@@ -11,7 +11,7 @@ export async function GET() {
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
-        '歌枠2025!A:J',
+        '歌枠2025!A:K',
         'debug',
       ], // 必要な範囲を指定
       includeGridData: true, // セルの詳細情報を含める
@@ -36,7 +36,7 @@ export async function GET() {
       return {
         title: values[2]?.userEnteredValue?.stringValue || '', // 曲名
         artist: values[3]?.userEnteredValue?.stringValue || '', // アーティスト
-        sing: values[4]?.userEnteredValue?.stringValue || '', // 歌手
+        sing: values[4]?.userEnteredValue?.stringValue || '', // 歌った人
         video_title: values[5]?.userEnteredValue?.stringValue || '', // 動画タイトル
         video_uri: values[5]?.hyperlink || '', // ハイパーリンクURL
         video_id: values[5]?.hyperlink?.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=))([^&\n]{11})/)?.[1] || '', // 動画IDの抽出
