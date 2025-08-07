@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Song } from './types/song'; // 型定義をインポート
 import YouTubePlayer from './components/YouTubePlayer';
+import { Analytics } from "@vercel/analytics/next"
 import './globals.css'; // スタイルシートをインポート
 
 
@@ -168,7 +169,7 @@ export default function Home() {
         <p className="text-sm">本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。</p>
         <p className="text-sm">© 2025 AZKi Song Database</p>
       </footer>
-      
+      <Analytics />
     </div>
   );
 }
