@@ -11,6 +11,7 @@ export async function GET() {
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
+        '歌枠2024!A:K',
         '歌枠2025!A:K',
         'debug',
       ], // 必要な範囲を指定
