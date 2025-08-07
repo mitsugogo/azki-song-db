@@ -51,6 +51,9 @@ export async function GET() {
         tags: values[9]?.userEnteredValue?.stringValue?.split(',').map(tag => tag.trim()) || [], // タグをカンマ区切りで分割
         extra: values[10]?.userEnteredValue?.stringValue || '', // オプションのフィールド
       };
+    })
+    .sort((a, b) => {
+      return new Date(b.broadcast_at).getTime() - new Date(a.broadcast_at).getTime();
     });
 
     // VercelのCDNサーバーに結果をキャッシュさせる
