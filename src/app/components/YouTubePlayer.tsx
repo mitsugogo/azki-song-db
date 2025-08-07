@@ -1,9 +1,7 @@
+import { Song } from "../types/song";
+
 interface YouTubePlayerProps {
-  song: {
-    video_id: string;
-    start: number;
-    end: number;
-  };
+  song: Song;
 }
 
 export default function YouTubePlayer({ song }: YouTubePlayerProps) {

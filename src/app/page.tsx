@@ -1,22 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { Song } from './types/song'; // 型定義をインポート
 import YouTubePlayer from './components/YouTubePlayer';
 import './globals.css'; // スタイルシートをインポート
 
-interface Song {
-  title: string;
-  artist: string;
-  sing: string;
-  video_title: string;
-  video_uri: string;
-  video_id: string;
-  start: string;
-  end: string;
-  broadcast_at: string;
-  tags: string[];
-  extra?: string;
-}
 
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]);

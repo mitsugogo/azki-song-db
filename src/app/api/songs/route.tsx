@@ -1,19 +1,6 @@
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 
-interface Song {
-  title: string;
-  artist: string;
-  sing: string;
-  video_title: string; // 動画タイトル
-  video_uri: string;
-  video_id: string; // 動画ID
-  start: string;
-  end: string;
-  broadcast_at: Date;
-  tags: string[]; // タグ
-  extra?: string; // オプションのフィールド
-}
 
 export async function GET() {
   try {
@@ -46,7 +33,6 @@ export async function GET() {
         && row.values[2]?.userEnteredValue?.stringValue;
     }).map((row) => {
       const values = row.values || [];
-      console.log(values[6]);
       return {
         title: values[2]?.userEnteredValue?.stringValue || '', // 曲名
         artist: values[3]?.userEnteredValue?.stringValue || '', // アーティスト
@@ -63,7 +49,7 @@ export async function GET() {
     });
 
     return NextResponse.json(songs);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching data from Google Sheets:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
