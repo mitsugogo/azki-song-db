@@ -53,7 +53,13 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(songs);
+    // VercelのCDNサーバーに結果をキャッシュさせる
+    return NextResponse.json(songs, {
+      headers: {
+        'Cache-Control': 's-maxage=600, stale-while-revalidate=300',
+        'CDN-Cache-Control': 's-maxage=600',
+      },
+    });
   } catch (error) {
     console.error('Error fetching data from Google Sheets:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
