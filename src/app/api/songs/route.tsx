@@ -13,6 +13,7 @@ export async function GET() {
       ranges: [
         '歌枠2024!A:K',
         '歌枠2025!A:K',
+        '記念ライブ系!A:K',
         'debug',
       ], // 必要な範囲を指定
       includeGridData: true, // セルの詳細情報を含める
