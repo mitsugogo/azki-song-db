@@ -75,7 +75,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className='flex h-full flex-col p-4 text-sm text-foreground'>
+            <div className='flex lg:h-full flex-col p-4 text-sm text-foreground'>
               {currentSong && (
                 <div className="song-info">
                   <h2 className="text-3xl font-semibold mb-3">{currentSong.title}</h2>
@@ -91,14 +91,16 @@ export default function Home() {
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">動画タイトル:</dt>
                       <dd className="col-span-3 sm:col-span-5">
-                        <a
-                          href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-red-500 hover:underline justify-self-start"
-                        >
-                          {currentSong.video_title}
-                        </a>
+                        <span className='hidden lg:inline'>
+                          <a
+                            href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-red-500 hover:underline justify-self-start"
+                          >
+                            {currentSong.video_title}
+                          </a>
+                        </span>
                         <a
                           href={currentSong.video_uri}
                           target="_blank"
@@ -140,7 +142,7 @@ export default function Home() {
             >
               ランダムで他の曲にする
             </button>
-            <h2 className="text-2xl font-semibold mb-4">曲一覧</h2>
+            <h2 className="hidden lg:block text-2xl font-semibold mb-4">曲一覧</h2>
             <div className="mb-4">
               <input
                 type="text"
@@ -167,8 +169,8 @@ export default function Home() {
         </section>
       </main>
       <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center'>
-        <p className="text-sm">本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。</p>
-        <p className="text-sm">© 2025 AZKi Song Database</p>
+        <p className="text-xs">本サイトは有志による非公式のファンサイトです。<span className="hidden lg:inline">動画はホロライブプロダクション様及びAZKi様が制作したものです。</span>動画の権利は制作者に帰属します。</p>
+        <p className="text-xs hidden lg:inline">© 2025 AZKi Song Database</p>
       </footer>
       <Analytics />
     </div>
