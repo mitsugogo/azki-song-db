@@ -4,3 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    .bg-primary {
+        background-color: #d11c76;
+    }
+    .hover\:bg-primary:hover {
+        background-color: #b10f5f;
+    }
+    .bg-secondary {
+        background-color: #f4348b;
+    }
+    .hover\:bg-secondary:hover {
+        background-color: #d11c76;
+    }
+    .text-primary {
+        color: #d11c76;
+    }
+    .text-secondary {
+        color: #f4348b;
+    }
+    
+}

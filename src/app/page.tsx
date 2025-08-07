@@ -59,10 +59,10 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      <header className='flex-shrink-0 bg-background bg-gray-900 text-white py-2 px-2'>
-        <h1 className="text-4xl font-bold">AZKi Song Player</h1>
+      <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
+        <h1 className="text-4xl font-bold">AZKi Song Database</h1>
       </header>
-      <main className='flex-1 flex flex-col flex-row min-h-0  pt-3'>
+      <main className='flex-1 flex flex-col flex-row min-h-0 pt-3 pb-4'>
         <aside className='flex lg:w-2/3'>
           <div className="flex flex-col h-full w-full bg-background">
             <div className="relative aspect-video w-full bg-black">
@@ -72,63 +72,70 @@ export default function Home() {
                     <YouTubePlayer song={currentSong} />
                   )}
                 </div>
-
-                <div className='p-6'>
-                  {currentSong && (
-                    <div className="song-info mt-4">
-                      <h2 className="text-3xl font-semibold mb-3">{currentSong.title}</h2>
-                      <div className="flex-grow space-y-2">
-                        <div className="grid grid-cols-4 gap-2">
-                          <dt className="text-muted-foreground truncate">アーティスト:</dt>
-                          <dd className="col-span-3">{currentSong.artist}</dd>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <dt className="text-muted-foreground truncate">歌った人:</dt>
-                          <dd className="col-span-3">{currentSong.sing}</dd>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <dt className="text-muted-foreground truncate">動画タイトル:</dt>
-                          <dd className="col-span-3">
-                            <a
-                              href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-red-500 hover:underline justify-self-start"
-                            >
-                              {currentSong.video_title}
-                            </a>
-                          </dd>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <dt className="text-muted-foreground truncate">配信日:</dt>
-                          <dd className="col-span-3">{(new Date(currentSong.broadcast_at)).toLocaleDateString()}</dd>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2">
-                          <dt className="text-muted-foreground truncate">タグ:</dt>
-                          <dd className="col-span-3">{currentSong.tags.join(', ')}</dd>
-                        </div>
-                        {currentSong.extra &&
-                          <>
-                            <div className="grid grid-cols-4 gap-2">
-                              <dt className="text-muted-foreground truncate">追加情報:</dt>
-                              <dd className="col-span-3">{currentSong.extra}</dd>
-                            </div>
-                          </>
-                        }
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
+            </div>
+            <div className='flex h-full flex-col p-4 text-sm text-foreground'>
+              {currentSong && (
+                <div className="song-info">
+                  <h2 className="text-3xl font-semibold mb-3">{currentSong.title}</h2>
+                  <div className="flex-grow space-y-2">
+                    <div className="grid grid-cols-4 gap-2">
+                      <dt className="text-muted-foreground truncate">アーティスト:</dt>
+                      <dd className="col-span-3">{currentSong.artist}</dd>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <dt className="text-muted-foreground truncate">歌った人:</dt>
+                      <dd className="col-span-3">{currentSong.sing}</dd>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <dt className="text-muted-foreground truncate">動画タイトル:</dt>
+                      <dd className="col-span-3">
+                        <a
+                          href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-500 hover:underline justify-self-start"
+                        >
+                          {currentSong.video_title}
+                        </a>
+                        <a
+                          href={currentSong.video_uri}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition"
+                        >
+                          YouTubeで見る
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <dt className="text-muted-foreground truncate">配信日:</dt>
+                      <dd className="col-span-3">{(new Date(currentSong.broadcast_at)).toLocaleDateString()}</dd>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <dt className="text-muted-foreground truncate">タグ:</dt>
+                      <dd className="col-span-3">{currentSong.tags.join(', ')}</dd>
+                    </div>
+                    {currentSong.extra &&
+                      <>
+                        <div className="grid grid-cols-4 gap-2">
+                          <dt className="text-muted-foreground truncate">追加情報:</dt>
+                          <dd className="col-span-3">{currentSong.extra}</dd>
+                        </div>
+                      </>
+                    }
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </aside>
         
         <section className='flex w-1/3 flex-col min-h-0 ml-3'>
-          <div className="flex flex-col h-full bg-background p-6 pt-0">
+          <div className="flex flex-col h-full bg-background p-6 py-0">
             <button
               onClick={() => playRandomSong(songs)}
-              className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer mb-2"
+              className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition cursor-pointer mb-2"
             >
               ランダムで他の曲にする
             </button>
@@ -157,6 +164,10 @@ export default function Home() {
           </div>
         </section>
       </main>
+      <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center'>
+        <p className="text-sm">本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。</p>
+        <p className="text-sm">© 2025 AZKi Song Database</p>
+      </footer>
       
     </div>
   );

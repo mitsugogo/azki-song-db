@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AZKi Song Player",
-  description: "AZKiさんの歌枠を楽しむためのプレイヤー",
+  title: "AZKi Song Database",
+  description: "AZKiさんの歌枠を楽しむためのデータベース",
 };
 
 export default function RootLayout({
