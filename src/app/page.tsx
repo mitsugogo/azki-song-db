@@ -59,11 +59,10 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      
-      <header className='flex-shrink-0 bg-background mb-3'>
-        <h1 className="text-4xl font-bold mb-6">AZKi Song Player</h1>
+      <header className='flex-shrink-0 bg-background bg-gray-900 text-white py-2 px-2'>
+        <h1 className="text-4xl font-bold">AZKi Song Player</h1>
       </header>
-      <main className='flex-1 flex flex-col flex-row min-h-0'>
+      <main className='flex-1 flex flex-col flex-row min-h-0  pt-3'>
         <aside className='flex lg:w-2/3'>
           <div className="flex flex-col h-full w-full bg-background">
             <div className="relative aspect-video w-full bg-black">
