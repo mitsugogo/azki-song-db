@@ -11,7 +11,7 @@ export async function GET() {
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
-        // '歌枠2025!A:J',
+        '歌枠2025!A:J',
         'debug',
       ], // 必要な範囲を指定
       includeGridData: true, // セルの詳細情報を含める
