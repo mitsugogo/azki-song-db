@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google, sheets_v4 } from 'googleapis';
 import { NextResponse } from 'next/server';
 
 
@@ -7,25 +7,28 @@ export async function GET() {
     const sheets = google.sheets({ version: 'v4', auth: process.env.GOOGLE_API_KEY });
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
-    // シート全体のデータを取得
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
         '歌枠2024!A:K',
         '歌枠2025!A:K',
         '記念ライブ系!A:K',
-        'debug',
-      ], // 必要な範囲を指定
+      ],
       includeGridData: true, // セルの詳細情報を含める
       fields: 'sheets.data.rowData.values(userEnteredValue,hyperlink)', // 必要なフィールドのみ取得
     });
+    const allRows: sheets_v4.Schema$RowData[] = [];
+    response.data.sheets?.forEach(sheet => {
+      const rows = sheet.data?.[0]?.rowData || [];
+      allRows.push(...rows);
+    });
+    const rows = allRows;
+
 
     function parseTimeFromNumberValue(numberValue: number): number {
       // 1日を秒単位に変換 (24時間 * 60分 * 60秒)
       return Math.round(numberValue * 24 * 60 * 60);
     }
-    
-    const rows = response.data.sheets?.[0]?.data?.[0]?.rowData || [];
     
     const songs = rows.slice(1).filter((row) => {
       // ヘッダー行を除外し、曲番号が空でない行のみをフィルタリング
