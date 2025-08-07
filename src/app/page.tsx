@@ -63,8 +63,8 @@ export default function Home() {
       <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
         <h1 className="text-4xl font-bold">AZKi Song Database</h1>
       </header>
-      <main className='flex-1 flex flex-col flex-row min-h-0 pt-3 pb-4'>
-        <aside className='flex lg:w-2/3'>
+      <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4'>
+        <aside className='flex lg:w-2/3 sm:w-full'>
           <div className="flex flex-col h-full w-full bg-background">
             <div className="relative aspect-video w-full bg-black">
               <div className="absolute top-0 left-0 w-full h-full">
@@ -80,17 +80,17 @@ export default function Home() {
                 <div className="song-info">
                   <h2 className="text-3xl font-semibold mb-3">{currentSong.title}</h2>
                   <div className="flex-grow space-y-2">
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">アーティスト:</dt>
-                      <dd className="col-span-3">{currentSong.artist}</dd>
+                      <dd className="col-span-3 sm:col-span-5">{currentSong.artist}</dd>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">歌った人:</dt>
-                      <dd className="col-span-3">{currentSong.sing}</dd>
+                      <dd className="col-span-3 sm:col-span-5">{currentSong.sing}</dd>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">動画タイトル:</dt>
-                      <dd className="col-span-3">
+                      <dd className="col-span-3 sm:col-span-5">
                         <a
                           href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
                           target="_blank"
@@ -109,19 +109,19 @@ export default function Home() {
                         </a>
                       </dd>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">配信日:</dt>
-                      <dd className="col-span-3">{(new Date(currentSong.broadcast_at)).toLocaleDateString()}</dd>
+                      <dd className="col-span-3 sm:col-span-5">{(new Date(currentSong.broadcast_at)).toLocaleDateString()}</dd>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       <dt className="text-muted-foreground truncate">タグ:</dt>
-                      <dd className="col-span-3">{currentSong.tags.join(', ')}</dd>
+                      <dd className="col-span-3 sm:col-span-5">{currentSong.tags.join(', ')}</dd>
                     </div>
                     {currentSong.extra &&
                       <>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                           <dt className="text-muted-foreground truncate">追加情報:</dt>
-                          <dd className="col-span-3">{currentSong.extra}</dd>
+                          <dd className="col-span-3 sm:col-span-5">{currentSong.extra}</dd>
                         </div>
                       </>
                     }
@@ -132,7 +132,7 @@ export default function Home() {
           </div>
         </aside>
         
-        <section className='flex w-1/3 flex-col min-h-0 ml-3'>
+        <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 lg:ml-3 sm:mx-0'>
           <div className="flex flex-col h-full bg-background p-6 py-0">
             <button
               onClick={() => playRandomSong(songs)}
@@ -157,8 +157,9 @@ export default function Home() {
                   className="p-3 bg-gray-200 rounded hover:bg-gray-300 cursor-pointer"
                   onClick={() => setCurrentSong(song)}
                 >
-                  <div className="font-semibold">{song.title}</div>
-                  <div className="text-sm text-muted-foreground">{song.artist} - {song.sing}</div>
+                  <div className="w-full text-sm font-semibold">{song.title}</div>
+                  <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
+                  <div className="w-full text-xs text-muted-foreground text-gray-400 pt-1">{song.video_title}</div>
                 </li>
               ))}
             </ul>
