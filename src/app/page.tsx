@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col">
       <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
-        <h1 className="text-4xl font-bold">AZKi Song Database</h1>
+        <h1 className="text-lg lg:text-3xl font-bold">AZKi Song Database</h1>
       </header>
       <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4'>
         <aside className='flex lg:w-2/3 sm:w-full'>
@@ -75,10 +75,10 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className='flex lg:h-full flex-col p-4 text-sm text-foreground'>
+            <div className='flex lg:h-full flex-col p-4 lg:pl-0 text-sm text-foreground'>
               {currentSong && (
                 <div className="song-info">
-                  <h2 className="text-3xl sm:text-xl font-semibold mb-3">{currentSong.title}</h2>
+                  <h2 className="text-xl lg:text-3xl font-semibold mb-3">{currentSong.title}</h2>
                   <div className="flex-grow space-y-1 lg:space-y-2">
                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">アーティスト:</dt>
