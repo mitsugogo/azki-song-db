@@ -105,7 +105,7 @@ export default function Home() {
                           href={currentSong.video_uri}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition"
+                          className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap"
                         >
                           YouTubeで見る
                         </a>
