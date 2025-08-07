@@ -78,17 +78,17 @@ export default function Home() {
             <div className='flex lg:h-full flex-col p-4 text-sm text-foreground'>
               {currentSong && (
                 <div className="song-info">
-                  <h2 className="text-3xl font-semibold mb-3">{currentSong.title}</h2>
-                  <div className="flex-grow space-y-2">
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                  <h2 className="text-3xl sm:text-xl font-semibold mb-3">{currentSong.title}</h2>
+                  <div className="flex-grow space-y-1 lg:space-y-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">アーティスト:</dt>
                       <dd className="col-span-3 sm:col-span-5">{currentSong.artist}</dd>
                     </div>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">歌った人:</dt>
                       <dd className="col-span-3 sm:col-span-5">{currentSong.sing}</dd>
                     </div>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">動画タイトル:</dt>
                       <dd className="col-span-3 sm:col-span-5">
                         <span className='hidden lg:inline'>
@@ -111,17 +111,17 @@ export default function Home() {
                         </a>
                       </dd>
                     </div>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">配信日:</dt>
                       <dd className="col-span-3 sm:col-span-5">{(new Date(currentSong.broadcast_at)).toLocaleDateString()}</dd>
                     </div>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                       <dt className="text-muted-foreground truncate">タグ:</dt>
                       <dd className="col-span-3 sm:col-span-5">{currentSong.tags.join(', ')}</dd>
                     </div>
                     {currentSong.extra &&
                       <>
-                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        <div className="grid grid-cols-4 sm:grid-cols-6lg:gap-2">
                           <dt className="text-muted-foreground truncate">追加情報:</dt>
                           <dd className="col-span-3 sm:col-span-5">{currentSong.extra}</dd>
                         </div>
@@ -161,7 +161,7 @@ export default function Home() {
                 >
                   <div className="w-full text-sm font-semibold">{song.title}</div>
                   <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
-                  <div className="w-full text-xs text-muted-foreground text-gray-400 pt-1">{song.video_title}</div>
+                  <div className="w-full text-xs text-muted-foreground text-gray-400 pt-1 hidden lg:block">{song.video_title}</div>
                 </li>
               ))}
             </ul>
