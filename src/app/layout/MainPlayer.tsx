@@ -132,7 +132,7 @@ export default function MainPlayer() {
         if (!crtSong) {
             crtSong = currentSong;
         }
-        const currentSongElement = document.querySelector(`[data-video-id="${crtSong?.video_id}"][data-title="${crtSong?.title}"]`);
+        const currentSongElement = document.querySelector(`[data-video-id="${crtSong?.video_id}"][data-start-time="${crtSong?.start}"]`);
         if (currentSongElement) {
             currentSongElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -326,6 +326,7 @@ export default function MainPlayer() {
                                 className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
                                 onClick={() => changeCurrentSong(song)}
                                 data-video-id={song.video_id}
+                                data-start-time={song.start}
                                 data-title={song.title}
                             >
                                 <div className='w-full'>
