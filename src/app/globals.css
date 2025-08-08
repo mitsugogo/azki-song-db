@@ -5,11 +5,24 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --background: #ffffff;
+        --foreground: #000000;
+        --primary: #d11c76;
+        --secondary: #ea7eaf;
+        --muted: #757575;
+    }
+    .bg-background {
+        background-color: var(--background);
+    }
+    .text-foreground {
+        color: var(--foreground);
+    }
     .bg-primary {
-        background-color: #d11c76;
+        background-color: var(--primary);
     }
     .hover\:bg-primary:hover {
-        background-color: #b10f5f;
+        background-color: darken(var(--primary), 10%);
     }
     .bg-primary-light {
         background-color: #f0cadb;
@@ -18,16 +31,34 @@
         background-color: #e6a0c3;
     }
     .bg-secondary {
-        background-color: #ea7eaf;
+        background-color: var(--secondary);
     }
     .hover\:bg-secondary:hover {
-        background-color: #d11c76;
+        background-color: darken(var(--secondary), 10%);
     }
     .text-primary {
-        color: #d11c76;
+        color: var(--primary);
     }
     .text-secondary {
-        color: #f4348b;
+        color: var(--secondary);
     }
-    
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #242424;
+        --foreground: #e0e0e0;
+        --primary: #e21f80;
+        --secondary: #ea7eaf;
+        --muted: #757575;
+    }
+    .hover\:bg-primary:hover {
+        background-color: lighten(var(--primary), 30%);
+    }
+    .bg-primary-light {
+        background-color: #3f3037;
+    }
+    .hover\:bg-primary-light:hover {
+        background-color: #422d38;
+    }
 }

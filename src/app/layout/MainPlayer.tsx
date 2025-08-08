@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Song } from '../types/song'; // 型定義をインポート
 import YouTubePlayer from '../components/YouTubePlayer';
-import next from 'next';
 import YouTube, { YouTubeEvent } from 'react-youtube';
-import { clear } from 'console';
 
 
 export default function MainPlayer() {
@@ -150,7 +148,7 @@ export default function MainPlayer() {
     }
 
     return (
-        <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4'>
+        <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4 bg-background'>
             <aside className='flex lg:w-2/3 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background">
                     <div className="relative aspect-video w-full bg-black">
@@ -201,7 +199,7 @@ export default function MainPlayer() {
                                                     href={`${currentSongInfo.video_uri}&t=${currentSongInfo.start || 0}s`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-red-500 hover:underline justify-self-start"
+                                                    className="text-primary hover:underline justify-self-start font-semibold"
                                                 >
                                                     {currentSongInfo.video_title}
                                                 </a>
@@ -210,7 +208,7 @@ export default function MainPlayer() {
                                                 href={currentSongInfo.video_uri}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap"
+                                                className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap inline-block"
                                             >
                                                 YouTubeで見る
                                             </a>
@@ -256,11 +254,14 @@ export default function MainPlayer() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <div className="hidden lg:block">
+                        <p className="text-xs text-muted-foreground mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
+                    </div>
                     <ul className="song-list space-y-2 overflow-y-auto flex-grow">
                         {songs.map((song, index) => (
                             <li
                                 key={index}
-                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-800'}`}
                                 onClick={() => changeCurrentSong(song)}
                                 data-video-id={song.video_id}
                                 data-title={song.title}
@@ -274,7 +275,7 @@ export default function MainPlayer() {
                                         <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
                                     </div>
                                     <div className='w-5/6'>
-                                        <div className="w-full text-xs text-muted-foreground text-gray-700 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
+                                        <div className="w-full text-xs text-muted-foreground text-gray-700 dark:text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
                                     </div>
                                 </div>
                             </li>
