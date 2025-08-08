@@ -5,12 +5,12 @@ import { Song } from '../types/song'; // 型定義をインポート
 import YouTubePlayer from '../components/YouTubePlayer';
 import next from 'next';
 import YouTube, { YouTubeEvent } from 'react-youtube';
+import { clear } from 'console';
 
 
 export default function MainPlayer() {
     const [allSongs, setAllSongs] = useState<Song[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
-    const [songsInSameVideoId, setSongsInSameVideoId] = useState<Song[]>([]);
 
     // 現在再生中の曲
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -72,89 +72,80 @@ export default function MainPlayer() {
         if (songsList.length === 0) return;
         const randomSong = songsList[Math.floor(Math.random() * songsList.length)];
         changeCurrentSong(randomSong);
-
-        // 同じ動画IDの曲をフィルタリング
-        const sameVideoIdSongs = songsList.filter(s => s.video_id === randomSong.video_id).sort((a, b) => {
-            return (parseInt(b.start) || 0) - (parseInt(a.start) || 0);
-        });
-        setSongsInSameVideoId(sameVideoIdSongs);
-        setPreviousAndNextSongs(randomSong, sameVideoIdSongs);
+        setPreviousAndNextSongs(randomSong, songsList);
     };
 
-    const setPreviousAndNextSongs = (currentSong: Song, sameVideoIdSongs: Song[]) => {
-        // 前の曲・次の曲を抽出
-        const previousSong = sameVideoIdSongs.sort((a, b) => {
-            return (parseInt(b.start) || 0) - (parseInt(a.start) || 0);
-        }).find(s => (parseInt(s.start) || 0) < (parseInt(currentSong?.start || '0') || 0)) || null;
-        const nextSong = sameVideoIdSongs.sort((a, b) => {
-            return (parseInt(a.start) || 0) - (parseInt(b.start) || 0);
-        }).find(s => (parseInt(s.start) || 0) > (parseInt(currentSong?.start || '0') || 0)) || null;
+    const setPreviousAndNextSongs = (currentSong: Song, songs: Song[]) => {
+        // 今再生している曲の1つ前
+        const currentSongIndex = songs.findIndex(song => song.video_id === currentSong.video_id && song.title === currentSong.title);
+        const previousSong = currentSongIndex > 0 ? songs[currentSongIndex - 1] : null;
+        // 今再生している曲の1つ後
+        const nextSong = currentSongIndex < songs.length - 1 ? songs[currentSongIndex + 1] : null;
 
         setPreviousSong(previousSong);
         setNextSong(nextSong);
     }
 
-    const scrollToCurrentSong = () => {
-        const currentSongElement = document.querySelector(`[data-video-id="${currentSong?.video_id}"][data-title="${currentSong?.title}"]`);
+    // 対象の曲にスクロール
+    const scrollToTargetSong = (crtSong: Song|null) => {
+        if (!crtSong) {
+            crtSong = currentSong;
+        }
+        const currentSongElement = document.querySelector(`[data-video-id="${crtSong?.video_id}"][data-title="${crtSong?.title}"]`);
         if (currentSongElement) {
-            currentSongElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            currentSongElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
 
     const changeCurrentSong = (song: Song | null, infoOnly: boolean = false) => {
-        if (infoOnly) {
-            setCurrentSongInfo(song);
-            return;
-        }
-        setCurrentSongInfo(song);
-        setCurrentSong(song);
-        if (!song) {
-            setSongsInSameVideoId([]); // 曲がない場合は同じ動画IDの曲をクリア
-            return;
-        }
-        if (!allSongs){
-            return;
-        }
-        // 同じ動画IDの曲をフィルタリング
-        const sameVideoIdSongs = allSongs.filter(s => s.video_id === song.video_id).sort((a, b) => {
-            return (parseInt(b.start) || 0) - (parseInt(a.start) || 0);
-        });
-        setSongsInSameVideoId(sameVideoIdSongs);
-
         // 前の曲・次の曲を抽出
-        setPreviousAndNextSongs(song, sameVideoIdSongs);        
+        if (song) {
+            setPreviousAndNextSongs(song, songs);
+        } 
+        setCurrentSongInfo(song);
+        scrollToTargetSong(song);
+        if (infoOnly) {
+            return;
+        }
+        setCurrentSong(song);
     };
 
+    const searchCurrentSong = (video_id: string, currentTime: number) => {
+        const song = songs.slice().sort((a, b) => (parseInt(b.start) || 0) - (parseInt(a.start) || 0))
+        .find(s => s.video_id === video_id
+            && (parseInt(s.start) || 0) <= currentTime);
+        // console.log('searchCurrentSong', video_id, currentTime, song);
+        return song || null;
+    }
+
+    // YouTubeの状態変更イベントハンドラ
     const handleStateChange = (event: YouTubeEvent<number>) => {
-        if (event.data === 1) { // 動画が再生されたとき
-            const player = event.target;
-            const intervalId = setInterval(() => {
-                if (player.getCurrentTime) {
-                    const currentTime = player.getCurrentTime();
+        if (event.data === YouTube.PlayerState.PLAYING) {
+            console.log('曲が再生されました:', currentSongInfo?.title);
+            // 曲が再生されたときの処理
+            
+            // 曲の変更検知するためのタイマーを起動
+            const timer = setInterval(() => {
+                // 再生位置から現在の曲を推定
+                const currentTime = event.target.getCurrentTime();
+                const currentVideoId = event.target.getVideoData().video_id;
 
-                    // songsInSameVideoIdを使って、現在の再生位置から現在の再生している楽曲を推定する
-                    const suggestedSong = songsInSameVideoId.sort((a, b) => {
-                        return (parseInt(b.start) || 0) - (parseInt(a.start) || 0);
-                    }).find(song => {
-                        return (parseInt(song.start) || 0) <= Math.trunc(currentTime) + 1 &&
-                            currentSong?.video_id === song.video_id
-                    });
-                    // currentSongとsuggestedSongが異なる場合、曲を切り替える
-                    if (suggestedSong && currentSong?.title !== suggestedSong.title) {
-
-                        changeCurrentSong(suggestedSong, true); // 曲情報のみ更新
-                        // player.seekTo(parseInt(suggestedSong.start) || 0, true); // 曲の開始時間にシーク
-                    }
-
-                    // 終了時間が設定されている場合、終了時間に達したら
-                    if (currentSong && currentSong.end && currentTime >= currentSong.end) {
-                        clearInterval(intervalId);
-                        player.pauseVideo(); // 動画を一時停止
-                        // changeCurrentSong(null); // 現在の曲をクリア
-                        playRandomSong(songs); // ランダムで次の曲を再生
-                    }
+                const curSong = searchCurrentSong(currentVideoId, currentTime);
+                if (curSong && (curSong.video_id !== currentSongInfo?.video_id || curSong.title !== currentSongInfo?.title)) {
+                    // 現在の曲が変わった場合、状態を更新
+                    changeCurrentSong(curSong, true);
+                    clearInterval(timer); // タイマーをクリア
                 }
-            }, 1000); // 1秒ごとに現在の再生時間を更新
+            }, 1000); // 1秒ごとにチェック
+
+        } else if (event.data === YouTube.PlayerState.PAUSED) {
+        } else if (event.data === YouTube.PlayerState.ENDED) {
+            // 曲が終了したときの処理
+            if (nextSong) {
+                changeCurrentSong(nextSong);
+            } else {
+                playRandomSong(songs);
+            }
         }
     }
 
