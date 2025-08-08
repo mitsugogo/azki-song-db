@@ -11,8 +11,14 @@
     .hover\:bg-primary:hover {
         background-color: #b10f5f;
     }
+    .bg-primary-light {
+        background-color: #f0cadb;
+    }
+    .hover\:bg-primary-light:hover {
+        background-color: #e6a0c3;
+    }
     .bg-secondary {
-        background-color: #f4348b;
+        background-color: #ea7eaf;
     }
     .hover\:bg-secondary:hover {
         background-color: #d11c76;
