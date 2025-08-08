@@ -221,20 +221,20 @@ export default function MainPlayer() {
                             <button
                                 onClick={() => changeCurrentSong(previousSong)}
                                 disabled={!previousSong}
-                                className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 前の曲<span className="hidden lg:inline"> ({previousSong ? previousSong.title : 'なし'})</span>
                             </button>
                             <button
                                 onClick={() => playRandomSong(songs)}
-                                className="inline-block lg:hidden px-3 py-2 bg-primary hover:bg-primary text-white rounded transition"
+                                className="inline-block lg:hidden px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition"
                             >
                                 ランダム選曲
                             </button>
                             <button
                                 onClick={() => changeCurrentSong(nextSong)}
                                 disabled={!nextSong}
-                                className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 次の曲<span className="hidden lg:inline"> ({nextSong ? nextSong.title : 'なし'})</span>
                             </button>
@@ -303,7 +303,7 @@ export default function MainPlayer() {
                 <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
                     <button
                         onClick={() => playRandomSong(songs)}
-                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary text-white rounded transition cursor-pointer mb-2"
+                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition cursor-pointer mb-2"
                     >
                         ランダムで他の曲にする
                     </button>
