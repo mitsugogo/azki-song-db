@@ -323,13 +323,13 @@ export default function MainPlayer() {
                         />
                     </div>
                     <div className="hidden lg:block">
-                        <p className="text-xs text-muted-foreground mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
+                        <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
                     </div>
                     <ul className="song-list space-y-2 overflow-y-auto flex-grow">
                         {songs.map((song, index) => (
                             <li
                                 key={index}
-                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
                                 onClick={() => changeCurrentSong(song)}
                                 data-video-id={song.video_id}
                                 data-title={song.title}
