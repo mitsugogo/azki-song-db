@@ -122,9 +122,7 @@ export default function MainPlayer() {
         setSongsInSameVideoId(sameVideoIdSongs);
 
         // 前の曲・次の曲を抽出
-        setPreviousAndNextSongs(song, sameVideoIdSongs);
-
-        
+        setPreviousAndNextSongs(song, sameVideoIdSongs);        
     };
 
     const handleStateChange = (event: YouTubeEvent<number>) => {

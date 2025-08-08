@@ -13,6 +13,8 @@ export async function GET() {
         '歌枠2024!A:K',
         '歌枠2025!A:K',
         '記念ライブ系!A:K',
+        'オリ曲!A:K',
+        'カバー!A:K',
       ],
       includeGridData: true, // セルの詳細情報を含める
       fields: 'sheets.data.rowData.values(userEnteredValue,hyperlink)', // 必要なフィールドのみ取得
