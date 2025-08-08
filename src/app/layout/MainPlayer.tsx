@@ -38,10 +38,13 @@ export default function MainPlayer() {
                     setSearchTerm(query);
                     const filteredSongs = searchSongs(data, query);
                     setSongs(filteredSongs);
-                    if (video_id) {
-                        const currentSong = filteredSongs.find(song => song.video_id === video_id);
+                    if (video_id && start_time) {
+                        // 前後2秒の誤差は許容する
+                        const currentSong = data.find(song => song.video_id === video_id
+                            && Math.abs(parseInt(song.start) - parseInt(start_time || '0')) <= 2);
                         if (currentSong) {
                             changeCurrentSong(currentSong);
+                            setPreviousAndNextSongs(currentSong, filteredSongs);
                         } else {
                             playRandomSong(filteredSongs);
                         }
@@ -49,7 +52,10 @@ export default function MainPlayer() {
                         playRandomSong(filteredSongs);
                     }
                 } else if (video_id) {
-                    const currentSong = data.find(song => song.video_id === video_id && parseInt(song.start) === parseInt(start_time || '0'));
+                    // 前後2秒の誤差は許容する
+                    const currentSong = data.find(song => song.video_id === video_id
+                        && Math.abs(parseInt(song.start) - parseInt(start_time || '0')) <= 2);
+
                     if (currentSong) {
                         changeCurrentSong(currentSong);
                     } else {
