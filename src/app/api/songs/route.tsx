@@ -44,7 +44,7 @@ export async function GET() {
         sing: values[4]?.userEnteredValue?.stringValue || '', // 歌った人
         video_title: values[5]?.userEnteredValue?.stringValue || '', // 動画タイトル
         video_uri: values[5]?.hyperlink || '', // ハイパーリンクURL
-        video_id: values[5]?.hyperlink?.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=))([^&\n]{11})/)?.[1] || '', // 動画IDの抽出
+        video_id: values[5]?.hyperlink?.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=))([^&\n]{11})/)?.[1] || '', // 動画IDの抽出
         start: parseTimeFromNumberValue(values[6]?.userEnteredValue?.numberValue || 0), // 開始時間 (秒)
         end: parseTimeFromNumberValue(values[7]?.userEnteredValue?.numberValue || 0), // 終了時間 (秒)
         broadcast_at: new Date((values[8]?.userEnteredValue?.numberValue || 0) * 24 * 60 * 60 * 1000 + new Date(1899, 11, 30).getTime()).toISOString() || '', // 放送日時

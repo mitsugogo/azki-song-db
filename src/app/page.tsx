@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Song } from './types/song'; // 型定義をインポート
 import YouTubePlayer from './components/YouTubePlayer';
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css'; // スタイルシートをインポート
 
 
@@ -70,7 +71,7 @@ export default function Home() {
               <div className="absolute top-0 left-0 w-full h-full">
                 <div className='w-full h-full'>
                   {currentSong && (
-                    <YouTubePlayer song={currentSong} />
+                    <YouTubePlayer song={currentSong} allSongs={allSongs} />
                   )}
                 </div>
               </div>
@@ -121,7 +122,7 @@ export default function Home() {
                     </div>
                     {currentSong.extra &&
                       <>
-                        <div className="grid grid-cols-4 sm:grid-cols-6lg:gap-2">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                           <dt className="text-muted-foreground truncate">追加情報:</dt>
                           <dd className="col-span-3 sm:col-span-5">{currentSong.extra}</dd>
                         </div>
@@ -142,7 +143,6 @@ export default function Home() {
             >
               ランダムで他の曲にする
             </button>
-            <h2 className="hidden lg:block text-2xl font-semibold mb-4">曲一覧</h2>
             <div className="mb-4">
               <input
                 type="text"
@@ -159,9 +159,18 @@ export default function Home() {
                   className="p-3 bg-gray-200 rounded hover:bg-gray-300 cursor-pointer"
                   onClick={() => setCurrentSong(song)}
                 >
-                  <div className="w-full text-sm font-semibold">{song.title}</div>
-                  <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
-                  <div className="w-full text-xs text-muted-foreground text-gray-400 pt-1 hidden lg:block">{song.video_title}</div>
+                  <div className='w-full'>
+                    <div className="w-full text-sm font-semibold">{song.title}</div>
+                    <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
+                  </div>
+                  <div className='hidden lg:flex gap-x-2 mt-2'>
+                    <div className='w-1/6'>
+                      <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
+                    </div>
+                    <div className='w-5/6'>
+                      <div className="w-full text-xs text-muted-foreground text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -173,6 +182,7 @@ export default function Home() {
         <p className="text-xs hidden lg:inline">© 2025 AZKi Song Database</p>
       </footer>
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
