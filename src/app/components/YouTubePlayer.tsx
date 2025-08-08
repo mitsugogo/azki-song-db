@@ -29,6 +29,9 @@ export default function YouTubePlayer({ song, onStateChange }: YouTubePlayerProp
       className='w-full h-full'
       opts={opts}
       onStateChange={onStateChange}
+      onReady={event => {
+        event.target.playVideo();
+      }}
     />
   );
 }
