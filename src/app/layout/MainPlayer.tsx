@@ -32,35 +32,25 @@ export default function MainPlayer() {
                 const query = urlParams.get('q');
                 const video_id = urlParams.get('v');
                 const start_time = urlParams.get('t')?.replace('s', '');
+
+                let filteredSongs = data;
                 if (query) {
                     setSearchTerm(query);
-                    const filteredSongs = searchSongs(data, query);
+                    filteredSongs = searchSongs(data, query);
                     setSongs(filteredSongs);
-                    if (video_id && start_time) {
-                        // 前後2秒の誤差は許容する
-                        const currentSong = data.find(song => song.video_id === video_id
-                            && Math.abs(parseInt(song.start) - parseInt(start_time || '0')) <= 2);
-                        if (currentSong) {
-                            changeCurrentSong(currentSong);
-                            setPreviousAndNextSongs(currentSong, filteredSongs);
-                        } else {
-                            playRandomSong(filteredSongs);
-                        }
+                }
+                if (video_id && start_time) {
+                    // 前後2秒の誤差は許容する
+                    const currentSong = filteredSongs.find(song => song.video_id === video_id
+                        && Math.abs(parseInt(song.start) - parseInt(start_time || '0')) <= 2);
+                    if (currentSong) {
+                        changeCurrentSong(currentSong);
+                        setPreviousAndNextSongs(currentSong, filteredSongs);
                     } else {
                         playRandomSong(filteredSongs);
                     }
-                } else if (video_id) {
-                    // 前後2秒の誤差は許容する
-                    const currentSong = data.find(song => song.video_id === video_id
-                        && Math.abs(parseInt(song.start) - parseInt(start_time || '0')) <= 2);
-
-                    if (currentSong) {
-                        changeCurrentSong(currentSong);
-                    } else {
-                        playRandomSong(data);
-                    }
                 } else {
-                    playRandomSong(data);
+                    playRandomSong(filteredSongs);
                 }
                 setSongs(data);
             });
@@ -102,20 +92,19 @@ export default function MainPlayer() {
     const searchSongs = (songs: Song[], term: string) => {
         // スペースで区切って検索語を分割
         const searchWords = term.split(' ').map(word => word.trim()).filter(word => word.length > 0);
-        console.log('searchWords:', searchWords);
         const filteredSongs = songs.filter(song => {
-                return searchWords.every(word => {
-                    const lowerWord = word.toLowerCase();
-                    return (
-                        song.title.toLowerCase().includes(lowerWord) ||
-                        song.artist.toLowerCase().includes(lowerWord) ||
-                        song.sing.toLowerCase().includes(lowerWord) ||
-                        song.tags.some(tag => tag.toLowerCase().includes(lowerWord)) ||
-                        song.video_title.toLowerCase().includes(lowerWord) ||
-                        (song.extra && song.extra.toLowerCase().includes(lowerWord))
-                    );
-                });
+            return searchWords.every(word => {
+                const lowerWord = word.toLowerCase();
+                return (
+                    song.title.toLowerCase().includes(lowerWord) ||
+                    song.artist.toLowerCase().includes(lowerWord) ||
+                    song.sing.toLowerCase().includes(lowerWord) ||
+                    song.tags.some(tag => tag.toLowerCase().includes(lowerWord)) ||
+                    song.video_title.toLowerCase().includes(lowerWord) ||
+                    (song.extra && song.extra.toLowerCase().includes(lowerWord))
+                );
             });
+        });
 
         return filteredSongs;
     };
@@ -177,7 +166,6 @@ export default function MainPlayer() {
         const song = songs.slice().sort((a, b) => (parseInt(b.start) || 0) - (parseInt(a.start) || 0))
         .find(s => s.video_id === video_id
             && (parseInt(s.start) || 0) <= currentTime);
-        // console.log('searchCurrentSong', video_id, currentTime, song);
         return song || null;
     }
 
@@ -185,6 +173,7 @@ export default function MainPlayer() {
     const handleStateChange = (event: YouTubeEvent<number>) => {
         if (event.data === YouTube.PlayerState.PLAYING) {
             console.log('曲が再生されました:', currentSongInfo?.title);
+            changeCurrentSong(currentSong, true);
             // 曲が再生されたときの処理
             
             // 曲の変更検知するためのタイマーを起動
