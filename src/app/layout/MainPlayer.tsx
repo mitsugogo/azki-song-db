@@ -210,7 +210,7 @@ export default function MainPlayer() {
     }
 
     return (
-        <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4 bg-background'>
+        <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-0 lg:p-4 bg-background'>
             <aside className='flex lg:w-2/3 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
@@ -222,7 +222,7 @@ export default function MainPlayer() {
                             </div>
                         </div>
                     </div>
-                    <div className='flex flex-col p-2 px-0 lg:px-0 text-sm text-foreground'>
+                    <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="flex justify-between">
                             <button
                                 onClick={() => changeCurrentSong(previousSong)}
@@ -246,7 +246,7 @@ export default function MainPlayer() {
                             </button>
                         </div>
                     </div>
-                    <div className='flex lg:h-full flex-col py-2 pt-0 lg:p-4 lg:pl-0 text-sm text-foreground'>
+                    <div className='flex lg:h-full flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
                                 <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
@@ -306,7 +306,7 @@ export default function MainPlayer() {
             </aside>
 
             <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 lg:ml-3 sm:mx-0'>
-                <div className="flex flex-col h-full bg-background px-0 py-0 lg:px-6">
+                <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
                     <button
                         onClick={() => playRandomSong(songs)}
                         className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary text-white rounded transition cursor-pointer mb-2"
