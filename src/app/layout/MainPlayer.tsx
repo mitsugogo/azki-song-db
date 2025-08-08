@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Song } from '../types/song'; // 型定義をインポート
 import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
 export default function MainPlayer() {
@@ -150,17 +152,17 @@ export default function MainPlayer() {
     return (
         <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-4 bg-background'>
             <aside className='flex lg:w-2/3 sm:w-full'>
-                <div className="flex flex-col h-full w-full bg-background">
+                <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
                         <div className="absolute top-0 left-0 w-full h-full">
-                            <div className='w-full h-full'>
+                            <div className='w-full h-full shadow-md'>
                                 {currentSong && (
                                     <YouTubePlayer song={currentSong} onStateChange={handleStateChange} />
                                 )}
                             </div>
                         </div>
                     </div>
-                    <div className='flex lg:h-full flex-col p-2 px-0 lg:px-0 text-sm text-foreground'>
+                    <div className='flex flex-col p-2 px-0 lg:px-0 text-sm text-foreground'>
                         <div className="flex justify-between">
                             <button
                                 onClick={() => changeCurrentSong(previousSong)}
@@ -187,7 +189,7 @@ export default function MainPlayer() {
                     <div className='flex lg:h-full flex-col py-2 pt-0 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
-                                <h2 className="text-xl lg:text-3xl font-semibold mb-3">{currentSongInfo.title}</h2>
+                                <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
@@ -207,16 +209,16 @@ export default function MainPlayer() {
                                                     rel="noopener noreferrer"
                                                     className="text-primary hover:underline justify-self-start font-semibold"
                                                 >
-                                                    {currentSongInfo.video_title}
+                                                    <FontAwesomeIcon icon={faYoutube} /> {currentSongInfo.video_title}
                                                 </a>
                                             </span>
                                             <a
                                                 href={currentSongInfo.video_uri}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap inline-block"
+                                                className="text-xs ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap inline-block lg:hidden"
                                             >
-                                                YouTubeで見る
+                                                 <FontAwesomeIcon icon={faYoutube} /> YouTube
                                             </a>
                                         </dd>
                                     </div>
