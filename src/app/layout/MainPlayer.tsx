@@ -6,6 +6,7 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { Elsie } from 'next/font/google';
 
 
 export default function MainPlayer() {
@@ -28,8 +29,37 @@ export default function MainPlayer() {
             .then((res) => res.json())
             .then((data: Song[]) => {
                 setAllSongs(data);
+                console.log(searchTerm);
+                // queryがある場合は、検索結果を反映させる
+                const urlParams = new URLSearchParams(window.location.search);
+                const query = urlParams.get('q');
+                const video_id = urlParams.get('v');
+                const start_time = urlParams.get('t')?.replace('s', '');
+                if (query) {
+                    setSearchTerm(query);
+                    const filteredSongs = searchSongs(data, query);
+                    setSongs(filteredSongs);
+                    if (video_id) {
+                        const currentSong = filteredSongs.find(song => song.video_id === video_id);
+                        if (currentSong) {
+                            changeCurrentSong(currentSong);
+                        } else {
+                            playRandomSong(filteredSongs);
+                        }
+                    } else {
+                        playRandomSong(filteredSongs);
+                    }
+                } else if (video_id) {
+                    const currentSong = data.find(song => song.video_id === video_id && parseInt(song.start) === parseInt(start_time || '0'));
+                    if (currentSong) {
+                        changeCurrentSong(currentSong);
+                    } else {
+                        playRandomSong(data);
+                    }
+                } else {
+                    playRandomSong(data);
+                }
                 setSongs(data);
-                playRandomSong(data);
             });
     }, []);
 
@@ -39,6 +69,14 @@ export default function MainPlayer() {
         if (lastSearchTerm == searchTerm) {
             return;
         }
+        // URLをq=xxxに更新.空ならqパラメータを削除
+        const url = new URL(window.location.href);
+        if (searchTerm) {
+            url.searchParams.set('q', searchTerm);
+        } else {
+            url.searchParams.delete('q');
+        }
+        window.history.replaceState({}, '', url);
 
         if (searchTerm) {
             // スペースで区切って検索語を分割
@@ -49,7 +87,20 @@ export default function MainPlayer() {
             }
             // 検索語を小文字に変換してフィルタリング
             // 曲名、アーティスト、歌った人、タグ、動画タイトル、追加情報のいずれかに全ての検索語が含まれる曲をフィルタリング
-            const filteredSongs = allSongs.filter(song => {
+            const filteredSongs = searchSongs(allSongs, searchTerm);
+            console.log('Filtered songs:', filteredSongs);
+            setSongs(filteredSongs);
+        } else {
+            setSongs(allSongs); // 検索語が空の場合は全曲を表示
+        }
+    }, [searchTerm, songs]);
+
+
+    const searchSongs = (songs: Song[], term: string) => {
+        // スペースで区切って検索語を分割
+        const searchWords = term.split(' ').map(word => word.trim()).filter(word => word.length > 0);
+        console.log('searchWords:', searchWords);
+        const filteredSongs = songs.filter(song => {
                 return searchWords.every(word => {
                     const lowerWord = word.toLowerCase();
                     return (
@@ -62,11 +113,9 @@ export default function MainPlayer() {
                     );
                 });
             });
-            setSongs(filteredSongs);
-        } else {
-            setSongs(allSongs); // 検索語が空の場合は全曲を表示
-        }
-    }, [searchTerm, songs]);
+
+        return filteredSongs;
+    };
 
     const playRandomSong = (songsList: Song[]) => {
         if (songsList.length === 0) return;
@@ -102,6 +151,17 @@ export default function MainPlayer() {
         if (song) {
             setPreviousAndNextSongs(song, songs);
         } 
+        // URLにv={video_id} と t={start}s 追加
+        const url = new URL(window.location.href);
+        if (song) {
+            url.searchParams.set('v', song.video_id);
+            url.searchParams.set('t', song.start + "s");
+        } else {
+            url.searchParams.delete('v');
+            url.searchParams.delete('t');
+        }
+        window.history.replaceState({}, '', url);
+
         setCurrentSongInfo(song);
         scrollToTargetSong(song);
         if (infoOnly) {
