@@ -10,6 +10,7 @@ export async function GET() {
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
+        '歌枠2023!A:K',
         '歌枠2024!A:K',
         '歌枠2025!A:K',
         '記念ライブ系!A:K',
