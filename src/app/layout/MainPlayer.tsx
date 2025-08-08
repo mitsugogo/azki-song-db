@@ -29,7 +29,6 @@ export default function MainPlayer() {
             .then((res) => res.json())
             .then((data: Song[]) => {
                 setAllSongs(data);
-                console.log(searchTerm);
                 // queryがある場合は、検索結果を反映させる
                 const urlParams = new URLSearchParams(window.location.search);
                 const query = urlParams.get('q');

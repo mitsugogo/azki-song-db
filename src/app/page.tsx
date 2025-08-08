@@ -14,7 +14,7 @@ export default function Home() {
     <div className="h-screen flex flex-col">
       <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
         <div className="flex items-center gap-2">
-          <h1 className="text-lg lg:text-lg font-bold">AZKi Song Database</h1>
+          <h1 className="text-lg lg:text-lg font-bold"><a href="/">AZKi Song Database</a></h1>
           <p className="text-xs hidden lg:inline">AZKiさんの歌枠データベース</p>
           <div className="ml-auto flex items-center gap-2">
             <a href="https://www.youtube.com/@AZKi" target="_blank" rel="noopener noreferrer" className="text-xs hover:underline">
