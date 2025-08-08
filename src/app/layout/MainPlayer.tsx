@@ -6,8 +6,6 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { Elsie } from 'next/font/google';
-
 
 export default function MainPlayer() {
     const [allSongs, setAllSongs] = useState<Song[]>([]);

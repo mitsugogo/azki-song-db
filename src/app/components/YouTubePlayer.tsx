@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from 'react-youtube';
 
