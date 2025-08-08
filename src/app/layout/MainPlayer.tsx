@@ -177,6 +177,7 @@ export default function MainPlayer() {
             // 曲が再生されたときの処理
             
             // 曲の変更検知するためのタイマーを起動
+            let cnt = 3;
             const timer = setInterval(() => {
                 // 再生位置から現在の曲を推定
                 const currentTime = event.target.getCurrentTime();
@@ -186,7 +187,8 @@ export default function MainPlayer() {
                 if (curSong && (curSong.video_id !== currentSongInfo?.video_id || curSong.title !== currentSongInfo?.title)) {
                     // 現在の曲が変わった場合、状態を更新
                     changeCurrentSong(curSong, true);
-                    clearInterval(timer); // タイマーをクリア
+                    if (cnt >=3) clearInterval(timer); // タイマーをクリア
+                    cnt++;
                 }
             }, 1000); // 1秒ごとにチェック
 
