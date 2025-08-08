@@ -160,29 +160,35 @@ export default function MainPlayer() {
                             </div>
                         </div>
                     </div>
-                    <div className='flex lg:h-full flex-col p-4 lg:px-0 text-sm text-foreground'>
-                        <div className="flex justify-between mb-4">
+                    <div className='flex lg:h-full flex-col p-2 px-0 lg:px-0 text-sm text-foreground'>
+                        <div className="flex justify-between">
                             <button
                                 onClick={() => changeCurrentSong(previousSong)}
                                 disabled={!previousSong}
                                 className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                前の曲 ({previousSong ? previousSong.title : 'なし'})
+                                前の曲<span className="hidden lg:inline"> ({previousSong ? previousSong.title : 'なし'})</span>
+                            </button>
+                            <button
+                                onClick={() => playRandomSong(songs)}
+                                className="inline-block lg:hidden px-3 py-2 bg-primary hover:bg-primary text-white rounded transition"
+                            >
+                                ランダム選曲
                             </button>
                             <button
                                 onClick={() => changeCurrentSong(nextSong)}
                                 disabled={!nextSong}
                                 className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                次の曲 ({nextSong ? nextSong.title : 'なし'})
+                                次の曲<span className="hidden lg:inline"> ({nextSong ? nextSong.title : 'なし'})</span>
                             </button>
                         </div>
                     </div>
-                    <div className='flex lg:h-full flex-col p-4 lg:pl-0 text-sm text-foreground'>
+                    <div className='flex lg:h-full flex-col py-2 pt-0 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
                                 <h2 className="text-xl lg:text-3xl font-semibold mb-3">{currentSongInfo.title}</h2>
-                                <div className="flex-grow space-y-1 lg:space-y-2">
+                                <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
                                         <dd className="col-span-3 sm:col-span-5">{currentSongInfo.artist}</dd>
@@ -238,10 +244,10 @@ export default function MainPlayer() {
             </aside>
 
             <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 lg:ml-3 sm:mx-0'>
-                <div className="flex flex-col h-full bg-background p-6 py-0">
+                <div className="flex flex-col h-full bg-background px-0 py-0 lg:px-6">
                     <button
                         onClick={() => playRandomSong(songs)}
-                        className="px-3 py-2 bg-primary hover:bg-primary text-white rounded transition cursor-pointer mb-2"
+                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary text-white rounded transition cursor-pointer mb-2"
                     >
                         ランダムで他の曲にする
                     </button>
@@ -249,7 +255,7 @@ export default function MainPlayer() {
                         <input
                             type="text"
                             placeholder="検索"
-                            className="px-3 py-2 border border-gray-300 rounded w-full"
+                            className="px-3 py-2 border border-gray-300 rounded w-full dark:text-white"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -261,7 +267,7 @@ export default function MainPlayer() {
                         {songs.map((song, index) => (
                             <li
                                 key={index}
-                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
                                 onClick={() => changeCurrentSong(song)}
                                 data-video-id={song.video_id}
                                 data-title={song.title}

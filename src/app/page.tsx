@@ -1,19 +1,27 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Song } from './types/song'; // 型定義をインポート
 import MainPlayer from './layout/MainPlayer';
-import YouTubePlayer from './components/YouTubePlayer';
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import './globals.css'; // スタイルシートをインポート
+import './globals.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 
 
 export default function Home() {
+  
   return (
-    <div className="h-screen flex flex-col text-foreground bg-background">
+    <div className="h-screen flex flex-col">
       <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
-        <h1 className="text-lg lg:text-3xl font-bold">AZKi Song Database</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg lg:text-lg font-bold">AZKi Song Database</h1>
+          <p className="text-xs hidden lg:inline">AZKiさんの歌枠データベース</p>
+          <div className="ml-auto flex items-center gap-2">
+            <a href="https://www.youtube.com/@AZKi" target="_blank" rel="noopener noreferrer" className="text-xs hover:underline">
+              <span className="inline"><FontAwesomeIcon icon={faYoutube} /> AZKi Channel</span>
+            </a>
+          </div>
+        </div>
       </header>
       <MainPlayer />
       <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center'>

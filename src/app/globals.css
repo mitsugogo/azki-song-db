@@ -22,7 +22,7 @@
         background-color: var(--primary);
     }
     .hover\:bg-primary:hover {
-        background-color: darken(var(--primary), 10%);
+        background-color: #b71c67;
     }
     .bg-primary-light {
         background-color: #f0cadb;
@@ -53,7 +53,7 @@
         --muted: #757575;
     }
     .hover\:bg-primary:hover {
-        background-color: lighten(var(--primary), 30%);
+        background-color: #b71c67;
     }
     .bg-primary-light {
         background-color: #3f3037;
