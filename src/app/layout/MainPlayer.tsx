@@ -23,6 +23,7 @@ let changeVideoIdCount = 0;
 
 export default function MainPlayer() {
     const [isLoading, setIsLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     const [baseUrl, setBaseUrl] = useState('');
     const [apiUrl, setApiUrl] = useState('');
@@ -86,6 +87,7 @@ export default function MainPlayer() {
                 }
                 setSongs(data);
                 setIsLoading(false);
+                setIsInitialLoading(false);
             });
     }, []);
 
@@ -152,8 +154,10 @@ export default function MainPlayer() {
             setSongs(allSongs);
 
             // URLのqを削除
-            url.searchParams.delete('q');
-            history.replaceState(null, '', url);
+            if (!isInitialLoading) {
+                url.searchParams.delete('q');
+                history.replaceState(null, '', url);
+            }
         }
     }, [debouncedSearchTerm]);
 
