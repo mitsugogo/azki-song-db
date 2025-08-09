@@ -181,15 +181,16 @@ export default function MainPlayer() {
     }
 
     // YouTubeの状態変更イベントハンドラ
+    let detectedChangeSongTimer: NodeJS.Timeout; // 状態変更を検知するためのタイマー
     const handleStateChange = (event: YouTubeEvent<number>) => {
         if (event.data === YouTube.PlayerState.PLAYING) {
             console.log('曲が再生されました:', currentSongInfo?.title);
             changeCurrentSong(currentSong, true);
             // 曲が再生されたときの処理
+            if (detectedChangeSongTimer) return;
             
             // 曲の変更検知するためのタイマーを起動
-            let cnt = 3;
-            const timer = setInterval(() => {
+            detectedChangeSongTimer = setInterval(() => {
                 // 再生位置から現在の曲を推定
                 const currentTime = event.target.getCurrentTime();
                 const currentVideoId = event.target.getVideoData().video_id;
@@ -198,8 +199,6 @@ export default function MainPlayer() {
                 if (curSong && (curSong.video_id !== currentSongInfo?.video_id || curSong.title !== currentSongInfo?.title)) {
                     // 現在の曲が変わった場合、状態を更新
                     changeCurrentSong(curSong, true);
-                    if (cnt >=3) clearInterval(timer); // タイマーをクリア
-                    cnt++;
                 }
             }, 1000); // 1秒ごとにチェック
 
@@ -360,8 +359,8 @@ export default function MainPlayer() {
             </section>
             {showToast && (
                 <ToastNotification
-                message={toastMessage}
-                onClose={() => setShowToast(false)}
+                    message={toastMessage}
+                    onClose={() => setShowToast(false)}
                 />
             )}
         </main>
