@@ -8,7 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import ToastNotification from '../components/ToastNotification';
-import { ClipboardWithIcon, Spinner } from 'flowbite-react';
+import { Badge, ClipboardWithIcon, Spinner, TextInput } from 'flowbite-react';
+import { HiSearch, HiX } from 'react-icons/hi';
 
 let detectedChangeSongTimer: NodeJS.Timeout | undefined; // 状態変更を検知するためのタイマー
 
@@ -88,15 +89,16 @@ export default function MainPlayer() {
 
         if (searchTerm) {
             // スペースで区切って検索語を分割
-            const searchWords = searchTerm.split(' ').map(word => word.trim()).filter(word => word.length > 0);
-            if (searchWords.length === 0) {
+            const searchWords = searchTerm.split(/\s+/).map(word => word.trim()).filter(word => word.length > 0);
+            console.log(searchWords);
+            if (searchWords && searchWords.length === 0) {
                 setSongs(allSongs); // 検索語が空の場合は全曲を表示
                 return;
             }
             // 検索語を小文字に変換してフィルタリング
             // 曲名、アーティスト、歌った人、タグ、動画タイトル、追加情報のいずれかに全ての検索語が含まれる曲をフィルタリング
             const filteredSongs = searchSongs(allSongs, searchTerm);
-            console.log('Filtered songs:', filteredSongs);
+            console.debug('Filtered songs:', filteredSongs);
             setSongs(filteredSongs);
         } else {
             setSongs(allSongs); // 検索語が空の場合は全曲を表示
@@ -106,10 +108,33 @@ export default function MainPlayer() {
 
     const searchSongs = (songs: Song[], term: string) => {
         // スペースで区切って検索語を分割
-        const searchWords = term.split(' ').map(word => word.trim()).filter(word => word.length > 0);
+        const searchWords = term.split(/\s+/).map(word => word.trim()).filter(word => word.length > 0);
         const filteredSongs = songs.filter(song => {
             return searchWords.every(word => {
                 const lowerWord = word.toLowerCase();
+
+                // title:{value} artist:{value} のように指定して検索できるようにする
+                if (lowerWord.startsWith('title:') && song.title.toLowerCase().includes(lowerWord.substring(6).toLowerCase())) {
+                    return true;
+                }
+                if (lowerWord.startsWith('artist:') && song.artist.toLowerCase().includes(lowerWord.substring(7).toLowerCase())) {
+                    return true;
+                }
+                if (lowerWord.startsWith('sing:')) {
+                    const sings = song.sing.toLowerCase().split('、');
+                    return sings.some(sing => sing.includes(lowerWord.substring(5).toLowerCase()));
+                }
+                if (lowerWord.startsWith('tag:')) {
+                    const tags = song.tags.join(',').toLowerCase().split(',');
+                    return tags.some(tag => tag.includes(lowerWord.substring(5).toLowerCase()));
+                }
+                if (lowerWord.startsWith('video_title:') && song.video_title.toLowerCase().includes(lowerWord.substring(12).toLowerCase())) {
+                    return true;
+                }
+                if (lowerWord.startsWith('extra:') && song.extra && song.extra.toLowerCase().includes(lowerWord.substring(6).toLowerCase())) {
+                    return true;
+                }
+
                 return (
                     song.title.toLowerCase().includes(lowerWord) ||
                     song.artist.toLowerCase().includes(lowerWord) ||
@@ -155,6 +180,13 @@ export default function MainPlayer() {
 
     const changeCurrentSong = (song: Song | null, infoOnly: boolean = false, force: boolean = false) => {
         console.debug('changeCurrentSong', song, force);
+        // URLのvとtを消す
+        const url = new URL(window.location.href);
+        url.searchParams.delete('v');
+        url.searchParams.delete('t');
+        history.replaceState(null, '', url);
+
+
         if (force) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
@@ -206,7 +238,7 @@ export default function MainPlayer() {
     // YouTubeの状態変更イベントハンドラ
 
     const handleStateChange = (event: YouTubeEvent<number>) => {
-        if (event.data === YouTube.PlayerState.PLAYING) {
+        if (event.data === YouTube.PlayerState.PLAYING || event.data === YouTube.PlayerState.BUFFERING) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
 
@@ -283,11 +315,33 @@ export default function MainPlayer() {
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
-                                        <dd className="col-span-3 sm:col-span-5">{currentSongInfo.artist}</dd>
+                                        <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
+                                            <Badge onClick={() => {
+                                                const existsSameArtist = searchTerm.startsWith(`artist:${currentSongInfo.artist}`);
+                                                if (!existsSameArtist) {
+                                                    setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}artist:${currentSongInfo.artist}`);
+                                                }
+                                            }} className="cursor-pointer inline-flex whitespace-nowrap">
+                                                {currentSongInfo.artist}
+                                            </Badge>
+                                        </dd>
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">歌った人:</dt>
-                                        <dd className="col-span-3 sm:col-span-5">{currentSongInfo.sing}</dd>
+                                        <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
+                                            {currentSongInfo.sing.split('、').map((sing, index) => {
+                                                const existsSameSing = searchTerm.startsWith(`sing:${sing}`);
+                                                return (
+                                                    <Badge key={index} onClick={() => {
+                                                        if (!existsSameSing) {
+                                                            setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}sing:${sing}`);
+                                                        }
+                                                    }} className="cursor-pointer inline-flex whitespace-nowrap">
+                                                        {sing}
+                                                    </Badge>
+                                                );
+                                            })}
+                                        </dd>
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">動画タイトル:</dt>
@@ -318,7 +372,25 @@ export default function MainPlayer() {
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">タグ:</dt>
-                                        <dd className="col-span-3 sm:col-span-5">{currentSongInfo.tags.join(', ')}</dd>
+                                        <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
+                                            {currentSongInfo.tags.map(tag => {
+                                                const existsSameTag = searchTerm.startsWith(`tag:${tag}`);
+                                                return (
+                                                    <Badge
+                                                        key={tag}
+                                                        color="gray"
+                                                        className="text-xs cursor-pointer"
+                                                        onClick={() => {
+                                                            if (!existsSameTag) {
+                                                                setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}tag:${tag}`);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {tag}
+                                                    </Badge>
+                                                );
+                                            })}
+                                        </dd>
                                     </div>
                                     {currentSongInfo.extra &&
                                         <>
@@ -348,18 +420,14 @@ export default function MainPlayer() {
                         </button>
                         <div className="mb-4">
                             <div className="relative">
-                                <label htmlFor="npm-install" className="sr-only">
-                                    Label
-                                </label>
-                                <input
-                                    id="npm-install"
-                                    type="text"
-                                    placeholder="検索"
-                                    className="col-span-6 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:placeholder:text-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                                    value={searchTerm}
-                                    onChange={(e) => changeSearchTerm(e.target.value)}
-                                />
-                                <ClipboardWithIcon valueToCopy={urlWithSearchTerm} />
+                                <TextInput value={searchTerm} onChange={(e) => changeSearchTerm(e.target.value)} placeholder='検索' icon={HiSearch} />
+                                {searchTerm &&<button
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                                    onClick={() => changeSearchTerm('')}
+                                >
+                                    <HiX className="w-4 h-4" />
+                                </button>}
+                                {/* <ClipboardWithIcon valueToCopy={urlWithSearchTerm} /> */}
                             </div>
                         </div>
                         <div className="hidden lg:block">

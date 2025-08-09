@@ -4,9 +4,8 @@ import MainPlayer from './layout/MainPlayer';
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import Link from 'next/link';
+import { FaYoutube } from "react-icons/fa";
 import { createTheme, ThemeProvider } from 'flowbite-react';
 
 const customTheme = createTheme({
@@ -52,7 +51,7 @@ export default function Home() {
             <p className="text-xs hidden lg:inline">AZKiさんの歌枠データベース</p>
             <div className="ml-auto flex items-center gap-2">
               <Link href="https://www.youtube.com/@AZKi" target="_blank" rel="noopener noreferrer" className="text-xs hover:underline">
-                <span className="inline"><FontAwesomeIcon icon={faYoutube} /> AZKi Channel</span>
+                <span className="inline"><FaYoutube className='inline' size={16} /> AZKi Channel</span>
               </Link>
             </div>
           </div>

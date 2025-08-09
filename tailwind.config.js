@@ -1,7 +1,4 @@
 // tailwind.config.js
-const colors = require('tailwindcss/colors');
-
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   // `dark`クラスの有無でダークモードを切り替える
   darkMode: 'class',
@@ -11,6 +8,9 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  corePlugins: {
+    preflight: true,
+  },
   theme: {
     extend: {
       colors: {
@@ -49,4 +49,4 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
   },
-};
+}
