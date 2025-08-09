@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import ToastNotification from '../components/ToastNotification';
-import { Badge, Button, ButtonGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
+import { Badge, Button, ButtonGroup, Card, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
 import { HiCheck, HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
 import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
 import { FaDatabase, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
@@ -17,6 +17,7 @@ import { clear } from 'console';
 
 // 状態変更を検知するためのタイマー
 let detectedChangeSongTimer: NodeJS.Timeout | undefined;
+let detectedChangeSongTimers: NodeJS.Timeout[] = [];
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -205,6 +206,7 @@ export default function MainPlayer() {
         if (youtubeVideoId !== song?.video_id) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
+            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
         }
         youtubeVideoId = song?.video_id || "";
 
@@ -262,10 +264,12 @@ export default function MainPlayer() {
         if (youtubeVideoId !== event.target.getVideoData()?.video_id && detectedChangeSongTimer) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
+            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
         }
-        if (event.data === YouTube.PlayerState.UNSTARTED) {
+        if (event.data === YouTube.PlayerState.UNSTARTED || event.data === YouTube.PlayerState.PAUSED) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
+            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
         }
         if (event.data === YouTube.PlayerState.PLAYING) {
             // iOSで勝手にスクロールするのを戻す
@@ -274,7 +278,6 @@ export default function MainPlayer() {
             changeCurrentSong(currentSongInfoRef.current, true);
             // 曲が再生されたときの処理
             if (detectedChangeSongTimer) return;
-            console.log("timer is undefiend");
 
             // 曲の変更検知するためのタイマーを起動
             detectedChangeSongTimer = setInterval(() => {
@@ -286,7 +289,7 @@ export default function MainPlayer() {
                     changeVideoIdCount++;
                     // 現在の曲が変わった場合、状態を更新
                     if (changeVideoIdCount > 1) {
-                        // console.log("handleStateChange", currentVideoId, curSong, currentSongInfoRef);
+                        console.log("handleStateChange", currentVideoId, curSong, currentSongInfoRef);
                         changeCurrentSong(curSong, true);
                         changeVideoIdCount = 0;
                     }
@@ -295,17 +298,19 @@ export default function MainPlayer() {
                 if (curSong && curSong.end && curSong.end < currentTime) {
                     clearInterval(detectedChangeSongTimer);
                     detectedChangeSongTimer = undefined;
+                    detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
                     changeCurrentSong(nextSong, false);
                 }
             }, 1000); // 1秒ごとにチェック
             console.log("start timer!!! ", detectedChangeSongTimer);
+            detectedChangeSongTimers.push(detectedChangeSongTimer);
 
         } else if (event.data === YouTube.PlayerState.ENDED) {
             // 曲が終了したときの処理
             if (nextSong) {
                 clearInterval(detectedChangeSongTimer);
                 detectedChangeSongTimer = undefined;
-                console.log("clear timer");
+                detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
                 changeCurrentSong(nextSong, false);
             } else {
                 playRandomSong(songs);
@@ -313,7 +318,7 @@ export default function MainPlayer() {
         }
     }
     return (
-        <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-0 lg:p-4 bg-background'>
+        <main className='flex flex-col lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 bg-background'>
             <aside className='flex lg:w-2/3 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
@@ -327,7 +332,7 @@ export default function MainPlayer() {
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="hidden lg:flex w-full justify-between gap-2">
-                            <div className="w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
+                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
                                     {previousSong && (
                                         <>
@@ -336,16 +341,16 @@ export default function MainPlayer() {
                                                 alt="thumbnail"
                                                 className="w-12 h-12 mr-2"
                                             />
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col w-full">
                                                 <span className="text-left font-bold truncate">{previousSong?.title}</span>
                                                 <span className="text-left text-sm text-muted truncate">{previousSong?.artist}</span>
                                             </div>
                                         </>
                                     )}
                                 </div>
-                            </div>
-                            <div
-                                className='w-2/6 p-2 truncate rounded bg-primary-light cursor-pointer'
+                            </Card>
+                            <Card
+                                className='h-20 w-2/6 p-2 truncate rounded bg-primary-light cursor-pointer'
                                 onClick={() => setOpenShereModal(true)}
                             >
                                 <div className="flex items-center">
@@ -363,8 +368,8 @@ export default function MainPlayer() {
                                         </>
                                     )}
                                 </div>
-                            </div>
-                            <div className="w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
+                            </Card>
+                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
                                     {nextSong && (
                                         <>
@@ -381,7 +386,7 @@ export default function MainPlayer() {
                                     )}
 
                                 </div>
-                            </div>
+                            </Card>
                         </div>
                         <div className="flex lg:hidden justify-between">
                             <div className="">
@@ -416,10 +421,10 @@ export default function MainPlayer() {
                             </div>
                         </div>
                     </div>
-                    <div className='flex lg:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
+                    <Card className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
-                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 cursor-pointer">{currentSongInfo.title}</h2>
+                                <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
@@ -543,11 +548,11 @@ export default function MainPlayer() {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </Card>
                 </div>
             </aside>
 
-            <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 lg:ml-3 sm:mx-0'>
+            <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 h-96 lg:h-full lg:ml-3 sm:mx-0'>
                 {isLoading ? (
                     <div className="text-center h-full"><Spinner size="xl" /></div>
                 ) : (
@@ -572,7 +577,7 @@ export default function MainPlayer() {
                         <div className="hidden lg:block">
                             <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
                         </div>
-                        <ul className="song-list space-y-2 overflow-y-auto h-500 flex-grow">
+                        <ul className="song-list space-y-2 overflow-y-auto h-800 flex-grow">
                             {songs.map((song, index) => (
                                 <li
                                     key={index}
