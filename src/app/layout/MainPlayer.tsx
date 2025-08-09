@@ -11,8 +11,14 @@ import ToastNotification from '../components/ToastNotification';
 import { Badge, ClipboardWithIcon, Spinner, TextInput } from 'flowbite-react';
 import { HiSearch, HiX } from 'react-icons/hi';
 import useDebounce from '../hook/useDebounce';
+import { clear } from 'console';
 
-let detectedChangeSongTimer: NodeJS.Timeout | undefined; // 状態変更を検知するためのタイマー
+// 状態変更を検知するためのタイマー
+let detectedChangeSongTimer: NodeJS.Timeout | undefined; 
+
+// 曲変更をロックするフラグ
+let lockChangeSong = false;
+let changeVideoIdCount = 0;
 
 export default function MainPlayer() {
     const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +36,6 @@ export default function MainPlayer() {
     const [nextSong, setNextSong] = useState<Song | null>(null);
 
     // 検索
-    const [lastSearchTerm, setLastSearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [urlWithSearchTerm, setUrlWithSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
@@ -125,13 +130,20 @@ export default function MainPlayer() {
     };
 
     useEffect(() => {
-        // 空文字の場合は検索しない
-        console.log('debouncedSearchTerm', debouncedSearchTerm);
+        const url = new URL(window.location.href);
         if (debouncedSearchTerm) {
             const filteredSongs = searchSongs(allSongs, debouncedSearchTerm);
             setSongs(filteredSongs);
+
+            // URLのqを変更
+            url.searchParams.set('q', debouncedSearchTerm);
+            history.replaceState(null, '', url);
         } else {
             setSongs(allSongs);
+
+            // URLのqを削除
+            url.searchParams.delete('q');
+            history.replaceState(null, '', url);
         }
     }, [debouncedSearchTerm]);
 
@@ -141,6 +153,7 @@ export default function MainPlayer() {
     };
 
     const playRandomSong = (songsList: Song[]) => {
+        lockChangeSong = false;
         if (songsList.length === 0) return;
         const randomSong = songsList[Math.floor(Math.random() * songsList.length)];
         changeCurrentSong(randomSong);
@@ -169,19 +182,19 @@ export default function MainPlayer() {
         }
     };
 
-    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false, force: boolean = false) => {
-        console.debug('changeCurrentSong', song, force);
+    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false, lock: boolean = false) => {
+        if (lockChangeSong) {
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+            return;
+        }
+        
         // URLのvとtを消す
         const url = new URL(window.location.href);
         url.searchParams.delete('v');
         url.searchParams.delete('t');
         history.replaceState(null, '', url);
 
-
-        if (force) {
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-        }
         // 前の曲・次の曲を抽出
         if (song) {
             setPreviousAndNextSongs(song, songs);
@@ -193,6 +206,11 @@ export default function MainPlayer() {
             return;
         }
         setCurrentSong(song);
+        if (lock) {
+            lockChangeSong = true;
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+        }
     };
 
     const searchCurrentSong = (video_id: string, currentTime: number) => {
@@ -232,6 +250,11 @@ export default function MainPlayer() {
     // YouTubeの状態変更イベントハンドラ
 
     const handleStateChange = (event: YouTubeEvent<number>) => {
+        if (event.data === YouTube.PlayerState.UNSTARTED){
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+        }
+        lockChangeSong = false;
         if (event.data === YouTube.PlayerState.PLAYING) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
@@ -248,11 +271,14 @@ export default function MainPlayer() {
                     const currentVideoId = event.target.getVideoData()?.video_id;
                     if (currentVideoId === null) return;
                     const curSong = searchCurrentSong(currentVideoId, currentTime);
-                    // console.log('curSong', curSong);
-                    // console.log('currentSongInfoRef.current', currentSongInfoRef.current);
+                    console.log('handleStateChange', curSong, currentSongInfoRef.current);
                     if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
+                        changeVideoIdCount++;
                         // 現在の曲が変わった場合、状態を更新
-                        changeCurrentSong(curSong, true);
+                        if (changeVideoIdCount > 1){
+                            changeCurrentSong(curSong, true);
+                            changeVideoIdCount = 0;
+                        }
                     }
                 }, 500);
             }, 1000); // 1秒ごとにチェック
@@ -260,6 +286,7 @@ export default function MainPlayer() {
         } else if (event.data === YouTube.PlayerState.ENDED) {
             // 曲が終了したときの処理
             if (nextSong) {
+                clearInterval(detectedChangeSongTimer);
                 changeCurrentSong(nextSong);
             } else {
                 playRandomSong(songs);
