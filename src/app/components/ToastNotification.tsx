@@ -2,7 +2,14 @@ import { Toast, ToastToggle } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { HiCheck, HiExclamation, HiX } from "react-icons/hi";
 
-const ToastNotification = ({ message, toastType = "success", duration = 3000, onClose }) => {
+interface ToastNotificationProps {
+  message: string;
+  toastType?: "success" | "error" | "warning";
+  duration?: number;
+  onClose: () => void;
+}
+
+const ToastNotification = ({ message, toastType = "success", duration = 3000, onClose }: ToastNotificationProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
