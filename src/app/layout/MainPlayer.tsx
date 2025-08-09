@@ -15,10 +15,6 @@ import { FaDatabase, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6"
 import useDebounce from '../hook/useDebounce';
 import { clear } from 'console';
 
-// 状態変更を検知するためのタイマー
-let detectedChangeSongTimer: NodeJS.Timeout | undefined;
-let detectedChangeSongTimers: NodeJS.Timeout[] = [];
-
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
 
@@ -26,11 +22,15 @@ export default function MainPlayer() {
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+    // 現在の曲変更をwatchするタイマー
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    
     const [baseUrl, setBaseUrl] = useState('');
     const [apiUrl, setApiUrl] = useState('');
 
     const [allSongs, setAllSongs] = useState<Song[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
+    const songsRef = useRef(songs);
 
     // 現在再生中の曲
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -204,9 +204,10 @@ export default function MainPlayer() {
         history.replaceState(null, '', url);
 
         if (youtubeVideoId !== song?.video_id) {
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
         }
         youtubeVideoId = song?.video_id || "";
 
@@ -227,7 +228,7 @@ export default function MainPlayer() {
         if (!video_id || !currentTime) {
             return null;
         }
-        const song = songs.slice().sort((a, b) => (parseInt(b.start) || 0) - (parseInt(a.start) || 0))
+        const song = allSongs.slice().sort((a, b) => (parseInt(b.start) || 0) - (parseInt(a.start) || 0))
             .find(s => s.video_id === video_id
                 && (parseInt(s.start) || 0) <= currentTime);
         return song || null;
@@ -261,15 +262,13 @@ export default function MainPlayer() {
 
     const handleStateChange = (event: YouTubeEvent<number>) => {
         console.log(event);
-        if (youtubeVideoId !== event.target.getVideoData()?.video_id && detectedChangeSongTimer) {
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
+        if (youtubeVideoId !== event.target.getVideoData()?.video_id && intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
         }
-        if (event.data === YouTube.PlayerState.UNSTARTED || event.data === YouTube.PlayerState.PAUSED) {
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-            detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
+        if (intervalRef.current && (event.data === YouTube.PlayerState.UNSTARTED || event.data === YouTube.PlayerState.PAUSED)) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
         }
         if (event.data === YouTube.PlayerState.PLAYING) {
             // iOSで勝手にスクロールするのを戻す
@@ -277,40 +276,41 @@ export default function MainPlayer() {
 
             changeCurrentSong(currentSongInfoRef.current, true);
             // 曲が再生されたときの処理
-            if (detectedChangeSongTimer) return;
+            if (intervalRef.current) return;
 
             // 曲の変更検知するためのタイマーを起動
-            detectedChangeSongTimer = setInterval(() => {
+            intervalRef.current = setInterval(() => {
                 const currentTime = event.target.getCurrentTime();
                 const currentVideoId = event.target.getVideoData()?.video_id;
                 if (currentVideoId === null) return;
                 const curSong = searchCurrentSong(currentVideoId, currentTime);
+                console.log("curSong", curSong);
                 if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
                     changeVideoIdCount++;
                     // 現在の曲が変わった場合、状態を更新
                     if (changeVideoIdCount > 1) {
-                        console.log("handleStateChange", currentVideoId, curSong, currentSongInfoRef);
+                        console.log("handleStateChange", currentTime, currentVideoId, curSong, currentSongInfoRef);
                         changeCurrentSong(curSong, true);
                         changeVideoIdCount = 0;
                     }
                 }
                 // song.end を超えたら次の曲へ
                 if (curSong && curSong.end && curSong.end < currentTime) {
-                    clearInterval(detectedChangeSongTimer);
-                    detectedChangeSongTimer = undefined;
-                    detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                    }
                     changeCurrentSong(nextSong, false);
                 }
             }, 1000); // 1秒ごとにチェック
-            console.log("start timer!!! ", detectedChangeSongTimer);
-            detectedChangeSongTimers.push(detectedChangeSongTimer);
 
         } else if (event.data === YouTube.PlayerState.ENDED) {
             // 曲が終了したときの処理
             if (nextSong) {
-                clearInterval(detectedChangeSongTimer);
-                detectedChangeSongTimer = undefined;
-                detectedChangeSongTimers?.forEach(timer => clearInterval(timer));
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                    intervalRef.current = null;
+                }
                 changeCurrentSong(nextSong, false);
             } else {
                 playRandomSong(songs);
@@ -325,7 +325,7 @@ export default function MainPlayer() {
                         <div className="absolute top-0 left-0 w-full h-full">
                             <div className='w-full h-full shadow-md'>
                                 {currentSong && (
-                                    <YouTubePlayer song={currentSong} onStateChange={handleStateChange} />
+                                    <YouTubePlayer key="youtube-player" song={currentSong} onStateChange={handleStateChange} />
                                 )}
                             </div>
                         </div>
@@ -410,21 +410,30 @@ export default function MainPlayer() {
                                 ><FaShuffle />&nbsp;ランダム</Button>
                             </div>
                             <div className="flex justify-end">
-                                <ButtonGroup>
-
-                                    <Button
-                                        onClick={() => setOpenShereModal(true)}
-                                        className="bg-primary hover:bg-primary text-white transition text-sm"
-                                    ><FaShare />&nbsp;Share
-                                    </Button>
-                                </ButtonGroup>
+                                <Button
+                                    onClick={() => setOpenShereModal(true)}
+                                    className="bg-primary hover:bg-primary text-white transition text-sm"
+                                ><FaShare />&nbsp;Share
+                                </Button>
                             </div>
                         </div>
                     </div>
                     <Card className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
-                                <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
+                                <div className='flex items-center gap-2'>
+                                    <div className='w-full lg:w-5/6'>
+                                     <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
+                                    </div>
+                                    <div className='hidden w-1/6 lg:block'>
+                                        <Button
+                                            onClick={() => setOpenShereModal(true)}
+                                            className="bg-primary hover:bg-primary text-white transition text-sm"
+                                        ><FaShare />&nbsp;Share
+                                        </Button>
+                                    </div>
+                                </div>
+                                
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
