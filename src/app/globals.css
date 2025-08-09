@@ -62,8 +62,8 @@
     :root {
         --background: #242424;
         --foreground: #e0e0e0;
-        --primary: #e21f80;
-        --secondary: #ea7eaf;
+        --primary: #a4165d;
+        --secondary: #ae5f83;
         --muted: #757575;
         --primary-50: #fdf2f8;
         --primary-100: #fce7f3;
@@ -78,13 +78,16 @@
         --primary-950: #500724;
         --primary-default: #d11c76;
     }
-    .hover\:bg-primary:hover {
+    .bg-primary:hover {
         background-color: #b71c67;
     }
     .bg-primary-light {
         background-color: #3f3037;
     }
-    .hover\:bg-primary-light:hover {
+    .dark\:bg-primary-light:hover {
         background-color: #422d38;
+    }
+    .dark\:text-primary-light {
+        color: #d23976
     }
 }

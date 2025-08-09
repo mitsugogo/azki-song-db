@@ -250,7 +250,7 @@ export default function MainPlayer() {
 
     const handleStateChange = (event: YouTubeEvent<number>) => {
         console.log(event);
-        if (youtubeVideoId !== event.target.getVideoData()?.video_id && detectedChangeSongTimer){
+        if (youtubeVideoId !== event.target.getVideoData()?.video_id && detectedChangeSongTimer) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
         }
@@ -312,14 +312,14 @@ export default function MainPlayer() {
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="hidden lg:flex w-full justify-between gap-2">
-                            <div className="w-2/6 p-2 truncate bg-gray-200 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
+                            <div className="w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
                                     {previousSong && (
                                         <>
                                             <img
-                                            src={`https://img.youtube.com/vi/${previousSong?.video_id}/default.jpg`}
-                                            alt="thumbnail"
-                                            className="w-12 h-12 mr-2"
+                                                src={`https://img.youtube.com/vi/${previousSong?.video_id}/default.jpg`}
+                                                alt="thumbnail"
+                                                className="w-12 h-12 mr-2"
                                             />
                                             <div className="flex flex-col">
                                                 <span className="text-left font-bold truncate">{previousSong?.title}</span>
@@ -334,28 +334,37 @@ export default function MainPlayer() {
                                 onClick={() => setOpenShereModal(true)}
                             >
                                 <div className="flex items-center">
-                                    <img
-                                        src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/default.jpg`}
-                                        alt="thumbnail"
-                                        className="w-12 h-12 mr-2"
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="text-left font-bold truncate">{currentSongInfo?.title}</span>
-                                        <span className="text-left text-sm text-muted truncate">{currentSongInfo?.artist}</span>
-                                    </div>
+                                    {currentSongInfo && (
+                                        <>
+                                            <img
+                                                src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/default.jpg`}
+                                                alt="thumbnail"
+                                                className="w-12 h-12 mr-2"
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="text-left font-bold truncate">{currentSongInfo?.title}</span>
+                                                <span className="text-left text-sm text-muted truncate">{currentSongInfo?.artist}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                            <div className="w-2/6 p-2 truncate bg-gray-200 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
+                            <div className="w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
-                                    <img
-                                        src={`https://img.youtube.com/vi/${nextSong?.video_id}/default.jpg`}
-                                        alt="thumbnail"
-                                        className="w-12 h-12 mr-2"
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="text-left font-bold truncate">{nextSong?.title}</span>
-                                        <span className="text-left text-sm text-muted truncate">{nextSong?.artist}</span>
-                                    </div>
+                                    {nextSong && (
+                                        <>
+                                            <img
+                                                src={`https://img.youtube.com/vi/${nextSong?.video_id}/default.jpg`}
+                                                alt="thumbnail"
+                                                className="w-12 h-12 mr-2"
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="text-left font-bold truncate">{nextSong?.title}</span>
+                                                <span className="text-left text-sm text-muted truncate">{nextSong?.artist}</span>
+                                            </div>
+                                        </>
+                                    )}
+
                                 </div>
                             </div>
                         </div>
@@ -452,7 +461,7 @@ export default function MainPlayer() {
                                                     href={`${currentSongInfo.video_uri}&t=${currentSongInfo.start || 0}s`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-primary hover:underline justify-self-start font-semibold"
+                                                    className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-light"
                                                 >
                                                     <FontAwesomeIcon icon={faYoutube} /> {currentSongInfo.video_title}
                                                 </a>
@@ -471,8 +480,7 @@ export default function MainPlayer() {
                                         <dt className="text-muted-foreground truncate">配信日:</dt>
                                         <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
                                             <Badge
-                                                color="gray"
-                                                className="text-xs cursor-pointer"
+                                                className={`text-xs cursor-pointer ${searchTerm.includes(`date:${new Date(currentSongInfo.broadcast_at).toLocaleDateString()}`) ? 'bg-cyan-300' : ''}`}
                                                 onClick={() => {
                                                     const broadcastDate = new Date(currentSongInfo.broadcast_at).toLocaleDateString();
                                                     const existsSameDate = searchTerm.includes(`date:${broadcastDate}`);
@@ -495,8 +503,7 @@ export default function MainPlayer() {
                                                 return (
                                                     <Badge
                                                         key={tag}
-                                                        color={existsSameTag ? "green" : "gray"}
-                                                        className="text-xs cursor-pointer"
+                                                        className={`text-xs cursor-pointer ${existsSameTag ? 'bg-cyan-300' : ''}`}
                                                         onClick={() => {
                                                             if (existsSameTag) {
                                                                 setSearchTerm(searchTerm.replace(`tag:${tag}`, '').trim());
@@ -591,8 +598,8 @@ export default function MainPlayer() {
                 size="md"
                 style={{ zIndex: 999 }}
             >
-                <ModalHeader className='bg-white'>URLをコピー</ModalHeader>
-                <ModalBody className='bg-white'>
+                <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>URLをコピー</ModalHeader>
+                <ModalBody className='bg-white dark:bg-gray-800 dark:text-white'>
                     <p className="mb-2">
                         以下のURLをコピーして現在の曲をシェアできます
                     </p>
@@ -679,8 +686,8 @@ export default function MainPlayer() {
                         </div>
                     </div>
                 </ModalBody>
-                <ModalFooter className='bg-white'>
-                    <Button className='bg-primary' onClick={() => setOpenShereModal(false)}>閉じる</Button>
+                <ModalFooter className='bg-white dark:bg-gray-800 dark:text-white'>
+                    <Button className='bg-primary dark:bg-primary' onClick={() => setOpenShereModal(false)}>閉じる</Button>
                 </ModalFooter>
             </Modal>
         </main>
