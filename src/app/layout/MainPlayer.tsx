@@ -6,6 +6,8 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { faLink, faShareNodes, faShuffle } from '@fortawesome/free-solid-svg-icons';
+import ToastNotification from '../components/ToastNotification';
 
 export default function MainPlayer() {
     const [allSongs, setAllSongs] = useState<Song[]>([]);
@@ -21,6 +23,10 @@ export default function MainPlayer() {
 
     const [lastSearchTerm, setLastSearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+
 
     useEffect(() => {
         fetch('/api/songs')
@@ -56,6 +62,7 @@ export default function MainPlayer() {
             });
     }, []);
 
+    // インクリメンタルサーチ
     useEffect(() => {
         setLastSearchTerm(searchTerm);
 
@@ -142,18 +149,7 @@ export default function MainPlayer() {
         // 前の曲・次の曲を抽出
         if (song) {
             setPreviousAndNextSongs(song, songs);
-        } 
-        // URLにv={video_id} と t={start}s 追加
-        const url = new URL(window.location.href);
-        if (song) {
-            url.searchParams.set('v', song.video_id);
-            url.searchParams.set('t', song.start + "s");
-        } else {
-            url.searchParams.delete('v');
-            url.searchParams.delete('t');
         }
-        window.history.replaceState({}, '', url);
-
         setCurrentSongInfo(song);
         scrollToTargetSong(song);
         if (infoOnly) {
@@ -167,6 +163,21 @@ export default function MainPlayer() {
         .find(s => s.video_id === video_id
             && (parseInt(s.start) || 0) <= currentTime);
         return song || null;
+    }
+
+    // 曲をシェア
+    const shereSong = (song: Song) => {
+        const baseUrl = window.location.origin;
+        const shareUrl = `${baseUrl}/?v=${song.video_id}&t=${song.start}s`;
+        
+        try {
+            navigator.clipboard.writeText(shareUrl);
+            setToastMessage("URLをコピーしました");
+            setShowToast(true);
+        } catch (err) {
+            setToastMessage("コピーに失敗しました");
+            setShowToast(true);
+        }
     }
 
     // YouTubeの状態変更イベントハンドラ
@@ -243,7 +254,8 @@ export default function MainPlayer() {
                     <div className='flex lg:h-full flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
-                                <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
+                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 cursor-pointer" onClick={() => shereSong(currentSongInfo)}>
+                                    {currentSongInfo.title} <span className='text-gray-400 text-sm'><FontAwesomeIcon icon={faShareNodes} /></span></h2>
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
@@ -303,7 +315,7 @@ export default function MainPlayer() {
                 <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
                     <button
                         onClick={() => playRandomSong(songs)}
-                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition cursor-pointer mb-2"
+                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition mb-2"
                     >
                         ランダムで他の曲にする
                     </button>
@@ -323,7 +335,7 @@ export default function MainPlayer() {
                         {songs.map((song, index) => (
                             <li
                                 key={index}
-                                className={`p-3 rounded cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                                className={`p-3 rounded relative cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
                                 onClick={() => changeCurrentSong(song)}
                                 data-video-id={song.video_id}
                                 data-start-time={song.start}
@@ -346,6 +358,12 @@ export default function MainPlayer() {
                     </ul>
                 </div>
             </section>
+            {showToast && (
+                <ToastNotification
+                message={toastMessage}
+                onClose={() => setShowToast(false)}
+                />
+            )}
         </main>
     );
 }
