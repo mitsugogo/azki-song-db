@@ -11,7 +11,6 @@ import ToastNotification from '../components/ToastNotification';
 import { Badge, ClipboardWithIcon, Spinner, TextInput } from 'flowbite-react';
 import { HiSearch, HiX } from 'react-icons/hi';
 import useDebounce from '../hook/useDebounce';
-import { clear } from 'console';
 
 // 状態変更を検知するためのタイマー
 let detectedChangeSongTimer: NodeJS.Timeout | undefined; 
@@ -271,7 +270,6 @@ export default function MainPlayer() {
                     const currentVideoId = event.target.getVideoData()?.video_id;
                     if (currentVideoId === null) return;
                     const curSong = searchCurrentSong(currentVideoId, currentTime);
-                    console.log('handleStateChange', curSong, currentSongInfoRef.current);
                     if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
                         changeVideoIdCount++;
                         // 現在の曲が変わった場合、状態を更新
