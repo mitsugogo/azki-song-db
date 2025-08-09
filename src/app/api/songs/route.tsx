@@ -17,6 +17,7 @@ export async function GET() {
         '記念ライブ系!A:K',
         'オリ曲!A:K',
         'カバー!A:K',
+        'ゲスト・fesなど!A:K',
       ],
       includeGridData: true, // セルの詳細情報を含める
       fields: 'sheets.data.rowData.values(userEnteredValue,hyperlink)', // 必要なフィールドのみ取得
