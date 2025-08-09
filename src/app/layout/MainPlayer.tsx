@@ -8,15 +8,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import ToastNotification from '../components/ToastNotification';
-import { Badge, ClipboardWithIcon, Spinner, TextInput } from 'flowbite-react';
-import { HiSearch, HiX } from 'react-icons/hi';
+import { Badge, Button, ButtonGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
+import { HiCheck, HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
+import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
+import { FaDatabase, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
 import useDebounce from '../hook/useDebounce';
+import { clear } from 'console';
 
 // 状態変更を検知するためのタイマー
-let detectedChangeSongTimer: NodeJS.Timeout | undefined; 
+let detectedChangeSongTimer: NodeJS.Timeout | undefined;
 
-// 曲変更をロックするフラグ
-let lockChangeSong = false;
+let youtubeVideoId = "";
 let changeVideoIdCount = 0;
 
 export default function MainPlayer() {
@@ -42,6 +44,10 @@ export default function MainPlayer() {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
 
+    // シェア用モーダル
+    const [openShareModal, setOpenShereModal] = useState(false);
+    const [showCopied, setShowCopied] = useState(false);
+    const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
 
     useEffect(() => {
         fetch('/api/songs')
@@ -152,7 +158,6 @@ export default function MainPlayer() {
     };
 
     const playRandomSong = (songsList: Song[]) => {
-        lockChangeSong = false;
         if (songsList.length === 0) return;
         const randomSong = songsList[Math.floor(Math.random() * songsList.length)];
         changeCurrentSong(randomSong);
@@ -181,18 +186,18 @@ export default function MainPlayer() {
         }
     };
 
-    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false, lock: boolean = false) => {
-        if (lockChangeSong) {
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-            return;
-        }
-        
+    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false) => {
         // URLのvとtを消す
         const url = new URL(window.location.href);
         url.searchParams.delete('v');
         url.searchParams.delete('t');
         history.replaceState(null, '', url);
+
+        if (youtubeVideoId !== song?.video_id) {
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+        }
+        youtubeVideoId = song?.video_id || "";
 
         // 前の曲・次の曲を抽出
         if (song) {
@@ -205,11 +210,6 @@ export default function MainPlayer() {
             return;
         }
         setCurrentSong(song);
-        if (lock) {
-            lockChangeSong = true;
-            clearInterval(detectedChangeSongTimer);
-            detectedChangeSongTimer = undefined;
-        }
     };
 
     const searchCurrentSong = (video_id: string, currentTime: number) => {
@@ -222,14 +222,14 @@ export default function MainPlayer() {
         return song || null;
     }
 
-    // 曲をシェア
-    const shereSong = (song: Song) => {
-        const baseUrl = window.location.origin;
-        const shareUrl = `${baseUrl}/?v=${song.video_id}&t=${song.start}s`;
 
+    const copyToClipboard = (text: string) => {
+        if (!text) {
+            return;
+        }
         try {
-            navigator.clipboard.writeText(shareUrl);
-            setToastMessage("URLをコピーしました");
+            navigator.clipboard.writeText(text);
+            setToastMessage("コピーしました");
             setShowToast(true);
         } catch (err) {
             setToastMessage("コピーに失敗しました");
@@ -249,49 +249,54 @@ export default function MainPlayer() {
     // YouTubeの状態変更イベントハンドラ
 
     const handleStateChange = (event: YouTubeEvent<number>) => {
-        if (event.data === YouTube.PlayerState.UNSTARTED){
+        console.log(event);
+        if (youtubeVideoId !== event.target.getVideoData()?.video_id && detectedChangeSongTimer){
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
         }
-        lockChangeSong = false;
-        if (event.data === YouTube.PlayerState.PLAYING) {
+        if (event.data === YouTube.PlayerState.UNSTARTED) {
             clearInterval(detectedChangeSongTimer);
             detectedChangeSongTimer = undefined;
+        }
+        if (event.data === YouTube.PlayerState.PLAYING) {
+            // iOSで勝手にスクロールするのを戻す
+            window.scrollTo(0, 0);
 
-            changeCurrentSong(currentSong, true);
+            changeCurrentSong(currentSongInfoRef.current, true);
             // 曲が再生されたときの処理
             if (detectedChangeSongTimer) return;
+            console.log("timer is undefiend");
 
             // 曲の変更検知するためのタイマーを起動
             detectedChangeSongTimer = setInterval(() => {
-                // YouTubeのgetCurrentTimeが安定しないのでちょっと待ってから反映する
-                setTimeout(() => {
-                    const currentTime = event.target.getCurrentTime();
-                    const currentVideoId = event.target.getVideoData()?.video_id;
-                    if (currentVideoId === null) return;
-                    const curSong = searchCurrentSong(currentVideoId, currentTime);
-                    if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
-                        changeVideoIdCount++;
-                        // 現在の曲が変わった場合、状態を更新
-                        if (changeVideoIdCount > 1){
-                            changeCurrentSong(curSong, true);
-                            changeVideoIdCount = 0;
-                        }
+                const currentTime = event.target.getCurrentTime();
+                const currentVideoId = event.target.getVideoData()?.video_id;
+                if (currentVideoId === null) return;
+                const curSong = searchCurrentSong(currentVideoId, currentTime);
+                if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
+                    changeVideoIdCount++;
+                    // 現在の曲が変わった場合、状態を更新
+                    if (changeVideoIdCount > 1) {
+                        // console.log("handleStateChange", currentVideoId, curSong, currentSongInfoRef);
+                        changeCurrentSong(curSong, true);
+                        changeVideoIdCount = 0;
                     }
-                }, 500);
-            }, 1000); // 1秒ごとにチェック
+                }
+            }, 3000); // 3秒ごとにチェック
+            console.log("start timer!!! ", detectedChangeSongTimer);
 
         } else if (event.data === YouTube.PlayerState.ENDED) {
             // 曲が終了したときの処理
             if (nextSong) {
                 clearInterval(detectedChangeSongTimer);
-                changeCurrentSong(nextSong);
+                detectedChangeSongTimer = undefined;
+                console.log("clear timer");
+                changeCurrentSong(nextSong, false);
             } else {
                 playRandomSong(songs);
             }
         }
     }
-
     return (
         <main className='flex flex-col lg:flex-row flex-grow overflow-hidden p-0 lg:p-4 bg-background'>
             <aside className='flex lg:w-2/3 sm:w-full'>
@@ -306,59 +311,132 @@ export default function MainPlayer() {
                         </div>
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
-                        <div className="flex justify-between">
-                            <button
-                                onClick={() => changeCurrentSong(previousSong)}
-                                disabled={!previousSong}
-                                className="px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        <div className="hidden lg:flex w-full justify-between gap-2">
+                            <div className="w-2/6 p-2 truncate bg-gray-200 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
+                                <div className="flex items-center">
+                                    {previousSong && (
+                                        <>
+                                            <img
+                                            src={`https://img.youtube.com/vi/${previousSong?.video_id}/default.jpg`}
+                                            alt="thumbnail"
+                                            className="w-12 h-12 mr-2"
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="text-left font-bold truncate">{previousSong?.title}</span>
+                                                <span className="text-left text-sm text-muted truncate">{previousSong?.artist}</span>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <div
+                                className='w-2/6 p-2 truncate rounded bg-primary-light cursor-pointer'
+                                onClick={() => setOpenShereModal(true)}
                             >
-                                前の曲<span className="hidden lg:inline"> ({previousSong ? previousSong.title : 'なし'})</span>
-                            </button>
-                            <button
-                                onClick={() => playRandomSong(songs)}
-                                className="inline-block lg:hidden px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition"
-                            >
-                                ランダム選曲
-                            </button>
-                            <button
-                                onClick={() => changeCurrentSong(nextSong)}
-                                disabled={!nextSong}
-                                className="px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                次の曲<span className="hidden lg:inline"> ({nextSong ? nextSong.title : 'なし'})</span>
-                            </button>
+                                <div className="flex items-center">
+                                    <img
+                                        src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/default.jpg`}
+                                        alt="thumbnail"
+                                        className="w-12 h-12 mr-2"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-left font-bold truncate">{currentSongInfo?.title}</span>
+                                        <span className="text-left text-sm text-muted truncate">{currentSongInfo?.artist}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-2/6 p-2 truncate bg-gray-200 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
+                                <div className="flex items-center">
+                                    <img
+                                        src={`https://img.youtube.com/vi/${nextSong?.video_id}/default.jpg`}
+                                        alt="thumbnail"
+                                        className="w-12 h-12 mr-2"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span className="text-left font-bold truncate">{nextSong?.title}</span>
+                                        <span className="text-left text-sm text-muted truncate">{nextSong?.artist}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex lg:hidden justify-between">
+                            <div className="">
+                                <ButtonGroup>
+                                    <Button
+                                        onClick={() => changeCurrentSong(previousSong)}
+                                        disabled={!previousSong}
+                                        className="bg-primary hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    ><GiPreviousButton /></Button>
+                                    <Button
+                                        onClick={() => changeCurrentSong(nextSong)}
+                                        disabled={!nextSong}
+                                        className="bg-primary hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    ><GiNextButton /></Button>
+                                </ButtonGroup>
+                            </div>
+                            <div>
+                                <Button
+                                    onClick={() => playRandomSong(songs)}
+                                    className="bg-primary hover:bg-primary text-white transition text-sm"
+                                ><FaShuffle />&nbsp;ランダム</Button>
+                            </div>
+                            <div className="flex justify-end">
+                                <ButtonGroup>
+
+                                    <Button
+                                        onClick={() => setOpenShereModal(true)}
+                                        className="bg-primary hover:bg-primary text-white transition text-sm"
+                                    ><FaShare />&nbsp;Share
+                                    </Button>
+                                </ButtonGroup>
+                            </div>
                         </div>
                     </div>
-                    <div className='flex lg:h-full flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
+                    <div className='flex lg:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
-                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 cursor-pointer" onClick={() => shereSong(currentSongInfo)}>
-                                    {currentSongInfo.title} <span className='text-gray-400 text-sm'><FontAwesomeIcon icon={faShareNodes} /></span></h2>
+                                <h2 className="text-xl lg:text-2xl font-semibold mb-3 cursor-pointer">{currentSongInfo.title}</h2>
                                 <div className="flex-grow space-y-1">
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">アーティスト:</dt>
                                         <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
-                                            <Badge onClick={() => {
-                                                const existsSameArtist = searchTerm.startsWith(`artist:${currentSongInfo.artist}`);
-                                                if (!existsSameArtist) {
-                                                    setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}artist:${currentSongInfo.artist}`);
-                                                }
-                                            }} className="cursor-pointer inline-flex whitespace-nowrap">
-                                                {currentSongInfo.artist}
-                                            </Badge>
+                                            {currentSongInfo.artist.split('、').map((artist, index) => {
+                                                const existsSameArtist = searchTerm.includes(`artist:${artist}`);
+                                                return (
+                                                    <Badge
+                                                        key={index}
+                                                        onClick={() => {
+                                                            if (existsSameArtist) {
+                                                                setSearchTerm(searchTerm.replace(`artist:${artist}`, '').trim());
+                                                            } else {
+                                                                setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}artist:${artist}`);
+                                                            }
+                                                        }}
+                                                        className={`cursor-pointer inline-flex whitespace-nowrap ${existsSameArtist ? 'bg-cyan-300' : ''}`}
+                                                    >
+                                                        {artist}
+                                                    </Badge>
+                                                );
+                                            })}
                                         </dd>
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
                                         <dt className="text-muted-foreground truncate">歌った人:</dt>
                                         <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
                                             {currentSongInfo.sing.split('、').map((sing, index) => {
-                                                const existsSameSing = searchTerm.startsWith(`sing:${sing}`);
+                                                const existsSameSing = searchTerm.includes(`sing:${sing}`);
                                                 return (
-                                                    <Badge key={index} onClick={() => {
-                                                        if (!existsSameSing) {
-                                                            setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}sing:${sing}`);
-                                                        }
-                                                    }} className="cursor-pointer inline-flex whitespace-nowrap">
+                                                    <Badge
+                                                        key={index}
+                                                        onClick={() => {
+                                                            if (existsSameSing) {
+                                                                setSearchTerm(searchTerm.replace(`sing:${sing}`, '').trim());
+                                                            } else {
+                                                                setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}sing:${sing}`);
+                                                            }
+                                                        }}
+                                                        className={`cursor-pointer inline-flex whitespace-nowrap ${existsSameSing ? 'bg-cyan-300' : ''}`}
+                                                    >
                                                         {sing}
                                                     </Badge>
                                                 );
@@ -366,7 +444,8 @@ export default function MainPlayer() {
                                         </dd>
                                     </div>
                                     <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
-                                        <dt className="text-muted-foreground truncate">動画タイトル:</dt>
+                                        <dt className="hidden lg:inline text-muted-foreground truncate">動画タイトル:</dt>
+                                        <dt className="lg:hidden text-muted-foreground truncate">動画:</dt>
                                         <dd className="col-span-3 sm:col-span-5">
                                             <span className='hidden lg:inline'>
                                                 <a
@@ -396,8 +475,10 @@ export default function MainPlayer() {
                                                 className="text-xs cursor-pointer"
                                                 onClick={() => {
                                                     const broadcastDate = new Date(currentSongInfo.broadcast_at).toLocaleDateString();
-                                                    const existsSameDate = searchTerm.startsWith(`date:${broadcastDate}`);
-                                                    if (!existsSameDate) {
+                                                    const existsSameDate = searchTerm.includes(`date:${broadcastDate}`);
+                                                    if (existsSameDate) {
+                                                        setSearchTerm(searchTerm.replace(`date:${broadcastDate}`, '').trim());
+                                                    } else {
                                                         setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}date:${broadcastDate}`);
                                                     }
                                                 }}
@@ -410,14 +491,16 @@ export default function MainPlayer() {
                                         <dt className="text-muted-foreground truncate">タグ:</dt>
                                         <dd className="col-span-3 sm:col-span-5 flex flex-wrap gap-1">
                                             {currentSongInfo.tags.map(tag => {
-                                                const existsSameTag = searchTerm.startsWith(`tag:${tag}`);
+                                                const existsSameTag = searchTerm.includes(`tag:${tag}`);
                                                 return (
                                                     <Badge
                                                         key={tag}
-                                                        color="gray"
+                                                        color={existsSameTag ? "green" : "gray"}
                                                         className="text-xs cursor-pointer"
                                                         onClick={() => {
-                                                            if (!existsSameTag) {
+                                                            if (existsSameTag) {
+                                                                setSearchTerm(searchTerm.replace(`tag:${tag}`, '').trim());
+                                                            } else {
                                                                 setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}tag:${tag}`);
                                                             }
                                                         }}
@@ -427,15 +510,14 @@ export default function MainPlayer() {
                                                 );
                                             })}
                                         </dd>
-                                    </div>
-                                    {currentSongInfo.extra &&
-                                        <>
-                                            <div className="grid grid-cols-4 sm:grid-cols-6 lg:gap-2">
+
+                                        {currentSongInfo && currentSongInfo.extra &&
+                                            <>
                                                 <dt className="text-muted-foreground truncate">追加情報:</dt>
                                                 <dd className="col-span-3 sm:col-span-5">{currentSongInfo.extra}</dd>
-                                            </div>
-                                        </>
-                                    }
+                                            </>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -457,24 +539,23 @@ export default function MainPlayer() {
                         <div className="mb-4">
                             <div className="relative">
                                 <TextInput value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} placeholder='検索' icon={HiSearch} />
-                                {searchTerm &&<button
+                                {searchTerm && <button
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
                                     onClick={() => changeSearchTerm('')}
                                 >
                                     <HiX className="w-4 h-4" />
                                 </button>}
-                                {/* <ClipboardWithIcon valueToCopy={urlWithSearchTerm} /> */}
                             </div>
                         </div>
                         <div className="hidden lg:block">
                             <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
                         </div>
-                        <ul className="song-list space-y-2 overflow-y-auto flex-grow">
+                        <ul className="song-list space-y-2 overflow-y-auto h-500 flex-grow">
                             {songs.map((song, index) => (
                                 <li
                                     key={index}
                                     className={`p-3 rounded relative cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
-                                    onClick={() => changeCurrentSong(song, false, true)}
+                                    onClick={() => changeCurrentSong(song, false)}
                                     data-video-id={song.video_id}
                                     data-start-time={song.start}
                                     data-title={song.title}
@@ -503,6 +584,105 @@ export default function MainPlayer() {
                     onClose={() => setShowToast(false)}
                 />
             )}
+
+            <Modal
+                show={openShareModal}
+                onClose={() => setOpenShereModal(false)}
+                size="md"
+                style={{ zIndex: 999 }}
+            >
+                <ModalHeader className='bg-white'>URLをコピー</ModalHeader>
+                <ModalBody className='bg-white'>
+                    <p className="mb-2">
+                        以下のURLをコピーして現在の曲をシェアできます
+                    </p>
+                    <div>
+                        <Label><FaYoutube className='inline' />&nbsp;YouTube URL (AZKi Channel)</Label>
+                        <div className="relative">
+                            <TextInput
+                                className="w-full"
+                                placeholder="URL"
+                                value={`https://www.youtube.com/watch?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`}
+                                readOnly
+                                onClick={(e) => {
+                                    copyToClipboard(`https://www.youtube.com/watch?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    setShowCopiedYoutube(true);
+                                    setTimeout(() => setShowCopiedYoutube(false), 3000);
+                                }}></TextInput>
+                            <button
+                                className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+                                onClick={(e) => {
+                                    copyToClipboard(`https://www.youtube.com/watch?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    setShowCopiedYoutube(true);
+                                    setTimeout(() => setShowCopiedYoutube(false), 3000);
+                                }}>
+                                <HiClipboardCopy className="w-4 h-4" />
+                            </button>
+                            {showCopiedYoutube && (
+                                <div className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+                                    copied!
+                                </div>
+                            )}
+                        </div>
+                        <div className='mt-2'>
+                            <Button
+                                size='xs'
+                                className='bg-black text-white'
+                                onClick={() => {
+                                    const text = `${currentSongInfo?.video_title} \nhttps://www.youtube.com/watch/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
+                                    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                                    window.open(twitterUrl);
+                                }}>
+                                <FaX className='w-4 h-4' />
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="mt-2">
+                        <Label><FaDatabase className='inline' />&nbsp;AZKi Song Database</Label>
+                        <div className="relative">
+                            <TextInput
+                                className="w-full"
+                                placeholder="URL"
+                                value={`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`}
+                                readOnly
+                                onClick={(e) => {
+                                    copyToClipboard(`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    setShowCopied(true);
+                                    setTimeout(() => setShowCopied(false), 3000);
+                                }}></TextInput>
+                            <button
+                                className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+                                onClick={(e) => {
+                                    copyToClipboard(`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    setShowCopied(true);
+                                    setTimeout(() => setShowCopied(false), 3000);
+                                }}>
+                                <HiClipboardCopy className="w-4 h-4" />
+                            </button>
+                            {showCopied && (
+                                <div className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+                                    copied!
+                                </div>
+                            )}
+                        </div>
+                        <div className='mt-2'>
+                            <Button
+                                size='xs'
+                                className='bg-black text-white'
+                                onClick={() => {
+                                    const text = `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
+                                    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                                    window.open(twitterUrl);
+                                }}>
+                                <FaX className='w-4 h-4' />
+                            </Button>
+                        </div>
+                    </div>
+                </ModalBody>
+                <ModalFooter className='bg-white'>
+                    <Button className='bg-primary' onClick={() => setOpenShereModal(false)}>閉じる</Button>
+                </ModalFooter>
+            </Modal>
         </main>
     );
 }

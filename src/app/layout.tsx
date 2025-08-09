@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AZKi Song Database",
-  description: "AZKiさんの歌枠を楽しむためのデータベース",
+  description: "ホロライブの歌姫 AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
   openGraph: {
     title: "AZKi Song Database",
-    description: "AZKiさんの歌枠を楽しむためのデータベース",
-    url: "https://azki-song-app.vercel.app/",
+    description: "ホロライブの歌姫 AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+    url: "https://azki-song-db.vercel.app/",
     siteName: "AZKi Song Database",
     locale: "ja_JP",
     type: "website",

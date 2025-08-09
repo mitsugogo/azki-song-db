@@ -48,7 +48,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
 
             <h1 className="text-lg lg:text-lg font-bold"><a href="/">AZKi Song Database</a></h1>
-            <p className="text-xs hidden lg:inline">AZKiさんの歌枠データベース</p>
+            <p className="text-xs hidden lg:inline">AZKiさんの歌を楽しむためのデータベース</p>
             <div className="ml-auto flex items-center gap-2">
               <Link href="https://www.youtube.com/@AZKi" target="_blank" rel="noopener noreferrer" className="text-xs hover:underline">
                 <span className="inline"><FaYoutube className='inline' size={16} /> AZKi Channel</span>
