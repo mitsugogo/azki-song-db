@@ -287,7 +287,13 @@ export default function MainPlayer() {
                         changeVideoIdCount = 0;
                     }
                 }
-            }, 3000); // 3秒ごとにチェック
+                // song.end を超えたら次の曲へ
+                if (curSong && curSong.end && curSong.end < currentTime) {
+                    clearInterval(detectedChangeSongTimer);
+                    detectedChangeSongTimer = undefined;
+                    changeCurrentSong(nextSong, false);
+                }
+            }, 1000); // 1秒ごとにチェック
             console.log("start timer!!! ", detectedChangeSongTimer);
 
         } else if (event.data === YouTube.PlayerState.ENDED) {
