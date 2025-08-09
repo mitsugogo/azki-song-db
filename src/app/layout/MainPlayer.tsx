@@ -24,6 +24,9 @@ let changeVideoIdCount = 0;
 export default function MainPlayer() {
     const [isLoading, setIsLoading] = useState(true);
 
+    const [baseUrl, setBaseUrl] = useState('');
+    const [apiUrl, setApiUrl] = useState('');
+
     const [allSongs, setAllSongs] = useState<Song[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
 
@@ -50,6 +53,8 @@ export default function MainPlayer() {
     const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
 
     useEffect(() => {
+        setBaseUrl(window.location.origin);
+        
         fetch('/api/songs')
             .then((res) => res.json())
             .then((data: Song[]) => {
@@ -240,9 +245,9 @@ export default function MainPlayer() {
     const changeSearchTerm = (term: string) => {
         setSearchTerm(term);
         if (term) {
-            setUrlWithSearchTerm(`${window.location.origin}/?q=${term}`);
+            setUrlWithSearchTerm(`${baseUrl}/?q=${term}`);
         } else {
-            setUrlWithSearchTerm(`${window.location.origin}`);
+            setUrlWithSearchTerm(`${baseUrl}`);
         }
     }
 
@@ -650,17 +655,17 @@ export default function MainPlayer() {
                             <TextInput
                                 className="w-full"
                                 placeholder="URL"
-                                value={`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`}
+                                value={`${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`}
                                 readOnly
                                 onClick={(e) => {
-                                    copyToClipboard(`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    copyToClipboard(`${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
                                     setShowCopied(true);
                                     setTimeout(() => setShowCopied(false), 3000);
                                 }}></TextInput>
                             <button
                                 className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
                                 onClick={(e) => {
-                                    copyToClipboard(`${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
+                                    copyToClipboard(`${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`);
                                     setShowCopied(true);
                                     setTimeout(() => setShowCopied(false), 3000);
                                 }}>
@@ -677,7 +682,7 @@ export default function MainPlayer() {
                                 size='xs'
                                 className='bg-black text-white'
                                 onClick={() => {
-                                    const text = `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${window.location.origin}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
+                                    const text = `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
                                     const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
                                     window.open(twitterUrl);
                                 }}>
