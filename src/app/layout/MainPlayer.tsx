@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Song } from '../types/song'; // 型定義をインポート
 import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { faLink, faShareNodes, faShuffle } from '@fortawesome/free-solid-svg-icons';
+import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import ToastNotification from '../components/ToastNotification';
+import { ClipboardWithIcon, Spinner } from 'flowbite-react';
+
+let detectedChangeSongTimer: NodeJS.Timeout | undefined; // 状態変更を検知するためのタイマー
 
 export default function MainPlayer() {
+    const [isLoading, setIsLoading] = useState(true);
+
     const [allSongs, setAllSongs] = useState<Song[]>([]);
     const [songs, setSongs] = useState<Song[]>([]);
 
@@ -17,12 +22,14 @@ export default function MainPlayer() {
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
     // 現在の曲情報
     const [currentSongInfo, setCurrentSongInfo] = useState<Song | null>(null);
+    const currentSongInfoRef = useRef(currentSongInfo);
 
     const [previousSong, setPreviousSong] = useState<Song | null>(null);
     const [nextSong, setNextSong] = useState<Song | null>(null);
 
     const [lastSearchTerm, setLastSearchTerm] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [urlWithSearchTerm, setUrlWithSearchTerm] = useState('');
 
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
@@ -59,6 +66,7 @@ export default function MainPlayer() {
                     playRandomSong(filteredSongs);
                 }
                 setSongs(data);
+                setIsLoading(false);
             });
     }, []);
 
@@ -135,7 +143,7 @@ export default function MainPlayer() {
     }
 
     // 対象の曲にスクロール
-    const scrollToTargetSong = (crtSong: Song|null) => {
+    const scrollToTargetSong = (crtSong: Song | null) => {
         if (!crtSong) {
             crtSong = currentSong;
         }
@@ -145,11 +153,17 @@ export default function MainPlayer() {
         }
     };
 
-    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false) => {
+    const changeCurrentSong = (song: Song | null, infoOnly: boolean = false, force: boolean = false) => {
+        console.debug('changeCurrentSong', song, force);
+        if (force) {
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+        }
         // 前の曲・次の曲を抽出
         if (song) {
             setPreviousAndNextSongs(song, songs);
         }
+        currentSongInfoRef.current = song;
         setCurrentSongInfo(song);
         scrollToTargetSong(song);
         if (infoOnly) {
@@ -160,8 +174,8 @@ export default function MainPlayer() {
 
     const searchCurrentSong = (video_id: string, currentTime: number) => {
         const song = songs.slice().sort((a, b) => (parseInt(b.start) || 0) - (parseInt(a.start) || 0))
-        .find(s => s.video_id === video_id
-            && (parseInt(s.start) || 0) <= currentTime);
+            .find(s => s.video_id === video_id
+                && (parseInt(s.start) || 0) <= currentTime);
         return song || null;
     }
 
@@ -169,7 +183,7 @@ export default function MainPlayer() {
     const shereSong = (song: Song) => {
         const baseUrl = window.location.origin;
         const shareUrl = `${baseUrl}/?v=${song.video_id}&t=${song.start}s`;
-        
+
         try {
             navigator.clipboard.writeText(shareUrl);
             setToastMessage("URLをコピーしました");
@@ -180,29 +194,40 @@ export default function MainPlayer() {
         }
     }
 
+    const changeSearchTerm = (term: string) => {
+        setSearchTerm(term);
+        if (term) {
+            setUrlWithSearchTerm(`${window.location.origin}/?q=${term}`);
+        } else {
+            setUrlWithSearchTerm(`${window.location.origin}`);
+        }
+    }
+
     // YouTubeの状態変更イベントハンドラ
-    let detectedChangeSongTimer: NodeJS.Timeout; // 状態変更を検知するためのタイマー
+
     const handleStateChange = (event: YouTubeEvent<number>) => {
         if (event.data === YouTube.PlayerState.PLAYING) {
-            console.log('曲が再生されました:', currentSongInfo?.title);
+            clearInterval(detectedChangeSongTimer);
+            detectedChangeSongTimer = undefined;
+
             changeCurrentSong(currentSong, true);
             // 曲が再生されたときの処理
             if (detectedChangeSongTimer) return;
-            
+
             // 曲の変更検知するためのタイマーを起動
             detectedChangeSongTimer = setInterval(() => {
-                // 再生位置から現在の曲を推定
-                const currentTime = event.target.getCurrentTime();
-                const currentVideoId = event.target.getVideoData().video_id;
-
-                const curSong = searchCurrentSong(currentVideoId, currentTime);
-                if (curSong && (curSong.video_id !== currentSongInfo?.video_id || curSong.title !== currentSongInfo?.title)) {
-                    // 現在の曲が変わった場合、状態を更新
-                    changeCurrentSong(curSong, true);
-                }
+                // YouTubeのgetCurrentTimeが安定しないのでちょっと待ってから反映する
+                setTimeout(() => {
+                    const currentTime = event.target.getCurrentTime();
+                    const currentVideoId = event.target.getVideoData().video_id;
+                    const curSong = searchCurrentSong(currentVideoId, currentTime);
+                    if (curSong && (curSong.video_id !== currentSongInfoRef.current?.video_id || curSong.title !== currentSongInfoRef.current?.title)) {
+                        // 現在の曲が変わった場合、状態を更新
+                        changeCurrentSong(curSong, true);
+                    }
+                }, 500);
             }, 1000); // 1秒ごとにチェック
 
-        } else if (event.data === YouTube.PlayerState.PAUSED) {
         } else if (event.data === YouTube.PlayerState.ENDED) {
             // 曲が終了したときの処理
             if (nextSong) {
@@ -283,7 +308,7 @@ export default function MainPlayer() {
                                                 rel="noopener noreferrer"
                                                 className="text-xs ml-2 px-3 py-1 bg-primary text-white rounded hover:bg-primary transition white-space-nowrap inline-block lg:hidden"
                                             >
-                                                 <FontAwesomeIcon icon={faYoutube} /> YouTube
+                                                <FontAwesomeIcon icon={faYoutube} /> YouTube
                                             </a>
                                         </dd>
                                     </div>
@@ -311,51 +336,62 @@ export default function MainPlayer() {
             </aside>
 
             <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 lg:ml-3 sm:mx-0'>
-                <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
-                    <button
-                        onClick={() => playRandomSong(songs)}
-                        className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition mb-2"
-                    >
-                        ランダムで他の曲にする
-                    </button>
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            placeholder="検索"
-                            className="px-3 py-2 border border-gray-300 rounded w-full dark:text-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <div className="hidden lg:block">
-                        <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
-                    </div>
-                    <ul className="song-list space-y-2 overflow-y-auto flex-grow">
-                        {songs.map((song, index) => (
-                            <li
-                                key={index}
-                                className={`p-3 rounded relative cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
-                                onClick={() => changeCurrentSong(song)}
-                                data-video-id={song.video_id}
-                                data-start-time={song.start}
-                                data-title={song.title}
-                            >
-                                <div className='w-full'>
-                                    <div className="w-full text-sm font-semibold">{song.title}</div>
-                                    <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
-                                </div>
-                                <div className='hidden lg:flex gap-x-2 mt-2'>
-                                    <div className='w-1/6'>
-                                        <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
+                {isLoading ? (
+                    <div className="text-center h-full"><Spinner size="xl" /></div>
+                ) : (
+                    <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
+                        <button
+                            onClick={() => playRandomSong(songs)}
+                            className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition mb-2"
+                        >
+                            ランダムで他の曲にする
+                        </button>
+                        <div className="mb-4">
+                            <div className="relative">
+                                <label htmlFor="npm-install" className="sr-only">
+                                    Label
+                                </label>
+                                <input
+                                    id="npm-install"
+                                    type="text"
+                                    placeholder="検索"
+                                    className="col-span-6 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-500 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 dark:placeholder:text-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                                    value={searchTerm}
+                                    onChange={(e) => changeSearchTerm(e.target.value)}
+                                />
+                                <ClipboardWithIcon valueToCopy={urlWithSearchTerm} />
+                            </div>
+                        </div>
+                        <div className="hidden lg:block">
+                            <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
+                        </div>
+                        <ul className="song-list space-y-2 overflow-y-auto flex-grow">
+                            {songs.map((song, index) => (
+                                <li
+                                    key={index}
+                                    className={`p-3 rounded relative cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                                    onClick={() => changeCurrentSong(song, false, true)}
+                                    data-video-id={song.video_id}
+                                    data-start-time={song.start}
+                                    data-title={song.title}
+                                >
+                                    <div className='w-full'>
+                                        <div className="w-full text-sm font-semibold">{song.title}</div>
+                                        <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
                                     </div>
-                                    <div className='w-5/6'>
-                                        <div className="w-full text-xs text-muted-foreground text-gray-700 dark:text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
+                                    <div className='hidden lg:flex gap-x-2 mt-2'>
+                                        <div className='w-1/6'>
+                                            <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
+                                        </div>
+                                        <div className='w-5/6'>
+                                            <div className="w-full text-xs text-muted-foreground text-gray-700 dark:text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </section>
             {showToast && (
                 <ToastNotification
