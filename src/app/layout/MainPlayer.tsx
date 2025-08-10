@@ -11,6 +11,7 @@ import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
 import { FaBackwardStep, FaCompactDisc, FaDatabase, FaForwardStep, FaPlay, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
 import useDebounce from '../hook/useDebounce';
 import NowPlayingSongInfo from '../components/NowPlayingSongInfo';
+import SongsList from '../components/SongList';
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -349,9 +350,9 @@ export default function MainPlayer() {
                                 className='h-20 w-2/6 p-2 truncate rounded bg-primary-light'
                             >
                                 <div className="flex items-center">
-                                    <FaCompactDisc className="text-primary-dark mr-2" />
                                     {currentSongInfo && (
                                         <>
+                                            <FaCompactDisc className="text-primary-dark mr-2" />
                                             <img
                                                 src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/default.jpg`}
                                                 alt="thumbnail"
@@ -448,31 +449,11 @@ export default function MainPlayer() {
                         <div className="hidden lg:block">
                             <p className="text-xs text-muted-foreground dark:text-white mb-2">楽曲一覧 ({songs.length}曲/{allSongs.length}曲)</p>
                         </div>
-                        <ul className="song-list space-y-2 overflow-y-auto h- lg:h-full flex-grow">
-                            {songs.map((song, index) => (
-                                <li
-                                    key={index}
-                                    className={`p-3 rounded relative cursor-pointer ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-light hover:bg-primary-light dark:text-white' : 'bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-800'}`}
-                                    onClick={() => changeCurrentSong(song, false)}
-                                    data-video-id={song.video_id}
-                                    data-start-time={song.start}
-                                    data-title={song.title}
-                                >
-                                    <div className='w-full'>
-                                        <div className="w-full text-sm font-semibold">{song.title}</div>
-                                        <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
-                                    </div>
-                                    <div className='hidden lg:flex gap-x-2 mt-2'>
-                                        <div className='w-1/6'>
-                                            <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
-                                        </div>
-                                        <div className='w-5/6'>
-                                            <div className="w-full text-xs text-muted-foreground text-gray-700 dark:text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                        <SongsList
+                            songs={songs}
+                            currentSongInfo={currentSongInfo}
+                            changeCurrentSong={changeCurrentSong}
+                        />
                     </div>
                 )}
             </section>

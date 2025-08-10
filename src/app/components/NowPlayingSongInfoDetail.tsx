@@ -15,11 +15,13 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
     return (
         <>
             {currentSongInfo && (
-                <div className="flex-grow space-y-1">
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex flex-wrap items-center">
+                <div className="flex-grow">
+                    <dl className="grid grid-cols-6 gap-x-4 gap-y-2">
+                        <div className="col-span-1 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaUser /><span className="hidden lg:inline ml-1">アーティスト:</span></dt>
-                            <dd className="flex flex-wrap gap-1 ml-2">
+                        </div>
+                        <div className="col-span-5">
+                            <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.artist.split('、').map((artist, index) => {
                                     const existsSameArtist = searchTerm.includes(`artist:${artist}`);
                                     return (
@@ -40,9 +42,12 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                 })}
                             </dd>
                         </div>
-                        <div className="flex flex-wrap items-center">
+
+                        <div className="col-span-1 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
-                            <dd className="flex flex-wrap gap-1 ml-2">
+                        </div>
+                        <div className="col-span-5">
+                            <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.sing.split('、').map((sing, index) => {
                                     const existsSameSing = searchTerm.includes(`sing:${sing}`);
                                     return (
@@ -63,9 +68,12 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                 })}
                             </dd>
                         </div>
-                        <div className="flex items-center">
+
+                        <div className="col-span-1 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
-                            <dd className="ml-2 sm:text-sm">
+                        </div>
+                        <div className="col-span-5">
+                            <dd>
                                 <a
                                     href={`${currentSongInfo.video_uri}&t=${currentSongInfo.start || 0}s`}
                                     target="_blank"
@@ -76,9 +84,12 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                 </a>
                             </dd>
                         </div>
-                        <div className="flex flex-wrap items-center">
+
+                        <div className="col-span-1 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
-                            <dd className="flex flex-wrap gap-1 ml-2">
+                        </div>
+                        <div className="col-span-5">
+                            <dd className="flex flex-wrap gap-1">
                                 <Badge
                                     className={`text-xs cursor-pointer ${searchTerm.includes(`date:${new Date(currentSongInfo.broadcast_at).toLocaleDateString()}`) ? 'bg-cyan-300' : ''}`}
                                     onClick={() => {
@@ -95,9 +106,12 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                 </Badge>
                             </dd>
                         </div>
-                        <div className="flex flex-wrap items-center">
+
+                        <div className="col-span-1 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
-                            <dd className="flex flex-wrap gap-1 ml-2">
+                        </div>
+                        <div className="col-span-5">
+                            <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.tags.map(tag => {
                                     const existsSameTag = searchTerm.includes(`tag:${tag}`);
                                     return (
@@ -118,13 +132,18 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                 })}
                             </dd>
                         </div>
+
                         {currentSongInfo && currentSongInfo.extra && (
-                            <div className="flex items-center">
-                                <dt className="text-muted-foreground flex items-center"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
-                                <dd className="ml-2">{currentSongInfo.extra}</dd>
-                            </div>
+                            <>
+                                <div className="col-span-1 flex items-center">
+                                    <dt className="text-muted-foreground flex items-center"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
+                                </div>
+                                <div className="col-span-5">
+                                    <dd>{currentSongInfo.extra}</dd>
+                                </div>
+                            </>
                         )}
-                    </div>
+                    </dl>
                 </div>
             )}
         </>
