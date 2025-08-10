@@ -16,11 +16,11 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
         <>
             {currentSongInfo && (
                 <div className="flex-grow">
-                    <dl className="grid grid-cols-6 gap-x-4 gap-y-2">
-                        <div className="col-span-1 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><FaUser /><span className="hidden lg:inline ml-1">アーティスト:</span></dt>
+                    <dl className="grid grid-cols-12 gap-x-4 gap-y-2">
+                        <div className="col-span-1 lg:col-span-2 flex items-center">
+                            <dt className="text-muted-foreground flex items-center"><FaUser /><span className="hidden  lg:inline ml-1">アーティスト:</span></dt>
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.artist.split('、').map((artist, index) => {
                                     const existsSameArtist = searchTerm.includes(`artist:${artist}`);
@@ -34,7 +34,7 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                                     setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}artist:${artist}`);
                                                 }
                                             }}
-                                            className={`cursor-pointer inline-flex whitespace-nowrap ${existsSameArtist ? 'bg-cyan-300' : ''}`}
+                                            className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${existsSameArtist ? 'bg-cyan-300' : ''}`}
                                         >
                                             {artist}
                                         </Badge>
@@ -43,10 +43,10 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 flex items-center">
+                        <div className="col-span-1 lg:col-span-2 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.sing.split('、').map((sing, index) => {
                                     const existsSameSing = searchTerm.includes(`sing:${sing}`);
@@ -60,7 +60,7 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                                                     setSearchTerm(`${searchTerm ? `${searchTerm} ` : ''}sing:${sing}`);
                                                 }
                                             }}
-                                            className={`cursor-pointer inline-flex whitespace-nowrap ${existsSameSing ? 'bg-cyan-300' : ''}`}
+                                            className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200  ${existsSameSing ? 'bg-cyan-300' : ''}`}
                                         >
                                             {sing}
                                         </Badge>
@@ -69,29 +69,29 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 flex items-center">
+                        <div className="col-span-1 lg:col-span-2 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-11 lg:col-span-10">
                             <dd>
                                 <a
                                     href={`${currentSongInfo.video_uri}&t=${currentSongInfo.start || 0}s`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-light"
+                                    className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
                                 >
                                     <FontAwesomeIcon icon={faYoutube} /> {currentSongInfo.video_title}
                                 </a>
                             </dd>
                         </div>
 
-                        <div className="col-span-1 flex items-center">
+                        <div className="col-span-1 lg:col-span-2 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
                                 <Badge
-                                    className={`text-xs cursor-pointer ${searchTerm.includes(`date:${new Date(currentSongInfo.broadcast_at).toLocaleDateString()}`) ? 'bg-cyan-300' : ''}`}
+                                    className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${searchTerm.includes(`date:${new Date(currentSongInfo.broadcast_at).toLocaleDateString()}`) ? 'bg-cyan-300' : ''}`}
                                     onClick={() => {
                                         const broadcastDate = new Date(currentSongInfo.broadcast_at).toLocaleDateString();
                                         const existsSameDate = searchTerm.includes(`date:${broadcastDate}`);
@@ -107,17 +107,17 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 flex items-center">
+                        <div className="col-span-1 lg:col-span-2 flex items-center">
                             <dt className="text-muted-foreground flex items-center"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
                         </div>
-                        <div className="col-span-5">
+                        <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
                                 {currentSongInfo.tags.map(tag => {
                                     const existsSameTag = searchTerm.includes(`tag:${tag}`);
                                     return (
                                         <Badge
                                             key={tag}
-                                            className={`text-xs cursor-pointer ${existsSameTag ? 'bg-cyan-300' : ''}`}
+                                            className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${existsSameTag ? 'bg-cyan-300' : ''}`}
                                             onClick={() => {
                                                 if (existsSameTag) {
                                                     setSearchTerm(searchTerm.replace(`tag:${tag}`, '').trim());
@@ -135,10 +135,10 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
 
                         {currentSongInfo && currentSongInfo.extra && (
                             <>
-                                <div className="col-span-1 flex items-center">
+                                <div className="col-span-1 lg:col-span-2 flex items-center">
                                     <dt className="text-muted-foreground flex items-center"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
                                 </div>
-                                <div className="col-span-5">
+                                <div className="col-span-11 lg:col-span-10">
                                     <dd>{currentSongInfo.extra}</dd>
                                 </div>
                             </>

@@ -5,6 +5,7 @@ import Marquee from "react-fast-marquee";
 import { useEffect, useRef, useState } from "react";
 import NowPlayingSongInfoDetail from "./NowPlayingSongInfoDetail";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaTimes } from "react-icons/fa";
 
 
 interface NowPlayingSongInfoProps {
@@ -38,7 +39,7 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
 
     return (
         <>
-            <div className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
+            <div className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground dark:text-gray-300'>
                 {currentSongInfo && (
                     <div className="song-info">
                         <div className='hidden lg:flex items-center gap-2 mb-3'>
@@ -71,6 +72,11 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
                                     )}
                                 </div>
                             </div>
+                            <div className="text-xs text-muted-foreground truncate w-full">
+                                {currentSongInfo && (
+                                    <span>{currentSongInfo.broadcast_at ? new Date(currentSongInfo.broadcast_at).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) + "配信 - " : ''}{currentSongInfo.video_title}</span>
+                                )}
+                            </div>
                         </div>
 
                         <div className="hidden lg:block">
@@ -83,13 +89,13 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
                     </div>
                 )}
             </div>
-            <Modal show={showModal} size="md" onClose={() => setShowModal(false)} popup>
+            <Modal show={showModal} size="" onClose={() => setShowModal(false)} popup>
                 <ModalHeader />
-                <ModalBody className='bg-white dark:bg-gray-800 dark:text-white rounded p-3'>
+                <ModalBody className='bg-white dark:bg-gray-800 dark:text-white rounded py-6'>
                     {currentSongInfo && (
                         <>
-                            <div className="mb-2">
-                                <FontAwesomeIcon icon="compact-disc" className="mr-2" />
+                            <div className="mb-2 relative">
+                                <FaCompactDisc className="fa-spin mr-2 inline relative" style={{ top: "-1px" }} />
                                 <span className="font-semibold">{currentSongInfo.title}</span>
                             </div>
                             <NowPlayingSongInfoDetail
@@ -97,6 +103,19 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
                                 searchTerm={searchTerm}
                                 setSearchTerm={setSearchTerm}
                             />
+                            <hr className="my-4" />
+                            <div className="flex items-center">
+                                <Button
+                                    onClick={() => setShowModal(false)}
+                                    className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer mr-3"
+                                ><FaTimes />&nbsp;Close
+                                </Button>
+                                <Button
+                                    onClick={() => setOpenShereModal(true)}
+                                    className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+                                ><FaShare />&nbsp;Share
+                                </Button>
+                            </div>
                         </>
                     )}
                 </ModalBody>

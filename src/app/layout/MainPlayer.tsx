@@ -44,6 +44,15 @@ export default function MainPlayer() {
     const [urlWithSearchTerm, setUrlWithSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
 
+    const [availableTags, setAvailableTags] = useState<string[]>([]);
+    const [availableArtists, setAvailableArtists] = useState<string[]>([]);
+    const [availableSingers, setAvailableSingers] = useState<string[]>([]);
+    const [availableSongTitles, setAvailableSongTitles] = useState<string[]>([]);
+
+    const [searchArtists, setSearchArtists] = useState('');
+
+
+
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
 
@@ -87,6 +96,17 @@ export default function MainPlayer() {
                 setSongs(data);
                 setIsLoading(false);
                 setIsInitialLoading(false);
+
+                // 取得したデータから検索用ワードを抽出
+                const tags = data.flatMap(song => song.tags);
+                const songTitles = data.map(song => song.title);
+                const singers = data.flatMap(song => song.sing.split(/、/).map(s => s.trim()));
+                const artists = data.flatMap(song => song.artist.split(/、/).map(s => s.trim()));
+
+                setAvailableTags(tags);
+                setAvailableSongTitles(songTitles);
+                setAvailableSingers(singers);
+                setAvailableArtists(artists);
             });
     }, []);
 
@@ -314,8 +334,8 @@ export default function MainPlayer() {
         }
     }
     return (
-        <main className='flex flex-col lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 bg-background'>
-            <aside className='flex lg:w-2/3 sm:w-full'>
+        <main className='flex flex-col lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 dark:bg-gray-800'>
+            <aside className='flex lg:w-2/3 xl:w-7/12 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
                         <div className="absolute top-0 left-0 w-full h-full">
@@ -328,11 +348,10 @@ export default function MainPlayer() {
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="hidden lg:flex w-full justify-between gap-2">
-                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
+                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
                                     {previousSong && (
                                         <>
-                                            <FaBackwardStep className="text-primary-dark mr-2" />
                                             <img
                                                 src={`https://img.youtube.com/vi/${previousSong?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
@@ -347,12 +366,11 @@ export default function MainPlayer() {
                                 </div>
                             </Card>
                             <Card
-                                className='h-20 w-2/6 p-2 truncate rounded bg-primary-light'
+                                className='h-20 w-2/6 p-2 truncate rounded bg-primary-400 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none'
                             >
                                 <div className="flex items-center">
                                     {currentSongInfo && (
                                         <>
-                                            <FaCompactDisc className="text-primary-dark mr-2" />
                                             <img
                                                 src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
@@ -366,11 +384,10 @@ export default function MainPlayer() {
                                     )}
                                 </div>
                             </Card>
-                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
+                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
                                     {nextSong && (
                                         <>
-                                            <FaForwardStep className="text-primary-dark mr-2" />
                                             <img
                                                 src={`https://img.youtube.com/vi/${nextSong?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
@@ -388,29 +405,29 @@ export default function MainPlayer() {
                         </div>
                         <div className="flex lg:hidden justify-between">
                             <div className="">
-                                <ButtonGroup>
+                                <ButtonGroup className='shadow-none'>
                                     <Button
                                         onClick={() => changeCurrentSong(previousSong)}
                                         disabled={!previousSong}
-                                        className="bg-primary hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed  cursor-pointer"
                                     ><GiPreviousButton /></Button>
                                     <Button
                                         onClick={() => changeCurrentSong(nextSong)}
                                         disabled={!nextSong}
-                                        className="bg-primary hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed  cursor-pointer"
                                     ><GiNextButton /></Button>
                                 </ButtonGroup>
                             </div>
                             <div>
                                 <Button
                                     onClick={() => playRandomSong(songs)}
-                                    className="bg-primary hover:bg-primary text-white transition text-sm"
+                                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
                                 ><FaShuffle />&nbsp;ランダム</Button>
                             </div>
                             <div className="flex justify-end">
                                 <Button
                                     onClick={() => setOpenShereModal(true)}
-                                    className="bg-primary hover:bg-primary text-white transition text-sm"
+                                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
                                 ><FaShare />&nbsp;Share
                                 </Button>
                             </div>
@@ -424,7 +441,7 @@ export default function MainPlayer() {
                 </div>
             </aside>
 
-            <section className='flex lg:w-1/3 sm:w-full flex-col min-h-0 h-96 lg:h-full lg:ml-3 sm:mx-0'>
+            <section className='flex lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh lg:h-full lg:ml-3 sm:mx-0'>
                 {isLoading ? (
                     <div className="text-center h-full"><Spinner size="xl" /></div>
                 ) : (
@@ -472,7 +489,7 @@ export default function MainPlayer() {
             >
                 <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>シェア</ModalHeader>
                 <ModalBody className='bg-white dark:bg-gray-800 dark:text-white'>
-                    <p className="mb-2">
+                    <p className="mb-4">
                         AZKiさんの素敵な歌声をシェアしましょう！
                     </p>
                     <div>
@@ -506,7 +523,7 @@ export default function MainPlayer() {
                         <div className='mt-2'>
                             <Button
                                 size='xs'
-                                className='bg-black text-white'
+                                className='bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900'
                                 onClick={() => {
                                     const text = `${currentSongInfo?.video_title} \nhttps://www.youtube.com/watch/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
                                     const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
@@ -516,7 +533,7 @@ export default function MainPlayer() {
                             </Button>
                         </div>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-4">
                         <Label><FaDatabase className='inline' />&nbsp;AZKi Song Database</Label>
                         <div className="relative">
                             <TextInput
@@ -547,9 +564,9 @@ export default function MainPlayer() {
                         <div className='mt-2'>
                             <Button
                                 size='xs'
-                                className='bg-black text-white'
+                                className='bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900'
                                 onClick={() => {
-                                    const text = `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
+                                    const text = `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${currentSongInfo?.video_title} \n${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
                                     const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
                                     window.open(twitterUrl);
                                 }}>
@@ -559,7 +576,7 @@ export default function MainPlayer() {
                     </div>
                 </ModalBody>
                 <ModalFooter className='bg-white dark:bg-gray-800 dark:text-white'>
-                    <Button className='bg-primary hover:bg-primary text-white transition text-sm' onClick={() => setOpenShereModal(false)}>閉じる</Button>
+                    <Button className='bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm' onClick={() => setOpenShereModal(false)}>閉じる</Button>
                 </ModalFooter>
             </Modal>
         </main>
