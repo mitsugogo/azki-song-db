@@ -334,9 +334,9 @@ export default function MainPlayer() {
                                         <>
                                             <FaBackwardStep className="text-primary-dark mr-2" />
                                             <img
-                                                src={`https://img.youtube.com/vi/${previousSong?.video_id}/default.jpg`}
+                                                src={`https://img.youtube.com/vi/${previousSong?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
-                                                className="w-12 h-12 mr-2"
+                                                className="w-12 mr-2"
                                             />
                                             <div className="flex flex-col w-full">
                                                 <span className="text-left font-bold truncate">{previousSong?.title}</span>
@@ -354,9 +354,9 @@ export default function MainPlayer() {
                                         <>
                                             <FaCompactDisc className="text-primary-dark mr-2" />
                                             <img
-                                                src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/default.jpg`}
+                                                src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
-                                                className="w-12 h-12 mr-2"
+                                                className="w-12 mr-2"
                                             />
                                             <div className="flex flex-col">
                                                 <span className="text-left font-bold truncate">{currentSongInfo?.title}</span>
@@ -372,9 +372,9 @@ export default function MainPlayer() {
                                         <>
                                             <FaForwardStep className="text-primary-dark mr-2" />
                                             <img
-                                                src={`https://img.youtube.com/vi/${nextSong?.video_id}/default.jpg`}
+                                                src={`https://img.youtube.com/vi/${nextSong?.video_id}/maxresdefault.jpg`}
                                                 alt="thumbnail"
-                                                className="w-12 h-12 mr-2"
+                                                className="w-12 mr-2"
                                             />
                                             <div className="flex flex-col">
                                                 <span className="text-left font-bold truncate">{nextSong?.title}</span>

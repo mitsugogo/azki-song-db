@@ -20,20 +20,14 @@ const SongsList = ({ songs, currentSongInfo, changeCurrentSong }: SongListProps)
                 >
                     <div className="block w-full mb-2">
                         <div className='shadow-md 0'>
-                            <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
+                            <img src={`https://img.youtube.com/vi/${song?.video_id}/maxresdefault.jpg`} />
                         </div>
                     </div>
                     <div className='w-full'>
                         <div className="w-full text-sm font-semibold">{song.title}</div>
                         <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
                     </div>
-                    <div className='hidden lg:flex gap-x-2 mt-2p-2 rounded text-xs text-muted-foreground'>
-                        {/* <div className='w-1/6'>
-                            <img src={`https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`} />
-                        </div>
-                        <div className='w-5/6'>
-                            <div className="w-full text-xs text-muted-foreground text-gray-700 dark:text-gray-400 pt-1 hidden lg:block">{song.video_title} ({(new Date(song.broadcast_at)).toLocaleDateString()})</div>
-                        </div> */}
+                    <div className='flex gap-x-2 mt-2p-2 rounded text-xs text-muted-foreground'>
                         {song.broadcast_at && (
                             <>{(new Date(song.broadcast_at)).toLocaleDateString()}</>
                         )}
