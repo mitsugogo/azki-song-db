@@ -15,18 +15,6 @@ const Acknowledgment = () => {
         <p>動画の権利は制作者に帰属します。</p>
       </div>
 
-      <h3 className="mt-4">使用ライブラリ</h3>
-
-      <List>
-        <ListItem>React</ListItem>
-        <ListItem>Next.js</ListItem>
-        <ListItem>Flowbite React</ListItem>
-        <ListItem>React Icons</ListItem>
-        <ListItem>Tailwind CSS</ListItem>
-        <ListItem>Google APIs</ListItem>
-      </List>
-
-
       <h3 className="mt-4">Copyright</h3>
       
       <div className="text-sm text-muted">
