@@ -8,7 +8,7 @@ interface SongListProps {
 
 const SongsList = ({ songs, currentSongInfo, changeCurrentSong }: SongListProps) => {
     return (
-        <ul className="song-list grid grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
+        <ul className="song-list grid grid-cols-3 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
             {songs.map((song, index) => (
                 <li
                     key={index}

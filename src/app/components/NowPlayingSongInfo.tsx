@@ -79,7 +79,7 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
                             </div>
                         </div>
 
-                        <div className="hidden lg:block">
+                        <div className="hidden md:block lg:block">
                             <NowPlayingSongInfoDetail
                                 currentSongInfo={currentSongInfo}
                                 searchTerm={searchTerm}

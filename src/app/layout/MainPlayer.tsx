@@ -334,8 +334,8 @@ export default function MainPlayer() {
         }
     }
     return (
-        <main className='flex flex-col lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 dark:bg-gray-800'>
-            <aside className='flex lg:w-2/3 xl:w-7/12 sm:w-full'>
+        <main className='flex flex-col md:flex-row lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 dark:bg-gray-800'>
+            <aside className='flex md:w-8/12 lg:w-2/3 xl:w-7/12 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
                         <div className="absolute top-0 left-0 w-full h-full">
@@ -441,7 +441,7 @@ export default function MainPlayer() {
                 </div>
             </aside>
 
-            <section className='flex lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh lg:h-full lg:ml-3 sm:mx-0'>
+            <section className='flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh lg:h-full lg:ml-3 sm:mx-0'>
                 {isLoading ? (
                     <div className="text-center h-full"><Spinner size="xl" /></div>
                 ) : (
