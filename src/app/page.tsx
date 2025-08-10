@@ -5,8 +5,11 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css';
 import Link from 'next/link';
-import { FaYoutube } from "react-icons/fa";
-import { createTheme, ThemeProvider } from 'flowbite-react';
+import { FaInfoCircle, FaYoutube } from "react-icons/fa";
+import { Button, createTheme, Modal, ModalBody, ModalFooter, ModalHeader, ThemeProvider } from 'flowbite-react';
+import { useState } from 'react';
+import Acknowledgment from './components/Acknowledgment';
+import { FaInfo } from 'react-icons/fa6';
 
 const customTheme = createTheme({
   button: {
@@ -40,15 +43,16 @@ const customTheme = createTheme({
 
 
 export default function Home() {
-
+  // 謝辞
+  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   return (
     <ThemeProvider theme={customTheme}>
       <div className="h-screen flex flex-col">
         <header className='flex-shrink-0 bg-background bg-primary text-white py-2 px-2'>
           <div className="flex items-center gap-2">
-
             <h1 className="text-lg lg:text-lg font-bold"><a href="/">AZKi Song Database</a></h1>
             <p className="text-xs hidden lg:inline">AZKiさんの歌を楽しむためのデータベース</p>
+            <FaInfoCircle className='inline cursor-pointer' size={16} onClick={() => setShowAcknowledgment(true)} />
             <div className="ml-auto flex items-center gap-2">
               <Link href="https://www.youtube.com/@AZKi" target="_blank" rel="noopener noreferrer" className="text-xs hover:underline">
                 <span className="inline"><FaYoutube className='inline' size={16} /> AZKi Channel</span>
@@ -63,6 +67,15 @@ export default function Home() {
         <Analytics />
         <SpeedInsights />
       </div>
+      <Modal show={showAcknowledgment} onClose={() => setShowAcknowledgment(false)}>
+        <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>謝辞</ModalHeader>
+        <ModalBody className='bg-white dark:bg-gray-800 dark:text-white'>
+          <Acknowledgment />
+        </ModalBody>
+        <ModalFooter className='bg-white dark:bg-gray-800 dark:text-white'>
+          <Button className='bg-primary hover:bg-primary text-white transition text-sm' onClick={() => setShowAcknowledgment(false)}>閉じる</Button>
+        </ModalFooter>
+      </Modal>
     </ThemeProvider>
   );
 }

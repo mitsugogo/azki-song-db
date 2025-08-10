@@ -6,14 +6,12 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import ToastNotification from '../components/ToastNotification';
 import { Badge, Button, ButtonGroup, Card, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
-import { HiCheck, HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
+import { HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
 import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
-import { FaDatabase, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
+import { FaBackwardStep, FaDatabase, FaForward, FaForwardStep, FaPlay, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
 import useDebounce from '../hook/useDebounce';
-import { clear } from 'console';
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -334,6 +332,7 @@ export default function MainPlayer() {
                         <div className="hidden lg:flex w-full justify-between gap-2">
                             <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded cursor-pointer" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
+                                    <FaBackwardStep className="text-primary-dark mr-2" />
                                     {previousSong && (
                                         <>
                                             <img
@@ -351,9 +350,9 @@ export default function MainPlayer() {
                             </Card>
                             <Card
                                 className='h-20 w-2/6 p-2 truncate rounded bg-primary-light cursor-pointer'
-                                onClick={() => setOpenShereModal(true)}
                             >
                                 <div className="flex items-center">
+                                    <FaPlay className="text-primary-dark mr-2" />
                                     {currentSongInfo && (
                                         <>
                                             <img
@@ -371,6 +370,7 @@ export default function MainPlayer() {
                             </Card>
                             <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 rounded text-right cursor-pointer" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
+                                    <FaForwardStep className="text-primary-dark mr-2" />
                                     {nextSong && (
                                         <>
                                             <img
@@ -418,14 +418,14 @@ export default function MainPlayer() {
                             </div>
                         </div>
                     </div>
-                    <Card className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
+                    <div className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground'>
                         {currentSongInfo && (
                             <div className="song-info">
                                 <div className='flex items-center gap-2'>
                                     <div className='w-full lg:w-5/6'>
                                      <h2 className="text-xl lg:text-2xl font-semibold mb-3">{currentSongInfo.title}</h2>
                                     </div>
-                                    <div className='hidden w-1/6 lg:block'>
+                                    <div className='hidden w-1/6 lg:block text-right'>
                                         <Button
                                             onClick={() => setOpenShereModal(true)}
                                             className="bg-primary hover:bg-primary text-white transition text-sm"
@@ -557,7 +557,7 @@ export default function MainPlayer() {
                                 </div>
                             </div>
                         )}
-                    </Card>
+                    </div>
                 </div>
             </aside>
 
@@ -627,10 +627,10 @@ export default function MainPlayer() {
                 size="md"
                 style={{ zIndex: 999 }}
             >
-                <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>URLをコピー</ModalHeader>
+                <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>シェア</ModalHeader>
                 <ModalBody className='bg-white dark:bg-gray-800 dark:text-white'>
                     <p className="mb-2">
-                        以下のURLをコピーして現在の曲をシェアできます
+                        AZKiさんの素敵な歌声をシェアしましょう！
                     </p>
                     <div>
                         <Label><FaYoutube className='inline' />&nbsp;YouTube URL (AZKi Channel)</Label>
@@ -716,7 +716,7 @@ export default function MainPlayer() {
                     </div>
                 </ModalBody>
                 <ModalFooter className='bg-white dark:bg-gray-800 dark:text-white'>
-                    <Button className='bg-primary dark:bg-primary' onClick={() => setOpenShereModal(false)}>閉じる</Button>
+                    <Button className='bg-primary hover:bg-primary text-white transition text-sm' onClick={() => setOpenShereModal(false)}>閉じる</Button>
                 </ModalFooter>
             </Modal>
         </main>

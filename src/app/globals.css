@@ -36,7 +36,7 @@
         background-color: var(--primary);
     }
     .hover\:bg-primary:hover {
-        background-color: #b71c67;
+        background-color: #b71c67 !important;
     }
     .bg-primary-light {
         background-color: #f0cadb;
