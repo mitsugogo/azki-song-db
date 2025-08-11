@@ -1,8 +1,8 @@
 "use client";
 
-import { SetStateAction, useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState } from 'react';
 import { Song } from '../types/song';
-import { Badge, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Tabs, ThemeProvider } from 'flowbite-react';
+import { Badge, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Tabs, TabsRef, ThemeProvider } from 'flowbite-react';
 import { HiClipboardList, HiUserCircle, HiMusicNote, HiPlay, HiTag } from 'react-icons/hi';
 import { FaYoutube } from 'react-icons/fa6';
 import Loading from '../loading';
@@ -15,9 +15,17 @@ export default function StatisticsPage() {
   const [artistCounts, setArtistCounts] = useState<{ artist: string; count: number; song: Song; lastVideo: Song | null }[]>([]);
   const [originalSongCounts, setOriginalSongCounts] = useState<{ title: string; count: number; song: Song; lastVideo: Song | null }[]>([]);
   const [tagCounts, setTagCounts] = useState<{ tag: string; count: number; song: Song; lastVideo: Song | null }[]>([]);
-  const [tab, setTab] = useState<'song' | 'artist' | 'original' | 'tags'>('song');
+  const tabsRef = useRef<TabsRef>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
+
+    const url = new URL(window.location.href);
+    const tabParam = url.searchParams.get('tab');
+    if (tabParam) {
+      setActiveTab(Number(tabParam));
+      tabsRef.current?.setActiveTab(Number(tabParam));
+    }
     fetch('/api/songs')
       .then((res) => res.json())
       .then((data) => {
@@ -122,28 +130,29 @@ export default function StatisticsPage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const searchParams = url.searchParams;
-    const tab = searchParams.get('tab');
-    if (tab) {
-      if (tab === "song" || tab === "artist" || tab === "original" || tab === "tags") {
-        setTab(tab as SetStateAction<"song" | "artist" | "original" | "tags">);
-      }
-    }
+    const tab = parseInt(searchParams.get('tab') || "0");
+    searchParams.set('tab', tab.toString());
+    window.history.replaceState({}, '', url.toString());
+    setActiveTab(tab);
   }, []);
 
-  useEffect(() => {
+  const changeTab = (tabIdx: number) => {
+    setActiveTab(tabIdx);
     const url = new URL(window.location.href);
     const searchParams = url.searchParams;
-    searchParams.set('tab', tab);
+    searchParams.set('tab', tabIdx.toString());
     window.history.replaceState({}, '', url.toString());
-  }, [tab]);
+  }
 
   return (
     <div className='lg:p-6'>
       <div>
         <h1 className='font-extrabold text-2xl mb-3 sm:p-3 dark:text-gray-200'>統計情報</h1>
       </div>
-      <Tabs aria-label="Default tabs" variant="default">
-        <TabItem active={tab === 'song'} title="曲名別" icon={HiMusicNote} onClick={() => setTab('song')}>
+      <Tabs aria-label="Default tabs" variant="default" ref={tabsRef} onActiveTabChange={(i) => {
+        changeTab(i);
+      }}>
+        <TabItem title="曲名別" icon={HiMusicNote}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loading />
@@ -172,17 +181,17 @@ export default function StatisticsPage() {
                     const today = new Date();
                     const lastVideoDate = lastVideo ? new Date(lastVideo.broadcast_at) : null;
                     const daysAfterLastVideo = lastVideoDate ? Math.ceil((today.getTime() - lastVideoDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
-                    
+
                     const searchQuery = encodeURIComponent(`title:${songCount.title} artist:${songCount.song.artist}`);
-                    
+
                     return (
                       <TableRow key={songCount.title}>
                         <TableCell>
-                          <Link 
+                          <Link
                             href={`/?q=${searchQuery}`}
                             className='text-primary hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400'
                           >
-                          {songCount.title}
+                            {songCount.title}
                           </Link>
                         </TableCell>
                         <TableCell className='hidden lg:table-cell'>{songCount.song.artist}</TableCell>
@@ -212,7 +221,7 @@ export default function StatisticsPage() {
             </div>
           )}
         </TabItem>
-        <TabItem active={tab === 'artist'} title="アーティスト名別" icon={HiUserCircle} onClick={() => setTab('artist')}>
+        <TabItem title="アーティスト名別" icon={HiUserCircle}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loading />
@@ -270,7 +279,7 @@ export default function StatisticsPage() {
             </Table>
           )}
         </TabItem>
-        <TabItem active={tab === 'original'} title="オリ曲" icon={HiPlay} onClick={() => setTab('original')}>
+        <TabItem title="オリ曲" icon={HiPlay}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loading />
@@ -327,7 +336,7 @@ export default function StatisticsPage() {
             </Table>
           )}
         </TabItem>
-        <TabItem active={tab === 'tags'} title="タグ" icon={HiTag} onClick={() => setTab('tags')}>
+        <TabItem title="タグ" icon={HiTag}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loading />
