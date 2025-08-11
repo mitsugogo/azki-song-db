@@ -39,7 +39,7 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
 
     return (
         <>
-            <div className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-4 lg:pl-0 text-sm text-foreground dark:text-gray-300'>
+            <div className='flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground dark:text-gray-300'>
                 {currentSongInfo && (
                     <div className="song-info">
                         <div className='hidden lg:flex items-center gap-2 mb-3'>

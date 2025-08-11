@@ -8,7 +8,7 @@ interface SongListProps {
 
 const SongsList = ({ songs, currentSongInfo, changeCurrentSong }: SongListProps) => {
     return (
-        <ul className="song-list grid grid-cols-3 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
+        <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
             {songs.map((song, index) => (
                 <li
                     key={index}
@@ -18,14 +18,14 @@ const SongsList = ({ songs, currentSongInfo, changeCurrentSong }: SongListProps)
                     data-start-time={song.start}
                     data-title={song.title}
                 >
-                    <div className="block w-full mb-2">
+                    <div className="block w-full mb-2 text-center">
                         <div className='shadow-md 0'>
                             <img src={`https://img.youtube.com/vi/${song?.video_id}/maxresdefault.jpg`} />
                         </div>
                     </div>
                     <div className='w-full'>
-                        <div className="w-full text-sm font-semibold">{song.title}</div>
-                        <div className="w-full text-xs text-muted-foreground">{song.artist} - {song.sing}</div>
+                        <div className="w-full text-sm font-semibold line-clamp-3">{song.title}</div>
+                        <div className="w-full text-xs text-muted-foreground line-clamp-3">{song.artist} - {song.sing}</div>
                     </div>
                     <div className='flex gap-x-2 mt-2p-2 rounded text-xs text-muted-foreground'>
                         {song.broadcast_at && (

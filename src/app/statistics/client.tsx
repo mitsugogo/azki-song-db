@@ -232,7 +232,7 @@ export default function StatisticsPage() {
               <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
                 アーティスト名別({artistCounts.length})
                 <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                  全{artistCounts.length}曲で、アーティスト名別に歌唱した回数をまとめています。<br />
+                  全{artistCounts.length}アーティストで、アーティスト名別に歌唱した回数をまとめています。<br />
                   データ上、表記揺れした場合に別のアーティストとしてカウントされる場合がありますので、ご了承ください。
                 </p>
               </caption>

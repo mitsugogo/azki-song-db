@@ -348,7 +348,7 @@ export default function MainPlayer() {
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="hidden lg:flex w-full justify-between gap-2">
-                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
+                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
                                     {previousSong && (
                                         <>
@@ -364,9 +364,9 @@ export default function MainPlayer() {
                                         </>
                                     )}
                                 </div>
-                            </Card>
-                            <Card
-                                className='h-20 w-2/6 p-2 truncate rounded bg-primary-400 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none'
+                            </div>
+                            <div
+                                className='h-14 w-2/6 p-2 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none'
                             >
                                 <div className="flex items-center">
                                     {currentSongInfo && (
@@ -383,8 +383,8 @@ export default function MainPlayer() {
                                         </>
                                     )}
                                 </div>
-                            </Card>
-                            <Card className="h-20 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
+                            </div>
+                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
                                     {nextSong && (
                                         <>
@@ -401,7 +401,7 @@ export default function MainPlayer() {
                                     )}
 
                                 </div>
-                            </Card>
+                            </div>
                         </div>
                         <div className="flex lg:hidden justify-between">
                             <div className="">
