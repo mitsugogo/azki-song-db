@@ -348,7 +348,7 @@ export default function MainPlayer() {
                     </div>
                     <div className='flex flex-col p-2 px-2 lg:px-0 text-sm text-foreground'>
                         <div className="hidden lg:flex w-full justify-between gap-2">
-                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
+                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(previousSong)}>
                                 <div className="flex items-center">
                                     {previousSong && (
                                         <>
@@ -384,7 +384,7 @@ export default function MainPlayer() {
                                     )}
                                 </div>
                             </div>
-                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
+                            <div className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-right cursor-pointer hover:bg-gray-300" onClick={() => changeCurrentSong(nextSong)}>
                                 <div className="flex items-center">
                                     {nextSong && (
                                         <>

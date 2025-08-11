@@ -15,7 +15,7 @@ export default function Home() {
     <ThemeProvider>
       <div className="h-screen flex flex-col">
         <Header />
-        <main className='flex flex-col md:flex-row flex-grow overflow-y-scroll lg:overflow-hidde 4xl:container 4xl:mx-auto p-0 lg:p-4 dark:bg-gray-800'>
+        <main className='flex flex-col md:flex-row flex-grow overflow-y-scroll lg:overflow-hidde 4xl:container 4xl:mx-auto p-0 lg:p-4 dark:bg-gray-900'>
           <MainPlayer />
         </main>
         <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block'>
