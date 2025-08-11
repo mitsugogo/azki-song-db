@@ -76,7 +76,8 @@ export default function StatisticsPage() {
       const dateB = new Date(b.broadcast_at).getTime();
       return dateA - dateB;
     }).reduce((map, song) => {
-      if (['AZKi', '瀬名航 feat.AZKi'].includes(song.artist)) {
+      const artists = song.artist.split('、');
+      if (artists.some((artist) => artist.includes('AZKi'))) {
         const title = song.title;
         map[title] = {
           title,
