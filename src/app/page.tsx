@@ -1,8 +1,6 @@
 "use client";
 
 import MainPlayer from './components/MainPlayer';
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css';
 import Link from 'next/link';
 import { FaInfoCircle, FaYoutube } from "react-icons/fa";
@@ -35,8 +33,6 @@ export default function Home() {
         <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block'>
           <p className="text-xs">本サイトは有志による非公式のファンサイトです。<span className="hidden lg:inline">動画はホロライブプロダクション様及びAZKi様が制作したものです。</span>動画の権利は制作者に帰属します。</p>
         </footer>
-        <Analytics />
-        <SpeedInsights />
       </div>
       <Modal show={showAcknowledgment} onClose={() => setShowAcknowledgment(false)}>
         <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>謝辞</ModalHeader>
