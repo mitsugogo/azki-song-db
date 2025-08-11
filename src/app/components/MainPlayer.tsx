@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Song } from '../types/song'; // 型定義をインポート
-import YouTubePlayer from '../components/YouTubePlayer';
+import YouTubePlayer from './YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
-import ToastNotification from '../components/ToastNotification';
+import ToastNotification from './ToastNotification';
 import { Button, ButtonGroup, Card, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
 import { HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
 import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
 import { FaBackwardStep, FaCompactDisc, FaDatabase, FaForwardStep, FaPlay, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
 import useDebounce from '../hook/useDebounce';
-import NowPlayingSongInfo from '../components/NowPlayingSongInfo';
-import SongsList from '../components/SongList';
+import NowPlayingSongInfo from './NowPlayingSongInfo';
+import SongsList from './SongList';
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;

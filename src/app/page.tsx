@@ -1,6 +1,6 @@
 "use client";
 
-import MainPlayer from './layout/MainPlayer';
+import MainPlayer from './components/MainPlayer';
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import './globals.css';
@@ -9,9 +9,6 @@ import { FaInfoCircle, FaYoutube } from "react-icons/fa";
 import { Button, DarkThemeToggle, Modal, ModalBody, ModalFooter, ModalHeader, ThemeProvider } from 'flowbite-react';
 import { useState } from 'react';
 import Acknowledgment from './components/Acknowledgment';
-import { FaInfo } from 'react-icons/fa6';
-
-
 
 export default function Home() {
   // 謝辞
