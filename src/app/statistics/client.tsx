@@ -160,7 +160,7 @@ export default function StatisticsPage() {
           ) : (
             <div className=''>
               <Table striped hoverable className='w-full'>
-                <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
                   曲名別({songCounts.length})
                   <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                     全{songCounts.length}曲で、曲名別に歌唱した回数をまとめています。<br />
@@ -229,7 +229,7 @@ export default function StatisticsPage() {
           ) : (
             <Table striped hoverable>
 
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
                 アーティスト名別({artistCounts.length})
                 <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                   全{artistCounts.length}アーティストで、アーティスト名別に歌唱した回数をまとめています。<br />
@@ -286,7 +286,7 @@ export default function StatisticsPage() {
             </div>
           ) : (
             <Table striped hoverable>
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
                 オリ曲({originalSongCounts.length})
                 <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                   全{originalSongCounts.length}曲で、オリジナル楽曲のみの回数をまとめています。<br />
@@ -343,7 +343,7 @@ export default function StatisticsPage() {
             </div>
           ) : (
             <Table striped hoverable>
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
                 タグ({tagCounts.length})
                 <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
                   全{tagCounts.length}タグで、回数をまとめています。<br />
