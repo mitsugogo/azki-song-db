@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { Song } from '../types/song';
 import { Badge, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Tabs, ThemeProvider } from 'flowbite-react';
 import { HiClipboardList, HiUserCircle, HiMusicNote, HiPlay, HiTag } from 'react-icons/hi';
@@ -123,7 +123,9 @@ export default function StatisticsPage() {
     const searchParams = url.searchParams;
     const tab = searchParams.get('tab');
     if (tab) {
-      setTab(tab);
+      if (tab === "song" || tab === "artist" || tab === "original" || tab === "tags") {
+        setTab(tab as SetStateAction<"song" | "artist" | "original" | "tags">);
+      }
     }
   }, []);
 
