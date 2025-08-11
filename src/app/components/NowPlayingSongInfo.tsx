@@ -43,13 +43,13 @@ const NowPlayingSongInfo = ({ currentSongInfo, searchTerm, setSearchTerm, setOpe
                 {currentSongInfo && (
                     <div className="song-info">
                         <div className='hidden lg:flex items-center gap-2 mb-3'>
-                            <div className='w-full lg:w-5/6 self-baseline border-b border-gray-200 pb-2'>
+                            <div className='w-full flex-auto self-baseline border-b border-gray-200 pb-2'>
                                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white"><FaCompactDisc className="relative fa-spin mr-2 inline" style={{ top: "-1px" }} />{currentSongInfo.title}<span className="font-normal text-lg"> - {currentSongInfo.artist}</span></h2>
                             </div>
-                            <div className='hidden w-1/6 lg:block text-right'>
+                            <div className='hidden lg:block text-right'>
                                 <Button
                                     onClick={() => setOpenShereModal(true)}
-                                    className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm"
+                                    className="bg-primary hover:bg-primary dark:hover:bg-primary dark:bg-primary-900 text-white transition text-sm"
                                 ><FaShare />&nbsp;Share
                                 </Button>
                             </div>

@@ -334,8 +334,8 @@ export default function MainPlayer() {
         }
     }
     return (
-        <main className='flex flex-col md:flex-row lg:flex-row flex-grow overflow-y-scroll lg:overflow-hidden p-0 lg:p-4 dark:bg-gray-800'>
-            <aside className='flex md:w-8/12 lg:w-2/3 xl:w-7/12 sm:w-full'>
+        <>
+            <aside className='flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full'>
                 <div className="flex flex-col h-full w-full bg-background overflow-auto">
                     <div className="relative aspect-video w-full bg-black">
                         <div className="absolute top-0 left-0 w-full h-full">
@@ -448,7 +448,7 @@ export default function MainPlayer() {
                     <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
                         <button
                             onClick={() => playRandomSong(songs)}
-                            className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary cursor-pointer text-white rounded transition mb-2"
+                            className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2"
                         >
                             ランダムで他の曲にする
                         </button>
@@ -579,6 +579,6 @@ export default function MainPlayer() {
                     <Button className='bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm' onClick={() => setOpenShereModal(false)}>閉じる</Button>
                 </ModalFooter>
             </Modal>
-        </main>
+        </>
     );
 }
