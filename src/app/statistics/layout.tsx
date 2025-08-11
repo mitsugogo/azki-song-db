@@ -12,7 +12,7 @@ export default function StatsLayout({
       <ThemeProvider>
         <div className="h-screen flex flex-col">
           <Header />
-          <div className="flex-grow overflow-y-scroll container mx-auto ">
+          <div className="flex-grow container mx-auto ">
             {children}
           </div>
           <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block'>

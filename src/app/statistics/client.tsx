@@ -189,7 +189,7 @@ export default function StatisticsPage() {
                         <TableCell>
                           <Link
                             href={`/?q=${searchQuery}`}
-                            className='text-primary hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400'
+                            className='text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500'
                           >
                             {songCount.title}
                           </Link>
@@ -198,7 +198,7 @@ export default function StatisticsPage() {
                         <TableCell>{songCount.count}</TableCell>
                         <TableCell>
                           {lastVideo ? (
-                            <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400'>
+                            <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500'>
                               <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                                 <img src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`} alt={lastVideo.video_title} className="w-full lg:w-12 aspect-video" />
                                 <div className="flex flex-col gap-1 lg:gap-">
@@ -252,12 +252,12 @@ export default function StatisticsPage() {
                   return (
                     <TableRow key={artistCount.artist}>
                       <TableCell>
-                        <Link href={`/?q=artist:${artistCount.artist}`} className='text-primary hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400'>{artistCount.artist}</Link>
+                        <Link href={`/?q=artist:${artistCount.artist}`} className='text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500'>{artistCount.artist}</Link>
                       </TableCell>
                       <TableCell>{artistCount.count}</TableCell>
                       <TableCell>
                         {lastVideo ? (
-                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700'>
+                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500'>
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <img src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`} alt={lastVideo.video_title} className="w-full lg:w-12 aspect-video" />
                               <div className="flex flex-col gap-1 lg:gap-">
@@ -309,12 +309,12 @@ export default function StatisticsPage() {
                   return (
                     <TableRow key={originalSongCount.title}>
                       <TableCell>
-                        <Link href={`/?q=title:${originalSongCount.title}`} className='text-primary hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400'>{originalSongCount.title}</Link>
+                        <Link href={`/?q=title:${originalSongCount.title}`} className='text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500'>{originalSongCount.title}</Link>
                       </TableCell>
                       <TableCell>{originalSongCount.count}</TableCell>
                       <TableCell>
                         {lastVideo ? (
-                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700'>
+                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500'>
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <img src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`} alt={lastVideo.video_title} className="w-full lg:w-12 aspect-video" />
                               <div className="flex flex-col gap-1 lg:gap-">
@@ -368,7 +368,7 @@ export default function StatisticsPage() {
                       <TableCell>{tag.count}</TableCell>
                       <TableCell>
                         {lastVideo ? (
-                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700'>
+                          <a href={`${lastVideo.video_uri}${lastVideo.start ? `&t=${lastVideo.start}s` : ''}`} target="_blank" rel="noopener noreferrer" className='text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500'>
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <img src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`} alt={lastVideo.video_title} className="w-full lg:w-12 aspect-video" />
                               <div className="flex flex-col gap-1 lg:gap-">

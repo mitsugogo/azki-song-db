@@ -41,7 +41,7 @@ export default function RootLayout({
         <ThemeModeScript />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-800`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900`}
       >
         {children}
       </body>

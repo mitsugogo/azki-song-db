@@ -47,6 +47,9 @@
     --color-secondary-900: #7f1c60;
     --color-secondary-950: #4e0938;
     --color-secondary: var(--color-secondary-700);
+
+    --breakpoint-3xl: 100rem;
+    --breakpoint-4xl: 140rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
