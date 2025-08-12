@@ -80,8 +80,10 @@ export async function GET(req: NextRequest) {
         height: parseInt(height),
       }
     );
-  } catch (e: any) {
-    console.log(`${e.message}`);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.log(`${e.message}`);
+    }
     return new Response(`Failed to generate the image`, {
       status: 500,
     });
