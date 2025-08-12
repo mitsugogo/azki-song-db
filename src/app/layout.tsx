@@ -30,12 +30,7 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     type: "website",
     images: [
-      {
-        url: `${baseUrl}/api/og?title=AZKi Song Database&subtitle=ホロライブのAZKiさんの歌枠の素晴らしさを伝えるサイト&titlecolor=b81e8a&w=1200&h=630`,
-        width: 1200,
-        height: 630,
-        alt: "AZKi Song Database",
-      }
+      `${baseUrl}/api/og?title=AZKi Song Database&subtitle=ホロライブのAZKiさんの歌枠の素晴らしさを伝えるサイト&titlecolor=b81e8a&w=1200&h=630`,
     ]
   },
 };
