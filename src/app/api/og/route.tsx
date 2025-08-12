@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 
-export const config = {
-  runtime: "edge",
-};
-
-export const contentType = 'image/png'
+export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
@@ -55,7 +51,6 @@ export async function GET(req: NextRequest) {
               padding: "0 120px",
               lineHeight: 1.3,
               marginBottom: "30px",
-              wordWrap: "break-word",
             }}
           >
             {title}
