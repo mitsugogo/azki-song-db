@@ -27,7 +27,7 @@ const Acknowledgment = () => {
 
       <h3 className="mt-4 font-semibold">アイコン</h3>
       <div className="text-sm text-muted mt-1">
-        <p>アイコンは、<Link href="https://x.com/YsWeissYs" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">わいす / Y&apos;s (@YsWeissYs)</Link> さんにご提供いただいたアイコンを使用しています。</p>
+        <p>アイコンは、<Link href="https://x.com/YsWeissYs" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">わいす / Ys (@YsWeissYs)</Link> さんにご提供いただいたアイコンを使用しています。</p>
       </div>
 
       <h3 className="mt-4 font-semibold">Copyright</h3>
