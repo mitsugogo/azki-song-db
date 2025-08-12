@@ -22,6 +22,7 @@ const baseUrl = process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+  
   openGraph: {
     title: "AZKi Song Database",
     description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       `${baseUrl}/api/og?title=AZKi Song Database&subtitle=ホロライブのAZKiさんの歌枠の素晴らしさを伝えるサイト&titlecolor=b81e8a&w=1200&h=630`,
-    ]
+    ],
   },
 };
 

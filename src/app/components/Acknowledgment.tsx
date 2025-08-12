@@ -22,13 +22,18 @@ const Acknowledgment = () => {
       <div className="text-sm text-muted mt-1">
         <p>集計対象は、AZKiさんのYouTubeチャンネルや他のホロメンや他事務所等にゲスト参加されたあずきんち歌枠・記念ライブ・AZKi生放送・Music Video・カバーMVなどの御本人の歌唱動画を対象にしています。</p>
         <p>集計は手作業で行っているため、更新の遅延や誤り、表記揺れなどがあるかもしれません。</p>
-        <p>情報の不足や誤りに気づいた場合は、<Link href="https://x.com/mitsugogo" target="_blank" rel="noopener noreferrer">@mitsugogo</Link>までご連絡ください。</p>
+        <p>情報の不足や誤りに気づいた場合は、<Link href="https://x.com/mitsugogo" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">@mitsugogo</Link>までご連絡ください。</p>
+      </div>
+
+      <h3 className="mt-4 font-semibold">アイコン</h3>
+      <div className="text-sm text-muted mt-1">
+        <p>アイコンは、<Link href="https://x.com/YsWeissYs" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">わいす / Ys (@YsWeissYs)</Link> さんにご提供いただいたアイコンを使用しています。</p>
       </div>
 
       <h3 className="mt-4 font-semibold">Copyright</h3>
 
       <div className="text-sm text-muted">
-        <p>© 2025 <Link href="https://x.com/mitsugogo" target="_blank" rel="noopener noreferrer">mitsugogo</Link></p>
+        <p>© 2025 <Link href="https://x.com/mitsugogo" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">mitsugogo</Link></p>
       </div>
     </>
   )
