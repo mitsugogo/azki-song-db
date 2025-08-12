@@ -17,16 +17,26 @@ const geistMono = Geist_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
+const baseUrl = process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
+
 export const metadata: Metadata = {
   title: "AZKi Song Database",
-  description: "ホロライブの歌姫 AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+  description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
   openGraph: {
     title: "AZKi Song Database",
-    description: "ホロライブの歌姫 AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+    description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
     url: "https://azki-song-db.vercel.app/",
     siteName: "AZKi Song Database",
     locale: "ja_JP",
     type: "website",
+    images: [
+      {
+        url: `${baseUrl}/api/og?title=AZKi Song Database&subtitle=ホロライブのAZKiさんの歌枠の素晴らしさを伝えるサイト&titlecolor=b81e8a&w=1200&h=630`,
+        width: 1200,
+        height: 630,
+        alt: "AZKi Song Database",
+      }
+    ]
   },
 };
 
@@ -36,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" className="dark">
       <head>
         <ThemeModeScript />
       </head>
