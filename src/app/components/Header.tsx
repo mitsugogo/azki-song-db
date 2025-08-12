@@ -38,7 +38,7 @@ export function Header() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex shrink-0 items-center">
-              <a href="/" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>
+              <a href="/">
                 <h1 className="text-lg lg:text-lg font-bold">AZKi Song Database</h1>
               </a>
               </div>
