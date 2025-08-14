@@ -10,9 +10,9 @@ export default function StatsLayout({
   return (
     <>
       <ThemeProvider>
-        <div className="h-dvh flex flex-col">
+        <div className="h-screen flex flex-col">
           <Header />
-          <div className="flex-grow container mx-auto">
+          <div className="flex-grow container mx-auto ">
             {children}
           </div>
           <footer className='flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block'>
