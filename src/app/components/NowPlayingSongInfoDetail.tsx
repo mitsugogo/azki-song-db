@@ -17,8 +17,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
             {currentSongInfo && (
                 <div className="flex-grow">
                     <dl className="grid grid-cols-12 gap-x-4 gap-y-2">
-                        <div className="col-span-1 lg:col-span-2 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><FaUser /><span className="hidden  lg:inline ml-1">アーティスト:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-start">
+                            <dt className="text-muted-foreground flex items-start"><FaUser /><span className="hidden  lg:inline ml-1">アーティスト:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -43,8 +43,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-start">
+                            <dt className="text-muted-foreground flex items-start"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -69,8 +69,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-start">
+                            <dt className="text-muted-foreground flex items-start"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd>
@@ -85,8 +85,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-start">
+                            <dt className="text-muted-foreground flex items-start"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -107,8 +107,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-center">
-                            <dt className="text-muted-foreground flex items-center"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-start">
+                            <dt className="text-muted-foreground flex items-start"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -135,11 +135,17 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
 
                         {currentSongInfo && currentSongInfo.extra && (
                             <>
-                                <div className="col-span-1 lg:col-span-2 flex items-center">
-                                    <dt className="text-muted-foreground flex items-center"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
+                                <div className="col-span-1 lg:col-span-2 flex items-start">
+                                    <dt className="text-muted-foreground flex items-start"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
                                 </div>
                                 <div className="col-span-11 lg:col-span-10">
-                                    <dd>{currentSongInfo.extra}</dd>
+                                    <dd
+                                        dangerouslySetInnerHTML={{
+                                            __html: currentSongInfo.extra
+                                                .replace(/(https?:\/\/[\w\d./=?#]+)/g, (url) => `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`)
+                                                .replace(/\n/g, '<br />'),
+                                        }}
+                                    />
                                 </div>
                             </>
                         )}
