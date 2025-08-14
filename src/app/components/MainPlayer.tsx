@@ -441,7 +441,7 @@ export default function MainPlayer() {
                 </div>
             </aside>
 
-            <section className='flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh lg:h-full lg:ml-3 sm:mx-0'>
+            <section className='flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 lg:h-full lg:ml-3 sm:mx-0'>
                 {isLoading ? (
                     <div className="text-center h-full"><Spinner size="xl" /></div>
                 ) : (
