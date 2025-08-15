@@ -443,7 +443,7 @@ export default function MainPlayer() {
 
             <section className='flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full lg:ml-3 sm:mx-0'>
                 {isLoading ? (
-                    <div className="text-center h-full"><Spinner size="xl" /></div>
+                    <div className="flex flex-col text-center h-full justify-center"><Spinner size="xl" /></div>
                 ) : (
                     <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
                         <button
