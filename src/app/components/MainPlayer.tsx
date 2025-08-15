@@ -5,7 +5,7 @@ import { Song } from '../types/song'; // 型定義をインポート
 import YouTubePlayer from './YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import ToastNotification from './ToastNotification';
-import { Button, ButtonGroup, Card, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
+import { Badge, Button, ButtonGroup, Card, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react';
 import { HiClipboardCopy, HiSearch, HiX } from 'react-icons/hi';
 import { GiPreviousButton, GiNextButton } from 'react-icons/gi';
 import { FaBackwardStep, FaCompactDisc, FaDatabase, FaForwardStep, FaPlay, FaShare, FaShuffle, FaX, FaYoutube } from "react-icons/fa6";
@@ -43,6 +43,7 @@ export default function MainPlayer() {
     const [searchTerm, setSearchTerm] = useState('');
     const [urlWithSearchTerm, setUrlWithSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
+    const [isComposing, setIsComposing] = useState(false); // IME変換中かどうか
 
     const [availableTags, setAvailableTags] = useState<string[]>([]);
     const [availableArtists, setAvailableArtists] = useState<string[]>([]);
@@ -461,6 +462,61 @@ export default function MainPlayer() {
                                 >
                                     <HiX className="w-4 h-4" />
                                 </button>}
+                            </div>
+
+                            <div className="flex">
+                                <div className="relative">
+                                    <select id="search-dropdown" className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-l-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
+                                        <option value="all">検索</option>
+                                        <option value="artist">アーティスト名</option>
+                                        <option value="sing">歌った人</option>
+                                        <option value="tag">タグ</option>
+                                    </select>
+                                </div>
+                                <div className="relative w-full">
+                                    <input 
+                                        type="search" 
+                                        className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-s-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500" 
+                                        placeholder="Search Mockups, Logos, Design Templates..." 
+                                        onKeyDown={(e) => {
+                                            if (isComposing) { return; }
+                                            const searchWord = (e.target as HTMLInputElement).value;
+                                            if (!searchWord) { return; }
+
+                                            const searchType = document.getElementById("search-dropdown") as HTMLSelectElement;
+                                            const searchTypeValue = (searchType.value === "all") ? "" : searchType.value + ":";
+                                            const searchText = `${searchTypeValue}${searchWord.split(" ").join(":")}`;
+
+                                            const newSearchTerm = searchTerm + ' ' + searchText;
+                                            handleSearchChange(newSearchTerm);
+
+                                            // 現在のinputを空にする
+                                            (e.target as HTMLInputElement).value = '';
+                                        }}
+                                        onCompositionStart={() => {
+                                            setIsComposing(true);
+                                        }}
+                                        onCompositionEnd={(e) => {
+                                            setIsComposing(false);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <div className="w-full">
+                                {searchTerm.split(' ').filter(Boolean).map((term, index) => {
+                                    return (
+                                        <Badge
+                                            key={index}
+                                            className="cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200"
+                                        >
+                                            {term}
+                                            <HiX className='inline' onClick={() => {
+                                            const newSearchTerm = searchTerm.replace(term, '').trim();
+                                            changeSearchTerm(newSearchTerm);
+                                            }}  />
+                                        </Badge>
+                                    );
+                                })}
                             </div>
                         </div>
                         <div className="hidden lg:block">
