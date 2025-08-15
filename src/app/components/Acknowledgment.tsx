@@ -13,7 +13,7 @@ const Acknowledgment = () => {
       <h3 className="mt-4 font-semibold">動画について</h3>
 
       <div className="text-sm text-muted mt-1">
-        <p>動画やアーカイブはホロライブプロダクション様及びAZKi様が制作・配信したものです。</p>
+        <p>動画やアーカイブはホロライブプロダクション様及び、AZKi様が制作・配信したものです。</p>
         <p>動画の権利は所有者に帰属します。</p>
       </div>
 
@@ -30,10 +30,10 @@ const Acknowledgment = () => {
         <p>アイコンは、<Link href="https://x.com/YsWeissYs" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">わいす / Ys (@YsWeissYs)</Link> さんにご提供いただいたアイコンを使用しています。</p>
       </div>
 
-      <h3 className="mt-4 font-semibold">Copyright</h3>
+      <h3 className="mt-4 font-semibold">管理</h3>
 
       <div className="text-sm text-muted">
-        <p>© 2025 <Link href="https://x.com/mitsugogo" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">mitsugogo</Link></p>
+        <p><Link href="https://x.com/mitsugogo" className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500" target="_blank" rel="noopener noreferrer">@mitsugogo</Link></p>
       </div>
     </>
   )
