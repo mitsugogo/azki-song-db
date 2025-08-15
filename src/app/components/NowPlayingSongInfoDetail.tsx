@@ -1,6 +1,6 @@
-import { Badge, Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
+import { Badge } from "flowbite-react";
 import { Song } from "../types/song";
-import { FaBook, FaCalendar, FaShare, FaTag, FaUser, FaYoutube } from "react-icons/fa6";
+import { FaBook, FaCalendar, FaTag, FaUser, FaYoutube } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faYoutube } from "@fortawesome/free-brands-svg-icons";
@@ -17,8 +17,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
             {currentSongInfo && (
                 <div className="flex-grow">
                     <dl className="grid grid-cols-12 gap-x-4 gap-y-2">
-                        <div className="col-span-1 lg:col-span-2 flex items-start">
-                            <dt className="text-muted-foreground flex items-start"><FaUser /><span className="hidden  lg:inline ml-1">アーティスト:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                            <dt className="text-muted-foreground flex items-baseline"><FaUser /><span className="hidden  lg:inline ml-1">アーティスト:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -43,8 +43,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-start">
-                            <dt className="text-muted-foreground flex items-start"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                            <dt className="text-muted-foreground flex items-baseline"><PiMicrophoneStageFill /><span className="hidden lg:inline ml-1">歌った人:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -69,8 +69,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-start">
-                            <dt className="text-muted-foreground flex items-start"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                            <dt className="text-muted-foreground flex items-baseline"><FaYoutube /><span className="hidden lg:inline ml-1">動画タイトル:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd>
@@ -85,8 +85,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-start">
-                            <dt className="text-muted-foreground flex items-start"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                            <dt className="text-muted-foreground flex items-baseline"><FaCalendar /><span className="hidden lg:inline ml-1">配信日:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -107,8 +107,8 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
                             </dd>
                         </div>
 
-                        <div className="col-span-1 lg:col-span-2 flex items-start">
-                            <dt className="text-muted-foreground flex items-start"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
+                        <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                            <dt className="text-muted-foreground flex items-baseline"><FaTag /><span className="hidden lg:inline ml-1">タグ:</span></dt>
                         </div>
                         <div className="col-span-11 lg:col-span-10">
                             <dd className="flex flex-wrap gap-1">
@@ -135,14 +135,14 @@ const NowPlayingSongInfoDetail = ({ currentSongInfo, searchTerm, setSearchTerm }
 
                         {currentSongInfo && currentSongInfo.extra && (
                             <>
-                                <div className="col-span-1 lg:col-span-2 flex items-start">
-                                    <dt className="text-muted-foreground flex items-start"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
+                                <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                                    <dt className="text-muted-foreground flex items-baseline"><FaBook /><span className="hidden lg:inline ml-1">追加情報:</span></dt>
                                 </div>
                                 <div className="col-span-11 lg:col-span-10">
                                     <dd
                                         dangerouslySetInnerHTML={{
                                             __html: currentSongInfo.extra
-                                                .replace(/(https?:\/\/[\w\d./=?#]+)/g, (url) => `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`)
+                                                .replace(/(https?:\/\/[\w\d./=?#-]+)/g, (url) => `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`)
                                                 .replace(/\n/g, '<br />'),
                                         }}
                                     />
