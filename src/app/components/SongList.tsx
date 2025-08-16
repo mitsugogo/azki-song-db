@@ -12,7 +12,7 @@ const SongsList = ({ songs, currentSongInfo, changeCurrentSong }: SongListProps)
             {songs.map((song, index) => (
                 <li
                     key={index}
-                    className={`p-3 rounded relative cursor-pointer transition ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id ? 'bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
+                    className={`p-3 rounded relative cursor-pointer transition ${currentSongInfo?.title === song.title && currentSongInfo.video_id === song.video_id && currentSongInfo.start === song.start ? 'bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'}`}
                     onClick={() => changeCurrentSong(song, false)}
                     data-video-id={song.video_id}
                     data-start-time={song.start}
