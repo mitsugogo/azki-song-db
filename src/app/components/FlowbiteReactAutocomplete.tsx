@@ -1,8 +1,13 @@
-import * as React from 'react';
-import useAutocomplete from '@mui/material/useAutocomplete';
-import { TextInput, ListGroup, ListGroupItem, ListGroupItemProps } from 'flowbite-react';
-import { IconType } from 'react-icons/lib';
-import { HiX } from 'react-icons/hi';
+import * as React from "react";
+import useAutocomplete from "@mui/material/useAutocomplete";
+import {
+  TextInput,
+  ListGroup,
+  ListGroupItem,
+  ListGroupItemProps,
+} from "flowbite-react";
+import { IconType } from "react-icons/lib";
+import { HiX } from "react-icons/hi";
 
 interface FrowbiteReactAutocompleteProps {
   options: string[];
@@ -13,8 +18,12 @@ interface FrowbiteReactAutocompleteProps {
   };
 }
 
-export default function FlowbiteReactAutocomplete({ options, onSelect, inputProps }: FrowbiteReactAutocompleteProps) {
-  const [inputValue, setInputValue] = React.useState('');
+export default function FlowbiteReactAutocomplete({
+  options,
+  onSelect,
+  inputProps,
+}: FrowbiteReactAutocompleteProps) {
+  const [inputValue, setInputValue] = React.useState("");
 
   const {
     getRootProps,

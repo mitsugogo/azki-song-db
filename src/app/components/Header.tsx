@@ -1,30 +1,57 @@
-'use client';
+"use client";
 
-import { Button, DarkThemeToggle, Modal, ModalBody, ModalFooter, ModalHeader, Navbar, NavbarCollapse, NavbarLink, NavbarToggle } from "flowbite-react";
+import {
+  Button,
+  DarkThemeToggle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Navbar,
+  NavbarCollapse,
+  NavbarLink,
+  NavbarToggle,
+} from "flowbite-react";
 import Link from "next/link";
 import { useState } from "react";
 import { FaInfoCircle } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export function Header() {
   // 謝辞
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
 
   const navigation = [
-    { name: '統計情報', href: '/statistics', current: false },
-    { name: '謝辞', href: '#', current: false, onClick: () => setShowAcknowledgment(true) },
-  ]
+    { name: "統計情報", href: "/statistics", current: false },
+    {
+      name: "謝辞",
+      href: "#",
+      current: false,
+      onClick: () => setShowAcknowledgment(true),
+    },
+  ];
 
   function classNames(...classes: (string | undefined)[]) {
-    return classes.filter(Boolean).join(' ')
+    return classes.filter(Boolean).join(" ");
   }
 
   return (
     <>
-      <Disclosure as="nav" className="relative bg-primary dark:bg-primary-900 text-white ">
+      <Disclosure
+        as="nav"
+        className="relative bg-primary dark:bg-primary-900 text-white "
+      >
         <div className="w-full px-2 sm:px-6 lg:px-8">
           <div className="relative flex h-16 items-center justify-between">
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -32,15 +59,23 @@ export function Header() {
               <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
                 <span className="absolute -inset-0.5" />
                 <span className="sr-only">Open main menu</span>
-                <Bars3Icon aria-hidden="true" className="block size-6 group-data-open:hidden" />
-                <XMarkIcon aria-hidden="true" className="hidden size-6 group-data-open:block" />
+                <Bars3Icon
+                  aria-hidden="true"
+                  className="block size-6 group-data-open:hidden"
+                />
+                <XMarkIcon
+                  aria-hidden="true"
+                  className="hidden size-6 group-data-open:block"
+                />
               </DisclosureButton>
             </div>
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex shrink-0 items-center">
-              <a href="/">
-                <h1 className="text-lg lg:text-lg font-bold">AZKi Song Database</h1>
-              </a>
+                <a href="/">
+                  <h1 className="text-lg lg:text-lg font-bold">
+                    AZKi Song Database
+                  </h1>
+                </a>
               </div>
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
@@ -48,10 +83,12 @@ export function Header() {
                     <a
                       key={item.name}
                       href={item.href}
-                      aria-current={item.current ? 'page' : undefined}
+                      aria-current={item.current ? "page" : undefined}
                       className={classNames(
-                        item.current ? 'bg-primary-600 text-white' : 'text-white hover:bg-primary-600',
-                        'rounded-md px-3 py-2 text-sm font-medium',
+                        item.current
+                          ? "bg-primary-600 text-white"
+                          : "text-white hover:bg-primary-600",
+                        "rounded-md px-3 py-2 text-sm font-medium"
                       )}
                       onClick={item?.onClick || undefined}
                     >
@@ -62,14 +99,16 @@ export function Header() {
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              <a href="https://www.youtube.com/@AZKi" target="_blank" className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700">
+              <a
+                href="https://www.youtube.com/@AZKi"
+                target="_blank"
+                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
+              >
                 <FaYoutube className="mr-1" />
                 AZKi Channel
               </a>
 
-              <DarkThemeToggle
-                className='outline-none focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700' />
-
+              <DarkThemeToggle className="outline-none focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" />
             </div>
           </div>
         </div>
@@ -82,8 +121,10 @@ export function Header() {
                   <DisclosureButton
                     key={item.name}
                     className={classNames(
-                      item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white',
-                      'block rounded-md px-3 py-2 text-base font-medium w-full text-left',
+                      item.current
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-300 hover:bg-white/5 hover:text-white",
+                      "block rounded-md px-3 py-2 text-base font-medium w-full text-left"
                     )}
                     onClick={() => setShowAcknowledgment(true)}
                   >
@@ -96,10 +137,12 @@ export function Header() {
                     key={item.name}
                     as="a"
                     href={item.href}
-                    aria-current={item.current ? 'page' : undefined}
+                    aria-current={item.current ? "page" : undefined}
                     className={classNames(
-                      item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-white/5 hover:text-white',
-                      'block rounded-md px-3 py-2 text-base font-medium',
+                      item.current
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-300 hover:bg-white/5 hover:text-white",
+                      "block rounded-md px-3 py-2 text-base font-medium"
                     )}
                   >
                     {item.name}
@@ -107,21 +150,34 @@ export function Header() {
                 );
               }
             })}
-            <Link href="https://www.youtube.com/@AZKi" target="_blank" className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">
+            <Link
+              href="https://www.youtube.com/@AZKi"
+              target="_blank"
+              className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white"
+            >
               AZKi Channel
             </Link>
           </div>
         </DisclosurePanel>
       </Disclosure>
 
-
-      <Modal show={showAcknowledgment} onClose={() => setShowAcknowledgment(false)}>
-        <ModalHeader className='bg-white dark:bg-gray-800 dark:text-white'>謝辞</ModalHeader>
-        <ModalBody className='bg-white dark:bg-gray-800 dark:text-white'>
+      <Modal
+        show={showAcknowledgment}
+        onClose={() => setShowAcknowledgment(false)}
+      >
+        <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white">
+          謝辞
+        </ModalHeader>
+        <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
           <Acknowledgment />
         </ModalBody>
-        <ModalFooter className='bg-white dark:bg-gray-800 dark:text-white'>
-          <Button className='bg-primary hover:bg-primary text-white transition text-sm' onClick={() => setShowAcknowledgment(false)}>閉じる</Button>
+        <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
+          <Button
+            className="bg-primary hover:bg-primary text-white transition text-sm"
+            onClick={() => setShowAcknowledgment(false)}
+          >
+            閉じる
+          </Button>
         </ModalFooter>
       </Modal>
     </>

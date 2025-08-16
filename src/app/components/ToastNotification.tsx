@@ -9,7 +9,12 @@ interface ToastNotificationProps {
   onClose: () => void;
 }
 
-const ToastNotification = ({ message, toastType = "success", duration = 3000, onClose }: ToastNotificationProps) => {
+const ToastNotification = ({
+  message,
+  toastType = "success",
+  duration = 3000,
+  onClose,
+}: ToastNotificationProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -33,7 +38,7 @@ const ToastNotification = ({ message, toastType = "success", duration = 3000, on
           <ToastToggle />
         </Toast>
       </div>
-    )
+    );
   }
   if (toastType === "warning") {
     return (
@@ -46,7 +51,7 @@ const ToastNotification = ({ message, toastType = "success", duration = 3000, on
           <ToastToggle />
         </Toast>
       </div>
-    )
+    );
   }
 
   return (
@@ -59,7 +64,7 @@ const ToastNotification = ({ message, toastType = "success", duration = 3000, on
         <ToastToggle />
       </Toast>
     </div>
-  )
+  );
 };
 
 export default ToastNotification;
