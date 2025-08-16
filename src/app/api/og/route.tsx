@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
             justifyContent: "center",
             flexDirection: "column",
             flexWrap: "nowrap",
-            border: "30px solid #b81e8a"
+            border: "30px solid #b81e8a",
           }}
         >
           <div

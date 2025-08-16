@@ -17,15 +17,18 @@ const geistMono = Geist_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-const baseUrl = process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
+const baseUrl =
+  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
 export const metadata: Metadata = {
   title: "AZKi Song Database",
-  description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
-  
+  description:
+    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+
   openGraph: {
     title: "AZKi Song Database",
-    description: "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+    description:
+      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
     url: "https://azki-song-db.vercel.app/",
     siteName: "AZKi Song Database",
     locale: "ja_JP",

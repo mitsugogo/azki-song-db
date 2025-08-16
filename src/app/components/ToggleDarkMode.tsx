@@ -1,31 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 // テーマを切り替えるためのコンポーネント
 const ThemeToggle = () => {
   // `localStorage`からテーマを取得し、ステートの初期値として設定
   // 存在しない場合はユーザーのOS設定をデフォルトにする
-  const [theme, setTheme] = useState(
-    localStorage.getItem('theme') || 'light'
-  );
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
   // themeステートが変更されるたびに実行
   useEffect(() => {
     const html = document.documentElement;
 
     // 現在のテーマをlocalStorageに保存
-    localStorage.setItem('theme', theme);
-    
+    localStorage.setItem("theme", theme);
+
     // テーマに応じて`dark`クラスをトグル
-    if (theme === 'dark') {
-      html.classList.add('dark');
+    if (theme === "dark") {
+      html.classList.add("dark");
     } else {
-      html.classList.remove('dark');
+      html.classList.remove("dark");
     }
   }, [theme]); // themeが変更されたときのみuseEffectが実行される
 
   // ボタンクリックでテーマを切り替える関数
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (

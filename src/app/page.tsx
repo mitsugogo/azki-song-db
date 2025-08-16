@@ -2,19 +2,7 @@
 
 import MainPlayer from "./components/MainPlayer";
 import "./globals.css";
-import Link from "next/link";
-import { FaInfoCircle, FaYoutube } from "react-icons/fa";
-import {
-  Button,
-  DarkThemeToggle,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ThemeProvider,
-} from "flowbite-react";
-import { useState } from "react";
-import Acknowledgment from "./components/Acknowledgment";
+import { ThemeProvider } from "flowbite-react";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import { Header } from "./components/Header";
 

@@ -3,21 +3,21 @@
 @source "../../.flowbite-react/class-list.json";
 
 @theme {
-    --color-primary-50: #fdf2f7;
-    --color-primary-100: #fce7f0;
-    --color-primary-200: #fbcfe1;
-    --color-primary-300: #f9a8ca;
-    --color-primary-400: #f472a8;
-    --color-primary-500: #ec488c;
-    --color-primary-600: #db2772;
-    --color-primary-700: #be185d;
-    --color-primary-800: #9d174f;
-    --color-primary-900: #831844;
-    --color-primary-950: #500725;
-    --color-primary: var(--color-primary-700);
-    --bg-primary:var(--color-primary-700);
+  --color-primary-50: #fdf2f7;
+  --color-primary-100: #fce7f0;
+  --color-primary-200: #fbcfe1;
+  --color-primary-300: #f9a8ca;
+  --color-primary-400: #f472a8;
+  --color-primary-500: #ec488c;
+  --color-primary-600: #db2772;
+  --color-primary-700: #be185d;
+  --color-primary-800: #9d174f;
+  --color-primary-900: #831844;
+  --color-primary-950: #500725;
+  --color-primary: var(--color-primary-700);
+  --bg-primary: var(--color-primary-700);
 
-    /* --color-primary-light-50: #fbf4f7;
+  /* --color-primary-light-50: #fbf4f7;
     --color-primary-light-100: #f8ebf0;
     --color-primary-light-200: #f0cadb;
     --color-primary-light-300: #ebb6cd;
@@ -31,107 +31,21 @@
     --color-primary-light:var(--bg-primary-light-200);
     --bg-primary-light:var(--bg-primary-light-200); */
 
-    --color-secondary-50: #fdf2fb;
-    --color-secondary-100: #fbe8f8;
-    --color-secondary-200: #fad0f4;
-    --color-secondary-300: #f6abe9;
-    --color-secondary-400: #f076d9;
-    --color-secondary-500: #e74dc5;
-    --color-secondary-600: #d941b0;
-    --color-secondary-700: #b81e8a;
-    --color-secondary-800: #991b72;
-    --color-secondary-900: #7f1c60;
-    --color-secondary-950: #4e0938;
-    --color-secondary: var(--color-secondary-700);
+  --color-secondary-50: #fdf2fb;
+  --color-secondary-100: #fbe8f8;
+  --color-secondary-200: #fad0f4;
+  --color-secondary-300: #f6abe9;
+  --color-secondary-400: #f076d9;
+  --color-secondary-500: #e74dc5;
+  --color-secondary-600: #d941b0;
+  --color-secondary-700: #b81e8a;
+  --color-secondary-800: #991b72;
+  --color-secondary-900: #7f1c60;
+  --color-secondary-950: #4e0938;
+  --color-secondary: var(--color-secondary-700);
 
-    --breakpoint-3xl: 100rem;
-    --breakpoint-4xl: 140rem;
+  --breakpoint-3xl: 100rem;
+  --breakpoint-4xl: 140rem;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
-
-/* @layer base {
-    :root {
-        --background: #ffffff;
-        --foreground: #000000;
-        --primary: #d11c76;
-        --secondary: #ea7eaf;
-        --muted: #757575;
-        --primary-50: #fdf2f8;
-        --primary-100: #fce7f3;
-        --primary-200: #fbcfe8;
-        --primary-300: #f9a8d4;
-        --primary-400: #f472b6;
-        --primary-500: #ec4899;
-        --primary-600: #232022;
-        --primary-700: #be185d;
-        --primary-800: #9d174d;
-        --primary-900: #831843;
-        --primary-950: #500724;
-        --primary-default: #d11c76;
-    }
-    .bg-background {
-        background-color: var(--background);
-    }
-    .text-foreground {
-        color: var(--foreground);
-    }
-    .bg-primary {
-        background-color: var(--primary);
-    }
-    .hover\:bg-primary:hover {
-        background-color: #b71c67 !important;
-    }
-    .bg-primary-light {
-        background-color: #f0cadb;
-    }
-    .hover\:bg-primary-light:hover {
-        background-color: #e6a0c3;
-    }
-    .bg-secondary {
-        background-color: var(--secondary);
-    }
-    .hover\:bg-secondary:hover {
-        background-color: darken(var(--secondary), 10%);
-    }
-    .text-primary {
-        color: var(--primary);
-    }
-    .text-secondary {
-        color: var(--secondary);
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #282828;
-        --foreground: #e0e0e0;
-        --primary: #a4165d;
-        --secondary: #ae5f83;
-        --muted: #757575;
-        --primary-50: #fdf2f8;
-        --primary-100: #fce7f3;
-        --primary-200: #fbcfe8;
-        --primary-300: #f9a8d4;
-        --primary-400: #f472b6;
-        --primary-500: #ec4899;
-        --primary-600: #232022;
-        --primary-700: #be185d;
-        --primary-800: #9d174d;
-        --primary-900: #831843;
-        --primary-950: #500724;
-        --primary-default: #d11c76;
-    }
-    .bg-primary:hover {
-        background-color: #b71c67;
-    }
-    .bg-primary-light {
-        background-color: #3f3037;
-    }
-    .dark\:bg-primary-light:hover {
-        background-color: #422d38;
-    }
-    .dark\:text-primary-light {
-        color: #d23976
-    }
-} */
