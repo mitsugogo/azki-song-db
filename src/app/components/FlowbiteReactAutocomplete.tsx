@@ -44,7 +44,7 @@ export default function FlowbiteReactAutocomplete({ options, onSelect, inputProp
       {groupedOptions.length > 0 && (
         <ListGroup
           {...getListboxProps()}
-          className="absolute z-10 w-full mt-1 border-none rounded-lg shadow-lg"
+          className="absolute z-10 w-full mt-1 border-none rounded-lg shadow-lg h-64 overflow-y-auto"
         >
           {groupedOptions.map((option, index) => {
             const optionProps = getOptionProps({ option, index });
