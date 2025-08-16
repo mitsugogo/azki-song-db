@@ -12,7 +12,10 @@ import { FaBackwardStep, FaCompactDisc, FaDatabase, FaForwardStep, FaMusic, FaPl
 import useDebounce from '../hook/useDebounce';
 import NowPlayingSongInfo from './NowPlayingSongInfo';
 import SongsList from './SongList';
-import { PiMicrophoneFill } from 'react-icons/pi';
+import { Autocomplete, Stack, TextField } from '@mui/material';
+import useAutocomplete from '@mui/material/useAutocomplete';
+import FlowbiteReactAutocomplete from './FlowbiteReactAutocomplete';
+
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -45,10 +48,13 @@ export default function MainPlayer() {
     const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 
     const [searchTitle, setSearchTitle] = useState('');
+    const searchTitleRef = useRef(searchTitle);
     const [searchArtist, setSearchArtist] = useState('');
+    const searchArtistRef = useRef(searchArtist);
     const [searchSinger, setSearchSinger] = useState('');
-    const [searchVideoTitle, setSearchVideoTitle] = useState('');
+    const searchSingerRef = useRef(searchSinger);
     const [searchTag, setSearchTag] = useState('');
+    const searchTagRef = useRef(searchTag);
 
     const [urlWithSearchTerm, setUrlWithSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
@@ -107,10 +113,10 @@ export default function MainPlayer() {
                 setIsInitialLoading(false);
 
                 // 取得したデータから検索用ワードを抽出
-                const tags = [...new Set(data.flatMap(song => song.tags))];
-                const songTitles = [...new Set(data.map(song => song.title))];
-                const singers = [...new Set(data.flatMap(song => song.sing.split(/、/).map(s => s.trim())))];
-                const artists = [...new Set(data.flatMap(song => song.artist.split(/、/).map(s => s.trim())))];
+                const tags = [...new Set(data.flatMap(song => song.tags))].sort();
+                const songTitles = [...new Set(data.map(song => song.title))].sort();
+                const singers = [...new Set(data.flatMap(song => song.sing.split(/、/).map(s => s.trim())))].sort();
+                const artists = [...new Set(data.flatMap(song => song.artist.split(/、/).map(s => s.trim())))].sort();
 
                 setAvailableTags(tags);
                 setAvailableSongTitles(songTitles);
@@ -285,8 +291,20 @@ export default function MainPlayer() {
         }
     }
 
-    // YouTubeの状態変更イベントハンドラ
+    const handleAdvancedSearch = () => {
+        // 高度検索の指定状況から検索キーワードを再組み立て
+        let newSearchTerm;
+        newSearchTerm = searchTitleRef.current ? "title:" + searchTitleRef.current : "";
+        if (newSearchTerm) newSearchTerm += " ";
+        newSearchTerm += searchArtistRef.current ? "artist: " + searchArtistRef.current : "";
+        if (newSearchTerm) newSearchTerm += " ";
+        newSearchTerm += searchTagRef.current ? "tag: " + searchTagRef.current : "";
+        if (newSearchTerm) newSearchTerm += " ";
+        newSearchTerm += searchSingerRef.current ? "sing: " + searchSingerRef.current : "";
+        changeSearchTerm(newSearchTerm);
+    }
 
+    // YouTubeの状態変更イベントハンドラ
     const handleStateChange = (event: YouTubeEvent<number>) => {
         console.log(event);
         if (youtubeVideoId !== event.target.getVideoData()?.video_id && intervalRef.current) {
@@ -463,190 +481,88 @@ export default function MainPlayer() {
                         </Button>
                         <div className="mb-4">
                             <div className="relative">
-                                <TextInput value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} placeholder='検索' icon={HiSearch} />
-                                {searchTerm && <Button
+                                <TextInput 
+                                    value={searchTerm} 
+                                    onChange={(e) => handleSearchChange(e.target.value)} 
+                                    placeholder='検索' 
+                                    icon={HiSearch}
+                                    disabled={advancedSearchOpen}
+                                />
+                                {searchTerm && <button
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                    onClick={() => changeSearchTerm('')}
+                                    onClick={(e) => {
+                                        changeSearchTerm('');
+                                    }}
                                 >
                                     <HiX className="w-4 h-4" />
-                                </Button>}
+                                </button>}
                             </div>
-                            
+
                             <Button
                                 data-collapse-target="advanced-search"
                                 onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
                                 className={`text-xs h-5 p-4 py-0 w-full transition focus:ring-0 mt-1 cursor-pointer ${!advancedSearchOpen ? 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-black dark:text-white' : 'bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white'}`}
                             >高度な検索 {!advancedSearchOpen ? <HiChevronUp /> : <HiChevronDown />}</Button>
-                            
+
                             <div data-collapse="advanced-search" className={`mb-6 collapse ${advancedSearchOpen ? 'visible' : 'hidden'} transition-all duration-300 ease-in-out mt-1`}>
-                                <div className="relative">
-                                    <TextInput
-                                        placeholder='曲名'
-                                        icon={FaMusic}
-                                        value={searchTitle}
-                                        onChange={(e) => setSearchTitle(e.target.value)}
-                                        list='song-titles'
-                                    />
-                                    <datalist id='song-titles'>
-                                        {availableSongTitles.map((title, index) => (
-                                            <option key={index} value={title} />
-                                        ))}
-                                    </datalist>
-                                    {searchTitle && <button
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                        style={{ right: 'calc(var(--spacing) * 12)' }}
-                                    >
-                                        <HiX className="w-4 h-4" onClick={() => setSearchTitle('')} />
-                                    </button>}
-                                    
-                                    <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                        onClick={() => {
-                                            if (!searchTitle) return;
-                                            const searchText = `title:${searchTitle}`;
-                                            const newSearchTerm = (searchTerm) ? searchTerm + ' ' + searchText : searchText;
-                                            handleSearchChange(newSearchTerm);
-                                        }}
-                                    >
-                                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                            </svg>
-                                    </button>
-                                </div>
                                 
                                 <div className="relative mt-1">
-                                    <TextInput
-                                        placeholder='アーティスト'
-                                        icon={FaUser}
-                                        value={searchArtist}
-                                        onChange={(e) => setSearchArtist(e.target.value)}
-                                        list='artist-names'
-                                    />
-                                    <datalist id='artist-names'>
-                                        {availableArtists.map((artist, index) => (
-                                            <option key={index} value={artist} />
-                                        ))}
-                                    </datalist>
-                                    {searchArtist && <button    
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                        style={{ right: 'calc(var(--spacing) * 12)' }}
-                                    >
-                                        <HiX className="w-4 h-4" onClick={() => setSearchArtist('')} />
-                                    </button>}
-                                    
-                                    <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                        onClick={() => {
-                                            if (!searchArtist) return;
-                                            const searchText = `artist:${searchArtist}`;
-                                            const newSearchTerm = (searchTerm) ? searchTerm + ' ' + searchText : searchText;
-                                            handleSearchChange(newSearchTerm);
+                                    <FlowbiteReactAutocomplete
+                                        options={(availableSongTitles || []).map((artist) => artist)}
+                                        onSelect={(value: string) => {
+                                            searchTitleRef.current = value;
+                                            setSearchTitle(value);
+                                            handleAdvancedSearch();
                                         }}
-                                    >
-                                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                            </svg>
-                                    </button>
+                                        inputProps={{
+                                            icon: FaMusic,
+                                            placeholder: '曲名',
+                                        }}
+                                    />
+                                </div>
+                                <div className="relative mt-1">
+                                    <FlowbiteReactAutocomplete
+                                        options={(availableArtists || []).map((artist) => artist)}
+                                        onSelect={(value: string) => {
+                                            searchArtistRef.current = value;
+                                            setSearchArtist(value);
+                                            handleAdvancedSearch();
+                                        }}
+                                        inputProps={{
+                                            icon: FaUser,
+                                            placeholder: 'アーティスト',
+                                        }}
+                                    />
                                 </div>
 
                                 <div className="relative mt-1">
-                                    <TextInput
-                                        placeholder='歌った人'
-                                        icon={FaCompactDisc}
-                                        value={searchSinger}
-                                        onChange={(e) => setSearchSinger(e.target.value)}
-                                        list='singer-names'
-                                    />
-                                    <datalist id='singer-names'>
-                                        {availableSingers.map((singer, index) => (
-                                            <option key={index} value={singer} />
-                                        ))}
-                                    </datalist>
-                                    {searchSinger && <button    
-                                        className="absolute top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                        style={{ right: 'calc(var(--spacing) * 12)' }}
-                                    >
-                                        <HiX className="w-4 h-4" onClick={() => setSearchSinger('')} />
-                                    </button>}
-
-                                    <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                        onClick={() => {
-                                            if (!searchSinger) return;
-                                            const searchText = `sing:${searchSinger}`;
-                                            const newSearchTerm = (searchTerm) ? searchTerm + ' ' + searchText : searchText;
-                                            handleSearchChange(newSearchTerm);
+                                    <FlowbiteReactAutocomplete
+                                        options={(availableSingers || []).map((singer) => singer)}
+                                        onSelect={(value: string) => {
+                                            searchSingerRef.current = value;
+                                            setSearchSinger(value);
+                                            handleAdvancedSearch();
                                         }}
-                                    >
-                                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                            </svg>
-                                    </button>
-
+                                        inputProps={{
+                                            icon: FaCompactDisc,
+                                            placeholder: '歌った人',
+                                        }}
+                                    />
                                 </div>
 
                                 <div className="relative mt-1">
-                                    <TextInput
-                                        placeholder='動画タイトル'
-                                        icon={FaYoutube}
-                                        value={searchVideoTitle}
-                                        onChange={(e) => setSearchVideoTitle(e.target.value)}
-                                    />
-                                    {searchVideoTitle && <button    
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                        style={{ right: 'calc(var(--spacing) * 12)' }}
-                                    >
-                                        <HiX className="w-4 h-4" onClick={() => setSearchVideoTitle('')} />
-                                    </button>}
-                                    
-                                    <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                        onClick={() => {
-                                            if (!searchVideoTitle) return;
-                                            const searchText = `video_title:${searchVideoTitle}`;
-                                            const newSearchTerm = (searchTerm) ? searchTerm + ' ' + searchText : searchText;
-                                            handleSearchChange(newSearchTerm);
+                                    <FlowbiteReactAutocomplete
+                                        options={(availableTags || []).map((tag) => tag)}
+                                        onSelect={(value: string) => {
+                                            searchTagRef.current = value;
+                                            setSearchTag(value);
+                                            handleAdvancedSearch();
                                         }}
-                                    >
-                                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                            </svg>
-                                    </button>
-                                </div>
-
-                                <div className="relative mt-1">
-                                    <TextInput
-                                        placeholder='タグ'
-                                        icon={FaTag}
-                                        value={searchTag}
-                                        onChange={(e) => setSearchTag(e.target.value)}
-                                        list='tag-names'
-                                    />
-                                    <datalist id='tag-names'>
-                                        {availableTags.map((tag, index) => (
-                                            <option key={index} value={tag} />
-                                        ))}
-                                    </datalist>
-                                    {searchTag && <button    
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-                                        style={{ right: 'calc(var(--spacing) * 12)' }}
-                                    >
-                                        <HiX className="w-4 h-4" onClick={() => setSearchTag('')} />
-                                    </button>}
-                                    
-                                    <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                        onClick={() => {
-                                            if (!searchTag) return;
-                                            const searchText = `tag:${searchTag}`;
-                                            const newSearchTerm = (searchTerm) ? searchTerm + ' ' + searchText : searchText;
-                                            handleSearchChange(newSearchTerm);
+                                        inputProps={{
+                                            icon: FaTag,
+                                            placeholder: 'タグ',
                                         }}
-                                    >
-                                            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                            </svg>
-                                    </button>
+                                    />
                                 </div>
                             </div>
                         </div>

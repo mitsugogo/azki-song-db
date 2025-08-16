@@ -2,10 +2,6 @@
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../../.flowbite-react/class-list.json";
 
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-
 @theme {
     --color-primary-50: #fdf2f7;
     --color-primary-100: #fce7f0;
