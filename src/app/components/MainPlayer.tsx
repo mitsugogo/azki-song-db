@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Song } from '../types/song'; // 型定義をインポート
+import { Song } from '../types/song';
 import YouTubePlayer from './YouTubePlayer';
 import YouTube, { YouTubeEvent } from 'react-youtube';
 import ToastNotification from './ToastNotification';
@@ -12,8 +12,6 @@ import { FaBackwardStep, FaCompactDisc, FaDatabase, FaForwardStep, FaMusic, FaPl
 import useDebounce from '../hook/useDebounce';
 import NowPlayingSongInfo from './NowPlayingSongInfo';
 import SongsList from './SongList';
-import { Autocomplete, Stack, TextField } from '@mui/material';
-import useAutocomplete from '@mui/material/useAutocomplete';
 import FlowbiteReactAutocomplete from './FlowbiteReactAutocomplete';
 
 
