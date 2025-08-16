@@ -455,21 +455,21 @@ export default function MainPlayer() {
                     <div className="flex flex-col text-center h-full justify-center"><Spinner size="xl" /></div>
                 ) : (
                     <div className="flex flex-col h-full bg-background px-2 py-0 lg:px-6">
-                        <button
+                        <Button
                             onClick={() => playRandomSong(songs)}
                             className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2"
                         >
                             ランダムで他の曲にする
-                        </button>
+                        </Button>
                         <div className="mb-4">
                             <div className="relative">
                                 <TextInput value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} placeholder='検索' icon={HiSearch} />
-                                {searchTerm && <button
+                                {searchTerm && <Button
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
                                     onClick={() => changeSearchTerm('')}
                                 >
                                     <HiX className="w-4 h-4" />
-                                </button>}
+                                </Button>}
                             </div>
                             
                             <Button
@@ -500,7 +500,7 @@ export default function MainPlayer() {
                                     </button>}
                                     
                                     <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-0 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                                         onClick={() => {
                                             if (!searchTitle) return;
                                             const searchText = `title:${searchTitle}`;
@@ -535,7 +535,7 @@ export default function MainPlayer() {
                                     </button>}
                                     
                                     <button 
-                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                        className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-primary-700 rounded-e-lg border border-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                                         onClick={() => {
                                             if (!searchArtist) return;
                                             const searchText = `artist:${searchArtist}`;
