@@ -33,32 +33,29 @@ const SongsList = ({
     setTotalPage(Math.ceil(songs.length / displayPage));
   };
 
-  const calculateCurrentPage = () => {
-    const currentPage = Math.ceil(
-      songs.findIndex(
-        (song) =>
-          song.video_id === currentSongInfo?.video_id &&
-          song.title === currentSongInfo?.title &&
-          song.start === currentSongInfo?.start
-      ) / displayPage
-    );
-    setCurrentPage(currentPage);
-  };
-
   useEffect(() => {
     calculateTotalPage();
     setSlicedSongs(songs.slice(currentPage, displayPage));
+    // もしページ番号が範囲外の場合は1ページ目にする
+    if (currentPage > totalPage) {
+      onPageChange(1);
+    }
   }, [songs]);
 
   useEffect(() => {
     // currentSongから何ページ目か求める
-    const currentPage = Math.ceil(
-      songs.findIndex(
-        (song) =>
-          song.video_id === currentSongInfo?.video_id &&
-          song.title === currentSongInfo?.title &&
-          song.start === currentSongInfo?.start
-      ) / displayPage
+    const currentPage = Math.max(
+      1,
+      Math.ceil(
+        (songs.findIndex(
+          (song) =>
+            song.video_id === currentSongInfo?.video_id &&
+            song.title === currentSongInfo?.title &&
+            song.start === currentSongInfo?.start
+        ) +
+          1) /
+          displayPage
+      )
     );
     onPageChange(currentPage);
   }, [currentSongInfo]);
