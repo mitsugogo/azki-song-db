@@ -44,6 +44,8 @@ import useDebounce from "../hook/useDebounce";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
+import Image from "next/image";
+import YoutubeThumbnail from "./YoutubeThumbnail";
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -483,18 +485,20 @@ export default function MainPlayer() {
           <div className="flex flex-col p-2 pl-2 lg:px-0 text-sm text-foreground">
             <div className="hidden lg:flex w-full justify-between gap-2">
               <div
-                className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(previousSong)}
               >
-                <div className="flex items-center">
+                <div className="flex items-center h-14">
                   {previousSong && (
                     <>
-                      <img
-                        src={`https://img.youtube.com/vi/${previousSong?.video_id}/maxresdefault.jpg`}
-                        alt="thumbnail"
-                        className="w-12 mr-2"
-                      />
-                      <div className="flex flex-col w-full">
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={previousSong.video_id}
+                          alt={previousSong.video_title}
+                          fill={true}
+                        />
+                      </div>
+                      <div className="flex flex-col flex-grow w-full px-2">
                         <span className="text-left font-bold truncate">
                           {previousSong?.title}
                         </span>
@@ -506,16 +510,18 @@ export default function MainPlayer() {
                   )}
                 </div>
               </div>
-              <div className="h-14 w-2/6 p-2 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none">
-                <div className="flex items-center">
+              <div className="h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none">
+                <div className="flex items-center h-14">
                   {currentSongInfo && (
                     <>
-                      <img
-                        src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/maxresdefault.jpg`}
-                        alt="thumbnail"
-                        className="w-12 mr-2"
-                      />
-                      <div className="flex flex-col">
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={currentSongInfo.video_id}
+                          alt={currentSongInfo.video_title}
+                          fill={true}
+                        />
+                      </div>
+                      <div className="flex flex-col flex-grow w-full px-2">
                         <span className="text-left font-bold truncate">
                           {currentSongInfo?.title}
                         </span>
@@ -528,18 +534,20 @@ export default function MainPlayer() {
                 </div>
               </div>
               <div
-                className="h-14 w-2/6 p-2 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-right cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-right cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(nextSong)}
               >
-                <div className="flex items-center">
+                <div className="flex items-center h-14">
                   {nextSong && (
                     <>
-                      <img
-                        src={`https://img.youtube.com/vi/${nextSong?.video_id}/maxresdefault.jpg`}
-                        alt="thumbnail"
-                        className="w-12 mr-2"
-                      />
-                      <div className="flex flex-col">
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={nextSong.video_id}
+                          alt={nextSong.video_title}
+                          fill={true}
+                        />
+                      </div>
+                      <div className="flex flex-col flex-grow w-full px-2">
                         <span className="text-left font-bold truncate">
                           {nextSong?.title}
                         </span>
@@ -593,9 +601,11 @@ export default function MainPlayer() {
           </div>
           <NowPlayingSongInfo
             currentSongInfo={currentSongInfo}
+            allSongs={allSongs}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             setOpenShereModal={setOpenShereModal}
+            changeCurrentSong={changeCurrentSong}
           />
         </div>
       </aside>
