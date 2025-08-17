@@ -1,20 +1,33 @@
 import { Badge } from "flowbite-react";
 import { Song } from "../types/song";
-import { FaBook, FaCalendar, FaTag, FaUser, FaYoutube } from "react-icons/fa6";
+import {
+  FaBook,
+  FaCalendar,
+  FaCompactDisc,
+  FaTag,
+  FaUser,
+  FaYoutube,
+} from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faYoutube } from "@fortawesome/free-brands-svg-icons";
+import { IoTime } from "react-icons/io5";
+import Link from "next/link";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
+  allSongs: Song[];
   searchTerm: string;
   setSearchTerm: (value: string) => void;
+  changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
 }
 
 const NowPlayingSongInfoDetail = ({
   currentSongInfo,
+  allSongs,
   searchTerm,
   setSearchTerm,
+  changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
   return (
     <>
@@ -218,6 +231,55 @@ const NowPlayingSongInfoDetail = ({
                 </div>
               </>
             )}
+
+            <div className="col-span-1 lg:col-span-2 flex items-baseline">
+              <dt className="text-muted-foreground flex items-baseline">
+                <IoTime />
+                <span className="hidden lg:inline ml-1">タイムスタンプ:</span>
+              </dt>
+            </div>
+            <div className="col-span-11 lg:col-span-10">
+              <dd className="grid grid-cols-1 gap-1 text-xs lg:text-sm">
+                {allSongs
+                  .filter((song) => song.video_id === currentSongInfo?.video_id)
+                  .sort(
+                    (a, b) =>
+                      (parseInt(a.start) || 0) - (parseInt(b.start) || 0)
+                  )
+                  .map((song) => (
+                    <div key={song.start} className="w-full">
+                      <div className="flex">
+                        <div className="flex tabular-nums">
+                          <Link
+                            href={`?v=${song.video_id}&t=${song.start}`}
+                            className="text-primary hover:underline dark:text-primary-300"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              changeCurrentSong(song);
+                            }}
+                          >
+                            {new Date(parseInt(song.start) * 1000)
+                              .toISOString()
+                              .substring(11, 19)}
+                          </Link>
+                        </div>
+                        <div className="flex ml-3">
+                          {currentSongInfo === song && (
+                            <FaCompactDisc
+                              className="relative fa-spin inline"
+                              style={{ top: "2px", marginRight: "3px" }}
+                            />
+                          )}
+                          {song.title}&nbsp;-&nbsp;
+                          <span className="text-gray-500 dark:text-gray-600">
+                            {song.artist}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </dd>
+            </div>
           </dl>
         </div>
       )}

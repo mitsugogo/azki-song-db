@@ -601,9 +601,11 @@ export default function MainPlayer() {
           </div>
           <NowPlayingSongInfo
             currentSongInfo={currentSongInfo}
+            allSongs={allSongs}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             setOpenShereModal={setOpenShereModal}
+            changeCurrentSong={changeCurrentSong}
           />
         </div>
       </aside>

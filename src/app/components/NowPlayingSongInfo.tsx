@@ -17,16 +17,20 @@ import { FaTimes } from "react-icons/fa";
 
 interface NowPlayingSongInfoProps {
   currentSongInfo: Song | null;
+  allSongs: Song[];
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   setOpenShereModal: (value: boolean) => void;
+  changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
 }
 
 const NowPlayingSongInfo = ({
   currentSongInfo,
+  allSongs,
   searchTerm,
   setSearchTerm,
   setOpenShereModal,
+  changeCurrentSong,
 }: NowPlayingSongInfoProps) => {
   const [showModal, setShowModal] = useState(false);
 
@@ -135,8 +139,10 @@ const NowPlayingSongInfo = ({
             <div className="hidden md:block lg:block">
               <NowPlayingSongInfoDetail
                 currentSongInfo={currentSongInfo}
+                allSongs={allSongs}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                changeCurrentSong={changeCurrentSong}
               />
             </div>
           </div>
@@ -156,8 +162,10 @@ const NowPlayingSongInfo = ({
               </div>
               <NowPlayingSongInfoDetail
                 currentSongInfo={currentSongInfo}
+                allSongs={allSongs}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                changeCurrentSong={changeCurrentSong}
               />
               <hr className="my-4" />
               <div className="flex items-center">
