@@ -775,7 +775,7 @@ export default function MainPlayer() {
             </div>
             <div className="hidden lg:block">
               <p className="text-xs text-muted-foreground dark:text-white mb-2">
-                {/* 楽曲一覧 ({songs.length}曲/{allSongs.length}曲) */}
+                楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
               </p>
             </div>
             <SongsList

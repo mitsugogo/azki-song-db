@@ -33,27 +33,40 @@ const SongsList = ({
     setTotalPage(Math.ceil(songs.length / displayPage));
   };
 
+  const calculateCurrentPage = () => {
+    const currentPage = Math.ceil(
+      songs.findIndex(
+        (song) =>
+          song.video_id === currentSongInfo?.video_id &&
+          song.title === currentSongInfo?.title &&
+          song.start === currentSongInfo?.start
+      ) / displayPage
+    );
+    setCurrentPage(currentPage);
+  };
+
   useEffect(() => {
     calculateTotalPage();
-    setSlicedSongs(songs.slice(0, displayPage));
+    setSlicedSongs(songs.slice(currentPage, displayPage));
   }, [songs]);
+
+  useEffect(() => {
+    // currentSongから何ページ目か求める
+    const currentPage = Math.ceil(
+      songs.findIndex(
+        (song) =>
+          song.video_id === currentSongInfo?.video_id &&
+          song.title === currentSongInfo?.title &&
+          song.start === currentSongInfo?.start
+      ) / displayPage
+    );
+    onPageChange(currentPage);
+  }, [currentSongInfo]);
 
   useEffect(() => {}, [slicedSongs]);
 
   return (
     <>
-      {totalPage > 1 && (
-        <div className="hidden lg:flexmb-2">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPage}
-            onPageChange={onPageChange}
-            previousLabel=""
-            nextLabel=""
-            showIcons
-          />
-        </div>
-      )}
       <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
         {slicedSongs.map((song, index) => (
           <SongListItem
@@ -69,7 +82,7 @@ const SongsList = ({
         ))}
       </ul>
       {totalPage > 1 && (
-        <div className="flex sm:justify-center mb-2">
+        <div className="flex justify-center mb-2">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPage}
