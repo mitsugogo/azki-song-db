@@ -26,6 +26,7 @@ import { FaYoutube } from "react-icons/fa6";
 import Loading from "../loading";
 import Link from "next/link";
 import Image from "next/image";
+import YoutubeThumbnail from "../components/YoutubeThumbnail";
 
 export default function StatisticsPage() {
   const [loading, setLoading] = useState(true);
@@ -275,11 +276,10 @@ export default function StatisticsPage() {
                             >
                               <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                                 <div className="flex w-full lg:w-12">
-                                  <Image
-                                    src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                  <YoutubeThumbnail
+                                    videoId={lastVideo.video_id}
                                     alt={lastVideo.video_title}
                                     fill={true}
-                                    className="aspect-video outfit-image"
                                   />
                                 </div>
                                 <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
@@ -367,11 +367,10 @@ export default function StatisticsPage() {
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <div className="flex w-full lg:w-12">
-                                <Image
-                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                <YoutubeThumbnail
+                                  videoId={lastVideo.video_id}
                                   alt={lastVideo.video_title}
                                   fill={true}
-                                  className="aspect-video outfit-image"
                                 />
                               </div>
                               <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
@@ -458,11 +457,10 @@ export default function StatisticsPage() {
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <div className="flex w-full lg:w-12">
-                                <Image
-                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                <YoutubeThumbnail
+                                  videoId={lastVideo.video_id}
                                   alt={lastVideo.video_title}
                                   fill={true}
-                                  className="aspect-video outfit-image"
                                 />
                               </div>
                               <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
@@ -535,11 +533,10 @@ export default function StatisticsPage() {
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
                               <div className="flex w-full lg:w-12">
-                                <Image
-                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                <YoutubeThumbnail
+                                  videoId={lastVideo.video_id}
                                   alt={lastVideo.video_title}
                                   fill={true}
-                                  className="aspect-video outfit-image"
                                 />
                               </div>
                               <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">

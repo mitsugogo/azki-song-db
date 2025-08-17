@@ -45,6 +45,7 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
 import Image from "next/image";
+import YoutubeThumbnail from "./YoutubeThumbnail";
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -490,12 +491,11 @@ export default function MainPlayer() {
                 <div className="flex items-center h-14">
                   {previousSong && (
                     <>
-                      <div className="flex max-w-24 align-middle">
-                        <Image
-                          src={`https://img.youtube.com/vi/${previousSong?.video_id}/maxresdefault.jpg`}
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={previousSong.video_id}
                           alt={previousSong.video_title}
                           fill={true}
-                          className="aspect-video outfit-image"
                         />
                       </div>
                       <div className="flex flex-col flex-grow w-full px-2">
@@ -514,12 +514,11 @@ export default function MainPlayer() {
                 <div className="flex items-center h-14">
                   {currentSongInfo && (
                     <>
-                      <div className="flex max-w-24 align-middle">
-                        <Image
-                          src={`https://img.youtube.com/vi/${currentSongInfo?.video_id}/maxresdefault.jpg`}
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={currentSongInfo.video_id}
                           alt={currentSongInfo.video_title}
                           fill={true}
-                          className="aspect-video outfit-image"
                         />
                       </div>
                       <div className="flex flex-col flex-grow w-full px-2">
@@ -541,15 +540,14 @@ export default function MainPlayer() {
                 <div className="flex items-center h-14">
                   {nextSong && (
                     <>
-                      <div className="flex max-w-24 align-middle">
-                        <Image
-                          src={`https://img.youtube.com/vi/${nextSong?.video_id}/maxresdefault.jpg`}
+                      <div className="flex min-w-24 max-w-24 align-middle">
+                        <YoutubeThumbnail
+                          videoId={nextSong.video_id}
                           alt={nextSong.video_title}
                           fill={true}
-                          className="aspect-video outfit-image"
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2 gap-0">
+                      <div className="flex flex-col flex-grow w-full px-2">
                         <span className="text-left font-bold truncate">
                           {nextSong?.title}
                         </span>
