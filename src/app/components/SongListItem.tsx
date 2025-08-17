@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
@@ -57,5 +59,7 @@ const SongListItem = React.memo(
     );
   }
 );
+
+SongListItem.displayName = "SongListItem";
 
 export default SongListItem;

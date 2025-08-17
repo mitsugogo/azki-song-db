@@ -16,7 +16,7 @@ const SongsList = ({
   currentSongInfo,
   changeCurrentSong,
 }: SongListProps) => {
-  const displayPage = 100;
+  const displayPage = 50;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
 
