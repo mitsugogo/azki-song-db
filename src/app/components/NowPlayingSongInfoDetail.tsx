@@ -13,6 +13,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { IoTime } from "react-icons/io5";
 import Link from "next/link";
+import { useState } from "react";
+import { HiChevronDown } from "react-icons/hi";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
@@ -29,6 +31,8 @@ const NowPlayingSongInfoDetail = ({
   setSearchTerm,
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
+  const [isTimestampExpand, setIsTimestampExpand] = useState(false);
+
   return (
     <>
       {currentSongInfo && (
@@ -239,45 +243,61 @@ const NowPlayingSongInfoDetail = ({
               </dt>
             </div>
             <div className="col-span-11 lg:col-span-10">
-              <dd className="grid grid-cols-1 gap-1 text-xs lg:text-sm">
-                {allSongs
-                  .filter((song) => song.video_id === currentSongInfo?.video_id)
-                  .sort(
-                    (a, b) =>
-                      (parseInt(a.start) || 0) - (parseInt(b.start) || 0)
-                  )
-                  .map((song) => (
-                    <div key={song.start} className="w-full">
-                      <div className="flex">
-                        <div className="flex tabular-nums">
-                          <Link
-                            href={`?v=${song.video_id}&t=${song.start}`}
-                            className="text-primary hover:underline dark:text-primary-300"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              changeCurrentSong(song);
-                            }}
-                          >
-                            {new Date(parseInt(song.start) * 1000)
-                              .toISOString()
-                              .substring(11, 19)}
-                          </Link>
+              <dd className="grid grid-cols-1 gap-1 text-xs lg:text-sm relative">
+                {!isTimestampExpand && (
+                  <button
+                    type="button"
+                    className="w-full text-center bg-gray-200 dark:bg-gray-800 text-xs py-1 px-2 cursor-pointer rounded"
+                    onClick={() => setIsTimestampExpand(!isTimestampExpand)}
+                  >
+                    クリックして展開&nbsp;
+                    <HiChevronDown className="inline" />
+                  </button>
+                )}
+                {isTimestampExpand && (
+                  <div className="absolute top-0 right-0 left-0 shadow-md p-2 overflow-y-auto max-h-80">
+                    {allSongs
+                      .filter(
+                        (song) => song.video_id === currentSongInfo?.video_id
+                      )
+                      .sort(
+                        (a, b) =>
+                          (parseInt(a.start) || 0) - (parseInt(b.start) || 0)
+                      )
+                      .map((song) => (
+                        <div key={song.start} className="w-full">
+                          <div className="flex">
+                            <div className="flex tabular-nums">
+                              <Link
+                                href={`?v=${song.video_id}&t=${song.start}`}
+                                className="text-primary hover:underline dark:text-primary-300"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  changeCurrentSong(song);
+                                }}
+                              >
+                                {new Date(parseInt(song.start) * 1000)
+                                  .toISOString()
+                                  .substring(11, 19)}
+                              </Link>
+                            </div>
+                            <div className="flex ml-3">
+                              {currentSongInfo === song && (
+                                <FaCompactDisc
+                                  className="relative fa-spin inline"
+                                  style={{ top: "2px", marginRight: "3px" }}
+                                />
+                              )}
+                              {song.title}&nbsp;-&nbsp;
+                              <span className="text-gray-500 dark:text-gray-600">
+                                {song.artist}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex ml-3">
-                          {currentSongInfo === song && (
-                            <FaCompactDisc
-                              className="relative fa-spin inline"
-                              style={{ top: "2px", marginRight: "3px" }}
-                            />
-                          )}
-                          {song.title}&nbsp;-&nbsp;
-                          <span className="text-gray-500 dark:text-gray-600">
-                            {song.artist}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
+                  </div>
+                )}
               </dd>
             </div>
           </dl>
