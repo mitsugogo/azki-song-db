@@ -84,6 +84,8 @@ export default function MainPlayer() {
   const searchSingerRef = useRef(searchSinger);
   const [searchTag, setSearchTag] = useState("");
   const searchTagRef = useRef(searchTag);
+  const [searchMilestone, setSearchMilestone] = useState("");
+  const searchMilestoneRef = useRef(searchMilestone);
 
   const [urlWithSearchTerm, setUrlWithSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
@@ -92,6 +94,7 @@ export default function MainPlayer() {
   const [availableArtists, setAvailableArtists] = useState<string[]>([]);
   const [availableSingers, setAvailableSingers] = useState<string[]>([]);
   const [availableSongTitles, setAvailableSongTitles] = useState<string[]>([]);
+  const [availableMilestones, setAvailableMilestones] = useState<string[]>([]);
 
   const [searchArtists, setSearchArtists] = useState("");
 
@@ -155,11 +158,15 @@ export default function MainPlayer() {
             data.flatMap((song) => song.artist.split(/、/).map((s) => s.trim()))
           ),
         ].sort();
+        const milestones = [
+          ...new Set(data.flatMap((song) => song.milestones)),
+        ].sort();
 
         setAvailableTags(tags);
         setAvailableSongTitles(songTitles);
         setAvailableSingers(singers);
         setAvailableArtists(artists);
+        setAvailableMilestones(milestones);
       });
   }, []);
 
@@ -250,7 +257,11 @@ export default function MainPlayer() {
           song.sing.toLowerCase().includes(lowerWord) ||
           song.tags.some((tag) => tag.toLowerCase().includes(lowerWord)) ||
           song.video_title.toLowerCase().includes(lowerWord) ||
-          (song.extra && song.extra.toLowerCase().includes(lowerWord))
+          (song.extra && song.extra.toLowerCase().includes(lowerWord)) ||
+          (song.milestones &&
+            song.milestones.some((milestone) =>
+              milestone.toLowerCase().includes(lowerWord)
+            ))
         );
       });
     });
@@ -403,6 +414,10 @@ export default function MainPlayer() {
     if (newSearchTerm) newSearchTerm += " ";
     newSearchTerm += searchSingerRef.current
       ? "sing: " + searchSingerRef.current
+      : "";
+    if (newSearchTerm) newSearchTerm += " ";
+    newSearchTerm += searchMilestoneRef.current
+      ? "milestone: " + searchMilestoneRef.current
       : "";
     changeSearchTerm(newSearchTerm);
   };
@@ -728,6 +743,23 @@ export default function MainPlayer() {
                     inputProps={{
                       icon: FaTag,
                       placeholder: "タグ",
+                    }}
+                  />
+                </div>
+
+                <div className="relative mt-1">
+                  <FlowbiteReactAutocomplete
+                    options={(availableMilestones || []).map(
+                      (milestone) => milestone
+                    )}
+                    onSelect={(value: string) => {
+                      searchMilestoneRef.current = value;
+                      setSearchMilestone(value);
+                      handleAdvancedSearch();
+                    }}
+                    inputProps={{
+                      icon: FaCompactDisc,
+                      placeholder: "マイルストーン",
                     }}
                   />
                 </div>

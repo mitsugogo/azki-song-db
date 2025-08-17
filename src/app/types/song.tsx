@@ -9,6 +9,6 @@ export interface Song {
   end: string;
   broadcast_at: string;
   tags: string[];
+  milestones: string[];
   extra?: string;
-  milestones?: string[];
 }
