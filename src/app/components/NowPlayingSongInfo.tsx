@@ -83,7 +83,7 @@ const NowPlayingSongInfo = ({
               <div className="hidden lg:block text-right">
                 <Button
                   onClick={() => setOpenShereModal(true)}
-                  className="bg-primary hover:bg-primary-600 dark:hover:bg-primary dark:bg-primary-900 text-white transition cursor-pointer text-sm shadow-md shadow-primary-400/20"
+                  className="bg-primary hover:bg-primary-600 dark:hover:bg-primary dark:bg-primary-900 text-white transition cursor-pointer text-sm shadow-md shadow-primary-400/20 dark:shadow-none"
                 >
                   <FaShare />
                   &nbsp;Share
