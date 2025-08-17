@@ -12,15 +12,15 @@ export async function GET() {
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
       ranges: [
-        "歌枠2021以前!A:K",
-        "歌枠2022!A:K",
-        "歌枠2023!A:K",
-        "歌枠2024!A:K",
-        "歌枠2025!A:K",
-        "記念ライブ系!A:K",
-        "オリ曲!A:K",
-        "カバー!A:K",
-        "ゲスト・fesなど!A:K",
+        "歌枠2021以前!A:L",
+        "歌枠2022!A:L",
+        "歌枠2023!A:L",
+        "歌枠2024!A:L",
+        "歌枠2025!A:L",
+        "記念ライブ系!A:L",
+        "オリ曲!A:L",
+        "カバー!A:L",
+        "ゲスト・fesなど!A:L",
       ],
       includeGridData: true, // セルの詳細情報を含める
       fields: "sheets.data.rowData.values(userEnteredValue,hyperlink)", // 必要なフィールドのみ取得
@@ -80,6 +80,10 @@ export async function GET() {
               ?.split(",")
               .map((tag) => tag.trim()) || [], // タグをカンマ区切りで分割
           extra: values[10]?.userEnteredValue?.stringValue || "", // オプションのフィールド
+          milestones:
+            values[11]?.userEnteredValue?.stringValue
+              ?.split(",")
+              .map((val) => val.trim()) || [],
         };
       })
       .sort((a, b) => {

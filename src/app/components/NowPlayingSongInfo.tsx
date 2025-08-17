@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Checkbox,
   Label,
@@ -14,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import NowPlayingSongInfoDetail from "./NowPlayingSongInfoDetail";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FaTimes } from "react-icons/fa";
+import MilestoneBadge from "./MilestoneBadge";
 
 interface NowPlayingSongInfoProps {
   currentSongInfo: Song | null;
@@ -61,6 +63,11 @@ const NowPlayingSongInfo = ({
           <div className="song-info">
             <div className="hidden lg:flex items-center gap-2 mb-3">
               <div className="w-full flex-auto self-baseline border-b border-gray-200 pb-2">
+                {currentSongInfo.milestones && (
+                  <div className="flex items-center gap-1">
+                    <MilestoneBadge milestones={currentSongInfo.milestones} />
+                  </div>
+                )}
                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white">
                   <FaCompactDisc
                     className="relative fa-spin mr-2 inline"

@@ -10,4 +10,5 @@ export interface Song {
   broadcast_at: string;
   tags: string[];
   extra?: string;
+  milestones?: string[];
 }

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
+import { Badge } from "flowbite-react";
+import MilestoneBadge from "./MilestoneBadge";
 
 interface SongListProps {
   songs: Song[];
@@ -46,10 +48,18 @@ const SongsList = ({
             <div className="w-full text-xs text-muted-foreground line-clamp-3">
               {song.artist} - {song.sing}
             </div>
-            <div className="flex gap-x-2 mt-2p-2 rounded text-xs text-gray-600 dark:text-gray-500">
+            <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-500">
               {song.broadcast_at && (
                 <>{new Date(song.broadcast_at).toLocaleDateString()}</>
               )}
+            </div>
+            <div className="flex w-full gap-x-2 mt-1 text-xs truncate">
+              <div>
+                <MilestoneBadge
+                  milestones={song.milestones}
+                  outClassName="mb-1.5"
+                />
+              </div>
             </div>
           </div>
         </li>

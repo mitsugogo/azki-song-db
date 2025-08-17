@@ -46,6 +46,7 @@ import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
 import Image from "next/image";
 import YoutubeThumbnail from "./YoutubeThumbnail";
+import MilestoneBadge from "./MilestoneBadge";
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;
@@ -234,6 +235,15 @@ export default function MainPlayer() {
             .includes(lowerWord.substring(6).toLowerCase())
         ) {
           return true;
+        }
+        if (lowerWord.startsWith("milestone:*")) {
+          return !!song.milestones && song.milestones.length > 0;
+        }
+        if (lowerWord.startsWith("milestone:")) {
+          const milestones = song.milestones || [];
+          return milestones.some((milestone) =>
+            milestone.includes(lowerWord.substring(10).toLowerCase())
+          );
         }
 
         return (
@@ -504,6 +514,11 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {previousSong?.artist}
+                          {previousSong.milestones && " "}
+                          <MilestoneBadge
+                            milestones={previousSong.milestones}
+                            inline
+                          />
                         </span>
                       </div>
                     </>
@@ -527,6 +542,11 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {currentSongInfo?.artist}
+                          {currentSongInfo.milestones && " "}
+                          <MilestoneBadge
+                            milestones={currentSongInfo.milestones}
+                            inline
+                          />
                         </span>
                       </div>
                     </>
@@ -553,6 +573,11 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {nextSong?.artist}
+                          {nextSong.milestones && " "}
+                          <MilestoneBadge
+                            milestones={nextSong.milestones}
+                            inline
+                          />
                         </span>
                       </div>
                     </>
