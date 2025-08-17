@@ -15,6 +15,7 @@ import { IoTime } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi";
+import MilestoneBadge from "./MilestoneBadge";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
@@ -255,7 +256,7 @@ const NowPlayingSongInfoDetail = ({
                   </button>
                 )}
                 {isTimestampExpand && (
-                  <div className="absolute top-0 right-0 left-0 shadow-md p-2 overflow-y-auto max-h-80">
+                  <div className="pb-2">
                     {allSongs
                       .filter(
                         (song) => song.video_id === currentSongInfo?.video_id
@@ -292,6 +293,18 @@ const NowPlayingSongInfoDetail = ({
                               <span className="text-gray-500 dark:text-gray-600">
                                 {song.artist}
                               </span>
+                              {song.milestones && (
+                                <>
+                                  <MilestoneBadge
+                                    song={song}
+                                    outClassName="ml-1"
+                                    inline
+                                    onClick={(event, song, milestone) => {
+                                      setSearchTerm(`milestone:${milestone}`);
+                                    }}
+                                  />
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>

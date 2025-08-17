@@ -44,7 +44,6 @@ import useDebounce from "../hook/useDebounce";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
-import Image from "next/image";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 
 let youtubeVideoId = "";
@@ -85,6 +84,8 @@ export default function MainPlayer() {
   const searchSingerRef = useRef(searchSinger);
   const [searchTag, setSearchTag] = useState("");
   const searchTagRef = useRef(searchTag);
+  const [searchMilestone, setSearchMilestone] = useState("");
+  const searchMilestoneRef = useRef(searchMilestone);
 
   const [urlWithSearchTerm, setUrlWithSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300); // 検索語いれてからの遅延
@@ -93,6 +94,7 @@ export default function MainPlayer() {
   const [availableArtists, setAvailableArtists] = useState<string[]>([]);
   const [availableSingers, setAvailableSingers] = useState<string[]>([]);
   const [availableSongTitles, setAvailableSongTitles] = useState<string[]>([]);
+  const [availableMilestones, setAvailableMilestones] = useState<string[]>([]);
 
   const [searchArtists, setSearchArtists] = useState("");
 
@@ -156,11 +158,15 @@ export default function MainPlayer() {
             data.flatMap((song) => song.artist.split(/、/).map((s) => s.trim()))
           ),
         ].sort();
+        const milestones = [
+          ...new Set(data.flatMap((song) => song.milestones)),
+        ].sort();
 
         setAvailableTags(tags);
         setAvailableSongTitles(songTitles);
         setAvailableSingers(singers);
         setAvailableArtists(artists);
+        setAvailableMilestones(milestones);
       });
   }, []);
 
@@ -235,6 +241,15 @@ export default function MainPlayer() {
         ) {
           return true;
         }
+        if (lowerWord.startsWith("milestone:*")) {
+          return !!song.milestones && song.milestones.length > 0;
+        }
+        if (lowerWord.startsWith("milestone:")) {
+          const milestones = song.milestones || [];
+          return milestones.some((milestone) =>
+            milestone.includes(lowerWord.substring(10).toLowerCase())
+          );
+        }
 
         return (
           song.title.toLowerCase().includes(lowerWord) ||
@@ -242,7 +257,11 @@ export default function MainPlayer() {
           song.sing.toLowerCase().includes(lowerWord) ||
           song.tags.some((tag) => tag.toLowerCase().includes(lowerWord)) ||
           song.video_title.toLowerCase().includes(lowerWord) ||
-          (song.extra && song.extra.toLowerCase().includes(lowerWord))
+          (song.extra && song.extra.toLowerCase().includes(lowerWord)) ||
+          (song.milestones &&
+            song.milestones.some((milestone) =>
+              milestone.toLowerCase().includes(lowerWord)
+            ))
         );
       });
     });
@@ -396,6 +415,10 @@ export default function MainPlayer() {
     newSearchTerm += searchSingerRef.current
       ? "sing: " + searchSingerRef.current
       : "";
+    if (newSearchTerm) newSearchTerm += " ";
+    newSearchTerm += searchMilestoneRef.current
+      ? "milestone: " + searchMilestoneRef.current
+      : "";
     changeSearchTerm(newSearchTerm);
   };
 
@@ -485,7 +508,7 @@ export default function MainPlayer() {
           <div className="flex flex-col p-2 pl-2 lg:px-0 text-sm text-foreground">
             <div className="hidden lg:flex w-full justify-between gap-2">
               <div
-                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(previousSong)}
               >
                 <div className="flex items-center h-14">
@@ -498,11 +521,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-auto flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {previousSong?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {previousSong?.artist}
                         </span>
                       </div>
@@ -521,11 +544,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-auto flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {currentSongInfo?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {currentSongInfo?.artist}
                         </span>
                       </div>
@@ -534,7 +557,7 @@ export default function MainPlayer() {
                 </div>
               </div>
               <div
-                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-right cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-right cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(nextSong)}
               >
                 <div className="flex items-center h-14">
@@ -547,11 +570,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {nextSong?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {nextSong?.artist}
                         </span>
                       </div>
@@ -619,7 +642,7 @@ export default function MainPlayer() {
           <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
             <Button
               onClick={() => playRandomSong(songs)}
-              className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2"
+              className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2 shadow-md shadow-primary-400/20 dark:shadow-none"
             >
               ランダムで他の曲にする
             </Button>
@@ -720,6 +743,23 @@ export default function MainPlayer() {
                     inputProps={{
                       icon: FaTag,
                       placeholder: "タグ",
+                    }}
+                  />
+                </div>
+
+                <div className="relative mt-1">
+                  <FlowbiteReactAutocomplete
+                    options={(availableMilestones || []).map(
+                      (milestone) => milestone
+                    )}
+                    onSelect={(value: string) => {
+                      searchMilestoneRef.current = value;
+                      setSearchMilestone(value);
+                      handleAdvancedSearch();
+                    }}
+                    inputProps={{
+                      icon: FaCompactDisc,
+                      placeholder: "マイルストーン",
                     }}
                   />
                 </div>
