@@ -514,11 +514,6 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {previousSong?.artist}
-                          {previousSong.milestones && " "}
-                          <MilestoneBadge
-                            milestones={previousSong.milestones}
-                            inline
-                          />
                         </span>
                       </div>
                     </>
@@ -542,11 +537,6 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {currentSongInfo?.artist}
-                          {currentSongInfo.milestones && " "}
-                          <MilestoneBadge
-                            milestones={currentSongInfo.milestones}
-                            inline
-                          />
                         </span>
                       </div>
                     </>
@@ -573,11 +563,6 @@ export default function MainPlayer() {
                         </span>
                         <span className="text-left text-sm text-muted truncate">
                           {nextSong?.artist}
-                          {nextSong.milestones && " "}
-                          <MilestoneBadge
-                            milestones={nextSong.milestones}
-                            inline
-                          />
                         </span>
                       </div>
                     </>
@@ -644,7 +629,7 @@ export default function MainPlayer() {
           <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
             <Button
               onClick={() => playRandomSong(songs)}
-              className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2"
+              className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition mb-2 shadow-md shadow-primary-400/20"
             >
               ランダムで他の曲にする
             </Button>
