@@ -1,9 +1,10 @@
 "use client";
 
-import { Pagination } from "flowbite-react";
+import { Button, Pagination } from "flowbite-react";
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
 import { useEffect, useState } from "react";
+import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 
 interface SongListProps {
   songs: Song[];
@@ -80,7 +81,18 @@ const SongsList = ({
       </ul>
       {totalPage > 1 && (
         <div className="flex justify-center mb-2">
+          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px mr-1">
+            <Button
+              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
+              onClick={() => onPageChange(1)}
+              disabled={currentPage === 1}
+              style={{ height: "38px" }}
+            >
+              <MdSkipPrevious />
+            </Button>
+          </div>
           <Pagination
+            layout="pagination"
             currentPage={currentPage}
             totalPages={totalPage}
             onPageChange={onPageChange}
@@ -88,6 +100,16 @@ const SongsList = ({
             nextLabel=""
             showIcons
           />
+          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px ml-1">
+            <Button
+              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
+              onClick={() => onPageChange(totalPage)}
+              disabled={currentPage === totalPage}
+              style={{ height: "38px" }}
+            >
+              <MdSkipNext />
+            </Button>
+          </div>
         </div>
       )}
     </>
