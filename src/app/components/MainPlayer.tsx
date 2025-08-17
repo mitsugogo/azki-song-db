@@ -508,7 +508,7 @@ export default function MainPlayer() {
           <div className="flex flex-col p-2 pl-2 lg:px-0 text-sm text-foreground">
             <div className="hidden lg:flex w-full justify-between gap-2">
               <div
-                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(previousSong)}
               >
                 <div className="flex items-center h-14">
@@ -521,11 +521,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-auto flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {previousSong?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {previousSong?.artist}
                         </span>
                       </div>
@@ -544,11 +544,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-auto flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {currentSongInfo?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {currentSongInfo?.artist}
                         </span>
                       </div>
@@ -557,7 +557,7 @@ export default function MainPlayer() {
                 </div>
               </div>
               <div
-                className="h-14 w-2/6 p-0 truncate bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-right cursor-pointer hover:bg-gray-300"
+                className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-right cursor-pointer hover:bg-gray-300"
                 onClick={() => changeCurrentSong(nextSong)}
               >
                 <div className="flex items-center h-14">
@@ -570,11 +570,11 @@ export default function MainPlayer() {
                           fill={true}
                         />
                       </div>
-                      <div className="flex flex-col flex-grow w-full px-2">
+                      <div className="flex flex-col px-2 truncate">
                         <span className="text-left font-bold truncate">
                           {nextSong?.title}
                         </span>
-                        <span className="text-left text-sm text-muted truncate">
+                        <span className="text-left text-xs text-muted truncate">
                           {nextSong?.artist}
                         </span>
                       </div>
