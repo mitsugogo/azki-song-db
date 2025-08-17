@@ -386,7 +386,6 @@ export default function MainPlayer() {
   };
 
   const changeSearchTerm = (term: string) => {
-    console.log("changeSearchTerm", term);
     setSearchTerm(term);
   };
 

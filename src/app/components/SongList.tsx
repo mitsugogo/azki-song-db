@@ -25,8 +25,9 @@ const SongsList = ({
 
   const onPageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo(0, 0);
-    setSlicedSongs(songs.slice((page - 1) * displayPage, page * displayPage));
+    const startIndex = (page - 1) * displayPage;
+    const endIndex = Math.min(startIndex + displayPage, songs.length + 1);
+    setSlicedSongs(songs.slice(startIndex, endIndex));
   };
 
   // ページ数を計算
@@ -60,8 +61,6 @@ const SongsList = ({
     );
     onPageChange(currentPage);
   }, [currentSongInfo]);
-
-  useEffect(() => {}, [slicedSongs]);
 
   return (
     <>
