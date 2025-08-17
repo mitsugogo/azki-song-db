@@ -1,8 +1,9 @@
-import Image from "next/image";
+"use client";
+
+import { Pagination } from "flowbite-react";
 import { Song } from "../types/song";
-import YoutubeThumbnail from "./YoutubeThumbnail";
-import { Badge } from "flowbite-react";
-import MilestoneBadge from "./MilestoneBadge";
+import SongListItem from "./SongListItem";
+import { useEffect, useState } from "react";
 
 interface SongListProps {
   songs: Song[];
@@ -15,53 +16,71 @@ const SongsList = ({
   currentSongInfo,
   changeCurrentSong,
 }: SongListProps) => {
+  const displayPage = 100;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+
+  const [slicedSongs, setSlicedSongs] = useState<Song[]>([]);
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+    setSlicedSongs(songs.slice((page - 1) * displayPage, page * displayPage));
+  };
+
+  // ページ数を計算
+  const calculateTotalPage = () => {
+    setTotalPage(Math.ceil(songs.length / displayPage));
+  };
+
+  useEffect(() => {
+    calculateTotalPage();
+    setSlicedSongs(songs.slice(0, displayPage));
+  }, [songs]);
+
+  useEffect(() => {}, [slicedSongs]);
+
   return (
-    <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
-      {songs.map((song, index) => (
-        <li
-          key={index}
-          className={`rounded relative cursor-pointer transition shadow-md ${
-            currentSongInfo?.title === song.title &&
-            currentSongInfo.video_id === song.video_id &&
-            currentSongInfo.start === song.start
-              ? "bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300"
-              : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-          }`}
-          onClick={() => changeCurrentSong(song, false)}
-          data-video-id={song.video_id}
-          data-start-time={song.start}
-          data-title={song.title}
-        >
-          <div className="block w-full mb-2 text-center">
-            <div className="aspect-video">
-              <YoutubeThumbnail
-                videoId={song.video_id}
-                alt={song.video_title}
-                fill={true}
-              />
-            </div>
-          </div>
-          <div className="w-full p-3 pt-0">
-            <div className="w-full text-sm font-semibold line-clamp-3">
-              {song.title}
-            </div>
-            <div className="w-full text-xs text-muted-foreground line-clamp-3">
-              {song.artist} - {song.sing}
-            </div>
-            <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-500">
-              {song.broadcast_at && (
-                <>{new Date(song.broadcast_at).toLocaleDateString()}</>
-              )}
-            </div>
-            <div className="flex w-full gap-x-2 mt-1 text-xs truncate">
-              <div>
-                <MilestoneBadge song={song} outClassName="mb-1.5" />
-              </div>
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <>
+      {totalPage > 1 && (
+        <div className="hidden lg:flexmb-2">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPage}
+            onPageChange={onPageChange}
+            previousLabel=""
+            nextLabel=""
+            showIcons
+          />
+        </div>
+      )}
+      <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
+        {slicedSongs.map((song, index) => (
+          <SongListItem
+            key={`${song.video_id}-${song.start}`} // 安定したユニークなキーを使用
+            song={song}
+            isSelected={
+              currentSongInfo?.title === song.title &&
+              currentSongInfo.video_id === song.video_id &&
+              currentSongInfo.start === song.start
+            }
+            changeCurrentSong={changeCurrentSong}
+          />
+        ))}
+      </ul>
+      {totalPage > 1 && (
+        <div className="flex sm:justify-center mb-2">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPage}
+            onPageChange={onPageChange}
+            previousLabel=""
+            nextLabel=""
+            showIcons
+          />
+        </div>
+      )}
+    </>
   );
 };
 
