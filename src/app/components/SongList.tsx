@@ -1,8 +1,10 @@
-import Image from "next/image";
+"use client";
+
+import { Button, Pagination } from "flowbite-react";
 import { Song } from "../types/song";
-import YoutubeThumbnail from "./YoutubeThumbnail";
-import { Badge } from "flowbite-react";
-import MilestoneBadge from "./MilestoneBadge";
+import SongListItem from "./SongListItem";
+import { useEffect, useState } from "react";
+import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 
 interface SongListProps {
   songs: Song[];
@@ -15,53 +17,101 @@ const SongsList = ({
   currentSongInfo,
   changeCurrentSong,
 }: SongListProps) => {
+  const displayPage = 50;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+
+  const [slicedSongs, setSlicedSongs] = useState<Song[]>([]);
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+    const startIndex = (page - 1) * displayPage;
+    const endIndex = Math.min(startIndex + displayPage, songs.length + 1);
+    setSlicedSongs(songs.slice(startIndex, endIndex));
+  };
+
+  // ページ数を計算
+  const calculateTotalPage = () => {
+    setTotalPage(Math.ceil(songs.length / displayPage));
+  };
+
+  useEffect(() => {
+    calculateTotalPage();
+    setSlicedSongs(songs.slice(currentPage, displayPage));
+    // もしページ番号が範囲外の場合は1ページ目にする
+    if (currentPage > totalPage) {
+      onPageChange(1);
+    }
+  }, [songs]);
+
+  useEffect(() => {
+    // currentSongから何ページ目か求める
+    const currentPage = Math.max(
+      1,
+      Math.ceil(
+        (songs.findIndex(
+          (song) =>
+            song.video_id === currentSongInfo?.video_id &&
+            song.title === currentSongInfo?.title &&
+            song.start === currentSongInfo?.start
+        ) +
+          1) /
+          displayPage
+      )
+    );
+    onPageChange(currentPage);
+  }, [currentSongInfo]);
+
   return (
-    <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
-      {songs.map((song, index) => (
-        <li
-          key={index}
-          className={`rounded relative cursor-pointer transition shadow-md ${
-            currentSongInfo?.title === song.title &&
-            currentSongInfo.video_id === song.video_id &&
-            currentSongInfo.start === song.start
-              ? "bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300"
-              : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
-          }`}
-          onClick={() => changeCurrentSong(song, false)}
-          data-video-id={song.video_id}
-          data-start-time={song.start}
-          data-title={song.title}
-        >
-          <div className="block w-full mb-2 text-center">
-            <div className="aspect-video">
-              <YoutubeThumbnail
-                videoId={song.video_id}
-                alt={song.video_title}
-                fill={true}
-              />
-            </div>
+    <>
+      <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
+        {slicedSongs.map((song, index) => (
+          <SongListItem
+            key={`${song.video_id}-${song.start}`} // 安定したユニークなキーを使用
+            song={song}
+            isSelected={
+              currentSongInfo?.title === song.title &&
+              currentSongInfo.video_id === song.video_id &&
+              currentSongInfo.start === song.start
+            }
+            changeCurrentSong={changeCurrentSong}
+          />
+        ))}
+      </ul>
+      {totalPage > 1 && (
+        <div className="flex justify-center mb-2">
+          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px mr-1">
+            <Button
+              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
+              onClick={() => onPageChange(1)}
+              disabled={currentPage === 1}
+              style={{ height: "38px" }}
+            >
+              <MdSkipPrevious />
+            </Button>
           </div>
-          <div className="w-full p-3 pt-0">
-            <div className="w-full text-sm font-semibold line-clamp-3">
-              {song.title}
-            </div>
-            <div className="w-full text-xs text-muted-foreground line-clamp-3">
-              {song.artist} - {song.sing}
-            </div>
-            <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-500">
-              {song.broadcast_at && (
-                <>{new Date(song.broadcast_at).toLocaleDateString()}</>
-              )}
-            </div>
-            <div className="flex w-full gap-x-2 mt-1 text-xs truncate">
-              <div>
-                <MilestoneBadge song={song} outClassName="mb-1.5" />
-              </div>
-            </div>
+          <Pagination
+            layout="pagination"
+            currentPage={currentPage}
+            totalPages={totalPage}
+            onPageChange={onPageChange}
+            previousLabel=""
+            nextLabel=""
+            showIcons
+          />
+          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px ml-1">
+            <Button
+              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
+              onClick={() => onPageChange(totalPage)}
+              disabled={currentPage === totalPage}
+              style={{ height: "38px" }}
+            >
+              <MdSkipNext />
+            </Button>
           </div>
-        </li>
-      ))}
-    </ul>
+        </div>
+      )}
+    </>
   );
 };
 

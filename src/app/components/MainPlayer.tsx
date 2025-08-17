@@ -289,11 +289,6 @@ export default function MainPlayer() {
     }
   }, [debouncedSearchTerm]);
 
-  // 検索語を変更したとき、少し待ってから検索を開始する
-  const handleSearchChange = (value: string) => {
-    changeSearchTerm(value);
-  };
-
   const playRandomSong = (songsList: Song[]) => {
     if (songsList.length === 0) return;
     const randomSong = songsList[Math.floor(Math.random() * songsList.length)];
@@ -392,11 +387,23 @@ export default function MainPlayer() {
 
   const changeSearchTerm = (term: string) => {
     setSearchTerm(term);
+  };
+
+  const execSearch = () => {
+    const term = searchTerm.trim();
+    const url = new URL(window.location.href);
+
     if (term) {
-      setUrlWithSearchTerm(`${baseUrl}/?q=${term}`);
+      const filteredSongs = searchSongs(allSongs, term);
+      setSongs(filteredSongs);
+      url.searchParams.set("q", term);
     } else {
-      setUrlWithSearchTerm(`${baseUrl}`);
+      setSongs(allSongs);
+      url.searchParams.delete("q");
     }
+
+    // Update the URL in the browser's history
+    history.replaceState(null, "", url);
   };
 
   const handleAdvancedSearch = () => {
@@ -650,7 +657,7 @@ export default function MainPlayer() {
               <div className="relative">
                 <TextInput
                   value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onChange={(e) => changeSearchTerm(e.target.value)}
                   placeholder="検索"
                   icon={HiSearch}
                   disabled={advancedSearchOpen}
