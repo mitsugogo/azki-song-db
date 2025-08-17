@@ -49,3 +49,10 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/** Next.jsのImageのfillを上書きして画像をoutfitにする */
+.outfit-image {
+  object-fit: contain;
+  position: relative !important;
+  width: auto !important;
+}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Song } from "../types/song";
 
 interface SongListProps {
@@ -16,7 +17,7 @@ const SongsList = ({
       {songs.map((song, index) => (
         <li
           key={index}
-          className={`p-3 rounded relative cursor-pointer transition ${
+          className={`rounded relative cursor-pointer transition shadow-md ${
             currentSongInfo?.title === song.title &&
             currentSongInfo.video_id === song.video_id &&
             currentSongInfo.start === song.start
@@ -29,24 +30,27 @@ const SongsList = ({
           data-title={song.title}
         >
           <div className="block w-full mb-2 text-center">
-            <div className="shadow-md 0">
-              <img
+            <div className="0 aspect-video">
+              <Image
                 src={`https://img.youtube.com/vi/${song?.video_id}/maxresdefault.jpg`}
+                alt={song.video_title}
+                fill={true}
+                className="aspect-video outfit-image"
               />
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full p-3 pt-0">
             <div className="w-full text-sm font-semibold line-clamp-3">
               {song.title}
             </div>
             <div className="w-full text-xs text-muted-foreground line-clamp-3">
               {song.artist} - {song.sing}
             </div>
-          </div>
-          <div className="flex gap-x-2 mt-2p-2 rounded text-xs text-muted-foreground">
-            {song.broadcast_at && (
-              <>{new Date(song.broadcast_at).toLocaleDateString()}</>
-            )}
+            <div className="flex gap-x-2 mt-2p-2 rounded text-xs text-muted-foreground">
+              {song.broadcast_at && (
+                <>{new Date(song.broadcast_at).toLocaleDateString()}</>
+              )}
+            </div>
           </div>
         </li>
       ))}

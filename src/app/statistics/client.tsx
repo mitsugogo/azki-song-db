@@ -25,6 +25,7 @@ import {
 import { FaYoutube } from "react-icons/fa6";
 import Loading from "../loading";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function StatisticsPage() {
   const [loading, setLoading] = useState(true);
@@ -273,12 +274,15 @@ export default function StatisticsPage() {
                               className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
                             >
                               <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                                <img
-                                  src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`}
-                                  alt={lastVideo.video_title}
-                                  className="w-full lg:w-12 aspect-video"
-                                />
-                                <div className="flex flex-col gap-1 lg:gap-">
+                                <div className="flex w-full lg:w-12">
+                                  <Image
+                                    src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                    alt={lastVideo.video_title}
+                                    fill={true}
+                                    className="aspect-video outfit-image"
+                                  />
+                                </div>
+                                <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
                                   <span className="text-sm hidden lg:inline">
                                     <span className="">
                                       {lastVideo.video_title}
@@ -362,12 +366,15 @@ export default function StatisticsPage() {
                             className="text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500"
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <img
-                                src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`}
-                                alt={lastVideo.video_title}
-                                className="w-full lg:w-12 aspect-video"
-                              />
-                              <div className="flex flex-col gap-1 lg:gap-">
+                              <div className="flex w-full lg:w-12">
+                                <Image
+                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                  alt={lastVideo.video_title}
+                                  fill={true}
+                                  className="aspect-video outfit-image"
+                                />
+                              </div>
+                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
                                 <span className="text-sm hidden lg:inline">
                                   <span className="">
                                     {lastVideo.video_title}
@@ -450,12 +457,15 @@ export default function StatisticsPage() {
                             className="text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500"
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <img
-                                src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`}
-                                alt={lastVideo.video_title}
-                                className="w-full lg:w-12 aspect-video"
-                              />
-                              <div className="flex flex-col gap-1 lg:gap-">
+                              <div className="flex w-full lg:w-12">
+                                <Image
+                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                  alt={lastVideo.video_title}
+                                  fill={true}
+                                  className="aspect-video outfit-image"
+                                />
+                              </div>
+                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
                                 <span className="text-sm hidden lg:inline">
                                   <span className="">
                                     {lastVideo.video_title}
@@ -524,12 +534,15 @@ export default function StatisticsPage() {
                             className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
                           >
                             <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <img
-                                src={`https://img.youtube.com/vi/${lastVideo.video_id}/mqdefault.jpg`}
-                                alt={lastVideo.video_title}
-                                className="w-full lg:w-12 aspect-video"
-                              />
-                              <div className="flex flex-col gap-1 lg:gap-">
+                              <div className="flex w-full lg:w-12">
+                                <Image
+                                  src={`https://img.youtube.com/vi/${lastVideo?.video_id}/maxresdefault.jpg`}
+                                  alt={lastVideo.video_title}
+                                  fill={true}
+                                  className="aspect-video outfit-image"
+                                />
+                              </div>
+                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
                                 <span className="text-sm hidden lg:inline">
                                   <span className="">
                                     {lastVideo.video_title}
