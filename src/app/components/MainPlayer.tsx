@@ -44,9 +44,7 @@ import useDebounce from "../hook/useDebounce";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
-import Image from "next/image";
 import YoutubeThumbnail from "./YoutubeThumbnail";
-import MilestoneBadge from "./MilestoneBadge";
 
 let youtubeVideoId = "";
 let changeVideoIdCount = 0;

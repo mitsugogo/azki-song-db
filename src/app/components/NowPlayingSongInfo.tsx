@@ -65,7 +65,12 @@ const NowPlayingSongInfo = ({
               <div className="w-full flex-auto self-baseline border-b border-gray-200 pb-2">
                 {currentSongInfo.milestones && (
                   <div className="flex items-center gap-1">
-                    <MilestoneBadge milestones={currentSongInfo.milestones} />
+                    <MilestoneBadge
+                      song={currentSongInfo}
+                      onClick={(event, song, milestone) => {
+                        setSearchTerm(`milestone:${milestone}`);
+                      }}
+                    />
                   </div>
                 )}
                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white">

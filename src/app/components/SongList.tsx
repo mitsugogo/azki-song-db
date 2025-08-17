@@ -55,10 +55,7 @@ const SongsList = ({
             </div>
             <div className="flex w-full gap-x-2 mt-1 text-xs truncate">
               <div>
-                <MilestoneBadge
-                  milestones={song.milestones}
-                  outClassName="mb-1.5"
-                />
+                <MilestoneBadge song={song} outClassName="mb-1.5" />
               </div>
             </div>
           </div>

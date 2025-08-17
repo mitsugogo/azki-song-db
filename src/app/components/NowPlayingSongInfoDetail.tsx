@@ -296,9 +296,12 @@ const NowPlayingSongInfoDetail = ({
                               {song.milestones && (
                                 <>
                                   <MilestoneBadge
-                                    milestones={song.milestones}
+                                    song={song}
                                     outClassName="ml-1"
                                     inline
+                                    onClick={(event, song, milestone) => {
+                                      setSearchTerm(`milestone:${milestone}`);
+                                    }}
                                   />
                                 </>
                               )}
