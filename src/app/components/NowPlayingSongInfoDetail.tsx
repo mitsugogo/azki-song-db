@@ -37,7 +37,7 @@ const NowPlayingSongInfoDetail = ({
   return (
     <>
       {currentSongInfo && (
-        <div className="flex-grow lg:shadow-lg lg:shadow-xl/20 rounded-xl ">
+        <div className="flex-grow">
           <dl className="grid grid-cols-12 gap-x-4 gap-y-2">
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
