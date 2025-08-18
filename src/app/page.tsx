@@ -1,30 +1,34 @@
-"use client";
-
-import MainPlayer from "./components/MainPlayer";
+import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "flowbite-react";
-import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
-import { Header } from "./components/Header";
+import ClientTop from "./client";
+import { baseUrl, metadata } from "./layout";
+
+export async function generateMetadata({
+  searchParams = {},
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}): Promise<Metadata> {
+  const searchTerm = typeof searchParams.q === "string" ? searchParams.q : "";
+
+  const subtitle = searchTerm
+    ? `「${searchTerm}」の検索結果`
+    : "AZKiさんの歌枠の素晴らしさを伝えるサイト";
+
+  // OGP画像URLに含めるsubtitleをURLエンコードします。
+  const encodedSubtitle = encodeURIComponent(subtitle);
+
+  return {
+    ...metadata,
+    openGraph: {
+      ...metadata.openGraph,
+      images: [
+        // エンコードされたsubtitleを使用するように修正
+        `${baseUrl}/api/og?title=AZKi Song Database&subtitle=${encodedSubtitle}&titlecolor=b81e8a&w=1200&h=630`,
+      ],
+    },
+  };
+}
 
 export default function Home() {
-  return (
-    <ThemeProvider>
-      <div className="h-dvh flex flex-col">
-        <Header />
-        <main className="flex flex-col md:flex-row flex-grow overflow-hidden 4xl:container 4xl:mx-auto p-0 lg:p-4 dark:bg-gray-900">
-          <MainPlayer />
-        </main>
-        <footer className="flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block">
-          <p className="text-xs">
-            本サイトは有志による非公式のファンサイトです。
-            <span className="hidden lg:inline">
-              動画はホロライブプロダクション様及びAZKi様が制作したものです。
-            </span>
-            動画の権利は制作者に帰属します。
-          </p>
-        </footer>
-      </div>
-      <AnalyticsWrapper />
-    </ThemeProvider>
-  );
+  return <ClientTop />;
 }
