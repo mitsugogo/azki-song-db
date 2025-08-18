@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ClientTop from "./client";
-import { baseUrl, metadata } from "./layout";
+import { metadata } from "./layout";
+
+const baseUrl =
+  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
 export async function generateMetadata({
   searchParams = {},
@@ -14,17 +17,20 @@ export async function generateMetadata({
     ? `「${searchTerm}」の検索結果`
     : "AZKiさんの歌枠の素晴らしさを伝えるサイト";
 
-  // OGP画像URLに含めるsubtitleをURLエンコードします。
-  const encodedSubtitle = encodeURIComponent(subtitle);
+  // URLオブジェクトを生成して、クエリパラメータを安全に設定します。
+  // これにより、Next.jsが自動的に適切なエンコードを行います。
+  const ogImageUrl = new URL("/api/og", baseUrl);
+  ogImageUrl.searchParams.set("title", "AZKi Song Database");
+  ogImageUrl.searchParams.set("subtitle", subtitle);
+  ogImageUrl.searchParams.set("titlecolor", "b81e8a");
+  ogImageUrl.searchParams.set("w", "1200");
+  ogImageUrl.searchParams.set("h", "630");
 
   return {
     ...metadata,
     openGraph: {
       ...metadata.openGraph,
-      images: [
-        // エンコードされたsubtitleを使用するように修正
-        `${baseUrl}/api/og?title=AZKi Song Database&subtitle=${encodedSubtitle}&titlecolor=b81e8a&w=1200&h=630`,
-      ],
+      images: [ogImageUrl.toString()],
     },
   };
 }

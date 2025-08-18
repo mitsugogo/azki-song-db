@@ -17,9 +17,6 @@ const geistMono = Geist_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-export const baseUrl =
-  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
-
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description:
