@@ -40,13 +40,11 @@ const SongsList = ({
     setSlicedSongs(
       songs.slice((currentPage - 1) * displayPage, currentPage * displayPage)
     );
-    // もしページ番号が範囲外の場合は1ページ目にする
-    if (currentPage > totalPage) {
-      onPageChange(1);
-    }
+    onPageChange(1);
   }, [songs]);
 
   useEffect(() => {
+    calculateTotalPage();
     // 先頭の要素にスクロール
     const listElement = document.getElementById("song-list");
     if (listElement) {
@@ -61,6 +59,10 @@ const SongsList = ({
       } else {
         listElement.scrollTo({ top: 0, behavior: "smooth" });
       }
+    }
+    // もしページ番号が範囲外の場合は1ページ目にする
+    if (currentPage > totalPage) {
+      onPageChange(1);
     }
   }, [slicedSongs]);
 
