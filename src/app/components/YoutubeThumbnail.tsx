@@ -40,7 +40,13 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
 
   return (
     <div style={{ position: "relative", width, height }}>
-      <Image src={imageUrl} alt={alt} layout="fill" onError={handleError} />
+      <Image
+        src={imageUrl}
+        alt={alt}
+        layout="fill"
+        onError={handleError}
+        unoptimized
+      />
     </div>
   );
 };
