@@ -561,7 +561,6 @@ export default function MainPlayer() {
                     (song) => song.video_id === currentSongInfo?.video_id
                   );
                   setSearchTerm("video_id:" + currentSongInfo?.video_id);
-                  setSongs(renewSongs);
                   changeCurrentSong(currentSongInfo, true);
                   if (currentSongInfoRef.current) {
                     setPreviousAndNextSongs(
