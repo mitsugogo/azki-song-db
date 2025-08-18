@@ -28,10 +28,6 @@ type StatisticsItem = {
   lastVideo: Song;
 };
 
-// 統計データを作成するヘルパー関数
-// この関数は、キーとソート関数に基づいて楽曲データを集計し、ソートします。
-// 統計データを作成するヘルパー関数
-// T は、count プロパティを数値として持つ型を拡張します。
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
@@ -79,7 +75,7 @@ export default function StatisticsPage() {
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
-  // APIから楽曲データを取得するuseEffect
+  // APIから楽曲データを取得する
   useEffect(() => {
     fetch("/api/songs")
       .then((res) => res.json())
@@ -89,7 +85,7 @@ export default function StatisticsPage() {
       });
   }, []);
 
-  // URLのタブパラメータを初期状態に設定するuseEffect
+  // URLのタブパラメータを初期状態に設定
   useEffect(() => {
     const url = new URL(window.location.href);
     const tabParam = url.searchParams.get("tab");
@@ -100,7 +96,6 @@ export default function StatisticsPage() {
     }
   }, []);
 
-  // useMemoを使用して、統計データを効率的に計算し、キャッシュする
   const songCounts = useMemo(() => {
     return createStatistics(songs, (song) => song.title);
   }, [songs]);
@@ -137,7 +132,7 @@ export default function StatisticsPage() {
     window.history.replaceState({}, "", url.toString());
   };
 
-  // 統計テーブルをレンダリングするための再利用可能なコンポーネント
+  // 統計テーブル
   const renderTable = <T extends StatisticsItem>(
     data: T[],
     caption: string,
@@ -184,7 +179,7 @@ export default function StatisticsPage() {
     );
   };
 
-  // 最新の動画のサムネイルと情報をレンダリングするための再利用可能なコンポーネント
+  // 最新の動画のサムネイルと情報
   const renderLastVideoCell = (lastVideo: Song | null) => {
     if (!lastVideo) {
       return <span className="text-sm">なし</span>;
