@@ -554,7 +554,7 @@ export default function MainPlayer() {
               </div>
 
               <div
-                className="h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400"
+                className="relative h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400"
                 onClick={() => {
                   // クリックで現在の動画に残る
                   const renewSongs = allSongs.filter(
@@ -565,14 +565,6 @@ export default function MainPlayer() {
                   changeCurrentSong(currentSongInfo, true);
                 }}
               >
-                <div
-                  id="tooltip-default"
-                  role="tooltip"
-                  className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700"
-                >
-                  クリックで現在の歌枠を続けて聴く
-                  <div className="tooltip-arrow" data-popper-arrow></div>
-                </div>
                 <div className="flex items-center h-14">
                   {currentSongInfo && (
                     <>
