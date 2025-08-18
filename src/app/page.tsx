@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import "./globals.css";
 import ClientTop from "./client";
 import { metadata } from "./layout";
@@ -6,18 +6,19 @@ import { metadata } from "./layout";
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined } & Record<
-    string,
-    unknown
-  >;
-}): Promise<Metadata> {
-  const searchTerm = typeof searchParams.q === "string" ? searchParams.q : "";
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-  const subtitle = searchTerm
-    ? `「${searchTerm}」の検索結果`
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { q } = await searchParams;
+
+  const subtitle = q
+    ? `「${q}」の検索結果`
     : "AZKiさんの歌枠の素晴らしさを伝えるサイト";
 
   // URLオブジェクトを生成して、クエリパラメータを安全に設定します。
