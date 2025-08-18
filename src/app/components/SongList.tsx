@@ -37,7 +37,9 @@ const SongsList = ({
 
   useEffect(() => {
     calculateTotalPage();
-    setSlicedSongs(songs.slice(currentPage, displayPage));
+    setSlicedSongs(
+      songs.slice((currentPage - 1) * displayPage, currentPage * displayPage)
+    );
     // もしページ番号が範囲外の場合は1ページ目にする
     if (currentPage > totalPage) {
       onPageChange(1);

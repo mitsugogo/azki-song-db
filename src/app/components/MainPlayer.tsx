@@ -123,7 +123,6 @@ export default function MainPlayer() {
         if (query) {
           setSearchTerm(query);
           filteredSongs = searchSongs(data, query);
-          setSongs(filteredSongs);
         }
         if (video_id && start_time) {
           // 前後2秒の誤差は許容する
@@ -141,7 +140,7 @@ export default function MainPlayer() {
         } else {
           playRandomSong(filteredSongs);
         }
-        setSongs(data);
+        setSongs(filteredSongs);
         setIsLoading(false);
         setIsInitialLoading(false);
 
@@ -408,30 +407,20 @@ export default function MainPlayer() {
 
   const handleAdvancedSearch = () => {
     // 高度検索の指定状況から検索キーワードを再組み立て
-    let newSearchTerm;
-    newSearchTerm = searchTitleRef.current
-      ? "title:" + searchTitleRef.current
-      : "";
-    if (newSearchTerm) newSearchTerm += " ";
-    newSearchTerm += searchArtistRef.current
-      ? "artist: " + searchArtistRef.current
-      : "";
-    if (newSearchTerm) newSearchTerm += " ";
-    newSearchTerm += searchTagRef.current ? "tag: " + searchTagRef.current : "";
-    if (newSearchTerm) newSearchTerm += " ";
-    newSearchTerm += searchSingerRef.current
-      ? "sing: " + searchSingerRef.current
-      : "";
-    if (newSearchTerm) newSearchTerm += " ";
-    newSearchTerm += searchMilestoneRef.current
-      ? "milestone: " + searchMilestoneRef.current
-      : "";
+    const newSearchTerm = [
+      searchTitleRef.current && `title:${searchTitleRef.current}`,
+      searchArtistRef.current && `artist:${searchArtistRef.current}`,
+      searchTagRef.current && `tag:${searchTagRef.current}`,
+      searchSingerRef.current && `sing:${searchSingerRef.current}`,
+      searchMilestoneRef.current && `milestone:${searchMilestoneRef.current}`,
+    ]
+      .filter(Boolean)
+      .join(" ");
     changeSearchTerm(newSearchTerm);
   };
 
   // YouTubeの状態変更イベントハンドラ
   const handleStateChange = (event: YouTubeEvent<number>) => {
-    console.log(event);
     if (
       youtubeVideoId !== event.target.getVideoData()?.video_id &&
       intervalRef.current
