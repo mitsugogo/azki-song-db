@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
+// URLにq={value}があったら、OGPのsubtitleを変える
+const url = new URL(baseUrl);
+const searchTerm = url.searchParams.get("q") || "";
+const subtitle = searchTerm
+  ? `「${searchTerm}」の検索結果`
+  : "AZKiさんの歌枠の素晴らしさを伝えるサイト";
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description:
@@ -34,7 +40,7 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     type: "website",
     images: [
-      `${baseUrl}/api/og?title=AZKi Song Database&subtitle=ホロライブのAZKiさんの歌枠の素晴らしさを伝えるサイト&titlecolor=b81e8a&w=1200&h=630`,
+      `${baseUrl}/api/og?title=AZKi Song Database&subtitle=${subtitle}&titlecolor=b81e8a&w=1200&h=630`,
     ],
   },
 };
