@@ -7,9 +7,12 @@ const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
 export async function generateMetadata({
-  searchParams = {},
+  searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined } & Record<
+    string,
+    unknown
+  >;
 }): Promise<Metadata> {
   const searchTerm = typeof searchParams.q === "string" ? searchParams.q : "";
 
