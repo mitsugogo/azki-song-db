@@ -22,7 +22,7 @@ import {
   HiPlay,
   HiTag,
 } from "react-icons/hi";
-import { FaYoutube } from "react-icons/fa6";
+import { FaStar, FaYoutube } from "react-icons/fa6";
 import Loading from "../loading";
 import Link from "next/link";
 import Image from "next/image";
@@ -42,6 +42,9 @@ export default function StatisticsPage() {
   >([]);
   const [tagCounts, setTagCounts] = useState<
     { tag: string; count: number; song: Song; lastVideo: Song | null }[]
+  >([]);
+  const [milestoneCounts, setMilestoneCounts] = useState<
+    { milestone: string; count: number; song: Song; lastVideo: Song | null }[]
   >([]);
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -169,6 +172,30 @@ export default function StatisticsPage() {
     );
 
     setTagCounts(tagCounts);
+  }, [songs]);
+
+  useEffect(() => {
+    // マイルストーン別
+    const milestoneCountsMap = songs.slice().reduce((map, song) => {
+      const milestones = song.milestones;
+      for (const milestone of milestones) {
+        map[milestone] = {
+          milestone,
+          count: (map[milestone]?.count || 0) + 1,
+          song: song,
+          lastVideo: song,
+        };
+      }
+      return map;
+    }, {} as { [key: string]: { milestone: string; count: number; song: Song; lastVideo: Song | null } });
+
+    const milestoneCounts = Object.values(milestoneCountsMap).sort(
+      (a, b) =>
+        new Date(b.lastVideo?.broadcast_at || "").getTime() -
+        new Date(a.lastVideo?.broadcast_at || "").getTime()
+    );
+
+    setMilestoneCounts(milestoneCounts);
   }, [songs]);
 
   useEffect(() => {
@@ -521,6 +548,87 @@ export default function StatisticsPage() {
                         </Link>
                       </TableCell>
                       <TableCell>{tag.count}</TableCell>
+                      <TableCell>
+                        {lastVideo ? (
+                          <a
+                            href={`${lastVideo.video_uri}${
+                              lastVideo.start ? `&t=${lastVideo.start}s` : ""
+                            }`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                          >
+                            <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
+                              <div className="flex w-full lg:w-12">
+                                <YoutubeThumbnail
+                                  videoId={lastVideo.video_id}
+                                  alt={lastVideo.video_title}
+                                  fill={true}
+                                />
+                              </div>
+                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
+                                <span className="text-sm hidden lg:inline">
+                                  <span className="">
+                                    {lastVideo.video_title}
+                                  </span>
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    lastVideo.broadcast_at
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </a>
+                        ) : (
+                          <span className="text-sm">なし</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </TabItem>
+        <TabItem title="マイルストーン" icon={FaStar}>
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loading />
+            </div>
+          ) : (
+            <Table striped hoverable>
+              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
+                マイルストーン({milestoneCounts.length})
+                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+                  これまでのマイルストーンをまとめています。
+                </p>
+              </caption>
+              <TableHead>
+                <TableRow>
+                  <TableHeadCell className="">マイルストーン</TableHeadCell>
+                  <TableHeadCell className="lg:text-nowrap">
+                    達成日
+                  </TableHeadCell>
+                  <TableHeadCell className="lg:text-nowrap">曲数</TableHeadCell>
+                  <TableHeadCell className="">最新の動画</TableHeadCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {milestoneCounts.map((m) => {
+                  const lastVideo = m.lastVideo;
+                  return (
+                    <TableRow key={m.milestone}>
+                      <TableCell>
+                        <Link href={`/?q=milestone:${m.milestone}`}>
+                          <Badge className="inline">{m.milestone}</Badge>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {lastVideo &&
+                          new Date(lastVideo.broadcast_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{m.count}</TableCell>
                       <TableCell>
                         {lastVideo ? (
                           <a
