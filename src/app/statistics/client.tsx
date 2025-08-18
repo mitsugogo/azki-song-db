@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Song } from "../types/song";
 import {
   Badge,
@@ -15,45 +15,68 @@ import {
   TabsRef,
   ThemeProvider,
 } from "flowbite-react";
-import {
-  HiClipboardList,
-  HiUserCircle,
-  HiMusicNote,
-  HiPlay,
-  HiTag,
-} from "react-icons/hi";
-import { FaYoutube } from "react-icons/fa6";
-import Loading from "../loading";
+import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
+import { FaStar } from "react-icons/fa6";
 import Link from "next/link";
-import Image from "next/image";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
+import Loading from "../loading";
+
+type StatisticsItem = {
+  key: string;
+  count: number;
+  song: Song;
+  lastVideo: Song;
+};
+
+const createStatistics = <T extends StatisticsItem>(
+  songs: Song[],
+  keyFn: (song: Song) => string | string[],
+  sortFn?: (a: T, b: T) => number
+) => {
+  const countsMap = songs
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime()
+    )
+    .reduce((map: Map<string, T>, song: Song) => {
+      const keys = Array.isArray(keyFn(song))
+        ? (keyFn(song) as string[])
+        : [keyFn(song) as string];
+
+      keys.forEach((key) => {
+        map.set(key, {
+          key,
+          count: (map.get(key)?.count || 0) + 1,
+          song,
+          lastVideo: song,
+        } as T & {
+          key: string;
+          count: number;
+          song: Song;
+          lastVideo: Song;
+        });
+      });
+      return map;
+    }, new Map<string, T & { key: string; count: number; song: Song; lastVideo: Song }>());
+
+  const sortedData = Array.from(countsMap.values()).sort(
+    sortFn ||
+      ((a, b) =>
+        (b as { count: number }).count - (a as { count: number }).count)
+  ) as Array<T & { key: string; count: number; song: Song; lastVideo: Song }>;
+
+  return sortedData;
+};
 
 export default function StatisticsPage() {
   const [loading, setLoading] = useState(true);
   const [songs, setSongs] = useState<Song[]>([]);
-  const [songCounts, setSongCounts] = useState<
-    { title: string; count: number; song: Song; lastVideo: Song | null }[]
-  >([]);
-  const [artistCounts, setArtistCounts] = useState<
-    { artist: string; count: number; song: Song; lastVideo: Song | null }[]
-  >([]);
-  const [originalSongCounts, setOriginalSongCounts] = useState<
-    { title: string; count: number; song: Song; lastVideo: Song | null }[]
-  >([]);
-  const [tagCounts, setTagCounts] = useState<
-    { tag: string; count: number; song: Song; lastVideo: Song | null }[]
-  >([]);
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
+  // APIから楽曲データを取得する
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const tabParam = url.searchParams.get("tab");
-
-    if (tabParam) {
-      setActiveTab(Number(tabParam));
-      tabsRef.current?.setActiveTab(Number(tabParam));
-    }
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
@@ -62,130 +85,136 @@ export default function StatisticsPage() {
       });
   }, []);
 
-  useEffect(() => {
-    const songCountsMap = songs
-      .slice()
-      .sort((a, b) => {
-        const dateA = new Date(a.broadcast_at).getTime();
-        const dateB = new Date(b.broadcast_at).getTime();
-        return dateA - dateB;
-      })
-      .reduce((map, song) => {
-        const title = song.title;
-        map[title] = {
-          title,
-          count: (map[title]?.count || 0) + 1,
-          song: song,
-          lastVideo: song,
-        };
-        return map;
-      }, {} as { [key: string]: { title: string; count: number; song: Song; lastVideo: Song | null } });
-
-    const songCounts = Object.values(songCountsMap).sort(
-      (a, b) => b.count - a.count
-    );
-
-    setSongCounts(songCounts);
-  }, [songs]);
-
-  useEffect(() => {
-    const artistCountsMap = songs
-      .slice()
-      .sort((a, b) => {
-        const dateA = new Date(a.broadcast_at).getTime();
-        const dateB = new Date(b.broadcast_at).getTime();
-        return dateA - dateB;
-      })
-      .reduce((map, song) => {
-        const artist = song.artist;
-        map[artist] = {
-          artist,
-          count: (map[artist]?.count || 0) + 1,
-          song: song,
-          lastVideo: song,
-        };
-        return map;
-      }, {} as { [key: string]: { artist: string; count: number; song: Song; lastVideo: Song | null } });
-
-    const artistCounts = Object.values(artistCountsMap).sort(
-      (a, b) => b.count - a.count
-    );
-
-    setArtistCounts(artistCounts);
-  }, [songs]);
-
-  useEffect(() => {
-    const originalSongCountsMap = songs
-      .slice()
-      .sort((a, b) => {
-        const dateA = new Date(a.broadcast_at).getTime();
-        const dateB = new Date(b.broadcast_at).getTime();
-        return dateA - dateB;
-      })
-      .reduce((map, song) => {
-        const artists = song.artist.split("、");
-        if (artists.some((artist) => artist.includes("AZKi"))) {
-          const title = song.title;
-          map[title] = {
-            title,
-            count: (map[title]?.count || 0) + 1,
-            song: song,
-            lastVideo: song,
-          };
-        }
-        return map;
-      }, {} as { [key: string]: { title: string; count: number; song: Song; lastVideo: Song | null } });
-
-    const originalSongCounts = Object.values(originalSongCountsMap).sort(
-      (a, b) => b.count - a.count
-    );
-
-    setOriginalSongCounts(originalSongCounts);
-  }, [songs]);
-
-  useEffect(() => {
-    const tagCountsMap = songs
-      .slice()
-      .sort((a, b) => {
-        const dateA = new Date(a.broadcast_at).getTime();
-        const dateB = new Date(b.broadcast_at).getTime();
-        return dateA - dateB;
-      })
-      .reduce((map, song) => {
-        const tags = song.tags;
-        for (const tag of tags) {
-          map[tag] = {
-            tag,
-            count: (map[tag]?.count || 0) + 1,
-            song: song,
-            lastVideo: song,
-          };
-        }
-        return map;
-      }, {} as { [key: string]: { tag: string; count: number; song: Song; lastVideo: Song | null } });
-
-    const tagCounts = Object.values(tagCountsMap).sort(
-      (a, b) => b.count - a.count
-    );
-
-    setTagCounts(tagCounts);
-  }, [songs]);
-
+  // URLのタブパラメータを初期状態に設定
   useEffect(() => {
     const url = new URL(window.location.href);
-    const searchParams = url.searchParams;
-    const tab = parseInt(searchParams.get("tab") || "0");
-    searchParams.set("tab", tab.toString());
-    window.history.replaceState({}, "", url.toString());
-    setActiveTab(tab);
+    const tabParam = url.searchParams.get("tab");
+    if (tabParam) {
+      const tabIndex = Number(tabParam);
+      setActiveTab(tabIndex);
+      tabsRef.current?.setActiveTab(tabIndex);
+    }
   }, []);
+
+  const songCounts = useMemo(() => {
+    return createStatistics(songs, (song) => song.title);
+  }, [songs]);
+
+  const artistCounts = useMemo(() => {
+    return createStatistics(songs, (song) => song.artist);
+  }, [songs]);
+
+  const originalSongCounts = useMemo(() => {
+    const originalSongs = songs.filter((song) =>
+      song.artist.split("、").some((artist) => artist.includes("AZKi"))
+    );
+    return createStatistics(originalSongs, (song) => song.title);
+  }, [songs]);
+
+  const tagCounts = useMemo(() => {
+    return createStatistics(songs, (song) => song.tags);
+  }, [songs]);
+
+  const milestoneCounts = useMemo(() => {
+    return createStatistics(
+      songs,
+      (song) => song.milestones,
+      (a: StatisticsItem, b: StatisticsItem) =>
+        new Date(b.lastVideo?.broadcast_at || "").getTime() -
+        new Date(a.lastVideo?.broadcast_at || "").getTime()
+    );
+  }, [songs]);
 
   const changeTab = (tabIdx: number) => {
     setActiveTab(tabIdx);
     const url = new URL(window.location.href);
-    const searchParams = url.searchParams;
-    searchParams.set("tab", tabIdx.toString());
+    url.searchParams.set("tab", tabIdx.toString());
     window.history.replaceState({}, "", url.toString());
+  };
+
+  // 統計テーブル
+  const renderTable = <T extends StatisticsItem>(
+    data: T[],
+    caption: string,
+    description: string,
+    columns: string[],
+    renderRow: (item: T) => React.ReactNode
+  ) => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Loading />
+        </div>
+      );
+    }
+
+    return (
+      <div className="">
+        <Table striped hoverable className="w-full">
+          <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
+            {caption} ({data.length})
+            <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+              {description}
+            </p>
+          </caption>
+          <TableHead className="sticky top-0">
+            <TableRow>
+              {columns.map((col, index) => (
+                <TableHeadCell
+                  key={index}
+                  className={
+                    col === "アーティスト名"
+                      ? "lg:text-nowrap hidden lg:block"
+                      : "lg:text-nowrap"
+                  }
+                >
+                  {col}
+                </TableHeadCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>{data.map(renderRow)}</TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  // 最新の動画のサムネイルと情報
+  const renderLastVideoCell = (lastVideo: Song | null) => {
+    if (!lastVideo) {
+      return <span className="text-sm">なし</span>;
+    }
+
+    const videoUrl = `${lastVideo.video_uri}${
+      lastVideo.start ? `&t=${lastVideo.start}s` : ""
+    }`;
+
+    return (
+      <a
+        href={videoUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+      >
+        <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
+          <div className="flex w-full lg:w-12">
+            <YoutubeThumbnail
+              videoId={lastVideo.video_id}
+              alt={lastVideo.video_title}
+              fill={true}
+            />
+          </div>
+          <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
+            <span className="text-sm hidden lg:inline">
+              <span className="">{lastVideo.video_title}</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(lastVideo.broadcast_at).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+      </a>
+    );
   };
 
   return (
@@ -204,364 +233,124 @@ export default function StatisticsPage() {
         }}
       >
         <TabItem title="曲名別" icon={HiMusicNote}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : (
-            <div className="">
-              <Table striped hoverable className="w-full">
-                <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
-                  曲名別({songCounts.length})
-                  <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                    全{songCounts.length}
-                    曲で、曲名別に歌唱した回数をまとめています。
-                    <br />
-                    データ上、表記揺れした場合に別の曲としてカウントされる場合がありますので、ご了承ください。
-                  </p>
-                </caption>
-                <TableHead className="sticky top-0">
-                  <TableRow>
-                    <TableHeadCell className="">曲名</TableHeadCell>
-                    <TableHeadCell className="lg:text-nowrap hidden lg:block">
-                      アーティスト名
-                    </TableHeadCell>
-                    <TableHeadCell className="lg:text-nowrap">
-                      回数
-                    </TableHeadCell>
-                    <TableHeadCell className="">最新の動画</TableHeadCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {songCounts.map((songCount) => {
-                    const lastVideo = songCount.lastVideo;
-                    const today = new Date();
-                    const lastVideoDate = lastVideo
-                      ? new Date(lastVideo.broadcast_at)
-                      : null;
-                    const daysAfterLastVideo = lastVideoDate
-                      ? Math.ceil(
-                          (today.getTime() - lastVideoDate.getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )
-                      : null;
-
-                    const searchQuery = encodeURIComponent(
-                      `title:${songCount.title} artist:${songCount.song.artist}`
-                    );
-
-                    return (
-                      <TableRow key={songCount.title}>
-                        <TableCell>
-                          <Link
-                            href={`/?q=${searchQuery}`}
-                            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                          >
-                            {songCount.title}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                          {songCount.song.artist}
-                        </TableCell>
-                        <TableCell>{songCount.count}</TableCell>
-                        <TableCell>
-                          {lastVideo ? (
-                            <a
-                              href={`${lastVideo.video_uri}${
-                                lastVideo.start ? `&t=${lastVideo.start}s` : ""
-                              }`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                            >
-                              <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                                <div className="flex w-full lg:w-12">
-                                  <YoutubeThumbnail
-                                    videoId={lastVideo.video_id}
-                                    alt={lastVideo.video_title}
-                                    fill={true}
-                                  />
-                                </div>
-                                <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
-                                  <span className="text-sm hidden lg:inline">
-                                    <span className="">
-                                      {lastVideo.video_title}
-                                    </span>
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(
-                                      lastVideo.broadcast_at
-                                    ).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </a>
-                          ) : (
-                            <span className="text-sm">なし</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+          {renderTable(
+            songCounts,
+            "曲名別",
+            "全曲で、曲名別に歌唱した回数をまとめています。\nデータ上、表記揺れした場合に別の曲としてカウントされる場合がありますので、ご了承ください。",
+            ["曲名", "アーティスト名", "回数", "最新の動画"],
+            (songCount) => (
+              <TableRow key={songCount.key}>
+                <TableCell>
+                  <Link
+                    href={`/?q=title:${songCount.key}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    {songCount.key}
+                  </Link>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {songCount.song.artist}
+                </TableCell>
+                <TableCell>{songCount.count}</TableCell>
+                <TableCell>
+                  {renderLastVideoCell(songCount.lastVideo)}
+                </TableCell>
+              </TableRow>
+            )
           )}
         </TabItem>
         <TabItem title="アーティスト名別" icon={HiUserCircle}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : (
-            <Table striped hoverable>
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
-                アーティスト名別({artistCounts.length})
-                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                  全{artistCounts.length}
-                  アーティストで、アーティスト名別に歌唱した回数をまとめています。
-                  <br />
-                  データ上、表記揺れした場合に別のアーティストとしてカウントされる場合がありますので、ご了承ください。
-                </p>
-              </caption>
-              <TableHead>
-                <TableRow>
-                  <TableHeadCell className="">アーティスト名</TableHeadCell>
-                  <TableHeadCell className="lg:text-nowrap">回数</TableHeadCell>
-                  <TableHeadCell className="">最新の動画</TableHeadCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {artistCounts.map((artistCount) => {
-                  const lastVideo = artistCount.lastVideo;
-                  const today = new Date();
-                  const lastVideoDate = lastVideo
-                    ? new Date(lastVideo.broadcast_at)
-                    : null;
-                  const daysAfterLastVideo = lastVideoDate
-                    ? Math.ceil(
-                        (today.getTime() - lastVideoDate.getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )
-                    : null;
-                  return (
-                    <TableRow key={artistCount.artist}>
-                      <TableCell>
-                        <Link
-                          href={`/?q=artist:${artistCount.artist}`}
-                          className="text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500"
-                        >
-                          {artistCount.artist}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{artistCount.count}</TableCell>
-                      <TableCell>
-                        {lastVideo ? (
-                          <a
-                            href={`${lastVideo.video_uri}${
-                              lastVideo.start ? `&t=${lastVideo.start}s` : ""
-                            }`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500"
-                          >
-                            <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <div className="flex w-full lg:w-12">
-                                <YoutubeThumbnail
-                                  videoId={lastVideo.video_id}
-                                  alt={lastVideo.video_title}
-                                  fill={true}
-                                />
-                              </div>
-                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
-                                <span className="text-sm hidden lg:inline">
-                                  <span className="">
-                                    {lastVideo.video_title}
-                                  </span>
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    lastVideo.broadcast_at
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          </a>
-                        ) : (
-                          <span className="text-sm">なし</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+          {renderTable(
+            artistCounts,
+            "アーティスト名別",
+            "全アーティストで、アーティスト名別に歌唱した回数をまとめています。\nデータ上、表記揺れした場合に別のアーティストとしてカウントされる場合がありますので、ご了承ください。",
+            ["アーティスト名", "回数", "最新の動画"],
+            (artistCount) => (
+              <TableRow key={artistCount.key}>
+                <TableCell>
+                  <Link
+                    href={`/?q=artist:${artistCount.key}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    {artistCount.key}
+                  </Link>
+                </TableCell>
+                <TableCell>{artistCount.count}</TableCell>
+                <TableCell>
+                  {renderLastVideoCell(artistCount.lastVideo)}
+                </TableCell>
+              </TableRow>
+            )
           )}
         </TabItem>
         <TabItem title="オリ曲" icon={HiPlay}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : (
-            <Table striped hoverable>
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
-                オリ曲({originalSongCounts.length})
-                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                  全{originalSongCounts.length}
-                  曲で、オリジナル楽曲のみの回数をまとめています。
-                  <br />
-                  データ上、表記揺れした場合に別のオリ曲としてカウントされる場合がありますので、ご了承ください。
-                </p>
-              </caption>
-              <TableHead>
-                <TableRow>
-                  <TableHeadCell className="">曲名</TableHeadCell>
-                  <TableHeadCell className="lg:text-nowrap">回数</TableHeadCell>
-                  <TableHeadCell className="">最新の動画</TableHeadCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {originalSongCounts.map((originalSongCount) => {
-                  const lastVideo = originalSongCount.lastVideo;
-                  const today = new Date();
-                  const lastVideoDate = lastVideo
-                    ? new Date(lastVideo.broadcast_at)
-                    : null;
-                  const daysAfterLastVideo = lastVideoDate
-                    ? Math.ceil(
-                        (today.getTime() - lastVideoDate.getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )
-                    : null;
-                  return (
-                    <TableRow key={originalSongCount.title}>
-                      <TableCell>
-                        <Link
-                          href={`/?q=title:${originalSongCount.title}`}
-                          className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                        >
-                          {originalSongCount.title}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{originalSongCount.count}</TableCell>
-                      <TableCell>
-                        {lastVideo ? (
-                          <a
-                            href={`${lastVideo.video_uri}${
-                              lastVideo.start ? `&t=${lastVideo.start}s` : ""
-                            }`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary-700  dark:text-pink-400 dark:hover:text-pink-500"
-                          >
-                            <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <div className="flex w-full lg:w-12">
-                                <YoutubeThumbnail
-                                  videoId={lastVideo.video_id}
-                                  alt={lastVideo.video_title}
-                                  fill={true}
-                                />
-                              </div>
-                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
-                                <span className="text-sm hidden lg:inline">
-                                  <span className="">
-                                    {lastVideo.video_title}
-                                  </span>
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    lastVideo.broadcast_at
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          </a>
-                        ) : (
-                          <span className="text-sm">なし</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+          {renderTable(
+            originalSongCounts,
+            "オリ曲",
+            "オリジナル楽曲のみの回数をまとめています。\nデータ上、表記揺れした場合に別のオリ曲としてカウントされる場合がありますので、ご了承ください。",
+            ["曲名", "回数", "最新の動画"],
+            (originalSongCount) => (
+              <TableRow key={originalSongCount.key}>
+                <TableCell>
+                  <Link
+                    href={`/?q=title:${originalSongCount.key}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    {originalSongCount.key}
+                  </Link>
+                </TableCell>
+                <TableCell>{originalSongCount.count}</TableCell>
+                <TableCell>
+                  {renderLastVideoCell(originalSongCount.lastVideo)}
+                </TableCell>
+              </TableRow>
+            )
           )}
         </TabItem>
         <TabItem title="タグ" icon={HiTag}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : (
-            <Table striped hoverable>
-              <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
-                タグ({tagCounts.length})
-                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-                  全{tagCounts.length}タグで、回数をまとめています。
-                  <br />
-                  タグについては手動で主観に基づいてつけているので、結構ざっくりです。
-                </p>
-              </caption>
-              <TableHead>
-                <TableRow>
-                  <TableHeadCell className="">タグ</TableHeadCell>
-                  <TableHeadCell className="lg:text-nowrap">回数</TableHeadCell>
-                  <TableHeadCell className="">最新の動画</TableHeadCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tagCounts.map((tag) => {
-                  const lastVideo = tag.lastVideo;
-                  return (
-                    <TableRow key={tag.tag}>
-                      <TableCell>
-                        <Link href={`/?q=tag:${tag.tag}`}>
-                          <Badge className="inline">{tag.tag}</Badge>
-                        </Link>
-                      </TableCell>
-                      <TableCell>{tag.count}</TableCell>
-                      <TableCell>
-                        {lastVideo ? (
-                          <a
-                            href={`${lastVideo.video_uri}${
-                              lastVideo.start ? `&t=${lastVideo.start}s` : ""
-                            }`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                          >
-                            <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-                              <div className="flex w-full lg:w-12">
-                                <YoutubeThumbnail
-                                  videoId={lastVideo.video_id}
-                                  alt={lastVideo.video_title}
-                                  fill={true}
-                                />
-                              </div>
-                              <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
-                                <span className="text-sm hidden lg:inline">
-                                  <span className="">
-                                    {lastVideo.video_title}
-                                  </span>
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    lastVideo.broadcast_at
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          </a>
-                        ) : (
-                          <span className="text-sm">なし</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+          {renderTable(
+            tagCounts,
+            "タグ",
+            "全タグで、回数をまとめています。\nタグについては手動で主観に基づいてつけているので、結構ざっくりです。",
+            ["タグ", "回数", "最新の動画"],
+            (tag) => (
+              <TableRow key={tag.key}>
+                <TableCell>
+                  <Link href={`/?q=tag:${tag.key}`}>
+                    <Badge className="inline">{tag.key}</Badge>
+                  </Link>
+                </TableCell>
+                <TableCell>{tag.count}</TableCell>
+                <TableCell>{renderLastVideoCell(tag.lastVideo)}</TableCell>
+              </TableRow>
+            )
+          )}
+        </TabItem>
+        <TabItem title="マイルストーン" icon={FaStar}>
+          {renderTable(
+            milestoneCounts,
+            "マイルストーン",
+            "これまでのマイルストーンをまとめています。",
+            ["マイルストーン", "達成日", "曲数", "最新の動画"],
+            (milestone) => (
+              <TableRow key={milestone.key}>
+                <TableCell>
+                  <Link href={`/?q=milestone:${milestone.key}`}>
+                    <Badge className="inline">{milestone.key}</Badge>
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  {milestone.lastVideo &&
+                    new Date(
+                      milestone.lastVideo.broadcast_at
+                    ).toLocaleDateString()}
+                </TableCell>
+                <TableCell>{milestone.count}</TableCell>
+                <TableCell>
+                  {renderLastVideoCell(milestone.lastVideo)}
+                </TableCell>
+              </TableRow>
+            )
           )}
         </TabItem>
       </Tabs>
