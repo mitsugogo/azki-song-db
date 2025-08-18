@@ -17,6 +17,7 @@ import {
   ModalHeader,
   Spinner,
   TextInput,
+  Tooltip,
 } from "flowbite-react";
 import {
   HiChevronDown,
@@ -222,6 +223,14 @@ export default function MainPlayer() {
           return tags.some((tag) =>
             tag.includes(lowerWord.substring(5).toLowerCase())
           );
+        }
+        if (
+          lowerWord.startsWith("video_id:") &&
+          song.video_id
+            .toLowerCase()
+            .includes(lowerWord.substring(9).toLowerCase())
+        ) {
+          return true;
         }
         if (
           lowerWord.startsWith("video_title:") &&
@@ -447,6 +456,20 @@ export default function MainPlayer() {
         const currentVideoId = event.target.getVideoData()?.video_id;
         if (currentVideoId === null) return;
         const curSong = searchCurrentSong(currentVideoId, currentTime);
+
+        // curSongがsongsの中になかったら次の曲へ
+        const isCurSongInSongs =
+          songs
+            .slice()
+            .findIndex(
+              (s) =>
+                s.video_id === curSong?.video_id && s.title === curSong?.title
+            ) !== -1;
+        if (!isCurSongInSongs) {
+          changeCurrentSong(nextSong, false);
+          return;
+        }
+
         if (
           curSong &&
           (curSong.video_id !== currentSongInfoRef.current?.video_id ||
@@ -458,6 +481,9 @@ export default function MainPlayer() {
             changeCurrentSong(curSong, true);
             changeVideoIdCount = 0;
           }
+        } else if (!curSong && nextSong) {
+          // 同一video_idの曲がない場合、次の曲へ
+          changeCurrentSong(nextSong, false);
         }
         // song.end を超えたら次の曲へ
         if (curSong && curSong.end && curSong.end < currentTime) {
@@ -526,7 +552,19 @@ export default function MainPlayer() {
                   )}
                 </div>
               </div>
-              <div className="h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none">
+
+              <div
+                className="relative h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400"
+                onClick={() => {
+                  // クリックで現在の動画に残る
+                  const renewSongs = allSongs.filter(
+                    (song) => song.video_id === currentSongInfo?.video_id
+                  );
+                  setSearchTerm("video_id:" + currentSongInfo?.video_id);
+                  setSongs(renewSongs);
+                  changeCurrentSong(currentSongInfo, true);
+                }}
+              >
                 <div className="flex items-center h-14">
                   {currentSongInfo && (
                     <>
