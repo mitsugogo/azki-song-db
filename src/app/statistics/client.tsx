@@ -21,6 +21,13 @@ import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
 
+type StatisticsItem = {
+  key: string;
+  count: number;
+  song: Song;
+  lastVideo: Song;
+};
+
 // 統計データを作成するヘルパー関数
 // この関数は、キーとソート関数に基づいて楽曲データを集計し、ソートします。
 const createStatistics = <T,>(
@@ -41,19 +48,25 @@ const createStatistics = <T,>(
 
       keys.forEach((key) => {
         map.set(key, {
-          ...(map.get(key) || {}),
           key,
           count: (map.get(key)?.count || 0) + 1,
-          song: song,
+          song,
           lastVideo: song,
-        } as T);
+        } as T & {
+          key: string;
+          count: number;
+          song: Song;
+          lastVideo: Song;
+        });
       });
       return map;
-    }, new Map<string, any>());
+    }, new Map<string, T & { key: string; count: number; song: Song; lastVideo: Song }>());
 
   const sortedData = Array.from(countsMap.values()).sort(
-    sortFn || ((a: any, b: any) => b.count - a.count)
-  );
+    sortFn ||
+      ((a, b) =>
+        (b as { count: number }).count - (a as { count: number }).count)
+  ) as Array<T & { key: string; count: number; song: Song; lastVideo: Song }>;
 
   return sortedData;
 };
@@ -109,7 +122,7 @@ export default function StatisticsPage() {
     return createStatistics(
       songs,
       (song) => song.milestones,
-      (a: any, b: any) =>
+      (a: StatisticsItem, b: StatisticsItem) =>
         new Date(b.lastVideo?.broadcast_at || "").getTime() -
         new Date(a.lastVideo?.broadcast_at || "").getTime()
     );
@@ -123,12 +136,12 @@ export default function StatisticsPage() {
   };
 
   // 統計テーブルをレンダリングするための再利用可能なコンポーネント
-  const renderTable = (
-    data: any[],
+  const renderTable = <T extends StatisticsItem>(
+    data: T[],
     caption: string,
     description: string,
     columns: string[],
-    renderRow: (item: any) => React.ReactNode
+    renderRow: (item: T) => React.ReactNode
   ) => {
     if (loading) {
       return (
