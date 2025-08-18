@@ -30,7 +30,9 @@ type StatisticsItem = {
 
 // 統計データを作成するヘルパー関数
 // この関数は、キーとソート関数に基づいて楽曲データを集計し、ソートします。
-const createStatistics = <T,>(
+// 統計データを作成するヘルパー関数
+// T は、count プロパティを数値として持つ型を拡張します。
+const createStatistics = <T extends { count: number }>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
   sortFn?: (a: T, b: T) => number
