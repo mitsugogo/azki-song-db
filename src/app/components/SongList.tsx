@@ -37,12 +37,34 @@ const SongsList = ({
 
   useEffect(() => {
     calculateTotalPage();
-    setSlicedSongs(songs.slice(currentPage, displayPage));
+    setSlicedSongs(
+      songs.slice((currentPage - 1) * displayPage, currentPage * displayPage)
+    );
+    onPageChange(1);
+  }, [songs]);
+
+  useEffect(() => {
+    calculateTotalPage();
+    // 先頭の要素にスクロール
+    const listElement = document.getElementById("song-list");
+    if (listElement) {
+      const currentSongElement = document.querySelector(
+        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
+      );
+      if (currentSongElement) {
+        currentSongElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else {
+        listElement.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
     // もしページ番号が範囲外の場合は1ページ目にする
     if (currentPage > totalPage) {
       onPageChange(1);
     }
-  }, [songs]);
+  }, [slicedSongs]);
 
   useEffect(() => {
     // currentSongから何ページ目か求める
@@ -64,7 +86,10 @@ const SongsList = ({
 
   return (
     <>
-      <ul className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300">
+      <ul
+        id="song-list"
+        className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300"
+      >
         {slicedSongs.map((song, index) => (
           <SongListItem
             key={`${song.video_id}-${song.start}`} // 安定したユニークなキーを使用
