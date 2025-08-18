@@ -17,20 +17,10 @@ const geistMono = Geist_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-const baseUrl =
-  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
-
-// URLにq={value}があったら、OGPのsubtitleを変える
-const url = new URL(baseUrl);
-const searchTerm = url.searchParams.get("q") || "";
-const subtitle = searchTerm
-  ? `「${searchTerm}」の検索結果`
-  : "AZKiさんの歌枠の素晴らしさを伝えるサイト";
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description:
     "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
-
   openGraph: {
     title: "AZKi Song Database",
     description:
@@ -39,9 +29,9 @@ export const metadata: Metadata = {
     siteName: "AZKi Song Database",
     locale: "ja_JP",
     type: "website",
-    images: [
-      `${baseUrl}/api/og?title=AZKi Song Database&subtitle=${subtitle}&titlecolor=b81e8a&w=1200&h=630`,
-    ],
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 
