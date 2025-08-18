@@ -437,9 +437,6 @@ export default function MainPlayer() {
       intervalRef.current = null;
     }
     if (event.data === YouTube.PlayerState.PLAYING) {
-      // iOSで勝手にスクロールするのを戻す
-      window.scrollTo(0, 0);
-
       changeCurrentSong(currentSongInfoRef.current, true);
       // 曲が再生されたときの処理
       if (intervalRef.current) return;
