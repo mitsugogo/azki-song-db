@@ -104,8 +104,8 @@ const SongsList = ({
         ))}
       </ul>
       {totalPage > 1 && (
-        <div className="flex justify-center mb-2">
-          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px mr-1">
+        <div className="flex justify-center mt-2 mb-2 lg:mb-0">
+          <div className="mt-2 inline-flex items-center -space-x-px mr-1">
             <Button
               className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
               onClick={() => onPageChange(1)}
@@ -117,6 +117,7 @@ const SongsList = ({
           </div>
           <Pagination
             layout="pagination"
+            className="md:hidden sm:block lg:block"
             currentPage={currentPage}
             totalPages={totalPage}
             onPageChange={onPageChange}
@@ -124,7 +125,17 @@ const SongsList = ({
             nextLabel=""
             showIcons
           />
-          <div className="xs:mt-0 mt-2 inline-flex items-center -space-x-px ml-1">
+          <Pagination
+            layout="navigation"
+            className="hidden md:block lg:hidden"
+            currentPage={currentPage}
+            totalPages={totalPage}
+            onPageChange={onPageChange}
+            previousLabel=""
+            nextLabel=""
+            showIcons
+          />
+          <div className="mt-2 inline-flex items-center -space-x-px ml-1">
             <Button
               className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
               onClick={() => onPageChange(totalPage)}
