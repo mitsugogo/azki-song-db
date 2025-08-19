@@ -41,6 +41,7 @@ import {
   FaX,
   FaYoutube,
 } from "react-icons/fa6";
+import { RiPlayListFill } from "react-icons/ri";
 import useDebounce from "../hook/useDebounce";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import SongsList from "./SongList";
@@ -414,6 +415,17 @@ export default function MainPlayer() {
     history.replaceState(null, "", url);
   };
 
+  const setSongsCurrentVideoId = () => {
+    const renewSongs = allSongs.filter(
+      (song) => song.video_id === currentSongInfo?.video_id
+    );
+    setSearchTerm("video_id:" + currentSongInfo?.video_id);
+    changeCurrentSong(currentSongInfo, true);
+    if (currentSongInfoRef.current) {
+      setPreviousAndNextSongs(currentSongInfoRef.current, renewSongs);
+    }
+  };
+
   const handleAdvancedSearch = () => {
     // 高度検索の指定状況から検索キーワードを再組み立て
     const newSearchTerm = [
@@ -533,7 +545,7 @@ export default function MainPlayer() {
                 <div className="flex items-center h-14">
                   {previousSong && (
                     <>
-                      <div className="flex min-w-24 max-w-24 align-middle">
+                      <div className="flex w-24 min-w-24 max-w-24 align-middle">
                         <YoutubeThumbnail
                           videoId={previousSong.video_id}
                           alt={previousSong.video_title}
@@ -556,24 +568,13 @@ export default function MainPlayer() {
               <div
                 className="relative h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400"
                 onClick={() => {
-                  // クリックで現在の動画に残る
-                  const renewSongs = allSongs.filter(
-                    (song) => song.video_id === currentSongInfo?.video_id
-                  );
-                  setSearchTerm("video_id:" + currentSongInfo?.video_id);
-                  changeCurrentSong(currentSongInfo, true);
-                  if (currentSongInfoRef.current) {
-                    setPreviousAndNextSongs(
-                      currentSongInfoRef.current,
-                      renewSongs
-                    );
-                  }
+                  setSongsCurrentVideoId();
                 }}
               >
                 <div className="flex items-center h-14">
                   {currentSongInfo && (
                     <>
-                      <div className="flex min-w-24 max-w-24 align-middle">
+                      <div className="flex w-24 min-w-24 max-w-24 align-middle">
                         <YoutubeThumbnail
                           videoId={currentSongInfo.video_id}
                           alt={currentSongInfo.video_title}
@@ -599,7 +600,7 @@ export default function MainPlayer() {
                 <div className="flex items-center h-14">
                   {nextSong && (
                     <>
-                      <div className="flex min-w-24 max-w-24 align-middle">
+                      <div className="flex w-24 min-w-24 max-w-24 align-middle">
                         <YoutubeThumbnail
                           videoId={nextSong.video_id}
                           alt={nextSong.video_title}
@@ -625,14 +626,14 @@ export default function MainPlayer() {
                   <Button
                     onClick={() => changeCurrentSong(previousSong)}
                     disabled={!previousSong}
-                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed  cursor-pointer"
+                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <GiPreviousButton />
                   </Button>
                   <Button
                     onClick={() => changeCurrentSong(nextSong)}
                     disabled={!nextSong}
-                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed  cursor-pointer"
+                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <GiNextButton />
                   </Button>
@@ -640,12 +641,23 @@ export default function MainPlayer() {
               </div>
               <div>
                 <Button
-                  onClick={() => playRandomSong(songs)}
-                  className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
+                  onClick={() => setSongsCurrentVideoId()}
+                  className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
                 >
-                  <FaShuffle />
-                  &nbsp;ランダム
+                  <RiPlayListFill />
+                  &nbsp;この歌枠を連続再生
                 </Button>
+              </div>
+              <div>
+                <ButtonGroup className="shadow-none">
+                  <Button
+                    onClick={() => playRandomSong(songs)}
+                    className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
+                  >
+                    <FaShuffle />
+                    &nbsp;ランダム
+                  </Button>
+                </ButtonGroup>
               </div>
               <div className="flex justify-end">
                 <Button
@@ -682,7 +694,7 @@ export default function MainPlayer() {
             >
               ランダムで他の曲にする
             </Button>
-            <div className="mb-4">
+            <div className="mb-4 md:mt-2 lg:mt-0">
               <div className="relative">
                 <TextInput
                   value={searchTerm}
