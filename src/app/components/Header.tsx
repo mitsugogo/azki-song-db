@@ -108,7 +108,7 @@ export function Header() {
                 AZKi Channel
               </a>
 
-              <DarkThemeToggle className="outline-none focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" />
+              <DarkThemeToggle className="outline-none cursor-pointer focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" />
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
+import { FaGithub } from "react-icons/fa6";
 
 const Acknowledgment = () => {
   return (
@@ -77,12 +78,22 @@ const Acknowledgment = () => {
       <div className="text-sm text-muted">
         <p>
           <Link
+            href="https://github.com/mitsugogo/azki-song-db"
+            className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub className="inline-block mr-1" />
+            GitHub
+          </Link>
+          &nbsp;
+          <Link
             href="https://x.com/mitsugogo"
             className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
             target="_blank"
             rel="noopener noreferrer"
           >
-            @mitsugogo
+            (@mitsugogo)
           </Link>
         </p>
       </div>
