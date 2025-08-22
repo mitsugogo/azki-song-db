@@ -163,11 +163,10 @@ export default function StatisticsPage() {
               {columns.map((col, index) => (
                 <TableHeadCell
                   key={index}
-                  className={`lg:text-nowrap ${
+                  className={`text-nowrap ${
                     col === "アーティスト名" ? "hidden lg:table-cell" : ""
                   }`}
                 >
-                  {" "}
                   {col}
                 </TableHeadCell>
               ))}
@@ -197,7 +196,7 @@ export default function StatisticsPage() {
         className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
       >
         <div className="lg:flex lg:items-center lg:gap-2 flex flex-col lg:flex-row">
-          <div className="flex w-full lg:w-12">
+          <div className="flex w-full lg:w-24 max-w-[120px]">
             <YoutubeThumbnail
               videoId={lastVideo.video_id}
               alt={lastVideo.video_title}
@@ -242,9 +241,9 @@ export default function StatisticsPage() {
             songCounts,
             "曲名別",
             "全曲で、曲名別に歌唱した回数をまとめています。\nデータ上、表記揺れした場合に別の曲としてカウントされる場合がありますので、ご了承ください。",
-            ["曲名", "アーティスト名", "回数", "最新の動画"],
+            ["曲名", "アーティスト名", "回数", "最新"],
             (songCount) => (
-              <TableRow key={songCount.key}>
+              <TableRow key={songCount.key} className="max-h-6">
                 <TableCell>
                   <Link
                     href={`/?q=title:${songCount.key}`}
@@ -269,9 +268,9 @@ export default function StatisticsPage() {
             artistCounts,
             "アーティスト名別",
             "全アーティストで、アーティスト名別に歌唱した回数をまとめています。\nデータ上、表記揺れした場合に別のアーティストとしてカウントされる場合がありますので、ご了承ください。",
-            ["アーティスト名", "回数", "最新の動画"],
+            ["アーティスト名", "回数", "最新"],
             (artistCount) => (
-              <TableRow key={artistCount.key}>
+              <TableRow key={artistCount.key} className="max-h-6">
                 <TableCell>
                   <Link
                     href={`/?q=artist:${artistCount.key}`}
@@ -293,9 +292,9 @@ export default function StatisticsPage() {
             originalSongCounts,
             "オリ曲",
             "オリジナル楽曲のみの回数をまとめています。\nデータ上、表記揺れした場合に別のオリ曲としてカウントされる場合がありますので、ご了承ください。",
-            ["曲名", "回数", "最新の動画"],
+            ["曲名", "回数", "最新"],
             (originalSongCount) => (
-              <TableRow key={originalSongCount.key}>
+              <TableRow key={originalSongCount.key} className="max-h-6">
                 <TableCell>
                   <Link
                     href={`/?q=title:${originalSongCount.key}`}
@@ -317,9 +316,9 @@ export default function StatisticsPage() {
             tagCounts,
             "タグ",
             "全タグで、回数をまとめています。\nタグについては手動で主観に基づいてつけているので、結構ざっくりです。",
-            ["タグ", "回数", "最新の動画"],
+            ["タグ", "回数", "最新"],
             (tag) => (
-              <TableRow key={tag.key}>
+              <TableRow key={tag.key} className="max-h-6">
                 <TableCell>
                   <Link href={`/?q=tag:${tag.key}`}>
                     <Badge className="inline lg:whitespace-nowrap">
@@ -338,9 +337,9 @@ export default function StatisticsPage() {
             milestoneCounts,
             "マイルストーン",
             "これまでの活動において、節目となった配信をまとめています。",
-            ["マイルストーン", "達成日", "曲数", "最新の動画"],
+            ["マイルストーン", "達成日", "最新"],
             (milestone) => (
-              <TableRow key={milestone.key}>
+              <TableRow key={milestone.key} className="max-h-6">
                 <TableCell>
                   <Link href={`/?q=milestone:${milestone.key}`}>
                     <Badge className="inline lg:whitespace-nowrap">
@@ -354,7 +353,6 @@ export default function StatisticsPage() {
                       milestone.lastVideo.broadcast_at
                     ).toLocaleDateString()}
                 </TableCell>
-                <TableCell>{milestone.count}</TableCell>
                 <TableCell>
                   {renderLastVideoCell(milestone.lastVideo)}
                 </TableCell>
