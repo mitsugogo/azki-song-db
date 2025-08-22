@@ -39,44 +39,54 @@ const NowPlayingSongInfoDetail = ({
       {currentSongInfo && (
         <div className="flex-grow">
           <dl className="grid grid-cols-12 gap-x-4 gap-y-2">
-            <div className="col-span-1 lg:col-span-2 flex items-baseline">
-              <dt className="text-muted-foreground flex items-baseline">
-                <FaUser />
-                <span className="hidden  lg:inline ml-1">アーティスト:</span>
-              </dt>
-            </div>
-            <div className="col-span-11 lg:col-span-10">
-              <dd className="flex flex-wrap gap-1">
-                {currentSongInfo.artist.split("、").map((artist, index) => {
-                  const existsSameArtist = searchTerm.includes(
-                    `artist:${artist}`
-                  );
-                  return (
-                    <Badge
-                      key={index}
-                      onClick={() => {
-                        if (existsSameArtist) {
-                          setSearchTerm(
-                            searchTerm.replace(`artist:${artist}`, "").trim()
-                          );
-                        } else {
-                          setSearchTerm(
-                            `${
-                              searchTerm ? `${searchTerm} ` : ""
-                            }artist:${artist}`
-                          );
-                        }
-                      }}
-                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
-                        existsSameArtist ? "bg-cyan-300 dark:bg-cyan-600" : ""
-                      }`}
-                    >
-                      {artist}
-                    </Badge>
-                  );
-                })}
-              </dd>
-            </div>
+            {currentSongInfo.artist && (
+              <>
+                <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                  <dt className="text-muted-foreground flex items-baseline">
+                    <FaUser />
+                    <span className="hidden  lg:inline ml-1">
+                      アーティスト:
+                    </span>
+                  </dt>
+                </div>
+                <div className="col-span-11 lg:col-span-10">
+                  <dd className="flex flex-wrap gap-1">
+                    {currentSongInfo.artist.split("、").map((artist, index) => {
+                      const existsSameArtist = searchTerm.includes(
+                        `artist:${artist}`
+                      );
+                      return (
+                        <Badge
+                          key={index}
+                          onClick={() => {
+                            if (existsSameArtist) {
+                              setSearchTerm(
+                                searchTerm
+                                  .replace(`artist:${artist}`, "")
+                                  .trim()
+                              );
+                            } else {
+                              setSearchTerm(
+                                `${
+                                  searchTerm ? `${searchTerm} ` : ""
+                                }artist:${artist}`
+                              );
+                            }
+                          }}
+                          className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                            existsSameArtist
+                              ? "bg-cyan-300 dark:bg-cyan-600"
+                              : ""
+                          }`}
+                        >
+                          {artist}
+                        </Badge>
+                      );
+                    })}
+                  </dd>
+                </div>
+              </>
+            )}
 
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
