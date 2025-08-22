@@ -3,7 +3,6 @@
 import Image from "next/image";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
 import { useState } from "react";
-import { Spinner } from "flowbite-react";
 
 interface YoutubeThumbnailProps {
   videoId: string;
@@ -27,6 +26,18 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   const { imageUrl, handleError } = useYoutubeThumbnailFallback(videoId);
   const [loading, setLoading] = useState(true);
 
+  const handleOnLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // 画像の幅を確認して、0または120(YouTubeがサムネがないときに返す幅)になった場合は、フォールバックを試す
+    if (
+      e.currentTarget.naturalWidth === 0 ||
+      e.currentTarget.naturalWidth === 120
+    ) {
+      handleError();
+      return;
+    }
+    setLoading(false);
+  };
+
   if (fill) {
     return (
       <div
@@ -39,10 +50,8 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
           alt={alt}
           fill={true}
           className={`outfit-image ${imageClassName || ""}`}
-          placeholder="blur"
-          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onLoad={() => setLoading(false)}
+          onLoad={handleOnLoad}
           onError={handleError}
           style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
         />
@@ -60,9 +69,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
           loading ? "hidden" : ""
         }`}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        placeholder="blur"
-        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
-        onLoad={() => setLoading(false)}
+        onLoad={handleOnLoad}
         onError={handleError}
         style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
       />
