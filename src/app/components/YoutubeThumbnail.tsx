@@ -41,7 +41,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   if (fill) {
     return (
       <div
-        className={`relative flex w-full items-center justify-center aspect-video ${
+        className={`relative flex w-full h-full items-center justify-center aspect-video ${
           outcontainerClassName || ""
         }`}
       >
