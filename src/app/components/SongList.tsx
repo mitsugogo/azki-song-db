@@ -97,23 +97,6 @@ const SongsList = ({
         element="div"
         className=""
         defer
-        // events={{
-        //   updated: () => {
-        //     const listElement = document.getElementById("song-list-scrollbar");
-        //     if (listElement) {
-        //       const currentSongElement = document.querySelector(
-        //         `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
-        //       );
-        //       if (currentSongElement) {
-        //         currentSongElement.scrollIntoView({
-        //           behavior: "smooth",
-        //           block: "center",
-        //           inline: "end",
-        //         });
-        //       }
-        //     }
-        //   },
-        // }}
       >
         <ul
           id="song-list"

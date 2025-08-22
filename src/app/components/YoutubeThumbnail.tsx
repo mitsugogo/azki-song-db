@@ -30,7 +30,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   if (fill) {
     return (
       <div
-        className={`flex w-full items-center justify-center aspect-video ${
+        className={`relative flex w-full items-center justify-center aspect-video ${
           outcontainerClassName || ""
         }`}
       >
@@ -42,7 +42,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
           placeholder="blur"
           blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onLoadingComplete={() => setLoading(false)}
+          onLoad={() => setLoading(false)}
           onError={handleError}
           style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
         />
@@ -51,7 +51,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   }
 
   return (
-    <div className={`aspect-video ${outcontainerClassName || ""}`}>
+    <div className={`relative aspect-video ${outcontainerClassName || ""}`}>
       <Image
         src={imageUrl}
         alt={alt}
@@ -62,7 +62,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
-        onLoadingComplete={() => setLoading(false)}
+        onLoad={() => setLoading(false)}
         onError={handleError}
         style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
       />
