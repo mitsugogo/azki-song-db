@@ -12,7 +12,7 @@ export default function StatsLayout({
       <ThemeProvider>
         <div className="flex flex-col h-dvh">
           <Header />
-          <div className="flex flex-col flex-grow md:flex-row overflow-hidden">
+          <div className="flex flex-col flex-grow md:flex-row overflow-y-hidden w-full">
             {children}
           </div>
           <footer className="flex-shrink-0 bg-gray-800 text-white py-2 px-4 text-center hidden lg:block">
