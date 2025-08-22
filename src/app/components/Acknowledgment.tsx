@@ -1,14 +1,5 @@
 import Link from "next/link";
-import {
-  List,
-  ListItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-} from "flowbite-react";
+import { List, ListItem } from "flowbite-react";
 import { FaGithub } from "react-icons/fa6";
 
 const Acknowledgment = () => {
@@ -31,6 +22,9 @@ const Acknowledgment = () => {
           動画やアーカイブはホロライブプロダクション様及び、AZKi様、各チャンネルの管理者が制作・配信したものです。
         </p>
         <p>動画の権利は所有者に帰属します。</p>
+        <p>
+          本サイトでは、第三者による動画（いわゆる切り抜き動画）ではなく、本家の動画を掲載しています。
+        </p>
       </div>
 
       <h3 className="mt-4 font-semibold">集計について</h3>
@@ -76,114 +70,29 @@ const Acknowledgment = () => {
       <h3 className="mt-4 font-semibold">使用ライブラリ</h3>
       <div className="text-sm text-muted mt-1">
         <p>以下のライブラリを使用しています。</p>
-        <Table className="mt-2">
-          <TableHead>
-            <TableHeadCell>ライブラリ名</TableHeadCell>
-            <TableHeadCell>バージョン</TableHeadCell>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell>@emotion/react</TableCell>
-              <TableCell>^11.14.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@emotion/styled</TableCell>
-              <TableCell>^11.14.1</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@fortawesome/free-brands-svg-icons</TableCell>
-              <TableCell>^7.0.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@fortawesome/free-solid-svg-icons</TableCell>
-              <TableCell>^7.0.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@fortawesome/react-fontawesome</TableCell>
-              <TableCell>^0.2.3</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@headlessui/react</TableCell>
-              <TableCell>^2.2.7</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@heroicons/react</TableCell>
-              <TableCell>^2.2.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/icons-material</TableCell>
-              <TableCell>^7.3.1</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/material</TableCell>
-              <TableCell>^7.3.1</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@mui/styled-engine-sc</TableCell>
-              <TableCell>^7.3.1</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@vercel/analytics</TableCell>
-              <TableCell>^1.5.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@vercel/og</TableCell>
-              <TableCell>^0.8.5</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@vercel/speed-insights</TableCell>
-              <TableCell>^1.2.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>autoprefixer</TableCell>
-              <TableCell>^10.4.21</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>flowbite-react</TableCell>
-              <TableCell>^0.12.6</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>googleapis</TableCell>
-              <TableCell>^156.0.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>next</TableCell>
-              <TableCell>15.5.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>overlayscrollbars-react</TableCell>
-              <TableCell>^0.5.6</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>postcss</TableCell>
-              <TableCell>^8.5.6</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>react</TableCell>
-              <TableCell>19.1.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>react-dom</TableCell>
-              <TableCell>19.1.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>react-fast-marquee</TableCell>
-              <TableCell>^1.6.5</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>react-icons</TableCell>
-              <TableCell>^5.5.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>react-youtube</TableCell>
-              <TableCell>^10.1.0</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>styled-components</TableCell>
-              <TableCell>^6.1.19</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <List className="mt-2">
+          <ListItem>flowbite-react</ListItem>
+          <ListItem>overlayscrollbars-react</ListItem>
+          <ListItem>react-fast-marquee</ListItem>
+          <ListItem>react-icons</ListItem>
+          <ListItem>react-youtube</ListItem>
+          <ListItem>styled-components</ListItem>
+          <ListItem>postcss</ListItem>
+          <ListItem>@emotion/react</ListItem>
+          <ListItem>@emotion/styled</ListItem>
+          <ListItem>@fortawesome/free-brands-svg-icons</ListItem>
+          <ListItem>@fortawesome/free-solid-svg-icons</ListItem>
+          <ListItem>@fortawesome/react-fontawesome</ListItem>
+          <ListItem>@headlessui/react</ListItem>
+          <ListItem>@heroicons/react</ListItem>
+          <ListItem>@mui/icons-material</ListItem>
+          <ListItem>@mui/material</ListItem>
+          <ListItem>@mui/styled-engine-sc</ListItem>
+          <ListItem>@vercel/analytics</ListItem>
+          <ListItem>@vercel/og</ListItem>
+          <ListItem>@vercel/speed-insights</ListItem>
+          <ListItem>googleapis</ListItem>
+        </List>
       </div>
 
       <h3 className="mt-4 font-semibold">管理</h3>
