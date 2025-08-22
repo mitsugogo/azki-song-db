@@ -220,7 +220,7 @@ export default function StatisticsPage() {
   return (
     <OverlayScrollbarsComponent
       element="div"
-      className="lg:p-6 flex flex-col h-full"
+      className="lg:p-6 flex flex-col w-full h-full"
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
