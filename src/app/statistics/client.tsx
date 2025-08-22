@@ -161,7 +161,13 @@ export default function StatisticsPage() {
           <TableHead className="sticky top-0 z-50 bg-gray-50 dark:bg-gray-700">
             <TableRow>
               {columns.map((col, index) => (
-                <TableHeadCell key={index} className="lg:text-nowrap">
+                <TableHeadCell
+                  key={index}
+                  className={`lg:text-nowrap ${
+                    col === "アーティスト名" ? "hidden lg:table-cell" : ""
+                  }`}
+                >
+                  {" "}
                   {col}
                 </TableHeadCell>
               ))}
