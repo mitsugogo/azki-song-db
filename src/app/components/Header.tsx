@@ -7,26 +7,18 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-  Navbar,
-  NavbarCollapse,
-  NavbarLink,
-  NavbarToggle,
 } from "flowbite-react";
 import Link from "next/link";
 import { useState } from "react";
-import { FaInfoCircle } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
 import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import ThemeToggle from "./ThemeToggle";
 
 export function Header() {
   // 謝辞
@@ -52,7 +44,7 @@ export function Header() {
         as="nav"
         className="relative bg-primary dark:bg-primary-900 text-white "
       >
-        <div className="w-full px-2 sm:px-6 lg:px-8">
+        <div className="w-full px-2 sm:px-6 lg:px-4">
           <div className="relative flex h-16 items-center justify-between">
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               {/* Mobile menu button*/}
@@ -108,7 +100,8 @@ export function Header() {
                 AZKi Channel
               </a>
 
-              <DarkThemeToggle className="outline-none cursor-pointer focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" />
+              {/* <DarkThemeToggle className="outline-none cursor-pointer focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" /> */}
+              <ThemeToggle />
             </div>
           </div>
         </div>
