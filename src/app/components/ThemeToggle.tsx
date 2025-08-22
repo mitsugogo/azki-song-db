@@ -1,9 +1,13 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { FaCircleHalfStroke, FaMoon, FaSun } from "react-icons/fa6";
 
 const ThemeToggle = () => {
   const [theme, setTheme] = useState(
-    localStorage.getItem("color-theme") || "system"
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("color-theme") || "system"
+      : "system"
   );
 
   useEffect(() => {
@@ -33,15 +37,21 @@ const ThemeToggle = () => {
     switch (theme) {
       case "light":
         setTheme("dark");
-        localStorage.setItem("color-theme", "dark");
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("color-theme", "dark");
+        }
         break;
       case "dark":
         setTheme("system");
-        localStorage.setItem("color-theme", "system");
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("color-theme", "system");
+        }
         break;
       case "system":
         setTheme("light");
-        localStorage.setItem("color-theme", "light");
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("color-theme", "light");
+        }
         break;
     }
   };
