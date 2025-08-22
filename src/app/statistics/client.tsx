@@ -150,7 +150,7 @@ export default function StatisticsPage() {
     }
 
     return (
-      <div className="">
+      <div className="max-h-dvh">
         <Table striped hoverable className="w-full">
           <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
             {caption} ({data.length})
@@ -158,17 +158,10 @@ export default function StatisticsPage() {
               {description}
             </p>
           </caption>
-          <TableHead className="sticky top-0">
+          <TableHead className="sticky top-0 z-50 bg-gray-50 dark:bg-gray-700">
             <TableRow>
               {columns.map((col, index) => (
-                <TableHeadCell
-                  key={index}
-                  className={
-                    col === "アーティスト名"
-                      ? "lg:text-nowrap hidden lg:block"
-                      : "lg:text-nowrap"
-                  }
-                >
+                <TableHeadCell key={index} className="lg:text-nowrap">
                   {col}
                 </TableHeadCell>
               ))}
@@ -221,7 +214,7 @@ export default function StatisticsPage() {
   return (
     <OverlayScrollbarsComponent
       element="div"
-      className="lg:p-6"
+      className="lg:p-6 flex flex-col h-full"
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
@@ -323,7 +316,7 @@ export default function StatisticsPage() {
               <TableRow key={tag.key}>
                 <TableCell>
                   <Link href={`/?q=tag:${tag.key}`}>
-                    <Badge className="inline whitespace-nowrap">
+                    <Badge className="inline lg:whitespace-nowrap">
                       {tag.key}
                     </Badge>
                   </Link>
@@ -344,7 +337,7 @@ export default function StatisticsPage() {
               <TableRow key={milestone.key}>
                 <TableCell>
                   <Link href={`/?q=milestone:${milestone.key}`}>
-                    <Badge className="inline whitespace-nowrap">
+                    <Badge className="inline lg:whitespace-nowrap">
                       {milestone.key}
                     </Badge>
                   </Link>
