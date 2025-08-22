@@ -162,20 +162,23 @@ export default function PlayerSection({
             </ButtonGroup>
             <Button
               onClick={setSongsToCurrentVideo}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate"
             >
               <RiPlayListFill />
-              &nbsp;<span className="text-xs">連続再生</span>
+              &nbsp;
+              <span className="text-xs">
+                この歌枠を
+                <br />
+                連続再生
+              </span>
             </Button>
-            <ButtonGroup className="shadow-none">
-              <Button
-                onClick={() => playRandomSong(songs)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
-              >
-                <FaShuffle />
-                &nbsp;<span className="text-xs">ランダム</span>
-              </Button>
-            </ButtonGroup>
+            <Button
+              onClick={() => playRandomSong(songs)}
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer truncate"
+            >
+              <FaShuffle />
+              &nbsp;<span className="text-xs">ランダム</span>
+            </Button>
             <div className="flex justify-end">
               <Button
                 onClick={() => setOpenShareModal(true)}
