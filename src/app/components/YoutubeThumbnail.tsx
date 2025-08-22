@@ -62,10 +62,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
         className={`outfit-image ${imageClassName || ""}`}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         onLoadingComplete={() => setLoading(false)}
-        onError={(e) => {
-          setLoading(false);
-          handleError(e);
-        }}
+        onError={handleError}
         style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
       />
     </div>
