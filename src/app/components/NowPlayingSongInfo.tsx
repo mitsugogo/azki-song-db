@@ -79,10 +79,15 @@ const NowPlayingSongInfo = ({
                     style={{ top: "-1px" }}
                   />
                   {currentSongInfo.title}
-                  <span className="font-normal text-lg">
-                    {" "}
-                    - {currentSongInfo.artist}
-                  </span>
+
+                  {currentSongInfo.artist && (
+                    <>
+                      <span className="font-normal text-lg">
+                        {" "}
+                        - {currentSongInfo.artist}
+                      </span>
+                    </>
+                  )}
                 </h2>
               </div>
               <div className="hidden lg:block text-right">
