@@ -20,6 +20,7 @@ import { FaStar } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 type StatisticsItem = {
   key: string;
@@ -218,7 +219,12 @@ export default function StatisticsPage() {
   };
 
   return (
-    <div className="lg:p-6">
+    <OverlayScrollbarsComponent
+      element="div"
+      className="lg:p-6"
+      options={{ scrollbars: { autoHide: "leave" } }}
+      defer
+    >
       <div>
         <h1 className="font-extrabold text-2xl mb-3 sm:p-3 dark:text-gray-200">
           統計情報
@@ -354,6 +360,6 @@ export default function StatisticsPage() {
           )}
         </TabItem>
       </Tabs>
-    </div>
+    </OverlayScrollbarsComponent>
   );
 }

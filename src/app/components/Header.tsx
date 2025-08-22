@@ -9,7 +9,7 @@ import {
   ModalHeader,
 } from "flowbite-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
 import {
@@ -24,21 +24,28 @@ export function Header() {
   // 謝辞
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
 
-  const navigation = [
-    { name: "統計情報", href: "/statistics", current: false },
+  const [navigation, setNavigation] = useState([
+    { name: " ", href: "/statistics", current: false },
     {
-      name: "謝辞",
+      name: " ",
       href: "#",
       current: false,
       onClick: () => setShowAcknowledgment(true),
     },
-  ].map((item) => ({
-    ...item,
-    current:
-      typeof window !== "undefined" && item.href === window.location.pathname
-        ? true
-        : false,
-  }));
+  ]);
+
+  useEffect(() => {
+    setNavigation(
+      navigation.map((item) => ({
+        ...item,
+        current:
+          typeof window !== "undefined" &&
+          item.href === window.location.pathname
+            ? true
+            : false,
+      }))
+    );
+  }, []);
 
   function classNames(...classes: (string | undefined)[]) {
     return classes.filter(Boolean).join(" ");
@@ -79,7 +86,7 @@ export function Header() {
                 <div className="flex space-x-4">
                   {navigation.map((item) => (
                     <a
-                      key={item.name}
+                      key={`${item.name}-${item.href}`}
                       href={item.href}
                       aria-current={item.current ? "page" : undefined}
                       className={classNames(
