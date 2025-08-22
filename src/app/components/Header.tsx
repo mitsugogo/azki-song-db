@@ -25,9 +25,9 @@ export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
 
   const [navigation, setNavigation] = useState([
-    { name: " ", href: "/statistics", current: false },
+    { name: "統計情報", href: "/statistics", current: false },
     {
-      name: " ",
+      name: "このサイトについて",
       href: "#",
       current: false,
       onClick: () => setShowAcknowledgment(true),
@@ -170,7 +170,7 @@ export function Header() {
         onClose={() => setShowAcknowledgment(false)}
       >
         <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white">
-          謝辞
+          このサイトについて
         </ModalHeader>
         <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
           <Acknowledgment />
