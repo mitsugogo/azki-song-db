@@ -41,19 +41,25 @@ const ThemeToggle = () => {
         localStorage.setItem("color-theme", "dark");
         break;
       case "dark":
-        setTheme("light");
+        setTheme("system");
         localStorage.setItem("color-theme", "light");
         break;
       case "system":
         setTheme("light");
-        localStorage.setItem("color-theme", "light");
+        localStorage.setItem("color-theme", "system");
         break;
     }
   };
 
   return (
     <button type="button" className="outline-none" onClick={handleClick}>
-      {theme === "light" ? <FaSun /> : <FaMoon />}
+      {theme === "light" ? (
+        <FaSun />
+      ) : theme === "dark" ? (
+        <FaMoon />
+      ) : (
+        <FaCircleHalfStroke />
+      )}
     </button>
   );
 };
