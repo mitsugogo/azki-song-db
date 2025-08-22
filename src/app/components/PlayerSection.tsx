@@ -72,7 +72,7 @@ export default function PlayerSection({
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
@@ -97,7 +97,7 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
@@ -117,12 +117,12 @@ export default function PlayerSection({
             </div>
             {/* Next Song */}
             <div
-              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-right cursor-pointer hover:bg-gray-300"
+              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
               onClick={() => changeCurrentSong(nextSong)}
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}

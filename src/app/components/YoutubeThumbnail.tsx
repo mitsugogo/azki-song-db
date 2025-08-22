@@ -1,4 +1,5 @@
-// components/YoutubeThumbnail.tsx
+"use client";
+
 import Image from "next/image";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
 import { useState } from "react";
@@ -28,17 +29,18 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
 
   if (fill) {
     return (
-      <div className={`relative aspect-video ${outcontainerClassName || ""}`}>
-        {loading && (
-          <>
-            <Spinner />
-          </>
-        )}
+      <div
+        className={`flex w-full items-center justify-center aspect-video ${
+          outcontainerClassName || ""
+        }`}
+      >
         <Image
           src={imageUrl}
           alt={alt}
           fill={true}
           className={`outfit-image ${imageClassName || ""}`}
+          placeholder="blur"
+          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onLoadingComplete={() => setLoading(false)}
           onError={handleError}
@@ -49,18 +51,17 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   }
 
   return (
-    <div className={`relative aspect-video ${outcontainerClassName || ""}`}>
-      {loading && (
-        <>
-          <Spinner />
-        </>
-      )}
+    <div className={`aspect-video ${outcontainerClassName || ""}`}>
       <Image
         src={imageUrl}
         alt={alt}
         fill={true}
-        className={`outfit-image ${imageClassName || ""}`}
+        className={`outfit-image ${imageClassName || ""} ${
+          loading ? "hidden" : ""
+        }`}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        placeholder="blur"
+        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
         onLoadingComplete={() => setLoading(false)}
         onError={handleError}
         style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}

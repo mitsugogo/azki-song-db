@@ -47,7 +47,7 @@ const SongsList = ({
   useEffect(() => {
     calculateTotalPage();
     // 先頭の要素にスクロール
-    const listElement = document.getElementById("song-list");
+    const listElement = document.getElementById("song-list-scrollbar");
     if (listElement) {
       const currentSongElement = document.querySelector(
         `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
@@ -56,9 +56,13 @@ const SongsList = ({
         currentSongElement.scrollIntoView({
           behavior: "smooth",
           block: "center",
+          inline: "end",
         });
       } else {
-        listElement.scrollTo({ top: 0, behavior: "smooth" });
+        const firstElement = listElement.querySelector("li");
+        if (firstElement) {
+          firstElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     }
     // もしページ番号が範囲外の場合は1ページ目にする
@@ -88,10 +92,28 @@ const SongsList = ({
   return (
     <>
       <OverlayScrollbarsComponent
+        id="song-list-scrollbar"
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
         className=""
         defer
+        // events={{
+        //   updated: () => {
+        //     const listElement = document.getElementById("song-list-scrollbar");
+        //     if (listElement) {
+        //       const currentSongElement = document.querySelector(
+        //         `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
+        //       );
+        //       if (currentSongElement) {
+        //         currentSongElement.scrollIntoView({
+        //           behavior: "smooth",
+        //           block: "center",
+        //           inline: "end",
+        //         });
+        //       }
+        //     }
+        //   },
+        // }}
       >
         <ul
           id="song-list"
