@@ -5,6 +5,7 @@ import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
 import { FaShare, FaShuffle } from "react-icons/fa6";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
 
@@ -42,7 +43,12 @@ export default function PlayerSection({
 }: PlayerSectionProps) {
   return (
     <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full">
-      <div className="flex flex-col h-full w-full bg-background overflow-auto">
+      <OverlayScrollbarsComponent
+        options={{ scrollbars: { autoHide: "leave" } }}
+        element="div"
+        className="flex flex-col h-full w-full bg-background"
+        defer
+      >
         {/* YouTube Player */}
         <div className="relative aspect-video w-full bg-black">
           <div className="absolute top-0 left-0 w-full h-full">
@@ -191,7 +197,7 @@ export default function PlayerSection({
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}
         />
-      </div>
+      </OverlayScrollbarsComponent>
     </aside>
   );
 }
