@@ -323,7 +323,9 @@ export default function StatisticsPage() {
               <TableRow key={tag.key}>
                 <TableCell>
                   <Link href={`/?q=tag:${tag.key}`}>
-                    <Badge className="inline">{tag.key}</Badge>
+                    <Badge className="inline whitespace-nowrap">
+                      {tag.key}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell>{tag.count}</TableCell>
@@ -336,13 +338,15 @@ export default function StatisticsPage() {
           {renderTable(
             milestoneCounts,
             "マイルストーン",
-            "これまでのマイルストーンをまとめています。",
+            "これまでの活動において、節目となった配信をまとめています。",
             ["マイルストーン", "達成日", "曲数", "最新の動画"],
             (milestone) => (
               <TableRow key={milestone.key}>
                 <TableCell>
                   <Link href={`/?q=milestone:${milestone.key}`}>
-                    <Badge className="inline">{milestone.key}</Badge>
+                    <Badge className="inline whitespace-nowrap">
+                      {milestone.key}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell>
