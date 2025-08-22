@@ -6,6 +6,7 @@ import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
 import { FaShare, FaShuffle } from "react-icons/fa6";
 import { RiPlayListFill } from "react-icons/ri";
+import { YouTubeEvent } from "react-youtube";
 
 // Propsの型定義
 type PlayerSectionProps = {
@@ -16,7 +17,7 @@ type PlayerSectionProps = {
   allSongs: Song[];
   songs: Song[];
   searchTerm: string;
-  handleStateChange: (event: any) => void;
+  handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;
