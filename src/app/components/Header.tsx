@@ -32,7 +32,13 @@ export function Header() {
       current: false,
       onClick: () => setShowAcknowledgment(true),
     },
-  ];
+  ].map((item) => ({
+    ...item,
+    current:
+      typeof window !== "undefined" && item.href === window.location.pathname
+        ? true
+        : false,
+  }));
 
   function classNames(...classes: (string | undefined)[]) {
     return classes.filter(Boolean).join(" ");
@@ -78,7 +84,7 @@ export function Header() {
                       aria-current={item.current ? "page" : undefined}
                       className={classNames(
                         item.current
-                          ? "bg-primary-600 text-white"
+                          ? "bg-primary-600 dark:bg-primary-700 text-white border-b-white"
                           : "text-white hover:bg-primary-600",
                         "rounded-md px-3 py-2 text-sm font-medium"
                       )}
@@ -99,8 +105,6 @@ export function Header() {
                 <FaYoutube className="mr-1" />
                 AZKi Channel
               </a>
-
-              {/* <DarkThemeToggle className="outline-none cursor-pointer focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" /> */}
               <ThemeToggle />
             </div>
           </div>
@@ -133,7 +137,7 @@ export function Header() {
                     aria-current={item.current ? "page" : undefined}
                     className={classNames(
                       item.current
-                        ? "bg-gray-900 text-white"
+                        ? "bg-primary-600 dark:bg-primary-700 text-white"
                         : "text-gray-300 hover:bg-white/5 hover:text-white",
                       "block rounded-md px-3 py-2 text-base font-medium"
                     )}
@@ -166,7 +170,7 @@ export function Header() {
         </ModalBody>
         <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
           <Button
-            className="bg-primary hover:bg-primary text-white transition text-sm"
+            className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
             onClick={() => setShowAcknowledgment(false)}
           >
             閉じる
