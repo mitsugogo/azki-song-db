@@ -165,7 +165,7 @@ export default function PlayerSection({
               className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
             >
               <RiPlayListFill />
-              &nbsp;この歌枠を連続再生
+              &nbsp;<span className="text-xs">連続再生</span>
             </Button>
             <ButtonGroup className="shadow-none">
               <Button
@@ -173,7 +173,7 @@ export default function PlayerSection({
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
               >
                 <FaShuffle />
-                &nbsp;ランダム
+                &nbsp;<span className="text-xs">ランダム</span>
               </Button>
             </ButtonGroup>
             <div className="flex justify-end">
@@ -182,7 +182,6 @@ export default function PlayerSection({
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
               >
                 <FaShare />
-                &nbsp;Share
               </Button>
             </div>
           </div>

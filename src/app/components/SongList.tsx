@@ -99,7 +99,7 @@ const SongsList = ({
         >
           {slicedSongs.map((song, index) => (
             <SongListItem
-              key={`${song.video_id}-${song.start}`} // 安定したユニークなキーを使用
+              key={`${song.video_id}-${song.start}`}
               song={song}
               isSelected={
                 currentSongInfo?.title === song.title &&
