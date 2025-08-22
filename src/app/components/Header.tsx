@@ -7,40 +7,45 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-  Navbar,
-  NavbarCollapse,
-  NavbarLink,
-  NavbarToggle,
 } from "flowbite-react";
 import Link from "next/link";
-import { useState } from "react";
-import { FaInfoCircle } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
 import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import ThemeToggle from "./ThemeToggle";
 
 export function Header() {
   // 謝辞
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
 
-  const navigation = [
+  const [navigation, setNavigation] = useState([
     { name: "統計情報", href: "/statistics", current: false },
     {
-      name: "謝辞",
+      name: "このサイトについて",
       href: "#",
       current: false,
       onClick: () => setShowAcknowledgment(true),
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    setNavigation(
+      navigation.map((item) => ({
+        ...item,
+        current:
+          typeof window !== "undefined" &&
+          item.href === window.location.pathname
+            ? true
+            : false,
+      }))
+    );
+  }, []);
 
   function classNames(...classes: (string | undefined)[]) {
     return classes.filter(Boolean).join(" ");
@@ -50,13 +55,13 @@ export function Header() {
     <>
       <Disclosure
         as="nav"
-        className="relative bg-primary dark:bg-primary-900 text-white "
+        className="relative bg-primary dark:bg-primary-900 text-white"
       >
-        <div className="w-full px-2 sm:px-6 lg:px-8">
+        <div className="w-full px-2 sm:px-6 lg:px-4">
           <div className="relative flex h-16 items-center justify-between">
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               {/* Mobile menu button*/}
-              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
+              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
                 <span className="absolute -inset-0.5" />
                 <span className="sr-only">Open main menu</span>
                 <Bars3Icon
@@ -81,12 +86,12 @@ export function Header() {
                 <div className="flex space-x-4">
                   {navigation.map((item) => (
                     <a
-                      key={item.name}
+                      key={`${item.name}-${item.href}`}
                       href={item.href}
                       aria-current={item.current ? "page" : undefined}
                       className={classNames(
                         item.current
-                          ? "bg-primary-600 text-white"
+                          ? "bg-primary-600 dark:bg-primary-700 text-white border-b-white"
                           : "text-white hover:bg-primary-600",
                         "rounded-md px-3 py-2 text-sm font-medium"
                       )}
@@ -107,8 +112,7 @@ export function Header() {
                 <FaYoutube className="mr-1" />
                 AZKi Channel
               </a>
-
-              <DarkThemeToggle className="outline-none cursor-pointer focus:ring-0 text-primary-200 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700" />
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -140,7 +144,7 @@ export function Header() {
                     aria-current={item.current ? "page" : undefined}
                     className={classNames(
                       item.current
-                        ? "bg-gray-900 text-white"
+                        ? "bg-primary-600 dark:bg-primary-700 text-white"
                         : "text-gray-300 hover:bg-white/5 hover:text-white",
                       "block rounded-md px-3 py-2 text-base font-medium"
                     )}
@@ -166,14 +170,14 @@ export function Header() {
         onClose={() => setShowAcknowledgment(false)}
       >
         <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white">
-          謝辞
+          このサイトについて
         </ModalHeader>
         <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
           <Acknowledgment />
         </ModalBody>
         <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
           <Button
-            className="bg-primary hover:bg-primary text-white transition text-sm"
+            className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
             onClick={() => setShowAcknowledgment(false)}
           >
             閉じる

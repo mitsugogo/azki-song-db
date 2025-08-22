@@ -5,6 +5,7 @@ import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
 import { useEffect, useState } from "react";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 interface SongListProps {
   songs: Song[];
@@ -46,7 +47,7 @@ const SongsList = ({
   useEffect(() => {
     calculateTotalPage();
     // 先頭の要素にスクロール
-    const listElement = document.getElementById("song-list");
+    const listElement = document.getElementById("song-list-scrollbar");
     if (listElement) {
       const currentSongElement = document.querySelector(
         `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
@@ -55,9 +56,13 @@ const SongsList = ({
         currentSongElement.scrollIntoView({
           behavior: "smooth",
           block: "center",
+          inline: "end",
         });
       } else {
-        listElement.scrollTo({ top: 0, behavior: "smooth" });
+        const firstElement = listElement.querySelector("li");
+        if (firstElement) {
+          firstElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     }
     // もしページ番号が範囲外の場合は1ページ目にする
@@ -86,23 +91,31 @@ const SongsList = ({
 
   return (
     <>
-      <ul
-        id="song-list"
-        className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-y-auto h-dvh lg:h-full flex-grow dark:text-gray-300"
+      <OverlayScrollbarsComponent
+        id="song-list-scrollbar"
+        options={{ scrollbars: { autoHide: "leave" } }}
+        element="div"
+        className=""
+        defer
       >
-        {slicedSongs.map((song, index) => (
-          <SongListItem
-            key={`${song.video_id}-${song.start}`} // 安定したユニークなキーを使用
-            song={song}
-            isSelected={
-              currentSongInfo?.title === song.title &&
-              currentSongInfo.video_id === song.video_id &&
-              currentSongInfo.start === song.start
-            }
-            changeCurrentSong={changeCurrentSong}
-          />
-        ))}
-      </ul>
+        <ul
+          id="song-list"
+          className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
+        >
+          {slicedSongs.map((song, index) => (
+            <SongListItem
+              key={`${song.video_id}-${song.start}`}
+              song={song}
+              isSelected={
+                currentSongInfo?.title === song.title &&
+                currentSongInfo.video_id === song.video_id &&
+                currentSongInfo.start === song.start
+              }
+              changeCurrentSong={changeCurrentSong}
+            />
+          ))}
+        </ul>
+      </OverlayScrollbarsComponent>
       {totalPage > 1 && (
         <div className="flex justify-center mt-2 mb-2 lg:mb-0">
           <div className="mt-2 inline-flex items-center -space-x-px mr-1">

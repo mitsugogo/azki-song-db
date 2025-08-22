@@ -5,6 +5,7 @@ import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
 import { FaShare, FaShuffle } from "react-icons/fa6";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
 
@@ -42,7 +43,12 @@ export default function PlayerSection({
 }: PlayerSectionProps) {
   return (
     <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full">
-      <div className="flex flex-col h-full w-full bg-background overflow-auto">
+      <OverlayScrollbarsComponent
+        options={{ scrollbars: { autoHide: "leave" } }}
+        element="div"
+        className="flex flex-col h-full w-full bg-background"
+        defer
+      >
         {/* YouTube Player */}
         <div className="relative aspect-video w-full bg-black">
           <div className="absolute top-0 left-0 w-full h-full">
@@ -66,7 +72,7 @@ export default function PlayerSection({
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
@@ -91,7 +97,7 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
@@ -111,12 +117,12 @@ export default function PlayerSection({
             </div>
             {/* Next Song */}
             <div
-              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-right cursor-pointer hover:bg-gray-300"
+              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
               onClick={() => changeCurrentSong(nextSong)}
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
@@ -156,27 +162,29 @@ export default function PlayerSection({
             </ButtonGroup>
             <Button
               onClick={setSongsToCurrentVideo}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate"
             >
               <RiPlayListFill />
-              &nbsp;この歌枠を連続再生
+              &nbsp;
+              <span className="text-xs">
+                この歌枠を
+                <br />
+                連続再生
+              </span>
             </Button>
-            <ButtonGroup className="shadow-none">
-              <Button
-                onClick={() => playRandomSong(songs)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer"
-              >
-                <FaShuffle />
-                &nbsp;ランダム
-              </Button>
-            </ButtonGroup>
+            <Button
+              onClick={() => playRandomSong(songs)}
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer truncate"
+            >
+              <FaShuffle />
+              &nbsp;<span className="text-xs">ランダム</span>
+            </Button>
             <div className="flex justify-end">
               <Button
                 onClick={() => setOpenShareModal(true)}
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
               >
                 <FaShare />
-                &nbsp;Share
               </Button>
             </div>
           </div>
@@ -191,7 +199,7 @@ export default function PlayerSection({
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}
         />
-      </div>
+      </OverlayScrollbarsComponent>
     </aside>
   );
 }

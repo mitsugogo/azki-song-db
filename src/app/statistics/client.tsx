@@ -20,6 +20,7 @@ import { FaStar } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 type StatisticsItem = {
   key: string;
@@ -149,7 +150,7 @@ export default function StatisticsPage() {
     }
 
     return (
-      <div className="">
+      <div className="max-h-dvh">
         <Table striped hoverable className="w-full">
           <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-900">
             {caption} ({data.length})
@@ -157,17 +158,10 @@ export default function StatisticsPage() {
               {description}
             </p>
           </caption>
-          <TableHead className="sticky top-0">
+          <TableHead className="sticky top-0 z-50 bg-gray-50 dark:bg-gray-700">
             <TableRow>
               {columns.map((col, index) => (
-                <TableHeadCell
-                  key={index}
-                  className={
-                    col === "アーティスト名"
-                      ? "lg:text-nowrap hidden lg:block"
-                      : "lg:text-nowrap"
-                  }
-                >
+                <TableHeadCell key={index} className="lg:text-nowrap">
                   {col}
                 </TableHeadCell>
               ))}
@@ -218,7 +212,12 @@ export default function StatisticsPage() {
   };
 
   return (
-    <div className="lg:p-6">
+    <OverlayScrollbarsComponent
+      element="div"
+      className="lg:p-6 flex flex-col h-full"
+      options={{ scrollbars: { autoHide: "leave" } }}
+      defer
+    >
       <div>
         <h1 className="font-extrabold text-2xl mb-3 sm:p-3 dark:text-gray-200">
           統計情報
@@ -317,7 +316,9 @@ export default function StatisticsPage() {
               <TableRow key={tag.key}>
                 <TableCell>
                   <Link href={`/?q=tag:${tag.key}`}>
-                    <Badge className="inline">{tag.key}</Badge>
+                    <Badge className="inline lg:whitespace-nowrap">
+                      {tag.key}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell>{tag.count}</TableCell>
@@ -330,13 +331,15 @@ export default function StatisticsPage() {
           {renderTable(
             milestoneCounts,
             "マイルストーン",
-            "これまでのマイルストーンをまとめています。",
+            "これまでの活動において、節目となった配信をまとめています。",
             ["マイルストーン", "達成日", "曲数", "最新の動画"],
             (milestone) => (
               <TableRow key={milestone.key}>
                 <TableCell>
                   <Link href={`/?q=milestone:${milestone.key}`}>
-                    <Badge className="inline">{milestone.key}</Badge>
+                    <Badge className="inline lg:whitespace-nowrap">
+                      {milestone.key}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell>
@@ -354,6 +357,6 @@ export default function StatisticsPage() {
           )}
         </TabItem>
       </Tabs>
-    </div>
+    </OverlayScrollbarsComponent>
   );
 }
