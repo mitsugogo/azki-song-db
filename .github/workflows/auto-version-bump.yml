@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout code
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -41,3 +41,10 @@ jobs:
           npx standard-version
           git push origin main
           git push --tags
+
+      - name: Merge main into develop
+        run: |
+          git checkout develop
+          git pull origin develop
+          git merge main --no-ff -m "Merge main branch with latest release version"
+          git push origin develop
