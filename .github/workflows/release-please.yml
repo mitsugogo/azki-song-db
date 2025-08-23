@@ -1,5 +1,3 @@
-name: Release Please
-
 on:
   push:
     branches:
@@ -9,23 +7,13 @@ permissions:
   contents: write
   pull-requests: write
 
+name: release-please
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .config/rp.json
-          manifest-file: .config/rp-manifest.json
-          target-branch: ${{ github.ref_name }}
-          skip-labeling: true
-        id: rp
-      - name: Upload Release Artifact
-        if: ${{ steps.release.outputs.release_created }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.release.outputs.tag_name }} ./artifact/some-build-artifact.zip
+          manifest-file: .config/.rp-manifest.json
