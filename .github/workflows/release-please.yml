@@ -16,4 +16,4 @@ jobs:
       - uses: googleapis/release-please-action@v4
         with:
           config-file: .config/rp.json
-          manifest-file: .config/.rp-manifest.json
+          manifest-file: .config/rp-manifest.json
