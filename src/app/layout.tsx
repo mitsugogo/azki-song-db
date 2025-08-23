@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
 
@@ -12,6 +12,13 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const notoSans = Noto_Sans_JP({
+  variable: "--font-noto-sans",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
@@ -41,15 +48,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html
+      lang="ja"
+      className={`${notoSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
       <head>
         <ThemeModeScript />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900`}
-      >
-        {children}
-      </body>
+      <body className={`antialiased dark:bg-gray-900`}>{children}</body>
     </html>
   );
 }

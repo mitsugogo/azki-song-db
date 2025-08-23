@@ -18,7 +18,7 @@ const SongsList = ({
   currentSongInfo,
   changeCurrentSong,
 }: SongListProps) => {
-  const displayPage = 200;
+  const displayPage = 204; // 横に2か3か4で並ぶのでタイルがキリよく並ぶ数にする
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
 
