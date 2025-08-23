@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.5](https://github.com/mitsugogo/azki-song-db/compare/v0.1.4...v0.1.5) (2025-08-23)
+
+
+### Changes
+
+* フォント変更 ([07b887f](https://github.com/mitsugogo/azki-song-db/commit/07b887f2c9105d2a687aa011d6c92ce797fffeea))
+
+
+### Bug Fixes
+
+* 曲リストをどのレイアウトでも切りの良いタイル数に変更 ([1d4864f](https://github.com/mitsugogo/azki-song-db/commit/1d4864f40cd2894af3966d4b798cd21639cfbd1e))
+
 ### [0.1.4](https://github.com/mitsugogo/azki-song-db/compare/v0.1.3...v0.1.4) (2025-08-23)
 
 ### 0.1.3 (2025-08-23)
