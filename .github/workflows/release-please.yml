@@ -18,3 +18,4 @@ jobs:
           target-branch: main
           release-type: node
           token: ${{ secrets.GITHUB_TOKEN }}
+          skip-labeling: true
