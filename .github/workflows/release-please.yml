@@ -12,6 +12,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: github.event.commits[0].committer.name != 'release-please[bot]'
     permissions:
       contents: write
       pull-requests: write
