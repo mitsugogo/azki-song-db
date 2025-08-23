@@ -17,3 +17,4 @@ jobs:
         with:
           config-file: .config/rp.json
           manifest-file: .config/rp-manifest.json
+          skip-labeling: true
