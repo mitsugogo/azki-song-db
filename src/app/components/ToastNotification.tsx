@@ -1,6 +1,6 @@
 import { Toast, ToastToggle } from "flowbite-react";
 import { useState, useEffect } from "react";
-import { HiCheck, HiExclamation, HiX } from "react-icons/hi";
+import { HiCheck, HiExclamation } from "react-icons/hi";
 
 interface ToastNotificationProps {
   message: string;
