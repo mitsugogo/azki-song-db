@@ -26,6 +26,9 @@ interface NowPlayingSongInfoProps {
   changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
 }
 
+/**
+ * 再生中の曲情報を表示するコンポーネント
+ */
 const NowPlayingSongInfo = ({
   currentSongInfo,
   allSongs,
@@ -165,8 +168,8 @@ const NowPlayingSongInfo = ({
           </div>
         )}
       </div>
-      <Modal show={showModal} size="" onClose={() => setShowModal(false)} popup>
-        <ModalHeader />
+      <Modal show={showModal} size="" onClose={() => setShowModal(false)}>
+        <ModalHeader className="border-b-gray-300">楽曲情報</ModalHeader>
         <ModalBody className="bg-white dark:bg-gray-800 dark:text-white rounded py-6">
           {currentSongInfo && (
             <>

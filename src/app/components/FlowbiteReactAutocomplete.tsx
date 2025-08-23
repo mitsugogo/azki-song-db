@@ -7,7 +7,6 @@ import {
   ListGroupItemProps,
 } from "flowbite-react";
 import { IconType } from "react-icons/lib";
-import { HiX } from "react-icons/hi";
 
 interface FrowbiteReactAutocompleteProps {
   options: string[];

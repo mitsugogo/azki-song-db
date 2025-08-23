@@ -2,7 +2,6 @@
 
 import {
   Button,
-  DarkThemeToggle,
   Modal,
   ModalBody,
   ModalFooter,

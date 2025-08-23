@@ -19,6 +19,11 @@ interface YoutubeThumbnailFallbackResult {
   handleError: () => void;
 }
 
+/**
+ * YouTubeのサムネイルをfallbackしながら取得する
+ * @param videoId
+ * @returns {imageUrl, handleError}
+ */
 const useYoutubeThumbnailFallback = (
   videoId: string
 ): YoutubeThumbnailFallbackResult => {

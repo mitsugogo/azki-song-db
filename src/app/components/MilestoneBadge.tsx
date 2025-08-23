@@ -11,6 +11,9 @@ interface MilestoneBadgeProps {
   onClick?: (event: React.MouseEvent, song: Song, milestone?: string) => void;
 }
 
+/**
+ * マイルストーンのbadge
+ */
 export default function MilestoneBadge({
   song,
   inline,

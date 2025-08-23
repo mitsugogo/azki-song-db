@@ -55,13 +55,8 @@ export default function ShareModal({
   };
 
   return (
-    <Modal
-      show={openShareModal}
-      onClose={onClose}
-      size="md"
-      style={{ zIndex: 999 }}
-    >
-      <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white">
+    <Modal show={openShareModal} onClose={onClose} size="md">
+      <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white border-b-gray-300">
         シェア
       </ModalHeader>
       <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
@@ -70,7 +65,7 @@ export default function ShareModal({
         <div>
           <Label>
             <FaYoutube className="inline" />
-            &nbsp;YouTube URL (AZKi Channel)
+            &nbsp;YouTube URL
           </Label>
           <div className="relative">
             <TextInput
@@ -98,7 +93,7 @@ export default function ShareModal({
           <div className="mt-2">
             <Button
               size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900"
+              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer"
               onClick={() => handleShareToX(false)}
             >
               <FaX className="w-4 h-4" />
@@ -133,7 +128,7 @@ export default function ShareModal({
           <div className="mt-2">
             <Button
               size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900"
+              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer"
               onClick={() => handleShareToX(true)}
             >
               <FaX className="w-4 h-4" />
@@ -143,7 +138,7 @@ export default function ShareModal({
       </ModalBody>
       <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
         <Button
-          className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm"
+          className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
           onClick={onClose}
         >
           閉じる
