@@ -14,9 +14,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Create GitHub Release
-        if: startsWith(github.event.head_commit.message, 'chore: release')
+        if: startsWith(github.event.head_commit.message, 'chore')
         id: release
         uses: softprops/action-gh-release@v1
         with:
