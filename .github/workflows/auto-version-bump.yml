@@ -1,4 +1,4 @@
-name: Auto Version Bump on Push to Main
+name: Auto Version Bump, Tag, and Merge to Develop
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  version-bump:
+  version-bump-tag-merge:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -32,14 +32,21 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Bump version
+      - name: Bump version and create tag
         id: version-bump
         run: |
-          npm version patch --no-git-tag-version
+          npm version patch
           echo "new-version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Commit and Push new version
+      - name: Push new version commit and tag
         run: |
-          git add package.json
-          git commit -m "chore: bump version to ${{ steps.version-bump.outputs.new-version }}"
           git push origin main
+          git push origin ${{ steps.version-bump.outputs.new-version }}
+
+      - name: Checkout develop branch
+        run: git checkout develop
+
+      - name: Merge main into develop
+        run: |
+          git merge main -m "Merge main into develop after version bump"
+          git push origin develop
