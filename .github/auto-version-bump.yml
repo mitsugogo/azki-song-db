@@ -2,10 +2,9 @@ name: Auto Version Bump on PR Merge to Main
 
 on:
   pull_request:
-    types:
-      - closed
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   version-bump:
@@ -36,8 +35,6 @@ jobs:
 
       - name: Bump version
         run: |
-          # npm versionコマンドでバージョンを自動的に繰り上げる
-          # ここではパッチバージョンを繰り上げる例です
           npm version patch --no-git-tag-version
 
       - name: Commit and Push new version
