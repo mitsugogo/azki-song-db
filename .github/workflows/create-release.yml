@@ -14,13 +14,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
+      - name: Extract Tag Name
+        id: extract_tag
+        run: |
+          # コミットメッセージからバージョン番号を抽出
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          TAG_NAME=$(echo "$COMMIT_MESSAGE" | awk '{print $3}')
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+      
       - name: Create GitHub Release
-        if: startsWith(github.event.head_commit.message, 'chore')
-        id: release
+        if: startsWith(github.event.head_commit.message, 'chore: release')
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
-          tag_name: ${{ github.event.head_commit.message }}
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
