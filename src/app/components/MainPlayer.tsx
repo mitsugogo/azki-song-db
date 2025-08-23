@@ -14,6 +14,9 @@ import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 
+/**
+ * メインプレイヤー
+ */
 export default function MainPlayer() {
   // --- Hooks ---
   const {

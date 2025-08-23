@@ -1,0 +1,47 @@
+name: Auto Version Bump on PR Merge to Main
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  version-bump:
+    # プルリクエストがマージされた場合にのみ実行
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0 # タグを取得するために必要
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Bump version
+        run: |
+          # npm versionコマンドでバージョンを自動的に繰り上げる
+          # ここではパッチバージョンを繰り上げる例です
+          npm version patch --no-git-tag-version
+
+      - name: Commit and Push new version
+        run: |
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version-bump.outputs.new-version }}"
+          git push origin main
