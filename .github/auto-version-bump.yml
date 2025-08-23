@@ -1,15 +1,12 @@
-name: Auto Version Bump on PR Merge to Main
+name: Auto Version Bump on Push to Main
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   version-bump:
-    # プルリクエストがマージされた場合にのみ実行
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0 # タグを取得するために必要
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -34,8 +31,10 @@ jobs:
         run: npm install
 
       - name: Bump version
+        id: version-bump
         run: |
           npm version patch --no-git-tag-version
+          echo "new-version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Commit and Push new version
         run: |
