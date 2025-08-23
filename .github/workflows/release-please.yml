@@ -1,3 +1,5 @@
+name: Release Please
+
 on:
   push:
     branches:
@@ -7,15 +9,12 @@ permissions:
   contents: write
   pull-requests: write
 
-name: release-please
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          config-file: .config/rp.json
-          manifest-file: .config/rp-manifest.json
-          skip-labeling: true
           target-branch: main
+          release-type: node
+          token: ${{ secrets.GITHUB_TOKEN }}
