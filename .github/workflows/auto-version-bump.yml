@@ -24,6 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Release and push to main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
