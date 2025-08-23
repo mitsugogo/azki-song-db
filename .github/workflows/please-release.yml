@@ -14,4 +14,5 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
+          token: ${{ secrets.PERSONAL_TOKEN }}
           skip-labeling: true
