@@ -146,27 +146,27 @@ export default function PlayerSection({
 
           {/* Player Controls (Mobile) */}
           <div className="flex lg:hidden justify-between">
-            <ButtonGroup className="shadow-none">
+            <ButtonGroup className="shadow-none rounded-md ">
               <Button
                 onClick={() => changeCurrentSong(previousSong)}
                 disabled={!previousSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs border-r-2 border-r-gray-300"
               >
                 <GiPreviousButton />
               </Button>
               <Button
                 onClick={() => changeCurrentSong(nextSong)}
                 disabled={!nextSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs"
               >
                 <GiNextButton />
               </Button>
             </ButtonGroup>
             <Button
               onClick={setSongsToCurrentVideo}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2"
             >
-              <RiPlayListFill />
+              <RiPlayListFill className="mr-1" />
               &nbsp;
               <span className="text-xs">
                 この歌枠を
@@ -176,15 +176,15 @@ export default function PlayerSection({
             </Button>
             <Button
               onClick={() => playRandomSong(songs)}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer truncate"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs"
             >
-              <FaShuffle />
+              <FaShuffle className="mr-1" />
               &nbsp;<span className="text-xs">ランダム</span>
             </Button>
             <div className="flex justify-end">
               <Button
                 onClick={() => setOpenShareModal(true)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer px-4 py-2 text-xs"
               >
                 <FaShare />
               </Button>
