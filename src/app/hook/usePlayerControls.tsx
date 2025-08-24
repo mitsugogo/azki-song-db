@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 
@@ -34,6 +34,10 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     },
     []
   );
+
+  const sortedAllSongs = useMemo(() => {
+    return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
+  }, [allSongs]);
 
   const scrollToTargetSong = (song: Song | null) => {
     if (!song) return;
@@ -82,12 +86,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
   const searchCurrentSongOnVideo = useCallback(
     (video_id: string, currentTime: number) => {
-      return allSongs
-        .slice()
-        .sort((a, b) => parseInt(b.start) - parseInt(a.start))
-        .find(
-          (s) => s.video_id === video_id && parseInt(s.start) <= currentTime
-        );
+      return sortedAllSongs.find(
+        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime
+      );
     },
     [allSongs]
   );
@@ -95,7 +96,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const handleStateChange = useCallback(
     (event: YouTubeEvent<number>) => {
       const player = event.target;
-      const videoId = player.getVideoData()?.video_id;
+      const videoData = player.getVideoData();
+      const videoId = videoData?.video_id;
 
       const clearMonitorInterval = () => {
         if (intervalRef.current) {
@@ -108,64 +110,73 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         clearMonitorInterval();
       }
 
-      switch (event.data) {
-        case YouTube.PlayerState.UNSTARTED:
-        case YouTube.PlayerState.PAUSED:
-          clearMonitorInterval();
-          break;
+      const handlePlayingState = () => {
+        if (intervalRef.current) return;
+        changeCurrentSong(currentSongInfoRef.current, true);
 
-        case YouTube.PlayerState.PLAYING:
-          if (intervalRef.current) return;
-          changeCurrentSong(currentSongInfoRef.current, true);
+        intervalRef.current = setInterval(() => {
+          const currentTime = player.getCurrentTime();
+          const currentVideoId = player.getVideoData()?.video_id;
 
-          intervalRef.current = setInterval(() => {
-            const currentTime = player.getCurrentTime();
-            const currentVideoId = player.getVideoData()?.video_id;
-            if (!currentVideoId) return;
+          if (!currentVideoId) {
+            return;
+          }
 
-            const foundSong = searchCurrentSongOnVideo(
-              currentVideoId,
-              currentTime
-            );
+          const foundSong = searchCurrentSongOnVideo(
+            currentVideoId,
+            currentTime
+          );
+          const isFoundSongInList = songs.some(
+            (s) =>
+              s.video_id === foundSong?.video_id && s.start === foundSong?.start
+          );
 
-            const isFoundSongInList = songs.some(
-              (s) =>
-                s.video_id === foundSong?.video_id &&
-                s.start === foundSong?.start
-            );
-            if (!isFoundSongInList && nextSong) {
-              changeCurrentSong(nextSong);
-              return;
-            }
+          if (!isFoundSongInList && nextSong) {
+            changeCurrentSong(nextSong);
+            return;
+          }
 
+          if (foundSong) {
             if (
-              foundSong &&
-              (foundSong.video_id !== currentSongInfoRef.current?.video_id ||
-                foundSong.title !== currentSongInfoRef.current?.title)
+              foundSong.video_id !== currentSongInfoRef.current?.video_id ||
+              foundSong.title !== currentSongInfoRef.current?.title
             ) {
               changeVideoIdCountRef.current++;
               if (changeVideoIdCountRef.current > 1) {
                 changeCurrentSong(foundSong, true);
                 changeVideoIdCountRef.current = 0;
               }
-            } else if (!foundSong && nextSong) {
-              changeCurrentSong(nextSong);
             }
-
-            if (foundSong?.end && foundSong.end < currentTime) {
-              clearMonitorInterval();
-              changeCurrentSong(nextSong);
-            }
-          }, 1000);
-          break;
-
-        case YouTube.PlayerState.ENDED:
-          clearMonitorInterval();
-          if (nextSong) {
+          } else if (nextSong) {
             changeCurrentSong(nextSong);
-          } else {
-            playRandomSong(songs);
           }
+
+          if (foundSong?.end && foundSong.end < currentTime) {
+            clearMonitorInterval();
+            changeCurrentSong(nextSong);
+          }
+        }, 1000);
+      };
+
+      const handleEndedState = () => {
+        clearMonitorInterval();
+        if (nextSong) {
+          changeCurrentSong(nextSong);
+        } else {
+          playRandomSong(songs);
+        }
+      };
+
+      switch (event.data) {
+        case YouTube.PlayerState.UNSTARTED:
+        case YouTube.PlayerState.PAUSED:
+          clearMonitorInterval();
+          break;
+        case YouTube.PlayerState.PLAYING:
+          handlePlayingState();
+          break;
+        case YouTube.PlayerState.ENDED:
+          handleEndedState();
           break;
       }
     },
