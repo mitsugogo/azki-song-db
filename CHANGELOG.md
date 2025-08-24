@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/mitsugogo/azki-song-db/compare/v0.1.5...v0.1.6) (2025-08-24)
+
+
+### Features
+
+* PWA対応 ([b1232a3](https://github.com/mitsugogo/azki-song-db/commit/b1232a31a8e4b61ccbd52f80ef84105d0cbb2ae6))
+
 ### [0.1.5](https://github.com/mitsugogo/azki-song-db/compare/v0.1.4...v0.1.5) (2025-08-23)
 
 
