@@ -63,6 +63,11 @@ export default function MainPlayer() {
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
 
+  useEffect(() => {
+    if (!currentSongInfo) return;
+    setPreviousAndNextSongs(currentSongInfo, songs);
+  }, [currentSongInfo, songs]);
+
   // --- State for UI ---
   const [baseUrl, setBaseUrl] = useState("");
   const [showToast, setShowToast] = useState(false);
