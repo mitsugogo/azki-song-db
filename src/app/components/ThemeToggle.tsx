@@ -6,7 +6,6 @@ const ThemeToggle = () => {
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("color-theme");
-    console.log(storedTheme);
     if (storedTheme) {
       setTheme(storedTheme);
     }
