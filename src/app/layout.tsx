@@ -53,6 +53,7 @@ export default function RootLayout({
       className={`${notoSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <ThemeModeScript />
       </head>
       <body className={`antialiased dark:bg-gray-900`}>{children}</body>
