@@ -6,6 +6,7 @@ const ThemeToggle = () => {
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("color-theme");
+    console.log(storedTheme);
     if (storedTheme) {
       setTheme(storedTheme);
     }
@@ -42,11 +43,11 @@ const ThemeToggle = () => {
         break;
       case "dark":
         setTheme("system");
-        localStorage.setItem("color-theme", "light");
+        localStorage.setItem("color-theme", "system");
         break;
       case "system":
         setTheme("light");
-        localStorage.setItem("color-theme", "system");
+        localStorage.setItem("color-theme", "light");
         break;
     }
   };
