@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.com/mitsugogo/azki-song-db/compare/v0.1.6...v0.1.7) (2025-08-24)
+
+
+### Bug Fixes
+
+* カラーテーマ "system" が保存されないバグを修正 ([cd0945e](https://github.com/mitsugogo/azki-song-db/commit/cd0945e5cff9325cbf1ac4b94a7dd74d939867d6))
+* ロード時に前後の曲がセットされてない不具合を修正 ([3c6a88d](https://github.com/mitsugogo/azki-song-db/commit/3c6a88d49082daf6c97f8f587c58f11ad77214ea))
+
 ### [0.1.6](https://github.com/mitsugogo/azki-song-db/compare/v0.1.5...v0.1.6) (2025-08-24)
 
 
