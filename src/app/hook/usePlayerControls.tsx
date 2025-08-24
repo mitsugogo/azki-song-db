@@ -13,6 +13,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const [previousSong, setPreviousSong] = useState<Song | null>(null);
   const [nextSong, setNextSong] = useState<Song | null>(null);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const currentSongInfoRef = useRef(currentSongInfo);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
@@ -171,12 +173,15 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         case YouTube.PlayerState.UNSTARTED:
         case YouTube.PlayerState.PAUSED:
           clearMonitorInterval();
+          setIsPlaying(false);
           break;
         case YouTube.PlayerState.PLAYING:
           handlePlayingState();
+          setIsPlaying(true);
           break;
         case YouTube.PlayerState.ENDED:
           handleEndedState();
+          setIsPlaying(false);
           break;
       }
     },
@@ -196,6 +201,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     setCurrentSongInfo,
     previousSong,
     nextSong,
+    isPlaying,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,

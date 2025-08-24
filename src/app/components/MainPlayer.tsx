@@ -57,6 +57,7 @@ export default function MainPlayer() {
     currentSongInfo,
     previousSong,
     nextSong,
+    isPlaying,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,
@@ -160,6 +161,7 @@ export default function MainPlayer() {
         setSongsToCurrentVideo={setSongsToCurrentVideo}
         setOpenShareModal={setOpenShareModal}
         setSearchTerm={setSearchTerm}
+        isPlaying={isPlaying}
       />
 
       <SearchAndSongList

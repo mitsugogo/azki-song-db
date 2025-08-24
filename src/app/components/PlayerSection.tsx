@@ -18,6 +18,7 @@ type PlayerSectionProps = {
   allSongs: Song[];
   songs: Song[];
   searchTerm: string;
+  isPlaying: boolean;
   handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
   playRandomSong: (songList: Song[]) => void;
@@ -34,6 +35,7 @@ export default function PlayerSection({
   allSongs,
   songs,
   searchTerm,
+  isPlaying,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
@@ -195,6 +197,7 @@ export default function PlayerSection({
           currentSongInfo={currentSongInfo}
           allSongs={allSongs}
           searchTerm={searchTerm}
+          isPlaying={isPlaying}
           setSearchTerm={setSearchTerm}
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}

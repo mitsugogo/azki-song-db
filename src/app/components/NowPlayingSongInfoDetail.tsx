@@ -21,6 +21,7 @@ interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
   allSongs: Song[];
   searchTerm: string;
+  isPlaying: boolean;
   setSearchTerm: (value: string) => void;
   changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
 }
@@ -29,6 +30,7 @@ const NowPlayingSongInfoDetail = ({
   currentSongInfo,
   allSongs,
   searchTerm,
+  isPlaying,
   setSearchTerm,
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
@@ -306,8 +308,14 @@ const NowPlayingSongInfoDetail = ({
                                 <div className="flex ml-3">
                                   {currentSongInfo === song && (
                                     <FaCompactDisc
-                                      className="relative fa-spin inline"
-                                      style={{ top: "2px", marginRight: "3px" }}
+                                      className={`relative inline ${
+                                        isPlaying ? "fa-spin" : ""
+                                      }`}
+                                      style={{
+                                        top: "2px",
+                                        marginRight: "3px",
+                                        animationDuration: "3s",
+                                      }}
                                     />
                                   )}
                                   {song.title}&nbsp;-&nbsp;

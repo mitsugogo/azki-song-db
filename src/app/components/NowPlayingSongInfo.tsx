@@ -21,6 +21,7 @@ interface NowPlayingSongInfoProps {
   currentSongInfo: Song | null;
   allSongs: Song[];
   searchTerm: string;
+  isPlaying: boolean;
   setSearchTerm: (value: string) => void;
   setOpenShereModal: (value: boolean) => void;
   changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
@@ -33,6 +34,7 @@ const NowPlayingSongInfo = ({
   currentSongInfo,
   allSongs,
   searchTerm,
+  isPlaying,
   setSearchTerm,
   setOpenShereModal,
   changeCurrentSong,
@@ -78,8 +80,10 @@ const NowPlayingSongInfo = ({
                 )}
                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white">
                   <FaCompactDisc
-                    className="relative fa-spin mr-2 inline"
-                    style={{ top: "-1px" }}
+                    className={`relative mr-2 inline ${
+                      isPlaying ? "fa-spin" : ""
+                    }`}
+                    style={{ top: "-1px", animationDuration: "3s" }}
                   />
                   {currentSongInfo.title}
 
@@ -110,7 +114,10 @@ const NowPlayingSongInfo = ({
                 onClick={() => setShowModal(true)}
               >
                 <div className="flex-none">
-                  <FaCompactDisc className="fa-spin mr-2" />
+                  <FaCompactDisc
+                    className={`${isPlaying ? "fa-spin" : ""} mr-2`}
+                    style={{ animationDuration: "3s" }}
+                  />
                 </div>
                 <div className="w-64 flex-auto">
                   {isOverflowing ? (
@@ -161,6 +168,7 @@ const NowPlayingSongInfo = ({
                 currentSongInfo={currentSongInfo}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
+                isPlaying={isPlaying}
                 setSearchTerm={setSearchTerm}
                 changeCurrentSong={changeCurrentSong}
               />
@@ -184,6 +192,7 @@ const NowPlayingSongInfo = ({
                 currentSongInfo={currentSongInfo}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
+                isPlaying={isPlaying}
                 setSearchTerm={setSearchTerm}
                 changeCurrentSong={changeCurrentSong}
               />
