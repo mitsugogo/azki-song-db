@@ -63,7 +63,7 @@ export default function SearchAndSongList({
   setSearchMilestone,
 }: SearchAndSongListProps) {
   return (
-    <section className="flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full lg:ml-3 sm:mx-0">
+    <section className="flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full sm:mx-0">
       <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
         <Button
           onClick={() => playRandomSong(songs)}

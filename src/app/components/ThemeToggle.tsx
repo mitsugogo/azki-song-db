@@ -42,11 +42,11 @@ const ThemeToggle = () => {
         break;
       case "dark":
         setTheme("system");
-        localStorage.setItem("color-theme", "light");
+        localStorage.setItem("color-theme", "system");
         break;
       case "system":
         setTheme("light");
-        localStorage.setItem("color-theme", "system");
+        localStorage.setItem("color-theme", "light");
         break;
     }
   };

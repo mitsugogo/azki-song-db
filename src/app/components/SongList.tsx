@@ -130,7 +130,7 @@ const SongsList = ({
           </div>
           <Pagination
             layout="pagination"
-            className="md:hidden sm:block lg:block"
+            className="hidden lg:block"
             currentPage={currentPage}
             totalPages={totalPage}
             onPageChange={onPageChange}
@@ -140,7 +140,7 @@ const SongsList = ({
           />
           <Pagination
             layout="navigation"
-            className="hidden md:block lg:hidden"
+            className="block lg:hidden"
             currentPage={currentPage}
             totalPages={totalPage}
             onPageChange={onPageChange}

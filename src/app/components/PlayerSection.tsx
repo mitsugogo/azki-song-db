@@ -18,6 +18,7 @@ type PlayerSectionProps = {
   allSongs: Song[];
   songs: Song[];
   searchTerm: string;
+  isPlaying: boolean;
   handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
   playRandomSong: (songList: Song[]) => void;
@@ -34,6 +35,7 @@ export default function PlayerSection({
   allSongs,
   songs,
   searchTerm,
+  isPlaying,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
@@ -42,11 +44,11 @@ export default function PlayerSection({
   setSearchTerm,
 }: PlayerSectionProps) {
   return (
-    <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full">
+    <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full pr-0">
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
-        className="flex flex-col h-full w-full bg-background"
+        className="flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
         defer
       >
         {/* YouTube Player */}
@@ -64,26 +66,26 @@ export default function PlayerSection({
 
         <div className="flex flex-col p-2 pl-2 lg:px-0 text-sm text-foreground">
           {/* Previous/Next Song Display (Desktop) */}
-          <div className="hidden lg:flex w-full justify-between gap-2">
+          <div className="hidden lg:flex justify-between gap-2 flex-nowrap">
             {/* Previous Song */}
             <div
-              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
+              className="h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
               onClick={() => changeCurrentSong(previousSong)}
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
                       fill={true}
                     />
                   </div>
-                  <div className="flex flex-auto flex-col px-2 truncate">
-                    <span className="text-left font-bold truncate">
+                  <div className="flex flex-1 flex-col px-2 min-w-0">
+                    <span className="block text-left font-bold truncate">
                       {previousSong.title}
                     </span>
-                    <span className="text-left text-xs text-muted truncate">
+                    <span className="block text-left text-xs text-muted truncate">
                       {previousSong.artist}
                     </span>
                   </div>
@@ -92,23 +94,23 @@ export default function PlayerSection({
             </div>
             {/* Current Video Playlist */}
             <div
-              className="relative h-14 w-2/6 p-0 truncate rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400"
+              className="relative h-14 flex-1 min-w-0 p-0 rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400 dark:hover:bg-primary-800"
               onClick={setSongsToCurrentVideo}
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
                       fill={true}
                     />
                   </div>
-                  <div className="flex flex-auto flex-col px-2 truncate">
-                    <span className="text-left font-bold truncate">
+                  <div className="flex flex-1 flex-col px-2 min-w-0">
+                    <span className="block text-left font-bold truncate">
                       {currentSongInfo.title}
                     </span>
-                    <span className="text-left text-xs text-muted truncate">
+                    <span className="block text-left text-xs text-muted truncate">
                       {currentSongInfo.artist}
                     </span>
                   </div>
@@ -117,23 +119,23 @@ export default function PlayerSection({
             </div>
             {/* Next Song */}
             <div
-              className="h-14 w-2/6 p-0 truncate rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
+              className="h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
               onClick={() => changeCurrentSong(nextSong)}
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle">
+                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
                       fill={true}
                     />
                   </div>
-                  <div className="flex flex-col px-2 truncate">
-                    <span className="text-left font-bold truncate">
+                  <div className="flex flex-1 flex-col px-2 min-w-0">
+                    <span className="block text-left font-bold truncate">
                       {nextSong.title}
                     </span>
-                    <span className="text-left text-xs text-muted truncate">
+                    <span className="block text-left text-xs text-muted truncate">
                       {nextSong.artist}
                     </span>
                   </div>
@@ -144,27 +146,27 @@ export default function PlayerSection({
 
           {/* Player Controls (Mobile) */}
           <div className="flex lg:hidden justify-between">
-            <ButtonGroup className="shadow-none">
+            <ButtonGroup className="shadow-none rounded-md ">
               <Button
                 onClick={() => changeCurrentSong(previousSong)}
                 disabled={!previousSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs border-r-2 border-r-gray-300"
               >
                 <GiPreviousButton />
               </Button>
               <Button
                 onClick={() => changeCurrentSong(nextSong)}
                 disabled={!nextSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs"
               >
                 <GiNextButton />
               </Button>
             </ButtonGroup>
             <Button
               onClick={setSongsToCurrentVideo}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2"
             >
-              <RiPlayListFill />
+              <RiPlayListFill className="mr-1" />
               &nbsp;
               <span className="text-xs">
                 この歌枠を
@@ -174,15 +176,15 @@ export default function PlayerSection({
             </Button>
             <Button
               onClick={() => playRandomSong(songs)}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm  cursor-pointer truncate"
+              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs"
             >
-              <FaShuffle />
+              <FaShuffle className="mr-1" />
               &nbsp;<span className="text-xs">ランダム</span>
             </Button>
             <div className="flex justify-end">
               <Button
                 onClick={() => setOpenShareModal(true)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer px-4 py-2 text-xs"
               >
                 <FaShare />
               </Button>
@@ -195,6 +197,7 @@ export default function PlayerSection({
           currentSongInfo={currentSongInfo}
           allSongs={allSongs}
           searchTerm={searchTerm}
+          isPlaying={isPlaying}
           setSearchTerm={setSearchTerm}
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}

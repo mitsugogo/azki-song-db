@@ -57,11 +57,17 @@ export default function MainPlayer() {
     currentSongInfo,
     previousSong,
     nextSong,
+    isPlaying,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
+
+  useEffect(() => {
+    if (!currentSongInfo) return;
+    setPreviousAndNextSongs(currentSongInfo, songs);
+  }, [currentSongInfo, songs]);
 
   // --- State for UI ---
   const [baseUrl, setBaseUrl] = useState("");
@@ -155,6 +161,7 @@ export default function MainPlayer() {
         setSongsToCurrentVideo={setSongsToCurrentVideo}
         setOpenShareModal={setOpenShareModal}
         setSearchTerm={setSearchTerm}
+        isPlaying={isPlaying}
       />
 
       <SearchAndSongList
