@@ -51,7 +51,7 @@ const NowPlayingSongInfoDetail = ({
                 <div className="col-span-1 lg:col-span-2 flex items-baseline">
                   <dt className="text-muted-foreground flex items-baseline">
                     <FaUser />
-                    <span className="hidden  lg:inline ml-1">
+                    <span className="hidden text-nowrap lg:inline ml-1">
                       アーティスト:
                     </span>
                   </dt>
@@ -98,7 +98,9 @@ const NowPlayingSongInfoDetail = ({
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
                 <PiMicrophoneStageFill />
-                <span className="hidden lg:inline ml-1">歌った人:</span>
+                <span className="hidden text-nowrap lg:inline ml-1">
+                  歌った人:
+                </span>
               </dt>
             </div>
             <div className="col-span-11 lg:col-span-10">
@@ -133,7 +135,9 @@ const NowPlayingSongInfoDetail = ({
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
                 <FaYoutube />
-                <span className="hidden lg:inline ml-1">動画タイトル:</span>
+                <span className="hidden text-nowrap lg:inline ml-1">
+                  動画タイトル:
+                </span>
               </dt>
             </div>
             <div className="col-span-11 lg:col-span-10">
@@ -155,7 +159,9 @@ const NowPlayingSongInfoDetail = ({
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
                 <FaCalendar />
-                <span className="hidden lg:inline ml-1">配信日:</span>
+                <span className="hidden text-nowrap lg:inline ml-1">
+                  配信日:
+                </span>
               </dt>
             </div>
             <div className="col-span-11 lg:col-span-10">
@@ -198,7 +204,7 @@ const NowPlayingSongInfoDetail = ({
             <div className="col-span-1 lg:col-span-2 flex items-baseline">
               <dt className="text-muted-foreground flex items-baseline">
                 <FaTag />
-                <span className="hidden lg:inline ml-1">タグ:</span>
+                <span className="hidden text-nowrap lg:inline ml-1">タグ:</span>
               </dt>
             </div>
             <div className="col-span-11 lg:col-span-10">
@@ -235,7 +241,9 @@ const NowPlayingSongInfoDetail = ({
                 <div className="col-span-1 lg:col-span-2 flex items-baseline">
                   <dt className="text-muted-foreground flex items-baseline">
                     <FaBook />
-                    <span className="hidden lg:inline ml-1">追加情報:</span>
+                    <span className="hidden text-nowrap lg:inline ml-1">
+                      追加情報:
+                    </span>
                   </dt>
                 </div>
                 <div className="col-span-11 lg:col-span-10">
@@ -259,7 +267,7 @@ const NowPlayingSongInfoDetail = ({
                 <div className="col-span-1 lg:col-span-2 flex items-baseline">
                   <dt className="text-muted-foreground flex items-baseline">
                     <IoTime />
-                    <span className="hidden lg:inline ml-1">
+                    <span className="hidden text-nowrap lg:inline ml-1">
                       タイムスタンプ:
                     </span>
                   </dt>
