@@ -44,11 +44,11 @@ export default function PlayerSection({
   setSearchTerm,
 }: PlayerSectionProps) {
   return (
-    <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full">
+    <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full pr-0">
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
-        className="flex flex-col h-full w-full bg-background"
+        className="flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
         defer
       >
         {/* YouTube Player */}
