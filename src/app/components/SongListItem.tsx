@@ -23,7 +23,9 @@ const SongListItem = React.memo(
             ? "bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300"
             : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
         }`}
-        onClick={() => changeCurrentSong(song, false)}
+        onClick={() => {
+          changeCurrentSong(song, false);
+        }}
         data-video-id={song.video_id}
         data-start-time={song.start}
         data-title={song.title}

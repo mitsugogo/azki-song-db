@@ -58,6 +58,7 @@ export default function MainPlayer() {
     previousSong,
     nextSong,
     isPlaying,
+    playerKey,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,
@@ -162,6 +163,7 @@ export default function MainPlayer() {
         setOpenShareModal={setOpenShareModal}
         setSearchTerm={setSearchTerm}
         isPlaying={isPlaying}
+        playerKey={playerKey}
       />
 
       <SearchAndSongList
