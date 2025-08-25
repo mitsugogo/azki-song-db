@@ -19,6 +19,7 @@ type PlayerSectionProps = {
   songs: Song[];
   searchTerm: string;
   isPlaying: boolean;
+  playerKey: number;
   handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
   playRandomSong: (songList: Song[]) => void;
@@ -36,6 +37,7 @@ export default function PlayerSection({
   songs,
   searchTerm,
   isPlaying,
+  playerKey,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
@@ -56,7 +58,7 @@ export default function PlayerSection({
           <div className="absolute top-0 left-0 w-full h-full">
             {currentSong && (
               <YouTubePlayer
-                key="youtube-player"
+                key={`youtube-player-${playerKey}`}
                 song={currentSong}
                 onStateChange={handleStateChange}
               />

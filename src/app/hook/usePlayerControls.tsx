@@ -13,6 +13,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const [previousSong, setPreviousSong] = useState<Song | null>(null);
   const [nextSong, setNextSong] = useState<Song | null>(null);
 
+  const [playerKey, setPlayerKey] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   const currentSongInfoRef = useRef(currentSongInfo);
@@ -37,9 +39,24 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     []
   );
 
+  // 現在の楽曲が変わったらtitleを変更する
+  useEffect(() => {
+    const title =
+      isPlaying && currentSongInfo
+        ? `♪${currentSongInfo.title} / ${currentSongInfo.artist} - AZKi Song Database`
+        : "AZKi Song Database";
+
+    document.title = title;
+  }, [currentSongInfo, isPlaying]);
+
   const sortedAllSongs = useMemo(() => {
     return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
   }, [allSongs]);
+
+  // 強制的にPlayerをリセットする
+  const resetPlayer = useCallback(() => {
+    setPlayerKey((prevKey) => prevKey + 1);
+  }, []);
 
   const scrollToTargetSong = (song: Song | null) => {
     if (!song) return;
@@ -70,10 +87,14 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       scrollToTargetSong(song);
 
       if (!infoOnly) {
+        // 再生開始した時と同じ曲だと同一になるのでリセットをかける
+        if (currentSong === song) {
+          resetPlayer();
+        }
         setCurrentSong(song);
       }
     },
-    [songs, setPreviousAndNextSongs]
+    [songs, setPreviousAndNextSongs, currentSong, resetPlayer]
   );
 
   const playRandomSong = useCallback(
@@ -202,6 +223,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     previousSong,
     nextSong,
     isPlaying,
+    playerKey,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,

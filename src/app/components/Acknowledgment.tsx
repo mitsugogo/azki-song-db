@@ -95,6 +95,22 @@ const Acknowledgment = () => {
         </List>
       </div>
 
+      <h3 className="mt-4 font-semibold">更新履歴</h3>
+
+      <div className="text-sm text-muted">
+        <p>
+          <Link
+            href="https://github.com/mitsugogo/azki-song-db/blob/main/CHANGELOG.md"
+            className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub className="inline-block mr-1" />
+            CHANGELOG
+          </Link>
+        </p>
+      </div>
+
       <h3 className="mt-4 font-semibold">管理</h3>
 
       <div className="text-sm text-muted">

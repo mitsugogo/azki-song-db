@@ -203,7 +203,7 @@ export default function StatisticsPage() {
               fill={true}
             />
           </div>
-          <div className="flex flex-grow flex-col w-full gap-1 lg:gap-2">
+          <div className="flex flex-grow flex-col w-full gap-1 lg:gap-0">
             <span className="text-sm hidden lg:inline">
               <span className="">{lastVideo.video_title}</span>
             </span>
@@ -256,7 +256,7 @@ export default function StatisticsPage() {
                   {songCount.song.artist}
                 </TableCell>
                 <TableCell>{songCount.count}</TableCell>
-                <TableCell>
+                <TableCell className="p-3">
                   {renderLastVideoCell(songCount.lastVideo)}
                 </TableCell>
               </TableRow>
@@ -280,7 +280,7 @@ export default function StatisticsPage() {
                   </Link>
                 </TableCell>
                 <TableCell>{artistCount.count}</TableCell>
-                <TableCell>
+                <TableCell className="p-3">
                   {renderLastVideoCell(artistCount.lastVideo)}
                 </TableCell>
               </TableRow>
@@ -304,7 +304,7 @@ export default function StatisticsPage() {
                   </Link>
                 </TableCell>
                 <TableCell>{originalSongCount.count}</TableCell>
-                <TableCell>
+                <TableCell className="p-3">
                   {renderLastVideoCell(originalSongCount.lastVideo)}
                 </TableCell>
               </TableRow>
@@ -327,7 +327,9 @@ export default function StatisticsPage() {
                   </Link>
                 </TableCell>
                 <TableCell>{tag.count}</TableCell>
-                <TableCell>{renderLastVideoCell(tag.lastVideo)}</TableCell>
+                <TableCell className="p-3">
+                  {renderLastVideoCell(tag.lastVideo)}
+                </TableCell>
               </TableRow>
             )
           )}
@@ -353,7 +355,7 @@ export default function StatisticsPage() {
                       milestone.lastVideo.broadcast_at
                     ).toLocaleDateString()}
                 </TableCell>
-                <TableCell>
+                <TableCell className="p-3">
                   {renderLastVideoCell(milestone.lastVideo)}
                 </TableCell>
               </TableRow>
