@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/mitsugogo/azki-song-db/compare/v0.1.7...v0.1.8) (2025-08-25)
+
+
+### Bug Fixes
+
+* 再生開始した動画から2曲目に行くと開始曲に戻れないバグを修正 [#83](https://github.com/mitsugogo/azki-song-db/issues/83) ([71ac0b8](https://github.com/mitsugogo/azki-song-db/commit/71ac0b8bc053a2a97d503fd3c8fe850a8fa87d26))
+
 ### [0.1.7](https://github.com/mitsugogo/azki-song-db/compare/v0.1.6...v0.1.7) (2025-08-24)
 
 
