@@ -117,7 +117,7 @@ function DataTable<T extends object>({
   data: T[];
   caption: string;
   description: string;
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T, unknown>[];
   loading: boolean;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
