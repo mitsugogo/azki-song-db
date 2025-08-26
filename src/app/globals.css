@@ -1,7 +1,10 @@
 @import "tailwindcss";
+@import "flowbite/src/themes/default";
 @import "overlayscrollbars/overlayscrollbars.css";
 @plugin "flowbite-react/plugin/tailwindcss";
+@plugin "flowbite/plugin";
 @source "../../.flowbite-react/class-list.json";
+@source "../node_modules/flowbite";
 
 @theme {
   --color-primary-50: #fdf2f7;
