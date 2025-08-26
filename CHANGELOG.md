@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.9](https://github.com/mitsugogo/azki-song-db/compare/v0.1.8...v0.1.9) (2025-08-26)
+
+
+### Features
+
+* 統計情報のtableで検索・ソートが出来るように ([b316b68](https://github.com/mitsugogo/azki-song-db/commit/b316b68a701d1e30c5fdb2ac9f9186c47d697fd1))
+
 ### [0.1.8](https://github.com/mitsugogo/azki-song-db/compare/v0.1.7...v0.1.8) (2025-08-25)
 
 
