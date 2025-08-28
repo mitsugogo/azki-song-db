@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.10](https://github.com/mitsugogo/azki-song-db/compare/v0.1.9...v0.1.10) (2025-08-28)
+
+
+### Features
+
+* 「収録動画一覧」を追加 ([4d28d6f](https://github.com/mitsugogo/azki-song-db/commit/4d28d6f516d04263420d16771f7d7f395886aae7))
+
 ### [0.1.9](https://github.com/mitsugogo/azki-song-db/compare/v0.1.8...v0.1.9) (2025-08-26)
 
 
