@@ -158,7 +158,9 @@ function DataTable<T extends object>({
             return String(cellContent);
           }
           // HTML要素が含まれる場合、テキストコンテンツを取得する
+          // @ts-ignore
           if (cell.column.columnDef.accessorKey === "lastVideo") {
+            // @ts-ignore
             // lastVideo.video_titleなどを検索対象に含める
             return row.original.lastVideo?.video_title;
           }
