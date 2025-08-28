@@ -35,6 +35,8 @@ import {
   ColumnDef,
 } from "@tanstack/react-table";
 
+import useDebounce from "../hook/useDebounce";
+
 type StatisticsItem = {
   key: string;
   count: number;
@@ -124,7 +126,8 @@ function DataTable<
   initialSortColumnId?: string;
   initialSortDirection?: "asc" | "desc";
 }) {
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const debouncedFilter = useDebounce(inputValue, 300);
 
   const table = useReactTable({
     data,
@@ -135,9 +138,9 @@ function DataTable<
         : [],
     },
     state: {
-      globalFilter,
+      globalFilter: debouncedFilter,
     },
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: setInputValue,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     // getPaginationRowModel: getPaginationRowModel(),
@@ -189,8 +192,8 @@ function DataTable<
           <div className="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
             <TextInput
               placeholder="検索..."
-              value={globalFilter ?? ""}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              value={inputValue ?? ""}
+              onChange={(e) => setInputValue(e.target.value)}
               className="max-w-xs"
             />
           </div>
