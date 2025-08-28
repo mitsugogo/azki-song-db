@@ -143,39 +143,30 @@ function DataTable<
     // getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, columnId, filterValue) => {
-      // フィルターの対象となる列の値を全て文字列化して結合
-      const allValues = row
-        .getVisibleCells()
-        .map((cell) => {
-          // flexRenderでレンダリングされるHTMLやコンポーネントを取得
-          const cellContent = flexRender(
-            cell.column.columnDef.cell,
-            cell.getContext()
-          );
-          // その内容からプレーンテキストを抽出
-          if (
-            typeof cellContent === "string" ||
-            typeof cellContent === "number"
-          ) {
-            return String(cellContent);
-          }
-          // HTML要素が含まれる場合、テキストコンテンツを取得する
-          const columnDef = cell.column.columnDef;
+      // 検索文字列を小文字に変換
+      const lowercasedFilterValue = filterValue.toLowerCase();
 
-          if (
-            "accessorKey" in columnDef &&
-            columnDef.accessorKey === "lastVideo"
-          ) {
-            return row.original.lastVideo?.video_title;
-          }
-          return "";
-        })
-        .join(" ")
-        .toLowerCase();
+      // 行内の全てのセルを対象にループ
+      return row.getVisibleCells().some((cell) => {
+        // セルの生のデータ値を取得
+        const cellValue = cell.getValue();
 
-      // 抽出したテキストからHTMLタグを削除し、フィルター値をチェック
-      const cleanedText = allValues.replace(/<[^>]*>/g, "");
-      return cleanedText.includes(filterValue.toLowerCase());
+        // 値が文字列または数値の場合、検索を実行
+        if (typeof cellValue === "string" || typeof cellValue === "number") {
+          return String(cellValue)
+            .toLowerCase()
+            .includes(lowercasedFilterValue);
+        }
+
+        // lastVideo列の場合、video_titleを検索対象に追加
+        if (cell.column.id === "lastVideo") {
+          const videoTitle = row.original?.lastVideo?.video_title;
+          if (typeof videoTitle === "string") {
+            return videoTitle.toLowerCase().includes(lowercasedFilterValue);
+          }
+        }
+        return false;
+      });
     },
   });
 
@@ -195,14 +186,14 @@ function DataTable<
           <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
             {description}
           </p>
-          <p className="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+          <div className="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
             <TextInput
               placeholder="検索..."
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="max-w-xs"
             />
-          </p>
+          </div>
         </caption>
 
         <TableHead className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-700">
