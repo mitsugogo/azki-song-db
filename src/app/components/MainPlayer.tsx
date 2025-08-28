@@ -105,6 +105,13 @@ export default function MainPlayer() {
       } else {
         playRandomSong(filteredSongs);
       }
+    } else if (videoId) {
+      const targetSong = filteredSongs.find(
+        (song) => song.video_id === videoId
+      );
+      if (targetSong) {
+        changeCurrentSong(targetSong);
+      }
     } else {
       playRandomSong(filteredSongs);
     }

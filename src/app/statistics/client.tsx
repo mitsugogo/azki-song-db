@@ -19,7 +19,7 @@ import {
 import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 
-import { FaStar } from "react-icons/fa6";
+import { FaDatabase, FaStar, FaYoutube } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
@@ -74,11 +74,9 @@ const createStatistics = <T extends StatisticsItem>(
   return sortedData as Array<T & StatisticsItem>;
 };
 
-const renderLastVideoCell = (lastVideo: Song | null) => {
+const renderLastVideoCell = (lastVideo: Song | null, hiddenTitle = false) => {
   if (!lastVideo) return <span className="text-sm">なし</span>;
-  const videoUrl = `${lastVideo.video_uri}${
-    lastVideo.start ? `&t=${lastVideo.start}s` : ""
-  }`;
+  const videoUrl = `${lastVideo.video_uri}`;
   return (
     <a
       href={videoUrl}
@@ -95,7 +93,7 @@ const renderLastVideoCell = (lastVideo: Song | null) => {
           />
         </div>
         <div className="flex flex-grow flex-col w-full gap-1 lg:gap-0">
-          <span className="text-xs hidden lg:inline">
+          <span className={`text-xs ${hiddenTitle ? "hidden" : ""} lg:inline`}>
             <span className="">{lastVideo.video_title}</span>
           </span>
           <span className="text-xs text-muted-foreground">
@@ -113,24 +111,66 @@ function DataTable<T extends object>({
   description,
   columns,
   loading,
+  initialSortColumnId,
+  initialSortDirection,
 }: {
   data: T[];
   caption: string;
   description: string;
   columns: ColumnDef<T, unknown>[];
   loading: boolean;
+  initialSortColumnId?: string;
+  initialSortDirection?: "asc" | "desc";
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     data,
     columns,
-    state: { globalFilter },
+    initialState: {
+      sorting: initialSortColumnId
+        ? [{ id: initialSortColumnId, desc: initialSortDirection === "desc" }]
+        : [],
+    },
+    state: {
+      globalFilter,
+    },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     // getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, columnId, filterValue) => {
+      // フィルターの対象となる列の値を全て文字列化して結合
+      const allValues = row
+        .getVisibleCells()
+        .map((cell) => {
+          // flexRenderでレンダリングされるHTMLやコンポーネントを取得
+          const cellContent = flexRender(
+            cell.column.columnDef.cell,
+            cell.getContext()
+          );
+          // その内容からプレーンテキストを抽出
+          if (
+            typeof cellContent === "string" ||
+            typeof cellContent === "number"
+          ) {
+            return String(cellContent);
+          }
+          // HTML要素が含まれる場合、テキストコンテンツを取得する
+          if (cell.column.columnDef.accessorKey === "lastVideo") {
+            // lastVideo.video_titleなどを検索対象に含める
+            return row.original.lastVideo?.video_title;
+          }
+          return "";
+        })
+        .join(" ")
+        .toLowerCase();
+
+      // 抽出したテキストからHTMLタグを削除し、フィルター値をチェック
+      const cleanedText = allValues.replace(/<[^>]*>/g, "");
+      return cleanedText.includes(filterValue.toLowerCase());
+    },
   });
 
   if (loading) {
@@ -143,20 +183,22 @@ function DataTable<T extends object>({
 
   return (
     <div className="space-y-4">
-      <TextInput
-        placeholder="検索..."
-        value={globalFilter ?? ""}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-xs"
-      />
-
       <Table hoverable striped>
         <caption className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-900">
           {caption} ({data.length})
           <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
             {description}
           </p>
+          <p className="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+            <TextInput
+              placeholder="検索..."
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="max-w-xs"
+            />
+          </p>
         </caption>
+
         <TableHead className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-700">
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
@@ -204,7 +246,7 @@ function DataTable<T extends object>({
       </Table>
 
       {/* ページネーション */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <span className="text-sm">
           ページ {table.getState().pagination.pageIndex + 1} /{" "}
           {table.getPageCount()}
@@ -225,7 +267,7 @@ function DataTable<T extends object>({
             次へ
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -273,6 +315,10 @@ export default function StatisticsPage() {
           new Date(b.lastVideo?.broadcast_at || "").getTime() -
           new Date(a.lastVideo?.broadcast_at || "").getTime()
       ),
+    [songs]
+  );
+  const videoCounts = useMemo(
+    () => createStatistics(songs, (s) => s.video_id),
     [songs]
   );
 
@@ -428,6 +474,73 @@ export default function StatisticsPage() {
                 accessorKey: "lastVideo",
                 header: "最新",
                 cell: (info) => renderLastVideoCell(info.getValue<Song>()),
+              },
+            ]}
+          />
+        </TabItem>
+
+        <TabItem title="収録動画" icon={FaYoutube}>
+          <DataTable
+            loading={loading}
+            data={videoCounts}
+            caption="収録動画"
+            description="現在データベースに収録されている動画一覧です"
+            initialSortColumnId="lastVideo.broadcast_at"
+            initialSortDirection="desc"
+            columns={[
+              {
+                id: "lastVideo.video_title",
+                accessorKey: "lastVideo",
+                header: "動画",
+                sortingFn: (rowA, rowB, columnId) => {
+                  const a = rowA.original.lastVideo?.video_title || "";
+                  const b = rowB.original.lastVideo?.video_title || "";
+                  return a.localeCompare(b);
+                },
+                cell: (info) =>
+                  renderLastVideoCell(info.getValue<Song>(), false),
+              },
+              {
+                accessorKey: "lastVideo",
+                header: "再生",
+                enableSorting: false,
+                cell: (info) => (
+                  <div className="flex items-center justify-center">
+                    <span className="inline-flex gap-x-1">
+                      <Link
+                        href={`https://www.youtube.com/watch?v=${
+                          info.getValue<Song>().video_id
+                        }`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                      >
+                        <FaYoutube />
+                      </Link>
+                      <Link
+                        href={`/?v=${info.getValue<Song>().video_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                      >
+                        <FaDatabase />
+                      </Link>
+                    </span>
+                  </div>
+                ),
+              },
+              {
+                accessorKey: "count",
+                header: "曲数",
+                cell: (info) => info.getValue<number>(),
+              },
+              {
+                id: "lastVideo.broadcast_at",
+                accessorKey: "lastVideo.broadcast_at",
+                header: "配信日",
+                cell: (info) =>
+                  info.getValue<string>() &&
+                  new Date(info.getValue<string>()).toLocaleDateString(),
               },
             ]}
           />
