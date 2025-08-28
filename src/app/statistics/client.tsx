@@ -105,7 +105,9 @@ const renderLastVideoCell = (lastVideo: Song | null, hiddenTitle = false) => {
   );
 };
 
-function DataTable<T extends object>({
+function DataTable<
+  T extends { lastVideo?: { video_title: string } } | StatisticsItem
+>({
   data,
   caption,
   description,
@@ -158,10 +160,12 @@ function DataTable<T extends object>({
             return String(cellContent);
           }
           // HTML要素が含まれる場合、テキストコンテンツを取得する
-          // @ts-expect-error
-          if (cell.column.columnDef.accessorKey === "lastVideo") {
-            // @ts-expect-error
-            // lastVideo.video_titleなどを検索対象に含める
+          const columnDef = cell.column.columnDef;
+
+          if (
+            "accessorKey" in columnDef &&
+            columnDef.accessorKey === "lastVideo"
+          ) {
             return row.original.lastVideo?.video_title;
           }
           return "";
