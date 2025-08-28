@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.com/mitsugogo/azki-song-db/compare/v0.1.10...v0.1.11) (2025-08-28)
+
+
+### Bug Fixes
+
+* 入力が重いのを調整 ([7d1889e](https://github.com/mitsugogo/azki-song-db/commit/7d1889e7259950f69bdc926a9a53c25a9314e61b))
+* 検索ワードが機能しない場合があったのを修正 ([624ac43](https://github.com/mitsugogo/azki-song-db/commit/624ac43e919066a56a9872ca0014099f4d7158c8))
+
 ### [0.1.10](https://github.com/mitsugogo/azki-song-db/compare/v0.1.9...v0.1.10) (2025-08-28)
 
 
