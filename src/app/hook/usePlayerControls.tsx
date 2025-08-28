@@ -20,7 +20,6 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const currentSongInfoRef = useRef(currentSongInfo);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
-  const changeVideoIdCountRef = useRef(0);
 
   useEffect(() => {
     currentSongInfoRef.current = currentSongInfo;
@@ -164,11 +163,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
               foundSong.video_id !== currentSongInfoRef.current?.video_id ||
               foundSong.title !== currentSongInfoRef.current?.title
             ) {
-              changeVideoIdCountRef.current++;
-              if (changeVideoIdCountRef.current > 1) {
-                changeCurrentSong(foundSong, true);
-                changeVideoIdCountRef.current = 0;
-              }
+              changeCurrentSong(foundSong, true);
             }
           } else if (nextSong) {
             changeCurrentSong(nextSong);
