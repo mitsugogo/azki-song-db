@@ -408,7 +408,18 @@ export default function StatisticsPage() {
             caption="オリ曲"
             description="オリジナル楽曲の歌った回数です"
             columns={[
-              { accessorKey: "key", header: "曲名" },
+              {
+                accessorKey: "key",
+                header: "曲名",
+                cell: (info) => (
+                  <Link
+                    href={`/?q=title:${info.getValue<string>()}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    {info.getValue<string>()}
+                  </Link>
+                ),
+              },
               { accessorKey: "count", header: "回数" },
               {
                 accessorKey: "lastVideo",
@@ -431,9 +442,14 @@ export default function StatisticsPage() {
                 accessorKey: "key",
                 header: "タグ",
                 cell: (info) => (
-                  <Badge className="inline lg:whitespace-nowrap">
-                    {info.getValue<string>()}
-                  </Badge>
+                  <Link
+                    href={`/?q=tag:${info.getValue<string>()}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    <Badge className="inline lg:whitespace-nowrap">
+                      {info.getValue<string>()}
+                    </Badge>
+                  </Link>
                 ),
               },
               { accessorKey: "count", header: "回数" },
@@ -458,9 +474,14 @@ export default function StatisticsPage() {
                 accessorKey: "key",
                 header: "マイルストーン",
                 cell: (info) => (
-                  <Badge className="inline lg:whitespace-nowrap">
-                    {info.getValue<string>()}
-                  </Badge>
+                  <Link
+                    href={`/?q=milestone:${info.getValue<string>()}`}
+                    className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                  >
+                    <Badge className="inline lg:whitespace-nowrap">
+                      {info.getValue<string>()}
+                    </Badge>
+                  </Link>
                 ),
               },
               {
