@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useDeferredValue } from "react";
 import { Song } from "../types/song";
 import {
   Badge,
@@ -49,26 +49,20 @@ const createStatistics = <T extends StatisticsItem>(
   keyFn: (song: Song) => string | string[],
   sortFn?: (a: T, b: T) => number
 ) => {
-  const countsMap = songs
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime()
-    )
-    .reduce((map: Map<string, T>, song: Song) => {
-      const keys = Array.isArray(keyFn(song))
-        ? (keyFn(song) as string[])
-        : [keyFn(song) as string];
-      keys.forEach((key) => {
-        map.set(key, {
-          key,
-          count: (map.get(key)?.count || 0) + 1,
-          song,
-          lastVideo: song,
-        } as T & StatisticsItem);
-      });
-      return map;
-    }, new Map<string, T & StatisticsItem>());
+  const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
+    const keys = Array.isArray(keyFn(song))
+      ? (keyFn(song) as string[])
+      : [keyFn(song) as string];
+    keys.forEach((key) => {
+      map.set(key, {
+        key,
+        count: (map.get(key)?.count || 0) + 1,
+        song,
+        lastVideo: song,
+      } as T & StatisticsItem);
+    });
+    return map;
+  }, new Map<string, T & StatisticsItem>());
 
   const sortedData = Array.from(countsMap.values()).sort(
     sortFn || ((a, b) => b.count - a.count)
@@ -280,6 +274,9 @@ export default function StatisticsPage() {
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
+  // useDeferredValueでactiveTabを遅延させる
+  const deferredActiveTab = useDeferredValue(activeTab);
+
   useEffect(() => {
     fetch("/api/songs")
       .then((res) => res.json())
@@ -343,7 +340,7 @@ export default function StatisticsPage() {
       >
         {/* 曲名別 */}
         <TabItem title="曲名別" icon={HiMusicNote}>
-          {activeTab === 0 && (
+          {deferredActiveTab === 0 && (
             <DataTable
               loading={loading}
               data={songCounts}
@@ -377,7 +374,7 @@ export default function StatisticsPage() {
 
         {/* アーティスト名別 */}
         <TabItem title="アーティスト名別" icon={HiUserCircle}>
-          {activeTab === 1 && (
+          {deferredActiveTab === 1 && (
             <DataTable
               loading={loading}
               data={artistCounts}
@@ -409,7 +406,7 @@ export default function StatisticsPage() {
 
         {/* オリ曲 */}
         <TabItem title="オリ曲" icon={HiPlay}>
-          {activeTab === 2 && (
+          {deferredActiveTab === 2 && (
             <DataTable
               loading={loading}
               data={originalSongCounts}
@@ -443,7 +440,7 @@ export default function StatisticsPage() {
 
         {/* タグ */}
         <TabItem title="タグ" icon={HiTag}>
-          {activeTab === 3 && (
+          {deferredActiveTab === 3 && (
             <DataTable
               loading={loading}
               data={tagCounts}
@@ -478,7 +475,7 @@ export default function StatisticsPage() {
 
         {/* マイルストーン */}
         <TabItem title="マイルストーン" icon={FaStar}>
-          {activeTab === 4 && (
+          {deferredActiveTab === 4 && (
             <DataTable
               loading={loading}
               data={milestoneCounts}
@@ -518,7 +515,7 @@ export default function StatisticsPage() {
         </TabItem>
 
         <TabItem title="収録動画" icon={FaYoutube}>
-          {activeTab === 5 && (
+          {deferredActiveTab === 5 && (
             <DataTable
               loading={loading}
               data={videoCounts}
