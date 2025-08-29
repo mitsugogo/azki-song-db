@@ -100,7 +100,7 @@ const SongsList = ({
       >
         <ul
           id="song-list"
-          className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
+          className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
         >
           {slicedSongs.map((song, index) => (
             <SongListItem

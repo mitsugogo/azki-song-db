@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
+import { VercelToolbar } from "@vercel/toolbar/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const shouldInjectToolbar = process.env.NODE_ENV === "development";
   return (
     <html
       lang="ja"
@@ -56,7 +58,10 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <ThemeModeScript />
       </head>
-      <body className={`antialiased dark:bg-gray-900`}>{children}</body>
+      <body className={`antialiased dark:bg-gray-900`}>
+        {children}
+        {shouldInjectToolbar && <VercelToolbar />}
+      </body>
     </html>
   );
 }

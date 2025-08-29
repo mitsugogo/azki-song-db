@@ -57,7 +57,7 @@ export function Header() {
         className="relative bg-primary dark:bg-primary-900 text-white"
       >
         <div className="w-full px-2 sm:px-6 lg:px-4">
-          <div className="relative flex h-16 items-center justify-between">
+          <div className="relative flex h-12 md:h-16 items-center justify-between">
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               {/* Mobile menu button*/}
               <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
