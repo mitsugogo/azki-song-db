@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.12](https://github.com/mitsugogo/azki-song-db/compare/v0.1.11...v0.1.12) (2025-08-29)
+
+
+### Features
+
+* **vercel-tools:** add vercel tools ([257632e](https://github.com/mitsugogo/azki-song-db/commit/257632edf7386d88b9f7b715798ae54e8d30a263))
+
+
+### Bug Fixes
+
+* **statistics:** レイアウト崩れ調整 ([490d958](https://github.com/mitsugogo/azki-song-db/commit/490d958a049e857ce37cd8b66c5faa3472006bac))
+* 統計情報で一部のリンクが無くなっていたのを修正 ([d8ef87a](https://github.com/mitsugogo/azki-song-db/commit/d8ef87a644af415b77d65059861a2c9f888adae9))
+
 ### [0.1.11](https://github.com/mitsugogo/azki-song-db/compare/v0.1.10...v0.1.11) (2025-08-28)
 
 
