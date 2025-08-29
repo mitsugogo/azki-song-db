@@ -66,7 +66,7 @@ export default function PlayerSection({
           </div>
         </div>
 
-        <div className="flex flex-col p-2 pl-2 lg:px-0 text-sm text-foreground">
+        <div className="flex flex-col p-2 pl-2 pb-0 lg:px-0 text-sm text-foreground">
           {/* Previous/Next Song Display (Desktop) */}
           <div className="hidden lg:flex justify-between gap-2 flex-nowrap">
             {/* Previous Song */}
