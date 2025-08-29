@@ -14,4 +14,6 @@ const withPWA = require("next-pwa")({
   disable: process.env.NODE_ENV === "development",
 });
 
-export default withFlowbiteReact(withPWA(nextConfig));
+const withVercelToolbar = require("@vercel/toolbar/plugins/next")();
+
+export default withVercelToolbar(withFlowbiteReact(withPWA(nextConfig)));
