@@ -71,7 +71,7 @@ export default function SearchAndSongList({
         >
           ランダムで他の曲にする
         </Button>
-        <div className="mb-4 md:mt-2 lg:mt-0">
+        <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
           {/* Search Bar */}
           <div className="relative">
             <TextInput

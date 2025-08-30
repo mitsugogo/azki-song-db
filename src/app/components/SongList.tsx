@@ -100,7 +100,7 @@ const SongsList = ({
       >
         <ul
           id="song-list"
-          className="song-list grid grid-cols-3 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
+          className="song-list grid grid-cols-1 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
         >
           {slicedSongs.map((song, index) => (
             <SongListItem
@@ -117,7 +117,7 @@ const SongsList = ({
         </ul>
       </OverlayScrollbarsComponent>
       {totalPage > 1 && (
-        <div className="flex justify-center mt-2 mb-2 lg:mb-0">
+        <div className="flex justify-center mt-0 md:mt-2 mb-2 lg:mb-0">
           <div className="mt-2 inline-flex items-center -space-x-px mr-1">
             <Button
               className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
