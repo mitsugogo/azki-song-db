@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/mitsugogo/azki-song-db/compare/v1.0.0...v1.0.1) (2025-08-30)
+
+
+### Bug Fixes
+
+* **about:** このサイトについての文言調整 ([096ced5](https://github.com/mitsugogo/azki-song-db/commit/096ced53c54df5b93139859b31ce645b7ca0c592))
+* **statistics:** デフォルトソートを明示するように ([1da2801](https://github.com/mitsugogo/azki-song-db/commit/1da2801cacb872ececa521b2347fd389942bd2b2))
+* **statistics:** 最新動画が最新のものじゃないバグを修正 ([eed7a86](https://github.com/mitsugogo/azki-song-db/commit/eed7a86b78f4ece78b0054c652aa1bf384203021))
+
 ## [1.0.0](https://github.com/mitsugogo/azki-song-db/compare/v0.2.0...v1.0.0) (2025-08-29)
 
 ## [0.2.0](https://github.com/mitsugogo/azki-song-db/compare/v0.1.12...v0.2.0) (2025-08-29)
