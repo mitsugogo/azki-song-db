@@ -58,7 +58,10 @@ const createStatistics = <T extends StatisticsItem>(
         key,
         count: (map.get(key)?.count || 0) + 1,
         song,
-        lastVideo: song,
+        lastVideo:
+          (map.get(key)?.lastVideo?.broadcast_at ?? 0) > song.broadcast_at
+            ? map.get(key)?.lastVideo
+            : song,
       } as T & StatisticsItem);
     });
     return map;
