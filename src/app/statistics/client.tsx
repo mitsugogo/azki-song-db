@@ -349,6 +349,8 @@ export default function StatisticsPage() {
               data={songCounts}
               caption="曲名別"
               description="曲名ごとで歌った回数です"
+              initialSortColumnId="count"
+              initialSortDirection="desc"
               columns={[
                 {
                   accessorKey: "key",
@@ -383,6 +385,8 @@ export default function StatisticsPage() {
               data={artistCounts}
               caption="アーティスト名別"
               description="アーティストごとで歌った回数です"
+              initialSortColumnId="count"
+              initialSortDirection="desc"
               columns={[
                 {
                   accessorKey: "key",
@@ -415,6 +419,8 @@ export default function StatisticsPage() {
               data={originalSongCounts}
               caption="オリ曲"
               description="オリジナル楽曲の歌った回数です"
+              initialSortColumnId="count"
+              initialSortDirection="desc"
               columns={[
                 {
                   accessorKey: "key",
@@ -449,6 +455,8 @@ export default function StatisticsPage() {
               data={tagCounts}
               caption="タグ"
               description="タグがつけられている動画です"
+              initialSortColumnId="count"
+              initialSortDirection="desc"
               columns={[
                 {
                   accessorKey: "key",
@@ -464,7 +472,7 @@ export default function StatisticsPage() {
                     </Link>
                   ),
                 },
-                { accessorKey: "count", header: "回数" },
+                { accessorKey: "count", header: "収録数" },
                 {
                   accessorKey: "lastVideo",
                   header: "最新",
@@ -484,6 +492,8 @@ export default function StatisticsPage() {
               data={milestoneCounts}
               caption="マイルストーン"
               description="活動の節目となった配信"
+              initialSortColumnId="broadcast_at"
+              initialSortDirection="desc"
               columns={[
                 {
                   accessorKey: "key",
@@ -500,6 +510,7 @@ export default function StatisticsPage() {
                   ),
                 },
                 {
+                  id: "broadcast_at",
                   accessorKey: "lastVideo.broadcast_at",
                   header: "達成日",
                   cell: (info) =>
