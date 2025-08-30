@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/mitsugogo/azki-song-db/compare/v1.1.0...v1.2.0) (2025-08-30)
+
+
+### Features
+
+* **statistics:** カバー曲リストを追加 ([901d173](https://github.com/mitsugogo/azki-song-db/commit/901d1734cff233741870687414c50d3992e01dfd))
+
 ## [1.1.0](https://github.com/mitsugogo/azki-song-db/compare/v1.0.2...v1.1.0) (2025-08-30)
 
 
