@@ -345,6 +345,17 @@ export default function StatisticsPage() {
     );
   }, [songs]);
 
+  const coverSongCountsByReleaseDate = useMemo(() => {
+    const covers = songs.filter((s) => s.tags.includes("カバー曲"));
+    return createStatistics(
+      covers,
+      (s) => s.title,
+      (a, b) =>
+        new Date(b.firstVideo.broadcast_at).getTime() -
+        new Date(a.firstVideo.broadcast_at).getTime()
+    );
+  }, [songs]);
+
   return (
     <OverlayScrollbarsComponent
       element="div"
@@ -468,51 +479,9 @@ export default function StatisticsPage() {
           )}
         </TabItem>
 
-        {/* Discography */}
-        <TabItem title="Discography" icon={FaCompactDisc}>
-          {deferredActiveTab === 3 && (
-            <DataTable
-              loading={loading}
-              data={originalSongCountsByReleaseDate}
-              caption="Discography"
-              description="オリジナル楽曲のリリース日 または 動画初公開日 です"
-              initialSortColumnId="broadcast_at"
-              initialSortDirection="desc"
-              columns={[
-                {
-                  accessorKey: "song.title",
-                  header: "曲名",
-                  cell: (info) => (
-                    <Link
-                      href={`/?q=title:${info.getValue<string>()}`}
-                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                    >
-                      {info.getValue<string>()}
-                    </Link>
-                  ),
-                },
-                {
-                  id: "broadcast_at",
-                  accessorKey: "firstVideo.broadcast_at",
-                  header: "リリース日/初公開日",
-                  cell: (info) =>
-                    new Date(info.getValue<number>()).toLocaleDateString(),
-                },
-                {
-                  id: "lastVideo.broadcast_at",
-                  accessorKey: "lastVideo",
-                  header: "最新",
-                  cell: (info) =>
-                    renderLastVideoCell(info.getValue<Song>(), true),
-                },
-              ]}
-            />
-          )}
-        </TabItem>
-
         {/* タグ */}
         <TabItem title="タグ" icon={HiTag}>
-          {deferredActiveTab === 4 && (
+          {deferredActiveTab === 3 && (
             <DataTable
               loading={loading}
               data={tagCounts}
@@ -549,7 +518,7 @@ export default function StatisticsPage() {
 
         {/* マイルストーン */}
         <TabItem title="マイルストーン" icon={FaStar}>
-          {deferredActiveTab === 5 && (
+          {deferredActiveTab === 4 && (
             <DataTable
               loading={loading}
               data={milestoneCounts}
@@ -592,7 +561,7 @@ export default function StatisticsPage() {
         </TabItem>
 
         <TabItem title="収録動画" icon={FaYoutube}>
-          {deferredActiveTab === 6 && (
+          {deferredActiveTab === 5 && (
             <DataTable
               loading={loading}
               data={videoCounts}
@@ -654,6 +623,102 @@ export default function StatisticsPage() {
                   cell: (info) =>
                     info.getValue<string>() &&
                     new Date(info.getValue<string>()).toLocaleDateString(),
+                },
+              ]}
+            />
+          )}
+        </TabItem>
+
+        {/* Discography */}
+        <TabItem title="Discography" icon={FaCompactDisc}>
+          {deferredActiveTab === 6 && (
+            <DataTable
+              loading={loading}
+              data={originalSongCountsByReleaseDate}
+              caption="Discography"
+              description="オリジナル楽曲のリリース日 または 動画初公開日 です"
+              initialSortColumnId="broadcast_at"
+              initialSortDirection="desc"
+              columns={[
+                {
+                  accessorKey: "song.title",
+                  header: "曲名",
+                  cell: (info) => (
+                    <Link
+                      href={`/?q=title:${info.getValue<string>()}`}
+                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                    >
+                      {info.getValue<string>()}
+                    </Link>
+                  ),
+                },
+                {
+                  id: "broadcast_at",
+                  accessorKey: "firstVideo.broadcast_at",
+                  header: "リリース日/初公開日",
+                  cell: (info) =>
+                    new Date(info.getValue<number>()).toLocaleDateString(),
+                },
+                {
+                  id: "lastVideo.broadcast_at",
+                  accessorKey: "lastVideo",
+                  header: "最新",
+                  cell: (info) =>
+                    renderLastVideoCell(info.getValue<Song>(), true),
+                },
+              ]}
+            />
+          )}
+        </TabItem>
+
+        {/* カバー楽曲 */}
+        <TabItem title="カバー楽曲" icon={HiMusicNote}>
+          {deferredActiveTab === 7 && (
+            <DataTable
+              loading={loading}
+              data={coverSongCountsByReleaseDate}
+              caption="カバー楽曲"
+              description="カバー楽曲のリリース日 または 動画初公開日 です"
+              initialSortColumnId="broadcast_at"
+              initialSortDirection="desc"
+              columns={[
+                {
+                  accessorKey: "song.title",
+                  header: "曲名",
+                  cell: (info) => (
+                    <Link
+                      href={`/?q=title:${info.getValue<string>()}`}
+                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500 font-semibold"
+                    >
+                      {info.getValue<string>()}
+                    </Link>
+                  ),
+                },
+                {
+                  accessorKey: "song.artist",
+                  header: "アーティスト",
+                  cell: (info) => (
+                    <Link
+                      href={`/?q=artist:${info.getValue<string>()}`}
+                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                    >
+                      {info.getValue<string>()}
+                    </Link>
+                  ),
+                },
+                {
+                  id: "broadcast_at",
+                  accessorKey: "firstVideo.broadcast_at",
+                  header: "リリース日/初公開日",
+                  cell: (info) =>
+                    new Date(info.getValue<number>()).toLocaleDateString(),
+                },
+                {
+                  id: "lastVideo.broadcast_at",
+                  accessorKey: "lastVideo",
+                  header: "最新",
+                  cell: (info) =>
+                    renderLastVideoCell(info.getValue<Song>(), true),
                 },
               ]}
             />
