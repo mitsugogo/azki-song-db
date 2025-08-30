@@ -15,26 +15,34 @@ const Acknowledgment = () => {
         </p>
       </div>
 
-      <h3 className="mt-4 font-semibold">動画について</h3>
+      <h3 className="mt-5 font-semibold">動画について</h3>
 
       <div className="text-sm text-muted mt-1">
         <p>
           動画やアーカイブはホロライブプロダクション様及び、AZKi様、各チャンネルの管理者が制作・配信したものです。
         </p>
-        <p>動画の権利は所有者に帰属します。</p>
-        <p>
-          本サイトでは、第三者による動画（いわゆる切り抜き動画）ではなく、公式のチャンネルの動画を掲載しています。
+        <p className="mt-2">
+          動画の権利は所有者に帰属します。また、制作者が動画を非公開にした場合は閲覧できなくなります。
+        </p>
+        <p className="mt-2">
+          本サイトでは、第三者による動画（いわゆる切り抜き動画）ではなく、公式で公開されている動画を掲載しています。
         </p>
       </div>
 
-      <h3 className="mt-4 font-semibold">集計について</h3>
+      <h3 className="mt-5 font-semibold">集計について</h3>
 
       <div className="text-sm text-muted mt-1">
         <p>
-          集計対象は、AZKiさんのYouTubeチャンネルや他のホロメン・ゲスト参加されたあずきんち歌枠・記念ライブ・AZKi生放送・Music
-          Video・カバーMV・御本人以外のチャンネルのゲスト出演など、AZKiさん御本人の歌唱動画を対象にしています。
+          集計対象は、YouTube上で一般公開されている歌枠・記念ライブ・生放送・Music
+          Video・カバー楽曲・MV・ゲスト出演など、AZKiさん御本人の歌唱動画を対象にしています。
         </p>
-        <p>
+        <p className="mt-2">
+          「0期生の記念ライブ」などの配信については、AZKiさんが歌唱していない部分も収録している場合があります。
+        </p>
+        <p className="mt-2">
+          メンバーシップ限定動画や非公開動画、有料配信など広く閲覧できない動画は対象外としています。
+        </p>
+        <p className="mt-2">
           集計は手作業で行っているため、更新の遅延や誤り、表記揺れなどがあるかもしれません。
         </p>
         <p>
@@ -51,7 +59,7 @@ const Acknowledgment = () => {
         </p>
       </div>
 
-      <h3 className="mt-4 font-semibold">アイコンについて</h3>
+      <h3 className="mt-5 font-semibold">アイコンについて</h3>
       <div className="text-sm text-muted mt-1">
         <p>
           アイコンは、
@@ -65,9 +73,13 @@ const Acknowledgment = () => {
           </Link>{" "}
           さんにご提供いただいたアイコンを使用しています。
         </p>
+        <p className="mt-2">
+          ソースコードはMIT
+          LICENSEですが、アイコンについては適用されませんのでご注意ください。
+        </p>
       </div>
 
-      <h3 className="mt-4 font-semibold">使用ライブラリ</h3>
+      <h3 className="mt-5 font-semibold">使用ライブラリ</h3>
       <div className="text-sm text-muted mt-1">
         <p>以下のライブラリを使用しています。</p>
         <List className="mt-2">
@@ -95,7 +107,7 @@ const Acknowledgment = () => {
         </List>
       </div>
 
-      <h3 className="mt-4 font-semibold">更新履歴</h3>
+      <h3 className="mt-5 font-semibold">更新履歴</h3>
 
       <div className="text-sm text-muted">
         <p>
@@ -111,7 +123,7 @@ const Acknowledgment = () => {
         </p>
       </div>
 
-      <h3 className="mt-4 font-semibold">管理</h3>
+      <h3 className="mt-5 font-semibold">管理者</h3>
 
       <div className="text-sm text-muted">
         <p>
