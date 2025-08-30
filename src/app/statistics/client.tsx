@@ -19,7 +19,7 @@ import {
 import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 
-import { FaDatabase, FaStar, FaYoutube } from "react-icons/fa6";
+import { FaCompactDisc, FaDatabase, FaStar, FaYoutube } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
@@ -41,6 +41,7 @@ type StatisticsItem = {
   key: string;
   count: number;
   song: Song;
+  firstVideo: Song;
   lastVideo: Song;
 };
 
@@ -58,6 +59,10 @@ const createStatistics = <T extends StatisticsItem>(
         key,
         count: (map.get(key)?.count || 0) + 1,
         song,
+        firstVideo:
+          (map.get(key)?.firstVideo?.broadcast_at ?? 0) < song.broadcast_at
+            ? map.get(key)?.firstVideo
+            : song,
         lastVideo:
           (map.get(key)?.lastVideo?.broadcast_at ?? 0) > song.broadcast_at
             ? map.get(key)?.lastVideo
@@ -324,6 +329,22 @@ export default function StatisticsPage() {
     [songs]
   );
 
+  const originalSongCountsByReleaseDate = useMemo(() => {
+    const originals = songs.filter(
+      (s) =>
+        (s.artist.split("、").some((a) => a.includes("AZKi")) &&
+          s.tags.includes("オリ曲")) ||
+        s.tags.includes("オリ曲MV")
+    );
+    return createStatistics(
+      originals,
+      (s) => s.title,
+      (a, b) =>
+        new Date(b.firstVideo.broadcast_at).getTime() -
+        new Date(a.firstVideo.broadcast_at).getTime()
+    );
+  }, [songs]);
+
   return (
     <OverlayScrollbarsComponent
       element="div"
@@ -447,9 +468,51 @@ export default function StatisticsPage() {
           )}
         </TabItem>
 
+        {/* Discography */}
+        <TabItem title="Discography" icon={FaCompactDisc}>
+          {deferredActiveTab === 3 && (
+            <DataTable
+              loading={loading}
+              data={originalSongCountsByReleaseDate}
+              caption="Discography"
+              description="オリジナル楽曲のリリース日 または 動画初公開日 です"
+              initialSortColumnId="broadcast_at"
+              initialSortDirection="desc"
+              columns={[
+                {
+                  accessorKey: "song.title",
+                  header: "曲名",
+                  cell: (info) => (
+                    <Link
+                      href={`/?q=title:${info.getValue<string>()}`}
+                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                    >
+                      {info.getValue<string>()}
+                    </Link>
+                  ),
+                },
+                {
+                  id: "broadcast_at",
+                  accessorKey: "firstVideo.broadcast_at",
+                  header: "リリース日/初公開日",
+                  cell: (info) =>
+                    new Date(info.getValue<number>()).toLocaleDateString(),
+                },
+                {
+                  id: "lastVideo.broadcast_at",
+                  accessorKey: "lastVideo",
+                  header: "最新",
+                  cell: (info) =>
+                    renderLastVideoCell(info.getValue<Song>(), true),
+                },
+              ]}
+            />
+          )}
+        </TabItem>
+
         {/* タグ */}
         <TabItem title="タグ" icon={HiTag}>
-          {deferredActiveTab === 3 && (
+          {deferredActiveTab === 4 && (
             <DataTable
               loading={loading}
               data={tagCounts}
@@ -486,7 +549,7 @@ export default function StatisticsPage() {
 
         {/* マイルストーン */}
         <TabItem title="マイルストーン" icon={FaStar}>
-          {deferredActiveTab === 4 && (
+          {deferredActiveTab === 5 && (
             <DataTable
               loading={loading}
               data={milestoneCounts}
@@ -529,7 +592,7 @@ export default function StatisticsPage() {
         </TabItem>
 
         <TabItem title="収録動画" icon={FaYoutube}>
-          {deferredActiveTab === 5 && (
+          {deferredActiveTab === 6 && (
             <DataTable
               loading={loading}
               data={videoCounts}
