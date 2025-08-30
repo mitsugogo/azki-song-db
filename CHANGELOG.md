@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/mitsugogo/azki-song-db/compare/v1.0.1...v1.0.2) (2025-08-30)
+
+
+### Bug Fixes
+
+* iOSなどでinputフォーカス時にズームしないように ([5a8c1c0](https://github.com/mitsugogo/azki-song-db/commit/5a8c1c0e9f625b0e9f4310ae17cea7ed605a375c))
+
 ### [1.0.1](https://github.com/mitsugogo/azki-song-db/compare/v1.0.0...v1.0.1) (2025-08-30)
 
 
