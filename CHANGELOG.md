@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/mitsugogo/azki-song-db/compare/v1.2.0...v1.3.0) (2025-08-31)
+
+
+### Features
+
+* **stats:** タブ切り替えでURLが変わるように ([faedf5d](https://github.com/mitsugogo/azki-song-db/commit/faedf5d2574adcb3d372ddc39d6d2a4048d1d7c5))
+
+
+### Bug Fixes
+
+* **statistics:** Discographyに一部のオリ曲が出ないバグを修正 ([5c1375b](https://github.com/mitsugogo/azki-song-db/commit/5c1375b9e465b6e3dfec01a5791a74195e894bc4))
+* 統計情報のタイトルタグ調整 ([c9faa95](https://github.com/mitsugogo/azki-song-db/commit/c9faa950be2ae1de266193e01815f3698607bce2))
+
 ## [1.2.0](https://github.com/mitsugogo/azki-song-db/compare/v1.1.0...v1.2.0) (2025-08-30)
 
 
