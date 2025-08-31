@@ -14,7 +14,6 @@ import {
   Tabs,
   TabsRef,
   TextInput,
-  Button,
 } from "flowbite-react";
 import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
@@ -331,10 +330,7 @@ export default function StatisticsPage() {
 
   const originalSongCountsByReleaseDate = useMemo(() => {
     const originals = songs.filter(
-      (s) =>
-        (s.artist.split("、").some((a) => a.includes("AZKi")) &&
-          s.tags.includes("オリ曲")) ||
-        s.tags.includes("オリ曲MV")
+      (s) => s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")
     );
     return createStatistics(
       originals,
