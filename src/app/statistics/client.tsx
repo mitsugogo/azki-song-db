@@ -352,6 +352,39 @@ export default function StatisticsPage() {
     );
   }, [songs]);
 
+  // タブ切り替えによってURLを書き換える
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const tab = url.searchParams.get("tab");
+    if (tab) {
+      tabsRef.current?.setActiveTab(parseInt(tab, 10));
+      setActiveTab(parseInt(tab, 10));
+    }
+
+    const handlePopState = () => {
+      const newUrl = new URL(window.location.href);
+      const newTab = newUrl.searchParams.get("tab");
+      if (newTab) {
+        tabsRef.current?.setActiveTab(parseInt(newTab, 10));
+        setActiveTab(parseInt(newTab, 10));
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (tabsRef.current) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", `${deferredActiveTab}`);
+      window.history.replaceState(null, "", url.toString());
+    }
+  }, [deferredActiveTab]);
+
   return (
     <OverlayScrollbarsComponent
       element="div"
@@ -595,6 +628,7 @@ export default function StatisticsPage() {
                         >
                           <FaYoutube />
                         </Link>
+                        &nbsp;
                         <Link
                           href={`/?v=${info.getValue<Song>().video_id}`}
                           target="_blank"
@@ -642,6 +676,18 @@ export default function StatisticsPage() {
                   cell: (info) => (
                     <Link
                       href={`/?q=title:${info.getValue<string>()}`}
+                      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500 font-semibold"
+                    >
+                      {info.getValue<string>()}
+                    </Link>
+                  ),
+                },
+                {
+                  accessorKey: "song.artist",
+                  header: "アーティスト",
+                  cell: (info) => (
+                    <Link
+                      href={`/?q=artist:${info.getValue<string>()}`}
                       className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
                     >
                       {info.getValue<string>()}
