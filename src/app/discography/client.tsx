@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState, useMemo, useDeferredValue } from "react";
 import { Song } from "../types/song";
-import { TabItem, Tabs, TabsRef } from "flowbite-react";
+import { Button, TabItem, Tabs, TabsRef, ToggleSwitch } from "flowbite-react";
 
-import { FaDatabase, FaYoutube } from "react-icons/fa6";
+import { FaCompactDisc, FaDatabase, FaMusic, FaYoutube } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import MilestoneBadge from "../components/MilestoneBadge";
 
 type StatisticsItem = {
   key: string;
   count: number;
+  isAlbum: boolean;
   song: Song;
   firstVideo: Song;
   lastVideo: Song;
@@ -21,25 +23,38 @@ type StatisticsItem = {
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  sortFn?: (a: T, b: T) => number
+  sortFn?: (a: T, b: T) => number,
+  groupByAlbum?: boolean
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
       ? (keyFn(song) as string[])
       : [keyFn(song) as string];
     keys.forEach((key) => {
+      const isAlbum = "album" in song && song.album;
+      let firstVideo: Song | undefined;
+      let lastVideo: Song | undefined;
+      if (groupByAlbum && isAlbum) {
+        firstVideo = map.get(key)?.firstVideo ?? song;
+        lastVideo = song;
+      } else {
+        firstVideo =
+          (map.get(key)?.firstVideo.broadcast_at ?? 0) < song.broadcast_at
+            ? map.get(key)?.firstVideo
+            : song;
+        lastVideo =
+          (map.get(key)?.lastVideo.broadcast_at ?? 0) > song.broadcast_at
+            ? map.get(key)?.lastVideo
+            : song;
+      }
+
       map.set(key, {
         key,
         count: (map.get(key)?.count || 0) + 1,
         song,
-        firstVideo:
-          (map.get(key)?.firstVideo?.broadcast_at ?? 0) < song.broadcast_at
-            ? map.get(key)?.firstVideo
-            : song,
-        lastVideo:
-          (map.get(key)?.lastVideo?.broadcast_at ?? 0) > song.broadcast_at
-            ? map.get(key)?.lastVideo
-            : song,
+        isAlbum: isAlbum,
+        firstVideo: firstVideo,
+        lastVideo: lastVideo,
       } as T & StatisticsItem);
     });
     return map;
@@ -51,85 +66,93 @@ const createStatistics = <T extends StatisticsItem>(
   return sortedData as Array<T & StatisticsItem>;
 };
 
-const renderLastVideoCell = (lastVideo: Song | null, hiddenTitle = false) => {
-  if (!lastVideo) return <span className="text-sm">なし</span>;
-  const videoUrl = `${lastVideo.video_uri}`;
-  return (
-    <a
-      href={videoUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-    >
-      <div className="md:flex md:items-center md:gap-2 flex flex-col md:flex-row">
-        <div className="flex w-full lg:w-24 max-w-[120px]">
-          <YoutubeThumbnail
-            videoId={lastVideo.video_id}
-            alt={lastVideo.video_title}
-            fill={true}
-          />
-        </div>
-        <div className="flex flex-grow flex-col w-full gap-1 lg:gap-0">
-          <span className={`text-xs ${hiddenTitle ? "hidden" : ""} md:inline`}>
-            <span className="">{lastVideo.video_title}</span>
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {new Date(lastVideo.broadcast_at).toLocaleDateString()}
-          </span>
-        </div>
-      </div>
-    </a>
-  );
-};
-
-// SongItemコンポーネントにアニメーション用のpropsを追加
 const SongItem = ({
   song,
   isVisible,
+  groupByAlbum,
 }: {
   song: StatisticsItem;
   isVisible: boolean;
+  groupByAlbum?: boolean;
 }) => {
   return (
     <div
       className={`group relative cursor-pointer shadow-lg transition-all duration-500 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
       }`}
-      title={`${song.firstVideo.video_title} (${new Date(
-        song.firstVideo.broadcast_at
-      ).toLocaleDateString()})`}
+      title={
+        song.isAlbum && groupByAlbum
+          ? `${song.firstVideo.album}${
+              song.song.album_is_compilation
+                ? ""
+                : " / " + song.firstVideo.artist
+            } (${new Date(
+              song.firstVideo.album_release_at
+            ).toLocaleDateString()})`
+          : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
+              song.firstVideo.broadcast_at
+            ).toLocaleDateString()})`
+      }
     >
-      <YoutubeThumbnail
-        videoId={song.firstVideo.video_id}
-        alt={song.firstVideo.video_title}
-        fill={true}
-      />
+      <div className="group-hover:blur-[2px] transition-all duration-300">
+        <YoutubeThumbnail
+          videoId={song.firstVideo.video_id}
+          alt={song.firstVideo.video_title}
+          fill={true}
+        />
+      </div>
       <div
         className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-20 opacity-0 group-hover:opacity-80 transition-opacity duration-300"
         onClick={() => {
           // YouTubeを開く
           window.open(
-            `https://www.youtube.com/watch?v=${song.firstVideo.video_id}`,
-            "_blank"
+            song.isAlbum && groupByAlbum
+              ? song.firstVideo.album_list_uri
+              : `https://www.youtube.com/watch?v=${song.firstVideo.video_id}`,
+            "_blank",
+            "noopener noreferrer"
           );
         }}
       >
         <div className="flex items-center justify-center h-full text-white text-center">
           <div className="flex-row text-sm">
             <div>
-              {song.song.title} - {song.song.artist}
+              <MilestoneBadge song={song.song} />
+            </div>
+            <div>
+              {song.isAlbum && groupByAlbum ? (
+                <FaCompactDisc className="inline mr-2" />
+              ) : (
+                <FaMusic className="inline mr-2" />
+              )}
+              {song.isAlbum && groupByAlbum
+                ? `${song.firstVideo.album}${
+                    song.song.album_is_compilation
+                      ? ""
+                      : " / " + song.firstVideo.artist
+                  }`
+                : `${song.firstVideo.title} / ${song.firstVideo.artist}`}
               <br />
-              {new Date(song.firstVideo.broadcast_at).toLocaleDateString()}
+              {new Date(song.lastVideo.broadcast_at).toLocaleDateString()}
+              {song.isAlbum && groupByAlbum ? `(${song.count}曲)` : ""}
             </div>
           </div>
         </div>
         <div className="absolute bottom-2 right-1 flex gap-x-2">
           <Link
-            href={`https://www.youtube.com/watch?v=${song.firstVideo.video_id}`}
+            href={
+              song.isAlbum && song.firstVideo.album_list_uri && groupByAlbum
+                ? song.firstVideo.album_list_uri
+                : `https://www.youtube.com/watch?v=${song.firstVideo.video_id}`
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="text-white"
-            title={`${song.firstVideo.video_title}`}
+            title={
+              song.isAlbum && groupByAlbum
+                ? `「${song.firstVideo.album}」をYouTubeで見る`
+                : `「${song.firstVideo.title}」をYouTubeで見る`
+            }
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -137,9 +160,17 @@ const SongItem = ({
             <FaYoutube className="w-4 h-4 mr-1" />
           </Link>
           <Link
-            href={`/?q=title:${song.song.title}+tag:オリ曲`}
+            href={
+              song.isAlbum
+                ? `/?q=album:${song.firstVideo.album}`
+                : `/?q=title:${song.firstVideo.title}+tag:オリ曲`
+            }
             className="text-white"
-            title={`${song.song.title}を再生`}
+            title={
+              song.isAlbum
+                ? `「${song.firstVideo.album}」を再生`
+                : `「${song.firstVideo.title}」を再生`
+            }
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -159,6 +190,8 @@ export default function DosographyPage() {
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
+  const [groupByAlbum, setGroupByAlbum] = useState(false);
+
   // 各タブのアイテムの表示状態を管理するstate
   const [visibleItems, setVisibleItems] = useState<boolean[][]>([[], [], []]);
   const deferredActiveTab = useDeferredValue(activeTab);
@@ -167,6 +200,16 @@ export default function DosographyPage() {
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
+        data.sort((a: Song, b: Song) => {
+          const dateA = new Date(
+            a.album_release_at || a.broadcast_at
+          ).getTime();
+          const dateB = new Date(
+            b.album_release_at || b.broadcast_at
+          ).getTime();
+          return dateB - dateA;
+        });
+
         setSongs(data);
         setLoading(false);
       });
@@ -179,54 +222,42 @@ export default function DosographyPage() {
         (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
         (s.artist.includes("AZKi") ||
           s.artist.includes("瀬名航") ||
-          s.artist.includes("Star Flower"))
+          s.artist.includes("Star Flower") ||
+          s.artist.includes("SorAZ"))
     );
     return createStatistics(
       originals,
-      (s) => s.title,
-      (a, b) =>
-        new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime()
+      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      (a, b) => {
+        return (
+          new Date(b.firstVideo.broadcast_at).getTime() -
+          new Date(a.firstVideo.broadcast_at).getTime()
+        );
+      },
+      groupByAlbum
     );
-  }, [songs]);
-
-  // SorAZとしての楽曲
-  const sorazSongCountsByReleaseDate = useMemo(() => {
-    const sorazs = songs.filter(
-      (s) =>
-        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-        s.artist.includes("SorAZ")
-    );
-    return createStatistics(
-      sorazs,
-      (s) => s.title,
-      (a, b) =>
-        new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime()
-    );
-  }, [songs]);
+  }, [songs, groupByAlbum]);
 
   const coverSongCountsByReleaseDate = useMemo(() => {
     const covers = songs.filter((s) => s.tags.includes("カバー曲"));
     return createStatistics(
       covers,
-      (s) => s.title,
+      (s) => (groupByAlbum ? s.album || s.title : s.title),
       (a, b) =>
         new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime()
+        new Date(a.firstVideo.broadcast_at).getTime(),
+      groupByAlbum
     );
-  }, [songs]);
+  }, [songs, groupByAlbum]);
 
   // スタッガードアニメーション
   useEffect(() => {
     // 最初にすべてのアイテムを非表示にする
     const newVisibleItems: boolean[][] = [[], [], []];
     newVisibleItems[activeTab] = new Array(
-      [
-        originalSongCountsByReleaseDate,
-        sorazSongCountsByReleaseDate,
-        coverSongCountsByReleaseDate,
-      ][activeTab].length
+      [originalSongCountsByReleaseDate, coverSongCountsByReleaseDate][
+        activeTab
+      ].length
     ).fill(false);
     setVisibleItems(newVisibleItems);
 
@@ -234,7 +265,6 @@ export default function DosographyPage() {
     setTimeout(() => {
       const itemsToAnimate = [
         originalSongCountsByReleaseDate,
-        sorazSongCountsByReleaseDate,
         coverSongCountsByReleaseDate,
       ][activeTab];
       itemsToAnimate.forEach((_, index) => {
@@ -251,11 +281,14 @@ export default function DosographyPage() {
   }, [
     activeTab,
     originalSongCountsByReleaseDate,
-    sorazSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   ]);
 
-  const renderContent = (data: StatisticsItem[], tabIndex: number) => {
+  const renderContent = (
+    data: StatisticsItem[],
+    tabIndex: number,
+    groupByAlbum: boolean
+  ) => {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1 lg:gap-4">
         {data.map((song, index) => (
@@ -263,6 +296,7 @@ export default function DosographyPage() {
             key={song.key}
             song={song}
             isVisible={visibleItems[tabIndex]?.[index] || false}
+            groupByAlbum={groupByAlbum}
           />
         ))}
       </div>
@@ -288,19 +322,22 @@ export default function DosographyPage() {
         Discography
       </h1>
 
+      <div className="flex items-center justify-end mb-4">
+        <ToggleSwitch
+          label="アルバムごとに表示"
+          checked={groupByAlbum}
+          onChange={setGroupByAlbum}
+        ></ToggleSwitch>
+      </div>
+
       <Tabs variant="fullWidth" ref={tabsRef} onActiveTabChange={setActiveTab}>
         <TabItem
           title={`オリジナル楽曲 (AZKi) (${originalSongCountsByReleaseDate.length})`}
         >
-          {renderContent(originalSongCountsByReleaseDate, 0)}
-        </TabItem>
-        <TabItem
-          title={`オリジナル楽曲 (SorAZ) (${sorazSongCountsByReleaseDate.length})`}
-        >
-          {renderContent(sorazSongCountsByReleaseDate, 1)}
+          {renderContent(originalSongCountsByReleaseDate, 0, groupByAlbum)}
         </TabItem>
         <TabItem title={`カバー楽曲 (${coverSongCountsByReleaseDate.length})`}>
-          {renderContent(coverSongCountsByReleaseDate, 2)}
+          {renderContent(coverSongCountsByReleaseDate, 1, groupByAlbum)}
         </TabItem>
       </Tabs>
     </OverlayScrollbarsComponent>

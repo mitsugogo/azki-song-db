@@ -18,8 +18,8 @@ export async function GET() {
         "歌枠2024!A:L",
         "歌枠2025!A:L",
         "記念ライブ系!A:L",
-        "オリ曲!A:L",
-        "カバー!A:L",
+        "オリ曲!A:O",
+        "カバー!A:O",
         "ゲスト・fesなど!A:L",
       ],
       includeGridData: true, // セルの詳細情報を含める
@@ -37,6 +37,41 @@ export async function GET() {
       return Math.round(numberValue * 24 * 60 * 60);
     }
 
+    // ヘッダー行からvalueのマッピングindexを決める
+    const headerMappers = {
+      "#": "num",
+      Enable: "enable",
+      曲名: "title",
+      アーティスト: "artist",
+      アルバム: "album",
+      アルバム発売日: "album_release_at",
+      コンピレーションアルバム: "album_is_compilation",
+      歌った人: "sing",
+      動画: "video",
+      start: "start",
+      end: "end",
+      配信日: "broadcast_at",
+      "tags（カンマ区切り）": "tags",
+      備考: "extra",
+      マイルストーン: "milestones",
+    };
+    // ヘッダー行だけ取得してみて、対応するindexを決める
+    const headerRow = rows[0];
+    const headerValues = headerRow?.values || [];
+    const headerMap: Record<string, number> = {};
+    headerValues.forEach((value, index) => {
+      const header = value?.userEnteredValue?.stringValue;
+      if (header) {
+        // headerMapperから合致するものを探してindexを求める
+        const mappedHeader = Object.entries(headerMappers).find(
+          ([key]) => key === header
+        );
+        if (mappedHeader) {
+          headerMap[mappedHeader[0]] = index;
+        }
+      }
+    });
+
     const songs = rows
       .slice(1)
       .filter((row) => {
@@ -51,24 +86,48 @@ export async function GET() {
       .map((row) => {
         const values = row.values || [];
         return {
-          title: values[2]?.userEnteredValue?.stringValue || "", // 曲名
-          artist: values[3]?.userEnteredValue?.stringValue || "", // アーティスト
-          sing: values[4]?.userEnteredValue?.stringValue || "", // 歌った人
-          video_title: values[5]?.userEnteredValue?.stringValue || "", // 動画タイトル
-          video_uri: values[5]?.hyperlink || "", // ハイパーリンクURL
+          title:
+            values[headerMap["曲名"] ?? 2]?.userEnteredValue?.stringValue || "", // 曲名
+          artist:
+            values[headerMap["アーティスト"] ?? 3]?.userEnteredValue
+              ?.stringValue || "", // アーティスト
+          sing:
+            values[headerMap["歌った人"] ?? 4]?.userEnteredValue?.stringValue ||
+            "", // 歌った人
+          album:
+            values[headerMap["アルバム"] ?? 12]?.userEnteredValue
+              ?.stringValue || "", // アルバム
+          album_list_uri: values[headerMap["アルバム"] ?? 12]?.hyperlink || "",
+          album_release_at:
+            new Date(
+              (values[headerMap["アルバム発売日"] ?? 13]?.userEnteredValue
+                ?.numberValue || 0) *
+                24 *
+                60 *
+                60 *
+                1000 +
+                new Date(1899, 11, 30).getTime()
+            ).toISOString() || "", // アルバム発売日
+          album_is_compilation:
+            values[headerMap["コンピレーションアルバム"] ?? 14]
+              ?.userEnteredValue?.boolValue || false, // コンピレーションアルバム
+          video_title:
+            values[headerMap["動画"] ?? 5]?.userEnteredValue?.stringValue || "", // 動画タイトル
+          video_uri: values[headerMap["動画"] ?? 5]?.hyperlink || "", // ハイパーリンクURL
           video_id:
-            values[5]?.hyperlink?.match(
+            values[headerMap["動画"] ?? 5]?.hyperlink?.match(
               /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=))([^&\n]{11})/
             )?.[1] || "", // 動画IDの抽出
           start: parseTimeFromNumberValue(
-            values[6]?.userEnteredValue?.numberValue || 0
+            values[headerMap["start"] ?? 6]?.userEnteredValue?.numberValue || 0
           ), // 開始時間 (秒)
           end: parseTimeFromNumberValue(
-            values[7]?.userEnteredValue?.numberValue || 0
+            values[headerMap["end"] ?? 7]?.userEnteredValue?.numberValue || 0
           ), // 終了時間 (秒)
           broadcast_at:
             new Date(
-              (values[8]?.userEnteredValue?.numberValue || 0) *
+              (values[headerMap["配信日"] ?? 8]?.userEnteredValue
+                ?.numberValue || 0) *
                 24 *
                 60 *
                 60 *
@@ -76,12 +135,18 @@ export async function GET() {
                 new Date(1899, 11, 30).getTime()
             ).toISOString() || "", // 放送日時
           tags:
-            values[9]?.userEnteredValue?.stringValue
+            values[
+              headerMap["tags（カンマ区切り）"] ?? 9
+            ]?.userEnteredValue?.stringValue
               ?.split(",")
               .map((tag) => tag.trim()) || [], // タグをカンマ区切りで分割
-          extra: values[10]?.userEnteredValue?.stringValue || "", // オプションのフィールド
+          extra:
+            values[headerMap["備考"] ?? 10]?.userEnteredValue?.stringValue ||
+            "", // オプションのフィールド
           milestones:
-            values[11]?.userEnteredValue?.stringValue
+            values[
+              headerMap["マイルストーン"] ?? 11
+            ]?.userEnteredValue?.stringValue
               ?.split(",")
               .map((val) => val.trim()) || [],
         };
