@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/mitsugogo/azki-song-db/compare/v1.3.0...v1.4.0) (2025-09-01)
+
+
+### Features
+
+* discographyページを追加 ([dc55899](https://github.com/mitsugogo/azki-song-db/commit/dc558990c8180527899739b2fedf732f1b1b0c0e))
+
+
+### Bug Fixes
+
+* **discography:** ディスコグラフィページのリデザイン ([3cc655e](https://github.com/mitsugogo/azki-song-db/commit/3cc655e9c2652c17ac1a386a000000e2c378849f))
+* **main:** ページ遷移で特定の楽曲が増殖するバグを修正 (fixed [#101](https://github.com/mitsugogo/azki-song-db/issues/101)) ([0d02491](https://github.com/mitsugogo/azki-song-db/commit/0d024913393b745b70eb03fbe666ba016c15eba4))
+* **main:** ページ遷移で特定の楽曲が増殖するバグを修正 (fixed [#101](https://github.com/mitsugogo/azki-song-db/issues/101)) ([9b74b61](https://github.com/mitsugogo/azki-song-db/commit/9b74b613e7574e0fa61be7e930e3b81a55b8ef76))
+* **main:** 検索時にヒットした楽曲が表示されないことがあったのを修正 ([610e335](https://github.com/mitsugogo/azki-song-db/commit/610e335ba911f2598fa0fdea434d58495c30a6b7))
+* **main:** 高解像度モニタでも画面いっぱいに表示するように ([11758f7](https://github.com/mitsugogo/azki-song-db/commit/11758f7fadb8a4e5795eb9ceae7a211c3bb40f38))
+* **stats:** データの持ち方の変更に伴う条件変更 ([c9d0b25](https://github.com/mitsugogo/azki-song-db/commit/c9d0b25527cea2b11a93dae1ceeadeee1b57aaa0))
+* **stats:** デフォルトをアルバム毎の表示に ([736d0d5](https://github.com/mitsugogo/azki-song-db/commit/736d0d5178c5c9e9624cb169c6a0d099f15758fb))
+* データの持ち方調整によるソート順を修正 ([02a1e7d](https://github.com/mitsugogo/azki-song-db/commit/02a1e7ded64f91bc72090ac756dcf9cf02cb4dda))
+
 ## [1.3.0](https://github.com/mitsugogo/azki-song-db/compare/v1.2.0...v1.3.0) (2025-08-31)
 
 
