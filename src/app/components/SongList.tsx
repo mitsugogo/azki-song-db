@@ -55,6 +55,9 @@ const SongsList = ({
         const page = Math.ceil((songIndex + 1) / displayPage);
         // ページを自動で切り替える
         setCurrentPage(page);
+      } else {
+        // 現在再生中の曲が見つからない場合は1ページ目に戻す
+        setCurrentPage(1);
       }
     } else {
       // currentSongInfoがnullの場合は1ページ目に戻す
