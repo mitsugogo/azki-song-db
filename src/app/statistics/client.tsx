@@ -330,7 +330,13 @@ export default function StatisticsPage() {
 
   const originalSongCountsByReleaseDate = useMemo(() => {
     const originals = songs.filter(
-      (s) => s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")
+      (s) =>
+        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+        s.sing.includes("AZKi") &&
+        (s.artist.includes("AZKi") ||
+          s.artist.includes("瀬名航") ||
+          s.artist.includes("Star Flower") ||
+          s.artist.includes("SorAZ"))
     );
     return createStatistics(
       originals,
