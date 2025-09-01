@@ -201,7 +201,7 @@ export default function DosographyPage() {
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
-  const [groupByAlbum, setGroupByAlbum] = useState(false);
+  const [groupByAlbum, setGroupByAlbum] = useState(true);
 
   // 各タブのアイテムの表示状態を管理するstate
   const [visibleItems, setVisibleItems] = useState<boolean[][]>([[], [], []]);
