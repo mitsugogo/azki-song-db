@@ -152,6 +152,13 @@ export async function GET() {
         };
       })
       .sort((a, b) => {
+        const isAlbum = "album" in a && a.album;
+        if (isAlbum && "album" in b && b.album) {
+          return (
+            new Date(b.album_release_at).getTime() -
+            new Date(a.album_release_at).getTime()
+          );
+        }
         return (
           new Date(b.broadcast_at).getTime() -
           new Date(a.broadcast_at).getTime()

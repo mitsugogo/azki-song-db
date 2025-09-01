@@ -17,6 +17,12 @@ const useSongs = () => {
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data: Song[]) => {
+        data.sort((a, b) => {
+          return (
+            new Date(b.broadcast_at).getTime() -
+            new Date(a.broadcast_at).getTime()
+          );
+        });
         setAllSongs(data);
 
         // 検索用のサジェストワードを抽出

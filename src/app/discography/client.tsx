@@ -23,7 +23,6 @@ type StatisticsItem = {
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  sortFn?: (a: T, b: T) => number,
   groupByAlbum?: boolean
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
@@ -59,10 +58,24 @@ const createStatistics = <T extends StatisticsItem>(
     });
     return map;
   }, new Map<string, T & StatisticsItem>());
+  console.log(songs);
 
-  const sortedData = Array.from(countsMap.values()).sort(
-    sortFn || ((a, b) => b.count - a.count)
-  );
+  const sortedData = groupByAlbum
+    ? Array.from(countsMap.values())
+    : Array.from(countsMap.values()).sort((a, b) => {
+        if (groupByAlbum) {
+          return (
+            new Date(b.firstVideo.album_release_at).getTime() -
+            new Date(a.firstVideo.album_release_at).getTime()
+          );
+        } else {
+          return (
+            new Date(b.firstVideo.broadcast_at).getTime() -
+            new Date(a.firstVideo.broadcast_at).getTime()
+          );
+        }
+      });
+  console.log(sortedData as Array<T & StatisticsItem>);
   return sortedData as Array<T & StatisticsItem>;
 };
 
@@ -200,16 +213,6 @@ export default function DosographyPage() {
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
-        data.sort((a: Song, b: Song) => {
-          const dateA = new Date(
-            a.album_release_at || a.broadcast_at
-          ).getTime();
-          const dateB = new Date(
-            b.album_release_at || b.broadcast_at
-          ).getTime();
-          return dateB - dateA;
-        });
-
         setSongs(data);
         setLoading(false);
       });
@@ -228,12 +231,6 @@ export default function DosographyPage() {
     return createStatistics(
       originals,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      (a, b) => {
-        return (
-          new Date(b.firstVideo.broadcast_at).getTime() -
-          new Date(a.firstVideo.broadcast_at).getTime()
-        );
-      },
       groupByAlbum
     );
   }, [songs, groupByAlbum]);
@@ -243,9 +240,6 @@ export default function DosographyPage() {
     return createStatistics(
       covers,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      (a, b) =>
-        new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime(),
       groupByAlbum
     );
   }, [songs, groupByAlbum]);
