@@ -324,7 +324,7 @@ export default function DosographyPage() {
 
       <Tabs variant="fullWidth" ref={tabsRef} onActiveTabChange={setActiveTab}>
         <TabItem
-          title={`オリジナル楽曲 (AZKi) (${originalSongCountsByReleaseDate.length})`}
+          title={`オリジナル楽曲 (${originalSongCountsByReleaseDate.length})`}
         >
           {renderContent(originalSongCountsByReleaseDate, 0, groupByAlbum)}
         </TabItem>
