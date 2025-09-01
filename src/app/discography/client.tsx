@@ -58,7 +58,6 @@ const createStatistics = <T extends StatisticsItem>(
     });
     return map;
   }, new Map<string, T & StatisticsItem>());
-  console.log(songs);
 
   const sortedData = groupByAlbum
     ? Array.from(countsMap.values())
@@ -75,7 +74,6 @@ const createStatistics = <T extends StatisticsItem>(
           );
         }
       });
-  console.log(sortedData as Array<T & StatisticsItem>);
   return sortedData as Array<T & StatisticsItem>;
 };
 
