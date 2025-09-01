@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 
 // titleタグ
 export const metadata = {
-  title: "統計情報 | AZKi Song Database",
+  title: "楽曲一覧 | AZKi Song Database",
 };
 
 export default function StatsLayout({

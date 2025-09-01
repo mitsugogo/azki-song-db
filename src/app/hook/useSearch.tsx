@@ -19,12 +19,14 @@ const useSearch = (allSongs: Song[]) => {
   const [searchTitle, setSearchTitle] = useState("");
   const [searchArtist, setSearchArtist] = useState("");
   const [searchSinger, setSearchSinger] = useState("");
+  const [searchAlbum, setSearchAlbum] = useState("");
   const [searchTag, setSearchTag] = useState("");
   const [searchMilestone, setSearchMilestone] = useState("");
 
   const searchTitleRef = useRef(searchTitle);
   const searchArtistRef = useRef(searchArtist);
   const searchSingerRef = useRef(searchSinger);
+  const searchAlbumRef = useRef(searchAlbum);
   const searchTagRef = useRef(searchTag);
   const searchMilestoneRef = useRef(searchMilestone);
 
@@ -42,6 +44,7 @@ const useSearch = (allSongs: Song[]) => {
         } = {
           "title:": (s, v) => s.title.toLowerCase().includes(v),
           "artist:": (s, v) => s.artist.toLowerCase().includes(v),
+          "album:": (s, v) => s.album.toLowerCase().includes(v),
           "sing:": (s, v) =>
             s.sing
               .toLowerCase()
@@ -72,6 +75,7 @@ const useSearch = (allSongs: Song[]) => {
         return (
           song.title.toLowerCase().includes(word) ||
           song.artist.toLowerCase().includes(word) ||
+          song.album.toLowerCase().includes(word) ||
           song.sing.toLowerCase().includes(word) ||
           song.tags.some((tag) => tag.toLowerCase().includes(word)) ||
           song.video_title.toLowerCase().includes(word) ||
@@ -88,6 +92,7 @@ const useSearch = (allSongs: Song[]) => {
     const newSearchTerm = [
       searchTitleRef.current && `title:${searchTitleRef.current}`,
       searchArtistRef.current && `artist:${searchArtistRef.current}`,
+      searchAlbumRef.current && `album:${searchAlbumRef.current}`,
       searchTagRef.current && `tag:${searchTagRef.current}`,
       searchSingerRef.current && `sing:${searchSingerRef.current}`,
       searchMilestoneRef.current && `milestone:${searchMilestoneRef.current}`,
@@ -124,6 +129,8 @@ const useSearch = (allSongs: Song[]) => {
     setSearchTitle,
     searchArtist,
     setSearchArtist,
+    searchAlbum,
+    setSearchAlbum,
     searchSinger,
     setSearchSinger,
     searchTag,

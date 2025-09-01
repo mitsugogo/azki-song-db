@@ -3,7 +3,7 @@
 import { Button, Pagination } from "flowbite-react";
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
@@ -18,35 +18,55 @@ const SongsList = ({
   currentSongInfo,
   changeCurrentSong,
 }: SongListProps) => {
-  const displayPage = 204; // 横に2か3か4で並ぶのでタイルがキリよく並ぶ数にする
+  const displayPage = 204;
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
 
-  const [slicedSongs, setSlicedSongs] = useState<Song[]>([]);
+  // songsの変更時にtotalPageを計算
+  const totalPage = useMemo(() => {
+    return Math.ceil(songs.length / displayPage);
+  }, [songs, displayPage]);
 
+  // ページネーションと曲リストの同期
   const onPageChange = (page: number) => {
-    setCurrentPage(page);
-    const startIndex = (page - 1) * displayPage;
-    const endIndex = Math.min(startIndex + displayPage, songs.length + 1);
-    setSlicedSongs(songs.slice(startIndex, endIndex));
+    // ページ番号が範囲外にならないように調整
+    const newPage = Math.max(1, Math.min(page, totalPage));
+    setCurrentPage(newPage);
   };
 
-  // ページ数を計算
-  const calculateTotalPage = () => {
-    setTotalPage(Math.ceil(songs.length / displayPage));
-  };
+  // 表示する曲リストをcurrentPageに基づいて動的に生成
+  const slicedSongs = useMemo(() => {
+    const startIndex = (currentPage - 1) * displayPage;
+    const endIndex = Math.min(startIndex + displayPage, songs.length);
+    return songs.slice(startIndex, endIndex);
+  }, [songs, currentPage, displayPage]);
 
+  // songsまたはcurrentSongInfoが変更されたときにページを調整
   useEffect(() => {
-    calculateTotalPage();
-    setSlicedSongs(
-      songs.slice((currentPage - 1) * displayPage, currentPage * displayPage)
-    );
-    onPageChange(1);
-  }, [songs]);
+    if (currentSongInfo) {
+      // 現在再生中の曲が何ページ目にあるか計算
+      const songIndex = songs.findIndex(
+        (song) =>
+          song.video_id === currentSongInfo?.video_id &&
+          song.title === currentSongInfo?.title &&
+          song.start === currentSongInfo?.start
+      );
 
+      if (songIndex !== -1) {
+        const page = Math.ceil((songIndex + 1) / displayPage);
+        // ページを自動で切り替える
+        setCurrentPage(page);
+      } else {
+        // 現在再生中の曲が見つからない場合は1ページ目に戻す
+        setCurrentPage(1);
+      }
+    } else {
+      // currentSongInfoがnullの場合は1ページ目に戻す
+      setCurrentPage(1);
+    }
+  }, [songs, currentSongInfo, displayPage]);
+
+  // currentPageまたはslicedSongsが変更されたときにスクロール位置を調整
   useEffect(() => {
-    calculateTotalPage();
-    // 先頭の要素にスクロール
     const listElement = document.getElementById("song-list-scrollbar");
     if (listElement) {
       const currentSongElement = document.querySelector(
@@ -59,35 +79,14 @@ const SongsList = ({
           inline: "end",
         });
       } else {
+        // 再生中の曲が現在のページにない場合、ページの先頭にスクロール
         const firstElement = listElement.querySelector("li");
         if (firstElement) {
           firstElement.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
     }
-    // もしページ番号が範囲外の場合は1ページ目にする
-    if (currentPage > totalPage) {
-      onPageChange(1);
-    }
-  }, [slicedSongs]);
-
-  useEffect(() => {
-    // currentSongから何ページ目か求める
-    const currentPage = Math.max(
-      1,
-      Math.ceil(
-        (songs.findIndex(
-          (song) =>
-            song.video_id === currentSongInfo?.video_id &&
-            song.title === currentSongInfo?.title &&
-            song.start === currentSongInfo?.start
-        ) +
-          1) /
-          displayPage
-      )
-    );
-    onPageChange(currentPage);
-  }, [currentSongInfo]);
+  }, [currentPage, slicedSongs, currentSongInfo]);
 
   return (
     <>
@@ -104,7 +103,7 @@ const SongsList = ({
         >
           {slicedSongs.map((song, index) => (
             <SongListItem
-              key={`${song.video_id}-${song.start}`}
+              key={`${song.video_id}-${song.start}-${index}`}
               song={song}
               isSelected={
                 currentSongInfo?.title === song.title &&

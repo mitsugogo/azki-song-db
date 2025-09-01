@@ -24,6 +24,7 @@ export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
 
   const [navigation, setNavigation] = useState([
+    { name: "Discography", href: "/discography", current: false },
     { name: "統計情報", href: "/statistics", current: false },
     {
       name: "このサイトについて",
@@ -84,20 +85,20 @@ export function Header() {
               <div className="hidden sm:ml-6 sm:block">
                 <div className="flex space-x-4">
                   {navigation.map((item) => (
-                    <a
+                    <Link
                       key={`${item.name}-${item.href}`}
                       href={item.href}
                       aria-current={item.current ? "page" : undefined}
                       className={classNames(
                         item.current
-                          ? "bg-primary-600 dark:bg-primary-700 text-white border-b-white"
-                          : "text-white hover:bg-primary-600 dark:hover:bg-primary-700",
-                        "rounded-md px-3 py-2 text-sm font-medium"
+                          ? " border-b-2 border-b-primary-200 rounded-t-md"
+                          : "  rounded-md",
+                        "text-white px-3 py-3 text-sm font-medium hover:bg-primary-600 dark:hover:bg-primary-800 hover:transition-all duration-300"
                       )}
                       onClick={item?.onClick || undefined}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
