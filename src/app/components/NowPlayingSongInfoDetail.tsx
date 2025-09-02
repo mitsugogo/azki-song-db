@@ -268,7 +268,7 @@ const NowPlayingSongInfoDetail = ({
                   <dt className="text-muted-foreground flex items-baseline">
                     <IoTime />
                     <span className="hidden text-nowrap lg:inline ml-1">
-                      タイムスタンプ:
+                      セトリ:
                     </span>
                   </dt>
                 </div>
