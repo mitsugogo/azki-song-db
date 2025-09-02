@@ -1,5 +1,5 @@
-import StatisticsPage from "./client";
+import DiscographyPage from "./client";
 
 export default function Page() {
-  return <StatisticsPage />;
+  return <DiscographyPage />;
 }

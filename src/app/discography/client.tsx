@@ -194,7 +194,7 @@ const SongItem = ({
   );
 };
 
-export default function DosographyPage() {
+export default function DiscographyPage() {
   const [loading, setLoading] = useState(true);
   const [songs, setSongs] = useState<Song[]>([]);
 
