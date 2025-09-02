@@ -27,7 +27,7 @@ import {
 import { FaStar } from "react-icons/fa6";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
-export default function ClientTable({}: {}) {
+export default function ClientTable() {
   const [isLoading, setIsLoading] = useState(true);
   const [songs, setSongs] = useState<Song[]>([]);
 
@@ -123,8 +123,8 @@ export default function ClientTable({}: {}) {
         accessorKey: "milestones",
         header: "マイルストーン",
         cell: (info) =>
-          info.getValue() && info.getValue<any[]>().length > 0
-            ? info.getValue<any[]>().map((m, index) => (
+          info.getValue<string[]>()?.length > 0
+            ? info.getValue<string[]>()?.map((m, index) => (
                 <div className={`align-center mb-1`} key={index}>
                   <Link
                     href={`/?q=milestone:${encodeURIComponent(m)}`}
