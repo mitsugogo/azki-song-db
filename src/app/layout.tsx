@@ -28,11 +28,11 @@ const notoSans = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description:
-    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
   openGraph: {
     title: "AZKi Song Database",
     description:
-      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲をまとめています。",
+      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
     url: "https://azki-song-db.vercel.app/",
     siteName: "AZKi Song Database",
     locale: "ja_JP",
