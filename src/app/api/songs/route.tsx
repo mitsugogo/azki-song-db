@@ -98,16 +98,18 @@ export async function GET() {
             values[headerMap["アルバム"] ?? 12]?.userEnteredValue
               ?.stringValue || "", // アルバム
           album_list_uri: values[headerMap["アルバム"] ?? 12]?.hyperlink || "",
-          album_release_at:
-            new Date(
-              (values[headerMap["アルバム発売日"] ?? 13]?.userEnteredValue
-                ?.numberValue || 0) *
-                24 *
-                60 *
-                60 *
-                1000 +
-                new Date(1899, 11, 30).getTime()
-            ).toISOString() || "", // アルバム発売日
+          album_release_at: values[headerMap["アルバム発売日"] ?? 13]
+            ?.userEnteredValue
+            ? new Date(
+                (values[headerMap["アルバム発売日"] ?? 13]?.userEnteredValue
+                  ?.numberValue || 0) *
+                  24 *
+                  60 *
+                  60 *
+                  1000 +
+                  new Date(1899, 11, 30).getTime()
+              ).toISOString()
+            : "", // アルバム発売日
           album_is_compilation:
             values[headerMap["コンピレーションアルバム"] ?? 14]
               ?.userEnteredValue?.boolValue || false, // コンピレーションアルバム
