@@ -24,6 +24,34 @@ export async function GET(req: NextRequest) {
     const width = searchParams.get("w") || "1200";
     const height = searchParams.get("h") || "630";
 
+    const notoSansRegular = await fetch(
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
+        encodeURIComponent(title || "AZKi Song Database") +
+        encodeURIComponent(subTitle || "🎵 AZKi Song Database")
+    )
+      .then((res) => res.text())
+      .then((css) => {
+        const url = css.match(
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/
+        )?.[1];
+        if (!url) throw new Error("Font not found");
+        return fetch(url).then((res) => res.arrayBuffer());
+      });
+
+    const notoSansBold = await fetch(
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
+        encodeURIComponent(title || "AZKi Song Database") +
+        encodeURIComponent(subTitle || "🎵 AZKi Song Database")
+    )
+      .then((res) => res.text())
+      .then((css) => {
+        const url = css.match(
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/
+        )?.[1];
+        if (!url) throw new Error("Font not found");
+        return fetch(url).then((res) => res.arrayBuffer());
+      });
+
     return new ImageResponse(
       (
         <div
@@ -39,6 +67,7 @@ export async function GET(req: NextRequest) {
             flexDirection: "column",
             flexWrap: "nowrap",
             border: "30px solid #b81e8a",
+            fontFamily: "Noto Sans JP",
           }}
         >
           <div
@@ -60,7 +89,6 @@ export async function GET(req: NextRequest) {
               width: "100%",
               fontSize: 40,
               fontStyle: "normal",
-              fontWeight: "bold",
               color: `#${subTitleColor}`,
               padding: "0 120px",
               lineHeight: 1.3,
@@ -73,6 +101,20 @@ export async function GET(req: NextRequest) {
       {
         width: parseInt(width),
         height: parseInt(height),
+        fonts: [
+          {
+            name: "Noto Sans JP",
+            data: notoSansRegular,
+            style: "normal",
+            weight: 400,
+          },
+          {
+            name: "Noto Sans JP",
+            data: notoSansBold,
+            style: "normal",
+            weight: 700,
+          },
+        ],
       }
     );
   } catch (e) {
