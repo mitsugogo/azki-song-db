@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/mitsugogo/azki-song-db/compare/v1.5.0...v1.6.0) (2025-09-03)
+
+
+### Features
+
+* OGP画像の曲名と動画名の表示対応 ([9a0c775](https://github.com/mitsugogo/azki-song-db/commit/9a0c7750d792a4102c5236666ef1f60c0ab26c82))
+
 ## [1.5.0](https://github.com/mitsugogo/azki-song-db/compare/v1.4.0...v1.5.0) (2025-09-02)
 
 
