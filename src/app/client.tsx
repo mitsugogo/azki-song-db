@@ -12,7 +12,7 @@ export default function ClientTop() {
     <ThemeProvider>
       <div className="h-dvh flex flex-col">
         <Header />
-        <main className="flex flex-col md:flex-row flex-grow overflow-hidden p-0 lg:p-4 mb:pb-0 dark:bg-gray-900">
+        <main className="flex flex-col md:flex-row flex-grow overflow-hidden p-0 lg:p-4 lg:pb-0 mb:pb-0 dark:bg-gray-900">
           <MainPlayer />
         </main>
         <Footer />
