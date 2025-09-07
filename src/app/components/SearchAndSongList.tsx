@@ -2,7 +2,7 @@ import { RefObject } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
-import { Button, TextInput } from "flowbite-react";
+import { Button, TextInput, ToggleSwitch } from "flowbite-react";
 import { HiChevronDown, HiChevronUp, HiSearch, HiX } from "react-icons/hi";
 import { FaCompactDisc, FaMusic, FaTag, FaUser } from "react-icons/fa6";
 
@@ -23,6 +23,7 @@ type SearchAndSongListProps = {
   searchSingerRef: RefObject<string>;
   searchTagRef: RefObject<string>;
   searchMilestoneRef: RefObject<string>;
+  hideFutureSongs: boolean;
   changeCurrentSong: (song: Song | null) => void;
   playRandomSong: (songList: Song[]) => void;
   setSearchTerm: (term: string) => void;
@@ -51,6 +52,7 @@ export default function SearchAndSongList({
   searchSingerRef,
   searchTagRef,
   searchMilestoneRef,
+  hideFutureSongs,
   changeCurrentSong,
   playRandomSong,
   setSearchTerm,
@@ -80,6 +82,7 @@ export default function SearchAndSongList({
               placeholder="検索"
               icon={HiSearch}
               disabled={advancedSearchOpen}
+              className="z-0"
             />
             {searchTerm && (
               <button
@@ -176,6 +179,7 @@ export default function SearchAndSongList({
           songs={songs}
           currentSongInfo={currentSongInfo}
           changeCurrentSong={changeCurrentSong}
+          hideFutureSongs={hideFutureSongs}
         />
       </div>
     </section>

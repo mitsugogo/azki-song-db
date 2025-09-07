@@ -17,6 +17,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // セトリのネタバレを回避するモード
+  const [hideFutureSongs, setHideFutureSongs] = useState(false);
+
   const currentSongInfoRef = useRef(currentSongInfo);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
@@ -24,6 +27,22 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   useEffect(() => {
     currentSongInfoRef.current = currentSongInfo;
   }, [currentSongInfo]);
+
+  // セトリネタバレ防止モードをlocalStorageに保存する
+  useEffect(() => {
+    const hideFutureSongs = localStorage.getItem("hideFutureSongs");
+    if (hideFutureSongs === "true") {
+      setHideFutureSongs(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hideFutureSongs) {
+      localStorage.setItem("hideFutureSongs", "true");
+    } else {
+      localStorage.removeItem("hideFutureSongs");
+    }
+  }, [hideFutureSongs]);
 
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
@@ -219,6 +238,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     nextSong,
     isPlaying,
     playerKey,
+    hideFutureSongs,
+    setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,

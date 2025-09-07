@@ -11,12 +11,14 @@ import { HiChevronLeft } from "react-icons/hi";
 interface SongListProps {
   songs: Song[];
   currentSongInfo: Song | null;
+  hideFutureSongs: boolean;
   changeCurrentSong: (song: Song, isRandom: boolean) => void;
 }
 
 const SongsList = ({
   songs,
   currentSongInfo,
+  hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
   const displayPage = 204;
@@ -112,6 +114,17 @@ const SongsList = ({
                 currentSongInfo.start === song.start
               }
               changeCurrentSong={changeCurrentSong}
+              isHide={
+                hideFutureSongs &&
+                currentSongInfo?.video_id === song.video_id &&
+                index >
+                  slicedSongs.findIndex(
+                    (song) =>
+                      currentSongInfo?.title === song.title &&
+                      currentSongInfo.video_id === song.video_id &&
+                      currentSongInfo.start === song.start
+                  )
+              }
             />
           ))}
         </ul>
