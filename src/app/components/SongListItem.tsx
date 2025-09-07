@@ -38,14 +38,14 @@ const SongListItem = React.memo(
             />
           </div>
         </div>
-        <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0 truncate">
+        <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
           <div
-            className={`w-full text-sm font-semibold line-clamp-1 md:line-clamp-3 truncate`}
+            className={`w-full text-sm font-semibold line-clamp-1 md:line-clamp-3`}
           >
             <span
               className={`${
                 isHide
-                  ? `h-4 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1 inline-block max-w-full`
+                  ? `h-4 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1 md:inline-block max-w-full`
                   : ""
               }`}
             >
@@ -60,7 +60,7 @@ const SongListItem = React.memo(
             <span
               className={`${
                 isHide
-                  ? `h-3 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1 inline-block max-w-full`
+                  ? `h-3 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1 md:inline-block max-w-full`
                   : ""
               }`}
             >
