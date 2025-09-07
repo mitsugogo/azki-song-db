@@ -59,6 +59,8 @@ export default function MainPlayer() {
     nextSong,
     isPlaying,
     playerKey,
+    hideFutureSongs,
+    setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
     handleStateChange,
@@ -169,8 +171,10 @@ export default function MainPlayer() {
         setSongsToCurrentVideo={setSongsToCurrentVideo}
         setOpenShareModal={setOpenShareModal}
         setSearchTerm={setSearchTerm}
+        setHideFutureSongs={setHideFutureSongs}
         isPlaying={isPlaying}
         playerKey={playerKey}
+        hideFutureSongs={hideFutureSongs}
       />
 
       <SearchAndSongList
@@ -189,6 +193,7 @@ export default function MainPlayer() {
         searchSingerRef={searchSingerRef}
         searchTagRef={searchTagRef}
         searchMilestoneRef={searchMilestoneRef}
+        hideFutureSongs={hideFutureSongs}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
         setSearchTerm={setSearchTerm}

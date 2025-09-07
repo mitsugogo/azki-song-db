@@ -1,27 +1,20 @@
-import {
-  Badge,
-  Button,
-  Checkbox,
-  Label,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  TextInput,
-} from "flowbite-react";
+import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
 import { Song } from "../types/song";
 import { FaCompactDisc, FaShare } from "react-icons/fa6";
 import Marquee from "react-fast-marquee";
 import { useEffect, useRef, useState } from "react";
 import NowPlayingSongInfoDetail from "./NowPlayingSongInfoDetail";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FaTimes } from "react-icons/fa";
 import MilestoneBadge from "./MilestoneBadge";
+import PlayerSettings from "./PlayerSettings";
 
 interface NowPlayingSongInfoProps {
   currentSongInfo: Song | null;
   allSongs: Song[];
   searchTerm: string;
   isPlaying: boolean;
+  hideFutureSongs: boolean;
+  setHideFutureSongs: (value: boolean) => void;
   setSearchTerm: (value: string) => void;
   setOpenShereModal: (value: boolean) => void;
   changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
@@ -35,6 +28,8 @@ const NowPlayingSongInfo = ({
   allSongs,
   searchTerm,
   isPlaying,
+  hideFutureSongs,
+  setHideFutureSongs,
   setSearchTerm,
   setOpenShereModal,
   changeCurrentSong,
@@ -59,11 +54,11 @@ const NowPlayingSongInfo = ({
       // コンテナの幅よりもテキストの幅が大きい場合にオーバーフローと判断
       setIsOverflowing(textWidth > containerWidth);
     }
-  }, [text]); // テキストが変更されたときに再評価
+  }, [text]);
 
   return (
     <>
-      <div className="flex g:h-full sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground dark:text-gray-300">
+      <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground dark:text-gray-300">
         {currentSongInfo && (
           <div className="song-info">
             <div className="hidden lg:flex items-center gap-2 mb-3">
@@ -97,15 +92,11 @@ const NowPlayingSongInfo = ({
                   )}
                 </h2>
               </div>
-              <div className="hidden lg:block text-right">
-                <Button
-                  onClick={() => setOpenShereModal(true)}
-                  className="bg-primary hover:bg-primary-600 dark:hover:bg-primary dark:bg-primary-900 text-white transition cursor-pointer text-sm shadow-md shadow-primary-400/20 dark:shadow-none"
-                >
-                  <FaShare />
-                  &nbsp;Share
-                </Button>
-              </div>
+              <PlayerSettings
+                hideFutureSongs={hideFutureSongs}
+                setHideFutureSongs={setHideFutureSongs}
+                setOpenShereModal={setOpenShereModal}
+              />
             </div>
 
             <div ref={containerRef} className="lg:hidden p-1">
@@ -169,6 +160,7 @@ const NowPlayingSongInfo = ({
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}
+                hideFutureSongs={hideFutureSongs}
                 setSearchTerm={setSearchTerm}
                 changeCurrentSong={changeCurrentSong}
               />
@@ -193,6 +185,7 @@ const NowPlayingSongInfo = ({
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}
+                hideFutureSongs={hideFutureSongs}
                 setSearchTerm={setSearchTerm}
                 changeCurrentSong={changeCurrentSong}
               />

@@ -4,18 +4,21 @@ import { Button, Pagination } from "flowbite-react";
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
 import { useEffect, useState, useMemo } from "react";
-import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
+import { MdFirstPage, MdSkipNext, MdSkipPrevious } from "react-icons/md";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { HiChevronLeft } from "react-icons/hi";
 
 interface SongListProps {
   songs: Song[];
   currentSongInfo: Song | null;
+  hideFutureSongs: boolean;
   changeCurrentSong: (song: Song, isRandom: boolean) => void;
 }
 
 const SongsList = ({
   songs,
   currentSongInfo,
+  hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
   const displayPage = 204;
@@ -111,51 +114,74 @@ const SongsList = ({
                 currentSongInfo.start === song.start
               }
               changeCurrentSong={changeCurrentSong}
+              isHide={
+                hideFutureSongs &&
+                currentSongInfo?.video_id === song.video_id &&
+                index >
+                  slicedSongs.findIndex(
+                    (song) =>
+                      currentSongInfo?.title === song.title &&
+                      currentSongInfo.video_id === song.video_id &&
+                      currentSongInfo.start === song.start
+                  )
+              }
             />
           ))}
         </ul>
       </OverlayScrollbarsComponent>
+
       {totalPage > 1 && (
-        <div className="flex justify-center mt-0 md:mt-2 mb-2 lg:mb-0">
-          <div className="mt-2 inline-flex items-center -space-x-px mr-1">
-            <Button
-              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
-              onClick={() => onPageChange(1)}
+        <div className="flex items-center justify-center col-span-2 py-2">
+          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-400 bg-gray-100 rounded-lg dark:bg-gray-600 max-w-[128px] mx-2">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-s-lg bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              style={{ height: "38px" }}
             >
-              <MdSkipPrevious />
-            </Button>
-          </div>
-          <Pagination
-            layout="pagination"
-            className="hidden lg:block"
-            currentPage={currentPage}
-            totalPages={totalPage}
-            onPageChange={onPageChange}
-            previousLabel=""
-            nextLabel=""
-            showIcons
-          />
-          <Pagination
-            layout="navigation"
-            className="block lg:hidden"
-            currentPage={currentPage}
-            totalPages={totalPage}
-            onPageChange={onPageChange}
-            previousLabel=""
-            nextLabel=""
-            showIcons
-          />
-          <div className="mt-2 inline-flex items-center -space-x-px ml-1">
-            <Button
-              className="text-xl ml-0 rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white inline-flex"
-              onClick={() => onPageChange(totalPage)}
+              <svg
+                className="w-2 h-2 rtl:rotate-180"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 1 1 5l4 4"
+                />
+              </svg>
+              <span className="sr-only">Previous page</span>
+            </button>
+            <span className="shrink-0 mx-1 text-sm font-medium space-x-0.5 rtl:space-x-reverse">
+              {currentPage} of {totalPage}
+            </span>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 bg-gray-100 rounded-e-lg dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPage}
-              style={{ height: "38px" }}
             >
-              <MdSkipNext />
-            </Button>
+              <svg
+                className="w-2 h-2 rtl:rotate-180"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
+              </svg>
+              <span className="sr-only">Next page</span>
+            </button>
           </div>
         </div>
       )}

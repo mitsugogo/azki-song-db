@@ -5,19 +5,17 @@ import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
 
-// SongListItem コンポーネントのプロパティを定義します。
 interface SongListItemProps {
   song: Song;
   isSelected: boolean;
+  isHide: boolean;
   changeCurrentSong: (song: Song, isRandom: boolean) => void;
 }
 
-// React.memo を使用して、props が変更されない限りコンポーネントの再レンダリングを防止します。
 const SongListItem = React.memo(
-  ({ song, isSelected, changeCurrentSong }: SongListItemProps) => {
+  ({ song, isSelected, isHide, changeCurrentSong }: SongListItemProps) => {
     return (
       <li
-        // 選択状態に応じて Tailwind CSS のクラスを動的に適用します。
         className={`rounded relative cursor-pointer transition shadow-md flex md:block ${
           isSelected
             ? "bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300"
@@ -40,12 +38,36 @@ const SongListItem = React.memo(
             />
           </div>
         </div>
-        <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0 truncate">
-          <div className="w-full text-sm font-semibold line-clamp-1 md:line-clamp-3 truncate">
-            {song.title}
+        <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
+          <div
+            className={`w-full text-sm font-semibold line-clamp-1 ${
+              isHide ? "truncate" : "md:line-clamp-3"
+            }`}
+          >
+            <span
+              className={`${
+                isHide ? `h-4 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1` : ""
+              }`}
+            >
+              <span className={`${isHide ? "opacity-0" : ""}`}>
+                {song.title}
+              </span>
+            </span>
           </div>
-          <div className="w-full text-xs text-muted-foreground line-clamp-1 md:line-clamp-3 truncate">
-            {song.artist} - {song.sing}
+          <div
+            className={`w-full text-xs text-gray-600 dark:text-gray-500 line-clamp-1 ${
+              isHide ? "mt-1 truncate" : "md:line-clamp-3"
+            }`}
+          >
+            <span
+              className={`${
+                isHide ? `h-3 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1` : ""
+              }`}
+            >
+              <span className={`${isHide ? "opacity-0" : ""}`}>
+                {song.artist} - {song.sing}
+              </span>
+            </span>
           </div>
           <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-500">
             {song.broadcast_at && (

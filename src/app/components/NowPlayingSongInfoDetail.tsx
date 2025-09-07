@@ -22,6 +22,7 @@ interface NowPlayingSongInfoDetailProps {
   allSongs: Song[];
   searchTerm: string;
   isPlaying: boolean;
+  hideFutureSongs: boolean;
   setSearchTerm: (value: string) => void;
   changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
 }
@@ -31,6 +32,7 @@ const NowPlayingSongInfoDetail = ({
   allSongs,
   searchTerm,
   isPlaying,
+  hideFutureSongs,
   setSearchTerm,
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
@@ -286,17 +288,18 @@ const NowPlayingSongInfoDetail = ({
                     )}
                     {isTimestampExpand && (
                       <div className="pb-2">
-                        {allSongs
-                          .filter(
-                            (song) =>
-                              song.video_id === currentSongInfo?.video_id
-                          )
-                          .sort(
-                            (a, b) =>
-                              (parseInt(a.start) || 0) -
-                              (parseInt(b.start) || 0)
-                          )
-                          .map((song) => (
+                        {videoTimestamps.map((song, index) => {
+                          const isHide =
+                            hideFutureSongs &&
+                            index >
+                              videoTimestamps.findIndex(
+                                (song) =>
+                                  currentSongInfo?.title === song.title &&
+                                  currentSongInfo.video_id === song.video_id &&
+                                  currentSongInfo.start === song.start
+                              );
+
+                          return (
                             <div key={song.start} className="w-full">
                               <div className="flex">
                                 <div className="flex tabular-nums">
@@ -326,9 +329,22 @@ const NowPlayingSongInfoDetail = ({
                                       }}
                                     />
                                   )}
-                                  {song.title}&nbsp;-&nbsp;
-                                  <span className="text-gray-500 dark:text-gray-600">
-                                    {song.artist}
+                                  <span
+                                    className={`${
+                                      // 現在再生中の曲以降は隠す
+                                      isHide
+                                        ? "h-4.5 bg-gray-300 rounded-lg dark:bg-gray-700"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span
+                                      className={`${isHide ? "opacity-0" : ""}`}
+                                    >
+                                      {song.title}&nbsp;-&nbsp;
+                                      <span className="text-gray-500 dark:text-gray-600">
+                                        {song.artist}
+                                      </span>
+                                    </span>
                                   </span>
                                   {song.milestones && (
                                     <>
@@ -347,7 +363,8 @@ const NowPlayingSongInfoDetail = ({
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          );
+                        })}
                       </div>
                     )}
                   </dd>

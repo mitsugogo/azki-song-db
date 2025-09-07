@@ -2,12 +2,13 @@ import { Song } from "../types/song";
 import YouTubePlayer from "./YouTubePlayer";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
-import { Button, ButtonGroup } from "flowbite-react";
+import { Button, ButtonGroup, ToggleSwitch } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
 import { FaShare, FaShuffle } from "react-icons/fa6";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
+import PlayerSettings from "./PlayerSettings";
 
 // Propsの型定義
 type PlayerSectionProps = {
@@ -20,12 +21,14 @@ type PlayerSectionProps = {
   searchTerm: string;
   isPlaying: boolean;
   playerKey: number;
+  hideFutureSongs: boolean;
   handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;
   setOpenShareModal: (isOpen: boolean) => void;
   setSearchTerm: (term: string) => void;
+  setHideFutureSongs: (value: boolean) => void;
 };
 
 export default function PlayerSection({
@@ -38,12 +41,14 @@ export default function PlayerSection({
   searchTerm,
   isPlaying,
   playerKey,
+  hideFutureSongs,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
   setSongsToCurrentVideo,
   setOpenShareModal,
   setSearchTerm,
+  setHideFutureSongs,
 }: PlayerSectionProps) {
   return (
     <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full pr-0">
@@ -121,7 +126,7 @@ export default function PlayerSection({
             </div>
             {/* Next Song */}
             <div
-              className="h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
+              className={`h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300`}
               onClick={() => changeCurrentSong(nextSong)}
             >
               {nextSong && (
@@ -133,13 +138,49 @@ export default function PlayerSection({
                       fill={true}
                     />
                   </div>
-                  <div className="flex flex-1 flex-col px-2 min-w-0">
-                    <span className="block text-left font-bold truncate">
-                      {nextSong.title}
-                    </span>
-                    <span className="block text-left text-xs text-muted truncate">
-                      {nextSong.artist}
-                    </span>
+                  <div className={`flex flex-1 flex-col px-2 min-w-0`}>
+                    <div className="line-clamp-1 truncate">
+                      <span
+                        className={`font-bold truncate ${
+                          hideFutureSongs &&
+                          nextSong.video_id === currentSongInfo?.video_id
+                            ? "h-4 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className={
+                            hideFutureSongs &&
+                            nextSong.video_id === currentSongInfo?.video_id
+                              ? "opacity-0"
+                              : ""
+                          }
+                        >
+                          {nextSong.title}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="line-clamp-1 truncate">
+                      <span
+                        className={`text-xs text-muted ${
+                          hideFutureSongs &&
+                          nextSong.video_id === currentSongInfo?.video_id
+                            ? "h-3 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            : ""
+                        }`}
+                      >
+                        <span
+                          className={
+                            hideFutureSongs &&
+                            nextSong.video_id === currentSongInfo?.video_id
+                              ? "opacity-0"
+                              : ""
+                          }
+                        >
+                          {nextSong.artist}
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -184,12 +225,11 @@ export default function PlayerSection({
               &nbsp;<span className="text-xs">ランダム</span>
             </Button>
             <div className="flex justify-end">
-              <Button
-                onClick={() => setOpenShareModal(true)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer px-4 py-2 text-xs"
-              >
-                <FaShare />
-              </Button>
+              <PlayerSettings
+                hideFutureSongs={hideFutureSongs}
+                setHideFutureSongs={setHideFutureSongs}
+                setOpenShereModal={setOpenShareModal}
+              />
             </div>
           </div>
         </div>
@@ -200,9 +240,11 @@ export default function PlayerSection({
           allSongs={allSongs}
           searchTerm={searchTerm}
           isPlaying={isPlaying}
+          hideFutureSongs={hideFutureSongs}
           setSearchTerm={setSearchTerm}
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}
+          setHideFutureSongs={setHideFutureSongs}
         />
       </OverlayScrollbarsComponent>
     </aside>
