@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/mitsugogo/azki-song-db/compare/v1.6.0...v1.7.0) (2025-09-07)
+
+
+### Features
+
+* セトリネタバレ防止機能 ([db59e33](https://github.com/mitsugogo/azki-song-db/commit/db59e33a20af3526fe53384c8f50243d898f75e3))
+
 ## [1.6.0](https://github.com/mitsugogo/azki-song-db/compare/v1.5.0...v1.6.0) (2025-09-03)
 
 
