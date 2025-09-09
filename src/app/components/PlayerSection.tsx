@@ -188,7 +188,7 @@ export default function PlayerSection({
           </div>
 
           {/* Player Controls (Mobile) */}
-          <div className="flex lg:hidden justify-between">
+          <div className="flex lg:hidden justify-between w-full">
             <ButtonGroup className="shadow-none rounded-md ">
               <Button
                 onClick={() => changeCurrentSong(previousSong)}
@@ -205,25 +205,41 @@ export default function PlayerSection({
                 <GiNextButton />
               </Button>
             </ButtonGroup>
-            <Button
-              onClick={setSongsToCurrentVideo}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2"
-            >
-              <RiPlayListFill className="mr-1" />
-              &nbsp;
-              <span className="text-xs">
-                この歌枠を
-                <br />
-                連続再生
-              </span>
-            </Button>
-            <Button
-              onClick={() => playRandomSong(songs)}
-              className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs"
-            >
-              <FaShuffle className="mr-1" />
-              &nbsp;<span className="text-xs">ランダム</span>
-            </Button>
+            <div className="flex flex-row gap-2 flex-1 ml-2">
+              {/* 連続再生ボタン */}
+              <Button
+                onClick={setSongsToCurrentVideo}
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 flex-1 flex items-center justify-between"
+              >
+                <div className="flex-shrink-0">
+                  <RiPlayListFill className="mr-2" />
+                </div>
+                <div
+                  className="flex-1 text-center"
+                  style={{ lineHeight: "1.1em" }}
+                >
+                  <span className="text-xs">
+                    この歌枠を
+                    <br />
+                    連続再生
+                  </span>
+                </div>
+                <div className="flex-shrink-0 w-0 sm:w-4"></div>
+              </Button>
+
+              {/* ランダム再生ボタン */}
+              <Button
+                onClick={() => playRandomSong(songs)}
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between"
+              >
+                <div className="flex-shrink-0">
+                  <FaShuffle className="mr-2" />
+                </div>
+                <div className="flex-1 text-center">
+                  <span className="text-xs">ランダム</span>
+                </div>
+              </Button>
+            </div>
             <div className="flex justify-end">
               <PlayerSettings
                 hideFutureSongs={hideFutureSongs}
