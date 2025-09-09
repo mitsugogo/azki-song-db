@@ -8,7 +8,7 @@ import {
   ModalHeader,
 } from "flowbite-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
 import {
@@ -20,34 +20,57 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import ThemeToggle from "./ThemeToggle";
 
 export function Header() {
-  // 謝辞
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
-
-  const [navigation, setNavigation] = useState([
-    { name: "Discography", href: "/discography", current: false },
-    { name: "統計情報", href: "/statistics", current: false },
-    {
-      name: "このサイトについて",
-      href: "#",
-      current: false,
-      onClick: () => setShowAcknowledgment(true),
-    },
-  ]);
+  const [currentPath, setCurrentPath] = useState("");
+  const disclosureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setNavigation(
-      navigation.map((item) => ({
-        ...item,
-        current:
-          typeof window !== "undefined" &&
-          item.href === window.location.pathname
-            ? true
-            : false,
-      }))
-    );
+    if (typeof window !== "undefined") {
+      setCurrentPath(window.location.pathname);
+    }
   }, []);
 
-  function classNames(...classes: (string | undefined)[]) {
+  const isTopPage = useMemo(() => currentPath === "/", [currentPath]);
+
+  const baseNavigation = [
+    { name: "Discography", href: "/discography" },
+    { name: "統計情報", href: "/statistics" },
+  ];
+
+  const navigation = useMemo(() => {
+    const navItems = baseNavigation.map((item) => ({
+      ...item,
+      current: item.href !== "#" && item.href === currentPath,
+    }));
+
+    if (!isTopPage) {
+      navItems.unshift({
+        name: "TOP",
+        href: "/",
+        current: false,
+      });
+    }
+
+    return navItems;
+  }, [currentPath, isTopPage]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleRouteChange = () => {
+        setCurrentPath(window.location.pathname);
+      };
+      window.addEventListener("popstate", handleRouteChange);
+      window.addEventListener("pushstate", handleRouteChange);
+      return () => {
+        window.removeEventListener("popstate", handleRouteChange);
+        window.removeEventListener("pushstate", handleRouteChange);
+      };
+    }
+  }, []);
+
+  function classNames(
+    ...classes: (string | boolean | undefined | null)[]
+  ): string {
     return classes.filter(Boolean).join(" ");
   }
 
@@ -56,113 +79,133 @@ export function Header() {
       <Disclosure
         as="nav"
         className="relative bg-primary dark:bg-primary-900 text-white"
+        ref={disclosureRef}
       >
-        <div className="w-full px-2 sm:px-6 lg:px-4">
-          <div className="relative flex h-12 md:h-16 items-center justify-between">
-            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-              {/* Mobile menu button*/}
-              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
-                <span className="absolute -inset-0.5" />
-                <span className="sr-only">Open main menu</span>
-                <Bars3Icon
-                  aria-hidden="true"
-                  className="block size-6 group-data-open:hidden"
-                />
-                <XMarkIcon
-                  aria-hidden="true"
-                  className="hidden size-6 group-data-open:block"
-                />
-              </DisclosureButton>
-            </div>
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-              <div className="flex shrink-0 items-center">
-                <a href="/">
-                  <h1 className="text-lg lg:text-lg font-bold">
-                    AZKi Song Database
-                  </h1>
-                </a>
-              </div>
-              <div className="hidden sm:ml-6 sm:block">
-                <div className="flex space-x-4">
-                  {navigation.map((item) => (
-                    <Link
-                      key={`${item.name}-${item.href}`}
-                      href={item.href}
-                      aria-current={item.current ? "page" : undefined}
-                      className={classNames(
-                        item.current
-                          ? " border-b-2 border-b-primary-200 rounded-t-md"
-                          : "  rounded-md",
-                        "text-white px-3 py-3 text-sm font-medium hover:bg-primary-600 dark:hover:bg-primary-800 hover:transition-all duration-300"
-                      )}
-                      onClick={item?.onClick || undefined}
+        {({ open, close }) => {
+          useEffect(() => {
+            const handleOutsideClick = (event: MouseEvent) => {
+              if (
+                disclosureRef.current &&
+                !disclosureRef.current.contains(event.target as Node)
+              ) {
+                close();
+              }
+            };
+            if (open) {
+              document.addEventListener("mousedown", handleOutsideClick);
+            }
+            return () => {
+              document.removeEventListener("mousedown", handleOutsideClick);
+            };
+          }, [open, close]);
+
+          return (
+            <>
+              <div className="w-full px-2">
+                <div className="relative flex h-12 md:h-16 items-center">
+                  <div className="absolute inset-y-0 left-0 flex items-center z-10">
+                    <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500 cursor-pointer">
+                      <span className="absolute -inset-0.5" />
+                      <span className="sr-only">Open main menu</span>
+                      <Bars3Icon
+                        aria-hidden="true"
+                        className="block size-6 group-data-open:hidden"
+                      />
+                      <XMarkIcon
+                        aria-hidden="true"
+                        className="hidden size-6 group-data-open:block"
+                      />
+                    </DisclosureButton>
+                  </div>
+                  <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
+                    <div className="flex shrink-0 items-center lg:ml-2">
+                      <a href="/">
+                        <h1 className="text-lg lg:text-lg font-bold">
+                          AZKi Song Database
+                        </h1>
+                      </a>
+                    </div>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <a
+                      href="https://www.youtube.com/@AZKi"
+                      target="_blank"
+                      className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
                     >
-                      {item.name}
-                    </Link>
-                  ))}
+                      <FaYoutube className="mr-1" />
+                      AZKi Channel
+                    </a>
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              <a
-                href="https://www.youtube.com/@AZKi"
-                target="_blank"
-                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
-              >
-                <FaYoutube className="mr-1" />
-                AZKi Channel
-              </a>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
 
-        <DisclosurePanel className="sm:hidden">
-          <div className="space-y-1 px-2 pt-2 pb-3">
-            {navigation.map((item) => {
-              if (item.onClick) {
-                return (
+              <DisclosurePanel
+                as="div"
+                className="fixed inset-y-0 left-0 z-50 w-3/4 max-w-xs overflow-y-auto bg-primary dark:bg-primary-900 px-6 py-4 shadow-lg ring-1 ring-gray-900/10 transition-transform duration-500 ease-in-out group-data-[closed]:-translate-x-full"
+              >
+                <div className="space-y-1">
+                  <div className="flex justify-start">
+                    <Button
+                      onClick={(event) => {
+                        event.currentTarget.blur();
+                        close();
+                      }}
+                      className="rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white"
+                    >
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </Button>
+                  </div>
+
+                  {navigation.map((item) => {
+                    const isCurrent = item.current;
+                    const baseClasses =
+                      "block rounded-md px-3 py-2 text-base font-medium";
+                    const activeClasses =
+                      "bg-primary-600 dark:bg-primary-700 text-white";
+                    const inactiveClasses =
+                      "text-gray-300 hover:bg-white/5 hover:text-white";
+
+                    return (
+                      <DisclosureButton
+                        key={item.name}
+                        as="a"
+                        href={item.href}
+                        aria-current={isCurrent ? "page" : undefined}
+                        className={classNames(
+                          isCurrent ? activeClasses : inactiveClasses,
+                          baseClasses
+                        )}
+                        onClick={() => close()}
+                      >
+                        {item.name}
+                      </DisclosureButton>
+                    );
+                  })}
+
                   <DisclosureButton
-                    key={item.name}
-                    className={classNames(
-                      item.current
-                        ? "bg-gray-900 text-white"
-                        : "text-gray-300 hover:bg-white/5 hover:text-white",
-                      "block rounded-md px-3 py-2 text-base font-medium w-full text-left"
-                    )}
-                    onClick={() => setShowAcknowledgment(true)}
+                    key="about"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer"
+                    onClick={() => {
+                      setShowAcknowledgment(true);
+                      close();
+                    }}
                   >
-                    {item.name}
+                    このサイトについて
                   </DisclosureButton>
-                );
-              } else {
-                return (
-                  <DisclosureButton
-                    key={item.name}
-                    as="a"
-                    href={item.href}
-                    aria-current={item.current ? "page" : undefined}
-                    className={classNames(
-                      item.current
-                        ? "bg-primary-600 dark:bg-primary-700 text-white"
-                        : "text-gray-300 hover:bg-white/5 hover:text-white",
-                      "block rounded-md px-3 py-2 text-base font-medium"
-                    )}
+                  <Link
+                    href="https://www.youtube.com/@AZKi"
+                    target="_blank"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white"
+                    onClick={() => close()}
                   >
-                    {item.name}
-                  </DisclosureButton>
-                );
-              }
-            })}
-            <Link
-              href="https://www.youtube.com/@AZKi"
-              target="_blank"
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white"
-            >
-              AZKi Channel
-            </Link>
-          </div>
-        </DisclosurePanel>
+                    AZKi Channel
+                  </Link>
+                </div>
+              </DisclosurePanel>
+            </>
+          );
+        }}
       </Disclosure>
 
       <Modal
@@ -180,7 +223,7 @@ export function Header() {
             className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
             onClick={() => setShowAcknowledgment(false)}
           >
-            閉じる
+            閉じる
           </Button>
         </ModalFooter>
       </Modal>
