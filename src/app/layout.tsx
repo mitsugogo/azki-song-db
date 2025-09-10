@@ -65,7 +65,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <ThemeModeScript />
       </head>
-      <body className={`antialiased dark:bg-gray-900`}>
+      <body
+        className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
+      >
         {children}
         {shouldInjectToolbar && <VercelToolbar />}
       </body>
