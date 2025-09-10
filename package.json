@@ -16,7 +16,7 @@
     "@fortawesome/react-fontawesome": "^3.0.1",
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
-    "@mui/icons-material": "^7.3.1",
+    "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/styled-engine-sc": "^7.3.1",
     "@tanstack/react-table": "^8.21.3",
