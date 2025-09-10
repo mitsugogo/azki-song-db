@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.2](https://github.com/mitsugogo/azki-song-db/compare/v1.7.1...v1.7.2) (2025-09-10)
+
+
+### Bug Fixes
+
+* **main:** 曲名部分がスクロールしない場合があったのを修正 fixed [#119](https://github.com/mitsugogo/azki-song-db/issues/119) ([9624156](https://github.com/mitsugogo/azki-song-db/commit/96241568ad1621f0489378d43f772d5690f98d5b))
+
 ### [1.7.1](https://github.com/mitsugogo/azki-song-db/compare/v1.7.0...v1.7.1) (2025-09-09)
 
 ## [1.7.0](https://github.com/mitsugogo/azki-song-db/compare/v1.6.0...v1.7.0) (2025-09-07)
