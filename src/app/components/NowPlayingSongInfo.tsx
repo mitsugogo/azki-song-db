@@ -40,21 +40,19 @@ const NowPlayingSongInfo = ({
   const textRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  // スマホ時に表示する曲タイトル部分
-  const text = currentSongInfo
-    ? `${currentSongInfo.title} - ${currentSongInfo.artist}`
-    : "";
-
   useEffect(() => {
     if (containerRef.current && textRef.current) {
       const containerElement = containerRef.current as HTMLElement;
-      const containerWidth = containerElement.clientWidth ?? 0;
+      const containerWidth = Math.max(
+        0,
+        (containerElement.clientWidth ?? 0) - 25 // CDのアイコン分
+      );
       const textWidth = (textRef.current as HTMLElement).scrollWidth ?? 0;
 
       // コンテナの幅よりもテキストの幅が大きい場合にオーバーフローと判断
       setIsOverflowing(textWidth > containerWidth);
     }
-  }, [text]);
+  }, [currentSongInfo]);
 
   return (
     <>
@@ -112,7 +110,10 @@ const NowPlayingSongInfo = ({
                 </div>
                 <div className="w-64 flex-auto">
                   {isOverflowing ? (
-                    <Marquee className="flex-1">
+                    <Marquee
+                      className="flex-1"
+                      key={`${currentSongInfo.title}-${currentSongInfo.artist}-${currentSongInfo.video_id}`}
+                    >
                       <span
                         className="text-nowrap inline-block pr-6"
                         ref={textRef}
@@ -120,7 +121,9 @@ const NowPlayingSongInfo = ({
                         <span className="font-semibold">
                           {currentSongInfo.title}
                         </span>{" "}
-                        - {currentSongInfo.artist}
+                        <span className="text-gray-500 text-sm">
+                          - {currentSongInfo.artist}
+                        </span>
                       </span>
                     </Marquee>
                   ) : (
@@ -131,7 +134,9 @@ const NowPlayingSongInfo = ({
                       <span className="font-semibold">
                         {currentSongInfo.title}
                       </span>{" "}
-                      - {currentSongInfo.artist}
+                      <span className="text-gray-500 text-sm">
+                        - {currentSongInfo.artist}
+                      </span>
                     </span>
                   )}
                 </div>

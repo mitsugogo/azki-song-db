@@ -54,7 +54,7 @@ const ThemeToggle = () => {
   return (
     <button
       type="button"
-      className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-700 p-2 rounded-md"
+      className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-800 p-2 rounded-md"
       onClick={handleClick}
     >
       {theme === "light" ? (

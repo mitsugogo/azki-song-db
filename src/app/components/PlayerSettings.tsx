@@ -38,19 +38,19 @@ export default function PlayerSettings({
 
   return (
     <div
-      className="inline-grid relative text-right grid-cols-1 md:grid-cols-2"
+      className="inline-grid relative text-right grid-cols-1 md:grid-cols-2 gap-1"
       ref={settingsRef}
     >
       <Button
         onClick={() => setOpenShereModal(true)}
-        className="hidden md:inline-flex items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        className="hidden md:inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-gray-100 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
       >
         <div className="inline-block w-5 h-5">
-          <FaShare className="relative top-1" />
+          <FaShare className="relative top-1 left-1" />
         </div>
       </Button>
       <Button
-        className="text-baseline inline-flex items-center p-2 text-sm font-medium text-center cursor-pointer rounded-full text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        className="text-baseline inline-flex w-10 h-10 items-center p-2 text-sm font-medium text-center cursor-pointer rounded-full text-gray-900 bg-white hover:bg-gray-100 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
         type="button"
         onClick={(event) => {
           setIsSettingsOpen(!isSettingsOpen);
