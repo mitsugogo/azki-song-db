@@ -112,7 +112,7 @@ export function Header() {
                   <a
                     href="https://www.youtube.com/@AZKi"
                     target="_blank"
-                    className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-700 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
+                    className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
                   >
                     <FaYoutube className="mr-1" />
                     AZKi Channel
@@ -132,7 +132,7 @@ export function Header() {
                       event.currentTarget.blur();
                       close();
                     }}
-                    className="rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white"
+                    className="rounded-md p-2 text-gray-300 hover:bg-white/5 hover:text-white dark:bg-primary-900 dark:hover:bg-primary-800 cursor-pointer"
                   >
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </Button>
@@ -165,6 +165,7 @@ export function Header() {
                 })}
 
                 <DisclosureButton
+                  as="a"
                   key="about"
                   className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer"
                   onClick={() => {
