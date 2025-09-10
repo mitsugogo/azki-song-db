@@ -40,11 +40,6 @@ const NowPlayingSongInfo = ({
   const textRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  // スマホ時に表示する曲タイトル部分
-  const text = currentSongInfo
-    ? `${currentSongInfo.title} - ${currentSongInfo.artist}`
-    : "";
-
   useEffect(() => {
     if (containerRef.current && textRef.current) {
       const containerElement = containerRef.current as HTMLElement;
@@ -57,7 +52,7 @@ const NowPlayingSongInfo = ({
       // コンテナの幅よりもテキストの幅が大きい場合にオーバーフローと判断
       setIsOverflowing(textWidth > containerWidth);
     }
-  }, [text]);
+  }, [currentSongInfo]);
 
   return (
     <>
