@@ -250,9 +250,7 @@ export default function ClientTable() {
                     {row.getVisibleCells().map((cell, index) => (
                       <TableCell
                         key={cell.id}
-                        className={`${
-                          index % 2 === 0 ? "bg-gray-100" : ""
-                        } w-full text-wrap break-all`}
+                        className={`w-full text-wrap break-all`}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
