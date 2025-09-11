@@ -105,7 +105,8 @@ export default function ShareModal({
                 onClick={() => {
                   const shareData = {
                     title: currentSongInfo?.video_title,
-                    text: `${currentSongInfo?.video_title} \n${youtubeUrl}`,
+                    text: currentSongInfo?.video_title,
+                    // text: `${currentSongInfo?.video_title} \n${youtubeUrl}`,
                     url: youtubeUrl,
                   };
                   navigator.share(shareData);
@@ -155,7 +156,8 @@ export default function ShareModal({
               onClick={() => {
                 const shareData = {
                   title: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
-                  text: `${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${databaseUrl}`,
+                  text: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
+                  // text: `${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${databaseUrl}`,
                   url: databaseUrl,
                 };
                 navigator.share(shareData);
