@@ -36,6 +36,7 @@ export function Header() {
   const baseNavigation = [
     { name: "Discography", href: "/discography" },
     { name: "統計情報", href: "/statistics" },
+    { name: "全データ(PC向け)", href: "/data" },
   ];
 
   const navigation = useMemo(() => {

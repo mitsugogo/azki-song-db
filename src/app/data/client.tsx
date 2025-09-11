@@ -149,6 +149,8 @@ export default function ClientTable() {
   const table = useReactTable({
     data: songs,
     columns,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
     state: {
       globalFilter: filterQuery,
     },
@@ -201,10 +203,13 @@ export default function ClientTable() {
                       <TableHeadCell
                         key={header.id}
                         className="sticky top-0 bg-white"
+                        style={{
+                          position: "relative",
+                          width: header.getSize(),
+                        }}
                       >
                         <div
                           onClick={header.column.getToggleSortingHandler()}
-                          style={{ width: `${header.getSize()}%` }}
                           className="p-2 cursor-pointer select-none whitespace-nowrap"
                         >
                           {flexRender(
@@ -224,6 +229,15 @@ export default function ClientTable() {
                             </span>
                           )}
                         </div>
+                        {header.column.getCanResize() && (
+                          <div
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={`resizer ${
+                              header.column.getIsResizing() ? "isResizing" : ""
+                            }`}
+                          ></div>
+                        )}
                       </TableHeadCell>
                     ))}
                   </TableRow>
@@ -233,8 +247,13 @@ export default function ClientTable() {
               <TableBody>
                 {table.getSortedRowModel().rows.map((row) => (
                   <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className={`p-2`}>
+                    {row.getVisibleCells().map((cell, index) => (
+                      <TableCell
+                        key={cell.id}
+                        className={`${
+                          index % 2 === 0 ? "bg-gray-100" : ""
+                        } w-full text-wrap break-all`}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

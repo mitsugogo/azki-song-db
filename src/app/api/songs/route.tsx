@@ -118,7 +118,7 @@ export async function GET() {
           video_uri: values[headerMap["動画"] ?? 5]?.hyperlink || "", // ハイパーリンクURL
           video_id:
             values[headerMap["動画"] ?? 5]?.hyperlink?.match(
-              /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=))([^&\n]{11})/
+              /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/
             )?.[1] || "", // 動画IDの抽出
           start: parseTimeFromNumberValue(
             values[headerMap["start"] ?? 6]?.userEnteredValue?.numberValue || 0
@@ -171,7 +171,6 @@ export async function GET() {
     return NextResponse.json(songs, {
       headers: {
         "Cache-Control": "s-maxage=600, stale-while-revalidate=300",
-        "CDN-Cache-Control": "s-maxage=600",
       },
     });
   } catch (error) {
