@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.2](https://github.com/mitsugogo/azki-song-db/compare/v1.8.1...v1.8.2) (2025-09-11)
+
+
+### Bug Fixes
+
+* **data:** ダークモード時の色がやばいので削除 ([425c745](https://github.com/mitsugogo/azki-song-db/commit/425c7454a4aed3616585158433a776c5e737e951))
+
 ### [1.8.1](https://github.com/mitsugogo/azki-song-db/compare/v1.8.0...v1.8.1) (2025-09-11)
 
 
