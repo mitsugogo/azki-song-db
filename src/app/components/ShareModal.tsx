@@ -9,7 +9,7 @@ import {
   Label,
 } from "flowbite-react";
 import { HiClipboardCopy } from "react-icons/hi";
-import { FaDatabase, FaX, FaYoutube } from "react-icons/fa6";
+import { FaDatabase, FaShare, FaX, FaYoutube } from "react-icons/fa6";
 
 // Propsの型定義
 type ShareModalProps = {
@@ -91,13 +91,30 @@ export default function ShareModal({
             )}
           </div>
           <div className="mt-2">
-            <Button
-              size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer"
-              onClick={() => handleShareToX(false)}
-            >
-              <FaX className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center">
+              <Button
+                size="xs"
+                className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer mr-2 ring-0 focus:ring-0"
+                onClick={() => handleShareToX(false)}
+              >
+                <FaX className="w-4 h-4" />
+              </Button>
+              <Button
+                size="xs"
+                className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
+                onClick={() => {
+                  const shareData = {
+                    title: currentSongInfo?.video_title,
+                    text: currentSongInfo?.video_title,
+                    // text: `${currentSongInfo?.video_title} \n${youtubeUrl}`,
+                    url: youtubeUrl,
+                  };
+                  navigator.share(shareData);
+                }}
+              >
+                <FaShare className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
         </div>
         {/* AZKi Song Database URL */}
@@ -125,13 +142,28 @@ export default function ShareModal({
               </div>
             )}
           </div>
-          <div className="mt-2">
+          <div className="flex items-center gap-2 mt-2">
             <Button
               size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer"
+              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
               onClick={() => handleShareToX(true)}
             >
               <FaX className="w-4 h-4" />
+            </Button>
+            <Button
+              size="xs"
+              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
+              onClick={() => {
+                const shareData = {
+                  title: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
+                  text: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
+                  // text: `${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${databaseUrl}`,
+                  url: databaseUrl,
+                };
+                navigator.share(shareData);
+              }}
+            >
+              <FaShare className="w-3 h-3" />
             </Button>
           </div>
         </div>
