@@ -155,7 +155,7 @@ export default function ShareModal({
               onClick={() => {
                 const shareData = {
                   title: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
-                  text: `${currentSongInfo?.video_title} \n${databaseUrl}`,
+                  text: `${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${databaseUrl}`,
                   url: databaseUrl,
                 };
                 navigator.share(shareData);
