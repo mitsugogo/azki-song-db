@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/mitsugogo/azki-song-db/compare/v1.7.2...v1.8.0) (2025-09-11)
+
+
+### Features
+
+* **data:** 全データ公開 ([b911ef9](https://github.com/mitsugogo/azki-song-db/commit/b911ef99b24ec63494d86fcd637a66f6bc7b1a9a))
+
+
+### Bug Fixes
+
+* **main:** shortsに対応 [#121](https://github.com/mitsugogo/azki-song-db/issues/121) ([4e63f45](https://github.com/mitsugogo/azki-song-db/commit/4e63f45c3c1a1a8b445375f8fb1f8d315dd03375))
+
 ### [1.7.2](https://github.com/mitsugogo/azki-song-db/compare/v1.7.1...v1.7.2) (2025-09-10)
 
 
