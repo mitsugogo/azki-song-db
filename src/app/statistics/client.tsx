@@ -288,10 +288,8 @@ export default function StatisticsPage() {
   const [coverSongInfo, setCoverSongInfo] = useState([]);
   const coverSongInfoRef = useRef(coverSongInfo);
 
-  // === ここから追加・変更 ===
   const [originalSongInfo, setOriginalSongInfo] = useState([]);
   const originalSongInfoRef = useRef(originalSongInfo);
-  // === ここまで追加・変更 ===
 
   // useDeferredValueでactiveTabを遅延させる
   const deferredActiveTab = useDeferredValue(activeTab);
@@ -350,16 +348,14 @@ export default function StatisticsPage() {
           s.artist.includes("Star Flower") ||
           s.artist.includes("SorAZ"))
     );
-    // === 変更 ===
     return createStatistics(
       originals,
       (s) => s.title,
       (a, b) =>
         new Date(b.firstVideo.broadcast_at).getTime() -
         new Date(a.firstVideo.broadcast_at).getTime(),
-      originalSongInfo // ここに動画情報を追加
+      originalSongInfo
     );
-    // === 変更ここまで ===
   }, [songs, originalSongInfo]);
 
   useEffect(() => {
@@ -388,7 +384,6 @@ export default function StatisticsPage() {
     fetchVideoInfo();
   }, [songs]);
 
-  // === ここから追加 ===
   useEffect(() => {
     const fetchOriginalVideoInfo = async () => {
       const originals = songs.filter(
@@ -421,14 +416,13 @@ export default function StatisticsPage() {
 
     fetchOriginalVideoInfo();
   }, [songs]);
-  // === ここまで追加 ===
 
   const coverSongCountsByReleaseDate = useMemo(() => {
     const covers = songs.filter((s) => s.tags.includes("カバー曲"));
 
     return createStatistics(
       covers,
-      (s) => s.title,
+      (s) => s.title + " (" + s.artist + ")" + " (" + s.sing + ")",
       (a, b) =>
         new Date(b.firstVideo.broadcast_at).getTime() -
         new Date(a.firstVideo.broadcast_at).getTime(),
