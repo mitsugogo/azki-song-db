@@ -35,6 +35,7 @@ import {
 } from "@tanstack/react-table";
 
 import useDebounce from "../hook/useDebounce";
+import { VideoInfo } from "../types/videoInfo";
 
 type StatisticsItem = {
   key: string;
@@ -42,12 +43,14 @@ type StatisticsItem = {
   song: Song;
   firstVideo: Song;
   lastVideo: Song;
+  videoInfo?: VideoInfo;
 };
 
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  sortFn?: (a: T, b: T) => number
+  sortFn?: (a: T, b: T) => number,
+  videoInfos?: VideoInfo[]
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
@@ -66,6 +69,7 @@ const createStatistics = <T extends StatisticsItem>(
           (map.get(key)?.lastVideo?.broadcast_at ?? 0) > song.broadcast_at
             ? map.get(key)?.lastVideo
             : song,
+        videoInfo: videoInfos?.find((v) => v.videoId === song.video_id),
       } as T & StatisticsItem);
     });
     return map;
@@ -281,6 +285,12 @@ export default function StatisticsPage() {
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
+  const [coverSongInfo, setCoverSongInfo] = useState([]);
+  const coverSongInfoRef = useRef(coverSongInfo);
+
+  const [originalSongInfo, setOriginalSongInfo] = useState([]);
+  const originalSongInfoRef = useRef(originalSongInfo);
+
   // useDeferredValueでactiveTabを遅延させる
   const deferredActiveTab = useDeferredValue(activeTab);
 
@@ -343,20 +353,82 @@ export default function StatisticsPage() {
       (s) => s.title,
       (a, b) =>
         new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime()
+        new Date(a.firstVideo.broadcast_at).getTime(),
+      originalSongInfo
     );
+  }, [songs, originalSongInfo]);
+
+  useEffect(() => {
+    const fetchVideoInfo = async () => {
+      const covers = songs.filter((s) => s.tags.includes("カバー曲"));
+      const videoIds = covers.map((s) => s.video_id);
+      if (videoIds.length === 0) {
+        setCoverSongInfo([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/yt/info?videoIds=${videoIds.join(",")}`);
+        if (!res.ok) {
+          throw new Error(`API call failed with status: ${res.status}`);
+        }
+        const data = await res.json();
+        setCoverSongInfo(data);
+        coverSongInfoRef.current = data;
+      } catch (error) {
+        console.error("Failed to fetch cover song info:", error);
+        setCoverSongInfo([]);
+      }
+    };
+
+    fetchVideoInfo();
+  }, [songs]);
+
+  useEffect(() => {
+    const fetchOriginalVideoInfo = async () => {
+      const originals = songs.filter(
+        (s) =>
+          (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+          s.sing.includes("AZKi") &&
+          (s.artist.includes("AZKi") ||
+            s.artist.includes("瀬名航") ||
+            s.artist.includes("Star Flower") ||
+            s.artist.includes("SorAZ"))
+      );
+      const videoIds = originals.map((s) => s.video_id);
+      if (videoIds.length === 0) {
+        setOriginalSongInfo([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/yt/info?videoIds=${videoIds.join(",")}`);
+        if (!res.ok) {
+          throw new Error(`API call failed with status: ${res.status}`);
+        }
+        const data = await res.json();
+        setOriginalSongInfo(data);
+        originalSongInfoRef.current = data;
+      } catch (error) {
+        console.error("Failed to fetch original song info:", error);
+        setOriginalSongInfo([]);
+      }
+    };
+
+    fetchOriginalVideoInfo();
   }, [songs]);
 
   const coverSongCountsByReleaseDate = useMemo(() => {
     const covers = songs.filter((s) => s.tags.includes("カバー曲"));
+
     return createStatistics(
       covers,
-      (s) => s.title,
+      (s) => s.title + " (" + s.artist + ")" + " (" + s.sing + ")",
       (a, b) =>
         new Date(b.firstVideo.broadcast_at).getTime() -
-        new Date(a.firstVideo.broadcast_at).getTime()
+        new Date(a.firstVideo.broadcast_at).getTime(),
+      coverSongInfo
     );
-  }, [songs]);
+  }, [songs, coverSongInfo]);
 
   // タブ切り替えによってURLを書き換える
   useEffect(() => {
@@ -595,6 +667,7 @@ export default function StatisticsPage() {
           )}
         </TabItem>
 
+        {/* 収録動画 */}
         <TabItem title="収録動画" icon={FaYoutube}>
           {deferredActiveTab === 5 && (
             <DataTable
@@ -701,6 +774,94 @@ export default function StatisticsPage() {
                   ),
                 },
                 {
+                  accessorKey: "videoInfo.statistics.viewCount",
+                  header: "再生回数",
+                  cell: (info) =>
+                    info.getValue<string>()
+                      ? Number(info.getValue<string>()).toLocaleString()
+                      : "N/A",
+                },
+                {
+                  id: "viewCount",
+                  accessorKey: "videoInfo.statistics.viewCount",
+                  header: "再生回数ラベル",
+                  cell: (info) => {
+                    const viewCount = info.getValue<number>();
+
+                    // 10万再生未満
+                    if (viewCount < 100000) {
+                      const remaining = 10000 - (viewCount % 10000);
+                      if (remaining <= 3000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    // 100万再生未満
+                    if (viewCount < 1000000) {
+                      const remaining = 100000 - (viewCount % 100000);
+                      if (remaining <= 10000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    // 100万再生以上
+                    if (viewCount >= 1000000) {
+                      const remaining = 1000000 - (viewCount % 1000000);
+                      if (remaining <= 20000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    return null;
+                  },
+                  sortingFn: (rowA, rowB) => {
+                    const viewCountA =
+                      typeof rowA.original.videoInfo?.statistics?.viewCount ===
+                      "string"
+                        ? parseInt(
+                            rowA.original.videoInfo.statistics.viewCount,
+                            10
+                          )
+                        : 0;
+                    const viewCountB =
+                      typeof rowB.original.videoInfo?.statistics?.viewCount ===
+                      "string"
+                        ? parseInt(
+                            rowB.original.videoInfo.statistics.viewCount,
+                            10
+                          )
+                        : 0;
+
+                    const labelA =
+                      (viewCountA < 100000 &&
+                        10000 - (viewCountA % 10000) <= 3000) ||
+                      (viewCountA < 1000000 &&
+                        100000 - (viewCountA % 100000) <= 10000) ||
+                      (viewCountA >= 1000000 &&
+                        1000000 - (viewCountA % 1000000) <= 20000)
+                        ? 1
+                        : 0;
+                    const labelB =
+                      (viewCountB < 100000 &&
+                        10000 - (viewCountB % 10000) <= 3000) ||
+                      (viewCountB < 1000000 &&
+                        100000 - (viewCountB % 100000) <= 10000) ||
+                      (viewCountB >= 1000000 &&
+                        1000000 - (viewCountB % 1000000) <= 20000)
+                        ? 1
+                        : 0;
+
+                    const labelSort = labelB - labelA;
+
+                    // もしラベルのソート結果が同じ（0）なら、再生回数でソートする
+                    if (labelSort !== 0) {
+                      return labelSort;
+                    }
+
+                    return viewCountB - viewCountA;
+                  },
+                },
+                {
                   id: "broadcast_at",
                   accessorKey: "firstVideo.broadcast_at",
                   header: "リリース日/初公開日",
@@ -724,7 +885,7 @@ export default function StatisticsPage() {
           {deferredActiveTab === 7 && (
             <DataTable
               loading={loading}
-              data={coverSongCountsByReleaseDate}
+              data={coverSongCountsByReleaseDate || []}
               caption="カバー楽曲"
               description="カバー楽曲のリリース日 または 動画初公開日 です"
               initialSortColumnId="broadcast_at"
@@ -753,6 +914,94 @@ export default function StatisticsPage() {
                       {info.getValue<string>()}
                     </Link>
                   ),
+                },
+                {
+                  accessorKey: "videoInfo.statistics.viewCount",
+                  header: "再生回数",
+                  cell: (info) =>
+                    info.getValue<string>()
+                      ? Number(info.getValue<string>()).toLocaleString()
+                      : "N/A",
+                },
+                {
+                  id: "viewCount",
+                  accessorKey: "videoInfo.statistics.viewCount",
+                  header: "再生回数ラベル",
+                  cell: (info) => {
+                    const viewCount = info.getValue<number>();
+
+                    // 10万再生未満
+                    if (viewCount < 100000) {
+                      const remaining = 10000 - (viewCount % 10000);
+                      if (remaining <= 3000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    // 100万再生未満
+                    if (viewCount < 1000000) {
+                      const remaining = 100000 - (viewCount % 100000);
+                      if (remaining <= 10000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    // 100万再生以上
+                    if (viewCount >= 1000000) {
+                      const remaining = 1000000 - (viewCount % 1000000);
+                      if (remaining <= 20000) {
+                        return <>あと {remaining.toLocaleString()} 再生</>;
+                      }
+                    }
+
+                    return null; // 条件に合わない場合は何も表示しない
+                  },
+                  sortingFn: (rowA, rowB) => {
+                    const viewCountA =
+                      typeof rowA.original.videoInfo?.statistics?.viewCount ===
+                      "string"
+                        ? parseInt(
+                            rowA.original.videoInfo.statistics.viewCount,
+                            10
+                          )
+                        : 0;
+                    const viewCountB =
+                      typeof rowB.original.videoInfo?.statistics?.viewCount ===
+                      "string"
+                        ? parseInt(
+                            rowB.original.videoInfo.statistics.viewCount,
+                            10
+                          )
+                        : 0;
+
+                    const labelA =
+                      (viewCountA < 100000 &&
+                        10000 - (viewCountA % 10000) <= 3000) ||
+                      (viewCountA < 1000000 &&
+                        100000 - (viewCountA % 100000) <= 10000) ||
+                      (viewCountA >= 1000000 &&
+                        1000000 - (viewCountA % 1000000) <= 20000)
+                        ? 1
+                        : 0;
+                    const labelB =
+                      (viewCountB < 100000 &&
+                        10000 - (viewCountB % 10000) <= 3000) ||
+                      (viewCountB < 1000000 &&
+                        100000 - (viewCountB % 100000) <= 10000) ||
+                      (viewCountB >= 1000000 &&
+                        1000000 - (viewCountB % 1000000) <= 20000)
+                        ? 1
+                        : 0;
+
+                    const labelSort = labelB - labelA;
+
+                    // もしラベルのソート結果が同じ（0）なら、再生回数でソートする
+                    if (labelSort !== 0) {
+                      return labelSort;
+                    }
+
+                    return viewCountB - viewCountA;
+                  },
                 },
                 {
                   id: "broadcast_at",

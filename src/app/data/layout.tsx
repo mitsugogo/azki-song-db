@@ -16,11 +16,9 @@ export default function StatsLayout({
   return (
     <>
       <ThemeProvider>
-        <div className="flex flex-col h-dvh">
+        <div className="flex flex-col min-h-screen">
           <Header />
-          <div className="flex flex-col flex-grow md:flex-row overflow-y-hidden w-full">
-            {children}
-          </div>
+          <div>{children}</div>
           <Footer />
         </div>
         <AnalyticsWrapper />

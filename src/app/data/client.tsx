@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Song } from "../types/song";
 import Link from "next/link";
 import {
@@ -10,28 +10,23 @@ import {
   getFilteredRowModel,
   flexRender,
   ColumnDef,
+  SortingState,
 } from "@tanstack/react-table";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
-import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-  TextInput,
-} from "flowbite-react";
+import { Badge, TextInput } from "flowbite-react";
 import { FaStar } from "react-icons/fa6";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { HiSearch } from "react-icons/hi";
+import MilestoneBadge from "../components/MilestoneBadge";
 
 export default function ClientTable() {
   const [isLoading, setIsLoading] = useState(true);
   const [songs, setSongs] = useState<Song[]>([]);
-
   const [filterQuery, setFilterQuery] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const columns = useMemo<ColumnDef<Song>[]>(
     () => [
@@ -39,6 +34,7 @@ export default function ClientTable() {
         id: "index",
         header: "#",
         cell: (info) => info.row.index + 1,
+        size: 80,
       },
       {
         accessorKey: "title",
@@ -46,11 +42,13 @@ export default function ClientTable() {
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
-            className="hover:underline text-primary dark:text-white font-semibold"
+            className="hover:underline font-semibold text-primary dark:text-primary-300 line-clamp-2"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 200,
+        enableResizing: true,
       },
       {
         accessorKey: "artist",
@@ -58,19 +56,48 @@ export default function ClientTable() {
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
-            className="hover:underline text-primary dark:text-white"
+            className="hover:underline text-primary dark:text-primary-300 line-clamp-2"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 150,
+        enableResizing: true,
       },
       {
         accessorKey: "sing",
         header: "歌った人",
+        size: 300,
+        cell: (info) => (
+          <div className="line-clamp-2">
+            {info
+              .getValue<string>()
+              .split("、")
+              .map((title, index) => (
+                <Link
+                  key={index}
+                  href={`/?q=title:${encodeURIComponent(title)}`}
+                  className="hover:underline text-primary dark:text-primary-300 mr-2"
+                >
+                  {title}
+                </Link>
+              ))}
+          </div>
+        ),
+        enableResizing: true,
       },
       {
         accessorKey: "album",
         header: "アルバム",
+        size: 150,
+        cell: (info) => (
+          <Link
+            href={`/?q=album:${info.getValue<string>()}`}
+            className="hover:underline text-primary dark:text-primary-300"
+          >
+            {info.getValue<string>()}
+          </Link>
+        ),
       },
       {
         accessorKey: "album_release_at",
@@ -79,6 +106,7 @@ export default function ClientTable() {
           info.getValue()
             ? new Date(info.getValue<string>()).toLocaleDateString("ja-JP")
             : "",
+        size: 150,
       },
       {
         accessorKey: "video_title",
@@ -88,28 +116,43 @@ export default function ClientTable() {
             href={`https://www.youtube.com/watch?v=${info.row.original.video_id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline text-primary dark:text-white"
+            className="hover:underline text-primary dark:text-primary-300"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 550,
+        enableResizing: true,
       },
       {
         accessorKey: "start",
         header: "開始タイムスタンプ",
         enableSorting: false,
         cell: (info) => {
-          {
-            return new Date(parseInt(info.getValue<string>()) * 1000)
-              .toISOString()
-              .substring(11, 19);
-          }
+          return new Date(parseInt(info.getValue<string>()) * 1000)
+            .toISOString()
+            .substring(11, 19);
         },
+        size: 120,
       },
       {
         accessorKey: "tags",
         header: "タグ",
-        cell: (info) => info.getValue<string[]>().join(", "),
+        cell: (info) => (
+          <div className="line-clamp-2">
+            {info.getValue<string[]>().map((tag, index) => (
+              <Link
+                key={index}
+                href={`/?q=tag:${encodeURIComponent(tag)}`}
+                className="hover:underline text-primary dark:text-primary-300 mr-2"
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
+        ),
+        size: 350,
+        enableResizing: true,
       },
       {
         accessorKey: "broadcast_at",
@@ -118,6 +161,7 @@ export default function ClientTable() {
           info.getValue()
             ? new Date(info.getValue<string>()).toLocaleDateString("ja-JP")
             : "-",
+        size: 120,
       },
       {
         accessorKey: "milestones",
@@ -130,17 +174,13 @@ export default function ClientTable() {
                     href={`/?q=milestone:${encodeURIComponent(m)}`}
                     className="hover:underline"
                   >
-                    <Badge
-                      className={`bg-primary-600 hover:bg-primary-500 dark:bg-primary-800 dark:hover:bg-primary-700 text-white dark:text-white inline px-1.5 rounded`}
-                    >
-                      <FaStar className="inline relative" style={{ top: -1 }} />
-                      &nbsp;
-                      {m}
-                    </Badge>
+                    <MilestoneBadge song={info.row.original} inline />
                   </Link>
                 </div>
               ))
             : "",
+        size: 200,
+        enableResizing: true,
       },
     ],
     []
@@ -153,8 +193,10 @@ export default function ClientTable() {
     columnResizeMode: "onChange",
     state: {
       globalFilter: filterQuery,
+      sorting,
     },
     onGlobalFilterChange: setFilterQuery,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -169,6 +211,17 @@ export default function ClientTable() {
       });
   }, []);
 
+  const rows = table.getRowModel().rows;
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 56,
+    overscan: 10,
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+
   if (isLoading) {
     return (
       <div className="flex items-center w-full justify-center h-screen">
@@ -179,38 +232,42 @@ export default function ClientTable() {
 
   return (
     <>
-      <OverlayScrollbarsComponent
-        element="div"
-        className="lg:p-6 flex flex-col w-full h-full"
-        options={{ scrollbars: { autoHide: "leave" } }}
-        defer
-      >
+      <div className="flex-grow">
         <h1 className="font-extrabold text-2xl p-3 mb-2 dark:text-gray-200">
           <span className="text-2xl font-bold">収録データ</span>
         </h1>
-
-        <p className="mb-4 text-gray-500 dark:text-gray-400">
+        <p className="mb-4 text-gray-500 dark:text-gray-400 px-3">
           本データベースの情報を表示しています。
         </p>
+        <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
+          <TextInput
+            icon={HiSearch}
+            placeholder="検索..."
+            onChange={(e) => setFilterQuery(e.target.value)}
+          />
 
-        <div className="space-y-4 dark:border-gray-700 rounded-lg shadow-sm">
-          <div className="max-h-[80vh]">
-            <Table striped hoverable className="table-fixed">
-              <TableHead>
+          <div
+            ref={tableContainerRef}
+            className="overflow-x-auto overflow-y-auto relative rounded-lg shadow-md"
+            // 残りの要素の高さいっぱい
+            style={{ height: "calc(100vh - 274px)" }}
+          >
+            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-fixed">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHeadCell
+                      <th
                         key={header.id}
-                        className="sticky top-0 bg-white"
+                        scope="col"
+                        className="px-6 py-3"
                         style={{
-                          position: "relative",
                           width: header.getSize(),
                         }}
                       >
                         <div
                           onClick={header.column.getToggleSortingHandler()}
-                          className="p-2 cursor-pointer select-none whitespace-nowrap"
+                          className="flex items-center cursor-pointer select-none whitespace-nowrap"
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -233,38 +290,64 @@ export default function ClientTable() {
                           <div
                             onMouseDown={header.getResizeHandler()}
                             onTouchStart={header.getResizeHandler()}
-                            className={`resizer ${
-                              header.column.getIsResizing() ? "isResizing" : ""
+                            className={`resizer absolute top-0 right-0 h-full w-2 cursor-col-resize ${
+                              header.column.getIsResizing() ? "bg-blue-500" : ""
                             }`}
                           ></div>
                         )}
-                      </TableHeadCell>
+                      </th>
                     ))}
-                  </TableRow>
+                  </tr>
                 ))}
-              </TableHead>
+              </thead>
 
-              <TableBody>
-                {table.getSortedRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell, index) => (
-                      <TableCell
-                        key={cell.id}
-                        className={`w-full text-wrap break-all`}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+              <tbody
+                className="relative"
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                }}
+              >
+                {virtualRows.map((virtualRow) => {
+                  const row = rows[virtualRow.index];
+                  if (!row) return null;
+
+                  return (
+                    <tr
+                      key={row.id}
+                      data-index={virtualRow.index}
+                      ref={(el) => rowVirtualizer.measureElement(el)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                      className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="px-6 py-2"
+                          style={{
+                            width: cell.column.getSize(),
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
-      </OverlayScrollbarsComponent>
+      </div>
     </>
   );
 }
