@@ -77,7 +77,7 @@ const SongsList = ({
       );
       if (currentSongElement) {
         currentSongElement.scrollIntoView({
-          behavior: "smooth",
+          behavior: "instant",
           block: "center",
           inline: "end",
         });
@@ -85,7 +85,7 @@ const SongsList = ({
         // 再生中の曲が現在のページにない場合、ページの先頭にスクロール
         const firstElement = listElement.querySelector("li");
         if (firstElement) {
-          firstElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          firstElement.scrollIntoView({ behavior: "instant", block: "center" });
         }
       }
     }
