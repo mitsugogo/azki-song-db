@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { MethodOptions } from "googleapis/build/src/apis/abusiveexperiencereport";
 import { NextRequest, NextResponse } from "next/server";
 
 // 50件ずつに分割するヘルパー関数
@@ -39,9 +40,9 @@ export async function GET(req: NextRequest) {
   try {
     const requests = chunkedVideoIds.map((chunk) => {
       return youtube.videos.list({
-        part: ["id", "snippet", "statistics"],
+        part: ["id", "snippet", "statistics"] as string[],
         id: chunk.join(","),
-      });
+      } as MethodOptions);
     });
 
     const responses = await Promise.all(requests);
