@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/mitsugogo/azki-song-db/compare/v1.8.2...v1.9.0) (2025-09-12)
+
+
+### Features
+
+* **stat:** オリ曲とカバー曲の再生数表示 ([9069c99](https://github.com/mitsugogo/azki-song-db/commit/9069c9999cd2fceeec62218565139a2236d3c904))
+
+
+### Bug Fixes
+
+* **data:** 全収録データページの軽量化 ([ef6f974](https://github.com/mitsugogo/azki-song-db/commit/ef6f974447400c51e4150857823ff21ecfeb768a))
+* **stat:** 同一曲を別の方とカバーしたときに同一動画扱いされていたのを修正 ([1959315](https://github.com/mitsugogo/azki-song-db/commit/1959315f9d61027cd05e8a2861676472bc87e030))
+
 ### [1.8.2](https://github.com/mitsugogo/azki-song-db/compare/v1.8.1...v1.8.2) (2025-09-11)
 
 
