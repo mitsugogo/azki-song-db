@@ -2,7 +2,7 @@ import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
 
 // 50件ずつに分割するヘルパー関数
-const chunkArray = (arr: Array<any>, size: number) => {
+const chunkArray = (arr: Array<string>, size: number) => {
   const chunkedArr = [];
   for (let i = 0; i < arr.length; i += size) {
     chunkedArr.push(arr.slice(i, i + size));
