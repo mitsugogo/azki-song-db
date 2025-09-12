@@ -202,8 +202,6 @@ export default function ClientTable() {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  console.log(table.getState().sorting);
-
   useEffect(() => {
     fetch("/api/songs")
       .then((res) => res.json())
