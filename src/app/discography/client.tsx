@@ -290,8 +290,14 @@ const SongItem = ({
                   }`
                 : `${song.firstVideo.title} / ${song.firstVideo.artist}`}
               <br />
-              {new Date(song.lastVideo.broadcast_at).toLocaleDateString()}
-              {song.isAlbum && groupByAlbum ? `(${song.count}曲)` : ""}
+              {song.isAlbum && groupByAlbum
+                ? `${new Date(
+                    song.firstVideo.album_release_at
+                  ).toLocaleDateString()}`
+                : `${new Date(
+                    song.firstVideo.broadcast_at
+                  ).toLocaleDateString()}`}
+              {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
             </div>
           </div>
         </div>
