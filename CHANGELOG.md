@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/mitsugogo/azki-song-db/compare/v1.9.0...v1.10.0) (2025-09-13)
+
+
+### Features
+
+* **stat:**  動画のセトリを表示する機能を追加 fixed [#122](https://github.com/mitsugogo/azki-song-db/issues/122) ([27765f5](https://github.com/mitsugogo/azki-song-db/commit/27765f57aec0ab9eb4099c1ed2d535be2c9674e9))
+* **stat:** アルバムや動画の詳細を表示する機能を追加 ([60c220c](https://github.com/mitsugogo/azki-song-db/commit/60c220c7a199b6eef8a5c2c6c8cc2e551ca5331d))
+
 ## [1.9.0](https://github.com/mitsugogo/azki-song-db/compare/v1.8.2...v1.9.0) (2025-09-12)
 
 
