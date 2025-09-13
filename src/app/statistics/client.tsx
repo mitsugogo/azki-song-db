@@ -18,7 +18,13 @@ import {
 import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 
-import { FaCompactDisc, FaDatabase, FaStar, FaYoutube } from "react-icons/fa6";
+import {
+  FaCirclePlay,
+  FaCompactDisc,
+  FaDatabase,
+  FaStar,
+  FaYoutube,
+} from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
@@ -36,6 +42,7 @@ import {
 
 import useDebounce from "../hook/useDebounce";
 import { VideoInfo } from "../types/videoInfo";
+import { Tab } from "@headlessui/react";
 
 type StatisticsItem = {
   key: string;
@@ -81,9 +88,33 @@ const createStatistics = <T extends StatisticsItem>(
   return sortedData as Array<T & StatisticsItem>;
 };
 
-const renderLastVideoCell = (lastVideo: Song | null, hiddenTitle = false) => {
+const renderLastVideoCell = (
+  lastVideo: Song | null,
+  hiddenTitle = false,
+  link = true
+) => {
   if (!lastVideo) return <span className="text-sm">なし</span>;
   const videoUrl = `${lastVideo.video_uri}`;
+  if (link === false)
+    return (
+      <div className="md:flex md:items-center md:gap-2 flex flex-col md:flex-row">
+        <div className="flex w-full lg:w-24 max-w-[120px]">
+          <YoutubeThumbnail
+            videoId={lastVideo.video_id}
+            alt={lastVideo.video_title}
+            fill={true}
+          />
+        </div>
+        <div className="flex flex-grow flex-col w-full gap-1 lg:gap-0">
+          <span className={`text-xs ${hiddenTitle ? "hidden" : ""} md:inline`}>
+            <span className="">{lastVideo.video_title}</span>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(lastVideo.broadcast_at).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    );
   return (
     <a
       href={videoUrl}
@@ -113,7 +144,9 @@ const renderLastVideoCell = (lastVideo: Song | null, hiddenTitle = false) => {
 };
 
 function DataTable<
-  T extends { lastVideo?: { video_title: string } } | StatisticsItem
+  T extends
+    | { lastVideo?: { video_title: string; video_id: string } }
+    | StatisticsItem
 >({
   data,
   caption,
@@ -122,6 +155,9 @@ function DataTable<
   loading,
   initialSortColumnId,
   initialSortDirection,
+  onRowClick,
+  selectedVideoId,
+  songs,
 }: {
   data: T[];
   caption: string;
@@ -130,6 +166,9 @@ function DataTable<
   loading: boolean;
   initialSortColumnId?: string;
   initialSortDirection?: "asc" | "desc";
+  onRowClick?: (id: string) => void;
+  selectedVideoId?: string | null;
+  songs?: Song[];
 }) {
   const [inputValue, setInputValue] = useState("");
   const debouncedFilter = useDebounce(inputValue, 300);
@@ -235,18 +274,109 @@ function DataTable<
           </TableHead>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={`py-1 px-3 ${
-                      typeof cell.getValue() === "number" ? "text-center" : ""
-                    }`}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+              <>
+                <TableRow
+                  key={row.id}
+                  onClick={() =>
+                    onRowClick &&
+                    onRowClick(row.original.lastVideo?.video_id ?? "")
+                  }
+                  className="cursor-pointer"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={`py-1 px-3 ${
+                        typeof cell.getValue() === "number" ? "text-center" : ""
+                      }`}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {/* 選択された動画のセットリスト表示 */}
+                {selectedVideoId &&
+                  row.original.lastVideo?.video_id === selectedVideoId &&
+                  songs && (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="p-0">
+                        <div className="p-4 bg-gray-100 dark:bg-gray-800">
+                          <h3 className="text-lg font-semibold mb-2">
+                            セットリスト (
+                            {songs.filter((s) => s.video_id === selectedVideoId)
+                              .length ?? 0}
+                            曲)
+                          </h3>
+                          <Table className="w-full">
+                            <TableHead>
+                              <TableHeadCell>再生</TableHeadCell>
+                              <TableHeadCell>タイムスタンプ</TableHeadCell>
+                              <TableHeadCell>曲名</TableHeadCell>
+                              <TableHeadCell>アーティスト</TableHeadCell>
+                              <TableHeadCell>タグ</TableHeadCell>
+                            </TableHead>
+                            <TableBody>
+                              {songs
+                                .filter((s) => s.video_id === selectedVideoId)
+                                .sort(
+                                  (a, b) =>
+                                    parseInt(a.start) - parseInt(b.start)
+                                )
+                                .map((s) => (
+                                  <TableRow key={`${s.video_id}-${s.start}`}>
+                                    <TableCell className="text-center">
+                                      <Link
+                                        href={`/?v=${s.video_id}&t=${s.start}s&q=video_id:${s.video_id}`}
+                                        className=" hover:text-primary-600 dark:hover:text-white"
+                                      >
+                                        <FaCirclePlay size={24} />
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      {new Date(parseInt(s.start) * 1000)
+                                        .toISOString()
+                                        .substring(11, 19)}
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      <Link
+                                        href={`/?q=title:${s.title}`}
+                                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                                      >
+                                        {s.title}
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      <Link
+                                        href={`/?q=artist:${s.artist}`}
+                                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                                      >
+                                        {s.artist}
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      {s.tags.map((tag) => (
+                                        <Badge
+                                          key={tag}
+                                          className="inline mr-1 lg:whitespace-nowrap"
+                                        >
+                                          <Link href={`/?q=tag:${tag}`}>
+                                            {tag}
+                                          </Link>
+                                        </Badge>
+                                      ))}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+              </>
             ))}
           </TableBody>
         </Table>
@@ -293,6 +423,9 @@ export default function StatisticsPage() {
 
   // useDeferredValueでactiveTabを遅延させる
   const deferredActiveTab = useDeferredValue(activeTab);
+
+  // 追加: 選択された動画のIDを保持するstate
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/songs")
@@ -429,6 +562,12 @@ export default function StatisticsPage() {
       coverSongInfo
     );
   }, [songs, coverSongInfo]);
+
+  // 追加: 行をクリックしたときのハンドラ
+  const handleVideoClick = (videoId: string) => {
+    // 同じ動画がクリックされたら非表示、そうでなければ表示
+    setSelectedVideoId((prevId) => (prevId === videoId ? null : videoId));
+  };
 
   // タブ切り替えによってURLを書き換える
   useEffect(() => {
@@ -670,71 +809,76 @@ export default function StatisticsPage() {
         {/* 収録動画 */}
         <TabItem title="収録動画" icon={FaYoutube}>
           {deferredActiveTab === 5 && (
-            <DataTable
-              loading={loading}
-              data={videoCounts}
-              caption="収録動画"
-              description="現在データベースに収録されている動画一覧です"
-              initialSortColumnId="lastVideo.broadcast_at"
-              initialSortDirection="desc"
-              columns={[
-                {
-                  id: "lastVideo.video_title",
-                  accessorKey: "lastVideo",
-                  header: "動画",
-                  sortingFn: (rowA, rowB, columnId) => {
-                    const a = rowA.original.lastVideo?.video_title || "";
-                    const b = rowB.original.lastVideo?.video_title || "";
-                    return a.localeCompare(b);
+            <>
+              <DataTable
+                loading={loading}
+                data={videoCounts}
+                caption="収録動画"
+                description="現在データベースに収録されている動画一覧です"
+                initialSortColumnId="lastVideo.broadcast_at"
+                initialSortDirection="desc"
+                columns={[
+                  {
+                    id: "lastVideo.video_title",
+                    accessorKey: "lastVideo",
+                    header: "動画",
+                    sortingFn: (rowA, rowB, columnId) => {
+                      const a = rowA.original.lastVideo?.video_title || "";
+                      const b = rowB.original.lastVideo?.video_title || "";
+                      return a.localeCompare(b);
+                    },
+                    cell: (info) =>
+                      renderLastVideoCell(info.getValue<Song>(), false, false),
                   },
-                  cell: (info) =>
-                    renderLastVideoCell(info.getValue<Song>(), false),
-                },
-                {
-                  accessorKey: "lastVideo",
-                  header: "再生",
-                  enableSorting: false,
-                  cell: (info) => (
-                    <div className="flex items-center justify-center">
-                      <span className="inline-flex gap-x-1">
-                        <Link
-                          href={`https://www.youtube.com/watch?v=${
-                            info.getValue<Song>().video_id
-                          }`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                        >
-                          <FaYoutube />
-                        </Link>
-                        &nbsp;
-                        <Link
-                          href={`/?v=${info.getValue<Song>().video_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-                        >
-                          <FaDatabase />
-                        </Link>
-                      </span>
-                    </div>
-                  ),
-                },
-                {
-                  accessorKey: "count",
-                  header: "曲数",
-                  cell: (info) => info.getValue<number>(),
-                },
-                {
-                  id: "lastVideo.broadcast_at",
-                  accessorKey: "lastVideo.broadcast_at",
-                  header: "配信日",
-                  cell: (info) =>
-                    info.getValue<string>() &&
-                    new Date(info.getValue<string>()).toLocaleDateString(),
-                },
-              ]}
-            />
+                  {
+                    accessorKey: "lastVideo",
+                    header: "再生",
+                    enableSorting: false,
+                    cell: (info) => (
+                      <div className="flex items-center justify-center">
+                        <span className="inline-flex gap-x-1">
+                          <Link
+                            href={`https://www.youtube.com/watch?v=${
+                              info.getValue<Song>().video_id
+                            }`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                          >
+                            <FaYoutube />
+                          </Link>
+                          &nbsp;
+                          <Link
+                            href={`/?v=${info.getValue<Song>().video_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                          >
+                            <FaDatabase />
+                          </Link>
+                        </span>
+                      </div>
+                    ),
+                  },
+                  {
+                    accessorKey: "count",
+                    header: "曲数",
+                    cell: (info) => info.getValue<number>(),
+                  },
+                  {
+                    id: "lastVideo.broadcast_at",
+                    accessorKey: "lastVideo.broadcast_at",
+                    header: "配信日",
+                    cell: (info) =>
+                      info.getValue<string>() &&
+                      new Date(info.getValue<string>()).toLocaleDateString(),
+                  },
+                ]}
+                onRowClick={handleVideoClick}
+                selectedVideoId={selectedVideoId}
+                songs={songs}
+              />
+            </>
           )}
         </TabItem>
 
