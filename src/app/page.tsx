@@ -18,7 +18,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { q, v, t } = await searchParams;
 
-  let title = "AZKi Song Database";
+  const title = "AZKi Song Database";
   let subtitle = "AZKiさんの歌の素晴らしさを伝えるサイト";
 
   let ogImageUrl = new URL("/api/og", baseUrl);
