@@ -123,6 +123,9 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               : song.firstVideo.title}
           </h2>
           <p className="text-sm">アーティスト: {song.firstVideo.artist}</p>
+          {song.song.tags.includes("カバー曲") && (
+            <p className="text-sm">カバー: {song.song.sing}</p>
+          )}
           {!song.isAlbum && (
             <>
               <p className="text-sm">
@@ -165,7 +168,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                         <TableCell className="px-2 py-1">
                           <Link
                             href={`/?q=tag:オリ曲+album:${s.album}&pvid=${s.video_id}`}
-                            className="hover:text-white"
+                            className=" hover:text-primary-600 dark:hover:text-white"
                           >
                             <FaCirclePlay size={24} />
                           </Link>
@@ -215,7 +218,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   ? `/?q=album:${song.firstVideo.album}&pvid=${song.firstVideo.video_id}`
                   : `/?q=title:${song.firstVideo.title}+tag:オリ曲`
               }
-              className="text-white bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
+              className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
             >
               <FaDatabase className="mr-2" /> データベースで見る
             </Link>
@@ -493,7 +496,14 @@ export default function DiscographyPage() {
         ></ToggleSwitch>
       </div>
 
-      <Tabs variant="fullWidth" ref={tabsRef} onActiveTabChange={setActiveTab}>
+      <Tabs
+        variant="fullWidth"
+        ref={tabsRef}
+        onActiveTabChange={(tabIdx) => {
+          setActiveTab(tabIdx || 0);
+          setExpandedItem(null);
+        }}
+      >
         <TabItem
           title={`オリジナル楽曲 (${originalSongCountsByReleaseDate.length})`}
         >
