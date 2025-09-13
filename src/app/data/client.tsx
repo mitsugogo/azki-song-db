@@ -232,9 +232,9 @@ export default function ClientTable() {
 
   return (
     <>
-      <div className="flex-grow">
-        <h1 className="font-extrabold text-2xl p-3 mb-2 dark:text-gray-200">
-          <span className="text-2xl font-bold">収録データ</span>
+      <div className="flex-grow lg:p-6">
+        <h1 className="font-extrabold text-2xl p-3 dark:text-gray-200">
+          収録データ
         </h1>
         <p className="mb-4 text-gray-500 dark:text-gray-400 px-3">
           本データベースの情報を表示しています。

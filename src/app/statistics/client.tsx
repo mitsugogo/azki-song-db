@@ -738,13 +738,13 @@ export default function StatisticsPage() {
           )}
         </TabItem>
 
-        {/* Discography */}
-        <TabItem title="Discography" icon={FaCompactDisc}>
+        {/* オリ曲 */}
+        <TabItem title="オリ曲" icon={FaCompactDisc}>
           {deferredActiveTab === 6 && (
             <DataTable
               loading={loading}
               data={originalSongCountsByReleaseDate}
-              caption="Discography"
+              caption="オリ曲"
               description="オリジナル楽曲のリリース日 または 動画初公開日 です"
               initialSortColumnId="broadcast_at"
               initialSortDirection="desc"
