@@ -20,32 +20,22 @@ export async function generateMetadata(
 
   let title = "AZKi Song Database";
   let subtitle = "AZKiさんの歌の素晴らしさを伝えるサイト";
+
+  let ogImageUrl = new URL("/api/og", baseUrl);
+
   if (q) {
     subtitle = `「${q}」の検索結果`;
+
+    ogImageUrl.searchParams.set("title", title);
+    ogImageUrl.searchParams.set("subtitle", subtitle);
+    ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   }
   if (v && t) {
-    const video_id = v;
-    const start = t.toString().replace("s", "");
-    const songs = await fetch(baseUrl + "/api/songs")
-      .then((res) => res.json())
-      .catch(() => []);
-    const song: Song = songs.find(
-      (s: Song) =>
-        s.video_id === video_id && parseInt(s.start) === parseInt(start)
-    );
-    if (song) {
-      title = `🎵 ${song.title} - ${song.artist}` || title;
-      subtitle =
-        `${song.video_title}\n(${new Date(song.broadcast_at).toLocaleDateString(
-          "ja-JP"
-        )}配信)` || subtitle;
-    }
+    ogImageUrl = new URL("/api/og/thumb", baseUrl);
+    ogImageUrl.searchParams.set("v", v?.toString());
+    ogImageUrl.searchParams.set("t", t?.toString());
   }
 
-  const ogImageUrl = new URL("/api/og", baseUrl);
-  ogImageUrl.searchParams.set("title", title);
-  ogImageUrl.searchParams.set("subtitle", subtitle);
-  ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
 

@@ -1,28 +1,46 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
+import { Song } from "@/app/types/song";
 
 export const runtime = "edge";
+
+const baseUrl =
+  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const v = searchParams.get("v");
+    const t = searchParams.get("t");
 
-    const hasTitle = searchParams.has("title");
-    const title = hasTitle
-      ? searchParams.get("title")?.slice(0, 100)
-      : "AZKi Song Database";
-
-    const titleColor = searchParams.get("titlecolor") || "000";
-
-    const hasSubTitle = searchParams.has("subtitle");
-    const subTitle = hasSubTitle
-      ? searchParams.get("subtitle")?.slice(0, 100)
-      : "🎵 AZKi Song Database";
-
-    const subTitleColor = searchParams.get("subtitlecolor") || "000";
+    if (!v || !t) {
+      return new Response("Missing required parameters", { status: 404 });
+    }
 
     const width = searchParams.get("w") || "1200";
     const height = searchParams.get("h") || "630";
+
+    const video_id = v;
+    const start = t.toString().replace("s", "");
+    const songs = await fetch(baseUrl + "/api/songs")
+      .then((res) => res.json())
+      .catch(() => []);
+    const song: Song = songs.find(
+      (s: Song) =>
+        s.video_id === video_id && parseInt(s.start) === parseInt(start)
+    );
+    if (!song) {
+      return new Response("Song not found", { status: 404 });
+    }
+
+    const title = `🎵 ${song.title} - ${song.artist}`;
+    const subTitle = `${song.video_title}\n(${new Date(
+      song.broadcast_at
+    ).toLocaleDateString("ja-JP")})`;
+    const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;
+
+    // サムネイルが読み込めない場合のフォールバックは、ImageResponseのtry/catchでエラーハンドリングする
+    // ため、useYoutubeThumbnailFallbackはここでは使用しません。
 
     const notoSansRegular = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
@@ -57,61 +75,89 @@ export async function GET(req: NextRequest) {
         <div
           style={{
             backgroundColor: "#eee",
-            backgroundSize: "100% 100%",
             height: "100%",
             width: "100%",
             display: "flex",
-            textAlign: "left",
+            flexDirection: "column",
             alignItems: "flex-start",
             justifyContent: "space-between",
-            flexDirection: "column",
             flexWrap: "nowrap",
             border: "30px solid #b81e8a",
             fontFamily: "Noto Sans JP",
-            padding: "90px 120px",
+            padding: "60px 90px",
+            position: "relative", // 子要素の絶対位置指定を可能にする
           }}
         >
+          {/* 曲名コンテナ（上段） */}
+          <div
+            style={{
+              width: "100%",
+              fontSize: 60,
+              fontStyle: "normal",
+              fontWeight: "bold",
+              color: "#333",
+              lineHeight: 1.3,
+            }}
+          >
+            {title}
+          </div>
+          {/* サムネイルと動画名のコンテナ（中段） */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "row",
+              alignItems: "center",
+              width: "100%",
+              marginTop: "120px",
             }}
           >
+            {/* サムネイル画像 */}
             <div
               style={{
-                width: "100%",
-                fontSize: 60,
-                fontStyle: "normal",
-                fontWeight: "bold",
-                color: `#${titleColor}`,
-                lineHeight: 1.3,
-                marginBottom: "30px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "280px",
+                height: "180px",
+                marginRight: "40px",
               }}
             >
-              {title}
+              <img
+                src={thumbnailUrl}
+                alt="YouTube Thumbnail"
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                }}
+              />
             </div>
+            {/* 動画名 */}
             <div
               style={{
-                width: "100%",
-                fontSize: 40,
+                fontSize: 32,
                 fontStyle: "normal",
-                color: `#${subTitleColor}`,
+                color: "#333",
                 lineHeight: 1.3,
+                flex: 1,
+                lineClamp: 3,
               }}
             >
               {subTitle}
             </div>
           </div>
-          {/* サイト名用のコンテナ */}
+          {/* サイト名（左下から絶対位置で固定） */}
           <div
             style={{
-              width: "100%",
               fontSize: 24,
               fontStyle: "normal",
-              color: "#333", // サイト名の色を調整
+              color: "#999",
               fontWeight: 400,
-              textAlign: "left", // 左揃え
-              marginTop: "auto", // 親要素の末尾に配置
+              position: "absolute",
+              bottom: "20px",
+              left: "40px",
             }}
           >
             AZKi Song Database
