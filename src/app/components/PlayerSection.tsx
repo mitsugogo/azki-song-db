@@ -81,7 +81,7 @@ export default function PlayerSection({
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
@@ -106,7 +106,7 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
@@ -131,7 +131,7 @@ export default function PlayerSection({
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
