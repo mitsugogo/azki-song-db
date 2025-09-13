@@ -18,13 +18,7 @@ import {
 import { HiMusicNote, HiPlay, HiTag, HiUserCircle } from "react-icons/hi";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 
-import {
-  FaCirclePlay,
-  FaCompactDisc,
-  FaDatabase,
-  FaStar,
-  FaYoutube,
-} from "react-icons/fa6";
+import { FaCompactDisc, FaDatabase, FaStar, FaYoutube } from "react-icons/fa6";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
@@ -42,7 +36,7 @@ import {
 
 import useDebounce from "../hook/useDebounce";
 import { VideoInfo } from "../types/videoInfo";
-import { Tab } from "@headlessui/react";
+import { BsPlayCircle } from "react-icons/bs";
 
 type StatisticsItem = {
   key: string;
@@ -332,7 +326,10 @@ function DataTable<
                                         href={`/?v=${s.video_id}&t=${s.start}s&q=video_id:${s.video_id}`}
                                         className=" hover:text-primary-600 dark:hover:text-white"
                                       >
-                                        <FaCirclePlay size={24} />
+                                        <BsPlayCircle
+                                          size={24}
+                                          className="inline"
+                                        />
                                       </Link>
                                     </TableCell>
                                     <TableCell className="text-sm">

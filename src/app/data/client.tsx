@@ -15,10 +15,10 @@ import {
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
 import { Badge, TextInput } from "flowbite-react";
-import { FaStar } from "react-icons/fa6";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
 import MilestoneBadge from "../components/MilestoneBadge";
+import { BsPlayCircle } from "react-icons/bs";
 
 export default function ClientTable() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,17 +37,29 @@ export default function ClientTable() {
         size: 80,
       },
       {
+        header: "再生",
+        cell: (info) => (
+          <Link
+            href={`/?v=${info.row.original.video_id}&t=${info.row.original.start}`}
+            className="hover:underline font-semibold hover:text-primary-600 dark:hover:text-white"
+          >
+            <BsPlayCircle className="inline w-6 h-6" />
+          </Link>
+        ),
+        size: 60,
+      },
+      {
         accessorKey: "title",
         header: "タイトル",
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
-            className="hover:underline font-semibold text-primary dark:text-primary-300 line-clamp-2"
+            className="hover:underline font-semibold text-primary dark:text-primary-300"
           >
             {info.getValue<string>()}
           </Link>
         ),
-        size: 200,
+        size: 250,
         enableResizing: true,
       },
       {
@@ -56,12 +68,12 @@ export default function ClientTable() {
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
-            className="hover:underline text-primary dark:text-primary-300 line-clamp-2"
+            className="hover:underline text-primary dark:text-primary-300"
           >
             {info.getValue<string>()}
           </Link>
         ),
-        size: 150,
+        size: 250,
         enableResizing: true,
       },
       {
@@ -69,17 +81,19 @@ export default function ClientTable() {
         header: "歌った人",
         size: 300,
         cell: (info) => (
-          <div className="line-clamp-2">
+          <div>
             {info
               .getValue<string>()
               .split("、")
               .map((title, index) => (
                 <Link
                   key={index}
-                  href={`/?q=title:${encodeURIComponent(title)}`}
+                  href={`/?q=sing:${encodeURIComponent(title)}`}
                   className="hover:underline text-primary dark:text-primary-300 mr-2"
                 >
-                  {title}
+                  <Badge color="info" size="xs" className="inline-block">
+                    {title}
+                  </Badge>
                 </Link>
               ))}
           </div>
@@ -139,7 +153,7 @@ export default function ClientTable() {
         accessorKey: "tags",
         header: "タグ",
         cell: (info) => (
-          <div className="line-clamp-2">
+          <div>
             {info.getValue<string[]>().map((tag, index) => (
               <Link
                 key={index}
@@ -216,7 +230,7 @@ export default function ClientTable() {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 56,
+    estimateSize: () => 86,
     overscan: 10,
   });
 
@@ -245,22 +259,22 @@ export default function ClientTable() {
             placeholder="検索..."
             onChange={(e) => setFilterQuery(e.target.value)}
           />
-
           <div
             ref={tableContainerRef}
-            className="overflow-x-auto overflow-y-auto relative rounded-lg shadow-md"
-            // 残りの要素の高さいっぱい
-            style={{ height: "calc(100vh - 274px)" }}
+            className="overflow-x-auto overflow-y-auto relative rounded-lg shadow-md h-dvh lg:h-[calc(100vh-314px)]"
           >
-            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-fixed">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+            <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+              {/* ヘッダー部分 */}
+              <div className="flex text-xs text-gray-700 sticky top-0 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
+                  <div
+                    key={headerGroup.id}
+                    className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+                  >
                     {headerGroup.headers.map((header) => (
-                      <th
+                      <div
                         key={header.id}
-                        scope="col"
-                        className="px-6 py-3"
+                        className="relative px-6 py-3 min-w-0 flex-shrink-0"
                         style={{
                           width: header.getSize(),
                         }}
@@ -295,13 +309,13 @@ export default function ClientTable() {
                             }`}
                           ></div>
                         )}
-                      </th>
+                      </div>
                     ))}
-                  </tr>
+                  </div>
                 ))}
-              </thead>
-
-              <tbody
+              </div>
+              {/* ボディ部分 */}
+              <div
                 className="relative"
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,
@@ -312,7 +326,7 @@ export default function ClientTable() {
                   if (!row) return null;
 
                   return (
-                    <tr
+                    <div
                       key={row.id}
                       data-index={virtualRow.index}
                       ref={(el) => rowVirtualizer.measureElement(el)}
@@ -320,16 +334,15 @@ export default function ClientTable() {
                         position: "absolute",
                         top: 0,
                         left: 0,
-                        width: "100%",
-                        height: `${virtualRow.size}px`,
+                        // height: `${virtualRow.size}px`,
                         transform: `translateY(${virtualRow.start}px)`,
                       }}
-                      className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      className="flex bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td
+                        <div
                           key={cell.id}
-                          className="px-6 py-2"
+                          className="px-6 py-2 min-w-0 flex-shrink-0"
                           style={{
                             width: cell.column.getSize(),
                           }}
@@ -338,13 +351,13 @@ export default function ClientTable() {
                             cell.column.columnDef.cell,
                             cell.getContext()
                           )}
-                        </td>
+                        </div>
                       ))}
-                    </tr>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -16,13 +16,8 @@ import {
   ToggleSwitch,
 } from "flowbite-react";
 
-import {
-  FaCirclePlay,
-  FaCompactDisc,
-  FaDatabase,
-  FaMusic,
-  FaYoutube,
-} from "react-icons/fa6";
+import { FaCompactDisc, FaDatabase, FaMusic, FaYoutube } from "react-icons/fa6";
+import { BsPlayCircle } from "react-icons/bs";
 import Link from "next/link";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
@@ -170,7 +165,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                             href={`/?q=tag:オリ曲+album:${s.album}&pvid=${s.video_id}`}
                             className=" hover:text-primary-600 dark:hover:text-white"
                           >
-                            <FaCirclePlay size={24} />
+                            <BsPlayCircle size={24} />
                           </Link>
                         </TableCell>
                         <TableCell className="px-2 py-1">
