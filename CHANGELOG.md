@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.2](https://github.com/mitsugogo/azki-song-db/compare/v1.10.1...v1.10.2) (2025-09-13)
+
+
+### Bug Fixes
+
+* **data:** Safariでの表示崩れを修正 ([c042976](https://github.com/mitsugogo/azki-song-db/commit/c042976153215db1cf6a1deccba0fadf692e1038))
+
 ### [1.10.1](https://github.com/mitsugogo/azki-song-db/compare/v1.10.0...v1.10.1) (2025-09-13)
 
 
