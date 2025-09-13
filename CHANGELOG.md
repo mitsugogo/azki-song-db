@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.1](https://github.com/mitsugogo/azki-song-db/compare/v1.10.0...v1.10.1) (2025-09-13)
+
+
+### Bug Fixes
+
+* **disco:** ホバー時のアルバム発売日が誤っている場合があるのを修正 ([0e56dbf](https://github.com/mitsugogo/azki-song-db/commit/0e56dbf56b0c4ade3e7926772494a54e9e0e5444))
+
 ## [1.10.0](https://github.com/mitsugogo/azki-song-db/compare/v1.9.0...v1.10.0) (2025-09-13)
 
 
