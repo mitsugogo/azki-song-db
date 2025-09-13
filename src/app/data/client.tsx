@@ -41,7 +41,7 @@ export default function ClientTable() {
         cell: (info) => (
           <Link
             href={`/?v=${info.row.original.video_id}&t=${info.row.original.start}`}
-            className="hover:underline font-semibold text-primary dark:text-primary-300"
+            className="hover:underline font-semibold hover:text-primary-600 dark:hover:text-white"
           >
             <BsPlayCircle className="inline w-6 h-6" />
           </Link>
