@@ -85,18 +85,19 @@ export async function GET(req: NextRequest) {
             border: "30px solid #b81e8a",
             fontFamily: "Noto Sans JP",
             padding: "60px 90px",
-            position: "relative", // 子要素の絶対位置指定を可能にする
+            position: "relative",
           }}
         >
           {/* 曲名コンテナ（上段） */}
           <div
             style={{
-              width: "100%",
               fontSize: 60,
               fontStyle: "normal",
               fontWeight: "bold",
+              display: "block",
               color: "#333",
               lineHeight: 1.3,
+              lineClamp: '3 "..."',
             }}
           >
             {title}
@@ -137,12 +138,13 @@ export async function GET(req: NextRequest) {
             {/* 動画名 */}
             <div
               style={{
+                display: "block",
                 fontSize: 32,
                 fontStyle: "normal",
                 color: "#333",
                 lineHeight: 1.3,
                 flex: 1,
-                lineClamp: 3,
+                lineClamp: '3 "..."',
               }}
             >
               {subTitle}
