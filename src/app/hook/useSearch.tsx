@@ -36,8 +36,66 @@ const useSearch = (allSongs: Song[]) => {
       .map((word) => word.trim().toLowerCase())
       .filter(Boolean);
 
-    return songsToFilter.filter((song) => {
-      return searchWords.every((word) => {
+    // 除外検索ワードの定義
+    const excludeWords = searchWords
+      .filter((word) => word.startsWith("-"))
+      .map((word) => word.substring(1));
+
+    // 通常検索ワードの定義
+    const normalWords = searchWords.filter((word) => !word.startsWith("-"));
+
+    const isExcluded = (song: Song, excludeWords: string[]) => {
+      return excludeWords.some((word) => {
+        // プレフィックス付き除外検索
+        const prefixSearches: {
+          [key: string]: (song: Song, value: string) => boolean;
+        } = {
+          "title:": (s, v) => s.title.toLowerCase().includes(v),
+          "artist:": (s, v) => s.artist.toLowerCase().includes(v),
+          "album:": (s, v) => s.album.toLowerCase().includes(v),
+          "sing:": (s, v) =>
+            s.sing
+              .toLowerCase()
+              .split("、")
+              .some((sing) => sing.includes(v)),
+          "tag:": (s, v) =>
+            s.tags
+              .join(",")
+              .toLowerCase()
+              .split(",")
+              .some((tag) => tag.includes(v)),
+          "video_id:": (s, v) => s.video_id.toLowerCase().includes(v),
+          "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
+          "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
+          "milestone:": (s, v) =>
+            v === "*"
+              ? (s.milestones?.length ?? 0) > 0
+              : s.milestones?.some((m) => m.includes(v)) ?? false,
+        };
+
+        for (const prefix in prefixSearches) {
+          if (word.startsWith(prefix)) {
+            return prefixSearches[prefix](song, word.substring(prefix.length));
+          }
+        }
+
+        // 除外検索
+        return (
+          song.title.toLowerCase().includes(word) ||
+          song.artist.toLowerCase().includes(word) ||
+          song.album.toLowerCase().includes(word) ||
+          song.sing.toLowerCase().includes(word) ||
+          song.tags.some((tag) => tag.toLowerCase().includes(word)) ||
+          song.video_title.toLowerCase().includes(word) ||
+          (song.extra && song.extra.toLowerCase().includes(word)) ||
+          (song.milestones &&
+            song.milestones.some((m) => m.toLowerCase().includes(word)))
+        );
+      });
+    };
+
+    const matchesNormalWords = (song: Song, normalWords: string[]) => {
+      return normalWords.every((word) => {
         // プレフィックス付き検索の定義
         const prefixSearches: {
           [key: string]: (song: Song, value: string) => boolean;
@@ -84,6 +142,12 @@ const useSearch = (allSongs: Song[]) => {
             song.milestones.some((m) => m.toLowerCase().includes(word)))
         );
       });
+    };
+
+    return songsToFilter.filter((song) => {
+      return (
+        matchesNormalWords(song, normalWords) && !isExcluded(song, excludeWords)
+      );
     });
   }, []);
 
