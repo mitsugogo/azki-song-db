@@ -916,6 +916,11 @@ export default function StatisticsPage() {
                   ),
                 },
                 {
+                  accessorKey: "song.sing",
+                  header: "歌った人",
+                  cell: (info) => info.getValue<string>(),
+                },
+                {
                   accessorKey: "videoInfo.statistics.viewCount",
                   header: "再生回数",
                   cell: (info) =>
