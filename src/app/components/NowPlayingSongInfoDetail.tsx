@@ -11,7 +11,7 @@ import {
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faYoutube } from "@fortawesome/free-brands-svg-icons";
-import { IoTime } from "react-icons/io5";
+import { IoAlbums, IoTime } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi";
@@ -89,6 +89,53 @@ const NowPlayingSongInfoDetail = ({
                           }`}
                         >
                           {artist}
+                        </Badge>
+                      );
+                    })}
+                  </dd>
+                </div>
+              </>
+            )}
+
+            {currentSongInfo.album && (
+              <>
+                <div className="col-span-1 lg:col-span-2 flex items-baseline">
+                  <dt className="text-muted-foreground flex items-baseline">
+                    <IoAlbums />
+                    <span className="hidden text-nowrap lg:inline ml-1">
+                      アルバム:
+                    </span>
+                  </dt>
+                </div>
+                <div className="col-span-11 lg:col-span-10">
+                  <dd className="flex flex-wrap gap-1">
+                    {currentSongInfo.album.split("、").map((album, index) => {
+                      const existsSameAlbum = searchTerm.includes(
+                        `album:${album}`
+                      );
+                      return (
+                        <Badge
+                          key={index}
+                          onClick={() => {
+                            if (existsSameAlbum) {
+                              setSearchTerm(
+                                searchTerm.replace(`album:${album}`, "").trim()
+                              );
+                            } else {
+                              setSearchTerm(
+                                `${
+                                  searchTerm ? `${searchTerm} ` : ""
+                                }album:${album}`
+                              );
+                            }
+                          }}
+                          className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                            existsSameAlbum
+                              ? "bg-cyan-300 dark:bg-cyan-600"
+                              : ""
+                          }`}
+                        >
+                          {album}
                         </Badge>
                       );
                     })}

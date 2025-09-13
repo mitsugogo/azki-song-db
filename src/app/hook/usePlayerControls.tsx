@@ -81,7 +81,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     const element = document.querySelector(
       `[data-video-id="${song.video_id}"][data-start-time="${song.start}"]`
     );
-    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    element?.scrollIntoView({ block: "center" });
   };
 
   const changeCurrentSong = useCallback(

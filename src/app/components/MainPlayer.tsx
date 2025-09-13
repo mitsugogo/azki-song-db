@@ -89,6 +89,7 @@ export default function MainPlayer() {
     const query = urlParams.get("q");
     const videoId = urlParams.get("v");
     const startTime = urlParams.get("t")?.replace("s", "");
+    const pvId = urlParams.get("pvid");
 
     let filteredSongs = allSongs;
     if (query) {
@@ -96,7 +97,15 @@ export default function MainPlayer() {
       filteredSongs = searchSongs(allSongs, query);
     }
 
-    if (videoId && startTime) {
+    if (pvId) {
+      // この動画idから再生する
+      const song = filteredSongs.find((s) => s.video_id === pvId);
+      if (song) {
+        changeCurrentSong(song);
+      } else {
+        playRandomSong(filteredSongs);
+      }
+    } else if (videoId && startTime) {
       const targetSong = filteredSongs.find(
         (song) =>
           song.video_id === videoId &&
