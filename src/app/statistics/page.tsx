@@ -18,10 +18,10 @@ export async function generateMetadata(
   const { q, v, t } = await searchParams;
 
   const title = "統計情報";
-  let subtitle =
+  const subtitle =
     "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています";
 
-  let ogImageUrl = new URL("/api/og", baseUrl);
+  const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
   ogImageUrl.searchParams.set("subtitle", subtitle);
 

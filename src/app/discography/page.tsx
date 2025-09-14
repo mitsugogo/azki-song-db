@@ -17,9 +17,9 @@ export async function generateMetadata(
   const { q, v, t } = await searchParams;
 
   const title = "Discography";
-  let subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
+  const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
 
-  let ogImageUrl = new URL("/api/og", baseUrl);
+  const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
   ogImageUrl.searchParams.set("subtitle", subtitle);
 
