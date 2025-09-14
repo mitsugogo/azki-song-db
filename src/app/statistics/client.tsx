@@ -378,30 +378,6 @@ function DataTable<
           </TableBody>
         </Table>
       </div>
-
-      {/* ページネーション */}
-      {/* <div className="flex items-center justify-between">
-        <span className="text-sm">
-          ページ {table.getState().pagination.pageIndex + 1} /{" "}
-          {table.getPageCount()}
-        </span>
-        <div className="flex gap-2">
-          <Button
-            size="xs"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            前へ
-          </Button>
-          <Button
-            size="xs"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            次へ
-          </Button>
-        </div>
-      </div> */}
     </div>
   );
 }
@@ -418,10 +394,8 @@ export default function StatisticsPage() {
   const [originalSongInfo, setOriginalSongInfo] = useState([]);
   const originalSongInfoRef = useRef(originalSongInfo);
 
-  // useDeferredValueでactiveTabを遅延させる
   const deferredActiveTab = useDeferredValue(activeTab);
 
-  // 追加: 選択された動画のIDを保持するstate
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -560,9 +534,7 @@ export default function StatisticsPage() {
     );
   }, [songs, coverSongInfo]);
 
-  // 追加: 行をクリックしたときのハンドラ
   const handleVideoClick = (videoId: string) => {
-    // 同じ動画がクリックされたら非表示、そうでなければ表示
     setSelectedVideoId((prevId) => (prevId === videoId ? null : videoId));
   };
 
