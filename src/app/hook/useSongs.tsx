@@ -30,12 +30,14 @@ const useSongs = () => {
         const songTitles = [...new Set(data.map((song) => song.title))].sort();
         const singers = [
           ...new Set(
-            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim()))
+            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim())),
           ),
         ].sort();
         const artists = [
           ...new Set(
-            data.flatMap((song) => song.artist.split(/、/).map((s) => s.trim()))
+            data.flatMap((song) =>
+              song.artist.split(/、/).map((s) => s.trim()),
+            ),
           ),
         ].sort();
         const milestones = [

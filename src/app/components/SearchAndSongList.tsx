@@ -118,7 +118,10 @@ export default function SearchAndSongList({
                   setSearchTitle(value);
                   handleAdvancedSearch();
                 }}
-                inputProps={{ icon: FaMusic, placeholder: "曲名" }}
+                inputProps={{
+                  icon: FaMusic,
+                  placeholder: "曲名",
+                }}
               />
             </div>
             <div className="relative mt-1">
@@ -129,7 +132,10 @@ export default function SearchAndSongList({
                   setSearchArtist(value);
                   handleAdvancedSearch();
                 }}
-                inputProps={{ icon: FaUser, placeholder: "アーティスト" }}
+                inputProps={{
+                  icon: FaUser,
+                  placeholder: "アーティスト",
+                }}
               />
             </div>
             <div className="relative mt-1">
@@ -140,7 +146,10 @@ export default function SearchAndSongList({
                   setSearchSinger(value);
                   handleAdvancedSearch();
                 }}
-                inputProps={{ icon: FaCompactDisc, placeholder: "歌った人" }}
+                inputProps={{
+                  icon: FaCompactDisc,
+                  placeholder: "歌った人",
+                }}
               />
             </div>
             <div className="relative mt-1">
@@ -151,7 +160,10 @@ export default function SearchAndSongList({
                   setSearchTag(value);
                   handleAdvancedSearch();
                 }}
-                inputProps={{ icon: FaTag, placeholder: "タグ" }}
+                inputProps={{
+                  icon: FaTag,
+                  placeholder: "タグ",
+                }}
               />
             </div>
             <div className="relative mt-1">

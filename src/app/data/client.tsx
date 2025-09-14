@@ -19,6 +19,10 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
+import {
+  OverlayScrollbarsComponent,
+  OverlayScrollbarsComponentRef,
+} from "overlayscrollbars-react";
 
 export default function ClientTable() {
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +30,7 @@ export default function ClientTable() {
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   const columns = useMemo<ColumnDef<Song>[]>(
     () => [
@@ -41,9 +45,9 @@ export default function ClientTable() {
         cell: (info) => (
           <Link
             href={`/?v=${info.row.original.video_id}&t=${info.row.original.start}`}
-            className="hover:underline font-semibold hover:text-primary-600 dark:hover:text-white"
+            className="text-gray-400 hover:text-primary-600 dark:hover:text-white"
           >
-            <BsPlayCircle className="inline w-6 h-6" />
+            <BsPlayCircle className="inline w-5 h-5" />
           </Link>
         ),
         size: 60,
@@ -197,7 +201,7 @@ export default function ClientTable() {
         enableResizing: true,
       },
     ],
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -229,7 +233,8 @@ export default function ClientTable() {
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
+    getScrollElement: () =>
+      tableContainerRef.current?.osInstance()?.elements().viewport as Element,
     estimateSize: () => 86,
     overscan: 10,
   });
@@ -259,106 +264,112 @@ export default function ClientTable() {
             placeholder="検索..."
             onChange={(e) => setFilterQuery(e.target.value)}
           />
-          <div
+          <OverlayScrollbarsComponent
             ref={tableContainerRef}
-            className="overflow-x-auto overflow-y-auto relative rounded-lg shadow-md h-dvh lg:h-[calc(100vh-314px)]"
+            className="h-dvh lg:h-[calc(100vh-314px)]"
           >
-            <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-              {/* ヘッダー部分 */}
-              <div className="flex text-xs text-gray-700 sticky top-0 z-10">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <div
-                    key={headerGroup.id}
-                    className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-                  >
-                    {headerGroup.headers.map((header) => (
-                      <div
-                        key={header.id}
-                        className="relative px-6 py-3 min-w-0 flex-shrink-0"
-                        style={{
-                          width: header.getSize(),
-                        }}
-                      >
-                        <div
-                          onClick={header.column.getToggleSortingHandler()}
-                          className="flex items-center cursor-pointer select-none whitespace-nowrap"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {header.column.getCanSort() && (
-                            <span className="ml-1 inline-block">
-                              {{
-                                asc: <HiChevronUp className="inline w-4 h-4" />,
-                                desc: (
-                                  <HiChevronDown className="inline w-4 h-4" />
-                                ),
-                              }[header.column.getIsSorted() as string] ?? (
-                                <HiArrowsUpDown className="inline w-4 h-4 opacity-50" />
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        {header.column.getCanResize() && (
-                          <div
-                            onMouseDown={header.getResizeHandler()}
-                            onTouchStart={header.getResizeHandler()}
-                            className={`resizer absolute top-0 right-0 h-full w-2 cursor-col-resize ${
-                              header.column.getIsResizing() ? "bg-blue-500" : ""
-                            }`}
-                          ></div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              {/* ボディ部分 */}
-              <div
-                className="relative"
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                }}
-              >
-                {virtualRows.map((virtualRow) => {
-                  const row = rows[virtualRow.index];
-                  if (!row) return null;
-
-                  return (
+            <div className="relative">
+              <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                {/* ヘッダー部分 */}
+                <div className="flex text-xs text-gray-700 sticky top-0 z-10">
+                  {table.getHeaderGroups().map((headerGroup) => (
                     <div
-                      key={row.id}
-                      data-index={virtualRow.index}
-                      ref={(el) => rowVirtualizer.measureElement(el)}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        // height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                      className="flex bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      key={headerGroup.id}
+                      className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
                     >
-                      {row.getVisibleCells().map((cell) => (
+                      {headerGroup.headers.map((header) => (
                         <div
-                          key={cell.id}
-                          className="px-6 py-2 min-w-0 flex-shrink-0"
+                          key={header.id}
+                          className="relative px-6 py-3 min-w-0 flex-shrink-0"
                           style={{
-                            width: cell.column.getSize(),
+                            width: header.getSize(),
                           }}
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
+                          <div
+                            onClick={header.column.getToggleSortingHandler()}
+                            className="flex items-center cursor-pointer select-none whitespace-nowrap"
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                            {header.column.getCanSort() && (
+                              <span className="ml-1 inline-block">
+                                {{
+                                  asc: (
+                                    <HiChevronUp className="inline w-4 h-4" />
+                                  ),
+                                  desc: (
+                                    <HiChevronDown className="inline w-4 h-4" />
+                                  ),
+                                }[header.column.getIsSorted() as string] ?? (
+                                  <HiArrowsUpDown className="inline w-4 h-4 opacity-50" />
+                                )}
+                              </span>
+                            )}
+                          </div>
+                          {header.column.getCanResize() && (
+                            <div
+                              onMouseDown={header.getResizeHandler()}
+                              onTouchStart={header.getResizeHandler()}
+                              className={`resizer absolute top-0 right-0 h-full w-2 cursor-col-resize ${
+                                header.column.getIsResizing()
+                                  ? "bg-blue-500"
+                                  : ""
+                              }`}
+                            ></div>
                           )}
                         </div>
                       ))}
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
+                {/* ボディ部分 */}
+                <div
+                  className="relative"
+                  style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                  }}
+                >
+                  {virtualRows.map((virtualRow) => {
+                    const row = rows[virtualRow.index];
+                    if (!row) return null;
+
+                    return (
+                      <div
+                        key={row.id}
+                        data-index={virtualRow.index}
+                        ref={(el) => rowVirtualizer.measureElement(el)}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          // height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                        className="flex bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <div
+                            key={cell.id}
+                            className="px-6 py-2 min-w-0 flex-shrink-0"
+                            style={{
+                              width: cell.column.getSize(),
+                            }}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          </OverlayScrollbarsComponent>
         </div>
       </div>
     </>

@@ -47,14 +47,16 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
       const currentIndex = songsList.findIndex(
-        (s) => s.video_id === song.video_id && s.start === song.start
+        (s) => s.video_id === song.video_id && s.start === song.start,
       );
       setPreviousSong(currentIndex > 0 ? songsList[currentIndex - 1] : null);
       setNextSong(
-        currentIndex < songsList.length - 1 ? songsList[currentIndex + 1] : null
+        currentIndex < songsList.length - 1
+          ? songsList[currentIndex + 1]
+          : null,
       );
     },
-    []
+    [],
   );
 
   // 現在の楽曲が変わったらtitleを変更する
@@ -79,7 +81,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const scrollToTargetSong = (song: Song | null) => {
     if (!song) return;
     const element = document.querySelector(
-      `[data-video-id="${song.video_id}"][data-start-time="${song.start}"]`
+      `[data-video-id="${song.video_id}"][data-start-time="${song.start}"]`,
     );
     element?.scrollIntoView({ block: "center" });
   };
@@ -112,7 +114,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         setCurrentSong(song);
       }
     },
-    [songs, setPreviousAndNextSongs, currentSong, resetPlayer]
+    [songs, setPreviousAndNextSongs, currentSong, resetPlayer],
   );
 
   const playRandomSong = useCallback(
@@ -122,16 +124,16 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         songsList[Math.floor(Math.random() * songsList.length)];
       changeCurrentSong(randomSong);
     },
-    [changeCurrentSong]
+    [changeCurrentSong],
   );
 
   const searchCurrentSongOnVideo = useCallback(
     (video_id: string, currentTime: number) => {
       return sortedAllSongs.find(
-        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime
+        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime,
       );
     },
-    [allSongs]
+    [allSongs],
   );
 
   const handleStateChange = useCallback(
@@ -165,11 +167,12 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
           const foundSong = searchCurrentSongOnVideo(
             currentVideoId,
-            currentTime
+            currentTime,
           );
           const isFoundSongInList = songs.some(
             (s) =>
-              s.video_id === foundSong?.video_id && s.start === foundSong?.start
+              s.video_id === foundSong?.video_id &&
+              s.start === foundSong?.start,
           );
 
           if (!isFoundSongInList && nextSong) {
@@ -226,7 +229,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       changeCurrentSong,
       playRandomSong,
       searchCurrentSongOnVideo,
-    ]
+    ],
   );
 
   return {

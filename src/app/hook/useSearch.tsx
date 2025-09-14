@@ -70,7 +70,7 @@ const useSearch = (allSongs: Song[]) => {
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
-              : s.milestones?.some((m) => m.includes(v)) ?? false,
+              : (s.milestones?.some((m) => m.includes(v)) ?? false),
         };
 
         for (const prefix in prefixSearches) {
@@ -120,7 +120,7 @@ const useSearch = (allSongs: Song[]) => {
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
-              : s.milestones?.some((m) => m.includes(v)) ?? false,
+              : (s.milestones?.some((m) => m.includes(v)) ?? false),
         };
 
         for (const prefix in prefixSearches) {

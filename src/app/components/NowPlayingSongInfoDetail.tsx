@@ -62,7 +62,7 @@ const NowPlayingSongInfoDetail = ({
                   <dd className="flex flex-wrap gap-1">
                     {currentSongInfo.artist.split("、").map((artist, index) => {
                       const existsSameArtist = searchTerm.includes(
-                        `artist:${artist}`
+                        `artist:${artist}`,
                       );
                       return (
                         <Badge
@@ -72,13 +72,13 @@ const NowPlayingSongInfoDetail = ({
                               setSearchTerm(
                                 searchTerm
                                   .replace(`artist:${artist}`, "")
-                                  .trim()
+                                  .trim(),
                               );
                             } else {
                               setSearchTerm(
                                 `${
                                   searchTerm ? `${searchTerm} ` : ""
-                                }artist:${artist}`
+                                }artist:${artist}`,
                               );
                             }
                           }}
@@ -111,7 +111,7 @@ const NowPlayingSongInfoDetail = ({
                   <dd className="flex flex-wrap gap-1">
                     {currentSongInfo.album.split("、").map((album, index) => {
                       const existsSameAlbum = searchTerm.includes(
-                        `album:${album}`
+                        `album:${album}`,
                       );
                       return (
                         <Badge
@@ -119,13 +119,13 @@ const NowPlayingSongInfoDetail = ({
                           onClick={() => {
                             if (existsSameAlbum) {
                               setSearchTerm(
-                                searchTerm.replace(`album:${album}`, "").trim()
+                                searchTerm.replace(`album:${album}`, "").trim(),
                               );
                             } else {
                               setSearchTerm(
                                 `${
                                   searchTerm ? `${searchTerm} ` : ""
-                                }album:${album}`
+                                }album:${album}`,
                               );
                             }
                           }}
@@ -162,11 +162,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameSing) {
                           setSearchTerm(
-                            searchTerm.replace(`sing:${sing}`, "").trim()
+                            searchTerm.replace(`sing:${sing}`, "").trim(),
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}sing:${sing}`
+                            `${searchTerm ? `${searchTerm} ` : ""}sing:${sing}`,
                           );
                         }
                       }}
@@ -219,28 +219,28 @@ const NowPlayingSongInfoDetail = ({
                   className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
                     searchTerm.includes(
                       `date:${new Date(
-                        currentSongInfo.broadcast_at
-                      ).toLocaleDateString()}`
+                        currentSongInfo.broadcast_at,
+                      ).toLocaleDateString()}`,
                     )
                       ? "bg-cyan-300 dark:bg-cyan-600"
                       : ""
                   }`}
                   onClick={() => {
                     const broadcastDate = new Date(
-                      currentSongInfo.broadcast_at
+                      currentSongInfo.broadcast_at,
                     ).toLocaleDateString();
                     const existsSameDate = searchTerm.includes(
-                      `date:${broadcastDate}`
+                      `date:${broadcastDate}`,
                     );
                     if (existsSameDate) {
                       setSearchTerm(
-                        searchTerm.replace(`date:${broadcastDate}`, "").trim()
+                        searchTerm.replace(`date:${broadcastDate}`, "").trim(),
                       );
                     } else {
                       setSearchTerm(
                         `${
                           searchTerm ? `${searchTerm} ` : ""
-                        }date:${broadcastDate}`
+                        }date:${broadcastDate}`,
                       );
                     }
                   }}
@@ -269,11 +269,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameTag) {
                           setSearchTerm(
-                            searchTerm.replace(`tag:${tag}`, "").trim()
+                            searchTerm.replace(`tag:${tag}`, "").trim(),
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}tag:${tag}`
+                            `${searchTerm ? `${searchTerm} ` : ""}tag:${tag}`,
                           );
                         }
                       }}
@@ -302,7 +302,7 @@ const NowPlayingSongInfoDetail = ({
                         .replace(
                           /(https?:\/\/[\w\d./=?#-]+)/g,
                           (url) =>
-                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`
+                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
                         )
                         .replace(/\n/g, "<br />"),
                     }}
@@ -343,7 +343,7 @@ const NowPlayingSongInfoDetail = ({
                                 (song) =>
                                   currentSongInfo?.title === song.title &&
                                   currentSongInfo.video_id === song.video_id &&
-                                  currentSongInfo.start === song.start
+                                  currentSongInfo.start === song.start,
                               );
 
                           return (
@@ -387,7 +387,8 @@ const NowPlayingSongInfoDetail = ({
                                     <span
                                       className={`${isHide ? "opacity-0" : ""}`}
                                     >
-                                      {song.title}&nbsp;-&nbsp;
+                                      {song.title}
+                                      &nbsp;-&nbsp;
                                       <span className="text-gray-500 dark:text-gray-600">
                                         {song.artist}
                                       </span>
@@ -401,7 +402,7 @@ const NowPlayingSongInfoDetail = ({
                                         inline
                                         onClick={(event, song, milestone) => {
                                           setSearchTerm(
-                                            `milestone:${milestone}`
+                                            `milestone:${milestone}`,
                                           );
                                         }}
                                       />

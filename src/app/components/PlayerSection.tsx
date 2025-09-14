@@ -81,7 +81,7 @@ export default function PlayerSection({
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
@@ -89,12 +89,12 @@ export default function PlayerSection({
                     />
                   </div>
                   <div className="flex flex-1 flex-col px-2 min-w-0">
-                    <span className="block text-left font-bold truncate">
+                    <div className="text-left font-bold line-clamp-1">
                       {previousSong.title}
-                    </span>
-                    <span className="block text-left text-xs text-muted truncate">
+                    </div>
+                    <div className="text-left text-xs text-muted line-clamp-1">
                       {previousSong.artist}
-                    </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -106,7 +106,7 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
@@ -114,10 +114,10 @@ export default function PlayerSection({
                     />
                   </div>
                   <div className="flex flex-1 flex-col px-2 min-w-0">
-                    <span className="block text-left font-bold truncate">
+                    <div className="text-left font-bold line-clamp-1">
                       {currentSongInfo.title}
-                    </span>
-                    <span className="block text-left text-xs text-muted truncate">
+                    </div>
+                    <span className="text-left text-xs text-muted line-clamp-1">
                       {currentSongInfo.artist}
                     </span>
                   </div>
@@ -131,7 +131,7 @@ export default function PlayerSection({
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex w-24 aspect-video min-w-24 max-w-24 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}

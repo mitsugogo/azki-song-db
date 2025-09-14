@@ -166,7 +166,7 @@ export function Header() {
                         aria-current={isCurrent ? "page" : undefined}
                         className={classNames(
                           isCurrent ? activeClasses : inactiveClasses,
-                          baseClasses
+                          baseClasses,
                         )}
                         onClick={() => close()}
                       >
