@@ -61,6 +61,7 @@ export default function StatisticsPage() {
         variant="underline"
         ref={tabsRef}
         onActiveTabChange={handleTabChange}
+        className="whitespace-nowrap overflow-y-scroll"
       >
         {TABS_CONFIG.map((tab, index) => (
           <TabItem key={tab.title} title={tab.title} icon={tab.icon}>

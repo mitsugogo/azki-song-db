@@ -157,7 +157,7 @@ export default function DataTable<
             {description}
           </p>
         </div>
-        <div className="px-3 lg:mb-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        <div className="px-3 pb-2 lg:mb-3 text-sm font-normal text-gray-500 dark:text-gray-400">
           <TextInput
             placeholder="検索..."
             value={inputValue}
