@@ -268,7 +268,7 @@ export default function ClientTable() {
             ref={tableContainerRef}
             className="h-dvh lg:h-[calc(100vh-314px)]"
           >
-            <div className="relative" style={{}}>
+            <div className="relative">
               <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 {/* ヘッダー部分 */}
                 <div className="flex text-xs text-gray-700 sticky top-0 z-10">

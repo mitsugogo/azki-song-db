@@ -51,12 +51,7 @@ export default function StatisticsPage() {
   }, []);
 
   return (
-    <OverlayScrollbarsComponent
-      element="div"
-      className="lg:p-6 flex flex-col w-full h-full"
-      options={{ scrollbars: { autoHide: "leave" } }}
-      defer
-    >
+    <div className="flex-grow lg:p-6 lg:pb-0">
       <h1 className="font-extrabold text-2xl p-3 dark:text-gray-200">
         統計情報
       </h1>
@@ -89,6 +84,6 @@ export default function StatisticsPage() {
           </TabItem>
         ))}
       </Tabs>
-    </OverlayScrollbarsComponent>
+    </div>
   );
 }

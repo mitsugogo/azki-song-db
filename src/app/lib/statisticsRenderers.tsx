@@ -15,6 +15,7 @@ export const renderLastVideoCell = (
     <div className="md:flex md:items-center md:gap-2 flex flex-col md:flex-row">
       <div className="flex w-full lg:w-24 max-w-[120px]">
         <YoutubeThumbnail
+          key={lastVideo.video_id}
           videoId={lastVideo.video_id}
           alt={lastVideo.video_title}
           fill={true}
@@ -45,24 +46,23 @@ export const renderLastVideoCell = (
 };
 
 export const renderViewCountCell = (viewCount: number) => {
-  return getViewCountLabel(viewCount);
+  const remain = getRemainCount(viewCount);
+  if (remain) return `あと ${remain.toLocaleString()} 再生`;
+  return null;
 };
 
-/**
- * 再生回数ラベルを返す共通関数
- */
-export const getViewCountLabel = (viewCount: number) => {
+const getRemainCount = (viewCount: number) => {
   if (viewCount < 100000) {
     const remaining = 10000 - (viewCount % 10000);
-    if (remaining <= 3000) return `あと ${remaining.toLocaleString()} 再生`;
+    if (remaining <= 3000) return remaining;
   }
   if (viewCount < 1000000) {
     const remaining = 100000 - (viewCount % 100000);
-    if (remaining <= 10000) return `あと ${remaining.toLocaleString()} 再生`;
+    if (remaining <= 10000) return remaining;
   }
   if (viewCount >= 1000000) {
     const remaining = 1000000 - (viewCount % 1000000);
-    if (remaining <= 20000) return `あと ${remaining.toLocaleString()} 再生`;
+    if (remaining <= 20000) return remaining;
   }
   return null;
 };
@@ -77,21 +77,9 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
       ? parseInt(rowB.original.videoInfo.statistics.viewCount, 10)
       : 0;
 
-  const labelA =
-    (viewCountA < 100000 && 10000 - (viewCountA % 10000) <= 3000) ||
-    (viewCountA < 1000000 && 100000 - (viewCountA % 100000) <= 10000) ||
-    (viewCountA >= 1000000 && 1000000 - (viewCountA % 1000000) <= 20000)
-      ? 1
-      : 0;
-  const labelB =
-    (viewCountB < 100000 && 10000 - (viewCountB % 10000) <= 3000) ||
-    (viewCountB < 1000000 && 100000 - (viewCountB % 100000) <= 10000) ||
-    (viewCountB >= 1000000 && 1000000 - (viewCountB % 1000000) <= 20000)
-      ? 1
-      : 0;
+  // viewCountAとBの残り再生数を計算
+  const remainA = getRemainCount(viewCountA) || 0;
+  const remainB = getRemainCount(viewCountB) || 0;
 
-  const labelSort = labelB - labelA;
-  if (labelSort !== 0) return labelSort;
-
-  return viewCountB - viewCountA;
+  return remainA - remainB;
 };

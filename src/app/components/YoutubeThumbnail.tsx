@@ -46,6 +46,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
         }`}
       >
         <Image
+          key={videoId}
           src={imageUrl}
           alt={alt}
           fill={true}

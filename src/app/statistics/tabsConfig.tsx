@@ -42,11 +42,12 @@ export const TABS_CONFIG: TabConfig[] = [
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
-            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+            className="font-semibold text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       { accessorKey: "song.artist", header: "アーティスト名" },
       { accessorKey: "count", header: "回数" },
@@ -54,6 +55,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 800,
       },
     ],
   },
@@ -72,17 +74,19 @@ export const TABS_CONFIG: TabConfig[] = [
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
-            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+            className="font-semibold text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       { accessorKey: "count", header: "回数" },
       {
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
+        size: 800,
       },
     ],
   },
@@ -101,11 +105,12 @@ export const TABS_CONFIG: TabConfig[] = [
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
-            className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+            className="font-semibold text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       { accessorKey: "count", header: "回数" },
       {
@@ -113,6 +118,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 800,
       },
     ],
   },
@@ -138,12 +144,18 @@ export const TABS_CONFIG: TabConfig[] = [
             </Badge>
           </Link>
         ),
+        size: 200,
       },
-      { accessorKey: "count", header: "収録数" },
+      {
+        accessorKey: "count",
+        header: "収録数",
+        cell: (info) => info.getValue().toLocaleString(),
+      },
       {
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 800,
       },
     ],
   },
@@ -169,6 +181,7 @@ export const TABS_CONFIG: TabConfig[] = [
             </Badge>
           </Link>
         ),
+        size: 300,
       },
       {
         id: "broadcast_at",
@@ -182,6 +195,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 800,
       },
     ],
   },
@@ -205,6 +219,7 @@ export const TABS_CONFIG: TabConfig[] = [
         },
         cell: (info) =>
           renderLastVideoCell(info.getValue<Song>(), false, false),
+        size: 800,
       },
       {
         accessorKey: "lastVideo",
@@ -313,6 +328,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 500,
       },
     ],
   },
@@ -336,6 +352,7 @@ export const TABS_CONFIG: TabConfig[] = [
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       {
         accessorKey: "song.artist",
@@ -348,6 +365,7 @@ export const TABS_CONFIG: TabConfig[] = [
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       {
         accessorKey: "song.sing",
@@ -382,6 +400,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        size: 500,
       },
     ],
   },
