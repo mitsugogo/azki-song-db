@@ -12,8 +12,8 @@ export const renderLastVideoCell = (
   const videoUrl = `${lastVideo.video_uri}`;
 
   const content = (
-    <div className="md:flex md:items-center md:gap-2 flex flex-col md:flex-row">
-      <div className="flex w-full lg:w-24 max-w-[120px]">
+    <div className="flex items-center gap-2 flex-row">
+      <div className="flex w-24 max-w-[120px]">
         <YoutubeThumbnail
           key={lastVideo.video_id}
           videoId={lastVideo.video_id}
@@ -21,8 +21,8 @@ export const renderLastVideoCell = (
           fill={true}
         />
       </div>
-      <div className="flex flex-grow flex-col w-full gap-1 lg:gap-0">
-        <span className={`text-xs ${hiddenTitle ? "hidden" : ""} md:inline`}>
+      <div className="flex flex-grow flex-col w-full gap-0">
+        <span className={`text-xs ${hiddenTitle ? "hidden" : ""} inline`}>
           <span>{lastVideo.video_title}</span>
         </span>
         <span className="text-xs text-muted-foreground">

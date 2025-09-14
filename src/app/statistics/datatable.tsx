@@ -151,7 +151,7 @@ export default function DataTable<
   return (
     <div>
       <div className="flex-grow">
-        <div className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-900">
+        <div className="hidden md:block p-1 md:p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-900">
           {caption} ({data.length})
           <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
             {description}
