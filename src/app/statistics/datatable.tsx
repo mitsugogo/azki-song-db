@@ -157,7 +157,7 @@ export default function DataTable<
             {description}
           </p>
         </div>
-        <div className="px-3 pb-2 lg:mb-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        <div className="px-3 py-2 lg:mb-3 lg:py-0 text-sm font-normal text-gray-500 dark:text-gray-400">
           <TextInput
             placeholder="検索..."
             value={inputValue}
@@ -167,7 +167,7 @@ export default function DataTable<
         </div>
         <OverlayScrollbarsComponent
           ref={tableContainerRef}
-          className="h-dvh lg:h-[calc(100vh-404px)]"
+          className="h-[calc(100vh-235px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-361px)]"
         >
           <div className="relative">
             <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -231,7 +231,7 @@ export default function DataTable<
                   height: `${rowVirtualizer.getTotalSize()}px`,
                 }}
               >
-                {virtualRows.map((virtualRow) => {
+                {virtualRows.map((virtualRow, idx) => {
                   const row = rows[virtualRow.index];
                   if (!row) return null;
 
@@ -246,12 +246,11 @@ export default function DataTable<
                         }
                         style={{
                           position: "absolute",
-                          width: "100%",
                           top: 0,
                           left: 0,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className={`flex bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${onRowClick ? "cursor-pointer select-none" : ""}`}
+                        className={`flex ${onRowClick ? "cursor-pointer select-none" : ""} ${idx % 2 === 0 ? "bg-gray-200/50 dark:bg-gray-800/70" : ""}`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <div
