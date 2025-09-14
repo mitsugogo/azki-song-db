@@ -78,22 +78,20 @@ export default function StatisticsPage() {
         <TabPanels>
           {TABS_CONFIG.map((tab, index) => (
             <TabPanel key={`${tab.title}-${index}-panel`}>
-              {deferredActiveTab === index && (
-                <DataTable
-                  loading={loading}
-                  data={statistics[tab.dataKey]}
-                  caption={tab.caption}
-                  description={tab.description}
-                  columns={tab.columns}
-                  initialSortColumnId={tab.initialSort.id}
-                  initialSortDirection={tab.initialSort.direction}
-                  {...(tab.dataKey === "videoCounts" && {
-                    onRowClick: handleVideoClick,
-                    selectedVideoId: selectedVideoId,
-                    songs: songs,
-                  })}
-                />
-              )}
+              <DataTable
+                loading={loading}
+                data={statistics[tab.dataKey]}
+                caption={tab.caption}
+                description={tab.description}
+                columns={tab.columns}
+                initialSortColumnId={tab.initialSort.id}
+                initialSortDirection={tab.initialSort.direction}
+                {...(tab.dataKey === "videoCounts" && {
+                  onRowClick: handleVideoClick,
+                  selectedVideoId: selectedVideoId,
+                  songs: songs,
+                })}
+              />
             </TabPanel>
           ))}
         </TabPanels>
