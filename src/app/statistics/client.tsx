@@ -20,7 +20,11 @@ export default function StatisticsPage() {
   const { songs, coverSongInfo, originalSongInfo, loading } = useSongData();
 
   // カスタムフックで統計データを計算
-  const statistics = useStatistics({ songs, coverSongInfo, originalSongInfo });
+  const statistics = useStatistics({
+    songs,
+    coverSongInfo,
+    originalSongInfo,
+  });
 
   // カスタムフックでタブの状態とURLを同期
   useTabSync(tabsRef, setActiveTab);

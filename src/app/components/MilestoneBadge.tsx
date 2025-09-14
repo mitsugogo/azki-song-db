@@ -25,7 +25,7 @@ export default function MilestoneBadge({
   const handleOnClick = (
     event: React.MouseEvent,
     song: Song,
-    milestone?: string
+    milestone?: string,
   ) => {
     if (onClick) {
       onClick(event, song, milestone);

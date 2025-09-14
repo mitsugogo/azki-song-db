@@ -82,7 +82,7 @@ const SongListItem = React.memo(
         </div>
       </li>
     );
-  }
+  },
 );
 
 SongListItem.displayName = "SongListItem";

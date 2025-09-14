@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json(
       { error: "YOUTUBE_DATA_API_KEY is not set" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   if (!videoIdsParam) {
     return NextResponse.json(
       { error: "videoIds parameter is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
   const videoIds = videoIdsParam.split(",");
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
         snippet: item.snippet,
         statistics: item.statistics,
         thumbnailUrl: item.snippet?.thumbnails?.default?.url,
-      }))
+      })),
     );
 
     return NextResponse.json(allVideoInfos, {
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     console.error("Failed to fetch YouTube video data:", error);
     return NextResponse.json(
       { error: "Failed to fetch video data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

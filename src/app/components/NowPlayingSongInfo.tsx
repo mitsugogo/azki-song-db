@@ -45,7 +45,7 @@ const NowPlayingSongInfo = ({
       const containerElement = containerRef.current as HTMLElement;
       const containerWidth = Math.max(
         0,
-        (containerElement.clientWidth ?? 0) - 25 // CDのアイコン分
+        (containerElement.clientWidth ?? 0) - 25, // CDのアイコン分
       );
       const textWidth = (textRef.current as HTMLElement).scrollWidth ?? 0;
 
@@ -76,7 +76,10 @@ const NowPlayingSongInfo = ({
                     className={`relative mr-2 inline ${
                       isPlaying ? "fa-spin" : ""
                     }`}
-                    style={{ top: "-1px", animationDuration: "3s" }}
+                    style={{
+                      top: "-1px",
+                      animationDuration: "3s",
+                    }}
                   />
                   {currentSongInfo.title}
 
@@ -146,7 +149,7 @@ const NowPlayingSongInfo = ({
                   <span>
                     {currentSongInfo.broadcast_at
                       ? new Date(
-                          currentSongInfo.broadcast_at
+                          currentSongInfo.broadcast_at,
                         ).toLocaleDateString("ja-JP", {
                           year: "numeric",
                           month: "2-digit",

@@ -25,11 +25,11 @@ interface YoutubeThumbnailFallbackResult {
  * @returns {imageUrl, handleError}
  */
 const useYoutubeThumbnailFallback = (
-  videoId: string
+  videoId: string,
 ): YoutubeThumbnailFallbackResult => {
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const [imageUrl, setImageUrl] = useState<string>(
-    getImageUrl(videoId, RESOLUTIONS[0])
+    getImageUrl(videoId, RESOLUTIONS[0]),
   );
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const useYoutubeThumbnailFallback = (
     } else {
       // 全てのフォールバックを試しても見つからなかった場合
       console.error(
-        `Failed to load YouTube thumbnail for video ID: ${videoId}`
+        `Failed to load YouTube thumbnail for video ID: ${videoId}`,
       );
     }
   }, [currentUrlIndex, videoId]);
