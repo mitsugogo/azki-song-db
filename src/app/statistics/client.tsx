@@ -1,21 +1,12 @@
 "use client";
 
-import {
-  useRef,
-  useState,
-  useDeferredValue,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, useDeferredValue, useEffect } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import DataTable from "./datatable";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
 import { TABS_CONFIG } from "./tabsConfig";
-
-// `useTabSync` and `TabsRef` are not needed with `headlessui`'s state-driven approach.
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -49,11 +40,6 @@ export default function StatisticsPage() {
     if (tab) {
       const tabIndex = parseInt(tab, 10);
       setActiveTab(tabIndex);
-      // スクロール
-      const tabElement = document.getElementById(`tab-${tabIndex}`);
-      if (tabElement) {
-        tabElement.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
     }
   }, []);
 
