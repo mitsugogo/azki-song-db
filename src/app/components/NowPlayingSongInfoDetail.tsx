@@ -300,7 +300,7 @@ const NowPlayingSongInfoDetail = ({
                     dangerouslySetInnerHTML={{
                       __html: currentSongInfo.extra
                         .replace(
-                          /(https?:\/\/[\w\d./=?#-]+)/g,
+                          /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
                           (url) =>
                             `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
                         )
