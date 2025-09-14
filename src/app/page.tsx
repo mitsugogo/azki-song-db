@@ -2,7 +2,6 @@ import type { Metadata, ResolvingMetadata } from "next";
 import "./globals.css";
 import ClientTop from "./client";
 import { metadata } from "./layout";
-import { Song } from "./types/song";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
@@ -22,6 +21,8 @@ export async function generateMetadata(
   let subtitle = "AZKiさんの歌の素晴らしさを伝えるサイト";
 
   let ogImageUrl = new URL("/api/og", baseUrl);
+  ogImageUrl.searchParams.set("title", title);
+  ogImageUrl.searchParams.set("subtitle", subtitle);
 
   if (q) {
     const isSololive2025 = q === "sololive2025";
