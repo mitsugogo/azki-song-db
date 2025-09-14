@@ -14,6 +14,7 @@ import { useMemo, useState } from "react";
 import useDebounce from "../hook/useDebounce";
 import Loading from "../loading";
 import {
+  Badge,
   Table,
   TableBody,
   TableCell,
@@ -24,6 +25,8 @@ import {
 } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
+import Link from "next/link";
+import { BsPlayCircle } from "react-icons/bs";
 
 export default function DataTable<
   T extends
@@ -191,9 +194,90 @@ export default function DataTable<
                 }
                 className="cursor-pointer"
               >
-                {row.getVisibleCells().map((cell) => (
+                {row.getVisibleCells().map((cell, idx) => (
                   <TableCell key={cell.id} className={`py-1 px-3`}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {selectedVideoId &&
+                      idx === 0 &&
+                      row.original.lastVideo?.video_id === selectedVideoId &&
+                      songs && (
+                        <div className="p-4 bg-gray-100 dark:bg-gray-800">
+                          <h3 className="text-lg font-semibold mb-2">
+                            セットリスト (
+                            {
+                              songs.filter(
+                                (s) => s.video_id === selectedVideoId,
+                              ).length
+                            }
+                            曲)
+                          </h3>
+                          <Table className="w-full">
+                            <TableHead>
+                              <TableHeadCell>再生</TableHeadCell>
+                              <TableHeadCell>タイムスタンプ</TableHeadCell>
+                              <TableHeadCell>曲名</TableHeadCell>
+                              <TableHeadCell>アーティスト</TableHeadCell>
+                              <TableHeadCell>タグ</TableHeadCell>
+                            </TableHead>
+                            <TableBody>
+                              {songs
+                                .filter((s) => s.video_id === selectedVideoId)
+                                .sort(
+                                  (a, b) =>
+                                    parseInt(a.start) - parseInt(b.start),
+                                )
+                                .map((s) => (
+                                  <TableRow key={`${s.video_id}-${s.start}`}>
+                                    <TableCell className="text-center">
+                                      <Link
+                                        href={`/?v=${s.video_id}&t=${s.start}s&q=video_id:${s.video_id}`}
+                                        className=" hover:text-primary-600 dark:hover:text-white"
+                                      >
+                                        <BsPlayCircle
+                                          size={24}
+                                          className="inline"
+                                        />
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      {new Date(parseInt(s.start) * 1000)
+                                        .toISOString()
+                                        .substring(11, 19)}
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      <Link
+                                        href={`/?q=title:${s.title}`}
+                                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                                      >
+                                        {s.title}
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      <Link
+                                        href={`/?q=artist:${s.artist}`}
+                                        className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
+                                      >
+                                        {s.artist}
+                                      </Link>
+                                    </TableCell>
+                                    <TableCell className="text-sm">
+                                      {s.tags.map((tag) => (
+                                        <Badge
+                                          key={tag}
+                                          className="inline mr-1 lg:whitespace-nowrap"
+                                        >
+                                          <Link href={`/?q=tag:${tag}`}>
+                                            {tag}
+                                          </Link>
+                                        </Badge>
+                                      ))}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                   </TableCell>
                 ))}
               </TableRow>
