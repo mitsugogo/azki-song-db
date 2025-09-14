@@ -285,6 +285,7 @@ export const TABS_CONFIG: TabConfig[] = [
             {info.getValue<string>()}
           </Link>
         ),
+        size: 300,
       },
       {
         accessorKey: "song.artist",
@@ -297,15 +298,18 @@ export const TABS_CONFIG: TabConfig[] = [
             {info.getValue<string>()}
           </Link>
         ),
+        size: 200,
       },
       {
         id: "viewCount",
         accessorFn: (row) => row.videoInfo?.statistics?.viewCount,
         header: "再生回数",
         cell: (info) => {
-          return info.getValue<string>()
-            ? Number(info.getValue<string>()).toLocaleString()
-            : "...";
+          return info.getValue<string>() ? (
+            Number(info.getValue<string>()).toLocaleString()
+          ) : (
+            <div className="animate-pulse h-3 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+          );
         },
       },
       {
@@ -328,7 +332,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
-        size: 500,
+        size: 600,
       },
     ],
   },
@@ -378,9 +382,11 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorFn: (row) => row.videoInfo?.statistics?.viewCount,
         header: "再生回数",
         cell: (info) =>
-          info.getValue<string>()
-            ? Number(info.getValue<string>()).toLocaleString()
-            : "N/A",
+          info.getValue<string>() ? (
+            Number(info.getValue<string>()).toLocaleString()
+          ) : (
+            <div className="animate-pulse h-3 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
+          ),
       },
       {
         id: "viewCountLbl",
