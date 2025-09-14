@@ -7,6 +7,7 @@ import DataTable from "./datatable";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
 import { TABS_CONFIG } from "./tabsConfig";
+import Loading from "../loading";
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -43,6 +44,10 @@ export default function StatisticsPage() {
     }
   }, []);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div className="flex-grow lg:p-6 lg:pb-0">
       <h1 className="font-extrabold text-2xl p-3 dark:text-gray-200">
@@ -51,7 +56,7 @@ export default function StatisticsPage() {
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <TabList className="flex whitespace-nowrap overflow-y-scroll lg:overflow-auto">
+          <TabList className="flex whitespace-nowrap overflow-x-auto overflow-y-hidden">
             {TABS_CONFIG.map((tab) => (
               <Tab
                 id={`tab-${TABS_CONFIG.indexOf(tab)}`}
@@ -79,7 +84,6 @@ export default function StatisticsPage() {
           {TABS_CONFIG.map((tab, index) => (
             <TabPanel key={`${tab.title}-${index}-panel`}>
               <DataTable
-                loading={loading}
                 data={statistics[tab.dataKey]}
                 caption={tab.caption}
                 description={tab.description}

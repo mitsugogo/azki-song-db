@@ -9,6 +9,7 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
 import PlayerSettings from "./PlayerSettings";
+import { LuCrown } from "react-icons/lu";
 
 // Propsの型定義
 type PlayerSectionProps = {
@@ -193,14 +194,14 @@ export default function PlayerSection({
               <Button
                 onClick={() => changeCurrentSong(previousSong)}
                 disabled={!previousSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs border-r-2 border-r-gray-300"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs border-r-2 border-r-gray-300 ring-0 focus:ring-0 focus:outline-none"
               >
                 <GiPreviousButton />
               </Button>
               <Button
                 onClick={() => changeCurrentSong(nextSong)}
                 disabled={!nextSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs ring-0 focus:ring-0 focus:outline-none"
               >
                 <GiNextButton />
               </Button>
@@ -209,7 +210,7 @@ export default function PlayerSection({
               {/* 連続再生ボタン */}
               <Button
                 onClick={setSongsToCurrentVideo}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 flex-1 flex items-center justify-between"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
                 <div className="flex-shrink-0">
                   <RiPlayListFill className="mr-2" />
@@ -230,13 +231,35 @@ export default function PlayerSection({
               {/* ランダム再生ボタン */}
               <Button
                 onClick={() => playRandomSong(songs)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
                 <div className="flex-shrink-0">
                   <FaShuffle className="mr-2" />
                 </div>
                 <div className="flex-1 text-center">
                   <span className="text-xs">ランダム</span>
+                </div>
+              </Button>
+
+              {/* ソロライブ予習モード */}
+              <Button
+                onClick={() => {
+                  // ソロライブ用のプレイリストをセットしてCreating worldを再生
+                  setSearchTerm("sololive2025");
+                  const song = songs.find(
+                    (song) => song.video_id === "ZkvtKUQp3nM",
+                  );
+                  if (!song) return;
+                  changeCurrentSong(song);
+                }}
+                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
+                style={{ backgroundColor: "#cba877" }}
+              >
+                <div className="flex-shrink-0">
+                  <LuCrown className="mr-2" />
+                </div>
+                <div className="flex-1 text-center">
+                  <span className="text-xs">ソロライブ</span>
                 </div>
               </Button>
             </div>

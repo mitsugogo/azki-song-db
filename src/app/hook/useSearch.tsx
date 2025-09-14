@@ -44,6 +44,9 @@ const useSearch = (allSongs: Song[]) => {
     // 通常検索ワードの定義
     const normalWords = searchWords.filter((word) => !word.startsWith("-"));
 
+    // ソロライブ予習モード(オリ曲のみ絞り込み)
+    const isSololive2025 = searchWords.some((word) => word === "sololive2025");
+
     const isExcluded = (song: Song, excludeWords: string[]) => {
       return excludeWords.some((word) => {
         // プレフィックス付き除外検索
@@ -143,6 +146,28 @@ const useSearch = (allSongs: Song[]) => {
         );
       });
     };
+
+    // ソロライブ2025モード
+    if (isSololive2025) {
+      return songsToFilter
+        .filter(
+          (s) =>
+            (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+            s.artist.includes("AZKi") &&
+            !s.title.includes("Maaya") &&
+            !s.artist.includes("星街") &&
+            !s.title.includes("Remix") &&
+            !s.tags.includes("リミックス") &&
+            !s.title.includes("Kiss me"),
+        )
+        .sort((a, b) => {
+          // リリース順でソート
+          return (
+            new Date(a.broadcast_at || "").getTime() -
+            new Date(b.broadcast_at || "").getTime()
+          );
+        });
+    }
 
     return songsToFilter.filter((song) => {
       return (

@@ -24,7 +24,12 @@ export async function generateMetadata(
   let ogImageUrl = new URL("/api/og", baseUrl);
 
   if (q) {
-    subtitle = `「${q}」の検索結果`;
+    const isSololive2025 = q === "sololive2025";
+    if (isSololive2025) {
+      subtitle = "ソロライブに向けたオリ曲予習用プレイリスト";
+    } else {
+      subtitle = `「${q}」の検索結果`;
+    }
 
     ogImageUrl.searchParams.set("title", title);
     ogImageUrl.searchParams.set("subtitle", subtitle);
