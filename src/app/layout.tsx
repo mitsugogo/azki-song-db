@@ -66,7 +66,7 @@ export default function RootLayout({
         <ThemeModeScript />
       </head>
       <body
-        className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
+        className={`antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-700`}
       >
         {children}
         {shouldInjectToolbar && <VercelToolbar />}

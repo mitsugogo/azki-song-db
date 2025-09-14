@@ -33,7 +33,6 @@ export default function DataTable<
   caption,
   description,
   columns,
-  loading,
   initialSortColumnId,
   initialSortDirection,
   onRowClick,
@@ -44,7 +43,6 @@ export default function DataTable<
   caption: string;
   description: string;
   columns: ColumnDef<T, unknown>[];
-  loading: boolean;
   initialSortColumnId?: string;
   initialSortDirection?: "asc" | "desc";
   onRowClick?: (id: string) => void;
@@ -139,14 +137,6 @@ export default function DataTable<
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loading />
-      </div>
-    );
-  }
 
   return (
     <div>
