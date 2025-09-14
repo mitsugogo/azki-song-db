@@ -19,7 +19,10 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import {
+  OverlayScrollbarsComponent,
+  OverlayScrollbarsComponentRef,
+} from "overlayscrollbars-react";
 
 export default function ClientTable() {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +30,7 @@ export default function ClientTable() {
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const tableContainerRef = useRef(null);
+  const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   const columns = useMemo<ColumnDef<Song>[]>(
     () => [
@@ -231,7 +234,7 @@ export default function ClientTable() {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () =>
-      tableContainerRef.current?.osInstance()?.elements().viewport,
+      tableContainerRef.current?.osInstance()?.elements().viewport as Element,
     estimateSize: () => 86,
     overscan: 10,
   });
