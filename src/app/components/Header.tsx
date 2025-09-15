@@ -1,18 +1,12 @@
 "use client";
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "flowbite-react";
+import { Button } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import { Drawer, Burger } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { Drawer, Burger, Modal } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import ThemeToggle from "./ThemeToggle";
 
 export function Header() {
@@ -20,6 +14,8 @@ export function Header() {
   const [currentPath, setCurrentPath] = useState("");
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
+
+  const isMobile = useMediaQuery("(max-width: 50em)");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -157,23 +153,22 @@ export function Header() {
       </Drawer>
 
       <Modal
-        show={showAcknowledgment}
+        opened={showAcknowledgment}
         onClose={() => setShowAcknowledgment(false)}
+        size="auto"
+        title="このサイトについて"
+        overlayProps={{ opacity: 0.5, blur: 4 }}
+        fullScreen={isMobile}
       >
-        <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white">
-          このサイトについて
-        </ModalHeader>
-        <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
-          <Acknowledgment />
-        </ModalBody>
-        <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
+        <Acknowledgment />
+        <div className="mt-4 flex justify-end">
           <Button
             className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
             onClick={() => setShowAcknowledgment(false)}
           >
             閉じる
           </Button>
-        </ModalFooter>
+        </div>
       </Modal>
     </>
   );
