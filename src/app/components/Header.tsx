@@ -105,7 +105,6 @@ export function Header() {
         onClose={closeDrawer}
         title="Menu"
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
-        className="relative"
       >
         <div className="flex-grow space-y-1">
           {navigation.map((item) => {

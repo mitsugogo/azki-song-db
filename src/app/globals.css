@@ -1,9 +1,15 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
 @import "overlayscrollbars/overlayscrollbars.css";
 @plugin "flowbite-react/plugin/tailwindcss";
 @plugin "flowbite/plugin";
 @source "../../.flowbite-react/class-list.json";
 @source "../node_modules/flowbite";
+@import "@mantine/core/styles.css";
 
 @theme {
   --color-primary-50: #fdf2f7;
@@ -65,9 +71,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-sans:
-    "Noto Sans JP", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --mantine-font-sans: var(--font-sans);
   --mantine-font-family: var(--font-sans);
 }

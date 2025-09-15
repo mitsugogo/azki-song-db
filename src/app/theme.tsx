@@ -8,7 +8,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = createFlowbiteTheme({
   textInput: {
     base: "block w-full",
     field: {
-      base: "rounded-lg border border-gray-50",
+      base: "rounded-lg border border-gray-50 dark:border-gray-500",
       input: {
         base: "px-3 py-2",
         sizes: {

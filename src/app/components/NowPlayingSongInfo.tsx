@@ -72,7 +72,7 @@ const NowPlayingSongInfo = ({
                     />
                   </div>
                 )}
-                <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white m-0">
                   <FaCompactDisc
                     className={`relative mr-2 inline ${
                       isPlaying ? "fa-spin" : ""

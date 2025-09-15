@@ -11,7 +11,7 @@ const ThemeToggle = () => {
     if (storedTheme) {
       setTheme(storedTheme);
       const colorScheme = storedTheme === "system" ? "auto" : storedTheme;
-      setColorScheme(storedTheme as "light" | "dark" | "auto");
+      setColorScheme(colorScheme as "light" | "dark" | "auto");
     }
   }, []);
 

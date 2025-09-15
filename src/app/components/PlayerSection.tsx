@@ -102,7 +102,7 @@ export default function PlayerSection({
             </div>
             {/* Current Video Playlist */}
             <div
-              className="relative h-14 flex-1 min-w-0 p-0 rounded bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-lg dark:shadow-primary-500/50 cursor-pointer transition-colors duration-200"
+              className="relative h-14 flex-1 min-w-0 p-0 rounded bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 cursor-pointer transition-colors duration-200"
               onClick={setSongsToCurrentVideo}
             >
               {currentSongInfo && (

@@ -18,7 +18,7 @@ const SongListItem = React.memo(
       <li
         className={`rounded relative cursor-pointer transition shadow-md flex md:block dark:text-gray-50 ${
           isSelected
-            ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-lg dark:shadow-primary-500/50 transition-colors duration-200"
+            ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
             : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
         }`}
         onClick={() => {
@@ -82,7 +82,7 @@ const SongListItem = React.memo(
         </div>
       </li>
     );
-  },
+  }
 );
 
 SongListItem.displayName = "SongListItem";
