@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/mitsugogo/azki-song-db/compare/v1.11.2...v1.12.0) (2025-09-15)
+
+
+### Features
+
+* **disco:** ユニット楽曲を分離 ([f294ccc](https://github.com/mitsugogo/azki-song-db/commit/f294ccc38dd38642fb9177df9b526a74b673409f))
+* **stats:** 再生数達成時にラベルを表示 ([12a512a](https://github.com/mitsugogo/azki-song-db/commit/12a512a6c3b608534a31c2c6b4979d20aa42faea))
+* 主要な箇所をMantineに置き換え ([ac8a2bb](https://github.com/mitsugogo/azki-song-db/commit/ac8a2bbc617aa21492e3e850aba0a939aee02f00))
+
+
+### Bug Fixes
+
+* **disco:** カバーしたホロメンが全員出ない場合があったのを修正 ([e72130b](https://github.com/mitsugogo/azki-song-db/commit/e72130b79be9629a6b980ef9ce5250746da3246d))
+* **disco:** タブ切り替え時に戻るとエラーになる場合があったのを修正 ([c06f920](https://github.com/mitsugogo/azki-song-db/commit/c06f9205f34021e27554a9ff4f79b00d0813e02f))
+* **disco:** 最終行の要素の詳細が表示されないバグを修正 ([2d7014f](https://github.com/mitsugogo/azki-song-db/commit/2d7014fc881d7546080aaffa2e0d33fbac0b9723))
+* **main:** ソロライブモードの時は初回ロード時にCreating worldから始める ([06de502](https://github.com/mitsugogo/azki-song-db/commit/06de5023c35bba1055bf086d1b29faec422d36ed))
+
 ### [1.11.2](https://github.com/mitsugogo/azki-song-db/compare/v1.11.1...v1.11.2) (2025-09-14)
 
 ### [1.11.1](https://github.com/mitsugogo/azki-song-db/compare/v1.11.0...v1.11.1) (2025-09-14)
