@@ -165,7 +165,7 @@ export function Header() {
             <div className="text-xs text-gray-400 dark:text-gray-500">
               2025.11.19 (Wed.) - PIA ARENA MM
             </div>{" "}
-            AZKi SOLO LiVE 2025 "Departure"
+            AZKi SOLO LiVE 2025 &quot;Departure&quot;
             <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
           </Link>
         </div>
