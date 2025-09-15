@@ -120,8 +120,14 @@ export default function SearchAndSongList({
                 : "bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white"
             }`}
           >
-            高度な検索{" "}
-            {!advancedSearchOpen ? <HiChevronUp /> : <HiChevronDown />}
+            <span className="text-xs">
+              高度な検索{" "}
+              {!advancedSearchOpen ? (
+                <HiChevronDown className="inline" />
+              ) : (
+                <HiChevronUp className="inline" />
+              )}
+            </span>
           </Button>
           <div
             className={`mb-6 ${
