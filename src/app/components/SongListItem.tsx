@@ -35,6 +35,7 @@ const SongListItem = React.memo(
               videoId={song.video_id}
               alt={song.video_title}
               fill={true}
+              imageClassName="rounded-t-md"
             />
           </div>
         </div>
