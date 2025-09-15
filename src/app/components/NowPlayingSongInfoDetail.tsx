@@ -46,10 +46,10 @@ const NowPlayingSongInfoDetail = ({
   return (
     <>
       {currentSongInfo && (
-        <div className="flex-grow mb-5">
-          <dl className="flex flex-col gap-2">
+        <div className="flex-grow mb-5 bg-gray-100 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm">
+          <dl className="flex flex-col gap-3 lg:gap-1">
             {currentSongInfo.artist && (
-              <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                   <FaUser />
                   <span className="text-nowrap inline ml-1">アーティスト:</span>
@@ -88,7 +88,7 @@ const NowPlayingSongInfoDetail = ({
             )}
 
             {currentSongInfo.album && (
-              <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                   <IoAlbums />
                   <span className="text-nowrap inline ml-1">アルバム:</span>
@@ -126,7 +126,7 @@ const NowPlayingSongInfoDetail = ({
               </div>
             )}
 
-            <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
               <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                 <PiMicrophoneStageFill />
                 <span className="text-nowrap inline ml-1">歌った人:</span>
@@ -159,7 +159,7 @@ const NowPlayingSongInfoDetail = ({
               </dd>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
               <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                 <FaYoutube />
                 <span className="text-nowrap inline ml-1">動画タイトル:</span>
@@ -171,7 +171,7 @@ const NowPlayingSongInfoDetail = ({
                   }s`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
+                  className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
                 >
                   <FontAwesomeIcon icon={faYoutube} />{" "}
                   {currentSongInfo.video_title}
@@ -179,7 +179,7 @@ const NowPlayingSongInfoDetail = ({
               </dd>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
               <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                 <FaCalendar />
                 <span className="text-nowrap inline ml-1">配信日:</span>
@@ -220,7 +220,7 @@ const NowPlayingSongInfoDetail = ({
               </dd>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
               <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                 <FaTag />
                 <span className="text-nowrap inline ml-1">タグ:</span>
@@ -253,29 +253,8 @@ const NowPlayingSongInfoDetail = ({
               </dd>
             </div>
 
-            {currentSongInfo && currentSongInfo.extra && (
-              <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
-                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                  <FaBook />
-                  <span className="text-nowrap inline ml-1">追加情報:</span>
-                </dt>
-                <dd
-                  className="break-words break-all"
-                  dangerouslySetInnerHTML={{
-                    __html: currentSongInfo.extra
-                      .replace(
-                        /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
-                        (url) =>
-                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
-                      )
-                      .replace(/\n/g, "<br />"),
-                  }}
-                />
-              </div>
-            )}
-
             {videoTimestamps.length > 1 && (
-              <div className="flex flex-col lg:flex-row lg:gap-4 gap-1">
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
                   <IoTime />
                   <span className="text-nowrap inline ml-1">セトリ:</span>
@@ -284,7 +263,7 @@ const NowPlayingSongInfoDetail = ({
                   {!isTimestampExpand && (
                     <button
                       type="button"
-                      className="w-full text-center bg-gray-200 dark:bg-gray-800 text-xs py-1 px-2 cursor-pointer rounded"
+                      className="w-full text-center bg-gray-200 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
                       onClick={() => setIsTimestampExpand(!isTimestampExpand)}
                     >
                       クリックして展開&nbsp;
@@ -345,7 +324,7 @@ const NowPlayingSongInfoDetail = ({
                                 >
                                   {song.title}
                                   &nbsp;-&nbsp;
-                                  <span className="text-gray-500 dark:text-gray-600">
+                                  <span className="text-gray-500 dark:text-gray-500">
                                     {song.artist}
                                   </span>
                                 </span>
@@ -369,6 +348,27 @@ const NowPlayingSongInfoDetail = ({
                     </div>
                   )}
                 </dd>
+              </div>
+            )}
+
+            {currentSongInfo && currentSongInfo.extra && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2 border-t border-gray-300/70">
+                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
+                  <FaBook />
+                  <span className="text-nowrap inline ml-1">追加情報:</span>
+                </dt>
+                <dd
+                  className="break-words break-all"
+                  dangerouslySetInnerHTML={{
+                    __html: currentSongInfo.extra
+                      .replace(
+                        /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
+                        (url) =>
+                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
+                      )
+                      .replace(/\n/g, "<br />"),
+                  }}
+                />
               </div>
             )}
           </dl>
