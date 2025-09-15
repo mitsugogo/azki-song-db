@@ -31,11 +31,4 @@ export function useTabSync(
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
-
-  // アクティブなタブをURLクエリパラメータに反映
-  //   useEffect(() => {
-  //     const url = new URL(window.location.href);
-  //     url.searchParams.set("tab", `${activeTab}`);
-  //     window.history.replaceState(null, "", url.toString());
-  //   }, [activeTab]);
 }
