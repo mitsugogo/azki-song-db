@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.1](https://github.com/mitsugogo/azki-song-db/compare/v1.12.0...v1.12.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* ダークモード判定バグ修正 ([1a5b332](https://github.com/mitsugogo/azki-song-db/commit/1a5b33278c276a92ae3e15c31b70913e279df02f))
+
 ## [1.12.0](https://github.com/mitsugogo/azki-song-db/compare/v1.11.2...v1.12.0) (2025-09-15)
 
 
