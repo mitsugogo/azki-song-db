@@ -62,6 +62,18 @@
 
   --breakpoint-3xl: 100rem;
   --breakpoint-4xl: 140rem;
+
+  --color-tan-50: #faf7f2;
+  --color-tan-100: #f4eee0;
+  --color-tan-200: #e8dac0;
+  --color-tan-300: #d8c199;
+  --color-tan-400: #cba877;
+  --color-tan-500: #bc8c53;
+  --color-tan-600: #af7947;
+  --color-tan-700: #91603d;
+  --color-tan-800: #764f36;
+  --color-tan-900: #60422e;
+  --color-tan-950: #332117;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

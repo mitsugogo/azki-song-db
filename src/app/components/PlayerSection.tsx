@@ -227,8 +227,10 @@ export default function PlayerSection({
                 onClick={() => playRandomSong(songs)}
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
-                <FaShuffle className="mr-2" />
+                <span className="text-xs">
+                <FaShuffle className="mr-2 inline" />
                 ランダム
+                </span>
               </Button>
 
               {/* ソロライブ予習モード */}
@@ -242,10 +244,9 @@ export default function PlayerSection({
                   if (!song) return;
                   changeCurrentSong(song);
                 }}
-                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
-                style={{ backgroundColor: "#cba877" }}
+                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 text-xs">
                   <LuCrown className="mr-2" />
                 </div>
                 <div className="flex-1 text-center">
