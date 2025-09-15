@@ -7,6 +7,7 @@ import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
 import { Drawer, Burger, Modal } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
 
 export function Header() {
@@ -104,8 +105,9 @@ export function Header() {
         onClose={closeDrawer}
         title="Menu"
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+        className="relative"
       >
-        <div className="space-y-1">
+        <div className="flex-grow space-y-1">
           {navigation.map((item) => {
             const isCurrent = item.current;
             const baseClasses =
@@ -141,6 +143,9 @@ export function Header() {
           >
             このサイトについて
           </Link>
+
+          <hr className="my-2 border border-gray-200 dark:border-gray-600" />
+
           <Link
             href="https://www.youtube.com/@AZKi"
             target="_blank"
@@ -148,6 +153,20 @@ export function Header() {
             onClick={() => closeDrawer()}
           >
             AZKi Channel
+            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+          </Link>
+
+          <Link
+            href="https://departure.hololivepro.com/"
+            target="_blank"
+            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+            onClick={() => closeDrawer()}
+          >
+            <div className="text-xs text-gray-400 dark:text-gray-500">
+              2025.11.19 (Wed.) - PIA ARENA MM
+            </div>{" "}
+            AZKi SOLO LiVE 2025 "Departure"
+            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
           </Link>
         </div>
       </Drawer>
