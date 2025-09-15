@@ -1,5 +1,4 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import "./globals.css";
 import ClientTop from "./client";
 import { metadata } from "./layout";
 
@@ -13,7 +12,7 @@ type Props = {
 
 export async function generateMetadata(
   { params, searchParams }: Props,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { q, v, t } = await searchParams;
 

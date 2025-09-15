@@ -1,4 +1,5 @@
-import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
+import { Button, Group, Modal } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { Song } from "../types/song";
 import { FaCompactDisc, FaShare } from "react-icons/fa6";
 import Marquee from "react-fast-marquee";
@@ -34,7 +35,7 @@ const NowPlayingSongInfo = ({
   setOpenShereModal,
   changeCurrentSong,
 }: NowPlayingSongInfoProps) => {
-  const [showModal, setShowModal] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const containerRef = useRef(null);
   const textRef = useRef(null);
@@ -56,7 +57,7 @@ const NowPlayingSongInfo = ({
 
   return (
     <>
-      <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground dark:text-gray-300">
+      <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSongInfo && (
           <div className="song-info">
             <div className="hidden lg:flex items-center gap-2 mb-1">
@@ -103,7 +104,7 @@ const NowPlayingSongInfo = ({
             <div ref={containerRef} className="lg:hidden p-1">
               <div
                 className="flex items-center cursor-pointer text-lg"
-                onClick={() => setShowModal(true)}
+                onClick={open}
               >
                 <div className="flex-none">
                   <FaCompactDisc
@@ -137,7 +138,7 @@ const NowPlayingSongInfo = ({
                       <span className="font-semibold">
                         {currentSongInfo.title}
                       </span>{" "}
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-gray-500 dark:text-gray-200 text-sm">
                         - {currentSongInfo.artist}
                       </span>
                     </span>
@@ -176,49 +177,46 @@ const NowPlayingSongInfo = ({
           </div>
         )}
       </div>
-      <Modal show={showModal} size="" onClose={() => setShowModal(false)}>
-        <ModalHeader className="border-b-gray-300">楽曲情報</ModalHeader>
-        <ModalBody className="bg-white dark:bg-gray-800 dark:text-white rounded py-6 px-3">
-          {currentSongInfo && (
-            <>
-              <div className="mb-2 relative">
-                <span className="font-semibold">{currentSongInfo.title}</span>
-                {currentSongInfo.artist && (
-                  <span className="text-gray-500 text-sm">
-                    {" "}
-                    - {currentSongInfo.artist}
-                  </span>
-                )}
-              </div>
-              <NowPlayingSongInfoDetail
-                currentSongInfo={currentSongInfo}
-                allSongs={allSongs}
-                searchTerm={searchTerm}
-                isPlaying={isPlaying}
-                hideFutureSongs={hideFutureSongs}
-                setSearchTerm={setSearchTerm}
-                changeCurrentSong={changeCurrentSong}
-              />
-              <hr className="my-4" />
-              <div className="flex items-center">
-                <Button
-                  onClick={() => setShowModal(false)}
-                  className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer mr-3"
-                >
-                  <FaTimes />
-                  &nbsp;Close
-                </Button>
-                <Button
-                  onClick={() => setOpenShereModal(true)}
-                  className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
-                >
-                  <FaShare />
-                  &nbsp;Share
-                </Button>
-              </div>
-            </>
-          )}
-        </ModalBody>
+      <Modal opened={opened} onClose={close} title="楽曲情報">
+        {currentSongInfo && (
+          <>
+            <div className="mb-2 relative">
+              <span className="font-semibold">{currentSongInfo.title}</span>
+              {currentSongInfo.artist && (
+                <span className="text-gray-500 dark:text-gray-200 text-sm">
+                  {" "}
+                  - {currentSongInfo.artist}
+                </span>
+              )}
+            </div>
+            <NowPlayingSongInfoDetail
+              currentSongInfo={currentSongInfo}
+              allSongs={allSongs}
+              searchTerm={searchTerm}
+              isPlaying={isPlaying}
+              hideFutureSongs={hideFutureSongs}
+              setSearchTerm={setSearchTerm}
+              changeCurrentSong={changeCurrentSong}
+            />
+            <hr className="my-4" />
+            <Group className="flex items-center">
+              <Button
+                onClick={close}
+                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer mr-3"
+              >
+                <FaTimes />
+                &nbsp;Close
+              </Button>
+              <Button
+                onClick={() => setOpenShereModal(true)}
+                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
+              >
+                <FaShare />
+                &nbsp;Share
+              </Button>
+            </Group>
+          </>
+        )}
       </Modal>
     </>
   );

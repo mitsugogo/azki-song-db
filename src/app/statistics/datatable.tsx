@@ -141,13 +141,11 @@ export default function DataTable<
   return (
     <div>
       <div className="flex-grow">
-        <div className="hidden md:block p-1 md:p-3 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-700">
+        <div className="hidden md:block p-1 md:p-3 text-lg font-semibold text-left">
           {caption} ({data.length})
-          <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-            {description}
-          </p>
+          <p className="mt-1 text-sm font-normal">{description}</p>
         </div>
-        <div className="px-3 py-2 lg:mb-3 lg:py-0 text-sm font-normal text-gray-500 dark:text-gray-400">
+        <div className="px-3 py-2 lg:mb-3 lg:py-0 text-sm font-normal">
           <TextInput
             placeholder="検索..."
             value={inputValue}
@@ -160,13 +158,13 @@ export default function DataTable<
           className="h-[calc(100vh-238px)] md:h-[calc(100vh-333px)] lg:h-[calc(100vh-366px)]"
         >
           <div className="relative">
-            <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <div className="w-full text-sm text-left">
               {/* Header */}
-              <div className="flex text-xs text-gray-700 sticky top-0 z-10">
+              <div className="flex text-xs sticky top-0 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <div
                     key={headerGroup.id}
-                    className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+                    className="flex flex-1 bg-gray-50 dark:bg-gray-700"
                   >
                     {headerGroup.headers.map((header) => (
                       <div
@@ -288,7 +286,7 @@ export default function DataTable<
                             </h3>
                             <div className="w-full">
                               {/* Inner Header */}
-                              <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                              <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700">
                                 <div className="flex-shrink-0 w-20 px-3 py-1">
                                   再生
                                 </div>

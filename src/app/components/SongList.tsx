@@ -51,7 +51,7 @@ const SongsList = ({
         (song) =>
           song.video_id === currentSongInfo?.video_id &&
           song.title === currentSongInfo?.title &&
-          song.start === currentSongInfo?.start,
+          song.start === currentSongInfo?.start
       );
 
       if (songIndex !== -1) {
@@ -73,7 +73,7 @@ const SongsList = ({
     const listElement = document.getElementById("song-list-scrollbar");
     if (listElement) {
       const currentSongElement = document.querySelector(
-        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`,
+        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
       );
       if (currentSongElement) {
         currentSongElement.scrollIntoView({
@@ -125,7 +125,7 @@ const SongsList = ({
                     (song) =>
                       currentSongInfo?.title === song.title &&
                       currentSongInfo.video_id === song.video_id &&
-                      currentSongInfo.start === song.start,
+                      currentSongInfo.start === song.start
                   )
               }
             />
@@ -135,10 +135,10 @@ const SongsList = ({
 
       {totalPage > 1 && (
         <div className="flex items-center justify-center col-span-2 py-2">
-          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-400 bg-gray-100 rounded-lg dark:bg-gray-600 max-w-[128px] mx-2">
+          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-200 bg-gray-50/30 rounded-lg dark:bg-gray-600 max-w-[128px] mx-2">
             <button
               type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-s-lg bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-s-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -164,7 +164,7 @@ const SongsList = ({
             </span>
             <button
               type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-10 bg-gray-100 rounded-e-lg dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-e-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPage}
             >

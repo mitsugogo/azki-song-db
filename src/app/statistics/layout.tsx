@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { MantineProvider } from "@mantine/core";
+import { theme, flowbiteTheme } from "../theme";
 
 // titleタグ
 export const metadata = {
@@ -16,8 +17,8 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <MantineProvider>
-        <ThemeProvider>
+      <MantineProvider theme={theme}>
+        <ThemeProvider theme={flowbiteTheme}>
           <div className="flex flex-col h-lvh">
             <Header />
             <div>{children}</div>

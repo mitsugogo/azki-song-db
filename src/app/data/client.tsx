@@ -201,7 +201,7 @@ export default function ClientTable() {
         enableResizing: true,
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({
@@ -252,12 +252,8 @@ export default function ClientTable() {
   return (
     <>
       <div className="flex-grow lg:p-6">
-        <h1 className="font-extrabold text-2xl p-3 dark:text-gray-200">
-          収録データ
-        </h1>
-        <p className="mb-4 text-gray-500 dark:text-gray-400 px-3">
-          本データベースの情報を表示しています。
-        </p>
+        <h1 className="font-extrabold text-2xl p-3">収録データ</h1>
+        <p className="mb-4 px-3">本データベースの情報を表示しています。</p>
         <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
           <TextInput
             icon={HiSearch}
@@ -269,13 +265,13 @@ export default function ClientTable() {
             className="h-dvh lg:h-[calc(100vh-314px)]"
           >
             <div className="relative">
-              <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+              <div className="w-full text-sm text-left">
                 {/* ヘッダー部分 */}
                 <div className="flex text-xs text-gray-700 sticky top-0 z-10">
                   {table.getHeaderGroups().map((headerGroup) => (
                     <div
                       key={headerGroup.id}
-                      className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+                      className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-white"
                     >
                       {headerGroup.headers.map((header) => (
                         <div
@@ -291,7 +287,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                             {header.column.getCanSort() && (
                               <span className="ml-1 inline-block">
@@ -347,7 +343,11 @@ export default function ClientTable() {
                           // height: `${virtualRow.size}px`,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className="flex bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        className={`flex border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-600 ${
+                          parseInt(row.id) % 2 === 0
+                            ? "bg-gray-50/30"
+                            : "bg-white"
+                        }`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <div
@@ -359,7 +359,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </div>
                         ))}

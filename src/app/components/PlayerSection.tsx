@@ -77,7 +77,7 @@ export default function PlayerSection({
           <div className="hidden lg:flex justify-between gap-2 flex-nowrap">
             {/* Previous Song */}
             <div
-              className="h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300"
+              className="h-14 flex-1 min-w-0 p-0 rounded bg-gray-50/50 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-50"
               onClick={() => changeCurrentSong(previousSong)}
             >
               {previousSong && (
@@ -102,7 +102,7 @@ export default function PlayerSection({
             </div>
             {/* Current Video Playlist */}
             <div
-              className="relative h-14 flex-1 min-w-0 p-0 rounded bg-primary-300 dark:bg-primary-900 dark:text-gray-300 border-0 shadow-none cursor-pointer hover:bg-primary-400 dark:hover:bg-primary-800"
+              className="relative h-14 flex-1 min-w-0 p-0 rounded bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-lg dark:shadow-primary-500/50 cursor-pointer transition-colors duration-200"
               onClick={setSongsToCurrentVideo}
             >
               {currentSongInfo && (
@@ -127,7 +127,7 @@ export default function PlayerSection({
             </div>
             {/* Next Song */}
             <div
-              className={`h-14 flex-1 min-w-0 p-0 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-300`}
+              className={`h-14 flex-1 min-w-0 p-0 rounded bg-gray-50/50 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-700 cursor-pointer hover:bg-gray-50`}
               onClick={() => changeCurrentSong(nextSong)}
             >
               {nextSong && (

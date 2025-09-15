@@ -1,5 +1,5 @@
+import { List } from "@mantine/core";
 import Link from "next/link";
-import { List, ListItem } from "flowbite-react";
 import { FaGithub } from "react-icons/fa6";
 
 const Acknowledgment = () => {
@@ -80,30 +80,30 @@ const Acknowledgment = () => {
       </div>
 
       <h3 className="mt-5 font-semibold">使用ライブラリ</h3>
-      <div className="text-sm text-muted mt-1">
+      <div className="text-sm mt-1">
         <p>以下のライブラリを使用しています。</p>
-        <List className="mt-2">
-          <ListItem>flowbite-react</ListItem>
-          <ListItem>overlayscrollbars-react</ListItem>
-          <ListItem>react-fast-marquee</ListItem>
-          <ListItem>react-icons</ListItem>
-          <ListItem>react-youtube</ListItem>
-          <ListItem>styled-components</ListItem>
-          <ListItem>postcss</ListItem>
-          <ListItem>@emotion/react</ListItem>
-          <ListItem>@emotion/styled</ListItem>
-          <ListItem>@fortawesome/free-brands-svg-icons</ListItem>
-          <ListItem>@fortawesome/free-solid-svg-icons</ListItem>
-          <ListItem>@fortawesome/react-fontawesome</ListItem>
-          <ListItem>@headlessui/react</ListItem>
-          <ListItem>@heroicons/react</ListItem>
-          <ListItem>@mui/icons-material</ListItem>
-          <ListItem>@mui/material</ListItem>
-          <ListItem>@mui/styled-engine-sc</ListItem>
-          <ListItem>@vercel/analytics</ListItem>
-          <ListItem>@vercel/og</ListItem>
-          <ListItem>@vercel/speed-insights</ListItem>
-          <ListItem>googleapis</ListItem>
+        <List className="mt-2" listStyleType="disc">
+          <List.Item>flowbite-react</List.Item>
+          <List.Item>overlayscrollbars-react</List.Item>
+          <List.Item>react-fast-marquee</List.Item>
+          <List.Item>react-icons</List.Item>
+          <List.Item>react-youtube</List.Item>
+          <List.Item>styled-components</List.Item>
+          <List.Item>postcss</List.Item>
+          <List.Item>@emotion/react</List.Item>
+          <List.Item>@emotion/styled</List.Item>
+          <List.Item>@fortawesome/free-brands-svg-icons</List.Item>
+          <List.Item>@fortawesome/free-solid-svg-icons</List.Item>
+          <List.Item>@fortawesome/react-fontawesome</List.Item>
+          <List.Item>@headlessui/react</List.Item>
+          <List.Item>@heroicons/react</List.Item>
+          <List.Item>@mui/icons-material</List.Item>
+          <List.Item>@mui/material</List.Item>
+          <List.Item>@mui/styled-engine-sc</List.Item>
+          <List.Item>@vercel/analytics</List.Item>
+          <List.Item>@vercel/og</List.Item>
+          <List.Item>@vercel/speed-insights</List.Item>
+          <List.Item>googleapis</List.Item>
         </List>
       </div>
 
