@@ -4,15 +4,12 @@ import { useEffect, useRef, useState, useMemo, useDeferredValue } from "react";
 import { Song } from "../types/song";
 import {
   Button,
-  TabItem,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeadCell,
   TableRow,
-  Tabs,
-  TabsRef,
   ToggleSwitch,
 } from "flowbite-react";
 
@@ -23,6 +20,7 @@ import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import Loading from "../loading";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import MilestoneBadge from "../components/MilestoneBadge";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 type StatisticsItem = {
   key: string;
@@ -101,6 +99,10 @@ const createStatistics = <T extends StatisticsItem>(
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
+  const coverArtists = useMemo(() => {
+    return Array.from(new Set(song.videos.map((v) => v.sing)));
+  }, [song.song.tags]);
+
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-300 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
@@ -119,7 +121,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           </h2>
           <p className="text-sm">アーティスト: {song.firstVideo.artist}</p>
           {song.song.tags.includes("カバー曲") && (
-            <p className="text-sm">カバー: {song.song.sing}</p>
+            <p className="text-sm">カバー: {coverArtists.join("、")}</p>
           )}
           {!song.isAlbum && (
             <>
@@ -305,7 +307,6 @@ export default function DiscographyPage() {
   const [loading, setLoading] = useState(true);
   const [songs, setSongs] = useState<Song[]>([]);
 
-  const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
 
   const [groupByAlbum, setGroupByAlbum] = useState(true);
@@ -345,13 +346,23 @@ export default function DiscographyPage() {
     const originals = songs.filter(
       (s) =>
         (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-        (s.artist.includes("AZKi") ||
-          s.artist.includes("瀬名航") ||
-          s.artist.includes("Star Flower") ||
-          s.artist.includes("SorAZ")),
+        (s.artist.includes("AZKi") || s.artist.includes("瀬名航")),
     );
     return createStatistics(
       originals,
+      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      groupByAlbum,
+    );
+  }, [songs, groupByAlbum]);
+
+  const unitSongCountsByReleaseDate = useMemo(() => {
+    const units = songs.filter(
+      (s) =>
+        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+        (s.artist.includes("Star Flower") || s.artist.includes("SorAZ")),
+    );
+    return createStatistics(
+      units,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
       groupByAlbum,
     );
@@ -367,25 +378,28 @@ export default function DiscographyPage() {
   }, [songs, groupByAlbum]);
 
   useEffect(() => {
-    const newVisibleItems: boolean[][] = [[], []];
-    newVisibleItems[activeTab] = new Array(
-      [originalSongCountsByReleaseDate, coverSongCountsByReleaseDate][
-        activeTab
-      ].length,
-    ).fill(false);
-    setVisibleItems(newVisibleItems);
+    const itemsToAnimate = [
+      originalSongCountsByReleaseDate,
+      unitSongCountsByReleaseDate,
+      coverSongCountsByReleaseDate,
+    ][activeTab];
+
+    setVisibleItems((prev) => {
+      const next = [...prev];
+      next[activeTab] = new Array(itemsToAnimate.length).fill(false);
+      return next;
+    });
 
     setTimeout(() => {
-      const itemsToAnimate = [
-        originalSongCountsByReleaseDate,
-        coverSongCountsByReleaseDate,
-      ][activeTab];
       itemsToAnimate.forEach((_, index) => {
         setTimeout(() => {
           setVisibleItems((prev) => {
             const next = [...prev];
-            next[activeTab] = [...next[activeTab]];
-            next[activeTab][index] = true;
+            if (Array.isArray(next[activeTab])) {
+              const nextInner = [...next[activeTab]];
+              nextInner[index] = true;
+              next[activeTab] = nextInner;
+            }
             return next;
           });
         }, index * 50);
@@ -394,6 +408,7 @@ export default function DiscographyPage() {
   }, [
     activeTab,
     originalSongCountsByReleaseDate,
+    unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   ]);
 
@@ -428,11 +443,16 @@ export default function DiscographyPage() {
     }
 
     const colCount = getGridCols();
-    const detailsInsertionIndex =
+    let detailsInsertionIndex =
       Math.floor(expandedIndex / colCount) * colCount + colCount;
 
     const itemsToRender = [...data];
     itemsToRender.splice(detailsInsertionIndex, 0, data[expandedIndex]);
+
+    // indexがあるか確認してなかったら最終indexにする
+    if (detailsInsertionIndex >= itemsToRender.length) {
+      detailsInsertionIndex = itemsToRender.length - 1;
+    }
 
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
@@ -497,23 +517,60 @@ export default function DiscographyPage() {
         ></ToggleSwitch>
       </div>
 
-      <Tabs
-        variant="fullWidth"
-        ref={tabsRef}
-        onActiveTabChange={(tabIdx) => {
-          setActiveTab(tabIdx || 0);
-          setExpandedItem(null);
-        }}
-      >
-        <TabItem
-          title={`オリジナル楽曲 (${originalSongCountsByReleaseDate.length})`}
-        >
-          {renderContent(originalSongCountsByReleaseDate, 0, groupByAlbum)}
-        </TabItem>
-        <TabItem title={`カバー楽曲 (${coverSongCountsByReleaseDate.length})`}>
-          {renderContent(coverSongCountsByReleaseDate, 1, groupByAlbum)}
-        </TabItem>
-      </Tabs>
+      <TabGroup selectedIndex={activeTab} onChange={setActiveTab}>
+        <TabList className="flex space-x-1 rounded-xl bg-gray-200 dark:bg-gray-800 p-1 mb-4">
+          <Tab
+            as="button"
+            className={({ selected }) =>
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              ${
+                selected
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+              }`
+            }
+          >
+            オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
+          </Tab>
+          <Tab
+            as="button"
+            className={({ selected }) =>
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              ${
+                selected
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+              }`
+            }
+          >
+            ユニット楽曲 ({unitSongCountsByReleaseDate.length})
+          </Tab>
+          <Tab
+            as="button"
+            className={({ selected }) =>
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              ${
+                selected
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+              }`
+            }
+          >
+            カバー楽曲 ({coverSongCountsByReleaseDate.length})
+          </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            {renderContent(originalSongCountsByReleaseDate, 0, groupByAlbum)}
+          </TabPanel>
+          <TabPanel>
+            {renderContent(unitSongCountsByReleaseDate, 1, groupByAlbum)}
+          </TabPanel>
+          <TabPanel>
+            {renderContent(coverSongCountsByReleaseDate, 2, groupByAlbum)}
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
     </OverlayScrollbarsComponent>
   );
 }

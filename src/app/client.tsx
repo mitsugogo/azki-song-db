@@ -7,6 +7,7 @@ import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import { Header } from "./components/Header";
 import Footer from "./components/Footer";
 import { CustomFlowbiteTheme } from "flowbite-react/types";
+import { MantineProvider } from "@mantine/core";
 
 const customTheme: CustomFlowbiteTheme = createTheme({
   modal: {
@@ -35,15 +36,17 @@ const customTheme: CustomFlowbiteTheme = createTheme({
 
 export default function ClientTop() {
   return (
-    <ThemeProvider theme={customTheme}>
-      <div className="h-dvh flex flex-col">
-        <Header />
-        <main className="flex flex-col md:flex-row flex-grow overflow-hidden p-0 lg:p-4 lg:pb-0 mb:pb-0 dark:bg-gray-900">
-          <MainPlayer />
-        </main>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </ThemeProvider>
+    <MantineProvider>
+      <ThemeProvider theme={customTheme}>
+        <div className="h-dvh flex flex-col">
+          <Header />
+          <main className="flex flex-col md:flex-row flex-grow overflow-hidden p-0 lg:p-4 lg:pb-0 mb:pb-0 dark:bg-gray-900">
+            <MainPlayer />
+          </main>
+          <Footer />
+        </div>
+        <AnalyticsWrapper />
+      </ThemeProvider>
+    </MantineProvider>
   );
 }

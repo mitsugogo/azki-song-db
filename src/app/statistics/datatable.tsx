@@ -27,7 +27,7 @@ import {
 export default function DataTable<
   T extends
     | { lastVideo?: { video_title: string; video_id: string } }
-    | StatisticsItem,
+    | StatisticsItem
 >({
   data,
   caption,
@@ -141,7 +141,7 @@ export default function DataTable<
   return (
     <div>
       <div className="flex-grow">
-        <div className="hidden md:block p-1 md:p-3 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-900">
+        <div className="hidden md:block p-1 md:p-3 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-700">
           {caption} ({data.length})
           <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
             {description}
@@ -157,7 +157,7 @@ export default function DataTable<
         </div>
         <OverlayScrollbarsComponent
           ref={tableContainerRef}
-          className="h-[calc(100vh-235px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-361px)]"
+          className="h-[calc(100vh-238px)] md:h-[calc(100vh-333px)] lg:h-[calc(100vh-366px)]"
         >
           <div className="relative">
             <div className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -185,7 +185,7 @@ export default function DataTable<
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                           {header.column.getCanSort() && (
                             <span className="ml-1 inline-block">
@@ -240,7 +240,13 @@ export default function DataTable<
                           left: 0,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className={`flex ${onRowClick ? "cursor-pointer select-none" : ""} ${idx % 2 === 0 ? "bg-gray-200/50 dark:bg-gray-800/70" : ""}`}
+                        className={`flex ${
+                          onRowClick ? "cursor-pointer select-none" : ""
+                        } ${
+                          idx % 2 === 0
+                            ? "bg-gray-200/50 dark:bg-gray-800/70"
+                            : ""
+                        }`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <div
@@ -256,7 +262,7 @@ export default function DataTable<
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </div>
                         ))}
@@ -275,7 +281,7 @@ export default function DataTable<
                               セットリスト (
                               {
                                 songs.filter(
-                                  (s) => s.video_id === selectedVideoId,
+                                  (s) => s.video_id === selectedVideoId
                                 ).length
                               }
                               曲)
@@ -305,7 +311,7 @@ export default function DataTable<
                                   .filter((s) => s.video_id === selectedVideoId)
                                   .sort(
                                     (a, b) =>
-                                      parseInt(a.start) - parseInt(b.start),
+                                      parseInt(a.start) - parseInt(b.start)
                                   )
                                   .map((s) => (
                                     <div

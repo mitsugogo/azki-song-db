@@ -70,9 +70,9 @@ export default function SearchAndSongList({
       <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
         <Button
           onClick={() => playRandomSong(songs)}
-          className="hidden lg:block px-3 py-2 bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition mb-1 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
+          className="hidden lg:block px-3 py-1 bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition mb-1 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
         >
-          ランダムで他の曲にする
+          <span className="text-sm">ランダムで他の曲にする</span>
         </Button>
 
         <Button
@@ -83,11 +83,12 @@ export default function SearchAndSongList({
             if (!song) return;
             changeCurrentSong(song);
           }}
-          className="hidden lg:block px-3 py-2 cursor-pointer text-white rounded transition mb-2 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
-          style={{ backgroundColor: "#cba877" }}
+          className="hidden lg:block px-3 py-1 cursor-pointer text-white rounded transition mb-2 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
         >
-          <LuCrown className="inline mr-2" />
-          ソロライブ予習モード
+          <span className="text-sm">
+            <LuCrown className="inline mr-2" />
+            ソロライブ予習モード
+          </span>
         </Button>
 
         <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
@@ -119,8 +120,14 @@ export default function SearchAndSongList({
                 : "bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white"
             }`}
           >
-            高度な検索{" "}
-            {!advancedSearchOpen ? <HiChevronUp /> : <HiChevronDown />}
+            <span className="text-xs">
+              高度な検索{" "}
+              {!advancedSearchOpen ? (
+                <HiChevronDown className="inline" />
+              ) : (
+                <HiChevronUp className="inline" />
+              )}
+            </span>
           </Button>
           <div
             className={`mb-6 ${

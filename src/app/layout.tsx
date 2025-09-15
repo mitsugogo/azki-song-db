@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@mantine/core/styles.css";
 import { ThemeModeScript } from "flowbite-react";
 import { VercelToolbar } from "@vercel/toolbar/next";
 
@@ -66,7 +67,7 @@ export default function RootLayout({
         <ThemeModeScript />
       </head>
       <body
-        className={`antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-700`}
+        className={`antialiased bg-gray-50 dark:bg-gray-950 transition-colors duration-700`}
       >
         {children}
         {shouldInjectToolbar && <VercelToolbar />}

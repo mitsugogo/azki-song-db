@@ -1,4 +1,5 @@
 /* eslint @typescript-eslint/no-explicit-any: off */
+import { Badge } from "flowbite-react";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { Song } from "../types/song";
 
@@ -48,6 +49,15 @@ export const renderLastVideoCell = (
 export const renderViewCountCell = (viewCount: number) => {
   const remain = getRemainCount(viewCount);
   if (remain) return `あと ${remain.toLocaleString()} 再生`;
+
+  const after = getAfterCount(viewCount);
+  if (after)
+    return (
+      <Badge color="success" className="inline whitespace-nowrap">
+        {Math.floor(after / 10000)}万再生達成
+      </Badge>
+    );
+
   return null;
 };
 
@@ -67,6 +77,44 @@ const getRemainCount = (viewCount: number) => {
   return null;
 };
 
+const getAfterCount = (viewCount: number) => {
+  // 100万台の処理
+  if (viewCount >= 1000000) {
+    const milestone = Math.floor(viewCount / 1000000) * 1000000;
+    // +10000までの範囲
+    if (viewCount <= milestone + 10000) {
+      return viewCount;
+    }
+  }
+  // 30～90万台の処理
+  else if (viewCount >= 300000) {
+    const milestone = Math.floor(viewCount / 100000) * 100000;
+    // +10000までの範囲
+    if (viewCount <= milestone + 10000) {
+      return viewCount;
+    }
+  }
+  // 10万台の処理
+  else if (viewCount >= 100000) {
+    const milestone = Math.floor(viewCount / 100000) * 100000;
+    // +5000までの範囲
+    if (viewCount <= milestone + 5000) {
+      return viewCount;
+    }
+  }
+  // 10万までの処理
+  else if (viewCount >= 10000) {
+    const milestone = Math.floor(viewCount / 10000) * 10000;
+    // +1000までの範囲
+    if (viewCount <= milestone + 1000) {
+      return viewCount;
+    }
+  }
+
+  // それ以外の場合はnullを返す
+  return null;
+};
+
 export const viewCountSortFn = (rowA: any, rowB: any) => {
   const viewCountA =
     typeof rowA.original.videoInfo?.statistics?.viewCount === "string"
@@ -81,5 +129,27 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
   const remainA = getRemainCount(viewCountA) || 0;
   const remainB = getRemainCount(viewCountB) || 0;
 
-  return remainA - remainB;
+  if (remainA && remainB) {
+    return remainA - remainB;
+  }
+  if (remainA) {
+    return -1;
+  }
+  if (remainB) {
+    return 1;
+  }
+
+  const afterA = getAfterCount(viewCountA) || 0;
+  const afterB = getAfterCount(viewCountB) || 0;
+  if (afterA && afterB) {
+    return afterA - afterB;
+  }
+  if (afterA) {
+    return -1;
+  }
+  if (afterB) {
+    return 1;
+  }
+
+  return afterA - afterB;
 };

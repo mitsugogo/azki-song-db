@@ -1,15 +1,8 @@
 import { Song } from "../types/song";
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  TextInput,
-  Label,
-} from "flowbite-react";
+import { Modal, TextInput, Button, Divider } from "@mantine/core";
 import { HiClipboardCopy } from "react-icons/hi";
 import { FaDatabase, FaShare, FaX, FaYoutube } from "react-icons/fa6";
+import { Label } from "flowbite-react";
 
 // Propsの型定義
 type ShareModalProps = {
@@ -40,7 +33,7 @@ export default function ShareModal({
 
   const handleCopyToClipboard = (
     textToCopy: string,
-    setShowCopiedState: (show: boolean) => void,
+    setShowCopiedState: (show: boolean) => void
   ) => {
     copyToClipboard(textToCopy);
     setShowCopiedState(true);
@@ -55,11 +48,13 @@ export default function ShareModal({
   };
 
   return (
-    <Modal show={openShareModal} onClose={onClose} size="md">
-      <ModalHeader className="bg-white dark:bg-gray-800 dark:text-white border-b-gray-300">
-        シェア
-      </ModalHeader>
-      <ModalBody className="bg-white dark:bg-gray-800 dark:text-white">
+    <Modal
+      opened={openShareModal}
+      onClose={onClose}
+      title="シェア"
+      overlayProps={{ opacity: 0.5, blur: 4 }}
+    >
+      <div className="">
         <p className="mb-4">AZKiさんの素敵な歌声をシェアしましょう！</p>
         {/* YouTube URL */}
         <div>
@@ -93,20 +88,22 @@ export default function ShareModal({
           <div className="mt-2">
             <div className="flex items-center">
               <Button
+                variant="filled"
+                color="dark"
                 size="xs"
-                className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer mr-2 ring-0 focus:ring-0"
+                className="mr-2"
                 onClick={() => handleShareToX(false)}
               >
                 <FaX className="w-4 h-4" />
               </Button>
               <Button
+                variant="filled"
+                color="dark"
                 size="xs"
-                className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
                 onClick={() => {
                   const shareData = {
                     title: currentSongInfo?.video_title,
                     text: currentSongInfo?.video_title,
-                    // text: `${currentSongInfo?.video_title} \n${youtubeUrl}`,
                     url: youtubeUrl,
                   };
                   navigator.share(shareData);
@@ -144,20 +141,21 @@ export default function ShareModal({
           </div>
           <div className="flex items-center gap-2 mt-2">
             <Button
+              variant="filled"
+              color="dark"
               size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
               onClick={() => handleShareToX(true)}
             >
               <FaX className="w-4 h-4" />
             </Button>
             <Button
+              variant="filled"
+              color="dark"
               size="xs"
-              className="bg-black text-white dark:bg-black dark:text-white dark:hover:bg-gray-900 cursor-pointer ring-0 focus:ring-0"
               onClick={() => {
                 const shareData = {
                   title: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
                   text: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
-                  // text: `${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${databaseUrl}`,
                   url: databaseUrl,
                 };
                 navigator.share(shareData);
@@ -167,15 +165,13 @@ export default function ShareModal({
             </Button>
           </div>
         </div>
-      </ModalBody>
-      <ModalFooter className="bg-white dark:bg-gray-800 dark:text-white">
-        <Button
-          className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
-          onClick={onClose}
-        >
-          閉じる
-        </Button>
-      </ModalFooter>
+        <Divider className="my-4" />
+        <div className="flex justify-end">
+          <Button variant="filled" color="dark" onClick={onClose}>
+            閉じる
+          </Button>
+        </div>
+      </div>
     </Modal>
   );
 }

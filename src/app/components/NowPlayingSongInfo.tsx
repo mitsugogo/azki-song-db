@@ -59,8 +59,8 @@ const NowPlayingSongInfo = ({
       <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground dark:text-gray-300">
         {currentSongInfo && (
           <div className="song-info">
-            <div className="hidden lg:flex items-center gap-2 mb-3">
-              <div className="w-full flex-auto self-baseline border-b border-gray-200 pb-2">
+            <div className="hidden lg:flex items-center gap-2 mb-1">
+              <div className="w-full flex-auto self-baseline">
                 {currentSongInfo.milestones && (
                   <div className="flex items-center gap-1">
                     <MilestoneBadge
@@ -77,7 +77,7 @@ const NowPlayingSongInfo = ({
                       isPlaying ? "fa-spin" : ""
                     }`}
                     style={{
-                      top: "-1px",
+                      top: "-2px",
                       animationDuration: "3s",
                     }}
                   />
@@ -162,7 +162,7 @@ const NowPlayingSongInfo = ({
               </div>
             </div>
 
-            <div className="hidden md:block lg:block">
+            <div className="hidden md:block">
               <NowPlayingSongInfoDetail
                 currentSongInfo={currentSongInfo}
                 allSongs={allSongs}
@@ -178,15 +178,17 @@ const NowPlayingSongInfo = ({
       </div>
       <Modal show={showModal} size="" onClose={() => setShowModal(false)}>
         <ModalHeader className="border-b-gray-300">楽曲情報</ModalHeader>
-        <ModalBody className="bg-white dark:bg-gray-800 dark:text-white rounded py-6">
+        <ModalBody className="bg-white dark:bg-gray-800 dark:text-white rounded py-6 px-3">
           {currentSongInfo && (
             <>
               <div className="mb-2 relative">
-                <FaCompactDisc
-                  className="fa-spin mr-2 inline relative"
-                  style={{ top: "-1px" }}
-                />
                 <span className="font-semibold">{currentSongInfo.title}</span>
+                {currentSongInfo.artist && (
+                  <span className="text-gray-500 text-sm">
+                    {" "}
+                    - {currentSongInfo.artist}
+                  </span>
+                )}
               </div>
               <NowPlayingSongInfoDetail
                 currentSongInfo={currentSongInfo}

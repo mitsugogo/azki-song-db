@@ -210,35 +210,27 @@ export default function PlayerSection({
               {/* 連続再生ボタン */}
               <Button
                 onClick={setSongsToCurrentVideo}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
                 <div className="flex-shrink-0">
-                  <RiPlayListFill className="mr-2" />
+                  <RiPlayListFill />
                 </div>
                 <div
                   className="flex-1 text-center"
                   style={{ lineHeight: "1.1em" }}
-                >
-                  <span className="text-xs">
-                    この歌枠を
-                    <br />
-                    連続再生
-                  </span>
-                </div>
+                ></div>
                 <div className="flex-shrink-0 w-0 sm:w-4"></div>
               </Button>
 
               {/* ランダム再生ボタン */}
               <Button
                 onClick={() => playRandomSong(songs)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
+                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
-                <div className="flex-shrink-0">
-                  <FaShuffle className="mr-2" />
-                </div>
-                <div className="flex-1 text-center">
-                  <span className="text-xs">ランダム</span>
-                </div>
+                <span className="text-xs">
+                <FaShuffle className="mr-2 inline" />
+                ランダム
+                </span>
               </Button>
 
               {/* ソロライブ予習モード */}
@@ -252,10 +244,9 @@ export default function PlayerSection({
                   if (!song) return;
                   changeCurrentSong(song);
                 }}
-                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none"
-                style={{ backgroundColor: "#cba877" }}
+                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 text-xs">
                   <LuCrown className="mr-2" />
                 </div>
                 <div className="flex-1 text-center">
