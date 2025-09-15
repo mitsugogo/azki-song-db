@@ -2,6 +2,7 @@ import { ThemeProvider } from "flowbite-react";
 import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
+import { MantineProvider } from "@mantine/core";
 
 // titleタグ
 export const metadata = {
@@ -15,14 +16,16 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <ThemeProvider>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <div>{children}</div>
-          <Footer />
-        </div>
-        <AnalyticsWrapper />
-      </ThemeProvider>
+      <MantineProvider>
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <div>{children}</div>
+            <Footer />
+          </div>
+          <AnalyticsWrapper />
+        </ThemeProvider>
+      </MantineProvider>
     </>
   );
 }

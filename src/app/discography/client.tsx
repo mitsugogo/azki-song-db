@@ -518,15 +518,15 @@ export default function DiscographyPage() {
       </div>
 
       <TabGroup selectedIndex={activeTab} onChange={setActiveTab}>
-        <TabList className="flex space-x-1 rounded-xl bg-gray-200 p-1 mb-4">
+        <TabList className="flex space-x-1 rounded-xl bg-gray-200 dark:bg-gray-800 p-1 mb-4">
           <Tab
             as="button"
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
-                  ? "bg-white text-primary shadow"
-                  : "hover:bg-white/[0.12] hover:text-primary"
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
@@ -535,11 +535,11 @@ export default function DiscographyPage() {
           <Tab
             as="button"
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
-                  ? "bg-white text-primary shadow"
-                  : "hover:bg-white/[0.12] hover:text-primary"
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
@@ -548,11 +548,11 @@ export default function DiscographyPage() {
           <Tab
             as="button"
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
-                  ? "bg-white text-primary shadow"
-                  : "hover:bg-white/[0.12] hover:text-primary"
+                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
+                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >

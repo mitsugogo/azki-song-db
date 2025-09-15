@@ -35,6 +35,18 @@
     --color-primary-light:var(--bg-primary-light-200);
     --bg-primary-light:var(--bg-primary-light-200); */
 
+  /* --color-gray-50: var(--mantine-color-dark-0);
+  --color-gray-100: var(--mantine-color-dark-1);
+  --color-gray-200: var(--mantine-color-dark-2);
+  --color-gray-300: var(--mantine-color-dark-3);
+  --color-gray-400: var(--mantine-color-dark-4);
+  --color-gray-500: var(--mantine-color-dark-5); */
+  --color-gray-600: var(--mantine-color-dark-6);
+  --color-gray-700: var(--mantine-color-dark-7);
+  --color-gray-800: var(--mantine-color-dark-8);
+  --color-gray-900: var(--mantine-color-dark-9);
+  --color-gray-950: var(--mantine-color-dark-10);
+
   --color-secondary-50: #fdf2fb;
   --color-secondary-100: #fbe8f8;
   --color-secondary-200: #fad0f4;
@@ -54,17 +66,21 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --mantine-font-sans: var(--font-sans);
+  --mantine-font-family: var(--font-sans);
+}
+body {
+  font-family: var(--font-sans) !important;
+}
+
 /** Next.jsのImageのfillを上書きして画像をoutfitにする */
 .outfit-image {
   object-fit: contain;
   position: relative !important;
   width: auto !important;
-}
-
-:root {
-  --font-sans:
-    "Noto Sans JP", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 .resizer {

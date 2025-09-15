@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { FaCircleHalfStroke, FaMoon, FaSun } from "react-icons/fa6";
+import { useMantineColorScheme, Button, Group } from "@mantine/core";
 
 const ThemeToggle = () => {
   const [theme, setTheme] = useState("system");
+  const { setColorScheme, clearColorScheme } = useMantineColorScheme();
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("color-theme");
     if (storedTheme) {
       setTheme(storedTheme);
+      const colorScheme = storedTheme === "system" ? "auto" : storedTheme;
+      setColorScheme(storedTheme as "light" | "dark" | "auto");
     }
   }, []);
 
@@ -38,14 +42,17 @@ const ThemeToggle = () => {
     switch (theme) {
       case "light":
         setTheme("dark");
+        setColorScheme("dark");
         localStorage.setItem("color-theme", "dark");
         break;
       case "dark":
         setTheme("system");
+        setColorScheme("light");
         localStorage.setItem("color-theme", "system");
         break;
       case "system":
         setTheme("light");
+        setColorScheme("light");
         localStorage.setItem("color-theme", "light");
         break;
     }
