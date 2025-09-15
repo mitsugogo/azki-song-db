@@ -438,11 +438,16 @@ export default function DiscographyPage() {
     }
 
     const colCount = getGridCols();
-    const detailsInsertionIndex =
+    let detailsInsertionIndex =
       Math.floor(expandedIndex / colCount) * colCount + colCount;
 
     const itemsToRender = [...data];
     itemsToRender.splice(detailsInsertionIndex, 0, data[expandedIndex]);
+
+    // indexがあるか確認してなかったら最終indexにする
+    if (detailsInsertionIndex >= itemsToRender.length) {
+      detailsInsertionIndex = itemsToRender.length - 1;
+    }
 
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
