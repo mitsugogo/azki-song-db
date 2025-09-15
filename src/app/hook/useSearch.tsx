@@ -38,8 +38,8 @@ const useSearch = (allSongs: Song[]) => {
 
     // 除外検索ワードの定義
     const excludeWords = searchWords
-      .filter((word) => word.startsWith("-"))
-      .map((word) => word.substring(1));
+      .filter((word) => word.startsWith("-") && word.includes(" "))
+      .map((word) => word.substring(1, word.indexOf(" ")));
 
     // 通常検索ワードの定義
     const normalWords = searchWords.filter((word) => !word.startsWith("-"));
@@ -73,7 +73,7 @@ const useSearch = (allSongs: Song[]) => {
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
-              : (s.milestones?.some((m) => m.includes(v)) ?? false),
+              : s.milestones?.some((m) => m.includes(v)) ?? false,
         };
 
         for (const prefix in prefixSearches) {
@@ -123,7 +123,7 @@ const useSearch = (allSongs: Song[]) => {
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
-              : (s.milestones?.some((m) => m.includes(v)) ?? false),
+              : s.milestones?.some((m) => m.includes(v)) ?? false,
         };
 
         for (const prefix in prefixSearches) {
@@ -158,7 +158,7 @@ const useSearch = (allSongs: Song[]) => {
             !s.artist.includes("星街") &&
             !s.title.includes("Remix") &&
             !s.tags.includes("リミックス") &&
-            !s.title.includes("Kiss me"),
+            !s.title.includes("Kiss me")
         )
         .sort((a, b) => {
           // リリース順でソート
