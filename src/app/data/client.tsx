@@ -201,7 +201,7 @@ export default function ClientTable() {
         enableResizing: true,
       },
     ],
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -287,7 +287,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                             {header.column.getCanSort() && (
                               <span className="ml-1 inline-block">
@@ -359,7 +359,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </div>
                         ))}

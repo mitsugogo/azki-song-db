@@ -33,7 +33,7 @@ export default function ShareModal({
 
   const handleCopyToClipboard = (
     textToCopy: string,
-    setShowCopiedState: (show: boolean) => void
+    setShowCopiedState: (show: boolean) => void,
   ) => {
     copyToClipboard(textToCopy);
     setShowCopiedState(true);

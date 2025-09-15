@@ -502,9 +502,7 @@ export default function DiscographyPage() {
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
-      <h1 className="font-extrabold text-2xl p-3 mb-2">
-        Discography
-      </h1>
+      <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 
       <div className="flex items-center justify-end mb-4">
         <ToggleSwitch

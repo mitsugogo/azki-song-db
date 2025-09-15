@@ -51,7 +51,7 @@ const SongsList = ({
         (song) =>
           song.video_id === currentSongInfo?.video_id &&
           song.title === currentSongInfo?.title &&
-          song.start === currentSongInfo?.start
+          song.start === currentSongInfo?.start,
       );
 
       if (songIndex !== -1) {
@@ -73,7 +73,7 @@ const SongsList = ({
     const listElement = document.getElementById("song-list-scrollbar");
     if (listElement) {
       const currentSongElement = document.querySelector(
-        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
+        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`,
       );
       if (currentSongElement) {
         currentSongElement.scrollIntoView({
@@ -125,7 +125,7 @@ const SongsList = ({
                     (song) =>
                       currentSongInfo?.title === song.title &&
                       currentSongInfo.video_id === song.video_id &&
-                      currentSongInfo.start === song.start
+                      currentSongInfo.start === song.start,
                   )
               }
             />

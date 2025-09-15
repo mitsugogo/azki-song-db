@@ -27,7 +27,7 @@ import {
 export default function DataTable<
   T extends
     | { lastVideo?: { video_title: string; video_id: string } }
-    | StatisticsItem
+    | StatisticsItem,
 >({
   data,
   caption,
@@ -183,7 +183,7 @@ export default function DataTable<
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {header.column.getCanSort() && (
                             <span className="ml-1 inline-block">
@@ -260,7 +260,7 @@ export default function DataTable<
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </div>
                         ))}
@@ -279,7 +279,7 @@ export default function DataTable<
                               セットリスト (
                               {
                                 songs.filter(
-                                  (s) => s.video_id === selectedVideoId
+                                  (s) => s.video_id === selectedVideoId,
                                 ).length
                               }
                               曲)
@@ -309,7 +309,7 @@ export default function DataTable<
                                   .filter((s) => s.video_id === selectedVideoId)
                                   .sort(
                                     (a, b) =>
-                                      parseInt(a.start) - parseInt(b.start)
+                                      parseInt(a.start) - parseInt(b.start),
                                   )
                                   .map((s) => (
                                     <div

@@ -117,7 +117,7 @@ export default function MainPlayer() {
       const targetSong = filteredSongs.find(
         (song) =>
           song.video_id === videoId &&
-          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
+          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2,
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -126,7 +126,7 @@ export default function MainPlayer() {
       }
     } else if (videoId) {
       const targetSong = filteredSongs.find(
-        (song) => song.video_id === videoId
+        (song) => song.video_id === videoId,
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -149,14 +149,14 @@ export default function MainPlayer() {
       () => {
         setToastMessage("コピーに失敗しました");
         setShowToast(true);
-      }
+      },
     );
   };
 
   const setSongsToCurrentVideo = () => {
     if (!currentSongInfo) return;
     const songsInVideo = allSongs.filter(
-      (song) => song.video_id === currentSongInfo.video_id
+      (song) => song.video_id === currentSongInfo.video_id,
     );
     setSearchTerm(`video_id:${currentSongInfo.video_id}`);
     changeCurrentSong(currentSongInfo, true);
