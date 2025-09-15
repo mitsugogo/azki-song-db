@@ -10,6 +10,7 @@ interface YoutubeThumbnailProps {
   fill?: boolean;
   width?: number;
   height?: number;
+  className?: string;
   imageClassName?: string;
   outcontainerClassName?: string;
 }
@@ -20,6 +21,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   fill,
   width,
   height,
+  className,
   imageClassName,
   outcontainerClassName,
 }) => {
@@ -43,7 +45,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
       <div
         className={`relative flex w-full h-full items-center justify-center aspect-video ${
           outcontainerClassName || ""
-        }`}
+        } ${className || ""}`}
       >
         <Image
           key={videoId}

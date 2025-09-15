@@ -108,12 +108,13 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 aspect-video w-25 min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
+                  <div className="flex flex-1 aspect-video w-25 min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
                       fill={true}
-                      imageClassName="w-25 min-w-25 max-w-25 dark:w-24 dark:min-w-24 dark:max-w-24 rounded-l-md"
+                      className="w-25 min-w-25 max-w-25 dark:w-24 dark:min-w-24 dark:max-w-24 ml-[1px]"
+                      imageClassName="rounded-l"
                     />
                   </div>
                   <div className="flex flex-1 flex-col px-2 min-w-0">
