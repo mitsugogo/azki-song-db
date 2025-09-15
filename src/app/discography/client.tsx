@@ -378,28 +378,28 @@ export default function DiscographyPage() {
   }, [songs, groupByAlbum]);
 
   useEffect(() => {
-    const newVisibleItems: boolean[][] = [[], []];
-    newVisibleItems[activeTab] = new Array(
-      [
-        originalSongCountsByReleaseDate,
-        unitSongCountsByReleaseDate,
-        coverSongCountsByReleaseDate,
-      ][activeTab].length,
-    ).fill(false);
-    setVisibleItems(newVisibleItems);
+    const itemsToAnimate = [
+      originalSongCountsByReleaseDate,
+      unitSongCountsByReleaseDate,
+      coverSongCountsByReleaseDate,
+    ][activeTab];
+
+    setVisibleItems((prev) => {
+      const next = [...prev];
+      next[activeTab] = new Array(itemsToAnimate.length).fill(false);
+      return next;
+    });
 
     setTimeout(() => {
-      const itemsToAnimate = [
-        originalSongCountsByReleaseDate,
-        unitSongCountsByReleaseDate,
-        coverSongCountsByReleaseDate,
-      ][activeTab];
       itemsToAnimate.forEach((_, index) => {
         setTimeout(() => {
           setVisibleItems((prev) => {
             const next = [...prev];
-            next[activeTab] = [...next[activeTab]];
-            next[activeTab][index] = true;
+            if (Array.isArray(next[activeTab])) {
+              const nextInner = [...next[activeTab]];
+              nextInner[index] = true;
+              next[activeTab] = nextInner;
+            }
             return next;
           });
         }, index * 50);
@@ -408,6 +408,7 @@ export default function DiscographyPage() {
   }, [
     activeTab,
     originalSongCountsByReleaseDate,
+    unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   ]);
 
