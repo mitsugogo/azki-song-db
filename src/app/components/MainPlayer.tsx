@@ -97,6 +97,14 @@ export default function MainPlayer() {
       filteredSongs = searchSongs(allSongs, query);
     }
 
+    // ソロライブモードの場合は強制的に先頭の曲(Creating world)からスタート
+    if (urlParams.get("q") === "sololive2025") {
+      changeCurrentSong(filteredSongs[0]);
+      setSongs(filteredSongs);
+      setIsInitialLoading(false);
+      return;
+    }
+
     if (pvId) {
       // この動画idから再生する
       const song = filteredSongs.find((s) => s.video_id === pvId);
@@ -109,7 +117,7 @@ export default function MainPlayer() {
       const targetSong = filteredSongs.find(
         (song) =>
           song.video_id === videoId &&
-          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2,
+          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -118,7 +126,7 @@ export default function MainPlayer() {
       }
     } else if (videoId) {
       const targetSong = filteredSongs.find(
-        (song) => song.video_id === videoId,
+        (song) => song.video_id === videoId
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -141,14 +149,14 @@ export default function MainPlayer() {
       () => {
         setToastMessage("コピーに失敗しました");
         setShowToast(true);
-      },
+      }
     );
   };
 
   const setSongsToCurrentVideo = () => {
     if (!currentSongInfo) return;
     const songsInVideo = allSongs.filter(
-      (song) => song.video_id === currentSongInfo.video_id,
+      (song) => song.video_id === currentSongInfo.video_id
     );
     setSearchTerm(`video_id:${currentSongInfo.video_id}`);
     changeCurrentSong(currentSongInfo, true);
