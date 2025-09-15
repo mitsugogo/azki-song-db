@@ -99,6 +99,10 @@ const createStatistics = <T extends StatisticsItem>(
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
+  const coverArtists = useMemo(() => {
+    return Array.from(new Set(song.videos.map((v) => v.sing)));
+  }, [song.song.tags]);
+
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-300 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
@@ -117,7 +121,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           </h2>
           <p className="text-sm">アーティスト: {song.firstVideo.artist}</p>
           {song.song.tags.includes("カバー曲") && (
-            <p className="text-sm">カバー: {song.song.sing}</p>
+            <p className="text-sm">カバー: {coverArtists.join("、")}</p>
           )}
           {!song.isAlbum && (
             <>
