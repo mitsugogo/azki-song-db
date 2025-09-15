@@ -104,7 +104,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   }, [song.song.tags]);
 
   return (
-    <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-300 dark:shadow-gray-900 my-2">
+    <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="w-full md:w-1/3 lg:w-1/2">
           <YoutubeThumbnail
@@ -502,9 +502,7 @@ export default function DiscographyPage() {
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
-      <h1 className="font-extrabold text-2xl p-3 mb-2 dark:text-gray-200">
-        Discography
-      </h1>
+      <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 
       <div className="flex items-center justify-end mb-4">
         <ToggleSwitch
@@ -518,7 +516,7 @@ export default function DiscographyPage() {
       </div>
 
       <TabGroup selectedIndex={activeTab} onChange={setActiveTab}>
-        <TabList className="flex space-x-1 rounded-xl bg-gray-200 dark:bg-gray-800 p-1 mb-4">
+        <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
           <Tab
             as="button"
             className={({ selected }) =>

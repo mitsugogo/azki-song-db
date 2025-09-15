@@ -135,10 +135,10 @@ const SongsList = ({
 
       {totalPage > 1 && (
         <div className="flex items-center justify-center col-span-2 py-2">
-          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-400 bg-gray-100 rounded-lg dark:bg-gray-600 max-w-[128px] mx-2">
+          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-200 bg-gray-50/30 rounded-lg dark:bg-gray-600 max-w-[128px] mx-2">
             <button
               type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-s-lg bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-s-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -164,7 +164,7 @@ const SongsList = ({
             </span>
             <button
               type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-10 bg-gray-100 rounded-e-lg dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800"
+              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-e-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPage}
             >

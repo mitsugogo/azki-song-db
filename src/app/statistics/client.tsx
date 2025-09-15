@@ -50,9 +50,7 @@ export default function StatisticsPage() {
 
   return (
     <div className="flex-grow lg:p-6 lg:pb-0">
-      <h1 className="font-extrabold text-2xl p-3 dark:text-gray-200">
-        統計情報
-      </h1>
+      <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
         <div className="border-b border-gray-200 dark:border-gray-700">
@@ -66,7 +64,7 @@ export default function StatisticsPage() {
                    ${
                      selected
                        ? "border-primary-600 text-primary-600 dark:border-primary-500 dark:text-primary-500"
-                       : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                       : "border-transparent hover:border-gray-300 hover:text-gray-600 dark:hover:text-gray-100"
                    }`
                 }
               >

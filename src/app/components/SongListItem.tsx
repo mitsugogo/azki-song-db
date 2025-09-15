@@ -16,10 +16,10 @@ const SongListItem = React.memo(
   ({ song, isSelected, isHide, changeCurrentSong }: SongListItemProps) => {
     return (
       <li
-        className={`rounded relative cursor-pointer transition shadow-md flex md:block ${
+        className={`rounded relative cursor-pointer transition shadow-md flex md:block dark:text-gray-50 ${
           isSelected
-            ? "bg-primary-300 hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-800 dark:text-gray-300"
-            : "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+            ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
+            : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
         }`}
         onClick={() => {
           changeCurrentSong(song, false);
@@ -55,7 +55,7 @@ const SongListItem = React.memo(
             </span>
           </div>
           <div
-            className={`w-full text-xs text-gray-600 dark:text-gray-500 line-clamp-1 ${
+            className={`w-full text-xs text-gray-600 dark:text-gray-200 line-clamp-1 ${
               isHide ? "mt-1 truncate" : "md:line-clamp-3"
             }`}
           >
@@ -69,7 +69,7 @@ const SongListItem = React.memo(
               </span>
             </span>
           </div>
-          <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-500">
+          <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
             {song.broadcast_at && (
               <>{new Date(song.broadcast_at).toLocaleDateString()}</>
             )}
@@ -82,7 +82,7 @@ const SongListItem = React.memo(
         </div>
       </li>
     );
-  },
+  }
 );
 
 SongListItem.displayName = "SongListItem";

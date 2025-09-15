@@ -1,10 +1,15 @@
-@import "tailwindcss";
-@import "flowbite/src/themes/default";
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
 @import "overlayscrollbars/overlayscrollbars.css";
 @plugin "flowbite-react/plugin/tailwindcss";
 @plugin "flowbite/plugin";
 @source "../../.flowbite-react/class-list.json";
 @source "../node_modules/flowbite";
+@import "@mantine/core/styles.css";
 
 @theme {
   --color-primary-50: #fdf2f7;
@@ -21,32 +26,6 @@
   --color-primary: var(--color-primary-700);
   --bg-primary: var(--color-primary-700);
 
-  /* --color-primary-light-50: #fbf4f7;
-    --color-primary-light-100: #f8ebf0;
-    --color-primary-light-200: #f0cadb;
-    --color-primary-light-300: #ebb6cd;
-    --color-primary-light-400: #de88ab;
-    --color-primary-light-500: #d0648c;
-    --color-primary-light-600: #bc466c;
-    --color-primary-light-700: #a23455;
-    --color-primary-light-800: #862e46;
-    --color-primary-light-900: #712a3e;
-    --color-primary-light-950: #441321;
-    --color-primary-light:var(--bg-primary-light-200);
-    --bg-primary-light:var(--bg-primary-light-200); */
-
-  /* --color-gray-50: var(--mantine-color-dark-0);
-  --color-gray-100: var(--mantine-color-dark-1);
-  --color-gray-200: var(--mantine-color-dark-2);
-  --color-gray-300: var(--mantine-color-dark-3);
-  --color-gray-400: var(--mantine-color-dark-4);
-  --color-gray-500: var(--mantine-color-dark-5); */
-  --color-gray-600: var(--mantine-color-dark-6);
-  --color-gray-700: var(--mantine-color-dark-7);
-  --color-gray-800: var(--mantine-color-dark-8);
-  --color-gray-900: var(--mantine-color-dark-9);
-  --color-gray-950: var(--mantine-color-dark-10);
-
   --color-secondary-50: #fdf2fb;
   --color-secondary-100: #fbe8f8;
   --color-secondary-200: #fad0f4;
@@ -59,6 +38,19 @@
   --color-secondary-900: #7f1c60;
   --color-secondary-950: #4e0938;
   --color-secondary: var(--color-secondary-700);
+
+  --color-gray-50: var(--mantine-color-dark-0);
+  --color-gray-100: var(--mantine-color-dark-1);
+  --color-gray-200: var(--mantine-color-dark-2);
+  --color-gray-300: var(--mantine-color-dark-3);
+  --color-gray-400: var(--mantine-color-dark-4);
+  --color-gray-500: var(--mantine-color-dark-5);
+  --color-gray-600: var(--mantine-color-dark-6);
+  --color-gray-700: var(--mantine-color-dark-7);
+  --color-gray-800: var(--mantine-color-dark-8);
+  --color-gray-900: var(--mantine-color-dark-9);
+  /* --color-gray-950: var(--mantine-color-dark-10); */
+  --color-gray-950: #141414;
 
   --breakpoint-3xl: 100rem;
   --breakpoint-4xl: 140rem;
@@ -84,11 +76,17 @@
   --mantine-font-sans: var(--font-sans);
   --mantine-font-family: var(--font-sans);
 }
+/* :root[data-mantine-color-scheme="dark"] {
+} */
+
+.dark\:bg-gray-950:where(.dark, .dark *) {
+  background-color: var(--color-gray-950);
+}
+
 body {
   font-family: var(--font-sans) !important;
 }
 
-/** Next.jsのImageのfillを上書きして画像をoutfitにする */
 .outfit-image {
   object-fit: contain;
   position: relative !important;

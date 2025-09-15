@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
       (
         <div
           style={{
-            backgroundColor: "#eee",
+            backgroundColor: "#fff",
             backgroundSize: "100% 100%",
             height: "100%",
             width: "100%",

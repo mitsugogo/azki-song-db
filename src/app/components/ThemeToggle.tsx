@@ -11,7 +11,7 @@ const ThemeToggle = () => {
     if (storedTheme) {
       setTheme(storedTheme);
       const colorScheme = storedTheme === "system" ? "auto" : storedTheme;
-      setColorScheme(storedTheme as "light" | "dark" | "auto");
+      setColorScheme(colorScheme as "light" | "dark" | "auto");
     }
   }, []);
 
@@ -23,6 +23,7 @@ const ThemeToggle = () => {
       case "dark":
         document.documentElement.classList.add("dark");
         break;
+      case "auto":
       case "system":
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
         mediaQuery.matches
@@ -47,9 +48,10 @@ const ThemeToggle = () => {
         break;
       case "dark":
         setTheme("system");
-        setColorScheme("light");
+        setColorScheme("auto");
         localStorage.setItem("color-theme", "system");
         break;
+      case "auto":
       case "system":
         setTheme("light");
         setColorScheme("light");

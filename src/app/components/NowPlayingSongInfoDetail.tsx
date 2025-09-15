@@ -46,7 +46,7 @@ const NowPlayingSongInfoDetail = ({
   return (
     <>
       {currentSongInfo && (
-        <div className="flex-grow mb-5 bg-gray-100 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm">
+        <div className="flex-grow mb-5 bg-gray-50/20 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm dark:text-gray-50">
           <dl className="flex flex-col gap-3 lg:gap-1">
             {currentSongInfo.artist && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
@@ -75,7 +75,7 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                           existsSameArtist ? "bg-cyan-300 dark:bg-cyan-600" : ""
                         }`}
                       >
@@ -114,7 +114,7 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                           existsSameAlbum ? "bg-cyan-300 dark:bg-cyan-600" : ""
                         }`}
                       >
@@ -148,7 +148,7 @@ const NowPlayingSongInfoDetail = ({
                           );
                         }
                       }}
-                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200  ${
+                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50  ${
                         existsSameSing ? "bg-cyan-300 dark:bg-cyan-600" : ""
                       }`}
                     >
@@ -186,7 +186,7 @@ const NowPlayingSongInfoDetail = ({
               </dt>
               <dd className="flex flex-wrap gap-1">
                 <Badge
-                  className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                  className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                     searchTerm.includes(
                       `date:${new Date(
                         currentSongInfo.broadcast_at,
@@ -231,7 +231,7 @@ const NowPlayingSongInfoDetail = ({
                   return (
                     <Badge
                       key={tag}
-                      className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-200 ${
+                      className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                         existsSameTag ? "bg-cyan-300 dark:bg-cyan-600" : ""
                       }`}
                       onClick={() => {
@@ -263,7 +263,7 @@ const NowPlayingSongInfoDetail = ({
                   {!isTimestampExpand && (
                     <button
                       type="button"
-                      className="w-full text-center bg-gray-200 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
+                      className="w-full text-center bg-gray-50/50 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
                       onClick={() => setIsTimestampExpand(!isTimestampExpand)}
                     >
                       クリックして展開&nbsp;
@@ -324,7 +324,7 @@ const NowPlayingSongInfoDetail = ({
                                 >
                                   {song.title}
                                   &nbsp;-&nbsp;
-                                  <span className="text-gray-500 dark:text-gray-500">
+                                  <span className="text-gray-500 dark:text-gray-300">
                                     {song.artist}
                                   </span>
                                 </span>

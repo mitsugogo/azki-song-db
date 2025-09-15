@@ -6,6 +6,7 @@ import { Button, TextInput, ToggleSwitch } from "flowbite-react";
 import { HiChevronDown, HiChevronUp, HiSearch, HiX } from "react-icons/hi";
 import { FaCompactDisc, FaMusic, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
+import { Input } from "@mantine/core";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -104,7 +105,7 @@ export default function SearchAndSongList({
             />
             {searchTerm && (
               <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
                 onClick={() => setSearchTerm("")}
               >
                 <HiX className="w-4 h-4" />
@@ -116,7 +117,7 @@ export default function SearchAndSongList({
             onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
             className={`text-xs h-5 p-4 py-0 w-full transition focus:ring-0 mt-1 cursor-pointer ${
               !advancedSearchOpen
-                ? "bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-black dark:text-white"
+                ? "bg-gray-50/50 hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-black dark:text-white"
                 : "bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white"
             }`}
           >

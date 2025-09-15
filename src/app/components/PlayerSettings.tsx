@@ -43,7 +43,7 @@ export default function PlayerSettings({
     >
       <Button
         onClick={() => setOpenShereModal(true)}
-        className="hidden md:inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-gray-100 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
+        className="hidden md:inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
       >
         <div className="inline-block w-5 h-5">
           <FaShare className="relative top-1 left-1" />
