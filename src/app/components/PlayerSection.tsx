@@ -82,11 +82,12 @@ export default function PlayerSection({
             >
               {previousSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
                       fill={true}
+                      imageClassName="w-24 min-w-24 max-w-24 rounded-l-md"
                     />
                   </div>
                   <div className="flex flex-1 flex-col px-2 min-w-0">
@@ -107,11 +108,13 @@ export default function PlayerSection({
             >
               {currentSongInfo && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
+                  <div className="flex flex-1 aspect-video w-25 min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
                       fill={true}
+                      className="w-25 min-w-25 max-w-25 dark:w-24 dark:min-w-24 dark:max-w-24 ml-[1px]"
+                      imageClassName="rounded-l"
                     />
                   </div>
                   <div className="flex flex-1 flex-col px-2 min-w-0">
@@ -132,11 +135,12 @@ export default function PlayerSection({
             >
               {nextSong && (
                 <div className="flex items-center h-14">
-                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0">
+                  <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
                       fill={true}
+                      imageClassName="w-24 min-w-24 max-w-24 rounded-l-md"
                     />
                   </div>
                   <div className={`flex flex-1 flex-col px-2 min-w-0`}>
@@ -239,7 +243,7 @@ export default function PlayerSection({
                   // ソロライブ用のプレイリストをセットしてCreating worldを再生
                   setSearchTerm("sololive2025");
                   const song = songs.find(
-                    (song) => song.video_id === "ZkvtKUQp3nM",
+                    (song) => song.video_id === "ZkvtKUQp3nM"
                   );
                   if (!song) return;
                   changeCurrentSong(song);
