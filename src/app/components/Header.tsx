@@ -103,7 +103,7 @@ export function Header() {
         opened={drawerOpened}
         onClose={closeDrawer}
         title="Menu"
-        overlayProps={{ opacity: 0.5, blur: 4 }}
+        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
         <div className="space-y-1">
           {navigation.map((item) => {
@@ -113,7 +113,7 @@ export function Header() {
             const activeClasses =
               "bg-primary-600 dark:bg-primary-800 text-white";
             const inactiveClasses =
-              "text-gray-300 hover:bg-white/5 hover:text-white";
+              "hover:bg-white/5 hover:text-primary dark:hover:text-white";
 
             return (
               <a
@@ -133,7 +133,7 @@ export function Header() {
           <Link
             href="#"
             key="about"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer text-gray-300 hover:bg-white/5 hover:text-white"
+            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
             onClick={() => {
               setShowAcknowledgment(true);
               closeDrawer();
@@ -144,7 +144,7 @@ export function Header() {
           <Link
             href="https://www.youtube.com/@AZKi"
             target="_blank"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer text-gray-300 hover:bg-white/5 hover:text-white"
+            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
             onClick={() => closeDrawer()}
           >
             AZKi Channel
