@@ -18,6 +18,12 @@ export function Header() {
 
   const isMobile = useMediaQuery("(max-width: 50em)");
 
+  let lastUpdated = process.env.NEXT_PUBLIC_LAST_UPDATED;
+  const isDev = process.env.NODE_ENV === "development";
+  if (isDev) {
+    lastUpdated = new Date().toLocaleDateString();
+  }
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCurrentPath(window.location.pathname);
@@ -143,38 +149,49 @@ export function Header() {
             このサイトについて
           </Link>
 
-          <hr className="my-2 border border-gray-200 dark:border-gray-600" />
+          <hr className="my-2 border border-gray-200 dark:border-gray-600 md:hidden" />
 
-          <Link
-            href="https://www.youtube.com/@AZKi"
-            target="_blank"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={() => closeDrawer()}
-          >
-            AZKi Channel
-            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-          </Link>
-
-          <Tooltip
-            arrowOffset={10}
-            arrowSize={4}
-            label="ソロライブ！"
-            withArrow
-            position="bottom"
-          >
+          <div className="block relative md:absolute md:bottom-6 md:left-3">
             <Link
-              href="https://departure.hololivepro.com/"
+              href="https://www.youtube.com/@AZKi"
               target="_blank"
               className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
               onClick={() => closeDrawer()}
             >
-              <div className="text-xs text-gray-400 dark:text-light-gray-500">
-                2025.11.19 (Wed.) - PIA ARENA MM
-              </div>{" "}
-              AZKi SOLO LiVE 2025 &quot;Departure&quot;
+              AZKi Channel
               <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
             </Link>
-          </Tooltip>
+
+            <Tooltip
+              arrowOffset={10}
+              arrowSize={4}
+              label="ソロライブ！"
+              withArrow
+              position="bottom"
+            >
+              <Link
+                href="https://departure.hololivepro.com/"
+                target="_blank"
+                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={() => closeDrawer()}
+              >
+                <div className="text-xs text-gray-400 dark:text-light-gray-500">
+                  2025.11.19 (Wed.) - PIA ARENA MM
+                </div>{" "}
+                AZKi SOLO LiVE 2025 &quot;Departure&quot;
+                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+              </Link>
+            </Tooltip>
+
+            <hr className="my-2 border border-gray-200 dark:border-gray-600 w-full" />
+
+            {lastUpdated && (
+              <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
+                Last Updated:{" "}
+                {lastUpdated ? new Date(lastUpdated).toLocaleDateString() : ""}
+              </div>
+            )}
+          </div>
         </div>
       </Drawer>
 
