@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.4](https://github.com/mitsugogo/azki-song-db/compare/v1.12.3...v1.12.4) (2025-09-16)
+
+
+### Bug Fixes
+
+* **data:** iOS26で縦方向にはみ出るのを修正 ([86eb0d4](https://github.com/mitsugogo/azki-song-db/commit/86eb0d435820ee3cdbc83a2e51fdb4b2ea33a803))
+
 ### [1.12.3](https://github.com/mitsugogo/azki-song-db/compare/v1.12.2...v1.12.3) (2025-09-16)
 
 ### [1.12.2](https://github.com/mitsugogo/azki-song-db/compare/v1.12.1...v1.12.2) (2025-09-15)
