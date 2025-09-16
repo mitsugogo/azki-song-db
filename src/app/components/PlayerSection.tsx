@@ -149,7 +149,7 @@ export default function PlayerSection({
                         className={`font-bold truncate ${
                           hideFutureSongs &&
                           nextSong.video_id === currentSongInfo?.video_id
-                            ? "h-4 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            ? "h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
                             : ""
                         }`}
                       >
@@ -170,7 +170,7 @@ export default function PlayerSection({
                         className={`text-xs text-muted ${
                           hideFutureSongs &&
                           nextSong.video_id === currentSongInfo?.video_id
-                            ? "h-3 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            ? "h-3 bg-light-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
                             : ""
                         }`}
                       >
