@@ -201,7 +201,7 @@ export default function ClientTable() {
         enableResizing: true,
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({
@@ -262,7 +262,7 @@ export default function ClientTable() {
           />
           <OverlayScrollbarsComponent
             ref={tableContainerRef}
-            className="h-dvh lg:h-[calc(100vh-314px)]"
+            className="h-[calc(100dvh-230px)] md:h-[calc(100dvh-250px)] lg:h-[calc(100dvh-320px)]"
           >
             <div className="relative">
               <div className="w-full text-sm text-left">
@@ -287,7 +287,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                             {header.column.getCanSort() && (
                               <span className="ml-1 inline-block">
@@ -359,7 +359,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </div>
                         ))}
