@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import { Drawer, Burger, Modal } from "@mantine/core";
+import { Drawer, Burger, Modal, Popover, Text, Tooltip } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
@@ -155,18 +155,26 @@ export function Header() {
             <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
           </Link>
 
-          <Link
-            href="https://departure.hololivepro.com/"
-            target="_blank"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={() => closeDrawer()}
+          <Tooltip
+            arrowOffset={10}
+            arrowSize={4}
+            label="ソロライブ！"
+            withArrow
+            position="bottom"
           >
-            <div className="text-xs text-gray-400 dark:text-gray-500">
-              2025.11.19 (Wed.) - PIA ARENA MM
-            </div>{" "}
-            AZKi SOLO LiVE 2025 &quot;Departure&quot;
-            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-          </Link>
+            <Link
+              href="https://departure.hololivepro.com/"
+              target="_blank"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={() => closeDrawer()}
+            >
+              <div className="text-xs text-gray-400 dark:text-light-gray-500">
+                2025.11.19 (Wed.) - PIA ARENA MM
+              </div>{" "}
+              AZKi SOLO LiVE 2025 &quot;Departure&quot;
+              <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+            </Link>
+          </Tooltip>
         </div>
       </Drawer>
 

@@ -60,7 +60,7 @@ export default function PlayerSection({
         defer
       >
         {/* YouTube Player */}
-        <div className="relative aspect-video w-full bg-black">
+        <div className="relative aspect-video w-full bg-black shadow-md dark:shadow-none">
           <div className="absolute top-0 left-0 w-full h-full">
             {currentSong && (
               <YouTubePlayer

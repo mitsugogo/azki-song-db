@@ -1,9 +1,17 @@
-import { Spinner } from "flowbite-react";
+import { LoadingOverlay, MantineProvider } from "@mantine/core";
+import { theme } from "./theme";
 
 export default function Loading() {
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-      <Spinner size="xl" />
-    </div>
+    <MantineProvider theme={theme}>
+      <div className="flex items-center justify-center h-[calc(100dvh-64px)] md:h-[calc(100dvh-99px)]">
+        <LoadingOverlay
+          visible={true}
+          zIndex={1000}
+          loaderProps={{ color: "pink", type: "bars" }}
+          overlayProps={{ radius: "sm", blur: 2 }}
+        />
+      </div>
+    </MantineProvider>
   );
 }
