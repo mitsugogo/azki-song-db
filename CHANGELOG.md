@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.5](https://github.com/mitsugogo/azki-song-db/compare/v1.12.4...v1.12.5) (2025-09-16)
+
+
+### Bug Fixes
+
+* メニューリンク変更 ([5008fc0](https://github.com/mitsugogo/azki-song-db/commit/5008fc04312aee928ea3f6c53f946c8a7c8b53f3))
+
 ### [1.12.4](https://github.com/mitsugogo/azki-song-db/compare/v1.12.3...v1.12.4) (2025-09-16)
 
 
