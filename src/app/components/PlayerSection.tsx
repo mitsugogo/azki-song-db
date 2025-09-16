@@ -60,7 +60,7 @@ export default function PlayerSection({
         defer
       >
         {/* YouTube Player */}
-        <div className="relative aspect-video w-full bg-black">
+        <div className="relative aspect-video w-full bg-black shadow-md dark:shadow-none">
           <div className="absolute top-0 left-0 w-full h-full">
             {currentSong && (
               <YouTubePlayer
@@ -149,7 +149,7 @@ export default function PlayerSection({
                         className={`font-bold truncate ${
                           hideFutureSongs &&
                           nextSong.video_id === currentSongInfo?.video_id
-                            ? "h-4 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            ? "h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
                             : ""
                         }`}
                       >
@@ -170,7 +170,7 @@ export default function PlayerSection({
                         className={`text-xs text-muted ${
                           hideFutureSongs &&
                           nextSong.video_id === currentSongInfo?.video_id
-                            ? "h-3 bg-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
+                            ? "h-3 bg-light-gray-300 rounded-lg dark:bg-gray-700 inline-block max-w-full"
                             : ""
                         }`}
                       >

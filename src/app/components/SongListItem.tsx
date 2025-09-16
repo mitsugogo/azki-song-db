@@ -48,7 +48,9 @@ const SongListItem = React.memo(
           >
             <span
               className={`${
-                isHide ? `h-4 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1` : ""
+                isHide
+                  ? `h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                  : ""
               }`}
             >
               <span className={`${isHide ? "opacity-0" : ""}`}>
@@ -63,7 +65,9 @@ const SongListItem = React.memo(
           >
             <span
               className={`${
-                isHide ? `h-3 bg-gray-300 rounded-lg dark:bg-gray-700 mb-1` : ""
+                isHide
+                  ? `h-2 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                  : ""
               }`}
             >
               <span className={`${isHide ? "opacity-0" : ""}`}>
@@ -76,11 +80,13 @@ const SongListItem = React.memo(
               <>{new Date(song.broadcast_at).toLocaleDateString()}</>
             )}
           </div>
-          <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
-            <div>
-              <MilestoneBadge song={song} outClassName="mb-1.5" />
+          {song.milestones && song.milestones.length > 0 && (
+            <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
+              <div>
+                <MilestoneBadge song={song} outClassName="mb-1.5" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </li>
     );

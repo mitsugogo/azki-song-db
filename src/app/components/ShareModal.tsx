@@ -3,48 +3,42 @@ import { Modal, TextInput, Button, Divider } from "@mantine/core";
 import { HiClipboardCopy } from "react-icons/hi";
 import { FaDatabase, FaShare, FaX, FaYoutube } from "react-icons/fa6";
 import { Label } from "flowbite-react";
+import { useState } from "react";
 
 // Propsの型定義
 type ShareModalProps = {
   openShareModal: boolean;
   currentSongInfo: Song | null;
   baseUrl: string;
-  showCopied: boolean;
-  showCopiedYoutube: boolean;
   onClose: () => void;
-  copyToClipboard: (text: string) => void;
-  setShowCopied: (show: boolean) => void;
-  setShowCopiedYoutube: (show: boolean) => void;
 };
 
 export default function ShareModal({
   openShareModal,
   currentSongInfo,
   baseUrl,
-  showCopied,
-  showCopiedYoutube,
   onClose,
-  copyToClipboard,
-  setShowCopied,
-  setShowCopiedYoutube,
 }: ShareModalProps) {
+  const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
+
   const youtubeUrl = `https://www.youtube.com/watch?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
   const databaseUrl = `${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
 
-  const handleCopyToClipboard = (
-    textToCopy: string,
-    setShowCopiedState: (show: boolean) => void,
-  ) => {
-    copyToClipboard(textToCopy);
-    setShowCopiedState(true);
-    setTimeout(() => setShowCopiedState(false), 3000);
-  };
-
   const handleShareToX = (isDatabaseUrl: boolean) => {
     const text = isDatabaseUrl
-      ? `Now Playing♪ ${currentSongInfo?.title} - ${currentSongInfo?.artist} \n${currentSongInfo?.video_title} \n${databaseUrl}`
+      ? `♪${currentSongInfo?.title} / ${currentSongInfo?.artist} \n${currentSongInfo?.video_title} \n${databaseUrl}`
       : `${currentSongInfo?.video_title} \n${youtubeUrl}`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`);
+  };
+
+  const handleCopyToClipboard = (
+    textToCopy: string,
+    setShowCopiedState: (show: boolean) => void
+  ) => {
+    navigator.clipboard.writeText(textToCopy);
+    setShowCopiedState(true);
+    setTimeout(() => setShowCopiedState(false), 3000);
   };
 
   return (
@@ -63,16 +57,9 @@ export default function ShareModal({
             &nbsp;YouTube URL
           </Label>
           <div className="relative">
-            <TextInput
-              className="w-full"
-              value={youtubeUrl}
-              readOnly
-              onClick={() =>
-                handleCopyToClipboard(youtubeUrl, setShowCopiedYoutube)
-              }
-            />
+            <TextInput className="w-full" value={youtubeUrl} readOnly />
             <button
-              className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+              className="absolute right-3 bottom-[-5px] transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
               onClick={() =>
                 handleCopyToClipboard(youtubeUrl, setShowCopiedYoutube)
               }
@@ -80,7 +67,7 @@ export default function ShareModal({
               <HiClipboardCopy className="w-4 h-4" />
             </button>
             {showCopiedYoutube && (
-              <div className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+              <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
                 copied!
               </div>
             )}
@@ -128,13 +115,13 @@ export default function ShareModal({
               onClick={() => handleCopyToClipboard(databaseUrl, setShowCopied)}
             />
             <button
-              className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+              className="absolute right-3 bottom-[-5px] transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
               onClick={() => handleCopyToClipboard(databaseUrl, setShowCopied)}
             >
               <HiClipboardCopy className="w-4 h-4" />
             </button>
             {showCopied && (
-              <div className="absolute right-3 bottom-0 transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+              <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
                 copied!
               </div>
             )}

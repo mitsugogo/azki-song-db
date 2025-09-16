@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import { Drawer, Burger, Modal } from "@mantine/core";
+import { Drawer, Burger, Modal, Popover, Text, Tooltip } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
@@ -16,7 +16,34 @@ export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
 
+  const [buildDate, setBuildDate] = useState("N/A");
+
   const isMobile = useMediaQuery("(max-width: 50em)");
+
+  useEffect(() => {
+    fetch("/build-info.json")
+      .then((res) => {
+        if (!res.ok)
+          throw new Error(`Failed to fetch build info: ${res.status}`);
+        return res.text().then((text) => {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            return {};
+          }
+        });
+      })
+      .then((data) => {
+        setBuildDate(data.buildDate);
+      })
+      .catch((error) => {
+        console.warn("Failed to fetch build info:", error);
+        const isDev = process.env.NODE_ENV === "development";
+        if (isDev) {
+          setBuildDate(new Date().toISOString());
+        }
+      });
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -143,30 +170,49 @@ export function Header() {
             このサイトについて
           </Link>
 
-          <hr className="my-2 border border-gray-200 dark:border-gray-600" />
+          <hr className="my-2 border border-gray-200 dark:border-gray-600 md:hidden" />
 
-          <Link
-            href="https://www.youtube.com/@AZKi"
-            target="_blank"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={() => closeDrawer()}
-          >
-            AZKi Channel
-            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-          </Link>
+          <div className="block relative md:absolute md:bottom-6 md:left-3">
+            <Link
+              href="https://www.youtube.com/@AZKi"
+              target="_blank"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={() => closeDrawer()}
+            >
+              AZKi Channel
+              <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+            </Link>
 
-          <Link
-            href="https://departure.hololivepro.com/"
-            target="_blank"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={() => closeDrawer()}
-          >
-            <div className="text-xs text-gray-400 dark:text-gray-500">
-              2025.11.19 (Wed.) - PIA ARENA MM
-            </div>{" "}
-            AZKi SOLO LiVE 2025 &quot;Departure&quot;
-            <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-          </Link>
+            <Tooltip
+              arrowOffset={10}
+              arrowSize={4}
+              label="ソロライブ！"
+              withArrow
+              position="bottom"
+            >
+              <Link
+                href="https://departure.hololivepro.com/"
+                target="_blank"
+                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={() => closeDrawer()}
+              >
+                <div className="text-xs text-gray-400 dark:text-light-gray-500">
+                  2025.11.19 (Wed.) - PIA ARENA MM
+                </div>{" "}
+                AZKi SOLO LiVE 2025 &quot;Departure&quot;
+                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+              </Link>
+            </Tooltip>
+
+            <hr className="my-2 border border-gray-200 dark:border-gray-600 w-full" />
+
+            {buildDate && (
+              <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
+                Last Updated:{" "}
+                {buildDate ? new Date(buildDate).toLocaleDateString() : ""}
+              </div>
+            )}
+          </div>
         </div>
       </Drawer>
 

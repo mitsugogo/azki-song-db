@@ -13,6 +13,7 @@ import PlayerSection from "./PlayerSection";
 import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
+import Loading from "../loading";
 
 /**
  * メインプレイヤー
@@ -77,8 +78,6 @@ export default function MainPlayer() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [openShareModal, setOpenShareModal] = useState(false);
-  const [showCopied, setShowCopied] = useState(false);
-  const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
 
   // --- Effects ---
   useEffect(() => {
@@ -117,7 +116,7 @@ export default function MainPlayer() {
       const targetSong = filteredSongs.find(
         (song) =>
           song.video_id === videoId &&
-          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2,
+          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -126,7 +125,7 @@ export default function MainPlayer() {
       }
     } else if (videoId) {
       const targetSong = filteredSongs.find(
-        (song) => song.video_id === videoId,
+        (song) => song.video_id === videoId
       );
       if (targetSong) {
         changeCurrentSong(targetSong);
@@ -138,25 +137,10 @@ export default function MainPlayer() {
     setIsInitialLoading(false);
   }, [allSongs]);
 
-  // --- Handlers ---
-  const copyToClipboard = (text: string) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(
-      () => {
-        setToastMessage("コピーしました");
-        setShowToast(true);
-      },
-      () => {
-        setToastMessage("コピーに失敗しました");
-        setShowToast(true);
-      },
-    );
-  };
-
   const setSongsToCurrentVideo = () => {
     if (!currentSongInfo) return;
     const songsInVideo = allSongs.filter(
-      (song) => song.video_id === currentSongInfo.video_id,
+      (song) => song.video_id === currentSongInfo.video_id
     );
     setSearchTerm(`video_id:${currentSongInfo.video_id}`);
     changeCurrentSong(currentSongInfo, true);
@@ -165,11 +149,7 @@ export default function MainPlayer() {
 
   // --- Render ---
   if (isSongDataLoading) {
-    return (
-      <div className="flex w-full h-dvh items-center justify-center">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -234,12 +214,7 @@ export default function MainPlayer() {
         openShareModal={openShareModal}
         currentSongInfo={currentSongInfo}
         baseUrl={baseUrl}
-        showCopied={showCopied}
-        showCopiedYoutube={showCopiedYoutube}
         onClose={() => setOpenShareModal(false)}
-        copyToClipboard={copyToClipboard}
-        setShowCopied={setShowCopied}
-        setShowCopiedYoutube={setShowCopiedYoutube}
       />
     </>
   );

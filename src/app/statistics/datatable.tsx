@@ -164,7 +164,7 @@ export default function DataTable<
                 {table.getHeaderGroups().map((headerGroup) => (
                   <div
                     key={headerGroup.id}
-                    className="flex flex-1 bg-gray-50 dark:bg-gray-700"
+                    className="flex flex-1 bg-light-gray-200 dark:bg-gray-700"
                   >
                     {headerGroup.headers.map((header) => (
                       <div
@@ -241,8 +241,8 @@ export default function DataTable<
                         className={`flex ${
                           onRowClick ? "cursor-pointer select-none" : ""
                         } ${
-                          idx % 2 === 0
-                            ? "bg-gray-50/50 dark:bg-gray-800/70"
+                          parseInt(row.id) % 2 === 0
+                            ? "bg-light-gray-100 dark:bg-gray-800/70"
                             : ""
                         }`}
                       >

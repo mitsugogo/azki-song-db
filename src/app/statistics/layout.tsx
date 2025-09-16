@@ -19,7 +19,7 @@ export default function StatsLayout({
     <>
       <MantineProvider theme={theme}>
         <ThemeProvider theme={flowbiteTheme}>
-          <div className="flex flex-col h-lvh">
+          <div className="flex flex-col h-dvh">
             <Header />
             <div>{children}</div>
             <Footer />
