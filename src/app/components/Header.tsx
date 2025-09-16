@@ -22,12 +22,26 @@ export function Header() {
 
   useEffect(() => {
     fetch("/build-info.json")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok)
+          throw new Error(`Failed to fetch build info: ${res.status}`);
+        return res.text().then((text) => {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            return {};
+          }
+        });
+      })
       .then((data) => {
         setBuildDate(data.buildDate);
       })
       .catch((error) => {
-        console.error("Failed to fetch build info:", error);
+        console.warn("Failed to fetch build info:", error);
+        const isDev = process.env.NODE_ENV === "development";
+        if (isDev) {
+          setBuildDate(new Date().toISOString());
+        }
       });
   }, []);
 
