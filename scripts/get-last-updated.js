@@ -6,4 +6,5 @@ const lastCommitDate = execSync("git log -1 --format=%cd --date=iso-strict")
   .trim();
 const envContent = `LAST_UPDATED="${lastCommitDate}"`;
 
+console.log("lastCommitDate: ", envContent);
 fs.writeFileSync(".env.production", envContent);
