@@ -54,6 +54,7 @@ export function Header() {
   const isTopPage = useMemo(() => currentPath === "/", [currentPath]);
 
   const baseNavigation = [
+    { name: "TOP", href: "/" },
     { name: "Discography", href: "/discography" },
     { name: "統計情報", href: "/statistics" },
     { name: "全データ", href: "/data" },
@@ -64,14 +65,6 @@ export function Header() {
       ...item,
       current: item.href !== "#" && item.href === currentPath,
     }));
-
-    if (!isTopPage) {
-      navItems.unshift({
-        name: "TOP",
-        href: "/",
-        current: false,
-      });
-    }
 
     return navItems;
   }, [currentPath, isTopPage]);
@@ -144,7 +137,7 @@ export function Header() {
               "hover:bg-white/5 hover:text-primary dark:hover:text-white";
 
             return (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 aria-current={isCurrent ? "page" : undefined}
@@ -154,7 +147,7 @@ export function Header() {
                 onClick={() => closeDrawer()}
               >
                 {item.name}
-              </a>
+              </Link>
             );
           })}
 
