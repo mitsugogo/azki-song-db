@@ -35,7 +35,7 @@
     "@mui/styled-engine-sc": "^7.3.1",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.12",
-    "@tiptap/extension-link": "^3.4.2",
+    "@tiptap/extension-link": "^3.4.3",
     "@tiptap/pm": "^3.4.3",
     "@tiptap/react": "^3.4.2",
     "@tiptap/starter-kit": "^3.4.2",
