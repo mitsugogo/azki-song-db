@@ -201,7 +201,7 @@ export default function ClientTable() {
         enableResizing: true,
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({
@@ -236,7 +236,7 @@ export default function ClientTable() {
     getScrollElement: () =>
       tableContainerRef.current?.osInstance()?.elements().viewport as Element,
     estimateSize: () => 86,
-    overscan: 10,
+    overscan: 15,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -251,7 +251,7 @@ export default function ClientTable() {
 
   return (
     <>
-      <div className="flex-grow lg:p-6">
+      <div className="flex-grow lg:p-6 lg:pb-0">
         <h1 className="font-extrabold text-2xl p-3">収録データ</h1>
         <p className="mb-4 px-3">本データベースの情報を表示しています。</p>
         <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
@@ -262,7 +262,7 @@ export default function ClientTable() {
           />
           <OverlayScrollbarsComponent
             ref={tableContainerRef}
-            className="h-dvh lg:h-[calc(100vh-314px)]"
+            className="h-[calc(100dvh-230px)] md:h-[calc(100dvh-250px)] lg:h-[calc(100dvh-296px)]"
           >
             <div className="relative">
               <div className="w-full text-sm text-left">
@@ -287,7 +287,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                             {header.column.getCanSort() && (
                               <span className="ml-1 inline-block">
@@ -359,7 +359,7 @@ export default function ClientTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </div>
                         ))}
