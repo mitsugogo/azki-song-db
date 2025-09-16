@@ -16,13 +16,20 @@ export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
 
+  const [buildDate, setBuildDate] = useState("N/A");
+
   const isMobile = useMediaQuery("(max-width: 50em)");
 
-  let lastUpdated = process.env.NEXT_PUBLIC_LAST_UPDATED;
-  const isDev = process.env.NODE_ENV === "development";
-  if (isDev) {
-    lastUpdated = new Date().toLocaleDateString();
-  }
+  useEffect(() => {
+    fetch("/build-info.json")
+      .then((res) => res.json())
+      .then((data) => {
+        setBuildDate(data.buildDate);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch build info:", error);
+      });
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -185,10 +192,10 @@ export function Header() {
 
             <hr className="my-2 border border-gray-200 dark:border-gray-600 w-full" />
 
-            {lastUpdated && (
+            {buildDate && (
               <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
                 Last Updated:{" "}
-                {lastUpdated ? new Date(lastUpdated).toLocaleDateString() : ""}
+                {buildDate ? new Date(buildDate).toLocaleDateString() : ""}
               </div>
             )}
           </div>
