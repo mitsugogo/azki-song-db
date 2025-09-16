@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "node scripts/get-last-updated.js && next build",
+    "build": "NEXT_PUBLIC_LAST_UPDATED=$(git log -1 --format=%cd --date=iso-strict) next build",
     "start": "next start",
     "lint": "next lint",
     "format": "npx prettier --write ."
