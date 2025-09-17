@@ -155,7 +155,7 @@ export default function DataTable<
         </div>
         <OverlayScrollbarsComponent
           ref={tableContainerRef}
-          className="h-[calc(100vh-238px)] md:h-[calc(100vh-333px)] lg:h-[calc(100vh-366px)]"
+          className="h-[calc(100vh-245px)] md:h-[calc(100vh-333px)] lg:h-[calc(100vh-366px)]"
         >
           <div className="relative">
             <div className="w-full text-sm text-left">
