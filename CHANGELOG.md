@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.1](https://github.com/mitsugogo/azki-song-db/compare/v1.13.0...v1.13.1) (2025-09-17)
+
+
+### Bug Fixes
+
+* **main:** スマホで異様にサムネがでかいのを修正 ([546c6ac](https://github.com/mitsugogo/azki-song-db/commit/546c6ac11fa5fa6739b754a43a99411ede2aa956))
+
 ## [1.13.0](https://github.com/mitsugogo/azki-song-db/compare/v1.12.6...v1.13.0) (2025-09-17)
 
 
