@@ -2,6 +2,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import ClientTop from "./client";
 import { metadata } from "./layout";
 import { Song } from "./types/song";
+import { parse } from "path";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
@@ -45,13 +46,18 @@ export async function generateMetadata(
     ogImageUrl.searchParams.set("v", v?.toString());
     ogImageUrl.searchParams.set("t", t?.toString());
 
-    const songs = await fetch(new URL(`/api/songs/${v}/${t}`, baseUrl)).then(
-      (res) => res.json()
+    const songs = await fetch(new URL(`/api/songs/`, baseUrl)).then((res) =>
+      res.json()
     );
-    const song = songs.find((s: Song) => s.video_id === v && s.start === t);
+    const song = songs.find(
+      (s: Song) =>
+        s.video_id === v &&
+        parseInt(s.start) == parseInt(t.toString().replace("s", ""))
+    );
+    console.log(song);
     if (song) {
       title = `🎵 ${song.title} - ${song.artist} | AZKi Song Database`;
-      description = `${song.video_title}\n(配信日時:${new Date(
+      description = `${song.video_title} (配信日時:${new Date(
         song.broadcast_at
       ).toLocaleDateString("ja-JP")})`;
     }
