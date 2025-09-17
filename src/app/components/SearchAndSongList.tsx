@@ -1,20 +1,11 @@
-import { RefObject, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
-import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
-import { Button, TextInput, ToggleSwitch } from "flowbite-react";
-import { HiChevronDown, HiChevronUp, HiSearch, HiX } from "react-icons/hi";
-import { FaCompactDisc, FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
+import { Button } from "flowbite-react";
+import { HiSearch } from "react-icons/hi";
+import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
-import {
-  Group,
-  Input,
-  MultiSelect,
-  MultiSelectProps,
-  TagsInput,
-  TagsInputProps,
-  Text,
-} from "@mantine/core";
+import { Group, TagsInput, TagsInputProps, Text } from "@mantine/core";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -22,7 +13,6 @@ type SearchAndSongListProps = {
   allSongs: Song[];
   currentSongInfo: Song | null;
   searchTerm: string;
-  advancedSearchOpen: boolean;
   availableSongTitles: string[];
   availableArtists: string[];
   availableSingers: string[];
