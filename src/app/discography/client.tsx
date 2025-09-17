@@ -347,8 +347,9 @@ export default function DiscographyPage() {
       (s) =>
         (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
         (s.artist.includes("AZKi") ||
-          s.artist.includes("瀬名航") ||
-          s.artist.includes("イトイ"))
+          s.title.includes("feat. AZKi") ||
+          s.title.includes("feat.AZKi")) &&
+        !s.tags.includes("ユニット曲")
     );
     return createStatistics(
       originals,
@@ -361,9 +362,7 @@ export default function DiscographyPage() {
     const units = songs.filter(
       (s) =>
         (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-        !s.artist.includes("AZKi") &&
-        !s.artist.includes("瀬名航") &&
-        !s.artist.includes("イトイ")
+        s.tags.includes("ユニット曲")
     );
     return createStatistics(
       units,
