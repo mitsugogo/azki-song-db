@@ -1,12 +1,20 @@
-import { RefObject } from "react";
+import { RefObject, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import FlowbiteReactAutocomplete from "./FlowbiteReactAutocomplete";
 import { Button, TextInput, ToggleSwitch } from "flowbite-react";
 import { HiChevronDown, HiChevronUp, HiSearch, HiX } from "react-icons/hi";
-import { FaCompactDisc, FaMusic, FaTag, FaUser } from "react-icons/fa6";
+import { FaCompactDisc, FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
-import { Input } from "@mantine/core";
+import {
+  Group,
+  Input,
+  MultiSelect,
+  MultiSelectProps,
+  TagsInput,
+  TagsInputProps,
+  Text,
+} from "@mantine/core";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -20,52 +28,58 @@ type SearchAndSongListProps = {
   availableSingers: string[];
   availableTags: string[];
   availableMilestones: string[];
-  searchTitleRef: RefObject<string>;
-  searchArtistRef: RefObject<string>;
-  searchSingerRef: RefObject<string>;
-  searchTagRef: RefObject<string>;
-  searchMilestoneRef: RefObject<string>;
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song | null) => void;
   playRandomSong: (songList: Song[]) => void;
   setSearchTerm: (term: string) => void;
-  setAdvancedSearchOpen: (isOpen: boolean) => void;
-  handleAdvancedSearch: () => void;
-  setSearchTitle: (title: string) => void;
-  setSearchArtist: (artist: string) => void;
-  setSearchSinger: (singer: string) => void;
-  setSearchTag: (tag: string) => void;
-  setSearchMilestone: (milestone: string) => void;
 };
 
 export default function SearchAndSongList({
   songs,
   allSongs,
-  currentSongInfo,
   searchTerm,
-  advancedSearchOpen,
+  currentSongInfo,
   availableSongTitles,
   availableArtists,
   availableSingers,
   availableTags,
   availableMilestones,
-  searchTitleRef,
-  searchArtistRef,
-  searchSingerRef,
-  searchTagRef,
-  searchMilestoneRef,
   hideFutureSongs,
   changeCurrentSong,
   playRandomSong,
   setSearchTerm,
-  setAdvancedSearchOpen,
-  handleAdvancedSearch,
-  setSearchTitle,
-  setSearchArtist,
-  setSearchSinger,
-  setSearchTag,
-  setSearchMilestone,
 }: SearchAndSongListProps) {
+  const [searchValue, setSearchValue] = useState<string[]>([]);
+
+  useEffect(() => {
+    const s = searchTerm.split(" ").filter((s) => s.trim() !== "");
+    if (s.length > 0) {
+      setSearchValue(searchTerm.split(" "));
+    }
+  }, [searchTerm]);
+
+  const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
+    option,
+  }) => (
+    <Group gap="sm">
+      {option.value.includes("title:") && <FaMusic />}
+      {option.value.includes("artist:") && <FaUser />}
+      {option.value.includes("sing:") && <FaUser />}
+      {option.value.includes("tag:") && <FaTag />}
+      {option.value.includes("milestone:") && <FaStar />}
+      <div>
+        <Text size="sm">
+          {option.value
+            .replace("title:", "")
+            .replace("artist:", "")
+            .replace("sing:", "")
+            .replace("tag:", "")
+            .replace("milestone:", "")}
+        </Text>
+      </div>
+    </Group>
+  );
+
   return (
     <section className="flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full sm:mx-0">
       <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
@@ -94,118 +108,52 @@ export default function SearchAndSongList({
 
         <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
           {/* Search Bar */}
-          <div className="relative">
-            <TextInput
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="検索"
-              icon={HiSearch}
-              disabled={advancedSearchOpen}
-              className="z-0"
-            />
-            {searchTerm && (
-              <button
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => setSearchTerm("")}
-              >
-                <HiX className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          {/* Advanced Search */}
-          <Button
-            onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
-            className={`text-xs h-5 p-4 py-0 w-full transition focus:ring-0 mt-1 cursor-pointer ${
-              !advancedSearchOpen
-                ? "bg-gray-50/50 hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-black dark:text-white"
-                : "bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white"
-            }`}
-          >
-            <span className="text-xs">
-              高度な検索{" "}
-              {!advancedSearchOpen ? (
-                <HiChevronDown className="inline" />
-              ) : (
-                <HiChevronUp className="inline" />
-              )}
-            </span>
-          </Button>
-          <div
-            className={`mb-6 ${
-              advancedSearchOpen ? "visible" : "hidden"
-            } transition-all duration-300 ease-in-out mt-1`}
-          >
-            <div className="relative mt-1">
-              <FlowbiteReactAutocomplete
-                options={availableSongTitles}
-                onSelect={(value) => {
-                  searchTitleRef.current = value;
-                  setSearchTitle(value);
-                  handleAdvancedSearch();
-                }}
-                inputProps={{
-                  icon: FaMusic,
-                  placeholder: "曲名",
-                }}
-              />
-            </div>
-            <div className="relative mt-1">
-              <FlowbiteReactAutocomplete
-                options={availableArtists}
-                onSelect={(value) => {
-                  searchArtistRef.current = value;
-                  setSearchArtist(value);
-                  handleAdvancedSearch();
-                }}
-                inputProps={{
-                  icon: FaUser,
-                  placeholder: "アーティスト",
-                }}
-              />
-            </div>
-            <div className="relative mt-1">
-              <FlowbiteReactAutocomplete
-                options={availableSingers}
-                onSelect={(value) => {
-                  searchSingerRef.current = value;
-                  setSearchSinger(value);
-                  handleAdvancedSearch();
-                }}
-                inputProps={{
-                  icon: FaCompactDisc,
-                  placeholder: "歌った人",
-                }}
-              />
-            </div>
-            <div className="relative mt-1">
-              <FlowbiteReactAutocomplete
-                options={availableTags}
-                onSelect={(value) => {
-                  searchTagRef.current = value;
-                  setSearchTag(value);
-                  handleAdvancedSearch();
-                }}
-                inputProps={{
-                  icon: FaTag,
-                  placeholder: "タグ",
-                }}
-              />
-            </div>
-            <div className="relative mt-1">
-              <FlowbiteReactAutocomplete
-                options={availableMilestones}
-                onSelect={(value) => {
-                  searchMilestoneRef.current = value;
-                  setSearchMilestone(value);
-                  handleAdvancedSearch();
-                }}
-                inputProps={{
-                  icon: FaCompactDisc,
-                  placeholder: "マイルストーン",
-                }}
-              />
-            </div>
-          </div>
+          <TagsInput
+            placeholder="検索"
+            leftSection={<HiSearch />}
+            data={[
+              {
+                group: "タグ",
+                items: availableTags
+                  .filter((tag) => tag !== "")
+                  .map((tag) => `tag:${tag}`),
+              },
+              {
+                group: "マイルストーン",
+                items: availableMilestones
+                  .filter((milestone) => milestone !== "")
+                  .map((milestone) => `milestone:${milestone}`),
+              },
+              {
+                group: "アーティスト",
+                items: availableArtists
+                  .filter((artist) => artist !== "")
+                  .map((artist) => `artist:${artist}`),
+              },
+              {
+                group: "歌手",
+                items: availableSingers
+                  .filter((singer) => singer !== "")
+                  .map((singer) => `sing:${singer}`),
+              },
+              {
+                group: "曲名",
+                items: availableSongTitles
+                  .filter((title) => title !== "")
+                  .map((title) => `title:${title}`),
+              },
+            ]}
+            renderOption={renderMultiSelectOption}
+            maxDropdownHeight={200}
+            value={searchValue}
+            onChange={(values: string[]) => {
+              setSearchValue(values);
+              setSearchTerm(values.join(" "));
+            }}
+            limit={15}
+            splitChars={[",", " ", "|"]}
+            clearable
+          />
         </div>
         <div className="hidden lg:block">
           <p className="text-xs text-muted-foreground dark:text-white mb-2">
