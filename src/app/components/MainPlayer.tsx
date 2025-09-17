@@ -35,21 +35,7 @@ export default function MainPlayer() {
     setSongs,
     searchTerm,
     setSearchTerm,
-    advancedSearchOpen,
-    setAdvancedSearchOpen,
-    setSearchTitle,
-    setSearchArtist,
-    setSearchSinger,
-    setSearchTag,
-    setSearchMilestone,
-    searchTitleRef,
-    searchArtistRef,
-    searchSingerRef,
-    searchTagRef,
-    searchMilestoneRef,
-    handleAdvancedSearch,
     searchSongs,
-    isInitialLoading,
     setIsInitialLoading,
   } = useSearch(allSongs);
 
@@ -179,28 +165,15 @@ export default function MainPlayer() {
         allSongs={allSongs}
         currentSongInfo={currentSongInfo}
         searchTerm={searchTerm}
-        advancedSearchOpen={advancedSearchOpen}
         availableSongTitles={availableSongTitles}
         availableArtists={availableArtists}
         availableSingers={availableSingers}
         availableTags={availableTags}
         availableMilestones={availableMilestones}
-        searchTitleRef={searchTitleRef}
-        searchArtistRef={searchArtistRef}
-        searchSingerRef={searchSingerRef}
-        searchTagRef={searchTagRef}
-        searchMilestoneRef={searchMilestoneRef}
         hideFutureSongs={hideFutureSongs}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
         setSearchTerm={setSearchTerm}
-        setAdvancedSearchOpen={setAdvancedSearchOpen}
-        handleAdvancedSearch={handleAdvancedSearch}
-        setSearchTitle={setSearchTitle}
-        setSearchArtist={setSearchArtist}
-        setSearchSinger={setSearchSinger}
-        setSearchTag={setSearchTag}
-        setSearchMilestone={setSearchMilestone}
       />
 
       {showToast && (

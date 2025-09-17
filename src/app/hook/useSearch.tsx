@@ -14,22 +14,6 @@ const useSearch = (allSongs: Song[]) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // 高度な検索
-  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
-  const [searchTitle, setSearchTitle] = useState("");
-  const [searchArtist, setSearchArtist] = useState("");
-  const [searchSinger, setSearchSinger] = useState("");
-  const [searchAlbum, setSearchAlbum] = useState("");
-  const [searchTag, setSearchTag] = useState("");
-  const [searchMilestone, setSearchMilestone] = useState("");
-
-  const searchTitleRef = useRef(searchTitle);
-  const searchArtistRef = useRef(searchArtist);
-  const searchSingerRef = useRef(searchSinger);
-  const searchAlbumRef = useRef(searchAlbum);
-  const searchTagRef = useRef(searchTag);
-  const searchMilestoneRef = useRef(searchMilestone);
-
   const searchSongs = useCallback((songsToFilter: Song[], term: string) => {
     const searchWords = term
       .split(/\s+/)
@@ -176,21 +160,6 @@ const useSearch = (allSongs: Song[]) => {
     });
   }, []);
 
-  // 高度な検索のキーワードを組み立てる
-  const handleAdvancedSearch = useCallback(() => {
-    const newSearchTerm = [
-      searchTitleRef.current && `title:${searchTitleRef.current}`,
-      searchArtistRef.current && `artist:${searchArtistRef.current}`,
-      searchAlbumRef.current && `album:${searchAlbumRef.current}`,
-      searchTagRef.current && `tag:${searchTagRef.current}`,
-      searchSingerRef.current && `sing:${searchSingerRef.current}`,
-      searchMilestoneRef.current && `milestone:${searchMilestoneRef.current}`,
-    ]
-      .filter(Boolean)
-      .join(" ");
-    setSearchTerm(newSearchTerm);
-  }, []);
-
   // 検索語の変更を監視し、URLを更新
   useEffect(() => {
     if (isInitialLoading) return;
@@ -212,26 +181,6 @@ const useSearch = (allSongs: Song[]) => {
     searchTerm,
     setSearchTerm,
     debouncedSearchTerm,
-    advancedSearchOpen,
-    setAdvancedSearchOpen,
-    searchTitle,
-    setSearchTitle,
-    searchArtist,
-    setSearchArtist,
-    searchAlbum,
-    setSearchAlbum,
-    searchSinger,
-    setSearchSinger,
-    searchTag,
-    setSearchTag,
-    searchMilestone,
-    setSearchMilestone,
-    searchTitleRef,
-    searchArtistRef,
-    searchSingerRef,
-    searchTagRef,
-    searchMilestoneRef,
-    handleAdvancedSearch,
     searchSongs,
     isInitialLoading,
     setIsInitialLoading,
