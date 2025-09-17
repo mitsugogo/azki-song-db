@@ -54,7 +54,6 @@ export async function generateMetadata(
         s.video_id === v &&
         parseInt(s.start) == parseInt(t.toString().replace("s", ""))
     );
-    console.log(song);
     if (song) {
       title = `🎵 ${song.title} - ${song.artist} | AZKi Song Database`;
       description = `${song.video_title} (配信日時:${new Date(
