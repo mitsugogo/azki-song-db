@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/mitsugogo/azki-song-db/compare/v1.12.6...v1.13.0) (2025-09-17)
+
+
+### Features
+
+* **main:** 検索BOXのリデザイン ([4bd321b](https://github.com/mitsugogo/azki-song-db/commit/4bd321bb35c6e1e90a2812785e7d25582f7d8d52))
+
+
+### Bug Fixes
+
+* OGの曲判定バグ修正 ([20ba0b1](https://github.com/mitsugogo/azki-song-db/commit/20ba0b1fc4ee63be3c2cb857762d85c540d6fa57))
+
 ### [1.12.6](https://github.com/mitsugogo/azki-song-db/compare/v1.12.5...v1.12.6) (2025-09-17)
 
 
