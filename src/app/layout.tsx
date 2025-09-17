@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata, ResolvingMetadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
@@ -28,7 +28,8 @@ const notoSans = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "AZKi Song Database",
   description:
-    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    "ホロライブのAZKさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+  keywords: ["AZKi", "歌", "歌枠", "オリ曲", "ライブ", "ホロライブ"],
   openGraph: {
     title: "AZKi Song Database",
     description:

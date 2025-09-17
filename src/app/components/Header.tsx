@@ -9,6 +9,7 @@ import { Drawer, Burger, Modal, Popover, Text, Tooltip } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
+import { pageList } from "../pagelists";
 
 export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -53,15 +54,8 @@ export function Header() {
 
   const isTopPage = useMemo(() => currentPath === "/", [currentPath]);
 
-  const baseNavigation = [
-    { name: "TOP", href: "/" },
-    { name: "Discography", href: "/discography" },
-    { name: "統計情報", href: "/statistics" },
-    { name: "全データ", href: "/data" },
-  ];
-
   const navigation = useMemo(() => {
-    const navItems = baseNavigation.map((item) => ({
+    const navItems = pageList.map((item) => ({
       ...item,
       current: item.href !== "#" && item.href === currentPath,
     }));
