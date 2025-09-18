@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.4](https://github.com/mitsugogo/azki-song-db/compare/v1.13.3...v1.13.4) (2025-09-18)
+
+
+### Bug Fixes
+
+* **stats:** tableの横幅がいっぱいにならないバグを修正 ([61e1f47](https://github.com/mitsugogo/azki-song-db/commit/61e1f47d50f09784bf58b0f9e9945f83bc651bbc))
+
 ### [1.13.3](https://github.com/mitsugogo/azki-song-db/compare/v1.13.2...v1.13.3) (2025-09-17)
 
 
