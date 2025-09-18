@@ -1,3 +1,4 @@
+import { Switch } from "@mantine/core";
 import { Button, ToggleSwitch } from "flowbite-react";
 import { useState, useRef, useEffect } from "react";
 import { FaShare } from "react-icons/fa6";
@@ -67,15 +68,16 @@ export default function PlayerSettings({
         </svg>
       </Button>
       {isSettingsOpen && (
-        <div className="absolute bottom-10 right-0 z-50 bg-white divide-y rounded-lg shadow-md w-80 dark:bg-gray-700 dark:divide-gray-600 text-left">
-          <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
+        <div className="absolute bottom-10 right-0 z-50 bg-white divide-y rounded-lg shadow-md w-80 divide-light-gray-300 dark:bg-gray-700 dark:divide-gray-600 text-left">
+          <ul className="p-3 space-y-1 text-sm text-light-gray-700 dark:text-light-gray-100">
             <li>
-              <div className="flex p-2 rounded-sm hover:bg-light-gray-100 dark:hover:bg-gray-600">
-                <ToggleSwitch
+              <div className="flex p-2 rounded-sm  hover:bg-light-gray-100 dark:hover:bg-gray-600 dark:text-gray-400">
+                <Switch
                   checked={hideFutureSongs}
-                  onChange={setHideFutureSongs}
+                  onChange={(event) => setHideFutureSongs(event.target.checked)}
+                  color="pink"
                   label="セトリネタバレ防止モード"
-                  className=""
+                  className="text-light-gray-700 dark:text-light-gray-300 cursor-pointer"
                 />
               </div>
             </li>
@@ -83,7 +85,7 @@ export default function PlayerSettings({
           <div className="py-2">
             <a
               href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-light-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+              className="block px-4 py-2 text-sm text-light-gray-700 hover:bg-light-gray-100 dark:hover:bg-gray-600 dark:text-gray-100 dark:hover:text-white"
               onClick={() => setOpenShereModal(true)}
             >
               <FaShare className="inline mr-2" />
