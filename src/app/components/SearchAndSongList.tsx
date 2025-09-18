@@ -142,10 +142,14 @@ export default function SearchAndSongList({
             }}
             limit={15}
             splitChars={[",", " ", "|"]}
+            comboboxProps={{
+              shadow: "md",
+              transitionProps: { transition: "pop", duration: 100 },
+            }}
             clearable
           />
         </div>
-        <div className="hidden lg:block">
+        <div className="block">
           <p className="text-xs text-muted-foreground dark:text-white mb-2">
             楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
           </p>

@@ -271,7 +271,7 @@ export default function ClientTable() {
                   {table.getHeaderGroups().map((headerGroup) => (
                     <div
                       key={headerGroup.id}
-                      className="flex flex-1 bg-gray-50 dark:bg-gray-700 dark:text-white"
+                      className="flex flex-1 bg-light-gray-200 dark:bg-gray-700 dark:text-white"
                     >
                       {headerGroup.headers.map((header) => (
                         <div
@@ -343,9 +343,9 @@ export default function ClientTable() {
                           // height: `${virtualRow.size}px`,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className={`flex border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-600 ${
+                        className={`flex border-b border-light-gray-200/80 dark:bg-gray-800 dark:border-gray-700 hover:bg-light-gray-100 dark:hover:bg-gray-600 ${
                           parseInt(row.id) % 2 === 0
-                            ? "bg-gray-50/30"
+                            ? "bg-light-gray-100/50 dark:bg-gray-800/50"
                             : "bg-white"
                         }`}
                       >

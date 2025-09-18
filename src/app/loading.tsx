@@ -9,7 +9,7 @@ export default function Loading() {
           visible={true}
           zIndex={1000}
           loaderProps={{ color: "pink", type: "bars" }}
-          overlayProps={{ radius: "sm", blur: 2 }}
+          overlayProps={{ radius: "md", blur: 2 }}
         />
       </div>
     </MantineProvider>
