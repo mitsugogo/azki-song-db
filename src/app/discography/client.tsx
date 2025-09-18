@@ -518,12 +518,20 @@ export default function DiscographyPage() {
         ></ToggleSwitch>
       </div>
 
-      <TabGroup selectedIndex={activeTab} onChange={setActiveTab}>
+      <TabGroup
+        selectedIndex={activeTab}
+        onChange={() => {
+          setExpandedItem(null);
+        }}
+      >
         <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
           <Tab
             as="button"
+            onClick={() => {
+              setActiveTab(0);
+            }}
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
@@ -535,8 +543,11 @@ export default function DiscographyPage() {
           </Tab>
           <Tab
             as="button"
+            onClick={() => {
+              setActiveTab(1);
+            }}
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
@@ -548,8 +559,11 @@ export default function DiscographyPage() {
           </Tab>
           <Tab
             as="button"
+            onClick={() => {
+              setActiveTab(2);
+            }}
             className={({ selected }) =>
-              `w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
