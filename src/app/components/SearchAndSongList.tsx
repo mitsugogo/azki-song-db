@@ -142,6 +142,10 @@ export default function SearchAndSongList({
             }}
             limit={15}
             splitChars={[",", " ", "|"]}
+            comboboxProps={{
+              shadow: "md",
+              transitionProps: { transition: "pop", duration: 100 },
+            }}
             clearable
           />
         </div>
