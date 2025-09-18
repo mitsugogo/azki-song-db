@@ -153,7 +153,7 @@ const SongsList = ({
             {/* Previous Page Button */}
             <button
               type="button"
-              className="inline-flex items-center justify-center h-8 px-3 w-10 dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
+              className="inline-flex items-center justify-center h-8 px-3 w-20 dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
