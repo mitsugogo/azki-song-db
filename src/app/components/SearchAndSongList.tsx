@@ -149,7 +149,7 @@ export default function SearchAndSongList({
             clearable
           />
         </div>
-        <div className="hidden lg:block">
+        <div className="block">
           <p className="text-xs text-muted-foreground dark:text-white mb-2">
             楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
           </p>
