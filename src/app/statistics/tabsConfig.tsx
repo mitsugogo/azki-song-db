@@ -23,6 +23,7 @@ type TabConfig = {
   caption: string;
   description: string;
   initialSort: { id: string; direction: "asc" | "desc" };
+  minWidth?: number | string;
   columns: ColumnDef<StatisticsItem, any>[];
 };
 
@@ -35,6 +36,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "曲名別",
     description: "曲名ごとで歌った回数です",
     initialSort: { id: "count", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
@@ -55,7 +57,7 @@ export const TABS_CONFIG: TabConfig[] = [
         accessorKey: "lastVideo",
         header: "最新",
         cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
-        size: 800,
+        minSize: 800,
       },
     ],
   },
@@ -67,6 +69,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "アーティスト名別",
     description: "アーティストごとで歌った回数です",
     initialSort: { id: "count", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
@@ -98,6 +101,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "オリ曲",
     description: "オリジナル楽曲の歌った回数です",
     initialSort: { id: "count", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
@@ -130,6 +134,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "タグ",
     description: "タグがつけられている動画です",
     initialSort: { id: "count", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
@@ -167,6 +172,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "マイルストーン",
     description: "活動の節目となった配信",
     initialSort: { id: "broadcast_at", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
@@ -207,6 +213,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "収録動画",
     description: "現在データベースに収録されている動画一覧です",
     initialSort: { id: "lastVideo.broadcast_at", direction: "desc" },
+    minWidth: 1024,
     columns: [
       {
         id: "lastVideo.video_title",
@@ -262,6 +269,7 @@ export const TABS_CONFIG: TabConfig[] = [
         cell: (info) =>
           info.getValue<string>() &&
           new Date(info.getValue<string>()).toLocaleDateString(),
+        size: 800,
       },
     ],
   },
@@ -273,6 +281,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "オリ曲",
     description: "オリジナル楽曲のリリース日 または 動画初公開日 です",
     initialSort: { id: "broadcast_at", direction: "desc" },
+    minWidth: 1700,
     columns: [
       {
         accessorKey: "song.title",
@@ -344,6 +353,7 @@ export const TABS_CONFIG: TabConfig[] = [
     caption: "カバー楽曲",
     description: "カバー楽曲のリリース日 または 動画初公開日 です",
     initialSort: { id: "broadcast_at", direction: "desc" },
+    minWidth: 1700,
     columns: [
       {
         accessorKey: "song.title",

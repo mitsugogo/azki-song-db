@@ -33,6 +33,7 @@ export default function DataTable<
   caption,
   description,
   columns,
+  minWidth,
   initialSortColumnId,
   initialSortDirection,
   onRowClick,
@@ -43,6 +44,7 @@ export default function DataTable<
   caption: string;
   description: string;
   columns: ColumnDef<T, unknown>[];
+  minWidth?: number | string;
   initialSortColumnId?: string;
   initialSortDirection?: "asc" | "desc";
   onRowClick?: (id: string) => void;
@@ -236,6 +238,8 @@ export default function DataTable<
                           position: "absolute",
                           top: 0,
                           left: 0,
+                          minWidth: `${minWidth + "px" || "auto"}`,
+                          width: "100%",
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
                         className={`flex ${
@@ -246,10 +250,14 @@ export default function DataTable<
                             : ""
                         }`}
                       >
-                        {row.getVisibleCells().map((cell) => (
+                        {row.getVisibleCells().map((cell, idx) => (
                           <div
                             key={cell.id}
-                            className="px-6 py-2 min-w-0 flex-shrink-0"
+                            className={`px-6 py-2 min-w-0 ${
+                              idx === row.getVisibleCells().length - 1
+                                ? "flex-grow-1"
+                                : "flex-shrink-0"
+                            }`}
                             style={{
                               width:
                                 cell.column.getSize() ===

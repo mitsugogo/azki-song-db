@@ -86,6 +86,7 @@ export default function StatisticsPage() {
                 caption={tab.caption}
                 description={tab.description}
                 columns={tab.columns}
+                minWidth={tab.minWidth}
                 initialSortColumnId={tab.initialSort.id}
                 initialSortDirection={tab.initialSort.direction}
                 {...(tab.dataKey === "videoCounts" && {
