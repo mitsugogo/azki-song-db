@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.3](https://github.com/mitsugogo/azki-song-db/compare/v1.13.2...v1.13.3) (2025-09-17)
+
+
+### Bug Fixes
+
+* **discography:** オリ曲、ユニット楽曲の判定を調整 ([3de6bec](https://github.com/mitsugogo/azki-song-db/commit/3de6becee466aad2307c9fb47ba26af68d585ef4))
+
 ### [1.13.2](https://github.com/mitsugogo/azki-song-db/compare/v1.13.1...v1.13.2) (2025-09-17)
 
 ### [1.13.1](https://github.com/mitsugogo/azki-song-db/compare/v1.13.0...v1.13.1) (2025-09-17)
