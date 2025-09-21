@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github.com/mitsugogo/azki-song-db/compare/v1.14.0...v1.15.0) (2025-09-21)
+
+
+### Features
+
+* 季節の絞り込みに対応 ([b43c09e](https://github.com/mitsugogo/azki-song-db/commit/b43c09e77a6bba705caf7590d7e02653c02456cc))
+
 ## [1.14.0](https://github.com/mitsugogo/azki-song-db/compare/v1.13.4...v1.14.0) (2025-09-21)
 
 
