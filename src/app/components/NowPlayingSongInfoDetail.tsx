@@ -89,7 +89,7 @@ const NowPlayingSongInfoDetail = ({
                           } else {
                             setSearchTerm(
                               `${
-                                searchTerm ? `${searchTerm} ` : ""
+                                searchTerm ? `${searchTerm}|` : ""
                               }artist:${artist}`
                             );
                           }
@@ -130,7 +130,7 @@ const NowPlayingSongInfoDetail = ({
                           } else {
                             setSearchTerm(
                               `${
-                                searchTerm ? `${searchTerm} ` : ""
+                                searchTerm ? `${searchTerm}|` : ""
                               }album:${album}`
                             );
                           }
@@ -167,7 +167,7 @@ const NowPlayingSongInfoDetail = ({
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}sing:${sing}`
+                            `${searchTerm ? `${searchTerm}|` : ""}sing:${sing}`
                           );
                         }
                       }}
@@ -236,7 +236,7 @@ const NowPlayingSongInfoDetail = ({
                     } else {
                       setSearchTerm(
                         `${
-                          searchTerm ? `${searchTerm} ` : ""
+                          searchTerm ? `${searchTerm}|` : ""
                         }date:${broadcastDate}`
                       );
                     }
@@ -270,7 +270,7 @@ const NowPlayingSongInfoDetail = ({
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}tag:${tag}`
+                            `${searchTerm ? `${searchTerm}|` : ""}tag:${tag}`
                           );
                         }
                       }}

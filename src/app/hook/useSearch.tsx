@@ -54,6 +54,20 @@ const useSearch = (allSongs: Song[]) => {
           "video_id:": (s, v) => s.video_id.toLowerCase().includes(v),
           "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
           "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
+          "date:": (s, v) => {
+            const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
+            if (dateRegex.test(v)) {
+              const [year, month, day] = v.split("/").map(Number);
+              console.log(year, month, day);
+              const date = new Date(s.broadcast_at);
+              return (
+                date.getFullYear() === year &&
+                date.getMonth() + 1 === month &&
+                date.getDate() === day
+              );
+            }
+            return false;
+          },
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
@@ -119,6 +133,19 @@ const useSearch = (allSongs: Song[]) => {
           "video_id:": (s, v) => s.video_id.toLowerCase().includes(v),
           "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
           "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
+          "date:": (s, v) => {
+            const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
+            if (dateRegex.test(v)) {
+              const [year, month, day] = v.split("/").map(Number);
+              const date = new Date(s.broadcast_at);
+              return (
+                date.getFullYear() === year &&
+                date.getMonth() + 1 === month &&
+                date.getDate() === day
+              );
+            }
+            return false;
+          },
           "milestone:": (s, v) =>
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
