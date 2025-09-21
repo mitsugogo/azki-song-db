@@ -57,6 +57,7 @@ export default function SearchAndSongList({
       {option.value.includes("sing:") && <FaUser />}
       {option.value.includes("tag:") && <FaTag />}
       {option.value.includes("milestone:") && <FaStar />}
+      {option.value.includes("season:") && "季節:"}
       <div>
         <Text size="sm">
           {option.value
@@ -64,7 +65,8 @@ export default function SearchAndSongList({
             .replace("artist:", "")
             .replace("sing:", "")
             .replace("tag:", "")
-            .replace("milestone:", "")}
+            .replace("milestone:", "")
+            .replace("season:", "")}
         </Text>
       </div>
     </Group>
@@ -131,6 +133,10 @@ export default function SearchAndSongList({
                 items: availableSongTitles
                   .filter((title) => title !== "")
                   .map((title) => `title:${title}`),
+              },
+              {
+                group: "季節",
+                items: ["season:春", "season:夏", "season:秋", "season:冬"],
               },
             ]}
             renderOption={renderMultiSelectOption}
