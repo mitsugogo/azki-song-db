@@ -16,6 +16,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi";
 import MilestoneBadge from "./MilestoneBadge";
+import { MdSpeakerNotes } from "react-icons/md";
+import { Tooltip } from "@mantine/core";
+import { FaInfoCircle } from "react-icons/fa";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
@@ -24,7 +27,12 @@ interface NowPlayingSongInfoDetailProps {
   isPlaying: boolean;
   hideFutureSongs: boolean;
   setSearchTerm: (value: string) => void;
-  changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
+  changeCurrentSong: (
+    song: Song | null,
+    isInfoOnly?: boolean,
+    videoId?: string,
+    startTime?: number
+  ) => void;
 }
 
 const NowPlayingSongInfoDetail = ({
@@ -43,6 +51,15 @@ const NowPlayingSongInfoDetail = ({
     .filter((song) => song.video_id === currentSongInfo?.video_id)
     .sort((a, b) => (parseInt(a.start) || 0) - (parseInt(b.start) || 0));
 
+  function timeToSeconds(timeString: string): number {
+    const parts = timeString.split(":");
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const seconds = parseInt(parts[2], 10);
+
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
   return (
     <>
       {currentSongInfo && (
@@ -50,14 +67,16 @@ const NowPlayingSongInfoDetail = ({
           <dl className="flex flex-col gap-3 lg:gap-1">
             {currentSongInfo.artist && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                  <FaUser />
-                  <span className="text-nowrap inline ml-1">アーティスト:</span>
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaUser className="text-base" />
+                    <span className="ml-1">アーティスト:</span>
+                  </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
                   {currentSongInfo.artist.split("、").map((artist, index) => {
                     const existsSameArtist = searchTerm.includes(
-                      `artist:${artist}`,
+                      `artist:${artist}`
                     );
                     return (
                       <Badge
@@ -65,13 +84,13 @@ const NowPlayingSongInfoDetail = ({
                         onClick={() => {
                           if (existsSameArtist) {
                             setSearchTerm(
-                              searchTerm.replace(`artist:${artist}`, "").trim(),
+                              searchTerm.replace(`artist:${artist}`, "").trim()
                             );
                           } else {
                             setSearchTerm(
                               `${
                                 searchTerm ? `${searchTerm} ` : ""
-                              }artist:${artist}`,
+                              }artist:${artist}`
                             );
                           }
                         }}
@@ -89,14 +108,16 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo.album && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                  <IoAlbums />
-                  <span className="text-nowrap inline ml-1">アルバム:</span>
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <IoAlbums className="text-base" />
+                    <span className="ml-1">アルバム:</span>
+                  </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
                   {currentSongInfo.album.split("、").map((album, index) => {
                     const existsSameAlbum = searchTerm.includes(
-                      `album:${album}`,
+                      `album:${album}`
                     );
                     return (
                       <Badge
@@ -104,13 +125,13 @@ const NowPlayingSongInfoDetail = ({
                         onClick={() => {
                           if (existsSameAlbum) {
                             setSearchTerm(
-                              searchTerm.replace(`album:${album}`, "").trim(),
+                              searchTerm.replace(`album:${album}`, "").trim()
                             );
                           } else {
                             setSearchTerm(
                               `${
                                 searchTerm ? `${searchTerm} ` : ""
-                              }album:${album}`,
+                              }album:${album}`
                             );
                           }
                         }}
@@ -127,9 +148,11 @@ const NowPlayingSongInfoDetail = ({
             )}
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                <PiMicrophoneStageFill />
-                <span className="text-nowrap inline ml-1">歌った人:</span>
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <span className="inline-flex items-center">
+                  <PiMicrophoneStageFill className="text-base" />
+                  <span className="ml-1">歌った人:</span>
+                </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
                 {currentSongInfo.sing.split("、").map((sing, index) => {
@@ -140,11 +163,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameSing) {
                           setSearchTerm(
-                            searchTerm.replace(`sing:${sing}`, "").trim(),
+                            searchTerm.replace(`sing:${sing}`, "").trim()
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}sing:${sing}`,
+                            `${searchTerm ? `${searchTerm} ` : ""}sing:${sing}`
                           );
                         }
                       }}
@@ -160,9 +183,11 @@ const NowPlayingSongInfoDetail = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                <FaYoutube />
-                <span className="text-nowrap inline ml-1">動画タイトル:</span>
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <span className="inline-flex items-center">
+                  <FaYoutube className="text-base" />
+                  <span className="ml-1">動画タイトル:</span>
+                </span>
               </dt>
               <dd>
                 <a
@@ -180,37 +205,39 @@ const NowPlayingSongInfoDetail = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                <FaCalendar />
-                <span className="text-nowrap inline ml-1">配信日:</span>
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <span className="inline-flex items-center">
+                  <FaCalendar className="text-base" />
+                  <span className="ml-1">配信日:</span>
+                </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
                 <Badge
                   className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                     searchTerm.includes(
                       `date:${new Date(
-                        currentSongInfo.broadcast_at,
-                      ).toLocaleDateString()}`,
+                        currentSongInfo.broadcast_at
+                      ).toLocaleDateString()}`
                     )
                       ? "bg-cyan-300 dark:bg-cyan-600"
                       : ""
                   }`}
                   onClick={() => {
                     const broadcastDate = new Date(
-                      currentSongInfo.broadcast_at,
+                      currentSongInfo.broadcast_at
                     ).toLocaleDateString();
                     const existsSameDate = searchTerm.includes(
-                      `date:${broadcastDate}`,
+                      `date:${broadcastDate}`
                     );
                     if (existsSameDate) {
                       setSearchTerm(
-                        searchTerm.replace(`date:${broadcastDate}`, "").trim(),
+                        searchTerm.replace(`date:${broadcastDate}`, "").trim()
                       );
                     } else {
                       setSearchTerm(
                         `${
                           searchTerm ? `${searchTerm} ` : ""
-                        }date:${broadcastDate}`,
+                        }date:${broadcastDate}`
                       );
                     }
                   }}
@@ -221,9 +248,11 @@ const NowPlayingSongInfoDetail = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                <FaTag />
-                <span className="text-nowrap inline ml-1">タグ:</span>
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <span className="inline-flex items-center">
+                  <FaTag className="text-base" />
+                  <span className="ml-1">タグ:</span>
+                </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
                 {currentSongInfo.tags.map((tag) => {
@@ -237,11 +266,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameTag) {
                           setSearchTerm(
-                            searchTerm.replace(`tag:${tag}`, "").trim(),
+                            searchTerm.replace(`tag:${tag}`, "").trim()
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm} ` : ""}tag:${tag}`,
+                            `${searchTerm ? `${searchTerm} ` : ""}tag:${tag}`
                           );
                         }
                       }}
@@ -255,9 +284,11 @@ const NowPlayingSongInfoDetail = ({
 
             {videoTimestamps.length > 1 && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                  <IoTime />
-                  <span className="text-nowrap inline ml-1">セトリ:</span>
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <IoTime className="text-base" />
+                    <span className="ml-1">セトリ:</span>
+                  </span>
                 </dt>
                 <dd className="flex-grow flex flex-col gap-1 text-xs lg:text-sm relative">
                   {!isTimestampExpand && (
@@ -280,7 +311,7 @@ const NowPlayingSongInfoDetail = ({
                               (song) =>
                                 currentSongInfo?.title === song.title &&
                                 currentSongInfo.video_id === song.video_id &&
-                                currentSongInfo.start === song.start,
+                                currentSongInfo.start === song.start
                             );
 
                         return (
@@ -351,11 +382,133 @@ const NowPlayingSongInfoDetail = ({
               </div>
             )}
 
+            {currentSongInfo && currentSongInfo.live_call && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2 border-t border-gray-300/70 select-none">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <MdSpeakerNotes className="text-base" />
+                    <span className="ml-1">ライブコール:</span>
+                    <Tooltip
+                      label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                      w={300}
+                      multiline
+                      withArrow
+                    >
+                      <FaInfoCircle className="inline ml-1 text-light-gray-200 dark:text-gray-300" />
+                    </Tooltip>
+                  </span>
+                </dt>
+                <dd className="text-xs lg:text-sm">
+                  {currentSongInfo.live_call
+                    .split(/[\r\n]/)
+                    .map((call, index) => {
+                      const match = call.match(
+                        /^(\d{1,2}:\d{2}:\d{2})\s*-\s*(\d{1,2}:\d{2}:\d{2})(.*)$/
+                      );
+
+                      let callstart = "";
+                      let callend = "";
+                      let calltext = "";
+
+                      if (match) {
+                        callstart = match[1];
+                        callend = match[2];
+                        calltext = match[3];
+                      } else {
+                        return (
+                          <div
+                            key={index}
+                            className="flex flex-col lg:flex-row border-t border-gray-300/70 my-2"
+                          ></div>
+                        );
+                      }
+                      return (
+                        <div
+                          key={index}
+                          className="flex flex-col lg:flex-row gap-0 lg:gap-1"
+                        >
+                          <span className="text-nowrap inline">
+                            <Link
+                              href={`?v=${
+                                currentSongInfo.video_id
+                              }&t=${Math.max(0, timeToSeconds(callstart) - 2)}`}
+                              className="text-primary hover:underline dark:text-primary-300"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                changeCurrentSong(
+                                  currentSongInfo,
+                                  false,
+                                  currentSongInfo.video_id,
+                                  Math.max(0, timeToSeconds(callstart) - 2)
+                                );
+                              }}
+                            >
+                              {callstart}
+                            </Link>{" "}
+                            -{" "}
+                            <Link
+                              href={`?v=${
+                                currentSongInfo.video_id
+                              }&t=${timeToSeconds(callend)}`}
+                              className="text-primary hover:underline dark:text-primary-300"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                changeCurrentSong(
+                                  currentSongInfo,
+                                  false,
+                                  currentSongInfo.video_id,
+                                  timeToSeconds(callend)
+                                );
+                              }}
+                            >
+                              {callend}
+                            </Link>
+                          </span>
+                          <span
+                            className="break-words break-all"
+                            dangerouslySetInnerHTML={{
+                              __html: calltext.replace(/\\n/g, "<br>"),
+                            }}
+                          ></span>
+                        </div>
+                      );
+                    })}
+                </dd>
+              </div>
+            )}
+
+            {currentSongInfo && currentSongInfo.live_note && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <MdSpeakerNotes className="text-base" />
+                    <span className="ml-1">ライブノート:</span>
+                  </span>
+                </dt>
+                <dd>
+                  <div
+                    className="break-words break-all"
+                    dangerouslySetInnerHTML={{
+                      __html: currentSongInfo.live_note
+                        .replace(
+                          /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
+                          (url) =>
+                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`
+                        )
+                        .replace(/\n/g, "<br />"),
+                    }}
+                  ></div>
+                </dd>
+              </div>
+            )}
+
             {currentSongInfo && currentSongInfo.extra && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2 border-t border-gray-300/70">
-                <dt className="text-muted-foreground flex items-baseline w-full lg:w-48 flex-shrink-0">
-                  <FaBook />
-                  <span className="text-nowrap inline ml-1">追加情報:</span>
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaBook className="text-base" />
+                    <span className="ml-1">追加情報:</span>
+                  </span>
                 </dt>
                 <dd
                   className="break-words break-all"
@@ -364,7 +517,7 @@ const NowPlayingSongInfoDetail = ({
                       .replace(
                         /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
                         (url) =>
-                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
+                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`
                       )
                       .replace(/\n/g, "<br />"),
                   }}

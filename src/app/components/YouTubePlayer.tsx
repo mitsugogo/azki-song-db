@@ -1,34 +1,40 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 
 interface YouTubePlayerProps {
   song: Song;
+  video_id?: string;
+  startTime?: number;
   onStateChange: (event: YouTubeEvent<number>) => void;
 }
 
-export default function YouTubePlayer({
+function YouTubePlayerComponent({
   song,
+  video_id,
+  startTime,
   onStateChange,
 }: YouTubePlayerProps) {
-  // startがない場合はvideo_idの先頭から再生
-  const start = song.start ? song.start : 0;
-  // endがない場合はvideo_idの最後まで再生
-  const end = song.end ? song.end : 0;
+  const videoId = video_id || song.video_id;
+  const start = startTime || song.start || 0;
+  const end = song.end || 0;
 
-  const opts = {
-    width: "100%",
-    height: "100%",
-    playerVars: {
-      autoplay: 1,
-      start: start,
-      end: end,
-    },
-  };
+  const opts = useMemo(
+    () => ({
+      width: "100%",
+      height: "100%",
+      playerVars: {
+        autoplay: 1,
+        start,
+        end,
+      },
+    }),
+    [videoId, start, end]
+  );
 
   return (
     <YouTube
-      videoId={song.video_id}
+      videoId={videoId}
       className="w-full h-full"
       opts={opts}
       onStateChange={onStateChange}
@@ -38,3 +44,20 @@ export default function YouTubePlayer({
     />
   );
 }
+
+// props が同じなら再レンダリングを防ぐ
+const YouTubePlayer = React.memo(
+  YouTubePlayerComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.song.video_id === nextProps.song.video_id &&
+      prevProps.song.start === nextProps.song.start &&
+      prevProps.song.end === nextProps.song.end &&
+      prevProps.video_id === nextProps.video_id &&
+      prevProps.startTime === nextProps.startTime
+      // onStateChange は比較しない
+    );
+  }
+);
+
+export default YouTubePlayer;

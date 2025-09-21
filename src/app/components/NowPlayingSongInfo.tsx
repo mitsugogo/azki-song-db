@@ -18,7 +18,12 @@ interface NowPlayingSongInfoProps {
   setHideFutureSongs: (value: boolean) => void;
   setSearchTerm: (value: string) => void;
   setOpenShereModal: (value: boolean) => void;
-  changeCurrentSong: (song: Song, isInfoOnly?: boolean) => void;
+  changeCurrentSong: (
+    song: Song | null,
+    isInfoOnly?: boolean,
+    videoId?: string,
+    startTime?: number
+  ) => void;
 }
 
 /**
@@ -46,7 +51,7 @@ const NowPlayingSongInfo = ({
       const containerElement = containerRef.current as HTMLElement;
       const containerWidth = Math.max(
         0,
-        (containerElement.clientWidth ?? 0) - 25, // CDのアイコン分
+        (containerElement.clientWidth ?? 0) - 25 // CDのアイコン分
       );
       const textWidth = (textRef.current as HTMLElement).scrollWidth ?? 0;
 
@@ -150,7 +155,7 @@ const NowPlayingSongInfo = ({
                   <span>
                     {currentSongInfo.broadcast_at
                       ? new Date(
-                          currentSongInfo.broadcast_at,
+                          currentSongInfo.broadcast_at
                         ).toLocaleDateString("ja-JP", {
                           year: "numeric",
                           month: "2-digit",

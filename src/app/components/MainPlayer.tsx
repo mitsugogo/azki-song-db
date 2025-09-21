@@ -14,6 +14,7 @@ import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
+import { time } from "console";
 
 /**
  * メインプレイヤー
@@ -47,6 +48,9 @@ export default function MainPlayer() {
     isPlaying,
     playerKey,
     hideFutureSongs,
+    videoId,
+    startTime,
+    timedLiveCallText,
     setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
@@ -148,6 +152,9 @@ export default function MainPlayer() {
         allSongs={allSongs}
         songs={songs}
         searchTerm={searchTerm}
+        videoId={videoId}
+        startTime={startTime}
+        timedLiveCallText={timedLiveCallText ?? ""}
         handleStateChange={handleStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}

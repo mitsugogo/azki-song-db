@@ -4,6 +4,7 @@ import React from "react";
 import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
+import { Badge } from "flowbite-react";
 
 interface SongListItemProps {
   song: Song;
@@ -75,11 +76,30 @@ const SongListItem = React.memo(
               </span>
             </span>
           </div>
+
           <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
             {song.broadcast_at && (
               <>{new Date(song.broadcast_at).toLocaleDateString()}</>
             )}
+            {song.live_call && (
+              <span className="text-xs md:hidden">
+                <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
+                  コールサポート
+                </Badge>
+              </span>
+            )}
           </div>
+
+          {song.live_call && (
+            <div className="hidden md:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
+              <span className="text-xs">
+                <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
+                  コールサポート
+                </Badge>
+              </span>
+            </div>
+          )}
+
           {song.milestones && song.milestones.length > 0 && (
             <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
               <div>

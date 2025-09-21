@@ -2,14 +2,17 @@ import { Song } from "../types/song";
 import YouTubePlayer from "./YouTubePlayer";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
-import { Button, ButtonGroup, ToggleSwitch } from "flowbite-react";
+import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { FaShare, FaShuffle } from "react-icons/fa6";
+import { FaInfo, FaShare, FaShuffle } from "react-icons/fa6";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
 import PlayerSettings from "./PlayerSettings";
 import { LuCrown } from "react-icons/lu";
+import { MdSpeakerNotes } from "react-icons/md";
+import { FaInfoCircle } from "react-icons/fa";
+import { Tooltip } from "@mantine/core";
 
 // Propsの型定義
 type PlayerSectionProps = {
@@ -23,8 +26,16 @@ type PlayerSectionProps = {
   isPlaying: boolean;
   playerKey: number;
   hideFutureSongs: boolean;
+  videoId?: string;
+  startTime?: number;
+  timedLiveCallText?: string;
   handleStateChange: (event: YouTubeEvent) => void;
-  changeCurrentSong: (song: Song | null, keepCurrentList?: boolean) => void;
+  changeCurrentSong: (
+    song: Song | null,
+    isInfoOnly?: boolean,
+    videoId?: string,
+    startTime?: number
+  ) => void;
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;
   setOpenShareModal: (isOpen: boolean) => void;
@@ -43,6 +54,9 @@ export default function PlayerSection({
   isPlaying,
   playerKey,
   hideFutureSongs,
+  videoId,
+  startTime,
+  timedLiveCallText,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
@@ -66,11 +80,40 @@ export default function PlayerSection({
               <YouTubePlayer
                 key={`youtube-player-${playerKey}`}
                 song={currentSong}
+                video_id={videoId}
+                startTime={startTime}
                 onStateChange={handleStateChange}
               />
             )}
           </div>
         </div>
+
+        {currentSongInfo?.live_call && (
+          <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
+            <div className="flex items-center flex-shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
+              <span className="ml-1 text-muted-foreground text-nowrap">
+                <span className="ml-1 hidden md:inline">ライブコール:</span>
+                <span className="ml-1 md:hidden">コール</span>
+                <Tooltip
+                  label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                  w={300}
+                  multiline
+                  withArrow
+                >
+                  <FaInfoCircle className="inline ml-1 mt-[-3px] text-light-gray-200 dark:text-gray-300" />
+                </Tooltip>
+              </span>
+            </div>
+            <div className="flex-1 min-w-0 ml-3">
+              <p
+                className="truncate"
+                dangerouslySetInnerHTML={{
+                  __html: timedLiveCallText?.replace(/\\n/g, "<br>") ?? "",
+                }}
+              ></p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col p-2 pl-2 pb-0 lg:px-0 text-sm text-foreground">
           {/* Previous/Next Song Display (Desktop) */}
