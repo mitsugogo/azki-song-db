@@ -16,7 +16,7 @@ const useSearch = (allSongs: Song[]) => {
 
   const searchSongs = useCallback((songsToFilter: Song[], term: string) => {
     const searchWords = term
-      .split(/\s+/)
+      .split(/[\s|\|]+/)
       .map((word) => word.trim().toLowerCase())
       .filter(Boolean);
 

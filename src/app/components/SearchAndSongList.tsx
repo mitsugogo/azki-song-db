@@ -42,9 +42,9 @@ export default function SearchAndSongList({
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
   useEffect(() => {
-    const s = searchTerm.split(" ").filter((s) => s.trim() !== "");
+    const s = searchTerm.split("|").filter((s) => s.trim() !== "");
     if (s.length > 0) {
-      setSearchValue(searchTerm.split(" "));
+      setSearchValue(searchTerm.split("|"));
     }
   }, [searchTerm]);
 
@@ -138,10 +138,10 @@ export default function SearchAndSongList({
             value={searchValue}
             onChange={(values: string[]) => {
               setSearchValue(values);
-              setSearchTerm(values.join(" "));
+              setSearchTerm(values.join("|"));
             }}
             limit={15}
-            splitChars={[",", " ", "|"]}
+            splitChars={["|"]}
             comboboxProps={{
               shadow: "md",
               transitionProps: { transition: "pop", duration: 100 },
