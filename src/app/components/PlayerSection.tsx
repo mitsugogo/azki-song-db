@@ -92,15 +92,14 @@ export default function PlayerSection({
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
             <div className="flex items-center flex-shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
               <span className="ml-1 text-muted-foreground text-nowrap">
-                <span className="ml-1 hidden md:inline">ライブコール:</span>
-                <span className="ml-1 md:hidden">コール</span>
+                <span className="ml-1">コール</span>
                 <Tooltip
                   label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
                   w={300}
                   multiline
                   withArrow
                 >
-                  <FaInfoCircle className="inline ml-1 mt-[-3px] text-light-gray-200 dark:text-gray-300" />
+                  <FaInfoCircle className="inline ml-1 mt-[-3px] text-light-gray-300 dark:text-gray-300" />
                 </Tooltip>
               </span>
             </div>

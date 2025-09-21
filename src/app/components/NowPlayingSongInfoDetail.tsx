@@ -418,7 +418,7 @@ const NowPlayingSongInfoDetail = ({
                         return (
                           <div
                             key={index}
-                            className="flex flex-col lg:flex-row border-t border-gray-300/70 my-2"
+                            className="flex flex-col lg:flex-row border-t border-light-gray-200 dark:border-gray-600 my-2"
                           ></div>
                         );
                       }
