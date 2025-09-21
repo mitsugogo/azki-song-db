@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github.com/mitsugogo/azki-song-db/compare/v1.13.4...v1.14.0) (2025-09-21)
+
+
+### Features
+
+* **main:** ライブコール練習用機能を追加 ([e916dac](https://github.com/mitsugogo/azki-song-db/commit/e916dac5ef91bf363dfacdd3e008aa4269456555))
+
 ### [1.13.4](https://github.com/mitsugogo/azki-song-db/compare/v1.13.3...v1.13.4) (2025-09-18)
 
 
