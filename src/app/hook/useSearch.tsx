@@ -16,7 +16,7 @@ const useSearch = (allSongs: Song[]) => {
 
   const searchSongs = useCallback((songsToFilter: Song[], term: string) => {
     const searchWords = term
-      .split(/\s+/)
+      .split(/[\s|\|]+/)
       .map((word) => word.trim().toLowerCase())
       .filter(Boolean);
 
@@ -58,6 +58,21 @@ const useSearch = (allSongs: Song[]) => {
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
               : s.milestones?.some((m) => m.includes(v)) ?? false,
+          "season:": (s, v) => {
+            const month = new Date(s.broadcast_at).getMonth() + 1;
+            switch (v) {
+              case "春":
+                return month >= 3 && month <= 5;
+              case "夏":
+                return month >= 6 && month <= 9;
+              case "秋":
+                return month >= 10 && month <= 11;
+              case "冬":
+                return month >= 12 || (month >= 1 && month <= 2);
+              default:
+                return false;
+            }
+          },
         };
 
         for (const prefix in prefixSearches) {
@@ -108,6 +123,21 @@ const useSearch = (allSongs: Song[]) => {
             v === "*"
               ? (s.milestones?.length ?? 0) > 0
               : s.milestones?.some((m) => m.includes(v)) ?? false,
+          "season:": (s, v) => {
+            const month = new Date(s.broadcast_at).getMonth() + 1;
+            switch (v) {
+              case "春":
+                return month >= 3 && month <= 5;
+              case "夏":
+                return month >= 6 && month <= 9;
+              case "秋":
+                return month >= 10 && month <= 11;
+              case "冬":
+                return month >= 12 || (month >= 1 && month <= 2);
+              default:
+                return false;
+            }
+          },
         };
 
         for (const prefix in prefixSearches) {

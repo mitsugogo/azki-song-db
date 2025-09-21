@@ -42,9 +42,9 @@ export default function SearchAndSongList({
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
   useEffect(() => {
-    const s = searchTerm.split(" ").filter((s) => s.trim() !== "");
+    const s = searchTerm.split("|").filter((s) => s.trim() !== "");
     if (s.length > 0) {
-      setSearchValue(searchTerm.split(" "));
+      setSearchValue(searchTerm.split("|"));
     }
   }, [searchTerm]);
 
@@ -57,6 +57,7 @@ export default function SearchAndSongList({
       {option.value.includes("sing:") && <FaUser />}
       {option.value.includes("tag:") && <FaTag />}
       {option.value.includes("milestone:") && <FaStar />}
+      {option.value.includes("season:") && "季節:"}
       <div>
         <Text size="sm">
           {option.value
@@ -64,7 +65,8 @@ export default function SearchAndSongList({
             .replace("artist:", "")
             .replace("sing:", "")
             .replace("tag:", "")
-            .replace("milestone:", "")}
+            .replace("milestone:", "")
+            .replace("season:", "")}
         </Text>
       </div>
     </Group>
@@ -132,16 +134,20 @@ export default function SearchAndSongList({
                   .filter((title) => title !== "")
                   .map((title) => `title:${title}`),
               },
+              {
+                group: "季節",
+                items: ["season:春", "season:夏", "season:秋", "season:冬"],
+              },
             ]}
             renderOption={renderMultiSelectOption}
             maxDropdownHeight={200}
             value={searchValue}
             onChange={(values: string[]) => {
               setSearchValue(values);
-              setSearchTerm(values.join(" "));
+              setSearchTerm(values.join("|"));
             }}
             limit={15}
-            splitChars={[",", " ", "|"]}
+            splitChars={["|"]}
             comboboxProps={{
               shadow: "md",
               transitionProps: { transition: "pop", duration: 100 },
