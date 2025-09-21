@@ -15,4 +15,6 @@ export interface Song {
   tags: string[];
   milestones: string[];
   extra?: string;
+  live_call?: string;
+  live_note?: string;
 }

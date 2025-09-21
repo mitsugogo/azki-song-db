@@ -26,7 +26,7 @@ const useSearch = (allSongs: Song[]) => {
       .map((word) => word.substring(1, word.indexOf(" ")));
 
     // 通常検索ワードの定義
-    const normalWords = searchWords.filter((word) => !word.startsWith("-"));
+    let normalWords = searchWords.filter((word) => !word.startsWith("-"));
 
     // ソロライブ予習モード(オリ曲のみ絞り込み)
     const isSololive2025 = searchWords.some((word) => word === "sololive2025");
@@ -133,7 +133,10 @@ const useSearch = (allSongs: Song[]) => {
 
     // ソロライブ2025モード
     if (isSololive2025) {
-      return songsToFilter
+      normalWords = normalWords.filter(
+        (word) => !word.startsWith("sololive2025")
+      );
+      songsToFilter = songsToFilter
         .filter(
           (s) =>
             (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
