@@ -1,4 +1,5 @@
 import { Switch } from "@mantine/core";
+import { useClickOutside } from "@mantine/hooks";
 import { Button, ToggleSwitch } from "flowbite-react";
 import { useState, useRef, useEffect } from "react";
 import { FaShare } from "react-icons/fa6";
@@ -15,27 +16,9 @@ export default function PlayerSettings({
   setOpenShereModal,
 }: PlayerSettingPropps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const settingsRef = useRef<HTMLDivElement>(null);
-
-  // 外部クリックを検出するロジック
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        settingsRef.current &&
-        !settingsRef.current.contains(event.target as Node)
-      ) {
-        setIsSettingsOpen(false);
-      }
-    }
-
-    // イベントリスナーを追加
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // クリーンアップ関数を返す
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [settingsRef]);
+  const settingsRef = useClickOutside(() => {
+    setIsSettingsOpen(false);
+  });
 
   return (
     <div
