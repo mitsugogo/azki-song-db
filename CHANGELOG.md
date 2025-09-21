@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.15.1](https://github.com/mitsugogo/azki-song-db/compare/v1.15.0...v1.15.1) (2025-09-21)
+
+
+### Bug Fixes
+
+* 日付検索が出来ないバグを修正 ([e01d8b3](https://github.com/mitsugogo/azki-song-db/commit/e01d8b3c737fa8d76267bf0ac9dbc622cb396a4f))
+
 ## [1.15.0](https://github.com/mitsugogo/azki-song-db/compare/v1.14.0...v1.15.0) (2025-09-21)
 
 
