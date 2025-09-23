@@ -3,9 +3,18 @@
 import { Button } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import { FaYoutube } from "react-icons/fa6";
+import { FaGear, FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import { Drawer, Burger, Modal, Popover, Text, Tooltip } from "@mantine/core";
+import {
+  Drawer,
+  Burger,
+  Modal,
+  Popover,
+  Text,
+  Tooltip,
+  Avatar,
+  Menu,
+} from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
@@ -100,14 +109,14 @@ export function Header() {
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              <a
+              <Link
                 href="https://www.youtube.com/@AZKi"
                 target="_blank"
                 className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
               >
                 <FaYoutube className="mr-1" />
                 AZKi Channel
-              </a>
+              </Link>
               <ThemeToggle />
             </div>
           </div>
@@ -144,7 +153,21 @@ export function Header() {
               </Link>
             );
           })}
+          <hr className="my-6 border border-gray-200 dark:border-gray-600 " />
 
+          <div className="text-xs">
+            <FaGear className="mr-0.5 inline" /> 管理機能
+          </div>
+          <Link
+            href="/playlist"
+            key="playlist"
+            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+            onClick={() => closeDrawer()}
+          >
+            プレイリスト
+          </Link>
+
+          <hr className="my-6 border border-gray-200 dark:border-gray-600 " />
           <Link
             href="#"
             key="about"
@@ -156,9 +179,7 @@ export function Header() {
           >
             このサイトについて
           </Link>
-
           <hr className="my-2 border border-gray-200 dark:border-gray-600 md:hidden" />
-
           <div className="block relative md:absolute md:bottom-6 md:left-3">
             <Link
               href="https://www.youtube.com/@AZKi"

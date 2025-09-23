@@ -1,16 +1,26 @@
-import { Switch } from "@mantine/core";
+import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
 import { useClickOutside } from "@mantine/hooks";
-import { Button, ToggleSwitch } from "flowbite-react";
-import { useState, useRef, useEffect } from "react";
-import { FaShare } from "react-icons/fa6";
+import { Button } from "flowbite-react";
+import { useState } from "react";
+import { FaRegStar, FaShare, FaStar } from "react-icons/fa6";
+import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import { Song } from "../types/song";
+import {
+  MdOutlineCreateNewFolder,
+  MdPlaylistAdd,
+  MdPlaylistAddCheck,
+} from "react-icons/md";
+import CreatePlaylistModal from "./CreatePlaylistModal";
 
 interface PlayerSettingPropps {
+  currentSongInfo: Song | null;
   hideFutureSongs: boolean;
   setHideFutureSongs: (value: boolean) => void;
   setOpenShereModal: (value: boolean) => void;
 }
 
 export default function PlayerSettings({
+  currentSongInfo,
   hideFutureSongs,
   setHideFutureSongs,
   setOpenShereModal,
@@ -20,11 +30,117 @@ export default function PlayerSettings({
     setIsSettingsOpen(false);
   });
 
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
+  const opendPlaylistRef = useClickOutside(() => {
+    setShowPlaylistMenu(false);
+  });
+
+  const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
+
+  // プレイリスト
+  const {
+    playlists,
+    addToPlaylist,
+    isInPlaylist,
+    removeFromPlaylist,
+    isInAnyPlaylist,
+  } = usePlaylists();
+
+  const addOrRemovePlaylist = (playlist: Playlist) => {
+    if (isInPlaylist(playlist, currentSongInfo!)) {
+      removeFromPlaylist(playlist, currentSongInfo!);
+    } else {
+      addToPlaylist(playlist, currentSongInfo!);
+    }
+  };
+
   return (
     <div
-      className="inline-grid relative text-right grid-cols-1 md:grid-cols-2 gap-1"
+      className="hidden lg:inline-grid relative text-right grid-cols-2 md:grid-cols-3 gap-1"
       ref={settingsRef}
     >
+      <div>
+        <Menu width={300} withArrow opened={showPlaylistMenu}>
+          <Menu.Target>
+            <div className="flex items-center justify-center h-full">
+              <Tooltip
+                label={`${
+                  isInAnyPlaylist(currentSongInfo!)
+                    ? "プレイリスト追加済み"
+                    : "プレイリストに追加"
+                }`}
+              >
+                <Button
+                  className="inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
+                  onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
+                >
+                  {isInAnyPlaylist(currentSongInfo!) ? (
+                    <FaStar />
+                  ) : (
+                    <FaRegStar />
+                  )}
+                </Button>
+              </Tooltip>
+            </div>
+          </Menu.Target>
+
+          <Menu.Dropdown ref={opendPlaylistRef}>
+            <Menu.Label>プレイリスト</Menu.Label>
+
+            {playlists.length === 0 && (
+              <div className="ml-3 mb-3">
+                <span className="text-sm text-light-gray-300 dark:text-gray-300">
+                  プレイリストはありません
+                </span>
+              </div>
+            )}
+
+            <ScrollArea mah={200}>
+              {playlists.map((playlist, index) => (
+                <MenuItem
+                  key={index}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    addOrRemovePlaylist(playlist);
+
+                    if (playlists.length === 1) {
+                      setShowPlaylistMenu(false);
+                      setIsSettingsOpen(false);
+                    }
+                  }}
+                  leftSection={
+                    isInPlaylist(playlist, currentSongInfo!) ? (
+                      <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
+                    ) : (
+                      <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
+                    )
+                  }
+                  component="div"
+                  bg={isInPlaylist(playlist, currentSongInfo!) ? "blue" : ""}
+                  color={
+                    isInPlaylist(playlist, currentSongInfo!) ? "white" : ""
+                  }
+                  className="mb-0.5"
+                >
+                  {playlist.name}
+                </MenuItem>
+              ))}
+            </ScrollArea>
+
+            <Menu.Divider />
+            <MenuItem
+              onClick={() => {
+                setIsSettingsOpen(false);
+                setShowPlaylistMenu(false);
+                setOpenCreatePlaylistModal(true);
+              }}
+            >
+              <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+              新しいプレイリストを作成
+            </MenuItem>
+          </Menu.Dropdown>
+        </Menu>
+      </div>
       <Button
         onClick={() => setOpenShereModal(true)}
         className="hidden md:inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
@@ -77,6 +193,11 @@ export default function PlayerSettings({
           </div>
         </div>
       )}
+
+      <CreatePlaylistModal
+        onenModal={openCreatePlaylistModal}
+        setOpenModal={setOpenCreatePlaylistModal}
+      />
     </div>
   );
 }

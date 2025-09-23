@@ -100,6 +100,7 @@ const NowPlayingSongInfo = ({
                 </h2>
               </div>
               <PlayerSettings
+                currentSongInfo={currentSongInfo}
                 hideFutureSongs={hideFutureSongs}
                 setHideFutureSongs={setHideFutureSongs}
                 setOpenShereModal={setOpenShereModal}

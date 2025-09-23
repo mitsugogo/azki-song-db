@@ -15,6 +15,7 @@ import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
 import { time } from "console";
+import usePlaylists from "../hook/usePlaylists";
 
 /**
  * メインプレイヤー
@@ -58,6 +59,8 @@ export default function MainPlayer() {
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
 
+  const { decodePlaylistUrlParam } = usePlaylists();
+
   useEffect(() => {
     if (!currentSongInfo) return;
     setPreviousAndNextSongs(currentSongInfo, songs);
@@ -79,6 +82,7 @@ export default function MainPlayer() {
     const videoId = urlParams.get("v");
     const startTime = urlParams.get("t")?.replace("s", "");
     const pvId = urlParams.get("pvid");
+    const playlist = urlParams.get("playlist");
 
     let filteredSongs = allSongs;
     if (query) {
@@ -87,9 +91,51 @@ export default function MainPlayer() {
     }
 
     // ソロライブモードの場合は強制的に先頭の曲(Creating world)からスタート
-    if (urlParams.get("q") === "sololive2025") {
-      changeCurrentSong(filteredSongs[0]);
+    if (query === "sololive2025") {
       setSongs(filteredSongs);
+      changeCurrentSong(filteredSongs[0]);
+      setIsInitialLoading(false);
+      return;
+    }
+
+    // プレイリスト再生モード
+    if (playlist) {
+      const playlistSongs = decodePlaylistUrlParam(playlist);
+      filteredSongs = filteredSongs
+        .filter((song) =>
+          playlistSongs.songs.find(
+            (entry) =>
+              entry.videoId === song.video_id &&
+              Number(String(entry.start)) === Number(song.start)
+          )
+        )
+        .sort((a, b) => {
+          return (
+            playlistSongs.songs.findIndex(
+              (entry) =>
+                entry.videoId === a.video_id &&
+                Number(String(entry.start)) === Number(a.start)
+            ) -
+            playlistSongs.songs.findIndex(
+              (entry) =>
+                entry.videoId === b.video_id &&
+                Number(String(entry.start)) === Number(b.start)
+            )
+          );
+        });
+      setSongs(filteredSongs);
+      if (videoId && startTime) {
+        const targetSong = filteredSongs.find(
+          (song) =>
+            song.video_id === videoId &&
+            Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
+        );
+        if (targetSong) {
+          changeCurrentSong(targetSong);
+        }
+      } else {
+        changeCurrentSong(filteredSongs[0]);
+      }
       setIsInitialLoading(false);
       return;
     }
@@ -155,6 +201,7 @@ export default function MainPlayer() {
         videoId={videoId}
         startTime={startTime}
         timedLiveCallText={timedLiveCallText ?? ""}
+        setSongs={setSongs}
         handleStateChange={handleStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
@@ -181,6 +228,7 @@ export default function MainPlayer() {
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
         setSearchTerm={setSearchTerm}
+        setSongs={setSongs}
       />
 
       {showToast && (
