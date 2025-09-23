@@ -12,7 +12,6 @@ import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { useMemo, useRef, useState } from "react";
 import useDebounce from "../hook/useDebounce";
-import Loading from "../loading";
 import { Badge, TextInput } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
@@ -221,7 +220,7 @@ export default function DataTable<
                   height: `${rowVirtualizer.getTotalSize()}px`,
                 }}
               >
-                {virtualRows.map((virtualRow, idx) => {
+                {virtualRows.map((virtualRow) => {
                   const row = rows[virtualRow.index];
                   if (!row) return null;
 

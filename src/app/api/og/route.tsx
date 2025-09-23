@@ -27,12 +27,13 @@ export async function GET(req: NextRequest) {
     const notoSansRegular = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
         encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database"),
+        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent("...…")
     )
       .then((res) => res.text())
       .then((css) => {
         const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/
         )?.[1];
         if (!url) throw new Error("Font not found");
         return fetch(url).then((res) => res.arrayBuffer());
@@ -41,12 +42,13 @@ export async function GET(req: NextRequest) {
     const notoSansBold = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
         encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database"),
+        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent("...…")
     )
       .then((res) => res.text())
       .then((css) => {
         const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/
         )?.[1];
         if (!url) throw new Error("Font not found");
         return fetch(url).then((res) => res.arrayBuffer());
@@ -139,7 +141,7 @@ export async function GET(req: NextRequest) {
           "Content-Type": "image/png",
           "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
         },
-      },
+      }
     );
   } catch (e) {
     if (e instanceof Error) {

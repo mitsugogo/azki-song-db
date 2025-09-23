@@ -1,22 +1,12 @@
 import StatisticsPage from "./client";
 
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import { metadata } from "../layout";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata,
-): Promise<Metadata> {
-  const { q, v, t } = await searchParams;
-
+export async function generateMetadata(): Promise<Metadata> {
   const title = "統計情報";
   const subtitle =
     "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています";

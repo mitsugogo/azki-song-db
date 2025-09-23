@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import useDebounce from "./useDebounce";
+import usePlaylists from "./usePlaylists";
 
 /**
  * 検索ロジックを管理するカスタムフック
@@ -13,6 +14,9 @@ const useSearch = (allSongs: Song[]) => {
   // 通常検索
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // プレイリスト
+  const { decodePlaylistUrlParam } = usePlaylists();
 
   const searchSongs = useCallback((songsToFilter: Song[], term: string) => {
     const searchWords = term
@@ -213,6 +217,33 @@ const useSearch = (allSongs: Song[]) => {
         });
     }
 
+    // プレイリスト
+    const url = new URL(window.location.href);
+    const isPlaylist = url.searchParams.get("playlist");
+    if (isPlaylist) {
+      const hashedPlaylist = url.searchParams.get("playlist");
+      const decodedPlaylist = decodePlaylistUrlParam(hashedPlaylist as string);
+      if (decodedPlaylist) {
+        songsToFilter = songsToFilter
+          .filter((song) => {
+            return decodedPlaylist.songs.some(
+              (s) => s.videoId === song.video_id && s.start === song.start
+            );
+          })
+          .sort((a, b) => {
+            // プレイリストに入れた順でソート
+            return (
+              decodedPlaylist.songs.findIndex(
+                (s) => s.videoId === a.video_id && s.start === a.start
+              ) -
+              decodedPlaylist.songs.findIndex(
+                (s) => s.videoId === b.video_id && s.start === b.start
+              )
+            );
+          });
+      }
+    }
+
     return songsToFilter.filter((song) => {
       return (
         matchesNormalWords(song, normalWords) && !isExcluded(song, excludeWords)
@@ -224,10 +255,41 @@ const useSearch = (allSongs: Song[]) => {
   useEffect(() => {
     if (isInitialLoading) return;
     const url = new URL(window.location.href);
+    const isPlaylist = url.searchParams.get("playlist");
     if (debouncedSearchTerm) {
       const filteredSongs = searchSongs(allSongs, debouncedSearchTerm);
       setSongs(filteredSongs);
       url.searchParams.set("q", debouncedSearchTerm);
+    } else if (isPlaylist) {
+      const hashedPlaylist = url.searchParams.get("playlist");
+      const decodedPlaylist = decodePlaylistUrlParam(hashedPlaylist as string);
+      if (decodedPlaylist) {
+        setSongs(
+          allSongs
+            .filter((song) =>
+              decodedPlaylist.songs.find(
+                (entry) =>
+                  entry.videoId === song.video_id &&
+                  Number(String(entry.start)) === Number(song.start)
+              )
+            )
+            .sort((a, b) => {
+              return (
+                decodedPlaylist.songs.findIndex(
+                  (entry) =>
+                    entry.videoId === a.video_id &&
+                    Number(String(entry.start)) === Number(a.start)
+                ) -
+                decodedPlaylist.songs.findIndex(
+                  (entry) =>
+                    entry.videoId === b.video_id &&
+                    Number(String(entry.start)) === Number(b.start)
+                )
+              );
+            })
+        );
+      }
+      url.searchParams.delete("q");
     } else {
       setSongs(allSongs);
       url.searchParams.delete("q");

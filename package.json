@@ -10,6 +10,8 @@
     "format": "npx prettier --write ."
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
