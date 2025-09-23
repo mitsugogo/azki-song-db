@@ -1,6 +1,5 @@
 import PlaylistDetailPage from "./client";
 import type { Metadata } from "next";
-import { metadata } from "../layout";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
@@ -16,11 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
   ogImageUrl.searchParams.set("h", "630");
 
   return {
-    ...metadata,
     title: "プレイリスト | AZKi Song Database",
     description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
     openGraph: {
-      ...metadata.openGraph,
       images: [ogImageUrl.toString()],
     },
   };

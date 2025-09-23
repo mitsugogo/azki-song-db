@@ -179,7 +179,9 @@ const usePlaylists = () => {
     const jsonString = JSON.stringify(compressedJson);
     const encoder = new TextEncoder();
     const utf8Bytes = encoder.encode(jsonString);
-    const encoded = btoa(String.fromCharCode.apply(null, utf8Bytes));
+
+    const encoded = btoa(String.fromCharCode(...utf8Bytes));
+
     return encoded;
   };
 
