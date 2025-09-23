@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Anchor, Breadcrumbs, Button, Checkbox, Table } from "@mantine/core";
+import {
+  Anchor,
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  ScrollArea,
+  Table,
+} from "@mantine/core";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import { Song } from "@/app/types/song";
 import Link from "next/link";
 import Loading from "@/app/loading";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaRegTrashCan, FaBars } from "react-icons/fa6"; // FaBarsを追加
 
 import {
   DndContext,
@@ -64,9 +71,14 @@ const SortableRow = ({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
       bg={isSelected ? "var(--mantine-color-blue-light)" : undefined}
     >
+      <Table.Td>
+        {/* ドラッグハンドル */}
+        <div {...listeners} className="cursor-grab hover:text-blue-500">
+          <FaBars />
+        </div>
+      </Table.Td>
       <Table.Td>
         <Checkbox
           aria-label="Select row"
@@ -179,8 +191,27 @@ export default function PlaylistDetailPage() {
     const updatedSongs = playlist.songs.filter(
       (s) => !keysToDelete.includes(`${s.videoId}-${s.start}`)
     );
+    console.log(keysToDelete);
     const updatedPlaylist = { ...playlist, songs: updatedSongs };
     updatePlaylist(updatedPlaylist);
+    const updatedPlaylistSongsWithInfo = updatedSongs
+      .map((s) => {
+        const songInfo = allSongs.find(
+          (song) =>
+            song.video_id === s.videoId &&
+            Number(song.start) === Number(s.start)
+        );
+        return songInfo
+          ? { ...s, start: Number(s.start), songinfo: songInfo }
+          : null;
+      })
+      .filter((s) => s !== null);
+
+    setPlaylistSongs(
+      updatedPlaylistSongsWithInfo as PlaylistWithSongs["songs"]
+    );
+
+    // Reset the selection
     handlers.resetSelection();
   };
 
@@ -240,7 +271,6 @@ export default function PlaylistDetailPage() {
           <Button
             color="red"
             onClick={handleDeleteSelected}
-            disabled={selection.length === 0}
             className="sm:hidden"
           >
             選択した曲を削除
@@ -258,69 +288,73 @@ export default function PlaylistDetailPage() {
         </div>
       </div>
 
-      <Table striped highlightOnHover withColumnBorders>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>
-              <Checkbox
-                aria-label="Select deselect all rows"
-                indeterminate={handlers.isSomeSelected()}
-                checked={handlers.isAllSelected()}
-                onChange={() => {
-                  if (handlers.isAllSelected()) {
-                    handlers.resetSelection();
-                  } else {
-                    handlers.setSelection(rowKeys);
-                  }
-                }}
-              />
-            </Table.Th>
-            <Table.Th>#</Table.Th>
-            <Table.Th>曲/アーティスト</Table.Th>
-            <Table.Th>動画</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        {playlistSongs.length === 0 && (
-          <Table.Tbody>
+      <ScrollArea className="h-[calc(100vh-200px)] lg:h-[calc(100vh-260px)]">
+        <Table striped highlightOnHover withColumnBorders>
+          <Table.Thead>
             <Table.Tr>
-              <Table.Td colSpan={5} className="text-center">
-                プレイリスト内に曲がありません
-              </Table.Td>
+              <Table.Th>並べ替え</Table.Th>
+              <Table.Th>
+                <Checkbox
+                  aria-label="Select deselect all rows"
+                  indeterminate={handlers.isSomeSelected()}
+                  checked={handlers.isAllSelected()}
+                  onChange={() => {
+                    if (handlers.isAllSelected()) {
+                      handlers.resetSelection();
+                    } else {
+                      handlers.setSelection(rowKeys);
+                    }
+                  }}
+                />
+              </Table.Th>
+              <Table.Th>#</Table.Th>
+              <Table.Th>曲/アーティスト</Table.Th>
+              <Table.Th>動画</Table.Th>
             </Table.Tr>
-          </Table.Tbody>
-        )}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={rowKeys}>
+          </Table.Thead>
+          {playlistSongs.length === 0 && (
             <Table.Tbody>
-              {playlistSongs.map((s, index) => {
-                const rowKey = `${s.videoId}-${s.start}`;
-                const isSelected = selection.includes(rowKey);
-                return (
-                  <SortableRow
-                    key={rowKey}
-                    s={s}
-                    index={index}
-                    playlist={playlist}
-                    encodePlaylistUrlParam={encodePlaylistUrlParam}
-                    isSelected={isSelected}
-                    onCheckboxChange={(event) => {
-                      if (event.currentTarget.checked) {
-                        handlers.select(rowKey);
-                      } else {
-                        handlers.deselect(rowKey);
-                      }
-                    }}
-                  />
-                );
-              })}
+              <Table.Tr>
+                <Table.Td colSpan={5} className="text-center">
+                  プレイリスト内に曲がありません
+                </Table.Td>
+              </Table.Tr>
             </Table.Tbody>
-          </SortableContext>
-        </DndContext>
-      </Table>
+          )}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={rowKeys}>
+              <Table.Tbody>
+                {playlistSongs.map((s, index) => {
+                  const rowKey = `${s.videoId}-${s.start}`;
+                  const isSelected = selection.includes(rowKey);
+                  return (
+                    <SortableRow
+                      key={rowKey}
+                      s={s}
+                      index={index}
+                      playlist={playlist}
+                      encodePlaylistUrlParam={encodePlaylistUrlParam}
+                      isSelected={isSelected}
+                      onCheckboxChange={(event) => {
+                        console.log(rowKey);
+                        if (event.currentTarget.checked) {
+                          handlers.select(rowKey);
+                        } else {
+                          handlers.deselect(rowKey);
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </Table.Tbody>
+            </SortableContext>
+          </DndContext>
+        </Table>
+      </ScrollArea>
     </div>
   );
 }
