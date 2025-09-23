@@ -4,13 +4,12 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { FaInfo, FaShare, FaShuffle } from "react-icons/fa6";
+import { FaShuffle } from "react-icons/fa6";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
 import PlayerSettings from "./PlayerSettings";
 import { LuCrown } from "react-icons/lu";
-import { MdSpeakerNotes } from "react-icons/md";
 import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "@mantine/core";
 

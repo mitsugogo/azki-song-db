@@ -5,17 +5,7 @@ import { metadata } from "../layout";
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const { q, v, t } = await searchParams;
-
+export async function generateMetadata(): Promise<Metadata> {
   const title = "Discography";
   const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
 

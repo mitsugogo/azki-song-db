@@ -3,7 +3,7 @@ import { TabsRef } from "flowbite-react";
 
 export function useTabSync(
   tabsRef: RefObject<TabsRef | null>,
-  setActiveTab: Dispatch<SetStateAction<number>>,
+  setActiveTab: Dispatch<SetStateAction<number>>
 ) {
   // URLクエリパラメータからタブを初期化
   useEffect(() => {

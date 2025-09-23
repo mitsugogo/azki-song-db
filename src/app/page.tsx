@@ -1,22 +1,19 @@
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import ClientTop from "./client";
 import { metadata } from "./layout";
 import { Song } from "./types/song";
-import { parse } from "path";
 import { Playlist } from "./hook/usePlaylists";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
 
 type Props = {
-  params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
   const { q, v, t, playlist } = await searchParams;
 
   let title = "AZKi Song Database";

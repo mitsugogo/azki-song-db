@@ -1,20 +1,8 @@
-import {
-  Badge,
-  Chip,
-  Input,
-  Menu,
-  MenuItem,
-  Modal,
-  Popover,
-  ScrollArea,
-  Switch,
-  Text,
-  Tooltip,
-} from "@mantine/core";
+import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
 import { useClickOutside } from "@mantine/hooks";
-import { Button, ToggleSwitch } from "flowbite-react";
-import { useState, useRef, useEffect } from "react";
-import { FaPencil, FaRegStar, FaShare, FaStar } from "react-icons/fa6";
+import { Button } from "flowbite-react";
+import { useState } from "react";
+import { FaRegStar, FaShare, FaStar } from "react-icons/fa6";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
 import { Song } from "../types/song";
 import {

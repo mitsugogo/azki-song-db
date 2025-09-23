@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import useDebounce from "./useDebounce";
 import usePlaylists from "./usePlaylists";

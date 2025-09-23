@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useDeferredValue, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import DataTable from "./datatable";
@@ -11,7 +11,6 @@ import Loading from "../loading";
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
-  const deferredActiveTab = useDeferredValue(activeTab);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
   const { songs, coverSongInfo, originalSongInfo, loading } = useSongData();

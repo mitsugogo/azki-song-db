@@ -12,7 +12,7 @@ import {
   Notification,
   Table,
 } from "@mantine/core";
-import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import usePlaylists from "../hook/usePlaylists";
 import Link from "next/link";
 import { FaCheck, FaPlay } from "react-icons/fa6";
 

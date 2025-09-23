@@ -1,19 +1,11 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import {
-  Anchor,
-  Breadcrumbs,
-  Button,
-  Checkbox,
-  CopyButton,
-  Table,
-} from "@mantine/core";
+import { Anchor, Breadcrumbs, Button, Checkbox, Table } from "@mantine/core";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import { Song } from "@/app/types/song";
 import Link from "next/link";
-import { Breadcrumb } from "flowbite-react";
 import Loading from "@/app/loading";
 import { FaRegTrashCan } from "react-icons/fa6";
 

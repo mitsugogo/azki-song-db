@@ -9,7 +9,6 @@ import {
   Button as MantineButton,
   Grid,
   Group,
-  Menu,
   Modal,
   ScrollArea,
   TagsInput,
@@ -24,8 +23,6 @@ import {
   MdContentCopy,
   MdOutlineCreateNewFolder,
   MdPlayArrow,
-  MdPlaylistAdd,
-  MdPlaylistAddCheck,
   MdPlaylistPlay,
   MdPlaylistRemove,
 } from "react-icons/md";

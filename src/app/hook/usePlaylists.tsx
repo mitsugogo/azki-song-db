@@ -1,4 +1,3 @@
-import { create } from "domain";
 import { Song } from "../types/song";
 import { useLocalStorage } from "@mantine/hooks";
 
@@ -99,7 +98,9 @@ const usePlaylists = () => {
         p.id === playlist.id
           ? {
               ...p,
-              songs: p.songs.filter((entry) => entry.videoId !== videoId),
+              songs: p.songs.filter(
+                (entry) => entry.videoId !== videoId && entry.start !== start
+              ),
               updatedAt: new Date().toISOString(),
             }
           : p
