@@ -1,3 +1,4 @@
+// SearchAndSongList.tsx
 import { useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
@@ -28,6 +29,7 @@ import {
   MdPlaylistRemove,
 } from "react-icons/md";
 import CreatePlaylistModal from "./CreatePlaylistModal";
+import { usePlaylistActions } from "../hook/usePlaylistActions";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -66,16 +68,38 @@ export default function SearchAndSongList({
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
-  const { playlists, isInPlaylist, encodePlaylistUrlParam } = usePlaylists();
+  const { playlists, addToPlaylist, removeFromPlaylist, isNowPlayingPlaylist } =
+    usePlaylists();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
 
   const {
-    addToPlaylist,
-    removeFromPlaylist,
-    isNowPlayingPlaylist,
-    decodePlaylistUrlParam,
-  } = usePlaylists();
+    playPlaylist,
+    disablePlaylistMode,
+    decodePlaylistFromUrl,
+    isInPlaylist,
+  } = usePlaylistActions({
+    allSongs,
+    setSongs,
+    changeCurrentSong,
+    setSearchTerm,
+  });
+
+  const { encodePlaylistUrlParam } = usePlaylists();
+
+  // Handles playing a playlist
+  const handlePlayPlaylist = (playlist: Playlist) => {
+    playPlaylist(playlist);
+    setShowPlaylistSelector(false);
+    setCurrentPlaylist(playlist);
+  };
+
+  // Handles disabling playlist mode
+  const handleDisablePlaylistMode = () => {
+    disablePlaylistMode();
+    setShowPlaylistSelector(false);
+    setCurrentPlaylist(null);
+  };
 
   const baseUrl = window.location.origin;
 
@@ -88,14 +112,16 @@ export default function SearchAndSongList({
 
   useEffect(() => {
     // URLでプレイリストの指定があったら反映
-    const url = new URL(window.location.href);
-    const param = url.searchParams.get("playlist");
-    if (param) {
-      const decodedPlaylist = decodePlaylistUrlParam(param);
-      if (!decodedPlaylist) return;
+    const decodedPlaylist = decodePlaylistFromUrl();
+
+    // プレイリストが変更された場合にのみ状態を更新
+    if (
+      (!decodedPlaylist && currentPlaylist) ||
+      (decodedPlaylist && decodedPlaylist.id !== currentPlaylist?.id)
+    ) {
       setCurrentPlaylist(decodedPlaylist);
     }
-  }, []);
+  }, [decodePlaylistFromUrl, currentPlaylist]);
 
   const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
     option,
@@ -129,7 +155,7 @@ export default function SearchAndSongList({
             onClick={() => playRandomSong(songs)}
             className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
           >
-            <span className="text-sm">ランダムで他の曲に</span>
+            <span className="text-sm">ランダムで他の曲にする</span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
             <Grid.Col span={6}>
@@ -298,18 +324,7 @@ export default function SearchAndSongList({
                     <div
                       className="flex flex-grow items-center ounded cursor-pointer"
                       onClick={() => {
-                        const songs = allSongs
-                          .slice()
-                          .filter((song) => isInPlaylist(playlist, song));
-                        setSongs(songs);
-                        changeCurrentSong(songs[0]);
-
-                        const encoded = encodePlaylistUrlParam(playlist);
-                        const url = new URL(window.location.href);
-                        url.searchParams.set("playlist", encoded);
-                        window.history.pushState({}, "", url);
-                        setShowPlaylistSelector(false);
-                        setCurrentPlaylist(playlist);
+                        handlePlayPlaylist(playlist);
                       }}
                     >
                       {playlist.id === currentPlaylist?.id ? (
@@ -330,19 +345,23 @@ export default function SearchAndSongList({
                       <MantineButton
                         size="xs"
                         onClick={() => {
-                          if (isInPlaylist(playlist, currentSongInfo!)) {
-                            removeFromPlaylist(playlist, currentSongInfo!);
-                          } else {
-                            addToPlaylist(playlist, currentSongInfo!);
+                          if (currentSongInfo) {
+                            if (isInPlaylist(playlist, currentSongInfo)) {
+                              removeFromPlaylist(playlist, currentSongInfo);
+                            } else {
+                              addToPlaylist(playlist, currentSongInfo);
+                            }
                           }
                         }}
                         bg={`${
-                          isInPlaylist(playlist, currentSongInfo!)
+                          currentSongInfo &&
+                          isInPlaylist(playlist, currentSongInfo)
                             ? "green"
                             : "gray"
                         }`}
                       >
-                        {isInPlaylist(playlist, currentSongInfo!) ? (
+                        {currentSongInfo &&
+                        isInPlaylist(playlist, currentSongInfo) ? (
                           <MdCheck className="inline w-5 h-5" />
                         ) : (
                           <MdAdd className="inline w-5 h-5" />
@@ -383,14 +402,7 @@ export default function SearchAndSongList({
                   className="mt-2"
                   color={"gray"}
                   w={"100%"}
-                  onClick={() => {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete("playlist");
-                    window.history.pushState({}, "", url);
-                    setSongs(allSongs);
-                    setShowPlaylistSelector(false);
-                    setCurrentPlaylist(null);
-                  }}
+                  onClick={handleDisablePlaylistMode}
                   leftSection={
                     <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
                   }

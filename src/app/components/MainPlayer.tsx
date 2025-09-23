@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Spinner } from "flowbite-react";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
@@ -14,7 +13,6 @@ import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
-import { time } from "console";
 import usePlaylists from "../hook/usePlaylists";
 
 /**
@@ -32,14 +30,7 @@ export default function MainPlayer() {
     availableMilestones,
   } = useSongs();
 
-  const {
-    songs,
-    setSongs,
-    searchTerm,
-    setSearchTerm,
-    searchSongs,
-    setIsInitialLoading,
-  } = useSearch(allSongs);
+  const { songs, setSongs, searchTerm, setSearchTerm } = useSearch(allSongs);
 
   const {
     currentSong,
@@ -64,7 +55,30 @@ export default function MainPlayer() {
   useEffect(() => {
     if (!currentSongInfo) return;
     setPreviousAndNextSongs(currentSongInfo, songs);
-  }, [currentSongInfo, songs]);
+  }, [currentSongInfo]);
+
+  // 初回ロード完了で曲を再生
+  useEffect(() => {
+    if (songs.length === 0 || currentSongInfo) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const playlist = urlParams.get("playlist");
+
+    if (playlist) {
+      // プレイリストモード → 先頭曲
+      changeCurrentSong(songs[0]);
+      return;
+    }
+
+    if (searchTerm.includes("sololive2025")) {
+      // ソロライブモード → 先頭曲
+      changeCurrentSong(songs[0]);
+      return;
+    }
+
+    // それ以外 → ランダム再生
+    playRandomSong(songs);
+  }, [songs, currentSongInfo, searchTerm, changeCurrentSong, playRandomSong]);
 
   // --- State for UI ---
   const [baseUrl, setBaseUrl] = useState("");
@@ -75,102 +89,7 @@ export default function MainPlayer() {
   // --- Effects ---
   useEffect(() => {
     if (allSongs.length === 0) return;
-
     setBaseUrl(window.location.origin);
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get("q");
-    const videoId = urlParams.get("v");
-    const startTime = urlParams.get("t")?.replace("s", "");
-    const pvId = urlParams.get("pvid");
-    const playlist = urlParams.get("playlist");
-
-    let filteredSongs = allSongs;
-    if (query) {
-      setSearchTerm(query);
-      filteredSongs = searchSongs(allSongs, query);
-    }
-
-    // ソロライブモードの場合は強制的に先頭の曲(Creating world)からスタート
-    if (query === "sololive2025") {
-      setSongs(filteredSongs);
-      changeCurrentSong(filteredSongs[0]);
-      setIsInitialLoading(false);
-      return;
-    }
-
-    // プレイリスト再生モード
-    if (playlist) {
-      const playlistSongs = decodePlaylistUrlParam(playlist);
-      filteredSongs = filteredSongs
-        .filter((song) =>
-          playlistSongs.songs.find(
-            (entry) =>
-              entry.videoId === song.video_id &&
-              Number(String(entry.start)) === Number(song.start)
-          )
-        )
-        .sort((a, b) => {
-          return (
-            playlistSongs.songs.findIndex(
-              (entry) =>
-                entry.videoId === a.video_id &&
-                Number(String(entry.start)) === Number(a.start)
-            ) -
-            playlistSongs.songs.findIndex(
-              (entry) =>
-                entry.videoId === b.video_id &&
-                Number(String(entry.start)) === Number(b.start)
-            )
-          );
-        });
-      setSongs(filteredSongs);
-      if (videoId && startTime) {
-        const targetSong = filteredSongs.find(
-          (song) =>
-            song.video_id === videoId &&
-            Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
-        );
-        if (targetSong) {
-          changeCurrentSong(targetSong);
-        }
-      } else {
-        changeCurrentSong(filteredSongs[0]);
-      }
-      setIsInitialLoading(false);
-      return;
-    }
-
-    if (pvId) {
-      // この動画idから再生する
-      const song = filteredSongs.find((s) => s.video_id === pvId);
-      if (song) {
-        changeCurrentSong(song);
-      } else {
-        playRandomSong(filteredSongs);
-      }
-    } else if (videoId && startTime) {
-      const targetSong = filteredSongs.find(
-        (song) =>
-          song.video_id === videoId &&
-          Math.abs(parseInt(song.start) - parseInt(startTime || "0")) <= 2
-      );
-      if (targetSong) {
-        changeCurrentSong(targetSong);
-      } else {
-        playRandomSong(filteredSongs);
-      }
-    } else if (videoId) {
-      const targetSong = filteredSongs.find(
-        (song) => song.video_id === videoId
-      );
-      if (targetSong) {
-        changeCurrentSong(targetSong);
-      }
-    } else {
-      playRandomSong(filteredSongs);
-    }
-    setSongs(filteredSongs);
-    setIsInitialLoading(false);
   }, [allSongs]);
 
   const setSongsToCurrentVideo = () => {
