@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.16.1](https://github.com/mitsugogo/azki-song-db/compare/v1.16.0...v1.16.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* **playlist:** D&Dが邪魔して曲の削除が出来ないバグを修正 ([add29cf](https://github.com/mitsugogo/azki-song-db/commit/add29cf030cfa457183271167f1514592e888e08))
+
 ## [1.16.0](https://github.com/mitsugogo/azki-song-db/compare/v1.15.1...v1.16.0) (2025-09-23)
 
 
