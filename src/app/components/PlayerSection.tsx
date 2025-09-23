@@ -38,6 +38,7 @@ type PlayerSectionProps = {
   ) => void;
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;
+  setSongs: (songs: Song[]) => void;
   setOpenShareModal: (isOpen: boolean) => void;
   setSearchTerm: (term: string) => void;
   setHideFutureSongs: (value: boolean) => void;
@@ -60,6 +61,7 @@ export default function PlayerSection({
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
+  setSongs,
   setSongsToCurrentVideo,
   setOpenShareModal,
   setSearchTerm,
@@ -274,8 +276,7 @@ export default function PlayerSection({
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
                 <span className="text-xs">
-                  <FaShuffle className="mr-2 inline" />
-                  ランダム
+                  <FaShuffle className="inline" />
                 </span>
               </Button>
 
@@ -302,6 +303,7 @@ export default function PlayerSection({
             </div>
             <div className="flex justify-end">
               <PlayerSettings
+                currentSongInfo={currentSongInfo}
                 hideFutureSongs={hideFutureSongs}
                 setHideFutureSongs={setHideFutureSongs}
                 setOpenShereModal={setOpenShareModal}

@@ -1,18 +1,11 @@
 "use client";
 
-import { Button, Pagination } from "flowbite-react";
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
 import { useEffect, useState, useMemo } from "react";
-import {
-  MdFirstPage,
-  MdLastPage,
-  MdSkipNext,
-  MdSkipPrevious,
-} from "react-icons/md";
+import { MdFirstPage, MdLastPage } from "react-icons/md";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-import { HiChevronLeft } from "react-icons/hi";
-import { useSwipeable } from "react-swipeable"; // 追加
+import { useSwipeable } from "react-swipeable";
 
 interface SongListProps {
   songs: Song[];

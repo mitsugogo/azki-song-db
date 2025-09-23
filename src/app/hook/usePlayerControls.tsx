@@ -106,6 +106,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       videoId?: string,
       startTime?: number
     ) => {
+      if (!song) {
+        return;
+      }
       const url = new URL(window.location.href);
       url.searchParams.delete("v");
       url.searchParams.delete("t");

@@ -5,7 +5,31 @@ import { Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
 import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
-import { Group, TagsInput, TagsInputProps, Text } from "@mantine/core";
+import {
+  Button as MantineButton,
+  Grid,
+  Group,
+  Menu,
+  Modal,
+  ScrollArea,
+  TagsInput,
+  TagsInputProps,
+  Text,
+  CopyButton,
+  Tooltip,
+} from "@mantine/core";
+import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import {
+  MdCheck,
+  MdContentCopy,
+  MdOutlineCreateNewFolder,
+  MdPlayArrow,
+  MdPlaylistAdd,
+  MdPlaylistAddCheck,
+  MdPlaylistPlay,
+  MdPlaylistRemove,
+} from "react-icons/md";
+import CreatePlaylistModal from "./CreatePlaylistModal";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -22,6 +46,7 @@ type SearchAndSongListProps = {
   changeCurrentSong: (song: Song | null) => void;
   playRandomSong: (songList: Song[]) => void;
   setSearchTerm: (term: string) => void;
+  setSongs: (songs: Song[]) => void;
 };
 
 export default function SearchAndSongList({
@@ -38,8 +63,18 @@ export default function SearchAndSongList({
   changeCurrentSong,
   playRandomSong,
   setSearchTerm,
+  setSongs,
 }: SearchAndSongListProps) {
   const [searchValue, setSearchValue] = useState<string[]>([]);
+  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
+
+  const { playlists, isInPlaylist, encodePlaylistUrlParam } = usePlaylists();
+  const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
+  const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
+
+  const { isNowPlayingPlaylist, decodePlaylistUrlParam } = usePlaylists();
+
+  const baseUrl = window.location.origin;
 
   useEffect(() => {
     const s = searchTerm.split("|").filter((s) => s.trim() !== "");
@@ -47,6 +82,17 @@ export default function SearchAndSongList({
       setSearchValue(searchTerm.split("|"));
     }
   }, [searchTerm]);
+
+  useEffect(() => {
+    // URLでプレイリストの指定があったら反映
+    const url = new URL(window.location.href);
+    const param = url.searchParams.get("playlist");
+    if (param) {
+      const decodedPlaylist = decodePlaylistUrlParam(param);
+      if (!decodedPlaylist) return;
+      setCurrentPlaylist(decodedPlaylist);
+    }
+  }, []);
 
   const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
     option,
@@ -75,28 +121,62 @@ export default function SearchAndSongList({
   return (
     <section className="flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full sm:mx-0">
       <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
-        <Button
-          onClick={() => playRandomSong(songs)}
-          className="hidden lg:block px-3 py-1 bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition mb-1 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
-        >
-          <span className="text-sm">ランダムで他の曲にする</span>
-        </Button>
+        <div className="mb-2 hidden lg:block">
+          <Button
+            onClick={() => playRandomSong(songs)}
+            className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
+          >
+            <span className="text-sm">ランダムで他の曲に</span>
+          </Button>
+          <Grid grow gutter={{ base: 5 }} className="mt-2">
+            <Grid.Col span={6}>
+              <Button
+                onClick={() => {
+                  // ソロライブ用のプレイリストをセットしてCreating worldを再生
+                  setSearchTerm("sololive2025");
+                  const song = songs.find(
+                    (song) => song.video_id === "ZkvtKUQp3nM"
+                  );
+                  if (!song) return;
+                  changeCurrentSong(song);
+                }}
+                className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
+              >
+                <LuCrown className="mr-1" />
+                <span className="text-sm">ソロライブ予習</span>
+              </Button>
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Button
+                className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0  ${
+                  isNowPlayingPlaylist()
+                    ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+                    : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+                }`}
+                onClick={() => {
+                  setShowPlaylistSelector(true);
+                }}
+              >
+                プレイリスト
+              </Button>
+            </Grid.Col>
+          </Grid>
+        </div>
 
-        <Button
-          onClick={() => {
-            // ソロライブ用のプレイリストをセットしてCreating worldを再生
-            setSearchTerm("sololive2025");
-            const song = songs.find((song) => song.video_id === "ZkvtKUQp3nM");
-            if (!song) return;
-            changeCurrentSong(song);
-          }}
-          className="hidden lg:block px-3 py-1 cursor-pointer text-white rounded transition mb-2 shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
-        >
-          <span className="text-sm">
-            <LuCrown className="inline mr-2" />
-            ソロライブ予習モード
-          </span>
-        </Button>
+        <div className="md:hidden mb-2">
+          <Button
+            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0  ${
+              isNowPlayingPlaylist()
+                ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+                : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+            }`}
+            onClick={() => {
+              setShowPlaylistSelector(true);
+            }}
+          >
+            プレイリスト
+          </Button>
+        </div>
 
         <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
           {/* Search Bar */}
@@ -167,6 +247,146 @@ export default function SearchAndSongList({
           hideFutureSongs={hideFutureSongs}
         />
       </div>
+      <Modal
+        opened={showPlaylistSelector}
+        onClose={() => setShowPlaylistSelector(false)}
+        title="プレイリスト"
+      >
+        <Modal.Body>
+          {playlists.length === 0 ? (
+            <>
+              <div>
+                プレイリストを作成して、自分だけのセットリストを作成しましょう！
+              </div>
+              <MantineButton
+                onClick={() => setOpenCreatePlaylistModal(true)}
+                className="mt-2"
+              >
+                <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                プレイリストを作成
+              </MantineButton>
+            </>
+          ) : (
+            <>
+              {currentPlaylist && (
+                <>
+                  <div className="bg-gray-100 dark:bg-gray-800 py-2 px-3 rounded">
+                    ♪ 「{currentPlaylist?.name}」 (
+                    {currentPlaylist?.songs.length}
+                    曲) を再生中
+                  </div>
+                  <div className="my-3 border-b border-gray-300"></div>
+                </>
+              )}
+
+              <div className="mb-2 mx-3 text-sm">
+                再生するプレイリストを選択してください
+              </div>
+              <ScrollArea h={400}>
+                {playlists.map((playlist, index) => (
+                  <Grid key={`${index}-${playlist.id}`} gutter={"xs"}>
+                    <Grid.Col span={9}>
+                      <MantineButton
+                        key={playlist.id}
+                        onClick={() => {
+                          const songs = allSongs
+                            .slice()
+                            .filter((song) => isInPlaylist(playlist, song));
+                          setSongs(songs);
+                          changeCurrentSong(songs[0]);
+
+                          const encoded = encodePlaylistUrlParam(playlist);
+                          const url = new URL(window.location.href);
+                          url.searchParams.set("playlist", encoded);
+                          window.history.pushState({}, "", url);
+                          setShowPlaylistSelector(false);
+                          setCurrentPlaylist(playlist);
+                        }}
+                        leftSection={
+                          playlist.id === currentPlaylist?.id ? (
+                            <MdPlayArrow className="mr-2 inline w-5 h-5" />
+                          ) : (
+                            <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
+                          )
+                        }
+                        w={"100%"}
+                        bg={`${
+                          playlist.id === currentPlaylist?.id ? "green" : "gray"
+                        }`}
+                        color={`${
+                          playlist.id === currentPlaylist?.id ? "white" : ""
+                        }`}
+                      >
+                        {playlist.name}
+                      </MantineButton>
+                    </Grid.Col>
+                    <Grid.Col span={3}>
+                      <CopyButton
+                        value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
+                          playlist
+                        )}`}
+                        timeout={2000}
+                      >
+                        {({ copied, copy }) => (
+                          <Tooltip
+                            withArrow
+                            label="URLをコピーしてプレイリストをシェアできます"
+                          >
+                            <MantineButton
+                              onClick={copy}
+                              color={`${copied ? "green" : "gray"}`}
+                            >
+                              {copied ? (
+                                <MdCheck className="inline w-5 h-5" />
+                              ) : (
+                                <MdContentCopy className="inline w-5 h-5" />
+                              )}
+                            </MantineButton>
+                          </Tooltip>
+                        )}
+                      </CopyButton>
+                    </Grid.Col>
+                  </Grid>
+                ))}
+              </ScrollArea>
+
+              <div className="border-t border-light-gray-300 dark:border-gray-600 mt-2">
+                <MantineButton
+                  className="mt-2"
+                  color={"gray"}
+                  w={"100%"}
+                  onClick={() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("playlist");
+                    window.history.pushState({}, "", url);
+                    setSongs(allSongs);
+                    setShowPlaylistSelector(false);
+                    setCurrentPlaylist(null);
+                  }}
+                  leftSection={
+                    <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
+                  }
+                >
+                  プレイリスト再生モードを解除
+                </MantineButton>
+              </div>
+            </>
+          )}
+        </Modal.Body>
+        <MantineButton
+          variant="filled"
+          color="dark"
+          className="ml-3"
+          onClick={() => setShowPlaylistSelector(false)}
+        >
+          閉じる
+        </MantineButton>
+      </Modal>
+
+      <CreatePlaylistModal
+        onenModal={openCreatePlaylistModal}
+        setOpenModal={setOpenCreatePlaylistModal}
+      />
     </section>
   );
 }

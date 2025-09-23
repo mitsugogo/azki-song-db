@@ -1,4 +1,4 @@
-import DiscographyPage from "./client";
+import PlaylistDetailPage from "./client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { metadata } from "../layout";
 
@@ -14,11 +14,8 @@ export async function generateMetadata(
   { params, searchParams }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { q, v, t } = await searchParams;
-
-  const title = "Discography";
+  const title = "プレイリスト";
   const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
-
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
   ogImageUrl.searchParams.set("subtitle", subtitle);
@@ -28,7 +25,7 @@ export async function generateMetadata(
 
   return {
     ...metadata,
-    title: "Discography | AZKi Song Database",
+    title: "プレイリスト | AZKi Song Database",
     description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
     openGraph: {
       ...metadata.openGraph,
@@ -38,5 +35,5 @@ export async function generateMetadata(
 }
 
 export default function Page() {
-  return <DiscographyPage />;
+  return <PlaylistDetailPage />;
 }
