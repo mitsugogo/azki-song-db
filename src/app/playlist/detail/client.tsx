@@ -157,7 +157,7 @@ export default function PlaylistDetailPage() {
               s.start
             }&playlist=${encodePlaylistUrlParam(playlist)}`}
           >
-            <Button>再生</Button>
+            <Button color="gray">再生</Button>
           </Link>
         </Table.Td>
       </Table.Tr>

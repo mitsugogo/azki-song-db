@@ -152,6 +152,7 @@ export default function PlaylistPage() {
                 >
                   {({ copied, copy }) => (
                     <Button
+                      size="xs"
                       variant="outline"
                       color={copied ? "teal" : "blue"}
                       onClick={() => {
@@ -187,7 +188,14 @@ export default function PlaylistPage() {
 
           <Table.Tbody>
             {playlists.map((playlist) => (
-              <Table.Tr key={playlist.id}>
+              <Table.Tr
+                key={playlist.id}
+                bg={`${
+                  selectedRows.includes(playlist.id || "")
+                    ? "var(--mantine-color-blue-light)"
+                    : ""
+                }`}
+              >
                 <Table.Td>
                   <Checkbox
                     aria-label="Select row"
@@ -208,7 +216,10 @@ export default function PlaylistPage() {
                     href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
                     className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
                   >
-                    <FaPlay />
+                    <Button size="xs" color="gray" radius={"sm"}>
+                      <FaPlay className="mr-1" />
+                      再生
+                    </Button>
                   </Link>
                 </Table.Td>
                 <Table.Td>
@@ -249,6 +260,7 @@ export default function PlaylistPage() {
                       {({ copied, copy }) => (
                         <Button
                           variant="outline"
+                          size="xs"
                           color={copied ? "teal" : "blue"}
                           onClick={() => {
                             copy();

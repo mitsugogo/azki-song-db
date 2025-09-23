@@ -273,8 +273,8 @@ export default function SearchAndSongList({
             <>
               {currentPlaylist && (
                 <>
-                  <div className="bg-gray-100 dark:bg-gray-800 py-2 px-3 rounded">
-                    ♪ 「{currentPlaylist?.name}」 (
+                  <div className="bg-green-100 dark:bg-gray-800 py-2 px-3 rounded text-sm">
+                    ♪ 「{currentPlaylist?.name}」プレイリスト (
                     {currentPlaylist?.songs.length}
                     曲) を再生中
                   </div>
@@ -290,9 +290,9 @@ export default function SearchAndSongList({
                   <div
                     key={`${index}-${playlist.id}`}
                     className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
-                      index % 2 === 0
-                        ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-600"
-                        : "hover:bg-gray-200 dark:hover:bg-gray-600"
+                      playlist.id === currentPlaylist?.id
+                        ? "bg-green-100 dark:bg-gray-600"
+                        : ""
                     }`}
                   >
                     <div
