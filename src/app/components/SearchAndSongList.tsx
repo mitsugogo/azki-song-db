@@ -162,7 +162,7 @@ export default function SearchAndSongList({
 
         <div className="md:hidden mb-2">
           <Button
-            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0  ${
+            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition ring-0 focus:ring-0  ${
               isNowPlayingPlaylist()
                 ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
                 : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
