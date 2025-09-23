@@ -9,6 +9,22 @@ import Link from "next/link";
 import Loading from "@/app/loading";
 import { FaRegTrashCan } from "react-icons/fa6";
 
+import {
+  DndContext,
+  closestCenter,
+  useSensors,
+  useSensor,
+  PointerSensor,
+  KeyboardSensor,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 type PlaylistWithSongs = {
   id: string;
   name: string;
@@ -17,6 +33,64 @@ type PlaylistWithSongs = {
     start: number;
     songinfo: Song;
   }[];
+};
+
+const SortableRow = ({
+  s,
+  index,
+  playlist,
+  encodePlaylistUrlParam,
+  isSelected,
+  onCheckboxChange,
+}: {
+  s: PlaylistWithSongs["songs"][0];
+  index: number;
+  playlist: Playlist;
+  encodePlaylistUrlParam: (playlist: Playlist) => string;
+  isSelected: boolean;
+  onCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: `${s.videoId}-${s.start}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <Table.Tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      bg={isSelected ? "var(--mantine-color-blue-light)" : undefined}
+    >
+      <Table.Td>
+        <Checkbox
+          aria-label="Select row"
+          checked={isSelected}
+          onChange={onCheckboxChange}
+        />
+      </Table.Td>
+      <Table.Td>{index + 1}</Table.Td>
+      <Table.Td>
+        <div className="line-clamp-2">{s.songinfo.title}</div>
+        <div className="line-clamp-1 text-xs text-light-gray-400 dark:text-gray-200">
+          {s.songinfo.artist}
+        </div>
+      </Table.Td>
+      <Table.Td>
+        <Link
+          href={`/?v=${s.videoId}&t=${
+            s.start
+          }&playlist=${encodePlaylistUrlParam(playlist)}`}
+        >
+          <Button color="gray">再生</Button>
+        </Link>
+      </Table.Td>
+    </Table.Tr>
+  );
 };
 
 export default function PlaylistDetailPage() {
@@ -30,6 +104,13 @@ export default function PlaylistDetailPage() {
   const { playlists, updatePlaylist, encodePlaylistUrlParam, clearAllSongs } =
     usePlaylists();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const rowKeys = useMemo(
     () => playlistSongs.map((s) => `${s.videoId}-${s.start}`),
@@ -102,6 +183,30 @@ export default function PlaylistDetailPage() {
     handlers.resetSelection();
   };
 
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      const oldIndex = rowKeys.indexOf(active.id);
+      const newIndex = rowKeys.indexOf(over.id);
+
+      const newSongs = arrayMove(playlistSongs, oldIndex, newIndex);
+
+      setPlaylistSongs(newSongs);
+
+      if (playlist) {
+        const updatedPlaylist = {
+          ...playlist,
+          songs: newSongs.map((s) => ({
+            videoId: s.videoId,
+            start: String(s.start),
+          })),
+        };
+        updatePlaylist(updatedPlaylist);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0">
@@ -121,48 +226,6 @@ export default function PlaylistDetailPage() {
       </div>
     );
   }
-
-  const rows = playlistSongs.map((s, index) => {
-    const rowKey = `${s.videoId}-${s.start}`;
-    const isSelected = selection.includes(rowKey);
-
-    return (
-      <Table.Tr
-        key={rowKey}
-        bg={isSelected ? "var(--mantine-color-blue-light)" : undefined}
-      >
-        <Table.Td>
-          <Checkbox
-            aria-label="Select row"
-            checked={isSelected}
-            onChange={(event) => {
-              if (event.currentTarget.checked) {
-                handlers.select(rowKey);
-              } else {
-                handlers.deselect(rowKey);
-              }
-            }}
-          />
-        </Table.Td>
-        <Table.Td>{index + 1}</Table.Td>
-        <Table.Td>
-          <div className="line-clamp-2">{s.songinfo.title}</div>
-          <div className="line-clamp-1 text-xs text-light-gray-400 dark:text-gray-200">
-            {s.songinfo.artist}
-          </div>
-        </Table.Td>
-        <Table.Td>
-          <Link
-            href={`/?v=${s.videoId}&t=${
-              s.start
-            }&playlist=${encodePlaylistUrlParam(playlist)}`}
-          >
-            <Button color="gray">再生</Button>
-          </Link>
-        </Table.Td>
-      </Table.Tr>
-    );
-  });
 
   return (
     <div className="flex-grow pt-3 p-1 lg:p-6 lg:pb-0">
@@ -216,7 +279,7 @@ export default function PlaylistDetailPage() {
             <Table.Th>動画</Table.Th>
           </Table.Tr>
         </Table.Thead>
-        {rows.length === 0 && (
+        {playlistSongs.length === 0 && (
           <Table.Tbody>
             <Table.Tr>
               <Table.Td colSpan={5} className="text-center">
@@ -225,7 +288,37 @@ export default function PlaylistDetailPage() {
             </Table.Tr>
           </Table.Tbody>
         )}
-        <Table.Tbody>{rows}</Table.Tbody>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={rowKeys}>
+            <Table.Tbody>
+              {playlistSongs.map((s, index) => {
+                const rowKey = `${s.videoId}-${s.start}`;
+                const isSelected = selection.includes(rowKey);
+                return (
+                  <SortableRow
+                    key={rowKey}
+                    s={s}
+                    index={index}
+                    playlist={playlist}
+                    encodePlaylistUrlParam={encodePlaylistUrlParam}
+                    isSelected={isSelected}
+                    onCheckboxChange={(event) => {
+                      if (event.currentTarget.checked) {
+                        handlers.select(rowKey);
+                      } else {
+                        handlers.deselect(rowKey);
+                      }
+                    }}
+                  />
+                );
+              })}
+            </Table.Tbody>
+          </SortableContext>
+        </DndContext>
       </Table>
     </div>
   );

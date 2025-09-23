@@ -101,15 +101,29 @@ export default function MainPlayer() {
     // プレイリスト再生モード
     if (playlist) {
       const playlistSongs = decodePlaylistUrlParam(playlist);
-      filteredSongs = filteredSongs.filter((song) =>
-        playlistSongs.songs.find(
-          (entry) =>
-            entry.videoId === song.video_id && entry.start === song.start
+      filteredSongs = filteredSongs
+        .filter((song) =>
+          playlistSongs.songs.find(
+            (entry) =>
+              entry.videoId === song.video_id &&
+              Number(String(entry.start)) === Number(song.start)
+          )
         )
-      );
+        .sort((a, b) => {
+          return (
+            playlistSongs.songs.findIndex(
+              (entry) =>
+                entry.videoId === a.video_id &&
+                Number(String(entry.start)) === Number(a.start)
+            ) -
+            playlistSongs.songs.findIndex(
+              (entry) =>
+                entry.videoId === b.video_id &&
+                Number(String(entry.start)) === Number(b.start)
+            )
+          );
+        });
       setSongs(filteredSongs);
-
-      console.log(videoId, startTime);
       if (videoId && startTime) {
         const targetSong = filteredSongs.find(
           (song) =>

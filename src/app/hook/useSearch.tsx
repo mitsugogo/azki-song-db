@@ -266,19 +266,24 @@ const useSearch = (allSongs: Song[]) => {
       if (decodedPlaylist) {
         setSongs(
           allSongs
-            .filter((song) => {
-              return decodedPlaylist.songs.some(
-                (s) => s.videoId === song.video_id && s.start === song.start
-              );
-            })
+            .filter((song) =>
+              decodedPlaylist.songs.find(
+                (entry) =>
+                  entry.videoId === song.video_id &&
+                  Number(String(entry.start)) === Number(song.start)
+              )
+            )
             .sort((a, b) => {
-              // プレイリストに入れた順でソート
               return (
                 decodedPlaylist.songs.findIndex(
-                  (s) => s.videoId === a.video_id && s.start === a.start
+                  (entry) =>
+                    entry.videoId === a.video_id &&
+                    Number(String(entry.start)) === Number(a.start)
                 ) -
                 decodedPlaylist.songs.findIndex(
-                  (s) => s.videoId === b.video_id && s.start === b.start
+                  (entry) =>
+                    entry.videoId === b.video_id &&
+                    Number(String(entry.start)) === Number(b.start)
                 )
               );
             })
