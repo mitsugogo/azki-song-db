@@ -53,7 +53,7 @@ export default function PlaylistPage() {
   );
 
   return (
-    <div className="flex-grow lg:p-6 lg:pb-0">
+    <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
       <Breadcrumbs>{breadcrumbs}</Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
@@ -63,7 +63,7 @@ export default function PlaylistPage() {
         setOpenModal={setOpenCreatePlaylistModal}
       />
 
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         <Button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           onClick={() => setOpenCreatePlaylistModal(true)}
@@ -73,7 +73,7 @@ export default function PlaylistPage() {
         </Button>
         <Button
           color="red"
-          className="ml-3"
+          className="mt-3 lg:mt-0 lg:ml-3"
           disabled={selectedRows.length === 0}
           onClick={() => {
             if (
@@ -95,26 +95,17 @@ export default function PlaylistPage() {
         </Button>
       </div>
 
-      <Table striped highlightOnHover withColumnBorders className="mt-6">
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th></Table.Th>
-            <Table.Th>再生</Table.Th>
-            <Table.Th>#</Table.Th>
-            <Table.Th>プレイリスト名</Table.Th>
-            <Table.Th>曲数</Table.Th>
-            <Table.Th>作成日</Table.Th>
-            <Table.Th>最終更新</Table.Th>
-            <Table.Th>共有URL</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-
-        <Table.Tbody>
-          {playlists.map((playlist) => (
-            <Table.Tr key={playlist.id}>
-              <Table.Td>
+      {/* モバイル用カードリスト（デフォルト表示） */}
+      <div className="mt-6 p-2 space-y-4 lg:hidden">
+        {playlists.map((playlist) => (
+          <div
+            key={playlist.id}
+            className="p-4 border border-gray-200 rounded-lg shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <Checkbox
-                  aria-label="Select row"
+                  aria-label="Select playlist"
                   checked={selectedRows.includes(playlist.id || "")}
                   onChange={(event) =>
                     setSelectedRows(
@@ -126,41 +117,31 @@ export default function PlaylistPage() {
                     )
                   }
                 />
-              </Table.Td>
-              <Table.Td>
-                <Link
-                  href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
-                  className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
-                >
-                  <FaPlay />
-                </Link>
-              </Table.Td>
-              <Table.Td>
                 <Link
                   href={`/playlist/detail?id=${playlist.id}`}
-                  className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
-                >
-                  {playlist.id}
-                </Link>
-              </Table.Td>
-              <Table.Td className="font-semibold">
-                <Link
-                  href={`/playlist/detail?id=${playlist.id}`}
-                  className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                  className="ml-3 font-semibold text-lg hover:underline"
                 >
                   {playlist.name}
                 </Link>
-              </Table.Td>
-              <Table.Td>
-                {playlist.songs.length} / {getMaxLimit()}
-              </Table.Td>
-              <Table.Td>
-                {new Date(playlist.createdAt as string).toLocaleString()}
-              </Table.Td>
-              <Table.Td>
+              </div>
+              <Link
+                href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                className="text-primary hover:text-primary-600 dark:hover:text-primary-500"
+              >
+                <FaPlay size={20} />
+              </Link>
+            </div>
+            <div className="mt-2 text-sm text-gray-300">
+              <p>
+                曲数: {playlist.songs.length} / {getMaxLimit()}
+              </p>
+              <p>
+                更新日:{" "}
                 {new Date(playlist.updatedAt as string).toLocaleString()}
-              </Table.Td>
-              <Table.Td>
+              </p>
+            </div>
+            <div className="mt-4 flex justify-end">
+              {playlist.songs.length > 0 && (
                 <CopyButton
                   value={
                     window.location.origin +
@@ -178,15 +159,113 @@ export default function PlaylistPage() {
                         setShowCopylinkToast(true);
                       }}
                     >
-                      {copied ? "Copied" : "Copy"}
+                      {copied ? "コピーしました" : "共有用URLコピー"}
                     </Button>
                   )}
                 </CopyButton>
-              </Table.Td>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* デスクトップ用テーブル（モバイルでは非表示） */}
+      <div className="hidden lg:block w-full">
+        <Table striped highlightOnHover withColumnBorders className="mt-6">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th></Table.Th>
+              <Table.Th>再生</Table.Th>
+              <Table.Th>#</Table.Th>
+              <Table.Th>プレイリスト名</Table.Th>
+              <Table.Th>曲数</Table.Th>
+              <Table.Th>作成日</Table.Th>
+              <Table.Th>最終更新</Table.Th>
+              <Table.Th>共有URL</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+
+          <Table.Tbody>
+            {playlists.map((playlist) => (
+              <Table.Tr key={playlist.id}>
+                <Table.Td>
+                  <Checkbox
+                    aria-label="Select row"
+                    checked={selectedRows.includes(playlist.id || "")}
+                    onChange={(event) =>
+                      setSelectedRows(
+                        event.currentTarget.checked
+                          ? [...selectedRows, playlist.id || ""]
+                          : selectedRows.filter(
+                              (position) => position !== playlist.id
+                            )
+                      )
+                    }
+                  />
+                </Table.Td>
+                <Table.Td>
+                  <Link
+                    href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                  >
+                    <FaPlay />
+                  </Link>
+                </Table.Td>
+                <Table.Td>
+                  <Link
+                    href={`/playlist/detail?id=${playlist.id}`}
+                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                  >
+                    {playlist.id}
+                  </Link>
+                </Table.Td>
+                <Table.Td className="font-semibold">
+                  <Link
+                    href={`/playlist/detail?id=${playlist.id}`}
+                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                  >
+                    {playlist.name}
+                  </Link>
+                </Table.Td>
+                <Table.Td>
+                  {playlist.songs.length} / {getMaxLimit()}
+                </Table.Td>
+                <Table.Td>
+                  {new Date(playlist.createdAt as string).toLocaleString()}
+                </Table.Td>
+                <Table.Td>
+                  {new Date(playlist.updatedAt as string).toLocaleString()}
+                </Table.Td>
+                <Table.Td>
+                  {playlist.songs.length > 0 && (
+                    <CopyButton
+                      value={
+                        window.location.origin +
+                        "?playlist=" +
+                        encodePlaylistUrlParam(playlist)
+                      }
+                      timeout={3000}
+                    >
+                      {({ copied, copy }) => (
+                        <Button
+                          variant="outline"
+                          color={copied ? "teal" : "blue"}
+                          onClick={() => {
+                            copy();
+                            setShowCopylinkToast(true);
+                          }}
+                        >
+                          {copied ? "コピーしました" : "共有用URLコピー"}
+                        </Button>
+                      )}
+                    </CopyButton>
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </div>
 
       {showDeletePlaylistToast && (
         <div className="fixed top-[80px] right-4">

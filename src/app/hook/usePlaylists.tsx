@@ -39,7 +39,7 @@ const usePlaylists = () => {
   // 該当のプレイリストに入っているかチェック
   const isInPlaylist = (playlist: Playlist, song: Song) => {
     const find = playlist.songs.find(
-      (entry) => entry.videoId == song.video_id && entry.start == song.start
+      (entry) => entry.videoId == song?.video_id && entry.start == song?.start
     );
     return !!find;
   };

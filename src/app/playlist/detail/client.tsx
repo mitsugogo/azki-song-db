@@ -145,8 +145,12 @@ export default function PlaylistDetailPage() {
           />
         </Table.Td>
         <Table.Td>{index + 1}</Table.Td>
-        <Table.Td>{s.songinfo.title}</Table.Td>
-        <Table.Td>{s.songinfo.artist}</Table.Td>
+        <Table.Td>
+          <div className="line-clamp-2">{s.songinfo.title}</div>
+          <div className="line-clamp-1 text-xs text-light-gray-400 dark:text-gray-200">
+            {s.songinfo.artist}
+          </div>
+        </Table.Td>
         <Table.Td>
           <Link
             href={`/?v=${s.videoId}&t=${
@@ -208,8 +212,7 @@ export default function PlaylistDetailPage() {
               />
             </Table.Th>
             <Table.Th>#</Table.Th>
-            <Table.Th>曲名</Table.Th>
-            <Table.Th>アーティスト名</Table.Th>
+            <Table.Th>曲/アーティスト</Table.Th>
             <Table.Th>動画</Table.Th>
           </Table.Tr>
         </Table.Thead>

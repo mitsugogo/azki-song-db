@@ -56,7 +56,7 @@ export default function PlayerSettings({
 
   return (
     <div
-      className="inline-grid relative text-right grid-cols-2 md:grid-cols-3 gap-1"
+      className="hidden lg:inline-grid relative text-right grid-cols-2 md:grid-cols-3 gap-1"
       ref={settingsRef}
     >
       <div>
