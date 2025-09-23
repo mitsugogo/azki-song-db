@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.0](https://github.com/mitsugogo/azki-song-db/compare/v1.15.1...v1.16.0) (2025-09-23)
+
+
+### Features
+
+* プレイリスト機能を追加 [#152](https://github.com/mitsugogo/azki-song-db/issues/152) ([b306fdd](https://github.com/mitsugogo/azki-song-db/commit/b306fddece3189e151a4c09cd9ecc5cb3554e45a))
+
+
+### Bug Fixes
+
+* 新規プレイリストモーダルが出たときにメニューが閉じないバグを修正 ([9a14a69](https://github.com/mitsugogo/azki-song-db/commit/9a14a69fcdf9abf3e061259fa4bd54c26b5cea60))
+
 ### [1.15.1](https://github.com/mitsugogo/azki-song-db/compare/v1.15.0...v1.15.1) (2025-09-21)
 
 
