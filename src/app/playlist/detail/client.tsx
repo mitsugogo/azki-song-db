@@ -78,9 +78,13 @@ export default function PlaylistDetailPage() {
     const songsWithInfo = currentPlaylist.songs
       .map((s) => {
         const songInfo = allSongs.find(
-          (song) => song.video_id === s.videoId && song.start === s.start
+          (song) =>
+            song.video_id === s.videoId &&
+            Number(String(song.start)) === Number(s.start)
         );
-        return songInfo ? { ...s, songinfo: songInfo } : null;
+        return songInfo
+          ? { ...s, start: Number(s.start), songinfo: songInfo }
+          : null;
       })
       .filter((s) => s !== null);
 
