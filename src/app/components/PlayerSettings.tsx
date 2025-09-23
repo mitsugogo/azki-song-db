@@ -125,6 +125,8 @@ export default function PlayerSettings({
             <Menu.Divider />
             <MenuItem
               onClick={() => {
+                setIsSettingsOpen(false);
+                setShowPlaylistMenu(false);
                 setOpenCreatePlaylistModal(true);
               }}
             >
