@@ -72,7 +72,7 @@ export default function PlayerSettings({
               >
                 <Button
                   className="inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
-                  onClick={() => setShowPlaylistMenu(true)}
+                  onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
                 >
                   {isInAnyPlaylist(currentSongInfo!) ? (
                     <FaStar />
@@ -102,6 +102,11 @@ export default function PlayerSettings({
                   onClick={(e) => {
                     e.preventDefault();
                     addOrRemovePlaylist(playlist);
+
+                    if (playlists.length === 1) {
+                      setShowPlaylistMenu(false);
+                      setIsSettingsOpen(false);
+                    }
                   }}
                   leftSection={
                     isInPlaylist(playlist, currentSongInfo!) ? (
