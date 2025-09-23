@@ -5,6 +5,7 @@ import { Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
 import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
+import { MdAdd } from "react-icons/md";
 import {
   Button as MantineButton,
   Grid,
@@ -69,7 +70,12 @@ export default function SearchAndSongList({
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
 
-  const { isNowPlayingPlaylist, decodePlaylistUrlParam } = usePlaylists();
+  const {
+    addToPlaylist,
+    removeFromPlaylist,
+    isNowPlayingPlaylist,
+    decodePlaylistUrlParam,
+  } = usePlaylists();
 
   const baseUrl = window.location.origin;
 
@@ -281,69 +287,94 @@ export default function SearchAndSongList({
               </div>
               <ScrollArea h={400}>
                 {playlists.map((playlist, index) => (
-                  <Grid key={`${index}-${playlist.id}`} gutter={"xs"}>
-                    <Grid.Col span={9}>
-                      <MantineButton
-                        key={playlist.id}
-                        onClick={() => {
-                          const songs = allSongs
-                            .slice()
-                            .filter((song) => isInPlaylist(playlist, song));
-                          setSongs(songs);
-                          changeCurrentSong(songs[0]);
+                  <div
+                    key={`${index}-${playlist.id}`}
+                    className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
+                      index % 2 === 0
+                        ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        : "hover:bg-gray-200 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    <div
+                      className="flex flex-grow items-center ounded cursor-pointer"
+                      onClick={() => {
+                        const songs = allSongs
+                          .slice()
+                          .filter((song) => isInPlaylist(playlist, song));
+                        setSongs(songs);
+                        changeCurrentSong(songs[0]);
 
-                          const encoded = encodePlaylistUrlParam(playlist);
-                          const url = new URL(window.location.href);
-                          url.searchParams.set("playlist", encoded);
-                          window.history.pushState({}, "", url);
-                          setShowPlaylistSelector(false);
-                          setCurrentPlaylist(playlist);
+                        const encoded = encodePlaylistUrlParam(playlist);
+                        const url = new URL(window.location.href);
+                        url.searchParams.set("playlist", encoded);
+                        window.history.pushState({}, "", url);
+                        setShowPlaylistSelector(false);
+                        setCurrentPlaylist(playlist);
+                      }}
+                    >
+                      {playlist.id === currentPlaylist?.id ? (
+                        <MdPlayArrow className="mr-2 inline w-5 h-5" />
+                      ) : (
+                        <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
+                      )}
+                      {playlist.name}
+                    </div>
+                    <Tooltip
+                      withArrow
+                      label={`${
+                        isInPlaylist(playlist, currentSongInfo!)
+                          ? "現在の楽曲をプレイリストから削除します"
+                          : "現在の楽曲をプレイリストに追加します"
+                      }`}
+                    >
+                      <MantineButton
+                        size="xs"
+                        onClick={() => {
+                          if (isInPlaylist(playlist, currentSongInfo!)) {
+                            removeFromPlaylist(playlist, currentSongInfo!);
+                          } else {
+                            addToPlaylist(playlist, currentSongInfo!);
+                          }
                         }}
-                        leftSection={
-                          playlist.id === currentPlaylist?.id ? (
-                            <MdPlayArrow className="mr-2 inline w-5 h-5" />
-                          ) : (
-                            <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
-                          )
-                        }
-                        w={"100%"}
                         bg={`${
-                          playlist.id === currentPlaylist?.id ? "green" : "gray"
-                        }`}
-                        color={`${
-                          playlist.id === currentPlaylist?.id ? "white" : ""
+                          isInPlaylist(playlist, currentSongInfo!)
+                            ? "green"
+                            : "gray"
                         }`}
                       >
-                        {playlist.name}
-                      </MantineButton>
-                    </Grid.Col>
-                    <Grid.Col span={3}>
-                      <CopyButton
-                        value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                          playlist
-                        )}`}
-                        timeout={2000}
-                      >
-                        {({ copied, copy }) => (
-                          <Tooltip
-                            withArrow
-                            label="URLをコピーしてプレイリストをシェアできます"
-                          >
-                            <MantineButton
-                              onClick={copy}
-                              color={`${copied ? "green" : "gray"}`}
-                            >
-                              {copied ? (
-                                <MdCheck className="inline w-5 h-5" />
-                              ) : (
-                                <MdContentCopy className="inline w-5 h-5" />
-                              )}
-                            </MantineButton>
-                          </Tooltip>
+                        {isInPlaylist(playlist, currentSongInfo!) ? (
+                          <MdCheck className="inline w-5 h-5" />
+                        ) : (
+                          <MdAdd className="inline w-5 h-5" />
                         )}
-                      </CopyButton>
-                    </Grid.Col>
-                  </Grid>
+                      </MantineButton>
+                    </Tooltip>
+                    <CopyButton
+                      value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
+                        playlist
+                      )}`}
+                      timeout={2000}
+                    >
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          label="URLをコピーしてプレイリストをシェアできます"
+                        >
+                          <MantineButton
+                            onClick={copy}
+                            color={`${copied ? "green" : "gray"}`}
+                            size="xs"
+                          >
+                            {copied ? (
+                              <MdCheck className="inline w-5 h-5" />
+                            ) : (
+                              <MdContentCopy className="inline w-5 h-5" />
+                            )}
+                          </MantineButton>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </div>
                 ))}
               </ScrollArea>
 
