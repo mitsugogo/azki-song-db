@@ -16,6 +16,7 @@ import {
   useSensor,
   PointerSensor,
   KeyboardSensor,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -183,12 +184,12 @@ export default function PlaylistDetailPage() {
     handlers.resetSelection();
   };
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
-      const oldIndex = rowKeys.indexOf(active.id);
-      const newIndex = rowKeys.indexOf(over.id);
+    if (active && over && active.id !== over?.id) {
+      const oldIndex = rowKeys.indexOf(active.id as string);
+      const newIndex = rowKeys.indexOf(over.id as string);
 
       const newSongs = arrayMove(playlistSongs, oldIndex, newIndex);
 
