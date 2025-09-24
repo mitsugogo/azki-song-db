@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
@@ -133,22 +133,24 @@ export default function MainPlayer() {
         hideFutureSongs={hideFutureSongs}
       />
 
-      <SearchAndSongList
-        songs={songs}
-        allSongs={allSongs}
-        currentSongInfo={currentSongInfo}
-        searchTerm={searchTerm}
-        availableSongTitles={availableSongTitles}
-        availableArtists={availableArtists}
-        availableSingers={availableSingers}
-        availableTags={availableTags}
-        availableMilestones={availableMilestones}
-        hideFutureSongs={hideFutureSongs}
-        changeCurrentSong={changeCurrentSong}
-        playRandomSong={playRandomSong}
-        setSearchTerm={setSearchTerm}
-        setSongs={setSongs}
-      />
+      <Suspense fallback={<Loading />}>
+        <SearchAndSongList
+          songs={songs}
+          allSongs={allSongs}
+          currentSongInfo={currentSongInfo}
+          searchTerm={searchTerm}
+          availableSongTitles={availableSongTitles}
+          availableArtists={availableArtists}
+          availableSingers={availableSingers}
+          availableTags={availableTags}
+          availableMilestones={availableMilestones}
+          hideFutureSongs={hideFutureSongs}
+          changeCurrentSong={changeCurrentSong}
+          playRandomSong={playRandomSong}
+          setSearchTerm={setSearchTerm}
+          setSongs={setSongs}
+        />
+      </Suspense>
 
       {showToast && (
         <ToastNotification

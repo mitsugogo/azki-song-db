@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeModeScript } from "flowbite-react";
 import { VercelToolbar } from "@vercel/toolbar/next";
 
 const geistSans = Geist({
@@ -64,7 +63,6 @@ export default function RootLayout({
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <ThemeModeScript />
       </head>
       <body
         className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
