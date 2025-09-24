@@ -4,7 +4,7 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { FaShuffle } from "react-icons/fa6";
+import { LuShuffle } from "react-icons/lu";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
@@ -259,14 +259,9 @@ export default function PlayerSection({
                 onClick={setSongsToCurrentVideo}
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
-                <div className="flex-shrink-0">
+                <span className="text-xs">
                   <RiPlayListFill />
-                </div>
-                <div
-                  className="flex-1 text-center"
-                  style={{ lineHeight: "1.1em" }}
-                ></div>
-                <div className="flex-shrink-0 w-0 sm:w-4"></div>
+                </span>
               </Button>
 
               {/* ランダム再生ボタン */}
@@ -275,7 +270,7 @@ export default function PlayerSection({
                 className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs items-center justify-between ring-0 focus:ring-0 focus:outline-none"
               >
                 <span className="text-xs">
-                  <FaShuffle className="inline" />
+                  <LuShuffle />
                 </span>
               </Button>
 

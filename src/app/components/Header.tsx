@@ -5,16 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { FaGear, FaYoutube } from "react-icons/fa6";
 import Acknowledgment from "./Acknowledgment";
-import {
-  Drawer,
-  Burger,
-  Modal,
-  Popover,
-  Text,
-  Tooltip,
-  Avatar,
-  Menu,
-} from "@mantine/core";
+import { Drawer, Burger, Modal, Tooltip } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
@@ -153,9 +144,9 @@ export function Header() {
               </Link>
             );
           })}
-          <hr className="my-6 border border-gray-200 dark:border-gray-600 " />
+          <hr className="my-6 border border-light-gray-200 dark:border-gray-600 " />
 
-          <div className="text-xs">
+          <div className="ml-3 text-xs text-light-gray-400 dark:text-gray-300">
             <FaGear className="mr-0.5 inline" /> 管理機能
           </div>
           <Link
@@ -167,7 +158,7 @@ export function Header() {
             プレイリスト
           </Link>
 
-          <hr className="my-6 border border-gray-200 dark:border-gray-600 " />
+          <hr className="my-6 border border-light-gray-200 dark:border-gray-600 " />
           <Link
             href="#"
             key="about"
@@ -179,7 +170,7 @@ export function Header() {
           >
             このサイトについて
           </Link>
-          <hr className="my-2 border border-gray-200 dark:border-gray-600 md:hidden" />
+          <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
           <div className="block relative md:absolute md:bottom-6 md:left-3">
             <Link
               href="https://www.youtube.com/@AZKi"
@@ -212,7 +203,7 @@ export function Header() {
               </Link>
             </Tooltip>
 
-            <hr className="my-2 border border-gray-200 dark:border-gray-600 w-full" />
+            <hr className="my-2 border border-light-gray-200 dark:border-gray-600 w-full" />
 
             {buildDate && (
               <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">

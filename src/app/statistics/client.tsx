@@ -63,7 +63,7 @@ export default function StatisticsPage() {
                    ${
                      selected
                        ? "border-primary-600 text-primary-600 dark:border-primary-500 dark:text-primary-500"
-                       : "border-transparent hover:border-gray-300 hover:text-gray-600 dark:hover:text-gray-100"
+                       : "border-transparent text-light-gray-800 dark:text-light-gray-300 hover:border-gray-300 hover:text-gray-400 dark:hover:text-gray-100"
                    }`
                 }
               >
