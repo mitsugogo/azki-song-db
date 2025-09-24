@@ -32,7 +32,8 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
     // 画像の幅を確認して、0または120(YouTubeがサムネがないときに返す幅)になった場合は、フォールバックを試す
     if (
       e.currentTarget.naturalWidth === 0 ||
-      e.currentTarget.naturalWidth === 120
+      (e.currentTarget.naturalWidth === 120 &&
+        e.currentTarget.naturalHeight === 90)
     ) {
       handleError();
       return;

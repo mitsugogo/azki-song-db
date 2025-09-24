@@ -1,5 +1,5 @@
 // SearchAndSongList.tsx
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
@@ -30,6 +30,7 @@ import {
 } from "react-icons/md";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistActions } from "../hook/usePlaylistActions";
+import Loading from "../loading";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -269,12 +270,15 @@ export default function SearchAndSongList({
             楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
           </p>
         </div>
-        <SongsList
-          songs={songs}
-          currentSongInfo={currentSongInfo}
-          changeCurrentSong={changeCurrentSong}
-          hideFutureSongs={hideFutureSongs}
-        />
+
+        <Suspense fallback={<Loading />}>
+          <SongsList
+            songs={songs}
+            currentSongInfo={currentSongInfo}
+            changeCurrentSong={changeCurrentSong}
+            hideFutureSongs={hideFutureSongs}
+          />
+        </Suspense>
       </div>
       <Modal
         opened={showPlaylistSelector}

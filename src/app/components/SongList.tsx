@@ -2,10 +2,11 @@
 
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import { MdFirstPage, MdLastPage } from "react-icons/md";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { useSwipeable } from "react-swipeable";
+import Loading from "../loading";
 
 interface SongListProps {
   songs: Song[];
@@ -20,7 +21,7 @@ const SongsList = ({
   hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
-  const displayPage = 204;
+  const displayPage = 120;
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPage = useMemo(() => {

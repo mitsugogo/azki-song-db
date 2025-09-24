@@ -133,24 +133,22 @@ export default function MainPlayer() {
         hideFutureSongs={hideFutureSongs}
       />
 
-      <Suspense fallback={<Loading />}>
-        <SearchAndSongList
-          songs={songs}
-          allSongs={allSongs}
-          currentSongInfo={currentSongInfo}
-          searchTerm={searchTerm}
-          availableSongTitles={availableSongTitles}
-          availableArtists={availableArtists}
-          availableSingers={availableSingers}
-          availableTags={availableTags}
-          availableMilestones={availableMilestones}
-          hideFutureSongs={hideFutureSongs}
-          changeCurrentSong={changeCurrentSong}
-          playRandomSong={playRandomSong}
-          setSearchTerm={setSearchTerm}
-          setSongs={setSongs}
-        />
-      </Suspense>
+      <SearchAndSongList
+        songs={songs}
+        allSongs={allSongs}
+        currentSongInfo={currentSongInfo}
+        searchTerm={searchTerm}
+        availableSongTitles={availableSongTitles}
+        availableArtists={availableArtists}
+        availableSingers={availableSingers}
+        availableTags={availableTags}
+        availableMilestones={availableMilestones}
+        hideFutureSongs={hideFutureSongs}
+        changeCurrentSong={changeCurrentSong}
+        playRandomSong={playRandomSong}
+        setSearchTerm={setSearchTerm}
+        setSongs={setSongs}
+      />
 
       {showToast && (
         <ToastNotification
