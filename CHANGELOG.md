@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.16.4](https://github.com/mitsugogo/azki-song-db/compare/v1.16.3...v1.16.4) (2025-09-25)
+
+
+### Bug Fixes
+
+* **stat:** タブを切り替えた時に表が表示されないことがあるのを修正 ([42a9518](https://github.com/mitsugogo/azki-song-db/commit/42a95185886b1e0a1b0678d01c1f4238d03932f4))
+
 ### [1.16.3](https://github.com/mitsugogo/azki-song-db/compare/v1.16.2...v1.16.3) (2025-09-25)
 
 
