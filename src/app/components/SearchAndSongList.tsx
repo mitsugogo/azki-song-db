@@ -48,6 +48,7 @@ type SearchAndSongListProps = {
   playRandomSong: (songList: Song[]) => void;
   setSearchTerm: (term: string) => void;
   setSongs: (songs: Song[]) => void;
+  searchSongs: (songsToFilter: Song[], term: string) => Song[];
 };
 
 export default function SearchAndSongList({
@@ -65,6 +66,7 @@ export default function SearchAndSongList({
   playRandomSong,
   setSearchTerm,
   setSongs,
+  searchSongs,
 }: SearchAndSongListProps) {
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
@@ -162,13 +164,8 @@ export default function SearchAndSongList({
             <Grid.Col span={6}>
               <Button
                 onClick={() => {
-                  // ソロライブ用のプレイリストをセットしてCreating worldを再生
+                  // ソロライブ用のプレイリストをセット
                   setSearchTerm("sololive2025");
-                  const song = songs.find(
-                    (song) => song.video_id === "ZkvtKUQp3nM"
-                  );
-                  if (!song) return;
-                  changeCurrentSong(song);
                 }}
                 className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >

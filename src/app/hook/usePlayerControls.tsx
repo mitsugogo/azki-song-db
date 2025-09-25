@@ -59,15 +59,38 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     }
   }, [hideFutureSongs]);
 
+  // songsが変わったら前後の楽曲をセットする
+  useEffect(() => {
+    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
+    const isExists = songs.some(
+      (song) =>
+        song.video_id === currentSongInfo?.video_id &&
+        song.start === currentSongInfo?.start
+    );
+    if (!isExists) {
+      changeCurrentSong(songs[0]);
+      return;
+    }
+
+    if (currentSongInfo && songs.length > 0) {
+      setPreviousAndNextSongs(currentSongInfo, songs);
+    }
+  }, [songs, currentSongInfo]);
+
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
       const currentIndex = songsList.findIndex(
         (s) => s.video_id === song.video_id && s.start === song.start
       );
-      setPreviousSong(currentIndex > 0 ? songsList[currentIndex - 1] : null);
-      setNextSong(
-        currentIndex < songsList.length - 1 ? songsList[currentIndex + 1] : null
-      );
+
+      const previousSong =
+        currentIndex > 0 ? songsList[currentIndex - 1] : null;
+      const nextSong =
+        currentIndex < songsList.length - 1
+          ? songsList[currentIndex + 1]
+          : null;
+      setPreviousSong(previousSong);
+      setNextSong(nextSong);
     },
     []
   );

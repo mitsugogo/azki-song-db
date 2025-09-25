@@ -38,6 +38,7 @@ type PlayerSectionProps = {
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;
   setSongs: (songs: Song[]) => void;
+  searchSongs: (songsToFilter: Song[], term: string) => Song[];
   setOpenShareModal: (isOpen: boolean) => void;
   setSearchTerm: (term: string) => void;
   setHideFutureSongs: (value: boolean) => void;
@@ -61,6 +62,7 @@ export default function PlayerSection({
   changeCurrentSong,
   playRandomSong,
   setSongs,
+  searchSongs,
   setSongsToCurrentVideo,
   setOpenShareModal,
   setSearchTerm,
@@ -277,13 +279,8 @@ export default function PlayerSection({
               {/* ソロライブ予習モード */}
               <Button
                 onClick={() => {
-                  // ソロライブ用のプレイリストをセットしてCreating worldを再生
+                  // ソロライブ用のプレイリストをセット
                   setSearchTerm("sololive2025");
-                  const song = songs.find(
-                    (song) => song.video_id === "ZkvtKUQp3nM"
-                  );
-                  if (!song) return;
-                  changeCurrentSong(song);
                 }}
                 className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
