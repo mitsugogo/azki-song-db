@@ -18,10 +18,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Link from "next/link";
 import { BsPlayCircle } from "react-icons/bs";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  OverlayScrollbarsComponent,
-  OverlayScrollbarsComponentRef,
-} from "overlayscrollbars-react";
+import { ScrollArea } from "@mantine/core";
 
 export default function DataTable<
   T extends
@@ -54,7 +51,7 @@ export default function DataTable<
   const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
   const debouncedFilter = useDebounce(inputValue, 300);
 
-  const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   type ColumnSort = { id: string; desc: boolean };
 
@@ -131,8 +128,7 @@ export default function DataTable<
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () =>
-      tableContainerRef.current?.osInstance()?.elements().viewport as Element,
+    getScrollElement: () => tableContainerRef.current as Element,
     estimateSize: () => 86,
     overscan: 10,
   });
@@ -154,9 +150,9 @@ export default function DataTable<
             className="max-w-sm"
           />
         </div>
-        <OverlayScrollbarsComponent
-          ref={tableContainerRef}
-          className="h-[calc(100vh-245px)] md:h-[calc(100vh-333px)] lg:h-[calc(100vh-366px)]"
+        <ScrollArea
+          className="h-[calc(100vh-260px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-365px)]"
+          viewportRef={tableContainerRef}
         >
           <div className="relative">
             <div className="w-full text-sm text-left">
@@ -379,7 +375,7 @@ export default function DataTable<
               </div>
             </div>
           </div>
-        </OverlayScrollbarsComponent>
+        </ScrollArea>
       </div>
     </div>
   );
