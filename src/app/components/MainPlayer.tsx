@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
@@ -30,7 +30,8 @@ export default function MainPlayer() {
     availableMilestones,
   } = useSongs();
 
-  const { songs, setSongs, searchTerm, setSearchTerm } = useSearch(allSongs);
+  const { songs, setSongs, searchTerm, setSearchTerm, searchSongs } =
+    useSearch(allSongs);
 
   const {
     currentSong,
@@ -50,14 +51,12 @@ export default function MainPlayer() {
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
 
-  const { decodePlaylistUrlParam } = usePlaylists();
-
   useEffect(() => {
     if (!currentSongInfo) return;
     setPreviousAndNextSongs(currentSongInfo, songs);
   }, [currentSongInfo]);
 
-  // 初回ロード完了で曲を再生
+  // 曲を再生
   useEffect(() => {
     if (songs.length === 0 || currentSongInfo) return;
 
@@ -121,6 +120,7 @@ export default function MainPlayer() {
         startTime={startTime}
         timedLiveCallText={timedLiveCallText ?? ""}
         setSongs={setSongs}
+        searchSongs={searchSongs}
         handleStateChange={handleStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
@@ -148,6 +148,7 @@ export default function MainPlayer() {
         playRandomSong={playRandomSong}
         setSearchTerm={setSearchTerm}
         setSongs={setSongs}
+        searchSongs={searchSongs}
       />
 
       {showToast && (

@@ -33,14 +33,14 @@ const SongListItem = React.memo(
         data-title={song.title}
         key={`${song.video_id}-${song.start}`}
       >
-        <div className="flex md:block md:w-full mb-0 md:mb-2 text-center">
+        <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
           <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
             <YoutubeThumbnail
               videoId={song.video_id}
               alt={song.video_title}
               fill={true}
               className="w-[calc(100%-2px)]"
-              imageClassName="rounded-t-sm"
+              imageClassName="rounded-l-sm lg:rounded-t-sm"
             />
           </div>
         </div>

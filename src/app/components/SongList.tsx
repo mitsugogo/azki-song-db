@@ -2,7 +2,7 @@
 
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { MdFirstPage, MdLastPage } from "react-icons/md";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { useSwipeable } from "react-swipeable";
@@ -14,41 +14,52 @@ interface SongListProps {
   changeCurrentSong: (song: Song, isRandom: boolean) => void;
 }
 
+const ITEMS_PER_PAGE = 120;
+
+// 曲が同一であるかを判定するヘルパー関数
+const areSongsEqual = (songA: Song | null, songB: Song | null): boolean => {
+  if (!songA || !songB) return false;
+  return (
+    songA.video_id === songB.video_id &&
+    songA.start === songB.start &&
+    songA.title === songB.title
+  );
+};
+
 const SongsList = ({
   songs,
   currentSongInfo,
   hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
-  const displayPage = 204;
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPage = useMemo(() => {
-    return Math.ceil(songs.length / displayPage);
-  }, [songs, displayPage]);
+    return Math.ceil(songs.length / ITEMS_PER_PAGE);
+  }, [songs.length]);
 
-  const onPageChange = (page: number) => {
-    const newPage = Math.max(1, Math.min(page, totalPage));
-    setCurrentPage(newPage);
-  };
+  const onPageChange = useCallback(
+    (page: number) => {
+      const newPage = Math.max(1, Math.min(page, totalPage));
+      setCurrentPage(newPage);
+    },
+    [totalPage]
+  );
 
   const slicedSongs = useMemo(() => {
-    const startIndex = (currentPage - 1) * displayPage;
-    const endIndex = Math.min(startIndex + displayPage, songs.length);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, songs.length);
     return songs.slice(startIndex, endIndex);
-  }, [songs, currentPage, displayPage]);
+  }, [songs, currentPage]);
 
   useEffect(() => {
     if (currentSongInfo) {
-      const songIndex = songs.findIndex(
-        (song) =>
-          song.video_id === currentSongInfo?.video_id &&
-          song.title === currentSongInfo?.title &&
-          song.start === currentSongInfo?.start
+      const songIndex = songs.findIndex((song) =>
+        areSongsEqual(song, currentSongInfo)
       );
 
       if (songIndex !== -1) {
-        const page = Math.ceil((songIndex + 1) / displayPage);
+        const page = Math.ceil((songIndex + 1) / ITEMS_PER_PAGE);
         setCurrentPage(page);
       } else {
         setCurrentPage(1);
@@ -56,39 +67,42 @@ const SongsList = ({
     } else {
       setCurrentPage(1);
     }
-  }, [songs, currentSongInfo, displayPage]);
+  }, [songs, currentSongInfo]);
 
   useEffect(() => {
     const listElement = document.getElementById("song-list-scrollbar");
-    if (listElement) {
-      const currentSongElement = document.querySelector(
-        `[data-video-id="${currentSongInfo?.video_id}"][data-start-time="${currentSongInfo?.start}"]`
-      );
-      if (currentSongElement) {
-        currentSongElement.scrollIntoView({
-          behavior: "instant",
-          block: "center",
-          inline: "end",
-        });
-      } else {
-        const firstElement = listElement.querySelector("li");
-        if (firstElement) {
-          firstElement.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-          });
-        }
-      }
+    if (!listElement) return;
+
+    const currentSongElement = currentSongInfo
+      ? document.querySelector(
+          `[data-video-id="${currentSongInfo.video_id}"][data-start-time="${currentSongInfo.start}"]`
+        )
+      : null;
+
+    if (currentSongElement) {
+      currentSongElement.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+      });
+    } else {
+      listElement.scrollIntoView({ behavior: "instant", block: "start" });
     }
   }, [currentPage, slicedSongs, currentSongInfo]);
 
-  // useSwipeableフックの定義
   const handlers = useSwipeable({
     onSwipedLeft: () => onPageChange(currentPage + 1),
     onSwipedRight: () => onPageChange(currentPage - 1),
-    preventScrollOnSwipe: true, // スワイプ中のスクロールを防ぐ
-    trackMouse: true, // デスクトップでのマウスドラッグを有効にする
+    preventScrollOnSwipe: true,
+    trackMouse: true,
   });
+
+  // 現在の曲のインデックスを事前に計算
+  const currentSongIndexInSlice = useMemo(() => {
+    if (!currentSongInfo) return -1;
+    return slicedSongs.findIndex((song) =>
+      areSongsEqual(song, currentSongInfo)
+    );
+  }, [slicedSongs, currentSongInfo]);
 
   return (
     <>
@@ -96,34 +110,23 @@ const SongsList = ({
         id="song-list-scrollbar"
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
-        className=""
         defer
       >
         <ul
           id="song-list"
           className="song-list grid grid-cols-1 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
-          {...handlers} // handlersを適用
+          {...handlers}
         >
           {slicedSongs.map((song, index) => (
             <SongListItem
-              key={`${song.video_id}-${song.start}-${index}`}
+              key={`${song.video_id}-${song.start}`}
               song={song}
-              isSelected={
-                currentSongInfo?.title === song.title &&
-                currentSongInfo.video_id === song.video_id &&
-                currentSongInfo.start === song.start
-              }
+              isSelected={areSongsEqual(currentSongInfo, song)}
               changeCurrentSong={changeCurrentSong}
               isHide={
                 hideFutureSongs &&
-                currentSongInfo?.video_id === song.video_id &&
-                index >
-                  slicedSongs.findIndex(
-                    (song) =>
-                      currentSongInfo?.title === song.title &&
-                      currentSongInfo.video_id === song.video_id &&
-                      currentSongInfo.start === song.start
-                  )
+                currentSongIndexInSlice !== -1 &&
+                index > currentSongIndexInSlice
               }
             />
           ))}
