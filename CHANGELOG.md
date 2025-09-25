@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.16.3](https://github.com/mitsugogo/azki-song-db/compare/v1.16.2...v1.16.3) (2025-09-25)
+
+
+### Bug Fixes
+
+* ソロライブモード切り替え時にプレイリストがバグって次の曲に行かない場合があったのを修正 ([4a4cfe1](https://github.com/mitsugogo/azki-song-db/commit/4a4cfe122df1f0d66fdb6dac2f685b99f01dbdd4))
+* ライト/ダークモードが連動しない場合があったのを修正 ([c3d34d4](https://github.com/mitsugogo/azki-song-db/commit/c3d34d4c29a2ea4b7546ae928a34c0831437d5a5))
+
 ### [1.16.2](https://github.com/mitsugogo/azki-song-db/compare/v1.16.1...v1.16.2) (2025-09-23)
 
 ### [1.16.1](https://github.com/mitsugogo/azki-song-db/compare/v1.16.0...v1.16.1) (2025-09-23)
