@@ -85,7 +85,7 @@ const SongsList = ({
         block: "center",
       });
     } else {
-      listElement.scrollTop = 0;
+      listElement.scrollIntoView({ behavior: "instant", block: "start" });
     }
   }, [currentPage, slicedSongs, currentSongInfo]);
 
