@@ -129,6 +129,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
+                      key={`${previousSong.video_id}-thumbnail-previous`}
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
                       fill={true}
@@ -155,6 +156,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 aspect-video w-25 min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
+                      key={`${currentSongInfo.video_id}-thumbnail-current`}
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
                       fill={true}
@@ -182,6 +184,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
+                      key={`${nextSong.video_id}-thumbnail-next`}
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
                       fill={true}
