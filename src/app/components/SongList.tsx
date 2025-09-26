@@ -85,7 +85,10 @@ const SongsList = ({
         block: "center",
       });
     } else {
-      listElement.scrollIntoView({ behavior: "instant", block: "start" });
+      const firstElement = listElement.querySelector("li");
+      if (firstElement) {
+        firstElement.scrollIntoView({ behavior: "instant", block: "center" });
+      }
     }
   }, [currentPage, slicedSongs, currentSongInfo]);
 
@@ -119,7 +122,7 @@ const SongsList = ({
         >
           {slicedSongs.map((song, index) => (
             <SongListItem
-              key={`${song.video_id}-${song.start}`}
+              key={`${song.video_id}-${song.start}-${index}`}
               song={song}
               isSelected={areSongsEqual(currentSongInfo, song)}
               changeCurrentSong={changeCurrentSong}
