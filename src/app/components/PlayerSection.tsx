@@ -95,9 +95,9 @@ export default function PlayerSection({
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
             <div className="flex items-center flex-shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
               <span className="ml-1 text-muted-foreground text-nowrap">
-                <span className="ml-1">コール</span>
+                <span className="ml-1">コーレス</span>
                 <Tooltip
-                  label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                  label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
                   w={300}
                   multiline
                   withArrow
