@@ -110,7 +110,9 @@ export default function SearchAndSongList({
   useEffect(() => {
     const s = searchTerm.split("|").filter((s) => s.trim() !== "");
     if (s.length > 0) {
-      setSearchValue(searchTerm.split("|"));
+      setSearchValue(s);
+    } else {
+      setSearchValue([]);
     }
   }, [searchTerm]);
 
