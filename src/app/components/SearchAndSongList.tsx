@@ -194,7 +194,7 @@ export default function SearchAndSongList({
           </Grid>
         </div>
 
-        <div className="md:hidden mb-2">
+        <div className="lg:hidden md:mt-2 mb-2">
           <Button
             className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition ring-0 focus:ring-0  ${
               isNowPlayingPlaylist()

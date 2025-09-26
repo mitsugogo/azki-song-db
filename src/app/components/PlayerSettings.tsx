@@ -59,7 +59,7 @@ export default function PlayerSettings({
       className="inline-grid relative text-right grid-cols-1 md:grid-cols-3 gap-1"
       ref={settingsRef}
     >
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <Menu width={300} withArrow opened={showPlaylistMenu}>
           <Menu.Target>
             <div className="flex items-center justify-center h-full">
