@@ -69,6 +69,8 @@ export default function SearchAndSongList({
   setSongs,
   searchSongs,
 }: SearchAndSongListProps) {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
