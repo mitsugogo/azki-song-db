@@ -10,6 +10,7 @@
 @source "../../.flowbite-react/class-list.json";
 @source "../node_modules/flowbite";
 @import "@mantine/core/styles.css";
+@import "@mantine/spotlight/styles.css";
 
 @theme {
   --color-primary-50: #fdf2f7;

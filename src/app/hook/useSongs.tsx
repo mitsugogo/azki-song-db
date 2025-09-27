@@ -12,6 +12,9 @@ const useSongs = () => {
   const [availableSingers, setAvailableSingers] = useState<string[]>([]);
   const [availableSongTitles, setAvailableSongTitles] = useState<string[]>([]);
   const [availableMilestones, setAvailableMilestones] = useState<string[]>([]);
+  const [availableTitleAndArtists, setAvailableTitleAndArtists] = useState<
+    { title: string; artist: string }[]
+  >([]);
 
   useEffect(() => {
     fetch("/api/songs")
@@ -30,25 +33,46 @@ const useSongs = () => {
         const songTitles = [...new Set(data.map((song) => song.title))].sort();
         const singers = [
           ...new Set(
-            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim())),
+            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim()))
           ),
         ].sort();
         const artists = [
           ...new Set(
-            data.flatMap((song) =>
-              song.artist.split(/、/).map((s) => s.trim()),
-            ),
+            data.flatMap((song) => song.artist.split(/、/).map((s) => s.trim()))
           ),
         ].sort();
         const milestones = [
           ...new Set(data.flatMap((song) => song.milestones)),
         ].sort();
 
+        const uniquedTitleAndArtists = Array.from(
+          data.reduce((map, song) => {
+            // ユニークキーとして titleとartist を結合
+            const key = `${song.title}|${song.artist}`;
+
+            // keyが存在しなければ、その曲のオブジェクトをMapに追加
+            if (!map.has(key)) {
+              map.set(key, {
+                title: song.title,
+                artist: song.artist,
+                // 必要に応じて、元のオブジェクトの他のプロパティも保持できます
+                // 例: duration: song.duration,
+              });
+            }
+            return map;
+          }, new Map())
+        );
+
         setAvailableTags(tags);
         setAvailableSongTitles(songTitles);
         setAvailableSingers(singers);
         setAvailableArtists(artists);
         setAvailableMilestones(milestones);
+        setAvailableTitleAndArtists(
+          uniquedTitleAndArtists
+            .map((item) => item[1])
+            .sort((a, b) => a.title.localeCompare(b.title))
+        );
         setIsLoading(false);
       });
   }, []);
@@ -61,6 +85,7 @@ const useSongs = () => {
     availableSingers,
     availableSongTitles,
     availableMilestones,
+    availableTitleAndArtists,
   };
 };
 

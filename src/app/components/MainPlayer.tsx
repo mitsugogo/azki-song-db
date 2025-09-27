@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import {
+  Spotlight,
+  SpotlightActionData,
+  createSpotlight,
+  spotlight,
+} from "@mantine/spotlight";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
@@ -13,12 +19,19 @@ import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
-import usePlaylists from "../hook/usePlaylists";
+import { FaMusic, FaShare, FaStar, FaTag, FaUser } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";
+import { BiHide } from "react-icons/bi";
+import { IoMusicalNotes } from "react-icons/io5";
 
 /**
  * メインプレイヤー
  */
 export default function MainPlayer() {
+  // Actions
+  const [actionsSpotlightStore, actionsSpotlight] = createSpotlight();
+  const [searchSpotlightStore, searchSpotlight] = createSpotlight();
+
   // --- Hooks ---
   const {
     allSongs,
@@ -28,6 +41,7 @@ export default function MainPlayer() {
     availableSingers,
     availableSongTitles,
     availableMilestones,
+    availableTitleAndArtists,
   } = useSongs();
 
   const { songs, setSongs, searchTerm, setSearchTerm, searchSongs } =
@@ -101,6 +115,123 @@ export default function MainPlayer() {
     setPreviousAndNextSongs(currentSongInfo, songsInVideo);
   };
 
+  // --- Spotlight Actions ---
+  const searchActions: SpotlightActionData[] = [
+    // アーティスト名検索
+    ...availableArtists
+      .filter((artist) => artist !== "")
+      .map((artist) => ({
+        id: `artist-${artist}`,
+        title: artist,
+        description: `アーティスト: ${artist}`,
+        group: "アーティスト",
+        onClick: () => {
+          setSearchTerm(`artist:${artist}`); // 既存の検索クエリを設定
+          spotlight.close();
+        },
+        leftSection: <FaUser />,
+      })),
+
+    // 歌手名検索
+    ...availableSingers
+      .filter((singer) => singer !== "")
+      .map((singer) => ({
+        id: `singer-${singer}`,
+        title: singer,
+        description: `歌った人: ${singer}`,
+        group: "歌った人",
+        onClick: () => {
+          setSearchTerm(`singer:${singer}`);
+          spotlight.close();
+        },
+        leftSection: <FaUser />,
+      })),
+
+    // タグ検索
+    ...availableTags
+      .filter((tag) => tag !== "")
+      .map((tag) => ({
+        id: `tag-${tag}`,
+        title: tag,
+        description: `タグ: ${tag}`,
+        group: "タグ",
+        onClick: () => {
+          setSearchTerm(`tag:${tag}`);
+          spotlight.close();
+        },
+        leftSection: <FaTag />,
+      })),
+
+    // マイルストーン検索
+    ...availableMilestones
+      .filter((milestone) => milestone !== "")
+      .map((milestone) => ({
+        id: `milestone-${milestone}`,
+        title: milestone,
+        description: `マイルストーン: ${milestone}`,
+        group: "マイルストーン",
+        onClick: () => {
+          setSearchTerm(`milestone:${milestone}`);
+          spotlight.close();
+        },
+        leftSection: <FaStar />,
+      })),
+
+    // 曲名+アーティスト検索
+    ...availableTitleAndArtists
+      .filter((s) => s.title !== "")
+      .map((s, idx) => ({
+        id: `song-and-artist-${idx}`,
+        title: s.title + " - " + s.artist,
+        description: `${s.title} - ${s.artist}`,
+        group: "曲名+アーティスト",
+        onClick: () => {
+          setSearchTerm(`title:${s.title}|artist:${s.artist}`);
+          spotlight.close();
+        },
+        leftSection: <FaMusic />,
+      })),
+  ];
+
+  const spotlightActions: SpotlightActionData[] = [
+    {
+      id: "search-songs",
+      title: "楽曲検索",
+      label: "楽曲検索",
+      description: "楽曲を検索する",
+      onClick: () => {
+        spotlight.close();
+        searchSpotlight.open();
+      },
+      leftSection: <IoMusicalNotes />,
+    },
+    {
+      id: "share",
+      title: "シェア",
+      label: "シェア",
+      description: "現在の楽曲をシェアする",
+      onClick: () => {
+        setOpenShareModal(true);
+        spotlight.close();
+      },
+      leftSection: <FaShare />,
+    },
+    {
+      id: "hide-future-songs",
+      title: "セトリネタバレ防止モード",
+      label: "セトリネタバレ防止モード",
+      description: "再生中の動画で歌っている曲以降の曲を非表示にします",
+      onClick: () => {
+        // toggle
+        setHideFutureSongs(!hideFutureSongs);
+        spotlight.close();
+      },
+      leftSection: <BiHide />,
+    },
+  ];
+
+  const allSpotlightActions = [...spotlightActions, ...searchActions];
+
   // --- Render ---
   if (isSongDataLoading) {
     return <Loading />;
@@ -163,6 +294,32 @@ export default function MainPlayer() {
         currentSongInfo={currentSongInfo}
         baseUrl={baseUrl}
         onClose={() => setOpenShareModal(false)}
+      />
+
+      {/* Spotlight */}
+      <Spotlight
+        actions={spotlightActions}
+        store={actionsSpotlightStore}
+        nothingFound="検索結果が見つかりません"
+        shortcut={["/"]}
+        highlightQuery
+        scrollable
+        searchProps={{
+          leftSection: <FaSearch />,
+          placeholder: "アクション検索...",
+        }}
+      />
+      <Spotlight
+        actions={searchActions}
+        store={searchSpotlightStore}
+        nothingFound="検索結果が見つかりません"
+        shortcut={["ctrl+K"]}
+        highlightQuery
+        scrollable
+        searchProps={{
+          leftSection: <FaSearch />,
+          placeholder: "アーティスト名・曲名・タグなどで検索...",
+        }}
       />
     </>
   );

@@ -9,8 +9,6 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { IoAlbums, IoTime } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
@@ -198,8 +196,7 @@ const NowPlayingSongInfoDetail = ({
                   rel="noopener noreferrer"
                   className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
                 >
-                  <FontAwesomeIcon icon={faYoutube} />{" "}
-                  {currentSongInfo.video_title}
+                  <FaYoutube /> {currentSongInfo.video_title}
                 </a>
               </dd>
             </div>
@@ -387,9 +384,9 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
                   <span className="inline-flex items-center">
                     <MdSpeakerNotes className="text-base" />
-                    <span className="ml-1">ライブコール:</span>
+                    <span className="ml-1">コーレス:</span>
                     <Tooltip
-                      label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                      label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
                       w={300}
                       multiline
                       withArrow

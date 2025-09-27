@@ -7,6 +7,7 @@ import { HiSearch } from "react-icons/hi";
 import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown } from "react-icons/lu";
 import { MdAdd } from "react-icons/md";
+import { LuSparkles } from "react-icons/lu";
 import {
   Button as MantineButton,
   Grid,
@@ -68,6 +69,8 @@ export default function SearchAndSongList({
   setSongs,
   searchSongs,
 }: SearchAndSongListProps) {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
@@ -109,7 +112,9 @@ export default function SearchAndSongList({
   useEffect(() => {
     const s = searchTerm.split("|").filter((s) => s.trim() !== "");
     if (s.length > 0) {
-      setSearchValue(searchTerm.split("|"));
+      setSearchValue(s);
+    } else {
+      setSearchValue([]);
     }
   }, [searchTerm]);
 
@@ -158,7 +163,10 @@ export default function SearchAndSongList({
             onClick={() => playRandomSong(songs)}
             className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
           >
-            <span className="text-sm">ランダムで他の曲にする</span>
+            <span className="text-sm">
+              <LuSparkles className="mr-1 inline" />
+              ランダムで他の曲にする
+            </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
             <Grid.Col span={6}>
@@ -190,7 +198,7 @@ export default function SearchAndSongList({
           </Grid>
         </div>
 
-        <div className="md:hidden mb-2">
+        <div className="lg:hidden md:mt-2 mb-2">
           <Button
             className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition ring-0 focus:ring-0  ${
               isNowPlayingPlaylist()
@@ -230,7 +238,7 @@ export default function SearchAndSongList({
                   .map((artist) => `artist:${artist}`),
               },
               {
-                group: "歌手",
+                group: "歌った人",
                 items: availableSingers
                   .filter((singer) => singer !== "")
                   .map((singer) => `sing:${singer}`),
