@@ -2,10 +2,15 @@
 
 import { Song } from "../types/song";
 import SongListItem from "./SongListItem";
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { MdFirstPage, MdLastPage } from "react-icons/md";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-import { useSwipeable } from "react-swipeable";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { ScrollArea } from "@mantine/core";
 
 interface SongListProps {
   songs: Song[];
@@ -14,9 +19,16 @@ interface SongListProps {
   changeCurrentSong: (song: Song, isRandom: boolean) => void;
 }
 
-const ITEMS_PER_PAGE = 120;
+// 画面幅からGridの列数を推定
+const getGridCols = (width: number): number => {
+  if (width >= 1920) return 5; // 4xl:grid-cols-5
+  if (width >= 1600) return 4; // 3xl:grid-cols-4
+  if (width >= 1280) return 3; // xl:grid-cols-3, 2xl:grid-cols-3
+  if (width >= 768) return 2; // md:grid-cols-2, lg:grid-cols-2
+  return 1; // grid-cols-1
+};
 
-// 曲が同一であるかを判定するヘルパー関数
+// 曲が同一であるかを判定
 const areSongsEqual = (songA: Song | null, songB: Song | null): boolean => {
   if (!songA || !songB) return false;
   return (
@@ -32,184 +44,206 @@ const SongsList = ({
   hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const parentRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
 
-  const totalPage = useMemo(() => {
-    return Math.ceil(songs.length / ITEMS_PER_PAGE);
-  }, [songs.length]);
-
-  const onPageChange = useCallback(
-    (page: number) => {
-      const newPage = Math.max(1, Math.min(page, totalPage));
-      setCurrentPage(newPage);
-    },
-    [totalPage]
-  );
-
-  const slicedSongs = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, songs.length);
-    return songs.slice(startIndex, endIndex);
-  }, [songs, currentPage]);
+  // 現在のウィンドウ幅
+  const [windowWidth, setWindowWidth] = useState(0);
 
   useEffect(() => {
-    if (currentSongInfo) {
-      const songIndex = songs.findIndex((song) =>
-        areSongsEqual(song, currentSongInfo)
-      );
+    // 読み込み時に画面幅を初期化
+    setWindowWidth(window.innerWidth);
 
-      if (songIndex !== -1) {
-        const page = Math.ceil((songIndex + 1) / ITEMS_PER_PAGE);
-        setCurrentPage(page);
-      } else {
-        setCurrentPage(1);
-      }
-    } else {
-      setCurrentPage(1);
-    }
-  }, [songs, currentSongInfo]);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  useEffect(() => {
-    const listElement = document.getElementById("song-list-scrollbar");
-    if (!listElement) return;
+  // 現在の列数を計算
+  const colCount = useMemo(() => getGridCols(windowWidth), [windowWidth]);
 
-    const currentSongElement = currentSongInfo
-      ? document.querySelector(
-          `[data-video-id="${currentSongInfo.video_id}"][data-start-time="${currentSongInfo.start}"]`
-        )
-      : null;
+  // 仮想化の対象となる行の総数を計算
+  const rowCount = useMemo(() => {
+    if (colCount === 0) return 0;
+    // (要素総数 + 列数 - 1) / 列数 => 要素を列数で区切ったときの天井値
+    return Math.ceil(songs.length / colCount);
+  }, [songs.length, colCount]);
 
-    if (currentSongElement) {
-      currentSongElement.scrollIntoView({
-        behavior: "instant",
-        block: "center",
-      });
-    } else {
-      listElement.scrollIntoView({ behavior: "instant", block: "start" });
-    }
-  }, [currentPage, slicedSongs, currentSongInfo]);
-
-  const handlers = useSwipeable({
-    onSwipedLeft: () => onPageChange(currentPage + 1),
-    onSwipedRight: () => onPageChange(currentPage - 1),
-    preventScrollOnSwipe: true,
-    trackMouse: true,
+  const virtualizer = useVirtualizer({
+    count: rowCount, // 行の総数
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => (colCount == 1 ? 61 : 220), // Gridアイテムの高さ
+    overscan: 4,
   });
 
-  // 現在の曲のインデックスを事前に計算
-  const currentSongIndexInSlice = useMemo(() => {
+  const virtualRows = virtualizer.getVirtualItems();
+
+  // 現在の曲のインデックス
+  const currentSongIndex = useMemo(() => {
     if (!currentSongInfo) return -1;
-    return slicedSongs.findIndex((song) =>
-      areSongsEqual(song, currentSongInfo)
-    );
-  }, [slicedSongs, currentSongInfo]);
+    return songs.findIndex((song) => areSongsEqual(song, currentSongInfo));
+  }, [songs, currentSongInfo]);
+
+  // 現在の曲へスクロール
+  useEffect(() => {
+    if (currentSongInfo && colCount > 0) {
+      const index = songs.findIndex((song) =>
+        areSongsEqual(song, currentSongInfo)
+      );
+      if (index !== -1) {
+        const rowIndex = Math.floor(index / colCount);
+        virtualizer.scrollToIndex(rowIndex, {
+          align: "center",
+        });
+      } else {
+        virtualizer.scrollToIndex(0);
+      }
+    } else if (!currentSongInfo) {
+      virtualizer.scrollToIndex(0);
+    }
+  }, [currentSongInfo, virtualizer, songs, colCount]);
+
+  // スペーサーのサイズを計算
+  const startOffset = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const endOffset =
+    virtualRows.length > 0
+      ? virtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
+      : 0;
+
+  // 連続スクロール処理を停止
+  const stopScrolling = useCallback(() => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  // キーボードのPageUp/PageDowを処理
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const parentElement = parentRef.current;
+      if (!parentElement) return;
+
+      // PageUpまたはPageDownが押されたかどうかを確認
+      if (event.key === "PageDown" || event.key === "PageUp") {
+        event.preventDefault();
+
+        // 押しっぱなしの時は新たに発火しない
+        if (event.repeat) return;
+
+        const scrollHeight = parentElement.clientHeight; // コンテナの可視領域の高さ
+        let scrollAmount = 0;
+
+        if (event.key === "PageDown") {
+          // 下にスクロール
+          scrollAmount = scrollHeight;
+        } else if (event.key === "PageUp") {
+          // 上にスクロール
+          scrollAmount = -scrollHeight;
+        }
+
+        parentElement.scrollBy({
+          top: scrollAmount,
+          behavior: "smooth",
+        });
+
+        const continuousScrollAmount = scrollAmount / 5;
+        intervalRef.current = window.setInterval(() => {
+          // 今キーが押されているかどうかを確認
+          if (event.key !== "PageDown" && event.key !== "PageUp") {
+            stopScrolling();
+            return;
+          }
+
+          parentElement.scrollBy({
+            top: continuousScrollAmount,
+            behavior: "auto",
+          });
+        }, 50);
+      }
+    },
+    []
+  );
+
+  // PageUp/PageDown キーを離した時
+  const handleKeyUp = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "PageDown" || event.key === "PageUp") {
+        stopScrolling();
+      }
+    },
+    [stopScrolling]
+  );
+
+  // コンポーネントがアンマウントされたときにタイマーを停止
+  useEffect(() => {
+    return () => {
+      stopScrolling();
+    };
+  }, [stopScrolling]);
 
   return (
     <>
-      <OverlayScrollbarsComponent
+      <ScrollArea
+        viewportRef={parentRef}
         id="song-list-scrollbar"
-        options={{ scrollbars: { autoHide: "leave" } }}
-        element="div"
-        defer
+        className="h-dvh lg:h-full overflow-y-auto focus:outline-0"
+        style={{
+          contain: "strict",
+        }}
+        scrollHideDelay={0}
+        onKeyUp={handleKeyUp}
+        onKeyDown={handleKeyDown}
+        tabIndex={-1}
+        onMouseEnter={() => parentRef.current?.focus()}
+        onMouseLeave={() => parentRef.current?.blur()}
       >
+        {/* 上部のスペーサー */}
+        <div style={{ height: `${startOffset}px` }} />
+
         <ul
           id="song-list"
-          className="song-list grid grid-cols-1 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 h-dvh lg:h-full flex-grow dark:text-gray-300"
-          {...handlers}
+          className="song-list mb-2 grid grid-cols-1 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
         >
-          {slicedSongs.map((song, index) => (
-            <SongListItem
-              key={`${song.video_id}-${song.start}`}
-              song={song}
-              isSelected={areSongsEqual(currentSongInfo, song)}
-              changeCurrentSong={changeCurrentSong}
-              isHide={
-                hideFutureSongs &&
-                currentSongIndexInSlice !== -1 &&
-                index > currentSongIndexInSlice
-              }
-            />
-          ))}
-        </ul>
-      </OverlayScrollbarsComponent>
+          {virtualRows.flatMap((virtualRow) => {
+            const startItemIndex = virtualRow.index * colCount;
+            // 行に表示すべき要素を songs から切り出し
+            const rowItems = songs.slice(
+              startItemIndex,
+              startItemIndex + colCount
+            );
 
-      {totalPage > 1 && (
-        <div className="flex items-center justify-center col-span-2 py-2">
-          <div className="flex items-center justify-between w-full text-gray-600 dark:text-gray-200 bg-gray-50/30 rounded-lg dark:bg-gray-600 max-w-[180px] mx-2">
-            {/* First Page Button */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-20 rounded-s-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
-              onClick={() => onPageChange(1)}
-              disabled={currentPage === 1}
-            >
-              <MdFirstPage className="w-5 h-5 rtl:rotate-180" />
-              <span className="sr-only">First page</span>
-            </button>
-            {/* Previous Page Button */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-8 px-3 w-20 dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <svg
-                className="w-2 h-2 rtl:rotate-180"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 1 1 5l4 4"
+            return rowItems.map((song, itemIndexInRow) => {
+              const globalIndex = startItemIndex + itemIndexInRow;
+              const shouldBeHidden =
+                hideFutureSongs &&
+                currentSongIndex !== -1 &&
+                globalIndex > currentSongIndex;
+
+              return (
+                <SongListItem
+                  key={`${virtualRow.key}-${itemIndexInRow}`}
+                  song={song}
+                  isSelected={areSongsEqual(currentSongInfo, song)}
+                  changeCurrentSong={changeCurrentSong}
+                  isHide={shouldBeHidden}
+                  // 行の最初の要素（または任意の要素）に ref を渡し、行の高さを測定させる
+                  ref={
+                    itemIndexInRow === 0
+                      ? virtualizer.measureElement
+                      : undefined
+                  }
+                  data-index={globalIndex}
+                  data-row-index={virtualRow.index}
                 />
-              </svg>
-              <span className="sr-only">Previous page</span>
-            </button>
-            <span className="shrink-0 mx-1 text-sm font-medium space-x-0.5 rtl:space-x-reverse">
-              {currentPage} of {totalPage}
-            </span>
-            {/* Next Page Button */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-8 px-3 w-20 dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPage}
-            >
-              <svg
-                className="w-2 h-2 rtl:rotate-180"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
-              <span className="sr-only">Next page</span>
-            </button>
-            {/* Last Page Button */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-8 px-1 w-10 rounded-e-lg dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 cursor-pointer"
-              onClick={() => onPageChange(totalPage)}
-              disabled={currentPage === totalPage}
-            >
-              <MdLastPage className="w-5 h-5 rtl:rotate-180" />
-              <span className="sr-only">Last page</span>
-            </button>
-          </div>
-        </div>
-      )}
+              );
+            });
+          })}
+        </ul>
+
+        {/* 下部のスペーサー */}
+        <div style={{ height: `${endOffset}px` }} />
+      </ScrollArea>
     </>
   );
 };

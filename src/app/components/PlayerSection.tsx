@@ -95,9 +95,9 @@ export default function PlayerSection({
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
             <div className="flex items-center flex-shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
               <span className="ml-1 text-muted-foreground text-nowrap">
-                <span className="ml-1">コール</span>
+                <span className="ml-1">コーレス</span>
                 <Tooltip
-                  label="コールは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                  label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
                   w={300}
                   multiline
                   withArrow
@@ -129,6 +129,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
+                      key={`${previousSong.video_id}-thumbnail-previous`}
                       videoId={previousSong.video_id}
                       alt={previousSong.video_title}
                       fill={true}
@@ -155,6 +156,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 aspect-video w-25 min-w-25 max-w-25 align-middle shrink-0">
                     <YoutubeThumbnail
+                      key={`${currentSongInfo.video_id}-thumbnail-current`}
                       videoId={currentSongInfo.video_id}
                       alt={currentSongInfo.video_title}
                       fill={true}
@@ -182,6 +184,7 @@ export default function PlayerSection({
                 <div className="flex items-center h-14">
                   <div className="flex flex-1 w-25 aspect-video min-w-25 max-w-25 align-middle shrink-0 ml-[-2px]">
                     <YoutubeThumbnail
+                      key={`${nextSong.video_id}-thumbnail-next`}
                       videoId={nextSong.video_id}
                       alt={nextSong.video_title}
                       fill={true}

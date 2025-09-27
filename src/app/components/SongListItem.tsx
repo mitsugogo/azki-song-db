@@ -14,106 +14,113 @@ interface SongListItemProps {
 }
 
 const SongListItem = React.memo(
-  ({ song, isSelected, isHide, changeCurrentSong }: SongListItemProps) => {
-    const url = new URL(window.location.href);
-    const isSololive2025 = url.searchParams.get("q") === "sololive2025";
+  React.forwardRef<HTMLLIElement, SongListItemProps>(
+    (
+      { song, isSelected, isHide, changeCurrentSong }: SongListItemProps,
+      ref
+    ) => {
+      const url = new URL(window.location.href);
+      const isSololive2025 = url.searchParams.get("q") === "sololive2025";
 
-    return (
-      <li
-        className={`rounded relative cursor-pointer transition shadow-md flex md:block dark:text-gray-50 ${
-          isSelected
-            ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
-            : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-        }`}
-        onClick={() => {
-          changeCurrentSong(song, false);
-        }}
-        data-video-id={song.video_id}
-        data-start-time={song.start}
-        data-title={song.title}
-        key={`${song.video_id}-${song.start}`}
-      >
-        <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
-          <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
-            <YoutubeThumbnail
-              videoId={song.video_id}
-              alt={song.video_title}
-              fill={true}
-              className="w-[calc(100%-2px)]"
-              imageClassName="rounded-l-sm lg:rounded-t-sm"
-            />
+      return (
+        <li
+          ref={ref}
+          className={`rounded relative cursor-pointer transition shadow-md flex md:block dark:text-gray-50 ${
+            isSelected
+              ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
+              : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+          }`}
+          onClick={() => {
+            changeCurrentSong(song, false);
+          }}
+          data-video-id={song.video_id}
+          data-start-time={song.start}
+          data-title={song.title}
+          data-index={`${song.video_id}-${song.start}`}
+          key={`${song.video_id}-${song.start}`}
+        >
+          <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
+            <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
+              <YoutubeThumbnail
+                videoId={song.video_id}
+                alt={song.video_title}
+                fill={true}
+                className="w-[calc(100%-2px)]"
+                imageClassName="rounded-l-sm lg:rounded-t-sm"
+              />
+            </div>
           </div>
-        </div>
-        <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
-          <div
-            className={`w-full text-sm font-semibold line-clamp-1 ${
-              isHide ? "truncate" : "md:line-clamp-3"
-            }`}
-          >
-            <span
-              className={`${
-                isHide
-                  ? `h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
-                  : ""
+          <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
+            <div
+              className={`w-full text-sm font-semibold line-clamp-1 ${
+                isHide ? "truncate" : "md:line-clamp-3"
               }`}
             >
-              <span className={`${isHide ? "opacity-0" : ""}`}>
-                {song.title}
-              </span>
-            </span>
-          </div>
-          <div
-            className={`w-full text-xs text-gray-600 dark:text-gray-200 line-clamp-1 ${
-              isHide ? "mt-1 truncate" : "md:line-clamp-3"
-            }`}
-          >
-            <span
-              className={`${
-                isHide
-                  ? `h-2 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
-                  : ""
-              }`}
-            >
-              <span className={`${isHide ? "opacity-0" : ""}`}>
-                {song.artist} - {song.sing}
-              </span>
-            </span>
-          </div>
-
-          <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
-            {song.broadcast_at && (
-              <>{new Date(song.broadcast_at).toLocaleDateString()}</>
-            )}
-            {song.live_call && (
-              <span className="text-xs md:hidden">
-                <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
-                  コール
-                </Badge>
-              </span>
-            )}
-          </div>
-
-          {song.live_call && isSololive2025 && (
-            <div className="hidden md:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
-              <span className="text-xs">
-                <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
-                  コール
-                </Badge>
+              <span
+                className={`${
+                  isHide
+                    ? `h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                    : ""
+                }`}
+              >
+                <span className={`${isHide ? "opacity-0" : ""}`}>
+                  {song.title}
+                </span>
               </span>
             </div>
-          )}
+            <div
+              className={`w-full text-xs text-gray-600 dark:text-gray-200 line-clamp-1 ${
+                isHide ? "mt-1 truncate" : "md:line-clamp-3"
+              }`}
+            >
+              <span
+                className={`${
+                  isHide
+                    ? `h-2 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                    : ""
+                }`}
+              >
+                <span className={`${isHide ? "opacity-0" : ""}`}>
+                  {song.artist} - {song.sing}
+                </span>
+              </span>
+            </div>
 
-          {song.milestones && song.milestones.length > 0 && (
-            <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
-              <div>
-                <MilestoneBadge song={song} outClassName="mb-1.5" />
+            <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
+              {song.broadcast_at && (
+                <>{new Date(song.broadcast_at).toLocaleDateString()}</>
+              )}
+              {song.live_call && (
+                <span className="text-xs md:hidden">
+                  <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
+                    コール
+                  </Badge>
+                </span>
+              )}
+            </div>
+
+            {song.live_call && isSololive2025 && (
+              <div className="hidden md:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
+                <span className="text-xs">
+                  <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
+                    コーレス
+                  </Badge>
+                </span>
               </div>
-            </div>
-          )}
-        </div>
-      </li>
-    );
-  }
+            )}
+
+            {song.milestones && song.milestones.length > 0 && (
+              <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
+                <div>
+                  <MilestoneBadge song={song} outClassName="mb-1.5" />
+                </div>
+              </div>
+            )}
+          </div>
+        </li>
+      );
+    }
+  )
 );
 
 SongListItem.displayName = "SongListItem";
