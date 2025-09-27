@@ -130,7 +130,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       videoId?: string,
       startTime?: number
     ) => {
-      if (!song) {
+      if (!song || song === currentSongInfo) {
         return;
       }
 
@@ -155,7 +155,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       // 曲が変わったらメッセージと表示済みリストをリセット
       setTimedLiveCallText(null);
 
-      if (song && song.live_call) {
+      if (song.live_call) {
         // ライブコール場所を秒数に変換しながらパース
         const timedMessages = song.live_call
           .split(/[\r\n]/)
