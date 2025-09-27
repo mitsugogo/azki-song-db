@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/mitsugogo/azki-song-db/compare/v1.16.4...v1.17.0) (2025-09-27)
+
+
+### Features
+
+* **main:** Spotlight検索に対応 ([0847874](https://github.com/mitsugogo/azki-song-db/commit/0847874dd6a742ebfe9c69022f9fd006f2ae9564))
+
+
+### Bug Fixes
+
+* **main:** ページ遷移時に最上部要素にならない場合があったのを修正 ([214c0c8](https://github.com/mitsugogo/azki-song-db/commit/214c0c8a237b5163598b4f1056f234a7b8126f83))
+* **main:** 動画下のサムネイルが小さいものが選択される場合があったのを修正 ([0ffd100](https://github.com/mitsugogo/azki-song-db/commit/0ffd100eb39c57d1a3b80d48dce744bbd1fed502))
+* **main:** 曲詳細のバッジを押した時に消えないバグを修正 ([4c31c68](https://github.com/mitsugogo/azki-song-db/commit/4c31c68415d629b4fca7835a0ef68b66bd848d78))
+* **main:** 特定画面サイズの時にプレイリスト追加が出来なかったのを修正 ([928231e](https://github.com/mitsugogo/azki-song-db/commit/928231e838f7b57584d49677be537428cea8ca38))
+
 ### [1.16.4](https://github.com/mitsugogo/azki-song-db/compare/v1.16.3...v1.16.4) (2025-09-25)
 
 
