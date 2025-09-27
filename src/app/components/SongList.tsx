@@ -191,7 +191,6 @@ const SongsList = ({
         style={{
           contain: "strict",
         }}
-        type="auto"
         scrollHideDelay={0}
         onKeyUp={handleKeyUp}
         onKeyDown={handleKeyDown}
