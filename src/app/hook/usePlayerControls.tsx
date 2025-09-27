@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
-import { time } from "console";
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
@@ -61,6 +60,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
   // songsが変わったら前後の楽曲をセットする
   useEffect(() => {
+    if (!currentSong) return;
+
     // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
     const isExists = songs.some(
       (song) =>
@@ -132,6 +133,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       if (!song) {
         return;
       }
+
       const url = new URL(window.location.href);
       url.searchParams.delete("v");
       url.searchParams.delete("t");

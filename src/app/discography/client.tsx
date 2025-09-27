@@ -163,7 +163,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       >
                         <TableCell className="px-2 py-1">
                           <Link
-                            href={`/?q=tag:オリ曲|album:${s.album}&pvid=${s.video_id}`}
+                            href={`/?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}
                             className=" hover:text-primary-600 dark:hover:text-white"
                           >
                             <BsPlayCircle size={24} />
@@ -211,7 +211,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <Link
               href={
                 song.isAlbum
-                  ? `/?q=album:${song.firstVideo.album}&pvid=${song.firstVideo.video_id}`
+                  ? `/?q=album:${song.firstVideo.album}&v=${song.firstVideo.video_id}`
                   : `/?q=title:${song.firstVideo.title}|tag:オリ曲`
               }
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"

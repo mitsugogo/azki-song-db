@@ -72,10 +72,23 @@ export default function MainPlayer() {
 
   // 曲を再生
   useEffect(() => {
-    if (songs.length === 0 || currentSongInfo) return;
-
+    if (songs.length === 0 || currentSong) return;
     const urlParams = new URLSearchParams(window.location.search);
     const playlist = urlParams.get("playlist");
+
+    const videoId = urlParams.get("v");
+    const startTime = Number(urlParams.get("t")?.replace("s", "")) || 0;
+
+    if (videoId) {
+      const song = songs.find(
+        (s) => s.video_id === videoId && Number(s.start) === startTime
+      );
+      // videoIdとstartTimeを直指定で再生する場合
+      if (song) {
+        changeCurrentSong(song);
+        return;
+      }
+    }
 
     if (playlist) {
       // プレイリストモード → 先頭曲
@@ -87,6 +100,21 @@ export default function MainPlayer() {
       // ソロライブモード → 先頭曲
       changeCurrentSong(songs[0]);
       return;
+    }
+
+    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
+    const isExists = songs.some(
+      (song) =>
+        song.video_id === currentSongInfo?.video_id &&
+        song.start === currentSongInfo?.start
+    );
+    if (!isExists) {
+      changeCurrentSong(songs[0]);
+      return;
+    }
+
+    if (currentSongInfo && songs.length > 0) {
+      setPreviousAndNextSongs(currentSongInfo, songs);
     }
 
     // それ以外 → ランダム再生
