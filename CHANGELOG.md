@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.17.1](https://github.com/mitsugogo/azki-song-db/compare/v1.17.0...v1.17.1) (2025-09-27)
+
+
+### Bug Fixes
+
+* pvidの廃止 ([df5e40a](https://github.com/mitsugogo/azki-song-db/commit/df5e40a675a47de1c009b383fb220fed944d986a))
+* URLパラメータでvideo_idの指定がうまく動いてなかったのを修正 ([815bdfb](https://github.com/mitsugogo/azki-song-db/commit/815bdfbfb8cf61b82ae3402275fb0084e823aa1e))
+
 ## [1.17.0](https://github.com/mitsugogo/azki-song-db/compare/v1.16.4...v1.17.0) (2025-09-27)
 
 
