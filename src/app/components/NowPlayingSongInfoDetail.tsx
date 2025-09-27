@@ -9,8 +9,6 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { IoAlbums, IoTime } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
@@ -198,8 +196,7 @@ const NowPlayingSongInfoDetail = ({
                   rel="noopener noreferrer"
                   className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
                 >
-                  <FontAwesomeIcon icon={faYoutube} />{" "}
-                  {currentSongInfo.video_title}
+                  <FaYoutube /> {currentSongInfo.video_title}
                 </a>
               </dd>
             </div>
