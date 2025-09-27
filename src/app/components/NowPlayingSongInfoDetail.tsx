@@ -196,7 +196,7 @@ const NowPlayingSongInfoDetail = ({
                   rel="noopener noreferrer"
                   className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
                 >
-                  <FaYoutube /> {currentSongInfo.video_title}
+                  <FaYoutube className="inline" /> {currentSongInfo.video_title}
                 </a>
               </dd>
             </div>
