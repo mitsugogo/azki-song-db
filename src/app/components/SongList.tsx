@@ -21,11 +21,11 @@ interface SongListProps {
 
 // 画面幅からGridの列数を推定
 const getGridCols = (width: number): number => {
-  if (width >= 1920) return 5; // 4xl:grid-cols-5
-  if (width >= 1600) return 4; // 3xl:grid-cols-4
-  if (width >= 1280) return 3; // xl:grid-cols-3, 2xl:grid-cols-3
-  if (width >= 768) return 2; // md:grid-cols-2, lg:grid-cols-2
-  return 1; // grid-cols-1
+  if (width >= 2080) return 5;
+  if (width >= 1600) return 4;
+  if (width >= 1280) return 3;
+  if (width >= 768) return 2;
+  return 1;
 };
 
 // 曲が同一であるかを判定
@@ -65,6 +65,11 @@ const SongsList = ({
   // 仮想化の対象となる行の総数を計算
   const rowCount = useMemo(() => {
     if (colCount === 0) return 0;
+
+    console.log("songs.length", songs.length);
+    console.log("colCount", colCount);
+    console.log("rowCount", Math.ceil(songs.length / colCount));
+
     // (要素総数 + 列数 - 1) / 列数 => 要素を列数で区切ったときの天井値
     return Math.ceil(songs.length / colCount);
   }, [songs.length, colCount]);
@@ -203,7 +208,7 @@ const SongsList = ({
 
         <ul
           id="song-list"
-          className="song-list mb-2 grid grid-cols-1 auto-rows-max md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
+          className="song-list mb-2 auto-rows-max grid grid-cols-1  md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
         >
           {virtualRows.flatMap((virtualRow) => {
             const startItemIndex = virtualRow.index * colCount;
