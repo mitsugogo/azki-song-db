@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.18.1](https://github.com/mitsugogo/azki-song-db/compare/v1.18.0...v1.18.1) (2025-09-28)
+
+
+### Bug Fixes
+
+* ソロライブ予習モードの絞り込み楽曲を調整 ([8bd10ea](https://github.com/mitsugogo/azki-song-db/commit/8bd10eaa38291c8dfb6cf001e30ac50eb28fd2a7))
+
 ## [1.18.0](https://github.com/mitsugogo/azki-song-db/compare/v1.17.1...v1.18.0) (2025-09-28)
 
 
