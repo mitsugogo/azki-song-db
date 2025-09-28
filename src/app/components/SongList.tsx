@@ -65,11 +65,6 @@ const SongsList = ({
   // 仮想化の対象となる行の総数を計算
   const rowCount = useMemo(() => {
     if (colCount === 0) return 0;
-
-    console.log("songs.length", songs.length);
-    console.log("colCount", colCount);
-    console.log("rowCount", Math.ceil(songs.length / colCount));
-
     // (要素総数 + 列数 - 1) / 列数 => 要素を列数で区切ったときの天井値
     return Math.ceil(songs.length / colCount);
   }, [songs.length, colCount]);
