@@ -130,7 +130,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       videoId?: string,
       startTime?: number
     ) => {
-      if (!song) {
+      if (!song || (song === currentSongInfo && !videoId)) {
         return;
       }
 
@@ -155,7 +155,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       // 曲が変わったらメッセージと表示済みリストをリセット
       setTimedLiveCallText(null);
 
-      if (song && song.live_call) {
+      if (song.live_call) {
         // ライブコール場所を秒数に変換しながらパース
         const timedMessages = song.live_call
           .split(/[\r\n]/)
@@ -202,10 +202,11 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         } else {
           setVideoId("");
           setStartTime(0);
+          if (currentSong === song) {
+            resetPlayer();
+          }
         }
-        if (currentSong === song) {
-          resetPlayer();
-        }
+
         setCurrentSong(song);
       }
     },
@@ -324,6 +325,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       switch (event.data) {
         case YouTube.PlayerState.UNSTARTED:
         case YouTube.PlayerState.PAUSED:
+        case YouTube.PlayerState.BUFFERING:
           clearMonitorInterval();
           setIsPlaying(false);
           break;
@@ -347,6 +349,12 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     ]
   );
 
+  const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
+    const player = event.target;
+    player.playVideo();
+    setIsPlaying(true);
+  }, []);
+
   return {
     currentSong,
     setCurrentSong,
@@ -363,6 +371,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
+    handlePlayerOnReady,
     handleStateChange,
     setPreviousAndNextSongs,
   };

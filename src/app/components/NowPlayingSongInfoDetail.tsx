@@ -331,7 +331,7 @@ const NowPlayingSongInfoDetail = ({
                               {currentSongInfo === song && (
                                 <FaCompactDisc
                                   className={`relative inline ${
-                                    isPlaying ? "fa-spin" : ""
+                                    isPlaying ? "animate-spin" : ""
                                   }`}
                                   style={{
                                     top: "2px",

@@ -5,6 +5,7 @@ import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
 import { Badge } from "flowbite-react";
+import { Indicator } from "@mantine/core";
 
 interface SongListItemProps {
   song: Song;
@@ -21,6 +22,10 @@ const SongListItem = React.memo(
     ) => {
       const url = new URL(window.location.href);
       const isSololive2025 = url.searchParams.get("q") === "sololive2025";
+
+      const isNewSong =
+        new Date(song.broadcast_at) >
+        new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
 
       return (
         <li
@@ -40,15 +45,23 @@ const SongListItem = React.memo(
           key={`${song.video_id}-${song.start}`}
         >
           <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
-            <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
-              <YoutubeThumbnail
-                videoId={song.video_id}
-                alt={song.video_title}
-                fill={true}
-                className="w-[calc(100%-2px)]"
-                imageClassName="rounded-l-sm lg:rounded-t-sm"
-              />
-            </div>
+            <Indicator
+              color="cyan"
+              size={8}
+              disabled={!isNewSong}
+              offset={8}
+              zIndex={50}
+            >
+              <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
+                <YoutubeThumbnail
+                  videoId={song.video_id}
+                  alt={song.video_title}
+                  fill={true}
+                  className="w-[calc(100%-2px)]"
+                  imageClassName="rounded-l-sm lg:rounded-t-sm"
+                />
+              </div>
+            </Indicator>
           </div>
           <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
             <div
@@ -85,7 +98,6 @@ const SongListItem = React.memo(
                 </span>
               </span>
             </div>
-
             <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
               {song.broadcast_at && (
                 <>{new Date(song.broadcast_at).toLocaleDateString()}</>
@@ -98,7 +110,6 @@ const SongListItem = React.memo(
                 </span>
               )}
             </div>
-
             {song.live_call && isSololive2025 && (
               <div className="hidden md:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
                 <span className="text-xs">
@@ -108,7 +119,6 @@ const SongListItem = React.memo(
                 </span>
               </div>
             )}
-
             {song.milestones && song.milestones.length > 0 && (
               <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
                 <div>

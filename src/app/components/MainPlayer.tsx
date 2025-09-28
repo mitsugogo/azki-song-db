@@ -61,6 +61,7 @@ export default function MainPlayer() {
     setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
+    handlePlayerOnReady,
     handleStateChange,
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
@@ -102,24 +103,27 @@ export default function MainPlayer() {
       return;
     }
 
-    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
-    const isExists = songs.some(
-      (song) =>
-        song.video_id === currentSongInfo?.video_id &&
-        song.start === currentSongInfo?.start
-    );
-    if (!isExists) {
+    // 先頭が2日以内更新なら先頭曲
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    if (new Date(songs[0].broadcast_at) > twoDaysAgo) {
       changeCurrentSong(songs[0]);
       return;
-    }
-
-    if (currentSongInfo && songs.length > 0) {
-      setPreviousAndNextSongs(currentSongInfo, songs);
     }
 
     // それ以外 → ランダム再生
     playRandomSong(songs);
   }, [songs, currentSongInfo, searchTerm, changeCurrentSong, playRandomSong]);
+
+  // URLにvとtが揃ったリクエストが新たに発生した場合
+  useEffect(() => {
+    if (!currentSongInfo) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get("v");
+    const startTime = Number(urlParams.get("t")?.replace("s", "")) || 0;
+    if (videoId && Number(currentSongInfo.start) === startTime) {
+      changeCurrentSong(null, false, videoId, startTime);
+    }
+  }, [currentSongInfo]);
 
   // --- State for UI ---
   const [baseUrl, setBaseUrl] = useState("");
@@ -258,8 +262,6 @@ export default function MainPlayer() {
     },
   ];
 
-  const allSpotlightActions = [...spotlightActions, ...searchActions];
-
   // --- Render ---
   if (isSongDataLoading) {
     return <Loading />;
@@ -280,6 +282,7 @@ export default function MainPlayer() {
         timedLiveCallText={timedLiveCallText ?? ""}
         setSongs={setSongs}
         searchSongs={searchSongs}
+        handlePlayerOnReady={handlePlayerOnReady}
         handleStateChange={handleStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}

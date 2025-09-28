@@ -52,6 +52,7 @@
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.12.9",
     "googleapis": "^160.0.0",
+    "motion": "^12.23.22",
     "next": "15.5.4",
     "next-pwa": "^5.6.0",
     "overlayscrollbars-react": "^0.5.6",

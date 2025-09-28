@@ -12,6 +12,8 @@ import PlayerSettings from "./PlayerSettings";
 import { LuCrown } from "react-icons/lu";
 import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "@mantine/core";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 
 // Propsの型定義
 type PlayerSectionProps = {
@@ -28,6 +30,7 @@ type PlayerSectionProps = {
   videoId?: string;
   startTime?: number;
   timedLiveCallText?: string;
+  handlePlayerOnReady: (event: YouTubeEvent) => void;
   handleStateChange: (event: YouTubeEvent) => void;
   changeCurrentSong: (
     song: Song | null,
@@ -58,6 +61,7 @@ export default function PlayerSection({
   videoId,
   startTime,
   timedLiveCallText,
+  handlePlayerOnReady,
   handleStateChange,
   changeCurrentSong,
   playRandomSong,
@@ -68,6 +72,21 @@ export default function PlayerSection({
   setSearchTerm,
   setHideFutureSongs,
 }: PlayerSectionProps) {
+  const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
+  const [timedLiveCallLineCount, setTimedLiveCallLineCount] = useState(1);
+
+  useEffect(() => {
+    // timedLiveCallText が何行か数える
+    const lineCount = timedLiveCallText
+      ?.replace(/\\r\\n|\\n/g, "<br>")
+      ?.split("<br>").length;
+    if (lineCount) {
+      setTimedLiveCallLineCount(lineCount);
+    }
+
+    setTimedLiveCallKey((prevKey) => prevKey + 1);
+  }, [timedLiveCallText]);
+
   return (
     <aside className="flex md:w-8/12 lg:w-2/3 xl:w-9/12 sm:w-full pr-0">
       <OverlayScrollbarsComponent
@@ -85,6 +104,7 @@ export default function PlayerSection({
                 song={currentSong}
                 video_id={videoId}
                 startTime={startTime}
+                onReady={handlePlayerOnReady}
                 onStateChange={handleStateChange}
               />
             )}
@@ -106,13 +126,44 @@ export default function PlayerSection({
                 </Tooltip>
               </span>
             </div>
-            <div className="flex-1 min-w-0 ml-3">
-              <p
-                className="truncate"
-                dangerouslySetInnerHTML={{
-                  __html: timedLiveCallText?.replace(/\\n/g, "<br>") ?? "",
-                }}
-              ></p>
+            <div
+              className={`flex-1 min-w-0 ml-1 w-full relative`}
+              style={{
+                height: `${(timedLiveCallLineCount || 1) * 1.2}rem`,
+              }}
+            >
+              <AnimatePresence>
+                {timedLiveCallText && (
+                  <motion.p
+                    key={`${timedLiveCallText}-${timedLiveCallKey}`}
+                    initial={{
+                      opacity: 0,
+                      y: 15,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      type: "spring",
+                      damping: 20,
+                      stiffness: 100,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -20,
+                      transition: {
+                        duration: 0.2,
+                      },
+                    }}
+                    className="truncate w-full absolute top-0 left-0"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        timedLiveCallText?.replace(/\\r\\n|\\n/g, "<br>") ?? "",
+                    }}
+                  ></motion.p>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         )}

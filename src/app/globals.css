@@ -65,8 +65,8 @@
   /* --color-gray-950: var(--mantine-color-dark-10); */
   --color-gray-950: #141414;
 
-  --breakpoint-3xl: 100rem;
-  --breakpoint-4xl: 130rem;
+  --breakpoint-3xl: 120rem; /* 1920px */
+  --breakpoint-4xl: 160rem; /* 2560px */
 
   --color-tan-50: #faf7f2;
   --color-tan-100: #f4eee0;
