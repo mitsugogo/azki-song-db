@@ -254,8 +254,6 @@ export default function MainPlayer() {
     },
   ];
 
-  const allSpotlightActions = [...spotlightActions, ...searchActions];
-
   // --- Render ---
   if (isSongDataLoading) {
     return <Loading />;
