@@ -21,8 +21,8 @@ interface SongListProps {
 
 // 画面幅からGridの列数を推定
 const getGridCols = (width: number): number => {
-  if (width >= 2080) return 5;
-  if (width >= 1600) return 4;
+  if (width >= 2560) return 5;
+  if (width >= 1920) return 4;
   if (width >= 1280) return 3;
   if (width >= 768) return 2;
   return 1;
@@ -65,11 +65,6 @@ const SongsList = ({
   // 仮想化の対象となる行の総数を計算
   const rowCount = useMemo(() => {
     if (colCount === 0) return 0;
-
-    console.log("songs.length", songs.length);
-    console.log("colCount", colCount);
-    console.log("rowCount", Math.ceil(songs.length / colCount));
-
     // (要素総数 + 列数 - 1) / 列数 => 要素を列数で区切ったときの天井値
     return Math.ceil(songs.length / colCount);
   }, [songs.length, colCount]);

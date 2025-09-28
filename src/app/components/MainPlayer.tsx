@@ -103,13 +103,6 @@ export default function MainPlayer() {
       return;
     }
 
-    // 先頭が2日以内更新なら先頭曲
-    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-    if (new Date(songs[0].broadcast_at) > twoDaysAgo) {
-      changeCurrentSong(songs[0]);
-      return;
-    }
-
     // それ以外 → ランダム再生
     playRandomSong(songs);
   }, [songs, currentSongInfo, searchTerm, changeCurrentSong, playRandomSong]);
