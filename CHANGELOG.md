@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.18.2](https://github.com/mitsugogo/azki-song-db/compare/v1.18.1...v1.18.2) (2025-09-28)
+
+
+### Bug Fixes
+
+* **main:** 曲一覧のbreakpoint修正 ([4179107](https://github.com/mitsugogo/azki-song-db/commit/4179107ffc5ba8986c94b836853d1ec9b99a171a))
+* **main:** 直近楽曲を流す処理がバグってるっぽいので一旦削除 ([6624e70](https://github.com/mitsugogo/azki-song-db/commit/6624e7075f69497f64f187bfddb33b8ed62bc4c2))
+
 ### [1.18.1](https://github.com/mitsugogo/azki-song-db/compare/v1.18.0...v1.18.1) (2025-09-28)
 
 
