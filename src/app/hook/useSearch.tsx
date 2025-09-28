@@ -136,7 +136,9 @@ const useSearch = (allSongs: Song[]) => {
               // ゲスト：星街すいせいさん
               ((s.tags.includes("オリ曲") || s.tags.includes("カバー曲")) &&
                 s.sing.includes("AZKi") &&
-                s.sing.includes("星街すいせい"))
+                s.sing.includes("星街すいせい") &&
+                !s.title.includes("威風堂々") &&
+                !s.title.includes("ray"))
           )
           .filter((s) => {
             return true;
