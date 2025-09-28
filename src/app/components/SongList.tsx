@@ -21,8 +21,8 @@ interface SongListProps {
 
 // 画面幅からGridの列数を推定
 const getGridCols = (width: number): number => {
-  if (width >= 2080) return 5;
-  if (width >= 1600) return 4;
+  if (width >= 2560) return 5;
+  if (width >= 1920) return 4;
   if (width >= 1280) return 3;
   if (width >= 768) return 2;
   return 1;
