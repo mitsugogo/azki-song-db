@@ -125,14 +125,22 @@ const useSearch = (allSongs: Song[]) => {
         songsToFilter = songsToFilter
           .filter(
             (s) =>
-              (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-              s.artist.includes("AZKi") &&
-              !s.title.includes("Maaya") &&
-              !s.artist.includes("星街") &&
-              !s.title.includes("Remix") &&
-              !s.tags.includes("リミックス") &&
-              !s.title.includes("Kiss me")
+              // AZKiさんオリ曲絞り込み
+              ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+                s.artist.includes("AZKi") &&
+                !s.title.includes("Maaya") &&
+                !s.artist.includes("星街") &&
+                !s.title.includes("Remix") &&
+                !s.tags.includes("リミックス") &&
+                !s.title.includes("Kiss me")) ||
+              // ゲスト：星街すいせいさん
+              ((s.tags.includes("オリ曲") || s.tags.includes("カバー曲")) &&
+                s.sing.includes("AZKi") &&
+                s.sing.includes("星街すいせい"))
           )
+          .filter((s) => {
+            return true;
+          })
           .sort((a, b) => {
             // リリース順でソート
             return (
