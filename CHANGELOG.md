@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.0](https://github.com/mitsugogo/azki-song-db/compare/v1.17.1...v1.18.0) (2025-09-28)
+
+
+### Features
+
+* **main:** 直近更新曲があれば先頭表示 ([2c4d102](https://github.com/mitsugogo/azki-song-db/commit/2c4d102691b78ac86fc7d05c19cb575a965e8cb5))
+
+
+### Bug Fixes
+
+* **main:** コーレスのタイムスタンプを押しても反応がない場合があったのを修正 ([6fffc13](https://github.com/mitsugogo/azki-song-db/commit/6fffc13fc780e6c52b3ecd71aed887d100a62d19))
+* **main:** 特定の解像度で曲一覧がスクロールできない場合があったのを修正 ([fb1195c](https://github.com/mitsugogo/azki-song-db/commit/fb1195c4f996145de0773376425623a02a5b46f7))
+* ページロード時にランダム再生で開始しないバグを修正 ([ca801d0](https://github.com/mitsugogo/azki-song-db/commit/ca801d0020a6c4667ab41b25a38b36ce3a3b17e0))
+
 ### [1.17.1](https://github.com/mitsugogo/azki-song-db/compare/v1.17.0...v1.17.1) (2025-09-27)
 
 
