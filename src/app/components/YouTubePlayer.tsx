@@ -6,6 +6,7 @@ interface YouTubePlayerProps {
   song: Song;
   video_id?: string;
   startTime?: number;
+  onReady: (event: YouTubeEvent<number>) => void;
   onStateChange: (event: YouTubeEvent<number>) => void;
 }
 
@@ -13,6 +14,7 @@ function YouTubePlayerComponent({
   song,
   video_id,
   startTime,
+  onReady,
   onStateChange,
 }: YouTubePlayerProps) {
   const videoId = video_id || song.video_id;
@@ -38,9 +40,7 @@ function YouTubePlayerComponent({
       className="w-full h-full"
       opts={opts}
       onStateChange={onStateChange}
-      onReady={(event) => {
-        event.target.playVideo();
-      }}
+      onReady={onReady}
     />
   );
 }

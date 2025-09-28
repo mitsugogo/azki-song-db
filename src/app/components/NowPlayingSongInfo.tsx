@@ -41,7 +41,6 @@ const NowPlayingSongInfo = ({
   changeCurrentSong,
 }: NowPlayingSongInfoProps) => {
   const [opened, { open, close }] = useDisclosure(false);
-
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -80,7 +79,7 @@ const NowPlayingSongInfo = ({
                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white m-0">
                   <FaCompactDisc
                     className={`relative mr-2 inline ${
-                      isPlaying ? "fa-spin" : ""
+                      isPlaying ? "animate-spin" : ""
                     }`}
                     style={{
                       top: "-2px",
@@ -114,7 +113,7 @@ const NowPlayingSongInfo = ({
               >
                 <div className="flex-none">
                   <FaCompactDisc
-                    className={`${isPlaying ? "fa-spin" : ""} mr-2`}
+                    className={`${isPlaying ? "animate-spin" : ""} mr-2`}
                     style={{ animationDuration: "3s" }}
                   />
                 </div>

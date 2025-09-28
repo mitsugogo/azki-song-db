@@ -61,6 +61,7 @@ export default function MainPlayer() {
     setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
+    handlePlayerOnReady,
     handleStateChange,
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
@@ -274,6 +275,7 @@ export default function MainPlayer() {
         timedLiveCallText={timedLiveCallText ?? ""}
         setSongs={setSongs}
         searchSongs={searchSongs}
+        handlePlayerOnReady={handlePlayerOnReady}
         handleStateChange={handleStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
