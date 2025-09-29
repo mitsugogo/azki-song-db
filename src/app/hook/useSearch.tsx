@@ -138,7 +138,8 @@ const useSearch = (allSongs: Song[]) => {
                 s.sing.includes("AZKi") &&
                 s.sing.includes("星街すいせい") &&
                 !s.title.includes("威風堂々") &&
-                !s.title.includes("ray"))
+                !s.title.includes("ray")) ||
+              s.video_id === "JNmmnB4bP0M" // 星街すいせい50万人ライブ
           )
           .filter((s) => {
             return true;
