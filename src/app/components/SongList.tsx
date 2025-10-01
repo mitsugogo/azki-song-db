@@ -86,20 +86,18 @@ const SongsList = ({
 
   // 現在の曲へスクロール
   useEffect(() => {
-    if (currentSongInfo && colCount > 0) {
+    if (currentSongInfo && colCount > 0 && virtualizer && parentRef.current) {
       const index = songs.findIndex((song) =>
         areSongsEqual(song, currentSongInfo)
       );
       if (index !== -1) {
         const rowIndex = Math.floor(index / colCount);
         virtualizer.scrollToIndex(rowIndex, {
-          align: "center",
+          align: colCount == 1 ? "start" : "center",
         });
       } else {
         virtualizer.scrollToIndex(0);
       }
-    } else if (!currentSongInfo) {
-      virtualizer.scrollToIndex(0);
     }
   }, [currentSongInfo, virtualizer, songs, colCount]);
 
@@ -229,7 +227,7 @@ const SongsList = ({
                   isHide={shouldBeHidden}
                   // 行の最初の要素（または任意の要素）に ref を渡し、行の高さを測定させる
                   ref={
-                    itemIndexInRow === 0
+                    itemIndexInRow === 0 && colCount > 1
                       ? virtualizer.measureElement
                       : undefined
                   }
