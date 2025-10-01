@@ -115,14 +115,6 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     setPlayerKey((prevKey) => prevKey + 1);
   }, []);
 
-  const scrollToTargetSong = (song: Song | null) => {
-    if (!song) return;
-    const element = document.querySelector(
-      `[data-video-id="${song.video_id}"][data-start-time="${song.start}"]`
-    );
-    element?.scrollIntoView({ block: "center" });
-  };
-
   const changeCurrentSong = useCallback(
     (
       song: Song | null,
@@ -150,7 +142,6 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       }
 
       setCurrentSongInfo(song);
-      scrollToTargetSong(song);
 
       // 曲が変わったらメッセージと表示済みリストをリセット
       setTimedLiveCallText(null);

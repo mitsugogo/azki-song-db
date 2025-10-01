@@ -41,8 +41,6 @@ const SongListItem = React.memo(
           data-video-id={song.video_id}
           data-start-time={song.start}
           data-title={song.title}
-          data-index={`${song.video_id}-${song.start}`}
-          key={`${song.video_id}-${song.start}`}
         >
           <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
             <Indicator

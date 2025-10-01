@@ -93,7 +93,7 @@ const SongsList = ({
       if (index !== -1) {
         const rowIndex = Math.floor(index / colCount);
         virtualizer.scrollToIndex(rowIndex, {
-          align: "center",
+          align: colCount == 1 ? "start" : "center",
         });
       } else {
         virtualizer.scrollToIndex(0);
@@ -229,7 +229,7 @@ const SongsList = ({
                   isHide={shouldBeHidden}
                   // 行の最初の要素（または任意の要素）に ref を渡し、行の高さを測定させる
                   ref={
-                    itemIndexInRow === 0
+                    itemIndexInRow === 0 && colCount > 1
                       ? virtualizer.measureElement
                       : undefined
                   }
