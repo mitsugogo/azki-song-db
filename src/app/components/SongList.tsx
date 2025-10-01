@@ -86,7 +86,7 @@ const SongsList = ({
 
   // 現在の曲へスクロール
   useEffect(() => {
-    if (currentSongInfo && colCount > 0) {
+    if (currentSongInfo && colCount > 0 && virtualizer && parentRef.current) {
       const index = songs.findIndex((song) =>
         areSongsEqual(song, currentSongInfo)
       );
@@ -98,8 +98,6 @@ const SongsList = ({
       } else {
         virtualizer.scrollToIndex(0);
       }
-    } else if (!currentSongInfo) {
-      virtualizer.scrollToIndex(0);
     }
   }, [currentSongInfo, virtualizer, songs, colCount]);
 
