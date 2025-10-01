@@ -185,7 +185,10 @@ const SongsList = ({
       <ScrollArea
         viewportRef={parentRef}
         id="song-list-scrollbar"
-        className="h-dvh lg:h-full overflow-y-auto focus:outline-0"
+        className="h-full overflow-y-auto focus:outline-0"
+        viewportProps={{
+          style: { contain: "strict" },
+        }}
         style={{
           contain: "strict",
         }}
@@ -205,7 +208,6 @@ const SongsList = ({
         >
           {virtualRows.flatMap((virtualRow) => {
             const startItemIndex = virtualRow.index * colCount;
-            // 行に表示すべき要素を songs から切り出し
             const rowItems = songs.slice(
               startItemIndex,
               startItemIndex + colCount
@@ -225,7 +227,6 @@ const SongsList = ({
                   isSelected={areSongsEqual(currentSongInfo, song)}
                   changeCurrentSong={changeCurrentSong}
                   isHide={shouldBeHidden}
-                  // 行の最初の要素（または任意の要素）に ref を渡し、行の高さを測定させる
                   ref={
                     itemIndexInRow === 0 && colCount > 1
                       ? virtualizer.measureElement
@@ -240,7 +241,7 @@ const SongsList = ({
         </ul>
 
         {/* 下部のスペーサー */}
-        <div style={{ height: `${endOffset}px` }} />
+        <div style={{ height: `${endOffset + 1}px` }} />
       </ScrollArea>
     </>
   );
