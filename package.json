@@ -1,6 +1,6 @@
 {
   "name": "azki-song-app",
-  "version": "1.18.3",
+  "version": "1.18.4",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

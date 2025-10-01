@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.18.4](https://github.com/mitsugogo/azki-song-db/compare/v1.18.3...v1.18.4) (2025-10-01)
+
+
+### Bug Fixes
+
+* **main:** スマホで曲リストの現在の曲がスクロール外になるバグを修正 ([3d2109f](https://github.com/mitsugogo/azki-song-db/commit/3d2109fab1365c9d4707cc0ace70716ae1370405))
+* **main:** ページロード時のスクロールがされない問題をちょっと解消 ([dd4a8d8](https://github.com/mitsugogo/azki-song-db/commit/dd4a8d88b94a81bf0ea652a7d8d2352025e21a32))
+
 ### [1.18.3](https://github.com/mitsugogo/azki-song-db/compare/v1.18.2...v1.18.3) (2025-09-29)
 
 ### [1.18.2](https://github.com/mitsugogo/azki-song-db/compare/v1.18.1...v1.18.2) (2025-09-28)
