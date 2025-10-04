@@ -25,19 +25,15 @@ const MAX_DOTS = 8;
  * 曲リストからページャー用のデータを生成するヘルパー関数 (相対ドット数計算を含む)
  */
 const generatePagerData = (songs: Song[]): PagerItem[] => {
-  const sortedSongs = [...songs].sort(
-    (a, b) =>
-      new Date(b.broadcast_at).getTime() - new Date(a.broadcast_at).getTime()
-  );
-
   const yearData: Record<number, { count: number; songs: Song[] }> = {};
-  sortedSongs.forEach((song) => {
+
+  songs.forEach((song) => {
     const broadcastYear = new Date(song.broadcast_at).getFullYear();
     if (!yearData[broadcastYear]) {
       yearData[broadcastYear] = { count: 0, songs: [] };
     }
-    yearData[broadcastYear].count += 1;
     yearData[broadcastYear].songs.push(song);
+    yearData[broadcastYear].count += 1;
   });
 
   const allCounts = Object.values(yearData).map((data) => data.count);
@@ -46,7 +42,7 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
   const years = new Set<number>();
   const pagerData: PagerItem[] = [];
 
-  sortedSongs.forEach((song) => {
+  songs.forEach((song) => {
     const broadcastYear = new Date(song.broadcast_at).getFullYear();
     const songId = `${song.video_id}-${song.start}-${song.title}`;
 
@@ -68,8 +64,7 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
       });
     }
   });
-
-  return pagerData.sort((a, b) => b.year - a.year);
+  return pagerData;
 };
 
 const YearPager: React.FC<YearPagerProps> = ({
@@ -83,6 +78,11 @@ const YearPager: React.FC<YearPagerProps> = ({
 
   const { triggerHaptic } = useHaptic();
 
+  const isDescendingOrder =
+    pagerData.length > 1
+      ? pagerData[0].year > pagerData[pagerData.length - 1].year
+      : true; // 要素が少ない場合は新しい順と仮定
+
   // 必要なデータの計算
   const visibleSongs = currentSongIds
     .map((id) =>
@@ -93,33 +93,134 @@ const YearPager: React.FC<YearPagerProps> = ({
   // 見えている曲がない場合の処理
   if (visibleSongs.length === 0) {
     return (
-      <div className="h-full w-10 py-4 hidden lg:block">
+      <div className="h-full w-9 py-4 hidden lg:block">
         <div className="relative h-full"></div>
       </div>
     );
   }
 
-  const firstVisibleSong = visibleSongs[0];
-  const lastVisibleSong = visibleSongs[visibleSongs.length - 1];
-  const firstVisibleYear = firstVisibleSong
-    ? new Date(firstVisibleSong.broadcast_at).getFullYear()
-    : 0;
-  const lastVisibleYear = lastVisibleSong
-    ? new Date(lastVisibleSong.broadcast_at).getFullYear()
-    : 0;
+  // 画面に見えている曲の中で、最も古い（broadcast_atが小さい）曲と最も新しい（broadcast_atが大きい）曲を特定
+  const visibleBroadcastDates = visibleSongs.map((s) =>
+    new Date(s.broadcast_at).getTime()
+  );
+  const minBroadcastDate = Math.min(...visibleBroadcastDates);
+  const maxBroadcastDate = Math.max(...visibleBroadcastDates);
+
+  const minVisibleYear = new Date(minBroadcastDate).getFullYear();
+  const maxVisibleYear = new Date(maxBroadcastDate).getFullYear();
+
+  // 画面の上端・下端の曲を特定するのではなく、可視範囲の境界となる曲を特定
+  const minYearSong = visibleSongs.find(
+    (s) => new Date(s.broadcast_at).getTime() === minBroadcastDate
+  );
+  const maxYearSong = visibleSongs.find(
+    (s) => new Date(s.broadcast_at).getTime() === maxBroadcastDate
+  );
 
   // 現在再生中の曲の年と、その年の中でのインデックスを特定
   const currentSongYear = currentSongInfo
     ? new Date(currentSongInfo.broadcast_at).getFullYear()
     : null;
 
+  const yearHeader = (item: PagerItem, yearColorClass: string) => (
+    <div
+      className={`text-xs font-bold cursor-pointer transition-colors duration-200 ${yearColorClass} py-1`}
+      onClick={() => {
+        onPagerItemClick(item.firstSongId);
+        triggerHaptic();
+      }}
+    >
+      {item.year}
+    </div>
+  );
+
+  const dotList = (
+    item: PagerItem,
+    minDotIndex: number,
+    maxDotIndex: number,
+    currentSongDotIndex: number,
+    isCurrentYear: boolean
+  ) => (
+    <ul className="list-none p-0 m-0">
+      {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
+        const isHighlightedDot =
+          dotIndex >= minDotIndex && dotIndex <= maxDotIndex;
+
+        const dotColorClass = isHighlightedDot
+          ? "bg-primary-500 border-primary-500"
+          : "bg-light-gray-300 border-light-gray-300 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
+
+        const totalSongsInYear = item.songs.length;
+        const totalDots = item.dotCount;
+
+        const targetSongIndexInYear = Math.min(
+          Math.floor((dotIndex / totalDots) * totalSongsInYear),
+          totalSongsInYear - 1
+        );
+
+        const targetSongId = item.songs[targetSongIndexInYear]
+          ? `${item.songs[targetSongIndexInYear].video_id}-${item.songs[targetSongIndexInYear].start}-${item.songs[targetSongIndexInYear].title}`
+          : item.firstSongId;
+
+        const isCurrentDot = isCurrentYear && dotIndex === currentSongDotIndex;
+
+        return (
+          <li
+            key={`${item.year}-${dotIndex}`}
+            className="my-0.5 cursor-pointer flex items-center relative"
+            onClick={() => {
+              let songIdToScroll = targetSongId;
+
+              if (isHighlightedDot && currentSongInfo) {
+                songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+              }
+
+              onPagerItemClick(songIdToScroll);
+              triggerHaptic();
+            }}
+          >
+            <div
+              className={`w-1.5 h-1.5 rounded-full border-2 transition-colors duration-200 ${dotColorClass}`}
+            ></div>
+
+            {isCurrentDot && (
+              <div
+                className="absolute right-full z-20 text-center bg-primary-500 text-white rounded text-xs w-5 h-5 flex items-center justify-center"
+                style={{
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: "8px",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  let songIdToScroll = targetSongId;
+
+                  if (isHighlightedDot && currentSongInfo) {
+                    songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+                  }
+                  onPagerItemClick(songIdToScroll);
+                  triggerHaptic();
+                }}
+              >
+                <IoMusicalNotes />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+
   return (
     <div className="h-full w-9" ref={pagerRef}>
       <div className="relative h-full">
         {pagerData.map((item) => {
           const itemYear = item.year;
+
           const isYearVisible =
-            itemYear <= firstVisibleYear && itemYear >= lastVisibleYear;
+            itemYear >= minVisibleYear && itemYear <= maxVisibleYear;
+
           const yearColorClass = isYearVisible
             ? "text-primary-400"
             : "text-gray-200 hover:text-primary-300";
@@ -130,7 +231,6 @@ const YearPager: React.FC<YearPagerProps> = ({
           let minDotIndex = -1;
           let maxDotIndex = -1;
 
-          // 現在再生中の曲が該当するドットのインデックスを計算
           let currentSongDotIndex = -1;
           if (isCurrentYear && currentSongInfo) {
             const songsInYear = item.songs;
@@ -146,7 +246,6 @@ const YearPager: React.FC<YearPagerProps> = ({
               currentSongDotIndex = Math.floor(
                 (currentSongIndexInYear / totalSongsInYear) * totalDots
               );
-              // 最後の曲が常に最後のドットに対応するように調整
               if (
                 currentSongIndexInYear === totalSongsInYear - 1 &&
                 totalDots > 0
@@ -165,28 +264,35 @@ const YearPager: React.FC<YearPagerProps> = ({
                 (s) => s.video_id === song.video_id && s.start === song.start
               );
 
-            if (itemYear === firstVisibleYear) {
-              const firstSongIndexInYear = findIndexInYear(firstVisibleSong);
-              minDotIndex = Math.floor(
-                (firstSongIndexInYear / totalSongsInYear) * totalDots
-              );
-            } else {
-              minDotIndex = 0;
-            }
+            let dotIndexMin = 0;
+            let dotIndexMax = totalDots - 1;
 
-            if (itemYear === lastVisibleYear) {
-              const lastSongIndexInYear = findIndexInYear(lastVisibleSong);
-              if (lastSongIndexInYear === -1) {
-                maxDotIndex = totalDots - 1;
-              } else {
-                maxDotIndex = Math.floor(
-                  (lastSongIndexInYear / totalSongsInYear) * totalDots
+            if (minVisibleYear === itemYear && minYearSong) {
+              const indexMin = findIndexInYear(minYearSong);
+              if (indexMin !== -1) {
+                dotIndexMin = Math.floor(
+                  (indexMin / totalSongsInYear) * totalDots
                 );
               }
+            }
 
-              if (maxDotIndex < minDotIndex) maxDotIndex = minDotIndex;
-            } else {
-              maxDotIndex = totalDots - 1;
+            if (maxVisibleYear === itemYear && maxYearSong) {
+              const indexMax = findIndexInYear(maxYearSong);
+              if (indexMax !== -1) {
+                dotIndexMax = Math.floor(
+                  (indexMax / totalSongsInYear) * totalDots
+                );
+                if (indexMax === totalSongsInYear - 1 && totalDots > 0) {
+                  dotIndexMax = totalDots - 1;
+                }
+              }
+            }
+
+            minDotIndex = dotIndexMin;
+            maxDotIndex = dotIndexMax;
+
+            if (minDotIndex > maxDotIndex) {
+              minDotIndex = maxDotIndex;
             }
           }
 
@@ -195,90 +301,31 @@ const YearPager: React.FC<YearPagerProps> = ({
 
           return (
             <div key={item.year} className="mb-2 relative">
-              {/* ドットのリスト */}
-              <ul className="list-none p-0 m-0 pt-1">
-                {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
-                  const isHighlightedDot =
-                    dotIndex >= minDotIndex && dotIndex <= maxDotIndex;
-                  const dotColorClass = isHighlightedDot
-                    ? "bg-primary-500 border-primary-500"
-                    : "bg-light-gray-300 border-light-gray-300 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
-
-                  const totalSongsInYear = item.songs.length;
-                  const totalDots = item.dotCount;
-
-                  const targetSongIndexInYear = Math.min(
-                    Math.floor((dotIndex / totalDots) * totalSongsInYear),
-                    totalSongsInYear - 1
-                  );
-
-                  const targetSongId = item.songs[targetSongIndexInYear]
-                    ? `${item.songs[targetSongIndexInYear].video_id}-${item.songs[targetSongIndexInYear].start}-${item.songs[targetSongIndexInYear].title}`
-                    : item.firstSongId;
-
-                  // 該当ドットの横に吹き出しを挿入
-                  const isCurrentDot =
-                    isCurrentYear && dotIndex === currentSongDotIndex;
-
-                  return (
-                    <li
-                      key={`${item.year}-${dotIndex}`}
-                      className="my-0.5 cursor-pointer flex items-center relative"
-                      onClick={() => {
-                        let songIdToScroll = targetSongId;
-
-                        // ハイライトされているドットがクリックされた場合、現在再生中の曲へスクロールする
-                        if (isHighlightedDot && currentSongInfo) {
-                          songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
-                        }
-
-                        onPagerItemClick(songIdToScroll);
-                        triggerHaptic();
-                      }}
-                    >
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full border-2 transition-colors duration-200 ${dotColorClass}`}
-                      ></div>
-
-                      {isCurrentDot && (
-                        <div
-                          className="absolute right-full z-20 text-center bg-primary-500 text-white rounded text-xs w-5 h-5 flex items-center justify-center"
-                          style={{
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            left: "8px",
-                            cursor: "pointer",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            let songIdToScroll = targetSongId;
-
-                            // ハイライトされているドットがクリックされた場合、現在再生中の曲へスクロールする
-                            if (isHighlightedDot && currentSongInfo) {
-                              songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
-                            }
-                            onPagerItemClick(songIdToScroll);
-                            triggerHaptic();
-                          }}
-                        >
-                          <IoMusicalNotes />
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {/* 年のヘッダー */}
-              <div
-                className={`text-xs font-bold cursor-pointer transition-colors duration-200 ${yearColorClass}`}
-                onClick={() => {
-                  onPagerItemClick(item.firstSongId);
-                  triggerHaptic();
-                }}
-              >
-                {item.year}
-              </div>
+              {isDescendingOrder ? (
+                // 新しい順の場合 (ドット → 年号)
+                <>
+                  {dotList(
+                    item,
+                    minDotIndex,
+                    maxDotIndex,
+                    currentSongDotIndex,
+                    isCurrentYear
+                  )}
+                  {yearHeader(item, yearColorClass)}
+                </>
+              ) : (
+                // 古い順の場合 (年号 → ドット)
+                <>
+                  {yearHeader(item, yearColorClass)}
+                  {dotList(
+                    item,
+                    minDotIndex,
+                    maxDotIndex,
+                    currentSongDotIndex,
+                    isCurrentYear
+                  )}
+                </>
+              )}
             </div>
           );
         })}
