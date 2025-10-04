@@ -233,25 +233,21 @@ const SongsList = ({
    * @param id スクロール先の曲を特定するID ('video_id-start-title')
    */
   const scrollToSong = useCallback(
-    // <--- 関数全体を書き換え
     (id: string) => {
       const songToScroll = songs.find(
         (song) => `${song.video_id}-${song.start}-${song.title}` === id
       );
 
       if (!songToScroll) {
-        console.log("Song not found for ID:", id);
         return;
       }
 
       const index = songs.indexOf(songToScroll);
       if (index === -1) {
-        console.log("Song index not found for song:", songToScroll.title);
         return;
       }
 
       const rowIndex = Math.floor(index / colCount);
-      console.log("Scrolling to rowIndex:", rowIndex);
 
       virtualizer.scrollToIndex(rowIndex, {
         align: colCount === 1 ? "start" : "center",
@@ -262,7 +258,9 @@ const SongsList = ({
     [songs, colCount, virtualizer]
   );
 
-  // ハイライトも連動させる
+  /**
+   * 現在再生中の曲をハイライトする
+   */
   useEffect(() => {
     if (currentSongInfo) {
       const playingId = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
@@ -336,15 +334,17 @@ const SongsList = ({
         </ScrollArea>
 
         {/* 右端の縦型ページャー */}
-        <div className="flex flex-col h-full justify-between pl-2">
-          <ScrollArea>
-            <YearPager
-              songs={songs}
-              currentSongIds={visibleSongIds}
-              onPagerItemClick={scrollToSong}
-            />
-          </ScrollArea>
-        </div>
+        {songs.length > 15 && (
+          <div className="flex flex-col h-full justify-between pl-2">
+            <ScrollArea type={"never"}>
+              <YearPager
+                songs={songs}
+                currentSongIds={visibleSongIds}
+                onPagerItemClick={scrollToSong}
+              />
+            </ScrollArea>
+          </div>
+        )}
       </div>
     </>
   );

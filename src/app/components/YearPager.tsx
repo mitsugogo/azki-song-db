@@ -157,7 +157,7 @@ const YearPager: React.FC<YearPagerProps> = ({
           maxDotIndex = Math.min(item.dotCount - 1, maxDotIndex);
 
           return (
-            <div key={item.year} className="mb-6 relative">
+            <div key={item.year} className="mb-2 relative">
               {/* ドットのリスト */}
               <ul className="list-none p-0 m-0 pt-1">
                 {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
