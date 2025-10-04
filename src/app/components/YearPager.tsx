@@ -73,6 +73,54 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
   return pagerData.sort((a, b) => b.year - a.year);
 };
 
+// iOS Safariでnavigator.vibrate()が機能しない問題に対処するため、
+// iOS 18+ Safariでネイティブなフィードバックがトリガーされる
+// <input type="checkbox" switch> のクリックをシミュレートするハックを実装します。
+const useHapticFeedback = () => {
+  const hapticRef = useRef<HTMLInputElement | null>(null);
+  const labelRef = useRef<HTMLLabelElement | null>(null);
+
+  useEffect(() => {
+    // 1. iOSハック用の非表示DOMエレメントを作成
+    hapticRef.current = document.createElement("input");
+    hapticRef.current.type = "checkbox";
+    hapticRef.current.setAttribute("switch", "true"); // iOS 18+ Safariの非標準属性
+
+    // input要素を内包する非表示のlabelを作成 (clickイベントをトリガーするため)
+    labelRef.current = document.createElement("label");
+    labelRef.current.style.cssText =
+      "display: none; width: 0; height: 0; overflow: hidden; position: absolute;";
+    labelRef.current.appendChild(hapticRef.current);
+
+    // 2. DOMに追加
+    document.body.appendChild(labelRef.current);
+
+    return () => {
+      // 3. クリーンアップ
+      if (labelRef.current) {
+        document.body.removeChild(labelRef.current);
+      }
+    };
+  }, []);
+
+  const triggerHapticFeedback = useCallback((duration: number = 50) => {
+    // 1. Android/Chromeなどの環境 (Vibration APIサポート)
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      // 短い振動パターン（例：50ms）
+      navigator.vibrate(duration);
+      return;
+    }
+
+    // 2. iOS Safari環境 (Vibration API非サポート、checkbox switchハック)
+    // ユーザーインタラクションイベント内でlabel.click()を呼び出し、ネイティブフィードバックをトリガー
+    if (labelRef.current && typeof window !== "undefined") {
+      labelRef.current.click();
+    }
+  }, []);
+
+  return triggerHapticFeedback;
+};
+
 const YearPager: React.FC<YearPagerProps> = ({
   songs,
   currentSongIds,
@@ -82,6 +130,8 @@ const YearPager: React.FC<YearPagerProps> = ({
   // 1. Hooksをトップレベルで呼び出す
   const pagerData = useMemo(() => generatePagerData(songs), [songs]);
   const pagerRef = useRef<HTMLDivElement>(null);
+
+  const triggerHaptic = useHapticFeedback();
 
   // ドラッグ操作でスクロール位置を計算し、親コンポーネントに通知するハンドラ
   const handleDragInteraction = useCallback(
@@ -118,6 +168,7 @@ const YearPager: React.FC<YearPagerProps> = ({
     const touch = e.changedTouches[0];
     if (touch) {
       handleDragInteraction(touch.clientY);
+      triggerHaptic();
     }
   };
 
@@ -247,7 +298,10 @@ const YearPager: React.FC<YearPagerProps> = ({
                     <li
                       key={`${item.year}-${dotIndex}`}
                       className="my-0.5 cursor-pointer flex items-center"
-                      onClick={() => onPagerItemClick(targetSongId)}
+                      onClick={() => {
+                        onPagerItemClick(targetSongId);
+                        triggerHaptic();
+                      }}
                     >
                       {/* 【デザイン復元】丸いドット w-1.5 h-1.5 に戻す */}
                       <div
@@ -261,7 +315,10 @@ const YearPager: React.FC<YearPagerProps> = ({
               {/* 年のヘッダー */}
               <div
                 className={`text-xs font-bold cursor-pointer transition-colors duration-200 ${yearColorClass}`}
-                onClick={() => onPagerItemClick(item.firstSongId)}
+                onClick={() => {
+                  onPagerItemClick(item.firstSongId);
+                  triggerHaptic();
+                }}
               >
                 {item.year}
               </div>
