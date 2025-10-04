@@ -1,6 +1,8 @@
 import React, { useMemo, useRef, useCallback, useEffect } from "react";
 import { Song } from "../types/song";
 import { useHaptic } from "use-haptic";
+import { IoMusicalNotes } from "react-icons/io5";
+import { Badge } from "@mantine/core";
 
 interface PagerItem {
   year: number;
@@ -12,6 +14,7 @@ interface PagerItem {
 interface YearPagerProps {
   songs: Song[];
   currentSongIds: string[];
+  currentSongInfo: Song | null;
   onPagerItemClick: (id: string) => void;
 }
 
@@ -72,6 +75,7 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
 const YearPager: React.FC<YearPagerProps> = ({
   songs,
   currentSongIds,
+  currentSongInfo,
   onPagerItemClick,
 }) => {
   const pagerData = useMemo(() => generatePagerData(songs), [songs]);
@@ -104,8 +108,13 @@ const YearPager: React.FC<YearPagerProps> = ({
     ? new Date(lastVisibleSong.broadcast_at).getFullYear()
     : 0;
 
+  // 現在再生中の曲の年と、その年の中でのインデックスを特定
+  const currentSongYear = currentSongInfo
+    ? new Date(currentSongInfo.broadcast_at).getFullYear()
+    : null;
+
   return (
-    <div className="h-full w-7 py-4" ref={pagerRef}>
+    <div className="h-full w-9" ref={pagerRef}>
       <div className="relative h-full">
         {pagerData.map((item) => {
           const itemYear = item.year;
@@ -115,9 +124,37 @@ const YearPager: React.FC<YearPagerProps> = ({
             ? "text-primary-400"
             : "text-gray-200 hover:text-primary-300";
 
+          const isCurrentYear = itemYear === currentSongYear;
+
           // ドットのハイライト範囲計算
           let minDotIndex = -1;
           let maxDotIndex = -1;
+
+          // 現在再生中の曲が該当するドットのインデックスを計算
+          let currentSongDotIndex = -1;
+          if (isCurrentYear && currentSongInfo) {
+            const songsInYear = item.songs;
+            const currentSongIndexInYear = songsInYear.findIndex(
+              (s) =>
+                s.video_id === currentSongInfo.video_id &&
+                s.start === currentSongInfo.start
+            );
+
+            if (currentSongIndexInYear !== -1) {
+              const totalSongsInYear = songsInYear.length;
+              const totalDots = item.dotCount;
+              currentSongDotIndex = Math.floor(
+                (currentSongIndexInYear / totalSongsInYear) * totalDots
+              );
+              // 最後の曲が常に最後のドットに対応するように調整
+              if (
+                currentSongIndexInYear === totalSongsInYear - 1 &&
+                totalDots > 0
+              ) {
+                currentSongDotIndex = totalDots - 1;
+              }
+            }
+          }
 
           if (isYearVisible) {
             const songsInYear = item.songs;
@@ -179,18 +216,54 @@ const YearPager: React.FC<YearPagerProps> = ({
                     ? `${item.songs[targetSongIndexInYear].video_id}-${item.songs[targetSongIndexInYear].start}-${item.songs[targetSongIndexInYear].title}`
                     : item.firstSongId;
 
+                  // 該当ドットの横に吹き出しを挿入
+                  const isCurrentDot =
+                    isCurrentYear && dotIndex === currentSongDotIndex;
+
                   return (
                     <li
                       key={`${item.year}-${dotIndex}`}
-                      className="my-0.5 cursor-pointer flex items-center"
+                      className="my-0.5 cursor-pointer flex items-center relative"
                       onClick={() => {
-                        onPagerItemClick(targetSongId);
+                        let songIdToScroll = targetSongId;
+
+                        // ハイライトされているドットがクリックされた場合、現在再生中の曲へスクロールする
+                        if (isHighlightedDot && currentSongInfo) {
+                          songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+                        }
+
+                        onPagerItemClick(songIdToScroll);
                         triggerHaptic();
                       }}
                     >
                       <div
                         className={`w-1.5 h-1.5 rounded-full border-2 transition-colors duration-200 ${dotColorClass}`}
                       ></div>
+
+                      {isCurrentDot && (
+                        <div
+                          className="absolute right-full z-20 text-center bg-primary-500 text-white rounded text-xs w-5 h-5 flex items-center justify-center"
+                          style={{
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            left: "8px",
+                            cursor: "pointer",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            let songIdToScroll = targetSongId;
+
+                            // ハイライトされているドットがクリックされた場合、現在再生中の曲へスクロールする
+                            if (isHighlightedDot && currentSongInfo) {
+                              songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+                            }
+                            onPagerItemClick(songIdToScroll);
+                            triggerHaptic();
+                          }}
+                        >
+                          <IoMusicalNotes />
+                        </div>
+                      )}
                     </li>
                   );
                 })}

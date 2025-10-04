@@ -10,11 +10,8 @@ import React, {
   useState,
 } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Button, ScrollArea } from "@mantine/core";
+import { ScrollArea } from "@mantine/core";
 import YearPager from "./YearPager";
-
-// SongListItemのDOM要素の型（forwardRefの型と一致させる）
-type SongListItemRef = HTMLLIElement;
 
 interface SongListProps {
   songs: Song[];
@@ -335,12 +332,13 @@ const SongsList = ({
 
         {/* 右端の縦型ページャー */}
         {songs.length > 15 && (
-          <div className="flex flex-col h-full justify-between pl-2">
+          <div className="flex flex-col h-full justify-between pl-2 overflow-hidden">
             <ScrollArea type={"never"}>
               <YearPager
                 songs={songs}
                 currentSongIds={visibleSongIds}
                 onPagerItemClick={scrollToSong}
+                currentSongInfo={currentSongInfo}
               />
             </ScrollArea>
           </div>
