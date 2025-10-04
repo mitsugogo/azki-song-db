@@ -1,10 +1,7 @@
-// YearPager.tsx
-
 import React, { useMemo, useRef, useCallback, useEffect } from "react";
-// Song型は親コンポーネントから渡されると仮定
 import { Song } from "../types/song";
+import { useHaptic } from "use-haptic";
 
-// ページャーに渡す年ごとの情報
 interface PagerItem {
   year: number;
   firstSongId: string;
@@ -16,11 +13,11 @@ interface YearPagerProps {
   songs: Song[];
   currentSongIds: string[];
   onPagerItemClick: (id: string) => void;
-  // ドラッグ操作でスクロールするためのハンドラ
   onDragScroll: (percentage: number) => void;
 }
 
-const MAX_DOTS = 8; // ドットの最大表示数（相対的なボリューム計算の基準）
+// ドットの最大表示数
+const MAX_DOTS = 8;
 
 /**
  * 曲リストからページャー用のデータを生成するヘルパー関数 (相対ドット数計算を含む)
@@ -73,65 +70,16 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
   return pagerData.sort((a, b) => b.year - a.year);
 };
 
-// iOS Safariでnavigator.vibrate()が機能しない問題に対処するため、
-// iOS 18+ Safariでネイティブなフィードバックがトリガーされる
-// <input type="checkbox" switch> のクリックをシミュレートするハックを実装します。
-const useHapticFeedback = () => {
-  const hapticRef = useRef<HTMLInputElement | null>(null);
-  const labelRef = useRef<HTMLLabelElement | null>(null);
-
-  useEffect(() => {
-    // 1. iOSハック用の非表示DOMエレメントを作成
-    hapticRef.current = document.createElement("input");
-    hapticRef.current.type = "checkbox";
-    hapticRef.current.setAttribute("switch", "true"); // iOS 18+ Safariの非標準属性
-
-    // input要素を内包する非表示のlabelを作成 (clickイベントをトリガーするため)
-    labelRef.current = document.createElement("label");
-    labelRef.current.style.cssText =
-      "display: none; width: 0; height: 0; overflow: hidden; position: absolute;";
-    labelRef.current.appendChild(hapticRef.current);
-
-    // 2. DOMに追加
-    document.body.appendChild(labelRef.current);
-
-    return () => {
-      // 3. クリーンアップ
-      if (labelRef.current) {
-        document.body.removeChild(labelRef.current);
-      }
-    };
-  }, []);
-
-  const triggerHapticFeedback = useCallback((duration: number = 50) => {
-    // 1. Android/Chromeなどの環境 (Vibration APIサポート)
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      // 短い振動パターン（例：50ms）
-      navigator.vibrate(duration);
-      return;
-    }
-
-    // 2. iOS Safari環境 (Vibration API非サポート、checkbox switchハック)
-    // ユーザーインタラクションイベント内でlabel.click()を呼び出し、ネイティブフィードバックをトリガー
-    if (labelRef.current && typeof window !== "undefined") {
-      labelRef.current.click();
-    }
-  }, []);
-
-  return triggerHapticFeedback;
-};
-
 const YearPager: React.FC<YearPagerProps> = ({
   songs,
   currentSongIds,
   onPagerItemClick,
   onDragScroll,
 }) => {
-  // 1. Hooksをトップレベルで呼び出す
   const pagerData = useMemo(() => generatePagerData(songs), [songs]);
   const pagerRef = useRef<HTMLDivElement>(null);
 
-  const triggerHaptic = useHapticFeedback();
+  const { triggerHaptic } = useHaptic();
 
   // ドラッグ操作でスクロール位置を計算し、親コンポーネントに通知するハンドラ
   const handleDragInteraction = useCallback(
@@ -150,8 +98,6 @@ const YearPager: React.FC<YearPagerProps> = ({
     [onDragScroll]
   );
 
-  // タッチイベントハンドラ
-  // JSXで直接 `onTouchMove` を呼び出すための関数
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
     if (touch) {
@@ -168,18 +114,12 @@ const YearPager: React.FC<YearPagerProps> = ({
     const touch = e.changedTouches[0];
     if (touch) {
       handleDragInteraction(touch.clientY);
-      triggerHaptic();
     }
   };
 
-  // 【エラー修正】パッシブイベントリスナーを無効化する
   useEffect(() => {
     const pagerElement = pagerRef.current;
     if (!pagerElement) return;
-
-    // パッシブイベントリスナーのエラーを回避するため、
-    // touchmoveイベントを `{ passive: false }` でネイティブに再登録する
-    // これにより、JSXの `handleTouchMove` 内での `e.preventDefault()` が許可される
     pagerElement.addEventListener("touchmove", (e) => {}, { passive: false });
 
     return () => {
@@ -271,9 +211,8 @@ const YearPager: React.FC<YearPagerProps> = ({
           maxDotIndex = Math.min(item.dotCount - 1, maxDotIndex);
 
           return (
-            // デザイン復元：縦積みレイアウト (mb-6 relative)
             <div key={item.year} className="mb-6 relative">
-              {/* ドットのリスト (年号の上に配置) */}
+              {/* ドットのリスト */}
               <ul className="list-none p-0 m-0 pt-1">
                 {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
                   const isHighlightedDot =
@@ -303,7 +242,6 @@ const YearPager: React.FC<YearPagerProps> = ({
                         triggerHaptic();
                       }}
                     >
-                      {/* 【デザイン復元】丸いドット w-1.5 h-1.5 に戻す */}
                       <div
                         className={`w-1.5 h-1.5 rounded-full border-2 transition-colors duration-200 ${dotColorClass}`}
                       ></div>
