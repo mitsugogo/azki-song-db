@@ -10,7 +10,11 @@ import React, {
   useState,
 } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ScrollArea } from "@mantine/core";
+import { Button, ScrollArea } from "@mantine/core";
+import YearPager from "./YearPager";
+
+// SongListItemのDOM要素の型（forwardRefの型と一致させる）
+type SongListItemRef = HTMLLIElement;
 
 interface SongListProps {
   songs: Song[];
@@ -46,6 +50,10 @@ const SongsList = ({
 }: SongListProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
+
+  // ページャーと連動するためのハイライト状態を管理
+  const [currentSongId, setCurrentSongId] = useState<string | null>(null);
+  const [visibleSongIds, setVisibleSongIds] = useState<string[]>([]);
 
   // 現在のウィンドウ幅
   const [windowWidth, setWindowWidth] = useState(0);
@@ -107,6 +115,9 @@ const SongsList = ({
     virtualRows.length > 0
       ? virtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
       : 0;
+
+  // 仮想化アイテムの取得
+  const virtualItems = virtualizer.getVirtualItems();
 
   // 連続スクロール処理を停止
   const stopScrolling = useCallback(() => {
@@ -173,6 +184,23 @@ const SongsList = ({
     [stopScrolling]
   );
 
+  const onPagerScrollToPercentage = useCallback(
+    (percentage: number) => {
+      // スクロール可能な全体の高さを取得
+      const maxOffset =
+        virtualizer.getTotalSize() - (parentRef.current?.clientHeight || 0);
+
+      // ターゲットのオフセットを計算
+      const targetOffset = maxOffset * percentage;
+
+      // 仮想化ライブラリの機能を使ってオフセットでスクロール
+      virtualizer.scrollToOffset(targetOffset, {
+        behavior: "auto", // ドラッグ操作ではアニメーションなし
+      });
+    },
+    [virtualizer, parentRef]
+  );
+
   // コンポーネントがアンマウントされたときにタイマーを停止
   useEffect(() => {
     return () => {
@@ -180,69 +208,181 @@ const SongsList = ({
     };
   }, [stopScrolling]);
 
+  useEffect(() => {
+    if (virtualItems.length > 0) {
+      const newVisibleIds: string[] = [];
+
+      // 画面に見えている全ての仮想アイテムを処理
+      virtualItems.forEach((item) => {
+        const startItemIndex = item.index * colCount;
+
+        // 1行内の全ての曲をチェック
+        for (let i = 0; i < colCount; i++) {
+          const globalIndex = startItemIndex + i;
+          const song = songs[globalIndex];
+
+          if (song) {
+            const visibleId = `${song.video_id}-${song.start}-${song.title}`;
+            newVisibleIds.push(visibleId);
+          }
+        }
+      });
+
+      // スクロール位置が変わったときのみstateを更新
+      // 配列の比較は面倒なので、IDの数で大まかに判定
+      if (
+        newVisibleIds.length !== visibleSongIds.length ||
+        newVisibleIds[0] !== visibleSongIds[0]
+      ) {
+        setVisibleSongIds(newVisibleIds);
+      }
+    } else if (songs.length > 0) {
+      // リストが空でない場合の初期値設定
+      const initialId = `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`;
+      if (visibleSongIds.length === 0) {
+        setVisibleSongIds([initialId]);
+      }
+    }
+  }, [virtualItems, songs, colCount, visibleSongIds]); // virtualItemsが変更されるたびに実行
+
+  /**
+   * ページャーまたはリストからのクリック時に特定の曲にスクロールする関数
+   * @param id スクロール先の曲を特定するID ('video_id-start-title')
+   */
+  const scrollToSong = useCallback(
+    // <--- 関数全体を書き換え
+    (id: string) => {
+      // 1. IDから曲を見つける
+      const songToScroll = songs.find(
+        (song) => `${song.video_id}-${song.start}-${song.title}` === id
+      );
+
+      if (!songToScroll) {
+        console.log("Song not found for ID:", id);
+        return;
+      }
+
+      // 2. その曲のグローバルインデックスと行インデックスを計算する
+      const index = songs.indexOf(songToScroll);
+      if (index === -1) {
+        console.log("Song index not found for song:", songToScroll.title);
+        return;
+      }
+
+      const rowIndex = Math.floor(index / colCount);
+      console.log("Scrolling to rowIndex:", rowIndex);
+
+      // 3. 仮想化ライブラリの機能を使ってスクロールする
+      virtualizer.scrollToIndex(rowIndex, {
+        align: colCount === 1 ? "start" : "center",
+      });
+
+      // 4. スクロール後、ハイライトを更新
+      setCurrentSongId(id);
+    },
+    [songs, colCount, virtualizer] // 依存配列に仮想化に必要な変数を追加
+  );
+
+  /**
+   * SongListItemがクリックされたときのカスタムハンドラ（既存のchangeCurrentSongをラップ）
+   */
+  const handleSongClick = useCallback(
+    (song: Song) => {
+      // 既存の再生処理を実行 (changeCurrentSongの仕様をオミットしない)
+      changeCurrentSong(song, false);
+
+      // ページャーと連動するためのハイライト状態を更新
+      const songId = `${song.video_id}-${song.start}-${song.title}`;
+      setCurrentSongId(songId);
+    },
+    [changeCurrentSong]
+  );
+
+  // ハイライトも連動させる
+  useEffect(() => {
+    if (currentSongInfo) {
+      const playingId = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+      setCurrentSongId(playingId);
+    }
+  }, [currentSongInfo]);
+
   return (
     <>
-      <ScrollArea
-        viewportRef={parentRef}
-        id="song-list-scrollbar"
-        className="h-full overflow-y-auto focus:outline-0"
-        viewportProps={{
-          style: { contain: "strict" },
-        }}
-        style={{
-          contain: "strict",
-        }}
-        scrollHideDelay={0}
-        onKeyUp={handleKeyUp}
-        onKeyDown={handleKeyDown}
-        tabIndex={-1}
-        onMouseEnter={() => parentRef.current?.focus()}
-        onMouseLeave={() => parentRef.current?.blur()}
-      >
-        {/* 上部のスペーサー */}
-        <div style={{ height: `${startOffset}px` }} />
-
-        <ul
-          id="song-list"
-          className="song-list mb-2 auto-rows-max grid grid-cols-1  md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
+      <div className="flex w-full h-screen overflow-hidden">
+        <ScrollArea
+          viewportRef={parentRef}
+          id="song-list-scrollbar"
+          className="h-full overflow-y-auto focus:outline-0 flex-grow"
+          viewportProps={{
+            style: { contain: "strict" },
+          }}
+          style={{
+            contain: "strict",
+          }}
+          scrollHideDelay={0}
+          onKeyUp={handleKeyUp}
+          onKeyDown={handleKeyDown}
+          tabIndex={-1}
+          onMouseEnter={() => parentRef.current?.focus()}
+          onMouseLeave={() => parentRef.current?.blur()}
         >
-          {virtualRows.flatMap((virtualRow) => {
-            const startItemIndex = virtualRow.index * colCount;
-            const rowItems = songs.slice(
-              startItemIndex,
-              startItemIndex + colCount
-            );
+          {/* 上部のスペーサー */}
+          <div style={{ height: `${startOffset}px` }} />
 
-            return rowItems.map((song, itemIndexInRow) => {
-              const globalIndex = startItemIndex + itemIndexInRow;
-              const shouldBeHidden =
-                hideFutureSongs &&
-                currentSongIndex !== -1 &&
-                globalIndex > currentSongIndex;
-
-              return (
-                <SongListItem
-                  key={`${virtualRow.key}-${itemIndexInRow}`}
-                  song={song}
-                  isSelected={areSongsEqual(currentSongInfo, song)}
-                  changeCurrentSong={changeCurrentSong}
-                  isHide={shouldBeHidden}
-                  ref={
-                    itemIndexInRow === 0 && colCount > 1
-                      ? virtualizer.measureElement
-                      : undefined
-                  }
-                  data-index={globalIndex}
-                  data-row-index={virtualRow.index}
-                />
+          <ul
+            id="song-list"
+            className="song-list mb-2 auto-rows-max grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
+          >
+            {virtualRows.flatMap((virtualRow) => {
+              const startItemIndex = virtualRow.index * colCount;
+              const rowItems = songs.slice(
+                startItemIndex,
+                startItemIndex + colCount
               );
-            });
-          })}
-        </ul>
 
-        {/* 下部のスペーサー */}
-        <div style={{ height: `${endOffset + 1}px` }} />
-      </ScrollArea>
+              return rowItems.map((song, itemIndexInRow) => {
+                const globalIndex = startItemIndex + itemIndexInRow;
+                const shouldBeHidden =
+                  hideFutureSongs &&
+                  currentSongIndex !== -1 &&
+                  globalIndex > currentSongIndex;
+
+                return (
+                  <SongListItem
+                    key={`${virtualRow.key}-${itemIndexInRow}`}
+                    song={song}
+                    isSelected={areSongsEqual(currentSongInfo, song)}
+                    changeCurrentSong={changeCurrentSong}
+                    isHide={shouldBeHidden}
+                    ref={
+                      itemIndexInRow === 0 && colCount > 1
+                        ? virtualizer.measureElement
+                        : undefined
+                    }
+                    data-index={globalIndex}
+                    data-row-index={virtualRow.index}
+                  />
+                );
+              });
+            })}
+          </ul>
+
+          {/* 下部のスペーサー */}
+          <div style={{ height: `${endOffset + 1}px` }} />
+        </ScrollArea>
+
+        {/* 右端の縦型ページャー */}
+        <div className="flex flex-col h-full justify-between pl-2">
+          <ScrollArea>
+            <YearPager
+              songs={songs}
+              currentSongIds={visibleSongIds}
+              onPagerItemClick={scrollToSong}
+              onDragScroll={onPagerScrollToPercentage}
+            />
+          </ScrollArea>
+        </div>
+      </div>
     </>
   );
 };
