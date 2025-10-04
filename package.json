@@ -63,7 +63,8 @@
     "react-swipeable": "^7.0.2",
     "react-youtube": "^10.1.0",
     "recharts": "^3.2.1",
-    "styled-components": "^6.1.19"
+    "styled-components": "^6.1.19",
+    "use-haptic": "^1.1.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
