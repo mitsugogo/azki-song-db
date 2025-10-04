@@ -13,7 +13,6 @@ interface YearPagerProps {
   songs: Song[];
   currentSongIds: string[];
   onPagerItemClick: (id: string) => void;
-  onDragScroll: (percentage: number) => void;
 }
 
 // ドットの最大表示数
@@ -74,58 +73,11 @@ const YearPager: React.FC<YearPagerProps> = ({
   songs,
   currentSongIds,
   onPagerItemClick,
-  onDragScroll,
 }) => {
   const pagerData = useMemo(() => generatePagerData(songs), [songs]);
   const pagerRef = useRef<HTMLDivElement>(null);
 
   const { triggerHaptic } = useHaptic();
-
-  // ドラッグ操作でスクロール位置を計算し、親コンポーネントに通知するハンドラ
-  const handleDragInteraction = useCallback(
-    (clientY: number) => {
-      if (!pagerRef.current) return;
-
-      const rect = pagerRef.current.getBoundingClientRect();
-
-      const relativeY = clientY - rect.top;
-
-      let percentage = relativeY / rect.height;
-      percentage = Math.max(0, Math.min(percentage, 1));
-
-      onDragScroll(percentage);
-    },
-    [onDragScroll]
-  );
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    if (touch) {
-      //   e.preventDefault();
-      handleDragInteraction(touch.clientY);
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    // onTouchStart では特に何もしない
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.changedTouches[0];
-    if (touch) {
-      handleDragInteraction(touch.clientY);
-    }
-  };
-
-  useEffect(() => {
-    const pagerElement = pagerRef.current;
-    if (!pagerElement) return;
-    pagerElement.addEventListener("touchmove", (e) => {}, { passive: false });
-
-    return () => {
-      pagerElement.removeEventListener("touchmove", (e) => {});
-    };
-  }, []);
 
   // 必要なデータの計算
   const visibleSongs = currentSongIds
@@ -153,13 +105,7 @@ const YearPager: React.FC<YearPagerProps> = ({
     : 0;
 
   return (
-    <div
-      className="h-full w-7 py-4"
-      ref={pagerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="h-full w-7 py-4" ref={pagerRef}>
       <div className="relative h-full">
         {pagerData.map((item) => {
           const itemYear = item.year;

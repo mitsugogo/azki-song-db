@@ -184,23 +184,6 @@ const SongsList = ({
     [stopScrolling]
   );
 
-  const onPagerScrollToPercentage = useCallback(
-    (percentage: number) => {
-      // スクロール可能な全体の高さを取得
-      const maxOffset =
-        virtualizer.getTotalSize() - (parentRef.current?.clientHeight || 0);
-
-      // ターゲットのオフセットを計算
-      const targetOffset = maxOffset * percentage;
-
-      // 仮想化ライブラリの機能を使ってオフセットでスクロール
-      virtualizer.scrollToOffset(targetOffset, {
-        behavior: "auto", // ドラッグ操作ではアニメーションなし
-      });
-    },
-    [virtualizer, parentRef]
-  );
-
   // コンポーネントがアンマウントされたときにタイマーを停止
   useEffect(() => {
     return () => {
@@ -252,7 +235,6 @@ const SongsList = ({
   const scrollToSong = useCallback(
     // <--- 関数全体を書き換え
     (id: string) => {
-      // 1. IDから曲を見つける
       const songToScroll = songs.find(
         (song) => `${song.video_id}-${song.start}-${song.title}` === id
       );
@@ -262,7 +244,6 @@ const SongsList = ({
         return;
       }
 
-      // 2. その曲のグローバルインデックスと行インデックスを計算する
       const index = songs.indexOf(songToScroll);
       if (index === -1) {
         console.log("Song index not found for song:", songToScroll.title);
@@ -272,30 +253,13 @@ const SongsList = ({
       const rowIndex = Math.floor(index / colCount);
       console.log("Scrolling to rowIndex:", rowIndex);
 
-      // 3. 仮想化ライブラリの機能を使ってスクロールする
       virtualizer.scrollToIndex(rowIndex, {
         align: colCount === 1 ? "start" : "center",
       });
 
-      // 4. スクロール後、ハイライトを更新
       setCurrentSongId(id);
     },
-    [songs, colCount, virtualizer] // 依存配列に仮想化に必要な変数を追加
-  );
-
-  /**
-   * SongListItemがクリックされたときのカスタムハンドラ（既存のchangeCurrentSongをラップ）
-   */
-  const handleSongClick = useCallback(
-    (song: Song) => {
-      // 既存の再生処理を実行 (changeCurrentSongの仕様をオミットしない)
-      changeCurrentSong(song, false);
-
-      // ページャーと連動するためのハイライト状態を更新
-      const songId = `${song.video_id}-${song.start}-${song.title}`;
-      setCurrentSongId(songId);
-    },
-    [changeCurrentSong]
+    [songs, colCount, virtualizer]
   );
 
   // ハイライトも連動させる
@@ -378,7 +342,6 @@ const SongsList = ({
               songs={songs}
               currentSongIds={visibleSongIds}
               onPagerItemClick={scrollToSong}
-              onDragScroll={onPagerScrollToPercentage}
             />
           </ScrollArea>
         </div>
