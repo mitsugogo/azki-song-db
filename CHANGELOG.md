@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.18.7](https://github.com/mitsugogo/azki-song-db/compare/v1.18.6...v1.18.7) (2025-10-04)
+
+
+### Bug Fixes
+
+* **main:** ソロライブモードの時にハイライトに色が付かないバグを修正 ([e8f7b8a](https://github.com/mitsugogo/azki-song-db/commit/e8f7b8a996e4741b5f8350a81921e74e2ec8bf61))
+
 ### [1.18.6](https://github.com/mitsugogo/azki-song-db/compare/v1.18.5...v1.18.6) (2025-10-04)
 
 ### [1.18.5](https://github.com/mitsugogo/azki-song-db/compare/v1.18.4...v1.18.5) (2025-10-02)
