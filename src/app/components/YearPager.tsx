@@ -143,12 +143,18 @@ const YearPager: React.FC<YearPagerProps> = ({
   ) => (
     <ul className="list-none p-0 m-0">
       {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
+        // ハイライトのロジック:
+        // minDotIndexとmaxDotIndexが有効な値 (-1以外) で、その範囲内にある場合のみハイライト
         const isHighlightedDot =
-          dotIndex >= minDotIndex && dotIndex <= maxDotIndex;
+          minDotIndex !== -1 &&
+          maxDotIndex !== -1 &&
+          dotIndex >= minDotIndex &&
+          dotIndex <= maxDotIndex;
 
         const dotColorClass = isHighlightedDot
           ? "bg-primary-500 border-primary-500"
-          : "bg-light-gray-300 border-light-gray-300 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
+          : "bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
+        // NOTE: 元コードの "light-gray-300" は未定義のようですが、ハイライトされていないドットとしてグレーを使用しました。
 
         const totalSongsInYear = item.songs.length;
         const totalDots = item.dotCount;
@@ -172,6 +178,7 @@ const YearPager: React.FC<YearPagerProps> = ({
               let songIdToScroll = targetSongId;
 
               if (isHighlightedDot && currentSongInfo) {
+                // ハイライトされているドットをクリックした場合は、現在再生中の曲にスクロールするロジック（そのまま維持）
                 songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
               }
 
@@ -217,11 +224,17 @@ const YearPager: React.FC<YearPagerProps> = ({
       <div className="relative h-full">
         {pagerData.map((item) => {
           const itemYear = item.year;
+          // その年の曲の中に、画面に可視な曲が1つでも含まれているかを確認
+          const isYearActuallyVisible = item.songs.some((song) =>
+            visibleSongs.some(
+              (vs) => vs.video_id === song.video_id && vs.start === song.start
+            )
+          );
 
-          const isYearVisible =
+          const isYearInGlobalVisibleRange =
             itemYear >= minVisibleYear && itemYear <= maxVisibleYear;
 
-          const yearColorClass = isYearVisible
+          const yearColorClass = isYearInGlobalVisibleRange
             ? "text-primary-400"
             : "text-gray-200 hover:text-primary-300";
 
@@ -232,6 +245,71 @@ const YearPager: React.FC<YearPagerProps> = ({
           let maxDotIndex = -1;
 
           let currentSongDotIndex = -1;
+
+          if (isYearActuallyVisible) {
+            const songsInYear = item.songs;
+            const totalSongsInYear = songsInYear.length;
+            const totalDots = item.dotCount;
+
+            const findIndexInYear = (song: Song) =>
+              songsInYear.findIndex(
+                (s) => s.video_id === song.video_id && s.start === song.start
+              );
+
+            const visibleSongsInYear = visibleSongs.filter(
+              (song) => new Date(song.broadcast_at).getFullYear() === itemYear
+            );
+
+            if (visibleSongsInYear.length > 0) {
+              const minVisibleTimeInYear = Math.min(
+                ...visibleSongsInYear.map((s) =>
+                  new Date(s.broadcast_at).getTime()
+                )
+              );
+              const maxVisibleTimeInYear = Math.max(
+                ...visibleSongsInYear.map((s) =>
+                  new Date(s.broadcast_at).getTime()
+                )
+              );
+
+              const minYearSongInView = visibleSongsInYear.find(
+                (s) =>
+                  new Date(s.broadcast_at).getTime() === minVisibleTimeInYear
+              );
+              const maxYearSongInView = visibleSongsInYear.find(
+                (s) =>
+                  new Date(s.broadcast_at).getTime() === maxVisibleTimeInYear
+              );
+
+              if (minYearSongInView && maxYearSongInView) {
+                const indexMin = findIndexInYear(minYearSongInView);
+                const indexMax = findIndexInYear(maxYearSongInView);
+
+                if (indexMin !== -1) {
+                  minDotIndex = Math.floor(
+                    (indexMin / totalSongsInYear) * totalDots
+                  );
+                }
+
+                if (indexMax !== -1) {
+                  maxDotIndex = Math.floor(
+                    (indexMax / totalSongsInYear) * totalDots
+                  );
+                  // 最後の曲の場合は、最後のドットになるように調整
+                  if (indexMax === totalSongsInYear - 1 && totalDots > 0) {
+                    maxDotIndex = totalDots - 1;
+                  }
+                }
+
+                // 範囲の保証
+                if (minDotIndex > maxDotIndex) {
+                  minDotIndex = maxDotIndex;
+                }
+              }
+            }
+          }
+
+          // 現在再生中の曲
           if (isCurrentYear && currentSongInfo) {
             const songsInYear = item.songs;
             const currentSongIndexInYear = songsInYear.findIndex(
@@ -255,48 +333,7 @@ const YearPager: React.FC<YearPagerProps> = ({
             }
           }
 
-          if (isYearVisible) {
-            const songsInYear = item.songs;
-            const totalSongsInYear = songsInYear.length;
-            const totalDots = item.dotCount;
-            const findIndexInYear = (song: Song) =>
-              songsInYear.findIndex(
-                (s) => s.video_id === song.video_id && s.start === song.start
-              );
-
-            let dotIndexMin = 0;
-            let dotIndexMax = totalDots - 1;
-
-            if (minVisibleYear === itemYear && minYearSong) {
-              const indexMin = findIndexInYear(minYearSong);
-              if (indexMin !== -1) {
-                dotIndexMin = Math.floor(
-                  (indexMin / totalSongsInYear) * totalDots
-                );
-              }
-            }
-
-            if (maxVisibleYear === itemYear && maxYearSong) {
-              const indexMax = findIndexInYear(maxYearSong);
-              if (indexMax !== -1) {
-                dotIndexMax = Math.floor(
-                  (indexMax / totalSongsInYear) * totalDots
-                );
-                if (indexMax === totalSongsInYear - 1 && totalDots > 0) {
-                  dotIndexMax = totalDots - 1;
-                }
-              }
-            }
-
-            minDotIndex = dotIndexMin;
-            maxDotIndex = dotIndexMax;
-
-            if (minDotIndex > maxDotIndex) {
-              minDotIndex = maxDotIndex;
-            }
-          }
-
-          minDotIndex = Math.max(0, minDotIndex);
+          minDotIndex = Math.max(-1, minDotIndex);
           maxDotIndex = Math.min(item.dotCount - 1, maxDotIndex);
 
           return (
