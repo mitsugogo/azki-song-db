@@ -153,7 +153,7 @@ const YearPager: React.FC<YearPagerProps> = ({
 
         const dotColorClass = isHighlightedDot
           ? "bg-primary-500 border-primary-500"
-          : "bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
+          : "bg-light-gray-300 border-light-gray-300 dark:bg-gray-600 dark:border-gray-600 hover:bg-primary-500 hover:border-primary-500";
 
         const totalSongsInYear = item.songs.length;
         const totalDots = item.dotCount;
