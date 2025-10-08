@@ -154,7 +154,6 @@ const YearPager: React.FC<YearPagerProps> = ({
         const dotColorClass = isHighlightedDot
           ? "bg-primary-500 border-primary-500"
           : "bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700 hover:bg-primary-500 hover:border-primary-500";
-        // NOTE: 元コードの "light-gray-300" は未定義のようですが、ハイライトされていないドットとしてグレーを使用しました。
 
         const totalSongsInYear = item.songs.length;
         const totalDots = item.dotCount;
@@ -178,7 +177,7 @@ const YearPager: React.FC<YearPagerProps> = ({
               let songIdToScroll = targetSongId;
 
               if (isHighlightedDot && currentSongInfo) {
-                // ハイライトされているドットをクリックした場合は、現在再生中の曲にスクロールするロジック（そのまま維持）
+                // ハイライトされているドットをクリックした場合は、現在再生中の曲にスクロールする
                 songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
               }
 
