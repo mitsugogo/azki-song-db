@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.18.8](https://github.com/mitsugogo/azki-song-db/compare/v1.18.7...v1.18.8) (2025-10-08)
+
+
+### Bug Fixes
+
+* **main:** 時系列ページャーが全部光る場合があったのを修正 ([0546fe3](https://github.com/mitsugogo/azki-song-db/commit/0546fe344268300737b1e98f3414912c844da34c))
+
 ### [1.18.7](https://github.com/mitsugogo/azki-song-db/compare/v1.18.6...v1.18.7) (2025-10-04)
 
 
