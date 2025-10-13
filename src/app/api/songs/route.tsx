@@ -21,6 +21,7 @@ export async function GET() {
         "オリ曲!A:Q",
         "カバー!A:O",
         "ゲスト・fesなど!A:L",
+        "特殊!A:O",
       ],
       includeGridData: true, // セルの詳細情報を含める
       fields: "sheets.data.rowData.values(userEnteredValue,hyperlink)", // 必要なフィールドのみ取得

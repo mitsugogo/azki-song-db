@@ -5,7 +5,7 @@ import SongsList from "./SongList";
 import { Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
 import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
-import { LuCrown } from "react-icons/lu";
+import { LuCrown, LuMusic } from "react-icons/lu";
 import { MdAdd } from "react-icons/md";
 import { LuSparkles } from "react-icons/lu";
 import {
@@ -169,7 +169,7 @@ export default function SearchAndSongList({
             </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
-            <Grid.Col span={6}>
+            <Grid.Col span={4}>
               <Button
                 onClick={() => {
                   // ソロライブ用のプレイリストをセット
@@ -181,7 +181,19 @@ export default function SearchAndSongList({
                 <span className="text-sm">ソロライブ予習</span>
               </Button>
             </Grid.Col>
-            <Grid.Col span={6}>
+            <Grid.Col span={4}>
+              <Button
+                onClick={() => {
+                  // 楽曲紹介shortsモード
+                  setSearchTerm("tag:楽曲紹介shorts");
+                }}
+                className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+              >
+                <LuMusic className="mr-1" />
+                <span className="text-sm">楽曲紹介shorts</span>
+              </Button>
+            </Grid.Col>
+            <Grid.Col span={4}>
               <Button
                 className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0  ${
                   isNowPlayingPlaylist()
