@@ -63,6 +63,31 @@ const NowPlayingSongInfoDetail = ({
       {currentSongInfo && (
         <div className="flex-grow mb-5 bg-gray-50/20 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm dark:text-gray-50">
           <dl className="flex flex-col gap-3 lg:gap-1">
+            {currentSongInfo.title && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaCompactDisc className="text-base" />
+                    <span className="ml-1">タイトル:</span>
+                  </span>
+                </dt>
+                <dd className="flex flex-wrap gap-1">
+                  <Badge
+                    onClick={() => {
+                      setSearchTerm(`title:${currentSongInfo.title}`);
+                    }}
+                    className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                      searchTerm.includes(`title:${currentSongInfo.title}`)
+                        ? "bg-cyan-300 dark:bg-cyan-800"
+                        : ""
+                    }`}
+                  >
+                    {currentSongInfo.title}
+                  </Badge>
+                </dd>
+              </div>
+            )}
+
             {currentSongInfo.artist && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
@@ -92,8 +117,8 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameArtist ? "bg-cyan-300 dark:bg-cyan-600" : ""
+                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                          existsSameArtist ? "bg-cyan-300 dark:bg-cyan-800" : ""
                         }`}
                       >
                         {artist}
@@ -133,8 +158,8 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameAlbum ? "bg-cyan-300 dark:bg-cyan-600" : ""
+                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                          existsSameAlbum ? "bg-cyan-300 dark:bg-cyan-800" : ""
                         }`}
                       >
                         {album}
@@ -169,8 +194,8 @@ const NowPlayingSongInfoDetail = ({
                           );
                         }
                       }}
-                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50  ${
-                        existsSameSing ? "bg-cyan-300 dark:bg-cyan-600" : ""
+                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50  ${
+                        existsSameSing ? "bg-cyan-300 dark:bg-cyan-800" : ""
                       }`}
                     >
                       {sing}
@@ -210,13 +235,13 @@ const NowPlayingSongInfoDetail = ({
               </dt>
               <dd className="flex flex-wrap gap-1">
                 <Badge
-                  className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                  className={`text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                     searchTerm.includes(
                       `date:${new Date(
                         currentSongInfo.broadcast_at
                       ).toLocaleDateString()}`
                     )
-                      ? "bg-cyan-300 dark:bg-cyan-600"
+                      ? "bg-cyan-300 dark:bg-cyan-800"
                       : ""
                   }`}
                   onClick={() => {
@@ -257,8 +282,8 @@ const NowPlayingSongInfoDetail = ({
                   return (
                     <Badge
                       key={tag}
-                      className={`text-xs cursor-pointer dark:bg-cyan-800 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                        existsSameTag ? "bg-cyan-300 dark:bg-cyan-600" : ""
+                      className={`text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                        existsSameTag ? "bg-cyan-300 dark:bg-cyan-800" : ""
                       }`}
                       onClick={() => {
                         if (existsSameTag) {

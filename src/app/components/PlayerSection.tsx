@@ -4,7 +4,7 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { LuShuffle } from "react-icons/lu";
+import { LuMusic, LuShuffle } from "react-icons/lu";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";

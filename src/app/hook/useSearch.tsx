@@ -203,6 +203,23 @@ const useSearch = (allSongs: Song[]) => {
         });
       };
 
+      // 楽曲紹介shortsの場合は逆順に並べる
+      if (normalWords.some((word) => word === "tag:楽曲紹介shorts")) {
+        return songsToFilter
+          .filter((song) => {
+            return (
+              matchesNormalWords(song, normalWords) &&
+              !isExcluded(song, excludeWords)
+            );
+          })
+          .sort((a, b) => {
+            return (
+              new Date(a.broadcast_at || "").getTime() -
+              new Date(b.broadcast_at || "").getTime()
+            );
+          });
+      }
+
       return songsToFilter.filter((song) => {
         return (
           matchesNormalWords(song, normalWords) &&
