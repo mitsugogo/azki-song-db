@@ -168,7 +168,7 @@ const NowPlayingSongInfo = ({
               </div>
             </div>
 
-            <div className="hidden md:block">
+            <div className="hidden md:block foldable:block">
               <NowPlayingSongInfoDetail
                 currentSongInfo={currentSongInfo}
                 allSongs={allSongs}

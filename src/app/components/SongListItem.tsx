@@ -30,7 +30,7 @@ const SongListItem = React.memo(
       return (
         <li
           ref={ref}
-          className={`rounded relative cursor-pointer transition shadow-md flex md:block dark:text-gray-50 ${
+          className={`rounded relative cursor-pointer transition shadow-md flex lg:block dark:text-gray-50 ${
             isSelected
               ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
               : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -43,7 +43,7 @@ const SongListItem = React.memo(
           data-title={song.title}
           data-index={`${song.video_id}-${song.start}-${song.title}`}
         >
-          <div className="flex md:block md:w-full mb-0 md:mb-2 text-center ">
+          <div className="flex lg:block lg:w-full mb-0 lg:mb-2 text-center ">
             <Indicator
               color="cyan"
               size={8}
@@ -51,7 +51,7 @@ const SongListItem = React.memo(
               offset={8}
               zIndex={50}
             >
-              <div className="aspect-video h-15 min-h-15 max-h-15 md:w-[calc(100%-2px)] md:h-auto md:max-h-full mx-auto mt-[1px]">
+              <div className="aspect-video h-15 min-h-15 max-h-15 lg:w-[calc(100%-2px)] lg:h-auto lg:max-h-full mx-auto mt-[1px]">
                 <YoutubeThumbnail
                   videoId={song.video_id}
                   alt={song.video_title}
@@ -62,10 +62,10 @@ const SongListItem = React.memo(
               </div>
             </Indicator>
           </div>
-          <div className="w-full p-0 pl-2 pt-1 md:pl-3 md:p-3 md:pt-0">
+          <div className="w-full p-0 pl-2 pt-1 lg:pl-3 lg:p-3 lg:pt-0">
             <div
               className={`w-full text-sm font-semibold line-clamp-1 ${
-                isHide ? "truncate" : "md:line-clamp-3"
+                isHide ? "truncate" : "lg:line-clamp-3"
               }`}
             >
               <span
@@ -82,7 +82,7 @@ const SongListItem = React.memo(
             </div>
             <div
               className={`w-full text-xs text-gray-600 dark:text-gray-200 line-clamp-1 ${
-                isHide ? "mt-1 truncate" : "md:line-clamp-3"
+                isHide ? "mt-1 truncate" : "lg:line-clamp-3"
               }`}
             >
               <span
@@ -102,7 +102,7 @@ const SongListItem = React.memo(
                 <>{new Date(song.broadcast_at).toLocaleDateString()}</>
               )}
               {song.live_call && (
-                <span className="text-xs md:hidden">
+                <span className="text-xs lg:hidden">
                   <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
                     コール
                   </Badge>
@@ -110,7 +110,7 @@ const SongListItem = React.memo(
               )}
             </div>
             {song.live_call && isSololive2025 && (
-              <div className="hidden md:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
+              <div className="hidden lg:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
                 <span className="text-xs">
                   <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
                     コーレス
@@ -119,7 +119,7 @@ const SongListItem = React.memo(
               </div>
             )}
             {song.milestones && song.milestones.length > 0 && (
-              <div className="absolute bottom-0 right-2 md:top-0 md:left-0 text-xs truncate">
+              <div className="absolute bottom-0 right-2 lg:top-0 lg:left-0 text-xs truncate">
                 <div>
                   <MilestoneBadge song={song} outClassName="mb-1.5" />
                 </div>

@@ -10,6 +10,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
 import { pageList } from "../pagelists";
+import FoldableToggle from "./FoldableToggle";
 
 export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -108,6 +109,7 @@ export function Header() {
                 <FaYoutube className="mr-1" />
                 AZKi Channel
               </Link>
+              <FoldableToggle />
               <ThemeToggle />
             </div>
           </div>

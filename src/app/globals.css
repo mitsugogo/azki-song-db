@@ -83,6 +83,9 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* 折りたたみモード */
+@custom-variant foldable (&:where(.foldable, .foldable *));
+
 :root {
   --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
