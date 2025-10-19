@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.0](https://github.com/mitsugogo/azki-song-db/compare/v1.18.8...v1.19.0) (2025-10-13)
+
+
+### Features
+
+* **main:** 楽曲紹介shortsを追加 ([84ff4b9](https://github.com/mitsugogo/azki-song-db/commit/84ff4b97223628c19cad726408c54f24c077236a))
+
 ### [1.18.8](https://github.com/mitsugogo/azki-song-db/compare/v1.18.7...v1.18.8) (2025-10-08)
 
 
