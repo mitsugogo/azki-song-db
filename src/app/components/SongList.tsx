@@ -290,7 +290,7 @@ const SongsList = ({
 
           <ul
             id="song-list"
-            className="song-list mb-2 auto-rows-max grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
+            className="song-list mb-2 auto-rows-max grid grid-cols-1 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
           >
             {virtualRows.flatMap((virtualRow) => {
               const startItemIndex = virtualRow.index * colCount;

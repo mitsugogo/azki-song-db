@@ -156,9 +156,9 @@ export default function SearchAndSongList({
   );
 
   return (
-    <section className="flex md:w-4/12 lg:w-1/3 xl:w-5/12 sm:w-full flex-col min-h-0 h-dvh md:h-full lg:h-full sm:mx-0">
-      <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 py-0">
-        <div className="mb-2 hidden lg:block">
+    <section className="flex md:w-1/2 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0 h-dvh md:h-full foldable:h-full lg:h-full sm:mx-0">
+      <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0">
+        <div className="mb-2 hidden lg:block foldable:block">
           <Button
             onClick={() => playRandomSong(songs)}
             className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
@@ -169,7 +169,7 @@ export default function SearchAndSongList({
             </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
-            <Grid.Col span={4}>
+            <Grid.Col span={4} className="foldable:hidden">
               <Button
                 onClick={() => {
                   // ソロライブ用のプレイリストをセット
@@ -210,7 +210,7 @@ export default function SearchAndSongList({
           </Grid>
         </div>
 
-        <div className="lg:hidden md:mt-2 mb-2">
+        <div className="lg:hidden md:mt-2 mb-2 foldable:hidden">
           <Button
             className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition ring-0 focus:ring-0  ${
               isNowPlayingPlaylist()
