@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.0](https://github.com/mitsugogo/azki-song-db/compare/v1.19.0...v1.20.0) (2025-10-19)
+
+
+### Features
+
+* **main:** fold系の端末モードを追加 ([80508e9](https://github.com/mitsugogo/azki-song-db/commit/80508e98414c2342ac99c7d96a3a92e813d97412))
+
 ## [1.19.0](https://github.com/mitsugogo/azki-song-db/compare/v1.18.8...v1.19.0) (2025-10-13)
 
 
