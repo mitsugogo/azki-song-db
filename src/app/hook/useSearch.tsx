@@ -126,12 +126,15 @@ const useSearch = (allSongs: Song[]) => {
           .filter(
             (s) =>
               // AZKiさんオリ曲絞り込み
-              ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+              ((s.tags.includes("オリ曲") ||
+                s.tags.includes("オリ曲MV") ||
+                s.tags.includes("ライブ予習")) &&
                 s.artist.includes("AZKi") &&
                 !s.title.includes("Maaya") &&
                 !s.artist.includes("星街") &&
                 !s.title.includes("Remix") &&
                 !s.tags.includes("リミックス") &&
+                !s.title.includes("あずいろ") &&
                 !s.title.includes("Kiss me")) ||
               // ゲスト：星街すいせいさん
               ((s.tags.includes("オリ曲") || s.tags.includes("カバー曲")) &&
