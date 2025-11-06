@@ -87,6 +87,22 @@ export default function PlayerSection({
     setTimedLiveCallKey((prevKey) => prevKey + 1);
   }, [timedLiveCallText]);
 
+  // AndroidなどではOSのMediaSessionAPIで前と後の曲情報も送出する
+  useEffect(() => {
+    if (typeof window !== "undefined" && "mediaSession" in navigator) {
+      if (previousSong) {
+        navigator.mediaSession.setActionHandler("previoustrack", () => {
+          changeCurrentSong(previousSong);
+        });
+      }
+      if (nextSong) {
+        navigator.mediaSession.setActionHandler("nexttrack", () => {
+          changeCurrentSong(nextSong);
+        });
+      }
+    }
+  }, [currentSong, previousSong, nextSong, changeCurrentSong]);
+
   return (
     <aside className="flex md:w-1/2 lg:w-2/3 xl:w-9/12 sm:w-full foldable:w-1/2 pr-0">
       <OverlayScrollbarsComponent
