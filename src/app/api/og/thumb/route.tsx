@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       .catch(() => []);
     const song: Song = songs.find(
       (s: Song) =>
-        s.video_id === video_id && parseInt(s.start) === parseInt(start)
+        s.video_id === video_id && parseInt(s.start) === parseInt(start),
     );
     if (!song) {
       return new Response("Song not found", { status: 404 });
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     const title = `🎵 ${song.title} - ${song.artist}`;
     const subTitle = `${song.video_title}\n(${new Date(
-      song.broadcast_at
+      song.broadcast_at,
     ).toLocaleDateString("ja-JP")})`;
     const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;
 
@@ -43,12 +43,12 @@ export async function GET(req: NextRequest) {
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
         encodeURIComponent(title || "AZKi Song Database") +
         encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
-        encodeURIComponent("...…")
+        encodeURIComponent("...…"),
     )
       .then((res) => res.text())
       .then((css) => {
         const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
         )?.[1];
         if (!url) throw new Error("Font not found");
         return fetch(url).then((res) => res.arrayBuffer());
@@ -58,12 +58,12 @@ export async function GET(req: NextRequest) {
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
         encodeURIComponent(title || "AZKi Song Database") +
         encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
-        encodeURIComponent("...…")
+        encodeURIComponent("...…"),
     )
       .then((res) => res.text())
       .then((css) => {
         const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/
+          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
         )?.[1];
         if (!url) throw new Error("Font not found");
         return fetch(url).then((res) => res.arrayBuffer());
@@ -186,7 +186,7 @@ export async function GET(req: NextRequest) {
           "Content-Type": "image/png",
           "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
         },
-      }
+      },
     );
   } catch (e) {
     if (e instanceof Error) {

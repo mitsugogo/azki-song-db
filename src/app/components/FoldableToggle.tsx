@@ -26,7 +26,7 @@ const FoldableToggle = () => {
   const handleClick = () => {
     // トグル処理: default -> foldable -> default
     setFoldableMode((currentMode) =>
-      currentMode === "default" ? "foldable" : "default"
+      currentMode === "default" ? "foldable" : "default",
     );
   };
 

@@ -52,7 +52,7 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
       const yearSongCount = yearData[broadcastYear].count;
 
       const relativeDotCount = Math.ceil(
-        (yearSongCount / maxSongCount) * MAX_DOTS
+        (yearSongCount / maxSongCount) * MAX_DOTS,
       );
       const dotCount = relativeDotCount > 0 ? relativeDotCount : 1;
 
@@ -86,7 +86,7 @@ const YearPager: React.FC<YearPagerProps> = ({
   // 必要なデータの計算
   const visibleSongs = currentSongIds
     .map((id) =>
-      songs.find((s) => `${s.video_id}-${s.start}-${s.title}` === id)
+      songs.find((s) => `${s.video_id}-${s.start}-${s.title}` === id),
     )
     .filter((s): s is Song => s !== undefined);
 
@@ -101,7 +101,7 @@ const YearPager: React.FC<YearPagerProps> = ({
 
   // 画面に見えている曲の中で、最も古い（broadcast_atが小さい）曲と最も新しい（broadcast_atが大きい）曲を特定
   const visibleBroadcastDates = visibleSongs.map((s) =>
-    new Date(s.broadcast_at).getTime()
+    new Date(s.broadcast_at).getTime(),
   );
   const minBroadcastDate = Math.min(...visibleBroadcastDates);
   const maxBroadcastDate = Math.max(...visibleBroadcastDates);
@@ -111,10 +111,10 @@ const YearPager: React.FC<YearPagerProps> = ({
 
   // 画面の上端・下端の曲を特定するのではなく、可視範囲の境界となる曲を特定
   const minYearSong = visibleSongs.find(
-    (s) => new Date(s.broadcast_at).getTime() === minBroadcastDate
+    (s) => new Date(s.broadcast_at).getTime() === minBroadcastDate,
   );
   const maxYearSong = visibleSongs.find(
-    (s) => new Date(s.broadcast_at).getTime() === maxBroadcastDate
+    (s) => new Date(s.broadcast_at).getTime() === maxBroadcastDate,
   );
 
   // 現在再生中の曲の年と、その年の中でのインデックスを特定
@@ -139,7 +139,7 @@ const YearPager: React.FC<YearPagerProps> = ({
     minDotIndex: number,
     maxDotIndex: number,
     currentSongDotIndex: number,
-    isCurrentYear: boolean
+    isCurrentYear: boolean,
   ) => (
     <ul className="list-none p-0 m-0">
       {Array.from({ length: item.dotCount }).map((_, dotIndex) => {
@@ -160,7 +160,7 @@ const YearPager: React.FC<YearPagerProps> = ({
 
         const targetSongIndexInYear = Math.min(
           Math.floor((dotIndex / totalDots) * totalSongsInYear),
-          totalSongsInYear - 1
+          totalSongsInYear - 1,
         );
 
         const targetSongId = item.songs[targetSongIndexInYear]
@@ -226,8 +226,8 @@ const YearPager: React.FC<YearPagerProps> = ({
           // その年の曲の中に、画面に可視な曲が1つでも含まれているかを確認
           const isYearActuallyVisible = item.songs.some((song) =>
             visibleSongs.some(
-              (vs) => vs.video_id === song.video_id && vs.start === song.start
-            )
+              (vs) => vs.video_id === song.video_id && vs.start === song.start,
+            ),
           );
 
           const isYearInGlobalVisibleRange =
@@ -252,32 +252,32 @@ const YearPager: React.FC<YearPagerProps> = ({
 
             const findIndexInYear = (song: Song) =>
               songsInYear.findIndex(
-                (s) => s.video_id === song.video_id && s.start === song.start
+                (s) => s.video_id === song.video_id && s.start === song.start,
               );
 
             const visibleSongsInYear = visibleSongs.filter(
-              (song) => new Date(song.broadcast_at).getFullYear() === itemYear
+              (song) => new Date(song.broadcast_at).getFullYear() === itemYear,
             );
 
             if (visibleSongsInYear.length > 0) {
               const minVisibleTimeInYear = Math.min(
                 ...visibleSongsInYear.map((s) =>
-                  new Date(s.broadcast_at).getTime()
-                )
+                  new Date(s.broadcast_at).getTime(),
+                ),
               );
               const maxVisibleTimeInYear = Math.max(
                 ...visibleSongsInYear.map((s) =>
-                  new Date(s.broadcast_at).getTime()
-                )
+                  new Date(s.broadcast_at).getTime(),
+                ),
               );
 
               const minYearSongInView = visibleSongsInYear.find(
                 (s) =>
-                  new Date(s.broadcast_at).getTime() === minVisibleTimeInYear
+                  new Date(s.broadcast_at).getTime() === minVisibleTimeInYear,
               );
               const maxYearSongInView = visibleSongsInYear.find(
                 (s) =>
-                  new Date(s.broadcast_at).getTime() === maxVisibleTimeInYear
+                  new Date(s.broadcast_at).getTime() === maxVisibleTimeInYear,
               );
 
               if (minYearSongInView && maxYearSongInView) {
@@ -286,13 +286,13 @@ const YearPager: React.FC<YearPagerProps> = ({
 
                 if (indexMin !== -1) {
                   minDotIndex = Math.floor(
-                    (indexMin / totalSongsInYear) * totalDots
+                    (indexMin / totalSongsInYear) * totalDots,
                   );
                 }
 
                 if (indexMax !== -1) {
                   maxDotIndex = Math.floor(
-                    (indexMax / totalSongsInYear) * totalDots
+                    (indexMax / totalSongsInYear) * totalDots,
                   );
                   // 最後の曲の場合は、最後のドットになるように調整
                   if (indexMax === totalSongsInYear - 1 && totalDots > 0) {
@@ -314,14 +314,14 @@ const YearPager: React.FC<YearPagerProps> = ({
             const currentSongIndexInYear = songsInYear.findIndex(
               (s) =>
                 s.video_id === currentSongInfo.video_id &&
-                s.start === currentSongInfo.start
+                s.start === currentSongInfo.start,
             );
 
             if (currentSongIndexInYear !== -1) {
               const totalSongsInYear = songsInYear.length;
               const totalDots = item.dotCount;
               currentSongDotIndex = Math.floor(
-                (currentSongIndexInYear / totalSongsInYear) * totalDots
+                (currentSongIndexInYear / totalSongsInYear) * totalDots,
               );
               if (
                 currentSongIndexInYear === totalSongsInYear - 1 &&
@@ -345,7 +345,7 @@ const YearPager: React.FC<YearPagerProps> = ({
                     minDotIndex,
                     maxDotIndex,
                     currentSongDotIndex,
-                    isCurrentYear
+                    isCurrentYear,
                   )}
                   {yearHeader(item, yearColorClass)}
                 </>
@@ -358,7 +358,7 @@ const YearPager: React.FC<YearPagerProps> = ({
                     minDotIndex,
                     maxDotIndex,
                     currentSongDotIndex,
-                    isCurrentYear
+                    isCurrentYear,
                   )}
                 </>
               )}

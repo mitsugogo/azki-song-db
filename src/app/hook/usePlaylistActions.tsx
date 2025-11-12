@@ -30,12 +30,12 @@ export const usePlaylistActions = ({
             playlist.songs.findIndex(
               (entry) =>
                 entry.videoId === a.video_id &&
-                Number(String(entry.start)) === Number(a.start)
+                Number(String(entry.start)) === Number(a.start),
             ) -
             playlist.songs.findIndex(
               (entry) =>
                 entry.videoId === b.video_id &&
-                Number(String(entry.start)) === Number(b.start)
+                Number(String(entry.start)) === Number(b.start),
             )
           );
         });
@@ -50,16 +50,22 @@ export const usePlaylistActions = ({
       const url = new URL(window.location.href);
       url.searchParams.set("playlist", encoded);
       url.searchParams.delete("q");
-      window.history.pushState({}, "", url);
+      // 履歴を増やさないようにreplaceStateを使う
+      window.history.replaceState({}, "", url);
+      // Headerなどに通知
+      window.dispatchEvent(new Event("replacestate"));
     },
-    [allSongs, isInPlaylist, setSongs, changeCurrentSong, setSearchTerm]
+    [allSongs, isInPlaylist, setSongs, changeCurrentSong, setSearchTerm],
   );
 
   // Disables playlist mode and resets the song list
   const disablePlaylistMode = useCallback(() => {
     const url = new URL(window.location.href);
     url.searchParams.delete("playlist");
-    window.history.pushState({}, "", url);
+    // 履歴を増やさないようにreplaceStateを使う
+    window.history.replaceState({}, "", url);
+    // Headerなどに通知
+    window.dispatchEvent(new Event("replacestate"));
     setSongs(allSongs);
   }, [allSongs, setSongs]);
 

@@ -82,7 +82,7 @@ export default function MainPlayer() {
 
     if (videoId) {
       const song = songs.find(
-        (s) => s.video_id === videoId && Number(s.start) === startTime
+        (s) => s.video_id === videoId && Number(s.start) === startTime,
       );
       // videoIdとstartTimeを直指定で再生する場合
       if (song) {
@@ -133,7 +133,7 @@ export default function MainPlayer() {
   const setSongsToCurrentVideo = () => {
     if (!currentSongInfo) return;
     const songsInVideo = allSongs.filter(
-      (song) => song.video_id === currentSongInfo.video_id
+      (song) => song.video_id === currentSongInfo.video_id,
     );
     setSearchTerm(`video_id:${currentSongInfo.video_id}`);
     changeCurrentSong(currentSongInfo, true);

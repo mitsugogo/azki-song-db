@@ -36,7 +36,7 @@ type PlayerSectionProps = {
     song: Song | null,
     isInfoOnly?: boolean,
     videoId?: string,
-    startTime?: number
+    startTime?: number,
   ) => void;
   playRandomSong: (songList: Song[]) => void;
   setSongsToCurrentVideo: () => void;

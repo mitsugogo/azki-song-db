@@ -70,10 +70,13 @@ export function Header() {
         setCurrentPath(window.location.pathname);
       };
       window.addEventListener("popstate", handleRouteChange);
+      // カスタムイベント(pushstate/replacestate)が発火されるように
       window.addEventListener("pushstate", handleRouteChange);
+      window.addEventListener("replacestate", handleRouteChange);
       return () => {
         window.removeEventListener("popstate", handleRouteChange);
         window.removeEventListener("pushstate", handleRouteChange);
+        window.removeEventListener("replacestate", handleRouteChange);
       };
     }
   }, []);

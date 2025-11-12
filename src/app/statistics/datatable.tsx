@@ -23,7 +23,7 @@ import { ScrollArea } from "@mantine/core";
 export default function DataTable<
   T extends
     | { lastVideo?: { video_title: string; video_id: string } }
-    | StatisticsItem
+    | StatisticsItem,
 >({
   data,
   caption,
@@ -100,7 +100,10 @@ export default function DataTable<
         url.searchParams.set("sort", newSortingValue[0].id);
         url.searchParams.set("order", newSortingValue[0].desc ? "desc" : "asc");
       }
-      window.history.pushState(null, "", url.href);
+      // 履歴を増やさないようにreplaceStateを使う
+      window.history.replaceState(null, "", url.href);
+      // Headerなどに変更を通知
+      window.dispatchEvent(new Event("replacestate"));
 
       setSorting(updater);
     },
@@ -180,7 +183,7 @@ export default function DataTable<
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {header.column.getCanSort() && (
                             <span className="ml-1 inline-block">
@@ -263,7 +266,7 @@ export default function DataTable<
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </div>
                         ))}
@@ -282,7 +285,7 @@ export default function DataTable<
                               セットリスト (
                               {
                                 songs.filter(
-                                  (s) => s.video_id === selectedVideoId
+                                  (s) => s.video_id === selectedVideoId,
                                 ).length
                               }
                               曲)
@@ -312,7 +315,7 @@ export default function DataTable<
                                   .filter((s) => s.video_id === selectedVideoId)
                                   .sort(
                                     (a, b) =>
-                                      parseInt(a.start) - parseInt(b.start)
+                                      parseInt(a.start) - parseInt(b.start),
                                   )
                                   .map((s) => (
                                     <div

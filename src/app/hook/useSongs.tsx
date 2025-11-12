@@ -33,12 +33,14 @@ const useSongs = () => {
         const songTitles = [...new Set(data.map((song) => song.title))].sort();
         const singers = [
           ...new Set(
-            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim()))
+            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim())),
           ),
         ].sort();
         const artists = [
           ...new Set(
-            data.flatMap((song) => song.artist.split(/、/).map((s) => s.trim()))
+            data.flatMap((song) =>
+              song.artist.split(/、/).map((s) => s.trim()),
+            ),
           ),
         ].sort();
         const milestones = [
@@ -60,7 +62,7 @@ const useSongs = () => {
               });
             }
             return map;
-          }, new Map())
+          }, new Map()),
         );
 
         setAvailableTags(tags);
@@ -71,7 +73,7 @@ const useSongs = () => {
         setAvailableTitleAndArtists(
           uniquedTitleAndArtists
             .map((item) => item[1])
-            .sort((a, b) => a.title.localeCompare(b.title))
+            .sort((a, b) => a.title.localeCompare(b.title)),
         );
         setIsLoading(false);
       });

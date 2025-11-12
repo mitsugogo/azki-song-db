@@ -67,7 +67,7 @@ export async function GET() {
       if (header) {
         // headerMapperから合致するものを探してindexを求める
         const mappedHeader = Object.entries(headerMappers).find(
-          ([key]) => key === header
+          ([key]) => key === header,
         );
         if (mappedHeader) {
           headerMap[mappedHeader[0]] = index;
@@ -110,7 +110,7 @@ export async function GET() {
                   60 *
                   60 *
                   1000 +
-                  new Date(1899, 11, 30).getTime()
+                  new Date(1899, 11, 30).getTime(),
               ).toISOString()
             : "", // アルバム発売日
           album_is_compilation:
@@ -121,13 +121,13 @@ export async function GET() {
           video_uri: values[headerMap["動画"] ?? 5]?.hyperlink || "", // ハイパーリンクURL
           video_id:
             values[headerMap["動画"] ?? 5]?.hyperlink?.match(
-              /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/
+              /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
             )?.[1] || "", // 動画IDの抽出
           start: parseTimeFromNumberValue(
-            values[headerMap["start"] ?? 6]?.userEnteredValue?.numberValue || 0
+            values[headerMap["start"] ?? 6]?.userEnteredValue?.numberValue || 0,
           ), // 開始時間 (秒)
           end: parseTimeFromNumberValue(
-            values[headerMap["end"] ?? 7]?.userEnteredValue?.numberValue || 0
+            values[headerMap["end"] ?? 7]?.userEnteredValue?.numberValue || 0,
           ), // 終了時間 (秒)
           broadcast_at:
             new Date(
@@ -137,7 +137,7 @@ export async function GET() {
                 60 *
                 60 *
                 1000 +
-                new Date(1899, 11, 30).getTime()
+                new Date(1899, 11, 30).getTime(),
             ).toISOString() || "", // 放送日時
           tags:
             values[
@@ -187,7 +187,7 @@ export async function GET() {
     console.error("Error fetching data from Google Sheets:", error);
     return NextResponse.json(
       { error: "Failed to fetch data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

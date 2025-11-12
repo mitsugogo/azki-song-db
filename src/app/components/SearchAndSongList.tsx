@@ -391,7 +391,7 @@ export default function SearchAndSongList({
                     </Tooltip>
                     <CopyButton
                       value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                        playlist
+                        playlist,
                       )}`}
                       timeout={2000}
                     >
