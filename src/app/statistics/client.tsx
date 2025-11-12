@@ -30,7 +30,9 @@ export default function StatisticsPage() {
 
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tabIndex.toString());
-    window.history.pushState(null, "", url.href);
+    // タブ切替は履歴を増やさない（戻る操作で過去のタブが大量に残るのを防ぐ）
+    window.history.replaceState(null, "", url.href);
+    window.dispatchEvent(new Event("replacestate"));
   };
 
   // ページを開いた時にURLの"tab"を取得してタブを選択する

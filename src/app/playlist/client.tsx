@@ -49,7 +49,7 @@ export default function PlaylistPage() {
       <Anchor href={item.href} key={index} underline="hover" c="pink" size="sm">
         {item.title}
       </Anchor>
-    )
+    ),
   );
 
   return (
@@ -78,7 +78,7 @@ export default function PlaylistPage() {
           onClick={() => {
             if (
               !confirm(
-                `選択した${selectedRows.length}個のプレイリストを削除します。よろしいですか?`
+                `選択した${selectedRows.length}個のプレイリストを削除します。よろしいですか?`,
               )
             ) {
               return;
@@ -112,8 +112,8 @@ export default function PlaylistPage() {
                       event.currentTarget.checked
                         ? [...selectedRows, playlist.id || ""]
                         : selectedRows.filter(
-                            (position) => position !== playlist.id
-                          )
+                            (position) => position !== playlist.id,
+                          ),
                     )
                   }
                 />
@@ -205,8 +205,8 @@ export default function PlaylistPage() {
                         event.currentTarget.checked
                           ? [...selectedRows, playlist.id || ""]
                           : selectedRows.filter(
-                              (position) => position !== playlist.id
-                            )
+                              (position) => position !== playlist.id,
+                            ),
                       )
                     }
                   />

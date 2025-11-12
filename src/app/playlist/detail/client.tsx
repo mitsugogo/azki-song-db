@@ -122,12 +122,12 @@ export default function PlaylistDetailPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const rowKeys = useMemo(
     () => playlistSongs.map((s) => `${s.videoId}-${s.start}`),
-    [playlistSongs]
+    [playlistSongs],
   );
 
   const [selection, handlers] = useSelection({
@@ -174,7 +174,7 @@ export default function PlaylistDetailPage() {
         const songInfo = allSongs.find(
           (song) =>
             song.video_id === s.videoId &&
-            Number(String(song.start)) === Number(s.start)
+            Number(String(song.start)) === Number(s.start),
         );
         return songInfo
           ? { ...s, start: Number(s.start), songinfo: songInfo }
@@ -189,7 +189,7 @@ export default function PlaylistDetailPage() {
     if (!playlist) return;
     const keysToDelete = selection;
     const updatedSongs = playlist.songs.filter(
-      (s) => !keysToDelete.includes(`${s.videoId}-${s.start}`)
+      (s) => !keysToDelete.includes(`${s.videoId}-${s.start}`),
     );
     console.log(keysToDelete);
     const updatedPlaylist = { ...playlist, songs: updatedSongs };
@@ -199,7 +199,7 @@ export default function PlaylistDetailPage() {
         const songInfo = allSongs.find(
           (song) =>
             song.video_id === s.videoId &&
-            Number(song.start) === Number(s.start)
+            Number(song.start) === Number(s.start),
         );
         return songInfo
           ? { ...s, start: Number(s.start), songinfo: songInfo }
@@ -208,7 +208,7 @@ export default function PlaylistDetailPage() {
       .filter((s) => s !== null);
 
     setPlaylistSongs(
-      updatedPlaylistSongsWithInfo as PlaylistWithSongs["songs"]
+      updatedPlaylistSongsWithInfo as PlaylistWithSongs["songs"],
     );
 
     // Reset the selection

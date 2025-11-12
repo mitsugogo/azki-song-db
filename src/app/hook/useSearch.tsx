@@ -56,7 +56,7 @@ const useSearch = (allSongs: Song[]) => {
         "milestone:": (s, v) =>
           v === "*"
             ? (s.milestones?.length ?? 0) > 0
-            : s.milestones?.some((m) => m.includes(v)) ?? false,
+            : (s.milestones?.some((m) => m.includes(v)) ?? false),
         "season:": (s, v) => {
           const month = new Date(s.broadcast_at).getMonth() + 1;
           switch (v) {
@@ -92,7 +92,7 @@ const useSearch = (allSongs: Song[]) => {
           song.milestones.some((m) => m.toLowerCase().includes(word)))
       );
     },
-    []
+    [],
   );
 
   // 曲を検索するcallback
@@ -111,7 +111,7 @@ const useSearch = (allSongs: Song[]) => {
 
       // 特殊モード判定
       const isSololive2025 = searchWords.some(
-        (word) => word === "sololive2025"
+        (word) => word === "sololive2025",
       );
       const urlParams = new URLSearchParams(window.location.search);
       const playlist = urlParams.get("playlist");
@@ -142,7 +142,7 @@ const useSearch = (allSongs: Song[]) => {
                 s.sing.includes("星街すいせい") &&
                 !s.title.includes("威風堂々") &&
                 !s.title.includes("ray")) ||
-              s.video_id === "JNmmnB4bP0M" // 星街すいせい50万人ライブ
+              s.video_id === "JNmmnB4bP0M", // 星街すいせい50万人ライブ
           )
           .filter((s) => {
             return true;
@@ -158,6 +158,8 @@ const useSearch = (allSongs: Song[]) => {
         // playlist削除
         urlParams.delete("playlist");
         window.history.replaceState({}, "", `?${urlParams.toString()}`);
+        // Headerなどに通知
+        window.dispatchEvent(new Event("replacestate"));
       } else if (playlist) {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
@@ -167,20 +169,20 @@ const useSearch = (allSongs: Song[]) => {
               playlistSongs.songs.find(
                 (entry) =>
                   entry.videoId === song.video_id &&
-                  Number(String(entry.start)) === Number(song.start)
-              )
+                  Number(String(entry.start)) === Number(song.start),
+              ),
             )
             .sort((a, b) => {
               return (
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === a.video_id &&
-                    Number(String(entry.start)) === Number(a.start)
+                    Number(String(entry.start)) === Number(a.start),
                 ) -
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === b.video_id &&
-                    Number(String(entry.start)) === Number(b.start)
+                    Number(String(entry.start)) === Number(b.start),
                 )
               );
             });
@@ -190,6 +192,8 @@ const useSearch = (allSongs: Song[]) => {
           normalWords = normalWords.filter((word) => word !== "sololive2025");
           urlParams.delete("q");
           window.history.replaceState({}, "", `?${urlParams.toString()}`);
+          // Headerなどに通知
+          window.dispatchEvent(new Event("replacestate"));
         }
       }
 
@@ -230,7 +234,7 @@ const useSearch = (allSongs: Song[]) => {
         );
       });
     },
-    [allSongs]
+    [allSongs],
   );
 
   // 初期ロード時のURLパラメータ処理
@@ -263,10 +267,14 @@ const useSearch = (allSongs: Song[]) => {
 
     if (searchTerm) {
       url.searchParams.set("q", searchTerm);
-      history.pushState(null, "", url.href);
+      // replaceStateを使って履歴を増やさない
+      history.replaceState(null, "", url.href);
+      // Headerなどに変更を通知するカスタムイベント
+      window.dispatchEvent(new Event("replacestate"));
     } else {
       url.searchParams.delete("q");
-      history.pushState(null, "", url.href);
+      history.replaceState(null, "", url.href);
+      window.dispatchEvent(new Event("replacestate"));
     }
     const newSongs = searchSongs(allSongs, searchTerm);
 

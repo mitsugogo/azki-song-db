@@ -31,7 +31,7 @@ function YouTubePlayerComponent({
         end,
       },
     }),
-    [videoId, start, end]
+    [videoId, start, end],
   );
 
   return (
@@ -57,7 +57,7 @@ const YouTubePlayer = React.memo(
       prevProps.startTime === nextProps.startTime
       // onStateChange は比較しない
     );
-  }
+  },
 );
 
 export default YouTubePlayer;

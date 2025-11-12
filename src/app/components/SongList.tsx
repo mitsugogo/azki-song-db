@@ -93,7 +93,7 @@ const SongsList = ({
   useEffect(() => {
     if (currentSongInfo && colCount > 0 && virtualizer && parentRef.current) {
       const index = songs.findIndex((song) =>
-        areSongsEqual(song, currentSongInfo)
+        areSongsEqual(song, currentSongInfo),
       );
       if (index !== -1) {
         const rowIndex = Math.floor(index / colCount);
@@ -168,7 +168,7 @@ const SongsList = ({
         }, 50);
       }
     },
-    []
+    [],
   );
 
   // PageUp/PageDown キーを離した時
@@ -178,7 +178,7 @@ const SongsList = ({
         stopScrolling();
       }
     },
-    [stopScrolling]
+    [stopScrolling],
   );
 
   // コンポーネントがアンマウントされたときにタイマーを停止
@@ -232,7 +232,7 @@ const SongsList = ({
   const scrollToSong = useCallback(
     (id: string) => {
       const songToScroll = songs.find(
-        (song) => `${song.video_id}-${song.start}-${song.title}` === id
+        (song) => `${song.video_id}-${song.start}-${song.title}` === id,
       );
 
       if (!songToScroll) {
@@ -252,7 +252,7 @@ const SongsList = ({
 
       setCurrentSongId(id);
     },
-    [songs, colCount, virtualizer]
+    [songs, colCount, virtualizer],
   );
 
   /**
@@ -296,7 +296,7 @@ const SongsList = ({
               const startItemIndex = virtualRow.index * colCount;
               const rowItems = songs.slice(
                 startItemIndex,
-                startItemIndex + colCount
+                startItemIndex + colCount,
               );
 
               return rowItems.map((song, itemIndexInRow) => {

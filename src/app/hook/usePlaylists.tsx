@@ -39,7 +39,7 @@ const usePlaylists = () => {
   // 該当のプレイリストに入っているかチェック
   const isInPlaylist = (playlist: Playlist, song: Song) => {
     const find = playlist.songs.find(
-      (entry) => entry.videoId == song?.video_id && entry.start == song?.start
+      (entry) => entry.videoId == song?.video_id && entry.start == song?.start,
     );
     return !!find;
   };
@@ -84,8 +84,8 @@ const usePlaylists = () => {
               songs: [...p.songs, { videoId, start }],
               updatedAt: new Date().toISOString(),
             }
-          : p
-      )
+          : p,
+      ),
     );
   };
 
@@ -99,12 +99,12 @@ const usePlaylists = () => {
           ? {
               ...p,
               songs: p.songs.filter(
-                (entry) => entry.videoId !== videoId && entry.start !== start
+                (entry) => entry.videoId !== videoId && entry.start !== start,
               ),
               updatedAt: new Date().toISOString(),
             }
-          : p
-      )
+          : p,
+      ),
     );
   };
 
@@ -112,7 +112,7 @@ const usePlaylists = () => {
   const updatePlaylist = (playlist: Playlist) => {
     playlist.updatedAt = new Date().toISOString();
     setPlaylists((prev) =>
-      prev.map((p) => (p.id === playlist.id ? playlist : p))
+      prev.map((p) => (p.id === playlist.id ? playlist : p)),
     );
   };
 
@@ -122,8 +122,8 @@ const usePlaylists = () => {
       prev.map((p) =>
         p.id === playlist.id
           ? { ...p, name: newName, updatedAt: new Date().toISOString() }
-          : p
-      )
+          : p,
+      ),
     );
   };
 
@@ -133,8 +133,8 @@ const usePlaylists = () => {
       prev.map((p) =>
         p.id === playlist.id
           ? { ...p, songs: [], updatedAt: new Date().toISOString() }
-          : p
-      )
+          : p,
+      ),
     );
   };
 

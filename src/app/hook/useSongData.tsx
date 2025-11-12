@@ -25,7 +25,7 @@ export function useSongData() {
 
     const fetchVideoInfo = async (
       filterFn: (s: Song) => boolean,
-      setter: (d: VideoInfo[]) => void
+      setter: (d: VideoInfo[]) => void,
     ) => {
       const videoIds = songs.filter(filterFn).map((s) => s.video_id);
       if (videoIds.length === 0) return setter([]);
@@ -49,9 +49,9 @@ export function useSongData() {
         (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
         s.sing.includes("AZKi") &&
         ["AZKi", "瀬名航", "Star Flower", "SorAZ"].some((a) =>
-          s.artist.includes(a)
+          s.artist.includes(a),
         ),
-      setOriginalSongInfo
+      setOriginalSongInfo,
     );
   }, [songs]);
 

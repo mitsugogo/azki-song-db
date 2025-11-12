@@ -31,7 +31,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
   // ライブのコール指南メッセージ
   const [timedLiveCallText, setTimedLiveCallText] = useState<string | null>(
-    null
+    null,
   );
   const [timedMessages, setTimedMessages] = useState<
     { start: number; end: number; text: string }[]
@@ -66,7 +66,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     const isExists = songs.some(
       (song) =>
         song.video_id === currentSongInfo?.video_id &&
-        song.start === currentSongInfo?.start
+        song.start === currentSongInfo?.start,
     );
     if (!isExists) {
       changeCurrentSong(songs[0]);
@@ -81,7 +81,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
       const currentIndex = songsList.findIndex(
-        (s) => s.video_id === song.video_id && s.start === song.start
+        (s) => s.video_id === song.video_id && s.start === song.start,
       );
 
       const previousSong =
@@ -93,7 +93,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       setPreviousSong(previousSong);
       setNextSong(nextSong);
     },
-    []
+    [],
   );
 
   // 現在の楽曲が変わったらtitleを変更する
@@ -120,7 +120,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       song: Song | null,
       infoOnly?: boolean,
       videoId?: string,
-      startTime?: number
+      startTime?: number,
     ) => {
       if (!song || (song === currentSongInfo && !videoId)) {
         return;
@@ -130,6 +130,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       url.searchParams.delete("v");
       url.searchParams.delete("t");
       history.replaceState(null, "", url);
+      // Headerなどに通知
+      window.dispatchEvent(new Event("replacestate"));
 
       if (youtubeVideoIdRef.current !== song?.video_id) {
         if (intervalRef.current) clearInterval(intervalRef.current);
@@ -151,7 +153,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         const timedMessages = song.live_call
           .split(/[\r\n]/)
           .map((line) =>
-            line.match(/(\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)(.*)$/)
+            line.match(/(\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)(.*)$/),
           )
           .filter((match) => !!match) // nullを除外
           .map((match) => {
@@ -201,7 +203,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         setCurrentSong(song);
       }
     },
-    [songs, setPreviousAndNextSongs, currentSong, resetPlayer]
+    [songs, setPreviousAndNextSongs, currentSong, resetPlayer],
   );
 
   const playRandomSong = useCallback(
@@ -211,16 +213,16 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         songsList[Math.floor(Math.random() * songsList.length)];
       changeCurrentSong(randomSong);
     },
-    [changeCurrentSong]
+    [changeCurrentSong],
   );
 
   const searchCurrentSongOnVideo = useCallback(
     (video_id: string, currentTime: number) => {
       return sortedAllSongs.find(
-        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime
+        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime,
       );
     },
-    [allSongs]
+    [allSongs],
   );
 
   const handleStateChange = useCallback(
@@ -246,7 +248,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
         // ループ内でtimedMessagesをチェック
         const sortedTimedMessages = [...timedMessagesRef.current].sort(
-          (a, b) => a.start - b.start
+          (a, b) => a.start - b.start,
         );
 
         intervalRef.current = setInterval(() => {
@@ -261,7 +263,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
           const nextMessage = sortedTimedMessages.find(
             (msg) =>
               currentTime + 1 >= msg.start && // 1秒前にメッセージを表示する
-              currentTime < msg.end
+              currentTime < msg.end,
           );
 
           if (nextMessage) {
@@ -272,11 +274,12 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
           const foundSong = searchCurrentSongOnVideo(
             currentVideoId,
-            currentTime
+            currentTime,
           );
           const isFoundSongInList = songs.some(
             (s) =>
-              s.video_id === foundSong?.video_id && s.start === foundSong?.start
+              s.video_id === foundSong?.video_id &&
+              s.start === foundSong?.start,
           );
 
           if (!isFoundSongInList && nextSong) {
@@ -337,7 +340,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       playRandomSong,
       searchCurrentSongOnVideo,
       timedMessages,
-    ]
+    ],
   );
 
   const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {

@@ -18,7 +18,7 @@ const SongListItem = React.memo(
   React.forwardRef<HTMLLIElement, SongListItemProps>(
     (
       { song, isSelected, isHide, changeCurrentSong }: SongListItemProps,
-      ref
+      ref,
     ) => {
       const url = new URL(window.location.href);
       const isSololive2025 = url.searchParams.get("q") === "sololive2025";
@@ -128,8 +128,8 @@ const SongListItem = React.memo(
           </div>
         </li>
       );
-    }
-  )
+    },
+  ),
 );
 
 SongListItem.displayName = "SongListItem";
