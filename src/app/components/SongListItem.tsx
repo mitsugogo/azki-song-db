@@ -21,7 +21,9 @@ const SongListItem = React.memo(
       ref,
     ) => {
       const url = new URL(window.location.href);
-      const isSololive2025 = url.searchParams.get("q") === "sololive2025";
+      const isOriginalSongsMode =
+        url.searchParams.get("q") === "sololive2025" ||
+        url.searchParams.get("q") === "original-songs";
 
       const isNewSong =
         new Date(song.broadcast_at) >
@@ -109,7 +111,7 @@ const SongListItem = React.memo(
                 </span>
               )}
             </div>
-            {song.live_call && isSololive2025 && (
+            {song.live_call && isOriginalSongsMode && (
               <div className="hidden lg:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
                 <span className="text-xs">
                   <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">

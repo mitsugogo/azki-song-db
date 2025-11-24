@@ -56,7 +56,7 @@ const useSearch = (allSongs: Song[]) => {
         "milestone:": (s, v) =>
           v === "*"
             ? (s.milestones?.length ?? 0) > 0
-            : (s.milestones?.some((m) => m.includes(v)) ?? false),
+            : s.milestones?.some((m) => m.includes(v)) ?? false,
         "season:": (s, v) => {
           const month = new Date(s.broadcast_at).getMonth() + 1;
           switch (v) {
@@ -92,7 +92,7 @@ const useSearch = (allSongs: Song[]) => {
           song.milestones.some((m) => m.toLowerCase().includes(word)))
       );
     },
-    [],
+    []
   );
 
   // 曲を検索するcallback
@@ -110,43 +110,34 @@ const useSearch = (allSongs: Song[]) => {
       const excludeWords = searchWords.filter((word) => word.startsWith("-"));
 
       // 特殊モード判定
-      const isSololive2025 = searchWords.some(
-        (word) => word === "sololive2025",
+      const isOriginalSongsMode = searchWords.some(
+        (word) => word === "sololive2025" || word === "original-songs"
       );
       const urlParams = new URLSearchParams(window.location.search);
       const playlist = urlParams.get("playlist");
 
-      // ソロライブ予習モード(オリ曲のみ絞り込み)
-      if (isSololive2025) {
+      // オリ曲モード(オリ曲のみ絞り込み)
+      if (isOriginalSongsMode) {
         // 検索ワードからマジックワードを除く
-        normalWords = normalWords.filter((word) => word !== "sololive2025");
+        normalWords = normalWords.filter(
+          (word) => word !== "sololive2025" && word !== "original-songs"
+        );
 
         // 予習曲のみ絞り込み
         songsToFilter = songsToFilter
           .filter(
             (s) =>
               // AZKiさんオリ曲絞り込み
-              ((s.tags.includes("オリ曲") ||
+              (s.tags.includes("オリ曲") ||
                 s.tags.includes("オリ曲MV") ||
                 s.tags.includes("ライブ予習")) &&
-                s.artist.includes("AZKi") &&
-                !s.title.includes("Maaya") &&
-                !s.artist.includes("星街") &&
-                !s.title.includes("Remix") &&
-                !s.tags.includes("リミックス") &&
-                !s.title.includes("あずいろ") &&
-                !s.title.includes("Kiss me")) ||
-              // ゲスト：星街すいせいさん
-              ((s.tags.includes("オリ曲") || s.tags.includes("カバー曲")) &&
-                s.sing.includes("AZKi") &&
-                s.sing.includes("星街すいせい") &&
-                !s.title.includes("威風堂々") &&
-                !s.title.includes("ray")) ||
-              s.video_id === "JNmmnB4bP0M", // 星街すいせい50万人ライブ
+              s.artist.includes("AZKi") &&
+              !s.title.includes("Maaya") &&
+              !s.title.includes("Remix") &&
+              !s.tags.includes("リミックス") &&
+              !s.title.includes("あずいろ") &&
+              !s.title.includes("Kiss me")
           )
-          .filter((s) => {
-            return true;
-          })
           .sort((a, b) => {
             // リリース順でソート
             return (
@@ -169,27 +160,29 @@ const useSearch = (allSongs: Song[]) => {
               playlistSongs.songs.find(
                 (entry) =>
                   entry.videoId === song.video_id &&
-                  Number(String(entry.start)) === Number(song.start),
-              ),
+                  Number(String(entry.start)) === Number(song.start)
+              )
             )
             .sort((a, b) => {
               return (
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === a.video_id &&
-                    Number(String(entry.start)) === Number(a.start),
+                    Number(String(entry.start)) === Number(a.start)
                 ) -
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === b.video_id &&
-                    Number(String(entry.start)) === Number(b.start),
+                    Number(String(entry.start)) === Number(b.start)
                 )
               );
             });
 
-          // sololiveモード解除
+          // オリ曲モード解除
           setSearchTerm("");
-          normalWords = normalWords.filter((word) => word !== "sololive2025");
+          normalWords = normalWords.filter(
+            (word) => word !== "sololive2025" && word !== "original-songs"
+          );
           urlParams.delete("q");
           window.history.replaceState({}, "", `?${urlParams.toString()}`);
           // Headerなどに通知
@@ -234,7 +227,7 @@ const useSearch = (allSongs: Song[]) => {
         );
       });
     },
-    [allSongs],
+    [allSongs]
   );
 
   // 初期ロード時のURLパラメータ処理

@@ -97,8 +97,11 @@ export default function MainPlayer() {
       return;
     }
 
-    if (searchTerm.includes("sololive2025")) {
-      // ソロライブモード → 先頭曲
+    if (
+      searchTerm.includes("sololive2025") ||
+      searchTerm.includes("original-songs")
+    ) {
+      // オリ曲モード → 先頭曲
       changeCurrentSong(songs[0]);
       return;
     }

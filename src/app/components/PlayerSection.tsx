@@ -330,11 +330,11 @@ export default function PlayerSection({
                 </span>
               </Button>
 
-              {/* ソロライブ予習モード */}
+              {/* オリ曲モード */}
               <Button
                 onClick={() => {
-                  // ソロライブ用のプレイリストをセット
-                  setSearchTerm("sololive2025");
+                  // オリ曲モードをセット
+                  setSearchTerm("original-songs");
                 }}
                 className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
@@ -342,7 +342,7 @@ export default function PlayerSection({
                   <LuCrown className="mr-2" />
                 </div>
                 <div className="flex-1 text-center">
-                  <span className="text-xs">ソロライブ</span>
+                  <span className="text-xs">オリ曲</span>
                 </div>
               </Button>
             </div>
