@@ -56,7 +56,7 @@ const useSearch = (allSongs: Song[]) => {
         "milestone:": (s, v) =>
           v === "*"
             ? (s.milestones?.length ?? 0) > 0
-            : s.milestones?.some((m) => m.includes(v)) ?? false,
+            : (s.milestones?.some((m) => m.includes(v)) ?? false),
         "season:": (s, v) => {
           const month = new Date(s.broadcast_at).getMonth() + 1;
           switch (v) {
@@ -92,7 +92,7 @@ const useSearch = (allSongs: Song[]) => {
           song.milestones.some((m) => m.toLowerCase().includes(word)))
       );
     },
-    []
+    [],
   );
 
   // 曲を検索するcallback
@@ -111,7 +111,7 @@ const useSearch = (allSongs: Song[]) => {
 
       // 特殊モード判定
       const isOriginalSongsMode = searchWords.some(
-        (word) => word === "sololive2025" || word === "original-songs"
+        (word) => word === "sololive2025" || word === "original-songs",
       );
       const urlParams = new URLSearchParams(window.location.search);
       const playlist = urlParams.get("playlist");
@@ -120,7 +120,7 @@ const useSearch = (allSongs: Song[]) => {
       if (isOriginalSongsMode) {
         // 検索ワードからマジックワードを除く
         normalWords = normalWords.filter(
-          (word) => word !== "sololive2025" && word !== "original-songs"
+          (word) => word !== "sololive2025" && word !== "original-songs",
         );
 
         // 予習曲のみ絞り込み
@@ -136,7 +136,7 @@ const useSearch = (allSongs: Song[]) => {
               !s.title.includes("Remix") &&
               !s.tags.includes("リミックス") &&
               !s.title.includes("あずいろ") &&
-              !s.title.includes("Kiss me")
+              !s.title.includes("Kiss me"),
           )
           .sort((a, b) => {
             // リリース順でソート
@@ -160,20 +160,20 @@ const useSearch = (allSongs: Song[]) => {
               playlistSongs.songs.find(
                 (entry) =>
                   entry.videoId === song.video_id &&
-                  Number(String(entry.start)) === Number(song.start)
-              )
+                  Number(String(entry.start)) === Number(song.start),
+              ),
             )
             .sort((a, b) => {
               return (
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === a.video_id &&
-                    Number(String(entry.start)) === Number(a.start)
+                    Number(String(entry.start)) === Number(a.start),
                 ) -
                 playlistSongs.songs.findIndex(
                   (entry) =>
                     entry.videoId === b.video_id &&
-                    Number(String(entry.start)) === Number(b.start)
+                    Number(String(entry.start)) === Number(b.start),
                 )
               );
             });
@@ -181,7 +181,7 @@ const useSearch = (allSongs: Song[]) => {
           // オリ曲モード解除
           setSearchTerm("");
           normalWords = normalWords.filter(
-            (word) => word !== "sololive2025" && word !== "original-songs"
+            (word) => word !== "sololive2025" && word !== "original-songs",
           );
           urlParams.delete("q");
           window.history.replaceState({}, "", `?${urlParams.toString()}`);
@@ -227,7 +227,7 @@ const useSearch = (allSongs: Song[]) => {
         );
       });
     },
-    [allSongs]
+    [allSongs],
   );
 
   // 初期ロード時のURLパラメータ処理

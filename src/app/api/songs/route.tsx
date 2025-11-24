@@ -38,42 +38,48 @@ export async function GET() {
       return Math.round(numberValue * 24 * 60 * 60);
     }
 
-    // ヘッダー行からvalueのマッピングindexを決める
-    const headerMappers = {
-      "#": "num",
-      Enable: "enable",
-      曲名: "title",
-      アーティスト: "artist",
-      アルバム: "album",
-      アルバム発売日: "album_release_at",
-      コンピレーションアルバム: "album_is_compilation",
-      歌った人: "sing",
-      動画: "video",
-      start: "start",
-      end: "end",
-      配信日: "broadcast_at",
-      "tags（カンマ区切り）": "tags",
-      備考: "extra",
-      マイルストーン: "milestones",
-      ライブコール: "live_call",
-      ライブノート: "live_note",
-    };
-    // ヘッダー行だけ取得してみて、対応するindexを決める
+    // ヘッダー定義：Googleシートのヘッダー名 -> { fieldName, defaultIndex }
+    const headerSchema = {
+      曲名: { field: "title", defaultIndex: 2 },
+      アーティスト: { field: "artist", defaultIndex: 3 },
+      歌った人: { field: "sing", defaultIndex: 4 },
+      動画: { field: "video", defaultIndex: 5 },
+      start: { field: "start", defaultIndex: 6 },
+      end: { field: "end", defaultIndex: 7 },
+      配信日: { field: "broadcast_at", defaultIndex: 8 },
+      "tags（カンマ区切り）": { field: "tags", defaultIndex: 9 },
+      備考: { field: "extra", defaultIndex: 10 },
+      マイルストーン: { field: "milestones", defaultIndex: 11 },
+      アルバム: { field: "album", defaultIndex: 12 },
+      アルバム発売日: { field: "album_release_at", defaultIndex: 13 },
+      コンピレーションアルバム: {
+        field: "album_is_compilation",
+        defaultIndex: 14,
+      },
+      ライブコール: { field: "live_call", defaultIndex: 15 },
+      ライブノート: { field: "live_note", defaultIndex: 16 },
+    } as const;
+
+    // ヘッダー行からインデックスを構築
     const headerRow = rows[0];
     const headerValues = headerRow?.values || [];
     const headerMap: Record<string, number> = {};
+
     headerValues.forEach((value, index) => {
       const header = value?.userEnteredValue?.stringValue;
-      if (header) {
-        // headerMapperから合致するものを探してindexを求める
-        const mappedHeader = Object.entries(headerMappers).find(
-          ([key]) => key === header,
-        );
-        if (mappedHeader) {
-          headerMap[mappedHeader[0]] = index;
-        }
+      if (header && header in headerSchema) {
+        headerMap[header] = index;
       }
     });
+
+    // フィールドアクセス用のヘルパー関数
+    const getHeaderIndex = (sheetHeader: string): number => {
+      return (
+        headerMap[sheetHeader] ??
+        headerSchema[sheetHeader as keyof typeof headerSchema]?.defaultIndex ??
+        -1
+      );
+    };
 
     const songs = rows
       .slice(1)
@@ -88,79 +94,55 @@ export async function GET() {
       })
       .map((row) => {
         const values = row.values || [];
-        return {
-          title:
-            values[headerMap["曲名"] ?? 2]?.userEnteredValue?.stringValue || "", // 曲名
-          artist:
-            values[headerMap["アーティスト"] ?? 3]?.userEnteredValue
-              ?.stringValue || "", // アーティスト
-          sing:
-            values[headerMap["歌った人"] ?? 4]?.userEnteredValue?.stringValue ||
-            "", // 歌った人
-          album:
-            values[headerMap["アルバム"] ?? 12]?.userEnteredValue
-              ?.stringValue || "", // アルバム
-          album_list_uri: values[headerMap["アルバム"] ?? 12]?.hyperlink || "",
-          album_release_at: values[headerMap["アルバム発売日"] ?? 13]
-            ?.userEnteredValue
-            ? new Date(
-                (values[headerMap["アルバム発売日"] ?? 13]?.userEnteredValue
-                  ?.numberValue || 0) *
-                  24 *
-                  60 *
-                  60 *
-                  1000 +
-                  new Date(1899, 11, 30).getTime(),
-              ).toISOString()
-            : "", // アルバム発売日
-          album_is_compilation:
-            values[headerMap["コンピレーションアルバム"] ?? 14]
-              ?.userEnteredValue?.boolValue || false, // コンピレーションアルバム
-          video_title:
-            values[headerMap["動画"] ?? 5]?.userEnteredValue?.stringValue || "", // 動画タイトル
-          video_uri: values[headerMap["動画"] ?? 5]?.hyperlink || "", // ハイパーリンクURL
-          video_id:
-            values[headerMap["動画"] ?? 5]?.hyperlink?.match(
-              /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
-            )?.[1] || "", // 動画IDの抽出
-          start: parseTimeFromNumberValue(
-            values[headerMap["start"] ?? 6]?.userEnteredValue?.numberValue || 0,
-          ), // 開始時間 (秒)
-          end: parseTimeFromNumberValue(
-            values[headerMap["end"] ?? 7]?.userEnteredValue?.numberValue || 0,
-          ), // 終了時間 (秒)
-          broadcast_at:
-            new Date(
-              (values[headerMap["配信日"] ?? 8]?.userEnteredValue
-                ?.numberValue || 0) *
-                24 *
-                60 *
-                60 *
-                1000 +
-                new Date(1899, 11, 30).getTime(),
-            ).toISOString() || "", // 放送日時
-          tags:
-            values[
-              headerMap["tags（カンマ区切り）"] ?? 9
-            ]?.userEnteredValue?.stringValue
-              ?.split(",")
-              .map((tag) => tag.trim()) || [], // タグをカンマ区切りで分割
-          extra:
-            values[headerMap["備考"] ?? 10]?.userEnteredValue?.stringValue ||
-            "", // オプションのフィールド
-          milestones:
-            values[
-              headerMap["マイルストーン"] ?? 11
-            ]?.userEnteredValue?.stringValue
-              ?.split(",")
-              .map((val) => val.trim()) || [],
 
-          live_call:
-            values[headerMap["ライブコール"] ?? 15]?.userEnteredValue
-              ?.stringValue || "",
-          live_note:
-            values[headerMap["ライブノート"] ?? 16]?.userEnteredValue
-              ?.stringValue || "",
+        const getString = (header: string) =>
+          values[getHeaderIndex(header)]?.userEnteredValue?.stringValue || "";
+        const getNumber = (header: string) =>
+          values[getHeaderIndex(header)]?.userEnteredValue?.numberValue || 0;
+        const getBoolean = (header: string) =>
+          values[getHeaderIndex(header)]?.userEnteredValue?.boolValue || false;
+        const getHyperlink = (header: string) =>
+          values[getHeaderIndex(header)]?.hyperlink || "";
+
+        const convertToDate = (numberValue: number) =>
+          new Date(
+            numberValue * 24 * 60 * 60 * 1000 +
+              new Date(1899, 11, 30).getTime(),
+          ).toISOString();
+
+        const videoHyperlink = getHyperlink("動画");
+        const videoId =
+          videoHyperlink.match(
+            /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
+          )?.[1] || "";
+
+        return {
+          title: getString("曲名"),
+          artist: getString("アーティスト"),
+          sing: getString("歌った人"),
+          album: getString("アルバム"),
+          album_list_uri: getHyperlink("アルバム"),
+          album_release_at: getNumber("アルバム発売日")
+            ? convertToDate(getNumber("アルバム発売日"))
+            : "",
+          album_is_compilation: getBoolean("コンピレーションアルバム"),
+          video_title: getString("動画"),
+          video_uri: videoHyperlink,
+          video_id: videoId,
+          start: parseTimeFromNumberValue(getNumber("start")),
+          end: parseTimeFromNumberValue(getNumber("end")),
+          broadcast_at: convertToDate(getNumber("配信日")),
+          tags: getString("tags（カンマ区切り）")
+            .split(",")
+            .filter(Boolean)
+            .map((tag) => tag.trim()),
+          extra: getString("備考"),
+          milestones: getString("マイルストーン")
+            .split(",")
+            .filter(Boolean)
+            .map((val) => val.trim()),
+          live_call: getString("ライブコール"),
+          live_note: getString("ライブノート"),
         };
       })
       .sort((a, b) => {
