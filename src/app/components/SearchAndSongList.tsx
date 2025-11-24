@@ -172,13 +172,13 @@ export default function SearchAndSongList({
             <Grid.Col span={4} className="foldable:hidden">
               <Button
                 onClick={() => {
-                  // ソロライブ用のプレイリストをセット
-                  setSearchTerm("sololive2025");
+                  // オリ曲モードをセット
+                  setSearchTerm("original-songs");
                 }}
                 className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
                 <LuCrown className="mr-1" />
-                <span className="text-sm">ソロライブ予習</span>
+                <span className="text-sm">オリ曲モード</span>
               </Button>
             </Grid.Col>
             <Grid.Col span={4}>

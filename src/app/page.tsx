@@ -27,11 +27,11 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("subtitle", og_subtitle);
 
   if (q) {
-    const isSololive2025 = q === "sololive2025";
-    if (isSololive2025) {
-      title = "ソロライブ予習モード | AZKi Song Database";
-      og_title = "ソロライブ予習モード";
-      og_subtitle = "ソロライブに向けたオリ曲予習用プレイリスト";
+    const isOriginalSongsMode = q === "sololive2025" || q === "original-songs";
+    if (isOriginalSongsMode) {
+      title = "オリジナル曲モード | AZKi Song Database";
+      og_title = "オリジナル曲モード";
+      og_subtitle = "AZKiさんのオリジナル楽曲を集めたプレイリスト";
     } else {
       og_subtitle = `「${q}」の検索結果`;
     }
