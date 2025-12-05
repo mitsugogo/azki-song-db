@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.20.5](https://github.com/mitsugogo/azki-song-db/compare/v1.20.4...v1.20.5) (2025-12-05)
+
 ### [1.20.4](https://github.com/mitsugogo/azki-song-db/compare/v1.20.3...v1.20.4) (2025-12-05)
 
 ### [1.20.3](https://github.com/mitsugogo/azki-song-db/compare/v1.20.2...v1.20.3) (2025-11-24)
