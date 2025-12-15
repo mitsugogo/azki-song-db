@@ -310,6 +310,7 @@ export default function DiscographyPage() {
 
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
 
   // 各タブのアイテムの表示状態を管理するstate
   const [visibleItems, setVisibleItems] = useState<boolean[][]>([[], []]);
@@ -342,21 +343,25 @@ export default function DiscographyPage() {
   }, []);
 
   const originalSongCountsByReleaseDate = useMemo(() => {
-    const originals = songs.filter(
-      (s) =>
-        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+    const originals = songs.filter((s) => {
+      const isOriginal = onlyOriginalMV
+        ? s.tags.includes("オリ曲MV")
+        : s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
+      return (
+        isOriginal &&
         (s.artist.includes("AZKi") ||
           s.title.includes("feat. AZKi") ||
           s.title.includes("feat.AZKi")) &&
         !s.tags.includes("ユニット曲") &&
         !s.tags.includes("ゲスト参加")
-    );
+      );
+    });
     return createStatistics(
       originals,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
       groupByAlbum
     );
-  }, [songs, groupByAlbum]);
+  }, [songs, groupByAlbum, onlyOriginalMV]);
 
   const unitSongCountsByReleaseDate = useMemo(() => {
     const units = songs.filter(
@@ -508,7 +513,7 @@ export default function DiscographyPage() {
     >
       <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 
-      <div className="flex items-center justify-end mb-4">
+      <div className="flex items-center justify-end mb-4 space-x-4">
         <ToggleSwitch
           label="アルバムごとに表示"
           checked={groupByAlbum}
@@ -517,6 +522,18 @@ export default function DiscographyPage() {
             setExpandedItem(null);
           }}
         ></ToggleSwitch>
+
+        {/* オリジナル楽曲タブのときのみ表示するオプション */}
+        {activeTab === 0 && (
+          <ToggleSwitch
+            label="オリ曲MVのみ"
+            checked={onlyOriginalMV}
+            onChange={() => {
+              setOnlyOriginalMV(!onlyOriginalMV);
+              setExpandedItem(null);
+            }}
+          />
+        )}
       </div>
 
       <TabGroup
