@@ -34,7 +34,7 @@ type StatisticsItem = {
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  groupByAlbum?: boolean,
+  groupByAlbum?: boolean
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
@@ -135,7 +135,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               <p className="text-sm">
                 発売日:{" "}
                 {new Date(
-                  song.firstVideo.album_release_at,
+                  song.firstVideo.album_release_at
                 ).toLocaleDateString()}
               </p>
               <p className="text-sm">収録曲数: {song.count}曲</p>
@@ -248,10 +248,10 @@ const SongItem = ({
                 ? ""
                 : " / " + song.firstVideo.artist
             } (${new Date(
-              song.firstVideo.album_release_at,
+              song.firstVideo.album_release_at
             ).toLocaleDateString()})`
           : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
-              song.firstVideo.broadcast_at,
+              song.firstVideo.broadcast_at
             ).toLocaleDateString()})`
       }
       onClick={() => onClick(song.key)}
@@ -288,10 +288,10 @@ const SongItem = ({
               <br />
               {song.isAlbum && groupByAlbum
                 ? `${new Date(
-                    song.firstVideo.album_release_at,
+                    song.firstVideo.album_release_at
                   ).toLocaleDateString()}`
                 : `${new Date(
-                    song.firstVideo.broadcast_at,
+                    song.firstVideo.broadcast_at
                   ).toLocaleDateString()}`}
               {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
             </div>
@@ -309,7 +309,9 @@ export default function DiscographyPage() {
   const [activeTab, setActiveTab] = useState(0);
 
   const [groupByAlbum, setGroupByAlbum] = useState(true);
+  const [groupByYear, setGroupByYear] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
 
   // 各タブのアイテムの表示状態を管理するstate
   const [visibleItems, setVisibleItems] = useState<boolean[][]>([[], []]);
@@ -342,31 +344,37 @@ export default function DiscographyPage() {
   }, []);
 
   const originalSongCountsByReleaseDate = useMemo(() => {
-    const originals = songs.filter(
-      (s) =>
-        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+    const originals = songs.filter((s) => {
+      const isOriginal = onlyOriginalMV
+        ? s.tags.includes("オリ曲MV")
+        : s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
+      return (
+        isOriginal &&
         (s.artist.includes("AZKi") ||
           s.title.includes("feat. AZKi") ||
           s.title.includes("feat.AZKi")) &&
-        !s.tags.includes("ユニット曲"),
-    );
+        !s.tags.includes("ユニット曲") &&
+        !s.tags.includes("ゲスト参加")
+      );
+    });
     return createStatistics(
       originals,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
-  }, [songs, groupByAlbum]);
+  }, [songs, groupByAlbum, onlyOriginalMV]);
 
   const unitSongCountsByReleaseDate = useMemo(() => {
     const units = songs.filter(
       (s) =>
-        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-        s.tags.includes("ユニット曲"),
+        ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+          s.tags.includes("ユニット曲")) ||
+        s.tags.includes("ゲスト参加")
     );
     return createStatistics(
       units,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
   }, [songs, groupByAlbum]);
 
@@ -375,7 +383,7 @@ export default function DiscographyPage() {
     return createStatistics(
       covers,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
   }, [songs, groupByAlbum]);
 
@@ -417,8 +425,157 @@ export default function DiscographyPage() {
   const renderContent = (
     data: StatisticsItem[],
     tabIndex: number,
-    groupByAlbum: boolean,
+    groupByAlbum: boolean
   ) => {
+    // 年ごとに区切るオプション
+    if (groupByYear) {
+      // 年の判定: アルバム表示なら album_release_at、それ以外なら broadcast_at を参照
+      const getYear = (s: StatisticsItem) => {
+        const dateStr = groupByAlbum
+          ? s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at
+          : s.firstVideo.broadcast_at;
+        const d = new Date(dateStr);
+        return isNaN(d.getFullYear()) ? "Unknown" : String(d.getFullYear());
+      };
+
+      // 年ごとにグループ化（降順）
+      const groups = data.reduce(
+        (
+          map: Map<string, Array<{ song: StatisticsItem; idx: number }>>,
+          song,
+          idx
+        ) => {
+          const y = getYear(song);
+          const arr = map.get(y) ?? [];
+          arr.push({ song, idx });
+          map.set(y, arr);
+          return map;
+        },
+        new Map<string, Array<{ song: StatisticsItem; idx: number }>>()
+      );
+
+      const years = Array.from(groups.keys()).sort(
+        (a, b) => Number(b) - Number(a)
+      );
+
+      return (
+        <div className="flex flex-col gap-4">
+          {years.map((year) => {
+            const groupItems = groups.get(year) ?? [];
+            const totalCount = groupItems.reduce(
+              (sum, g) => sum + (g.song.count || 0),
+              0
+            );
+            // 展開アイテムがこのグループにあるか
+            const groupExpandedIndex = groupItems.findIndex(
+              (g) => g.song.key === expandedItem
+            );
+
+            const colCount = getGridCols();
+
+            // グループ内の表示を構築
+            if (expandedItem === null || groupExpandedIndex === -1) {
+              // 展開なし: 単純にグリッド表示
+              return (
+                <div key={year}>
+                  <div className="col-span-2 md:col-span-3 xl:col-span-4 my-4">
+                    <div className="flex items-center">
+                      <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                      <div className="px-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                        [{year}] ({totalCount}曲)
+                      </div>
+                      <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
+                    {groupItems.map(({ song, idx }) => (
+                      <SongItem
+                        key={song.key}
+                        song={song}
+                        isVisible={visibleItems[tabIndex]?.[idx] || false}
+                        groupByAlbum={groupByAlbum}
+                        onClick={() =>
+                          setExpandedItem(
+                            song.key === expandedItem ? null : song.key
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            // 展開あり: 展開位置に詳細を挿入
+            const expandedIdxInGroup = groupExpandedIndex;
+            let detailsInsertionIndex =
+              Math.floor(expandedIdxInGroup / colCount) * colCount + colCount;
+
+            const itemsToRender = groupItems.map((g) => g.song);
+            itemsToRender.splice(
+              detailsInsertionIndex,
+              0,
+              groupItems[expandedIdxInGroup].song
+            );
+
+            if (detailsInsertionIndex >= itemsToRender.length) {
+              detailsInsertionIndex = itemsToRender.length - 1;
+            }
+
+            return (
+              <div key={year}>
+                <div className="col-span-2 md:col-span-3 xl:col-span-4 my-4">
+                  <div className="flex items-center">
+                    <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                    <div className="px-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                      [{year}] ({totalCount}曲)
+                    </div>
+                    <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
+                  {itemsToRender.map((s, i) => {
+                    if (i === detailsInsertionIndex) {
+                      return (
+                        <div
+                          key={`${s.key}-details`}
+                          className="col-span-2 md:col-span-3 xl:col-span-4"
+                        >
+                          <SongDetails song={s} />
+                        </div>
+                      );
+                    }
+
+                    // 元のアイテムの index を求める
+                    const originalIndex = (() => {
+                      const idxInGroup = i > detailsInsertionIndex ? i - 1 : i;
+                      return groupItems[idxInGroup].idx;
+                    })();
+
+                    return (
+                      <SongItem
+                        key={s.key}
+                        song={s}
+                        isVisible={
+                          visibleItems[tabIndex]?.[originalIndex] || false
+                        }
+                        groupByAlbum={groupByAlbum}
+                        onClick={() =>
+                          setExpandedItem(s.key === expandedItem ? null : s.key)
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
     // 展開するアイテムがない場合、通常のグリッドを表示
     if (expandedItem === null) {
       return (
@@ -506,7 +663,7 @@ export default function DiscographyPage() {
     >
       <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 
-      <div className="flex items-center justify-end mb-4">
+      <div className="flex items-center justify-end mb-4 space-x-4">
         <ToggleSwitch
           label="アルバムごとに表示"
           checked={groupByAlbum}
@@ -515,6 +672,27 @@ export default function DiscographyPage() {
             setExpandedItem(null);
           }}
         ></ToggleSwitch>
+
+        <ToggleSwitch
+          label="年ごとに区切る"
+          checked={groupByYear}
+          onChange={() => {
+            setGroupByYear(!groupByYear);
+            setExpandedItem(null);
+          }}
+        />
+
+        {/* オリジナル楽曲タブのときのみ表示するオプション */}
+        {activeTab === 0 && (
+          <ToggleSwitch
+            label="オリ曲MVのみ"
+            checked={onlyOriginalMV}
+            onChange={() => {
+              setOnlyOriginalMV(!onlyOriginalMV);
+              setExpandedItem(null);
+            }}
+          />
+        )}
       </div>
 
       <TabGroup
@@ -534,11 +712,19 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
-            オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
+            オリジナル楽曲 (
+            {
+              Array.from(
+                new Set(
+                  originalSongCountsByReleaseDate.map((s) => s.song.title)
+                )
+              ).length
+            }
+            )
           </Tab>
           <Tab
             as="button"
@@ -550,7 +736,7 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
@@ -566,7 +752,7 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
