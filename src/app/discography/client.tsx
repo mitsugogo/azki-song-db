@@ -34,7 +34,7 @@ type StatisticsItem = {
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  groupByAlbum?: boolean,
+  groupByAlbum?: boolean
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
@@ -135,7 +135,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               <p className="text-sm">
                 発売日:{" "}
                 {new Date(
-                  song.firstVideo.album_release_at,
+                  song.firstVideo.album_release_at
                 ).toLocaleDateString()}
               </p>
               <p className="text-sm">収録曲数: {song.count}曲</p>
@@ -248,10 +248,10 @@ const SongItem = ({
                 ? ""
                 : " / " + song.firstVideo.artist
             } (${new Date(
-              song.firstVideo.album_release_at,
+              song.firstVideo.album_release_at
             ).toLocaleDateString()})`
           : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
-              song.firstVideo.broadcast_at,
+              song.firstVideo.broadcast_at
             ).toLocaleDateString()})`
       }
       onClick={() => onClick(song.key)}
@@ -288,10 +288,10 @@ const SongItem = ({
               <br />
               {song.isAlbum && groupByAlbum
                 ? `${new Date(
-                    song.firstVideo.album_release_at,
+                    song.firstVideo.album_release_at
                   ).toLocaleDateString()}`
                 : `${new Date(
-                    song.firstVideo.broadcast_at,
+                    song.firstVideo.broadcast_at
                   ).toLocaleDateString()}`}
               {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
             </div>
@@ -348,25 +348,27 @@ export default function DiscographyPage() {
         (s.artist.includes("AZKi") ||
           s.title.includes("feat. AZKi") ||
           s.title.includes("feat.AZKi")) &&
-        !s.tags.includes("ユニット曲"),
+        !s.tags.includes("ユニット曲") &&
+        !s.tags.includes("ゲスト参加")
     );
     return createStatistics(
       originals,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
   }, [songs, groupByAlbum]);
 
   const unitSongCountsByReleaseDate = useMemo(() => {
     const units = songs.filter(
       (s) =>
-        (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-        s.tags.includes("ユニット曲"),
+        ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+          s.tags.includes("ユニット曲")) ||
+        s.tags.includes("ゲスト参加")
     );
     return createStatistics(
       units,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
   }, [songs, groupByAlbum]);
 
@@ -375,7 +377,7 @@ export default function DiscographyPage() {
     return createStatistics(
       covers,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum,
+      groupByAlbum
     );
   }, [songs, groupByAlbum]);
 
@@ -417,7 +419,7 @@ export default function DiscographyPage() {
   const renderContent = (
     data: StatisticsItem[],
     tabIndex: number,
-    groupByAlbum: boolean,
+    groupByAlbum: boolean
   ) => {
     // 展開するアイテムがない場合、通常のグリッドを表示
     if (expandedItem === null) {
@@ -534,11 +536,19 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
-            オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
+            オリジナル楽曲 (
+            {
+              Array.from(
+                new Set(
+                  originalSongCountsByReleaseDate.map((s) => s.song.title)
+                )
+              ).length
+            }
+            )
           </Tab>
           <Tab
             as="button"
@@ -550,7 +560,7 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
@@ -566,7 +576,7 @@ export default function DiscographyPage() {
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/[0.12] hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
+                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
             }
           >
