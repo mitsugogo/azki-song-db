@@ -44,7 +44,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/og": "^0.8.5",
     "@vercel/speed-insights": "^1.2.0",
-    "@vercel/toolbar": "^0.1.41",
+    "@vercel/toolbar": "^0.1.32",
     "autoprefixer": "^10.4.22",
     "dayjs": "^1.11.19",
     "embla-carousel": "^8.6.0",
