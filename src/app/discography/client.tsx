@@ -309,6 +309,7 @@ export default function DiscographyPage() {
   const [activeTab, setActiveTab] = useState(0);
 
   const [groupByAlbum, setGroupByAlbum] = useState(true);
+  const [groupByYear, setGroupByYear] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
 
@@ -426,6 +427,155 @@ export default function DiscographyPage() {
     tabIndex: number,
     groupByAlbum: boolean
   ) => {
+    // 年ごとに区切るオプション
+    if (groupByYear) {
+      // 年の判定: アルバム表示なら album_release_at、それ以外なら broadcast_at を参照
+      const getYear = (s: StatisticsItem) => {
+        const dateStr = groupByAlbum
+          ? s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at
+          : s.firstVideo.broadcast_at;
+        const d = new Date(dateStr);
+        return isNaN(d.getFullYear()) ? "Unknown" : String(d.getFullYear());
+      };
+
+      // 年ごとにグループ化（降順）
+      const groups = data.reduce(
+        (
+          map: Map<string, Array<{ song: StatisticsItem; idx: number }>>,
+          song,
+          idx
+        ) => {
+          const y = getYear(song);
+          const arr = map.get(y) ?? [];
+          arr.push({ song, idx });
+          map.set(y, arr);
+          return map;
+        },
+        new Map<string, Array<{ song: StatisticsItem; idx: number }>>()
+      );
+
+      const years = Array.from(groups.keys()).sort(
+        (a, b) => Number(b) - Number(a)
+      );
+
+      return (
+        <div className="flex flex-col gap-4">
+          {years.map((year) => {
+            const groupItems = groups.get(year) ?? [];
+            const totalCount = groupItems.reduce(
+              (sum, g) => sum + (g.song.count || 0),
+              0
+            );
+            // 展開アイテムがこのグループにあるか
+            const groupExpandedIndex = groupItems.findIndex(
+              (g) => g.song.key === expandedItem
+            );
+
+            const colCount = getGridCols();
+
+            // グループ内の表示を構築
+            if (expandedItem === null || groupExpandedIndex === -1) {
+              // 展開なし: 単純にグリッド表示
+              return (
+                <div key={year}>
+                  <div className="col-span-2 md:col-span-3 xl:col-span-4 my-4">
+                    <div className="flex items-center">
+                      <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                      <div className="px-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                        [{year}] ({totalCount}曲)
+                      </div>
+                      <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
+                    {groupItems.map(({ song, idx }) => (
+                      <SongItem
+                        key={song.key}
+                        song={song}
+                        isVisible={visibleItems[tabIndex]?.[idx] || false}
+                        groupByAlbum={groupByAlbum}
+                        onClick={() =>
+                          setExpandedItem(
+                            song.key === expandedItem ? null : song.key
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            // 展開あり: 展開位置に詳細を挿入
+            const expandedIdxInGroup = groupExpandedIndex;
+            let detailsInsertionIndex =
+              Math.floor(expandedIdxInGroup / colCount) * colCount + colCount;
+
+            const itemsToRender = groupItems.map((g) => g.song);
+            itemsToRender.splice(
+              detailsInsertionIndex,
+              0,
+              groupItems[expandedIdxInGroup].song
+            );
+
+            if (detailsInsertionIndex >= itemsToRender.length) {
+              detailsInsertionIndex = itemsToRender.length - 1;
+            }
+
+            return (
+              <div key={year}>
+                <div className="col-span-2 md:col-span-3 xl:col-span-4 my-4">
+                  <div className="flex items-center">
+                    <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                    <div className="px-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                      [{year}] ({totalCount}曲)
+                    </div>
+                    <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
+                  {itemsToRender.map((s, i) => {
+                    if (i === detailsInsertionIndex) {
+                      return (
+                        <div
+                          key={`${s.key}-details`}
+                          className="col-span-2 md:col-span-3 xl:col-span-4"
+                        >
+                          <SongDetails song={s} />
+                        </div>
+                      );
+                    }
+
+                    // 元のアイテムの index を求める
+                    const originalIndex = (() => {
+                      const idxInGroup = i > detailsInsertionIndex ? i - 1 : i;
+                      return groupItems[idxInGroup].idx;
+                    })();
+
+                    return (
+                      <SongItem
+                        key={s.key}
+                        song={s}
+                        isVisible={
+                          visibleItems[tabIndex]?.[originalIndex] || false
+                        }
+                        groupByAlbum={groupByAlbum}
+                        onClick={() =>
+                          setExpandedItem(s.key === expandedItem ? null : s.key)
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
     // 展開するアイテムがない場合、通常のグリッドを表示
     if (expandedItem === null) {
       return (
@@ -522,6 +672,15 @@ export default function DiscographyPage() {
             setExpandedItem(null);
           }}
         ></ToggleSwitch>
+
+        <ToggleSwitch
+          label="年ごとに区切る"
+          checked={groupByYear}
+          onChange={() => {
+            setGroupByYear(!groupByYear);
+            setExpandedItem(null);
+          }}
+        />
 
         {/* オリジナル楽曲タブのときのみ表示するオプション */}
         {activeTab === 0 && (
