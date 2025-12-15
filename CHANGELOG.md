@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.21.0](https://github.com/mitsugogo/azki-song-db/compare/v1.20.5...v1.21.0) (2025-12-15)
+
+
+### Features
+
+* **disco:** オリ曲MVのみを表示する機能 ([a2b4cfb](https://github.com/mitsugogo/azki-song-db/commit/a2b4cfbd923ee30cf13c1c9d23e06986845dcc61))
+* **disco:** 年区切り機能 ([bb35e14](https://github.com/mitsugogo/azki-song-db/commit/bb35e14b71350230d5686378009dfc01966fdaa6))
+* **main:** 詳細情報に過去に歌った回数と動画のリンクを追加 ([22bb36a](https://github.com/mitsugogo/azki-song-db/commit/22bb36a9081ac2fdb0ff8975ddf945fa5e72e028))
+
 ### [1.20.5](https://github.com/mitsugogo/azki-song-db/compare/v1.20.4...v1.20.5) (2025-12-05)
 
 ### [1.20.4](https://github.com/mitsugogo/azki-song-db/compare/v1.20.3...v1.20.4) (2025-12-05)
