@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.22.0](https://github.com/mitsugogo/azki-song-db/compare/v1.21.0...v1.22.0) (2026-01-04)
+
+
+### Features
+
+* **main:** 2026年に対応 ([2273d21](https://github.com/mitsugogo/azki-song-db/commit/2273d21e1c2a8c15e5ca5b02a25e07711af22691))
+* **main:** 配信年検索 ([d2efde3](https://github.com/mitsugogo/azki-song-db/commit/d2efde3b0b65e2f74dbf7330ff0f15ecef238aa4))
+
 ## [1.21.0](https://github.com/mitsugogo/azki-song-db/compare/v1.20.5...v1.21.0) (2025-12-15)
 
 
