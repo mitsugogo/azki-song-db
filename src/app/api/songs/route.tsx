@@ -17,6 +17,7 @@ export async function GET() {
         "歌枠2023!A:L",
         "歌枠2024!A:L",
         "歌枠2025!A:L",
+        "歌枠2026!A:L",
         "記念ライブ系!A:L",
         "オリ曲!A:Q",
         "カバー!A:O",
@@ -106,14 +107,13 @@ export async function GET() {
 
         const convertToDate = (numberValue: number) =>
           new Date(
-            numberValue * 24 * 60 * 60 * 1000 +
-              new Date(1899, 11, 30).getTime(),
+            numberValue * 24 * 60 * 60 * 1000 + new Date(1899, 11, 30).getTime()
           ).toISOString();
 
         const videoHyperlink = getHyperlink("動画");
         const videoId =
           videoHyperlink.match(
-            /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
+            /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/
           )?.[1] || "";
 
         return {
@@ -132,6 +132,7 @@ export async function GET() {
           start: parseTimeFromNumberValue(getNumber("start")),
           end: parseTimeFromNumberValue(getNumber("end")),
           broadcast_at: convertToDate(getNumber("配信日")),
+          year: new Date(convertToDate(getNumber("配信日"))).getFullYear(),
           tags: getString("tags（カンマ区切り）")
             .split(",")
             .filter(Boolean)
@@ -169,7 +170,7 @@ export async function GET() {
     console.error("Error fetching data from Google Sheets:", error);
     return NextResponse.json(
       { error: "Failed to fetch data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
