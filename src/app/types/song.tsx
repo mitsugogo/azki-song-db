@@ -12,6 +12,7 @@ export interface Song {
   start: string;
   end: string;
   broadcast_at: string;
+  year: number;
   tags: string[];
   milestones: string[];
   extra?: string;
