@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.23.1](https://github.com/mitsugogo/azki-song-db/compare/v1.23.0...v1.23.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* **summary:** 活動記録のTOPの年月日書式がja-JPじゃないのを修正 ([8f44aa8](https://github.com/mitsugogo/azki-song-db/commit/8f44aa825b296174aa59b979ec75ee973d30a9b0))
+
 ## [1.23.0](https://github.com/mitsugogo/azki-song-db/compare/v1.22.0...v1.23.0) (2026-01-12)
 
 
