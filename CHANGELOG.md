@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.23.0](https://github.com/mitsugogo/azki-song-db/compare/v1.22.0...v1.23.0) (2026-01-12)
+
+
+### Features
+
+* **summary:** 年ごとの活動サマリー機能 ([bc7ebe4](https://github.com/mitsugogo/azki-song-db/commit/bc7ebe43e4c866ea73d181fd878ffd450775e5b3))
+
+
+### Bug Fixes
+
+* **summary:** レイアウト調整、無限ループバグ修正 ([8ca6e74](https://github.com/mitsugogo/azki-song-db/commit/8ca6e744a00e11f37944cbf5fc57bc14c30bcb98))
+
 ## [1.22.0](https://github.com/mitsugogo/azki-song-db/compare/v1.21.0...v1.22.0) (2026-01-04)
 
 
