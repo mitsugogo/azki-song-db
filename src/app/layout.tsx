@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
+import { MantineProvider } from "@mantine/core";
+import { theme } from "./theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,8 +69,10 @@ export default function RootLayout({
       <body
         className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
       >
-        {children}
-        {shouldInjectToolbar && <VercelToolbar />}
+        <MantineProvider theme={theme}>
+          {children}
+          {shouldInjectToolbar && <VercelToolbar />}
+        </MantineProvider>
       </body>
     </html>
   );
