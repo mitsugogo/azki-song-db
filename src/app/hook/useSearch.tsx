@@ -261,25 +261,32 @@ const useSearch = (allSongs: Song[]) => {
   // リアルタイム検索とURL更新
   useEffect(() => {
     const url = new URL(window.location.href);
+    const currentQ = url.searchParams.get("q") || "";
 
-    if (searchTerm) {
-      url.searchParams.set("q", searchTerm);
-      // replaceStateを使って履歴を増やさない
+    if (searchTerm !== currentQ) {
+      if (searchTerm) {
+        url.searchParams.set("q", searchTerm);
+      } else {
+        url.searchParams.delete("q");
+      }
+
+      // ブラウザの履歴を更新
       history.replaceState(null, "", url.href);
-      // Headerなどに変更を通知するカスタムイベント
-      window.dispatchEvent(new Event("replacestate"));
-    } else {
-      url.searchParams.delete("q");
-      history.replaceState(null, "", url.href);
+      // 他のコンポーネント（Header等）にURL変更を通知
       window.dispatchEvent(new Event("replacestate"));
     }
+
+    // 楽曲のフィルタリングを実行
     const newSongs = searchSongs(allSongs, searchTerm);
 
-    // 変更があるときだけ setSongs
-    if (JSON.stringify(newSongs) !== JSON.stringify(songs)) {
+    // 配列の長さが異なるか、中身が異なる場合のみセットする
+    if (
+      newSongs.length !== songs.length ||
+      JSON.stringify(newSongs) !== JSON.stringify(songs)
+    ) {
       setSongs(newSongs);
     }
-  }, [searchTerm, allSongs, searchSongs, decodePlaylistUrlParam]);
+  }, [searchTerm, allSongs, searchSongs]);
 
   return {
     songs,

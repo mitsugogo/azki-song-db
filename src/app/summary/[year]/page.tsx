@@ -127,7 +127,9 @@ export default async function Page({ params }: Props) {
 
   const songsOfYear = Number.isNaN(yearNum)
     ? []
-    : songs.filter((s) => Number(s.year) === yearNum);
+    : songs.filter(
+        (s) => Number(s.year) === yearNum && s.sing.includes("AZKi")
+      );
 
   const displayYearServer = Number.isFinite(yearNum)
     ? yearNum
@@ -160,9 +162,7 @@ export default async function Page({ params }: Props) {
 
       <div className="flex items-center justify-between mb-3">
         <h1 className="font-extrabold text-2xl">
-          {displayYearServer
-            ? `${displayYearServer}年のまとめ`
-            : `年が不明なまとめ`}
+          {displayYearServer ? `${displayYearServer}年` : `まとめ`}
         </h1>
       </div>
 

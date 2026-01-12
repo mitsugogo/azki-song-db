@@ -58,6 +58,38 @@ export default async function Page() {
       {item.title}
     </Anchor>
   ));
+
+  // 年ごとのマイルストーンと達成日(broadcast_at)を取得
+  const milestonesByYear = songs
+    .sort(
+      (a, b) =>
+        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime()
+    )
+    .reduce<Record<number, { broadcast_at: string; milestones: string[] }[]>>(
+      (acc, song) => {
+        const year = Number(song.year);
+        if (Number.isNaN(year)) return acc;
+        if (!acc[year]) acc[year] = [];
+        // 空のマイルストーンは除外
+        if (!song.milestones || song.milestones.length === 0) return acc;
+
+        // 重複するマイルストーンはスキップ
+        if (
+          acc[year].some((entry) =>
+            entry.milestones.includes(song.milestones[0])
+          )
+        )
+          return acc;
+
+        acc[year].push({
+          broadcast_at: song.broadcast_at,
+          milestones: song.milestones || [],
+        });
+        return acc;
+      },
+      {}
+    );
+
   return (
     <div className="flex-grow lg:p-6 lg:pb-0">
       <div className="mb-4">
@@ -74,16 +106,37 @@ export default async function Page() {
           {years.map((year) => (
             <li
               key={year}
-              className="border rounded p-3 hover:shadow-md transition-shadow duration-150"
+              className="border rounded p-3 hover:shadow-md transition-shadow duration-150 dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-600"
             >
-              <a
-                href={`/summary/${year}`}
-                className="flex items-center justify-between"
-              >
-                <span className="text-lg font-semibold">{year}年</span>
-                <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1">
-                  {counts[year]}曲
-                </span>
+              <a href={`/summary/${year}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold">{year}年</span>
+                  <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1">
+                    {counts[year]}曲
+                  </span>
+                </div>
+                <div>
+                  {milestonesByYear[year] && (
+                    <ul className="mt-2 space-y-1">
+                      {milestonesByYear[year]
+                        .flat()
+                        .map(
+                          (
+                            s: { broadcast_at: string; milestones: string[] },
+                            idx: number
+                          ) => (
+                            <li
+                              key={idx}
+                              className="text-sm text-light-gray-600 dark:text-light-gray-400"
+                            >
+                              • {s.milestones.join(", ")} (
+                              {new Date(s.broadcast_at).toLocaleDateString()})
+                            </li>
+                          )
+                        )}
+                    </ul>
+                  )}
+                </div>
               </a>
             </li>
           ))}
