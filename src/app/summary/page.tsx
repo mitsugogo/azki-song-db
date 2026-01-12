@@ -130,7 +130,10 @@ export default async function Page() {
                               className="text-sm text-light-gray-600 dark:text-light-gray-400"
                             >
                               • {s.milestones.join(", ")} (
-                              {new Date(s.broadcast_at).toLocaleDateString()})
+                              {new Date(s.broadcast_at).toLocaleDateString(
+                                "ja-JP"
+                              )}
+                              )
                             </li>
                           )
                         )}
