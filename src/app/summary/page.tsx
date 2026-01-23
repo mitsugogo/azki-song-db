@@ -63,7 +63,7 @@ export default async function Page() {
   const milestonesByYear = songs
     .sort(
       (a, b) =>
-        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime()
+        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime(),
     )
     .reduce<Record<number, { broadcast_at: string; milestones: string[] }[]>>(
       (acc, song) => {
@@ -76,7 +76,7 @@ export default async function Page() {
         // 重複するマイルストーンはスキップ
         if (
           acc[year].some((entry) =>
-            entry.milestones.includes(song.milestones[0])
+            entry.milestones.includes(song.milestones[0]),
           )
         )
           return acc;
@@ -87,7 +87,7 @@ export default async function Page() {
         });
         return acc;
       },
-      {}
+      {},
     );
 
   return (
@@ -123,7 +123,7 @@ export default async function Page() {
                         .map(
                           (
                             s: { broadcast_at: string; milestones: string[] },
-                            idx: number
+                            idx: number,
                           ) => (
                             <li
                               key={idx}
@@ -131,11 +131,11 @@ export default async function Page() {
                             >
                               • {s.milestones.join(", ")} (
                               {new Date(s.broadcast_at).toLocaleDateString(
-                                "ja-JP"
+                                "ja-JP",
                               )}
                               )
                             </li>
-                          )
+                          ),
                         )}
                     </ul>
                   )}

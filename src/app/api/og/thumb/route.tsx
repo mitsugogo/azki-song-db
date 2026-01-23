@@ -70,101 +70,99 @@ export async function GET(req: NextRequest) {
       });
 
     return new ImageResponse(
-      (
+      <div
+        style={{
+          backgroundColor: "#fff",
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          flexWrap: "nowrap",
+          border: "30px solid #b81e8a",
+          fontFamily: "Noto Sans JP",
+          padding: "60px 90px",
+          position: "relative",
+        }}
+      >
+        {/* 曲名コンテナ（上段） */}
         <div
           style={{
-            backgroundColor: "#fff",
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            flexWrap: "nowrap",
-            border: "30px solid #b81e8a",
-            fontFamily: "Noto Sans JP",
-            padding: "60px 90px",
-            position: "relative",
+            fontSize: 60,
+            fontStyle: "normal",
+            fontWeight: "bold",
+            display: "block",
+            color: "#333",
+            lineHeight: 1.3,
+            lineClamp: '3 "..."',
           }}
         >
-          {/* 曲名コンテナ（上段） */}
-          <div
-            style={{
-              fontSize: 60,
-              fontStyle: "normal",
-              fontWeight: "bold",
-              display: "block",
-              color: "#333",
-              lineHeight: 1.3,
-              lineClamp: '3 "..."',
-            }}
-          >
-            {title}
-          </div>
-          {/* サムネイルと動画名のコンテナ（中段） */}
+          {title}
+        </div>
+        {/* サムネイルと動画名のコンテナ（中段） */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            marginTop: "120px",
+          }}
+        >
+          {/* サムネイル画像 */}
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
               alignItems: "center",
-              width: "100%",
-              marginTop: "120px",
+              justifyContent: "center",
+              width: "280px",
+              height: "180px",
+              marginRight: "40px",
             }}
           >
-            {/* サムネイル画像 */}
-            <div
+            <img
+              src={thumbnailUrl}
+              alt="YouTube Thumbnail"
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "280px",
-                height: "180px",
-                marginRight: "40px",
+                objectFit: "cover",
+                width: "100%",
+                height: "100%",
+                borderRadius: "10px",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
               }}
-            >
-              <img
-                src={thumbnailUrl}
-                alt="YouTube Thumbnail"
-                style={{
-                  objectFit: "cover",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "10px",
-                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                }}
-              />
-            </div>
-            {/* 動画名 */}
-            <div
-              style={{
-                display: "block",
-                fontSize: 32,
-                fontStyle: "normal",
-                color: "#333",
-                lineHeight: 1.3,
-                flex: 1,
-                lineClamp: '3 "..."',
-              }}
-            >
-              {subTitle}
-            </div>
+            />
           </div>
-          {/* サイト名（左下から絶対位置で固定） */}
+          {/* 動画名 */}
           <div
             style={{
-              fontSize: 24,
+              display: "block",
+              fontSize: 32,
               fontStyle: "normal",
-              color: "#999",
-              fontWeight: 400,
-              position: "absolute",
-              bottom: "20px",
-              left: "40px",
+              color: "#333",
+              lineHeight: 1.3,
+              flex: 1,
+              lineClamp: '3 "..."',
             }}
           >
-            AZKi Song Database
+            {subTitle}
           </div>
         </div>
-      ),
+        {/* サイト名（左下から絶対位置で固定） */}
+        <div
+          style={{
+            fontSize: 24,
+            fontStyle: "normal",
+            color: "#999",
+            fontWeight: 400,
+            position: "absolute",
+            bottom: "20px",
+            left: "40px",
+          }}
+        >
+          AZKi Song Database
+        </div>
+      </div>,
       {
         width: parseInt(width),
         height: parseInt(height),

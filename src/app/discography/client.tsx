@@ -34,7 +34,7 @@ type StatisticsItem = {
 const createStatistics = <T extends StatisticsItem>(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
-  groupByAlbum?: boolean
+  groupByAlbum?: boolean,
 ) => {
   const countsMap = songs.reduce((map: Map<string, T>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
@@ -135,7 +135,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               <p className="text-sm">
                 発売日:{" "}
                 {new Date(
-                  song.firstVideo.album_release_at
+                  song.firstVideo.album_release_at,
                 ).toLocaleDateString()}
               </p>
               <p className="text-sm">収録曲数: {song.count}曲</p>
@@ -248,10 +248,10 @@ const SongItem = ({
                 ? ""
                 : " / " + song.firstVideo.artist
             } (${new Date(
-              song.firstVideo.album_release_at
+              song.firstVideo.album_release_at,
             ).toLocaleDateString()})`
           : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
-              song.firstVideo.broadcast_at
+              song.firstVideo.broadcast_at,
             ).toLocaleDateString()})`
       }
       onClick={() => onClick(song.key)}
@@ -288,10 +288,10 @@ const SongItem = ({
               <br />
               {song.isAlbum && groupByAlbum
                 ? `${new Date(
-                    song.firstVideo.album_release_at
+                    song.firstVideo.album_release_at,
                   ).toLocaleDateString()}`
                 : `${new Date(
-                    song.firstVideo.broadcast_at
+                    song.firstVideo.broadcast_at,
                   ).toLocaleDateString()}`}
               {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
             </div>
@@ -360,7 +360,7 @@ export default function DiscographyPage() {
     return createStatistics(
       originals,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum
+      groupByAlbum,
     );
   }, [songs, groupByAlbum, onlyOriginalMV]);
 
@@ -369,12 +369,12 @@ export default function DiscographyPage() {
       (s) =>
         ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
           s.tags.includes("ユニット曲")) ||
-        s.tags.includes("ゲスト参加")
+        s.tags.includes("ゲスト参加"),
     );
     return createStatistics(
       units,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum
+      groupByAlbum,
     );
   }, [songs, groupByAlbum]);
 
@@ -383,7 +383,7 @@ export default function DiscographyPage() {
     return createStatistics(
       covers,
       (s) => (groupByAlbum ? s.album || s.title : s.title),
-      groupByAlbum
+      groupByAlbum,
     );
   }, [songs, groupByAlbum]);
 
@@ -425,14 +425,14 @@ export default function DiscographyPage() {
   const renderContent = (
     data: StatisticsItem[],
     tabIndex: number,
-    groupByAlbum: boolean
+    groupByAlbum: boolean,
   ) => {
     // 年ごとに区切るオプション
     if (groupByYear) {
       // 年の判定: アルバム表示なら album_release_at、それ以外なら broadcast_at を参照
       const getYear = (s: StatisticsItem) => {
         const dateStr = groupByAlbum
-          ? s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at
+          ? (s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at)
           : s.firstVideo.broadcast_at;
         const d = new Date(dateStr);
         return isNaN(d.getFullYear()) ? "Unknown" : String(d.getFullYear());
@@ -443,7 +443,7 @@ export default function DiscographyPage() {
         (
           map: Map<string, Array<{ song: StatisticsItem; idx: number }>>,
           song,
-          idx
+          idx,
         ) => {
           const y = getYear(song);
           const arr = map.get(y) ?? [];
@@ -451,11 +451,11 @@ export default function DiscographyPage() {
           map.set(y, arr);
           return map;
         },
-        new Map<string, Array<{ song: StatisticsItem; idx: number }>>()
+        new Map<string, Array<{ song: StatisticsItem; idx: number }>>(),
       );
 
       const years = Array.from(groups.keys()).sort(
-        (a, b) => Number(b) - Number(a)
+        (a, b) => Number(b) - Number(a),
       );
 
       return (
@@ -464,11 +464,11 @@ export default function DiscographyPage() {
             const groupItems = groups.get(year) ?? [];
             const totalCount = groupItems.reduce(
               (sum, g) => sum + (g.song.count || 0),
-              0
+              0,
             );
             // 展開アイテムがこのグループにあるか
             const groupExpandedIndex = groupItems.findIndex(
-              (g) => g.song.key === expandedItem
+              (g) => g.song.key === expandedItem,
             );
 
             const colCount = getGridCols();
@@ -497,7 +497,7 @@ export default function DiscographyPage() {
                         groupByAlbum={groupByAlbum}
                         onClick={() =>
                           setExpandedItem(
-                            song.key === expandedItem ? null : song.key
+                            song.key === expandedItem ? null : song.key,
                           )
                         }
                       />
@@ -516,7 +516,7 @@ export default function DiscographyPage() {
             itemsToRender.splice(
               detailsInsertionIndex,
               0,
-              groupItems[expandedIdxInGroup].song
+              groupItems[expandedIdxInGroup].song,
             );
 
             if (detailsInsertionIndex >= itemsToRender.length) {
@@ -720,8 +720,8 @@ export default function DiscographyPage() {
             {
               Array.from(
                 new Set(
-                  originalSongCountsByReleaseDate.map((s) => s.song.title)
-                )
+                  originalSongCountsByReleaseDate.map((s) => s.song.title),
+                ),
               ).length
             }
             )

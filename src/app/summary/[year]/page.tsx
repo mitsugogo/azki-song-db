@@ -17,7 +17,7 @@ export async function generateStaticParams() {
     const res = await fetch(`${baseUrl}/api/songs`, { cache: "no-store" });
     const songs = (await res.json()) as any[];
     const years = Array.from(
-      new Set(songs.map((s) => Number(s.year)).filter((y) => !Number.isNaN(y)))
+      new Set(songs.map((s) => Number(s.year)).filter((y) => !Number.isNaN(y))),
     ).sort((a, b) => b - a);
 
     return years.map((y) => ({ year: String(y) }));
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Decode and normalize (also convert fullwidth digits to ASCII)
   const decoded = decodeURIComponent(String(paramStr)).trim();
   const normalized = decoded.replace(/[\uFF10-\uFF19]/g, (c) =>
-    String(c.charCodeAt(0) - 0xff10)
+    String(c.charCodeAt(0) - 0xff10),
   );
 
   // Try to extract a 4-digit year first, then fallback to any digit sequence
@@ -128,21 +128,21 @@ export default async function Page({ params }: Props) {
   const songsOfYear = Number.isNaN(yearNum)
     ? []
     : songs.filter(
-        (s) => Number(s.year) === yearNum && s.sing.includes("AZKi")
+        (s) => Number(s.year) === yearNum && s.sing.includes("AZKi"),
       );
 
   const displayYearServer = Number.isFinite(yearNum)
     ? yearNum
     : songsOfYear[0]
-    ? Number(songsOfYear[0].year)
-    : null;
+      ? Number(songsOfYear[0].year)
+      : null;
 
   const breadcrumbItems = [
     {
       title: React.createElement(
         "span",
         null,
-        React.createElement("span", { className: "inline-block mr-1" }, "Home")
+        React.createElement("span", { className: "inline-block mr-1" }, "Home"),
       ),
       href: "/",
     },

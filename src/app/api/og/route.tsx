@@ -55,71 +55,69 @@ export async function GET(req: NextRequest) {
       });
 
     return new ImageResponse(
-      (
+      <div
+        style={{
+          backgroundColor: "#fff",
+          backgroundSize: "100% 100%",
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          textAlign: "left",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          flexDirection: "column",
+          flexWrap: "nowrap",
+          border: "30px solid #b81e8a",
+          fontFamily: "Noto Sans JP",
+          padding: "90px 120px",
+        }}
+      >
         <div
           style={{
-            backgroundColor: "#fff",
-            backgroundSize: "100% 100%",
-            height: "100%",
-            width: "100%",
             display: "flex",
-            textAlign: "left",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
             flexDirection: "column",
-            flexWrap: "nowrap",
-            border: "30px solid #b81e8a",
-            fontFamily: "Noto Sans JP",
-            padding: "90px 120px",
           }}
         >
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
+              width: "100%",
+              fontSize: 60,
+              fontStyle: "normal",
+              fontWeight: "bold",
+              color: `#${titleColor}`,
+              lineHeight: 1.3,
+              marginBottom: "30px",
             }}
           >
-            <div
-              style={{
-                width: "100%",
-                fontSize: 60,
-                fontStyle: "normal",
-                fontWeight: "bold",
-                color: `#${titleColor}`,
-                lineHeight: 1.3,
-                marginBottom: "30px",
-              }}
-            >
-              {title}
-            </div>
-            <div
-              style={{
-                width: "100%",
-                fontSize: 40,
-                fontStyle: "normal",
-                color: `#${subTitleColor}`,
-                lineHeight: 1.3,
-              }}
-            >
-              {subTitle}
-            </div>
+            {title}
           </div>
-          {/* サイト名用のコンテナ */}
           <div
             style={{
               width: "100%",
-              fontSize: 24,
+              fontSize: 40,
               fontStyle: "normal",
-              color: "#333", // サイト名の色を調整
-              fontWeight: 400,
-              textAlign: "left", // 左揃え
-              marginTop: "auto", // 親要素の末尾に配置
+              color: `#${subTitleColor}`,
+              lineHeight: 1.3,
             }}
           >
-            AZKi Song Database
+            {subTitle}
           </div>
         </div>
-      ),
+        {/* サイト名用のコンテナ */}
+        <div
+          style={{
+            width: "100%",
+            fontSize: 24,
+            fontStyle: "normal",
+            color: "#333", // サイト名の色を調整
+            fontWeight: 400,
+            textAlign: "left", // 左揃え
+            marginTop: "auto", // 親要素の末尾に配置
+          }}
+        >
+          AZKi Song Database
+        </div>
+      </div>,
       {
         width: parseInt(width),
         height: parseInt(height),
