@@ -4,6 +4,7 @@ import {
   FaBook,
   FaCalendar,
   FaCompactDisc,
+  FaRepeat,
   FaTag,
   FaUser,
   FaYoutube,
@@ -553,7 +554,7 @@ const NowPlayingSongInfoDetail = ({
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
                 <span className="inline-flex items-center">
-                  <FaTag className="text-base" />
+                  <FaRepeat className="text-base" />
                   <span className="ml-1">歌った回数:</span>
                 </span>
               </dt>
@@ -587,13 +588,7 @@ const NowPlayingSongInfoDetail = ({
                   )
                   .map((song, index) => (
                     <div key={index}>
-                      <a
-                        key={`${index}-${song.video_id}`}
-                        href={`/?v=${song.video_id}&t=${song.start}s`}
-                        className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
-                      >
-                        <FaYoutube className="inline" />
-                      </a>{" "}
+                      {" "}
                       <span className="text-xs">
                         {new Date(song.broadcast_at).toLocaleDateString(
                           "ja-JP",
@@ -606,13 +601,20 @@ const NowPlayingSongInfoDetail = ({
                         -{" "}
                         <Link
                           key={index}
-                          href={`${song.video_uri}&t=${song.start}s`}
-                          target="_blank"
+                          href={`/?v=${song.video_id}&t=${song.start}s`}
                           rel="noopener noreferrer"
                           className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
                         >
                           {song.video_title}
                         </Link>
+                        <a
+                          key={`${index}-${song.video_id}`}
+                          href={`${song.video_uri}&t=${song.start}s`}
+                          target="_blank"
+                          className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 ml-1"
+                        >
+                          <FaYoutube className="inline" />
+                        </a>
                       </span>
                     </div>
                   ))}
