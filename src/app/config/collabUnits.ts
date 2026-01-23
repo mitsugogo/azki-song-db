@@ -79,6 +79,18 @@ export const collabUnits: CollabUnit[] = [
     members: ["AZKi", "IRyS"],
     unitName: "AZRyS",
   },
+  {
+    members: ["AZKi", "博衣こより"],
+    unitName: "こよあず",
+  },
+  {
+    members: ["AZKi", "角巻わため"],
+    unitName: "わたあず",
+  },
+  {
+    members: ["さくらみこ", "星街すいせい"],
+    unitName: "miComet",
+  },
 ];
 
 // メンバー配列を正規化（ソート）
