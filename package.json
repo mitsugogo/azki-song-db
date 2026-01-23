@@ -71,13 +71,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.49.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@playwright/test": "^1.49.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "jsdom": "^26.0.0",
@@ -86,6 +86,6 @@
     "postcss-simple-vars": "^7.0.1",
     "tailwindcss": "^4.1.13",
     "typescript": "^5",
-    "vitest": "^2.1.4"
+    "vitest": "^4.0.18"
   }
 }
