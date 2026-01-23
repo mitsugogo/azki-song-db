@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.0](https://github.com/mitsugogo/azki-song-db/compare/v1.23.1...v1.24.0) (2026-01-23)
+
+
+### Features
+
+* **search:** 検索ページ ([e7bd84c](https://github.com/mitsugogo/azki-song-db/commit/e7bd84cd1cefe8dd5ee6647cf1cecabeb9067515))
+* コラボユニット対応 ([0e968ad](https://github.com/mitsugogo/azki-song-db/commit/0e968adecb6dcb67231b8a4f19f2493cb553c100))
+
+
+### Bug Fixes
+
+* E2Eテストの環境変数を設定ファイルに追加 ([3e9159d](https://github.com/mitsugogo/azki-song-db/commit/3e9159d3917494507906c40393d82c3eab884a13))
+* GitHub Actionsのテストワークフローにリンターを追加し、Vitestの設定を更新 ([57ff604](https://github.com/mitsugogo/azki-song-db/commit/57ff6047f297696ee950d5cb9ab827d422613ee6))
+* **main:** 検索にyearが加味されていないのを修正 ([299c977](https://github.com/mitsugogo/azki-song-db/commit/299c9777968622792dad0faa899cd828f1bd9b8f))
+* Playwrightの設定でactionTimeoutを追加 ([6088588](https://github.com/mitsugogo/azki-song-db/commit/608858823f4ca1ea2091c54ae7392d0990c54bed))
+* **summary:** コラボ判定の調整 ([6e754e5](https://github.com/mitsugogo/azki-song-db/commit/6e754e54dcf6360bd34ad5fbad3d30973a9844a4))
+* テストワークフローからリンターのステップを削除 ([c0a7709](https://github.com/mitsugogo/azki-song-db/commit/c0a77097cdd72500e97ae8dbf415f09c4acfbfd7))
+* 検索のドロップダウンのアーティスト分割漏れを修正 ([76f99ce](https://github.com/mitsugogo/azki-song-db/commit/76f99ce84753198eebcbfa516c049281675497e0))
+
 ### [1.23.1](https://github.com/mitsugogo/azki-song-db/compare/v1.23.0...v1.23.1) (2026-01-12)
 
 
