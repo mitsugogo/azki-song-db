@@ -422,7 +422,7 @@ const SearchPageClient = () => {
           </Link>
           <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
             {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("unit:") 
+            {currentSearchTerm.startsWith("unit:")
               ? `${currentSearchTerm.replace("unit:", "")}の検索結果`
               : `「${currentSearchTerm}」の検索結果`}
           </h1>
@@ -518,7 +518,7 @@ const SearchPageClient = () => {
           </Link>
           <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
             {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("unit:") 
+            {currentSearchTerm.startsWith("unit:")
               ? `${currentSearchTerm.replace("unit:", "")}の検索結果`
               : `「${currentSearchTerm}」の検索結果`}
           </h1>

@@ -28,12 +28,43 @@ export async function generateMetadata({
 
   if (q) {
     const isOriginalSongsMode = q === "sololive2025" || q === "original-songs";
+    const qStr = typeof q === "string" ? q : "";
+
+    // プレフィックスとアイコンのマッピング
+    const prefixMap: Record<string, { icon: string; label: string }> = {
+      "unit:": { icon: "👥", label: "" },
+      "artist:": { icon: "🎤", label: "" },
+      "sing:": { icon: "🎤", label: "" },
+      "tag:": { icon: "🏷️", label: "" },
+      "title:": { icon: "🎵", label: "" },
+      "milestone:": { icon: "⭐", label: "" },
+      "year:": { icon: "📅", label: "" },
+      "season:": { icon: "🌸", label: "" },
+    };
+
     if (isOriginalSongsMode) {
       title = "オリジナル曲モード | AZKi Song Database";
       og_title = "オリジナル曲モード";
       og_subtitle = "AZKiさんのオリジナル楽曲を集めたプレイリスト";
     } else {
-      og_subtitle = `「${q}」の検索結果`;
+      // プレフィックスを検出
+      let matched = false;
+      for (const [prefix, { icon }] of Object.entries(prefixMap)) {
+        if (qStr.startsWith(prefix)) {
+          const displayTerm = qStr.replace(prefix, "");
+          title = `${displayTerm}の検索結果 | AZKi Song Database`;
+          og_title = `${icon} ${displayTerm}の検索結果`;
+          og_subtitle = "AZKi Song Database";
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        title = `「${q}」の検索結果 | AZKi Song Database`;
+        og_title = `「${q}」の検索結果`;
+        og_subtitle = "AZKi Song Database";
+      }
     }
 
     ogImageUrl.searchParams.set("title", og_title);
