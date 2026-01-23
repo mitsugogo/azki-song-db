@@ -10,11 +10,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 2 : 4,
+  timeout: 30000,
   reporter: [["html", { open: "never" }], ["list"], ["github"]],
   use: {
     baseURL,
     trace: "on-first-retry",
     headless: true,
+    actionTimeout: 15000,
   },
   webServer: {
     command: `npm run dev -- --hostname ${HOST} --port ${PORT}`,
