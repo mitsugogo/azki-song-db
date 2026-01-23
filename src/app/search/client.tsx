@@ -190,8 +190,15 @@ const SearchPageClient = () => {
     ).filter((artist) => artist !== "");
 
     const availableSingers = Array.from(
-      new Set(allSongs.map((song) => song.sing)),
-    ).filter((singer) => singer !== "");
+      new Set(
+        allSongs.flatMap((song) =>
+          song.sing
+            .split("、")
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+        ),
+      ),
+    );
 
     const availableTitles = Array.from(
       new Set(allSongs.map((song) => song.title)),
