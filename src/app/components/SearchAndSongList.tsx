@@ -4,7 +4,7 @@ import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
+import { FaCalendar, FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown, LuMusic } from "react-icons/lu";
 import { MdAdd } from "react-icons/md";
 import { LuSparkles } from "react-icons/lu";
@@ -140,6 +140,7 @@ export default function SearchAndSongList({
       {option.value.includes("sing:") && <FaUser />}
       {option.value.includes("tag:") && <FaTag />}
       {option.value.includes("milestone:") && <FaStar />}
+      {option.value.includes("year:") && <FaCalendar />}
       {option.value.includes("season:") && "季節:"}
       <div>
         <Text size="sm">
@@ -260,6 +261,13 @@ export default function SearchAndSongList({
                 items: availableSongTitles
                   .filter((title) => title !== "")
                   .map((title) => `title:${title}`),
+              },
+              {
+                group: "配信年",
+                items: Array.from(new Set(allSongs.map((song) => song.year)))
+                  .filter((year): year is number => year !== undefined)
+                  .sort((a, b) => b - a)
+                  .map((year) => `year:${year}`),
               },
               {
                 group: "季節",
@@ -391,7 +399,7 @@ export default function SearchAndSongList({
                     </Tooltip>
                     <CopyButton
                       value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                        playlist,
+                        playlist
                       )}`}
                       timeout={2000}
                     >
