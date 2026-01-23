@@ -9,8 +9,7 @@ import useSongs from "../hook/useSongs";
 import usePlayerControls from "../hook/usePlayerControls";
 import useSearch from "../hook/useSearch";
 import Link from "next/link";
-import { TagsInput, Group, Text, LoadingOverlay, Button } from "@mantine/core";
-import { HiSearch } from "react-icons/hi";
+import { LoadingOverlay, Button } from "@mantine/core";
 import { FaMusic, FaUser, FaTag, FaUsers } from "react-icons/fa6";
 import { FaCalendar } from "react-icons/fa";
 import {
@@ -18,6 +17,7 @@ import {
   getCollabUnitName,
   normalizeMemberNames,
 } from "../config/collabUnits";
+import SearchInput from "../components/SearchInput";
 
 interface TagCategory {
   label: string;
@@ -175,92 +175,6 @@ const SearchPageClient = () => {
     return [];
   }, [tagParam, allSongs, tagCategories]);
 
-  // 検索データを生成
-  const searchData = useMemo(() => {
-    const availableTags = Array.from(
-      new Set(allSongs.flatMap((song) => song.tags)),
-    ).filter((tag) => tag !== "");
-
-    const availableMilestones = Array.from(
-      new Set(allSongs.flatMap((song) => song.milestones || [])),
-    ).filter((milestone) => milestone !== "");
-
-    const availableArtists = Array.from(
-      new Set(allSongs.map((song) => song.artist)),
-    ).filter((artist) => artist !== "");
-
-    const availableSingers = Array.from(
-      new Set(
-        allSongs.flatMap((song) =>
-          song.sing
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
-        ),
-      ),
-    );
-
-    const availableTitles = Array.from(
-      new Set(allSongs.map((song) => song.title)),
-    ).filter((title) => title !== "");
-
-    // ユニット（コラボ通称）のリスト作成
-    const availableUnits = collabUnits
-      .filter((unit) => {
-        // 実際にそのユニットの曲が存在するかチェック
-        return allSongs.some((song) => {
-          if (song.sing === "") return false;
-          const singers = song.sing
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== "");
-          if (singers.length !== unit.members.length) return false;
-          const sortedSingers = normalizeMemberNames(singers);
-          const sortedUnitMembers = normalizeMemberNames(unit.members);
-          return sortedUnitMembers.every((m, i) => m === sortedSingers[i]);
-        });
-      })
-      .map((unit) => unit.unitName);
-
-    return [
-      {
-        group: "タグ",
-        items: availableTags.map((tag) => `tag:${tag}`),
-      },
-      {
-        group: "マイルストーン",
-        items: availableMilestones.map((milestone) => `milestone:${milestone}`),
-      },
-      {
-        group: "アーティスト",
-        items: availableArtists.map((artist) => `artist:${artist}`),
-      },
-      {
-        group: "歌った人",
-        items: availableSingers.map((singer) => `sing:${singer}`),
-      },
-      {
-        group: "ユニット",
-        items: availableUnits.map((unit) => `unit:${unit}`),
-      },
-      {
-        group: "曲名",
-        items: availableTitles.map((title) => `title:${title}`),
-      },
-      {
-        group: "配信年",
-        items: Array.from(new Set(allSongs.map((song) => song.year)))
-          .filter((year): year is number => year !== undefined)
-          .sort((a, b) => b - a)
-          .map((year) => `year:${year}`),
-      },
-      {
-        group: "季節",
-        items: ["season:春", "season:夏", "season:秋", "season:冬"],
-      },
-    ];
-  }, [allSongs]);
-
   // フィルターモード用データ生成
   const filterModeData = useMemo(() => {
     if (filterMode === "title") {
@@ -370,38 +284,6 @@ const SearchPageClient = () => {
     return [];
   }, [allSongs, filterMode]);
 
-  // TOPページと同じrenderOptionを使用
-  const renderMultiSelectOption = ({
-    option,
-  }: {
-    option: { value: string };
-  }) => (
-    <Group gap="sm">
-      {option.value.includes("title:") && <FaMusic />}
-      {option.value.includes("artist:") && <FaUser />}
-      {option.value.includes("sing:") && <FaUser />}
-      {option.value.includes("unit:") && <FaUsers />}
-      {option.value.includes("tag:") && <FaTag />}
-      {option.value.includes("milestone:") && "★"}
-      {option.value.includes("year:") && <FaCalendar />}
-      {option.value.includes("season:") && "季節:"}
-      <div>
-        <Text size="sm">
-          {option.value
-            .replace("title:", "")
-            .replace("artist:", "")
-            .replace("sing:", "")
-            .replace("unit:", "")
-            .replace("tag:", "")
-            .replace("milestone:", "")
-            .replace("season:", "")}
-        </Text>
-      </div>
-    </Group>
-  );
-
-  // カスタム検索フィルター（不要になったため削除）
-
   if (isLoading) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto relative">
@@ -465,14 +347,10 @@ const SearchPageClient = () => {
 
         {/* 検索バー */}
         <div className="mb-4 px-3">
-          <TagsInput
-            placeholder="検索"
-            leftSection={<HiSearch />}
-            data={searchData}
-            renderOption={renderMultiSelectOption}
-            maxDropdownHeight={200}
-            value={searchValue}
-            onChange={(values: string[]) => {
+          <SearchInput
+            allSongs={allSongs}
+            searchValue={searchValue}
+            onSearchChange={(values: string[]) => {
               setSearchValue(values);
               const searchQuery = values.join("|");
               setSearchTerm(searchQuery);
@@ -483,13 +361,6 @@ const SearchPageClient = () => {
                 router.push("/search");
               }
             }}
-            limit={15}
-            splitChars={["|"]}
-            comboboxProps={{
-              shadow: "md",
-              transitionProps: { transition: "pop", duration: 100 },
-            }}
-            clearable
           />
         </div>
 
@@ -584,14 +455,10 @@ const SearchPageClient = () => {
 
         {/* 検索バー */}
         <div className="mb-4 px-3">
-          <TagsInput
-            placeholder="検索"
-            leftSection={<HiSearch />}
-            data={searchData}
-            renderOption={renderMultiSelectOption}
-            maxDropdownHeight={200}
-            value={searchValue}
-            onChange={(values: string[]) => {
+          <SearchInput
+            allSongs={allSongs}
+            searchValue={searchValue}
+            onSearchChange={(values: string[]) => {
               setSearchValue(values);
               const searchQuery = values.join("|");
               setSearchTerm(searchQuery);
@@ -602,13 +469,6 @@ const SearchPageClient = () => {
                 router.push("/search");
               }
             }}
-            limit={15}
-            splitChars={["|"]}
-            comboboxProps={{
-              shadow: "md",
-              transitionProps: { transition: "pop", duration: 100 },
-            }}
-            clearable
           />
         </div>
       </div>
@@ -697,14 +557,10 @@ const SearchPageClient = () => {
 
       {/* 検索バー */}
       <div className="mb-4 px-3">
-        <TagsInput
-          placeholder="曲名、アーティスト、タグなどで検索"
-          leftSection={<HiSearch />}
-          data={searchData}
-          renderOption={renderMultiSelectOption}
-          maxDropdownHeight={200}
-          value={searchValue}
-          onChange={(values: string[]) => {
+        <SearchInput
+          allSongs={allSongs}
+          searchValue={searchValue}
+          onSearchChange={(values: string[]) => {
             setSearchValue(values);
             const searchQuery = values.join("|");
             setSearchTerm(searchQuery);
@@ -715,13 +571,7 @@ const SearchPageClient = () => {
               router.push("/search");
             }
           }}
-          limit={15}
-          splitChars={["|"]}
-          comboboxProps={{
-            shadow: "md",
-            transitionProps: { transition: "pop", duration: 100 },
-          }}
-          clearable
+          placeholder="曲名、アーティスト、タグなどで検索"
         />
       </div>
 

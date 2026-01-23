@@ -3,23 +3,18 @@ import { Suspense, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
-import { HiSearch } from "react-icons/hi";
-import { FaCalendar, FaMusic, FaStar, FaTag, FaUser } from "react-icons/fa6";
 import { LuCrown, LuMusic } from "react-icons/lu";
 import { MdAdd } from "react-icons/md";
 import { LuSparkles } from "react-icons/lu";
 import {
   Button as MantineButton,
   Grid,
-  Group,
   Modal,
   ScrollArea,
-  TagsInput,
-  TagsInputProps,
-  Text,
   CopyButton,
   Tooltip,
 } from "@mantine/core";
+import SearchInput from "./SearchInput";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
 import {
   MdCheck,
@@ -39,11 +34,6 @@ type SearchAndSongListProps = {
   allSongs: Song[];
   currentSongInfo: Song | null;
   searchTerm: string;
-  availableSongTitles: string[];
-  availableArtists: string[];
-  availableSingers: string[];
-  availableTags: string[];
-  availableMilestones: string[];
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song | null) => void;
   playRandomSong: (songList: Song[]) => void;
@@ -57,11 +47,6 @@ export default function SearchAndSongList({
   allSongs,
   searchTerm,
   currentSongInfo,
-  availableSongTitles,
-  availableArtists,
-  availableSingers,
-  availableTags,
-  availableMilestones,
   hideFutureSongs,
   changeCurrentSong,
   playRandomSong,
@@ -130,31 +115,6 @@ export default function SearchAndSongList({
       setCurrentPlaylist(decodedPlaylist);
     }
   }, [decodePlaylistFromUrl, currentPlaylist]);
-
-  const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
-    option,
-  }) => (
-    <Group gap="sm">
-      {option.value.includes("title:") && <FaMusic />}
-      {option.value.includes("artist:") && <FaUser />}
-      {option.value.includes("sing:") && <FaUser />}
-      {option.value.includes("tag:") && <FaTag />}
-      {option.value.includes("milestone:") && <FaStar />}
-      {option.value.includes("year:") && <FaCalendar />}
-      {option.value.includes("season:") && "季節:"}
-      <div>
-        <Text size="sm">
-          {option.value
-            .replace("title:", "")
-            .replace("artist:", "")
-            .replace("sing:", "")
-            .replace("tag:", "")
-            .replace("milestone:", "")
-            .replace("season:", "")}
-        </Text>
-      </div>
-    </Group>
-  );
 
   return (
     <section className="flex md:w-1/2 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0 h-dvh md:h-full foldable:h-full lg:h-full sm:mx-0">
@@ -228,66 +188,14 @@ export default function SearchAndSongList({
 
         <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
           {/* Search Bar */}
-          <TagsInput
-            placeholder="検索"
-            leftSection={<HiSearch />}
-            data={[
-              {
-                group: "タグ",
-                items: availableTags
-                  .filter((tag) => tag !== "")
-                  .map((tag) => `tag:${tag}`),
-              },
-              {
-                group: "マイルストーン",
-                items: availableMilestones
-                  .filter((milestone) => milestone !== "")
-                  .map((milestone) => `milestone:${milestone}`),
-              },
-              {
-                group: "アーティスト",
-                items: availableArtists
-                  .filter((artist) => artist !== "")
-                  .map((artist) => `artist:${artist}`),
-              },
-              {
-                group: "歌った人",
-                items: availableSingers
-                  .filter((singer) => singer !== "")
-                  .map((singer) => `sing:${singer}`),
-              },
-              {
-                group: "曲名",
-                items: availableSongTitles
-                  .filter((title) => title !== "")
-                  .map((title) => `title:${title}`),
-              },
-              {
-                group: "配信年",
-                items: Array.from(new Set(allSongs.map((song) => song.year)))
-                  .filter((year): year is number => year !== undefined)
-                  .sort((a, b) => b - a)
-                  .map((year) => `year:${year}`),
-              },
-              {
-                group: "季節",
-                items: ["season:春", "season:夏", "season:秋", "season:冬"],
-              },
-            ]}
-            renderOption={renderMultiSelectOption}
-            maxDropdownHeight={200}
-            value={searchValue}
-            onChange={(values: string[]) => {
+          <SearchInput
+            allSongs={allSongs}
+            searchValue={searchValue}
+            onSearchChange={(values: string[]) => {
               setSearchValue(values);
               setSearchTerm(values.join("|"));
             }}
-            limit={15}
-            splitChars={["|"]}
-            comboboxProps={{
-              shadow: "md",
-              transitionProps: { transition: "pop", duration: 100 },
-            }}
-            clearable
+            placeholder="検索"
           />
         </div>
         <div className="block">
@@ -351,7 +259,7 @@ export default function SearchAndSongList({
                     }`}
                   >
                     <div
-                      className="flex flex-grow items-center ounded cursor-pointer"
+                      className="flex grow items-center rounded cursor-pointer"
                       onClick={() => {
                         handlePlayPlaylist(playlist);
                       }}
@@ -399,7 +307,7 @@ export default function SearchAndSongList({
                     </Tooltip>
                     <CopyButton
                       value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                        playlist
+                        playlist,
                       )}`}
                       timeout={2000}
                     >
