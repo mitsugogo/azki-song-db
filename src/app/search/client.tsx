@@ -339,7 +339,7 @@ const SearchPageClient = () => {
             })()}
           </h1>
           <div className="p-3">
-            <p className="text-sm text-light-gray-400 mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               {filteredSongs.length} 件の楽曲が見つかりました
             </p>
           </div>
@@ -388,11 +388,11 @@ const SearchPageClient = () => {
                   <div className="p-3">
                     <div className="font-medium line-clamp-2">{song.title}</div>
                     {song.artist && (
-                      <div className="text-sm text-gray-700 dark:text-light-gray-400 line-clamp-1">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
                         {song.artist}
                       </div>
                     )}
-                    <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                       {new Date(song.broadcast_at).toLocaleDateString()}
                     </div>
                   </div>
@@ -447,7 +447,7 @@ const SearchPageClient = () => {
             })()}
           </h1>
           <div className="p-3">
-            <p className="text-sm text-light-gray-400 mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               該当する曲がありません
             </p>
           </div>
@@ -494,7 +494,7 @@ const SearchPageClient = () => {
             {selectedCategory?.label}
           </h1>
           <div className="p-3">
-            <p className="text-sm text-light-gray-400 mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               {tagFilteredSongs.length} 件の楽曲が見つかりました
             </p>
           </div>
@@ -524,11 +524,11 @@ const SearchPageClient = () => {
                   <div className="p-3">
                     <div className="font-medium line-clamp-2">{song.title}</div>
                     {song.artist && (
-                      <div className="text-sm text-gray-700 dark:text-light-gray-400 line-clamp-1">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
                         {song.artist}
                       </div>
                     )}
-                    <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                       {new Date(song.broadcast_at).toLocaleDateString()}
                     </div>
                   </div>
@@ -548,7 +548,7 @@ const SearchPageClient = () => {
       <div>
         <h1 className="font-extrabold text-2xl p-3">検索</h1>
         <div className="p-3">
-          <p className="text-sm text-light-gray-400 mb-6">
+          <p className="text-sm text-gray-600 dark:text-light-gray-400 mb-6">
             楽曲を検索できます。全{allSongs.length}
             曲を収録。各カテゴリーの最新16曲を表示しています。
           </p>
@@ -744,10 +744,10 @@ const SearchPageClient = () => {
                         <div className="font-medium text-sm line-clamp-2">
                           {item.title}
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1 mt-1">
+                        <div className="text-xs text-gray-600 dark:text-light-gray-400 line-clamp-1 mt-1">
                           {item.artist}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
                           {item.count}回
                         </div>
                       </div>
@@ -782,7 +782,7 @@ const SearchPageClient = () => {
                         <div className="font-medium text-sm line-clamp-2">
                           {item.artist}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
                           {item.count}曲
                         </div>
                       </div>
@@ -816,7 +816,7 @@ const SearchPageClient = () => {
                           <div className="font-medium text-sm line-clamp-2">
                             {item.tag}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                          <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
                             {item.count}曲
                           </div>
                         </div>
@@ -852,7 +852,7 @@ const SearchPageClient = () => {
                         <div className="font-medium text-sm line-clamp-2">
                           {item.singer}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
                           {item.count}曲
                         </div>
                       </div>
@@ -903,11 +903,11 @@ const SearchPageClient = () => {
                           {item.unitName || item.members}
                         </div>
                         {item.unitName && (
-                          <div className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1 mt-1">
+                          <div className="text-xs text-gray-400 dark:text-light-gray-500 line-clamp-1 mt-1">
                             （{item.members}）
                           </div>
                         )}
-                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-light-gray-300 mt-1">
                           {item.count}曲
                         </div>
                       </div>
