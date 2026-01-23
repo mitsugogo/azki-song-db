@@ -15,72 +15,98 @@ export default function useBackgroundAudio() {
     if (typeof window === "undefined") return;
     if ("mediaSession" in navigator) {
       try {
-        (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({
+        (navigator as any).mediaSession.metadata = new (
+          window as any
+        ).MediaMetadata({
           title: meta?.title || "",
           artist: meta?.artist || "",
-          artwork: meta?.artwork ? [{ src: meta.artwork, sizes: "512x512", type: "image/jpeg" }] : [],
+          artwork: meta?.artwork
+            ? [{ src: meta.artwork, sizes: "512x512", type: "image/jpeg" }]
+            : [],
         });
 
-        (navigator as any).mediaSession.setActionHandler("play", () => audioRef.current?.play());
-        (navigator as any).mediaSession.setActionHandler("pause", () => audioRef.current?.pause());
-        (navigator as any).mediaSession.setActionHandler("seekbackward", (details: any) => {
-          if (!audioRef.current) return;
-          const d = details?.seekOffset ?? 10;
-          audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - d);
-        });
-        (navigator as any).mediaSession.setActionHandler("seekforward", (details: any) => {
-          if (!audioRef.current) return;
-          const d = details?.seekOffset ?? 10;
-          audioRef.current.currentTime = Math.min(audioRef.current.duration || Infinity, audioRef.current.currentTime + d);
-        });
-        (navigator as any).mediaSession.setActionHandler("seekto", (details: any) => {
-          if (!audioRef.current || details === undefined) return;
-          audioRef.current.currentTime = details.seekTime;
-        });
+        (navigator as any).mediaSession.setActionHandler("play", () =>
+          audioRef.current?.play(),
+        );
+        (navigator as any).mediaSession.setActionHandler("pause", () =>
+          audioRef.current?.pause(),
+        );
+        (navigator as any).mediaSession.setActionHandler(
+          "seekbackward",
+          (details: any) => {
+            if (!audioRef.current) return;
+            const d = details?.seekOffset ?? 10;
+            audioRef.current.currentTime = Math.max(
+              0,
+              audioRef.current.currentTime - d,
+            );
+          },
+        );
+        (navigator as any).mediaSession.setActionHandler(
+          "seekforward",
+          (details: any) => {
+            if (!audioRef.current) return;
+            const d = details?.seekOffset ?? 10;
+            audioRef.current.currentTime = Math.min(
+              audioRef.current.duration || Infinity,
+              audioRef.current.currentTime + d,
+            );
+          },
+        );
+        (navigator as any).mediaSession.setActionHandler(
+          "seekto",
+          (details: any) => {
+            if (!audioRef.current || details === undefined) return;
+            audioRef.current.currentTime = details.seekTime;
+          },
+        );
       } catch (e) {
         // ignore
       }
     }
   }, []);
 
-  const play = useCallback(async (videoId: string, startSeconds = 0, meta?: Meta) => {
-    if (typeof window === "undefined") return;
+  const play = useCallback(
+    async (videoId: string, startSeconds = 0, meta?: Meta) => {
+      if (typeof window === "undefined") return;
 
-    if (!audioRef.current) {
-      const audio = new Audio();
-      audio.preload = "auto";
-      // playsinline is important for iOS PWA — set as attribute to satisfy TS
-      audio.setAttribute("playsinline", "true");
-      audio.crossOrigin = "anonymous";
-      audioRef.current = audio;
+      if (!audioRef.current) {
+        const audio = new Audio();
+        audio.preload = "auto";
+        // playsinline is important for iOS PWA — set as attribute to satisfy TS
+        audio.setAttribute("playsinline", "true");
+        audio.crossOrigin = "anonymous";
+        audioRef.current = audio;
 
-      audio.addEventListener("play", () => setIsPlaying(true));
-      audio.addEventListener("pause", () => setIsPlaying(false));
-      audio.addEventListener("ended", () => setIsPlaying(false));
-    }
+        audio.addEventListener("play", () => setIsPlaying(true));
+        audio.addEventListener("pause", () => setIsPlaying(false));
+        audio.addEventListener("ended", () => setIsPlaying(false));
+      }
 
-    const link = `https://www.youtube.com/watch?v=${videoId}`;
-    const src = `/api/stream?link=${encodeURIComponent(link)}&start=${startSeconds}`;
-    audioRef.current.src = src;
+      const link = `https://www.youtube.com/watch?v=${videoId}`;
+      const src = `/api/stream?link=${encodeURIComponent(link)}&start=${startSeconds}`;
+      audioRef.current.src = src;
 
-    setupMediaSession(meta);
+      setupMediaSession(meta);
 
-    // Dispatch event so embedded YouTube player can pause itself
-    try {
-      window.dispatchEvent(new Event("azki:backgroundPlay"));
-    } catch (e) {
-      // ignore
-    }
+      // Dispatch event so embedded YouTube player can pause itself
+      try {
+        window.dispatchEvent(new Event("azki:backgroundPlay"));
+      } catch (e) {
+        // ignore
+      }
 
-    // try to play
-    try {
-      await audioRef.current.play();
-      setCurrentVideoId(videoId);
-      setIsPlaying(true);
-    } catch (e) {
-      console.error("Background audio play failed", e);
-    }
-  }, [setupMediaSession]);
+      // try to play
+      try {
+        await audioRef.current.play();
+        setCurrentVideoId(videoId);
+        setIsPlaying(true);
+      } catch (e) {
+        console.error("Background audio play failed", e);
+      }
+    },
+    [setupMediaSession],
+  );
 
   const stop = useCallback(() => {
     if (audioRef.current) {

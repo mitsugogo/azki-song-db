@@ -2,7 +2,7 @@ import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
 import { useClickOutside } from "@mantine/hooks";
 import { Button } from "flowbite-react";
 import { useState } from "react";
-import { FaRegStar, FaShare, FaStar } from "react-icons/fa6";
+import { FaMinus, FaPlus, FaRegStar, FaShare, FaStar } from "react-icons/fa6";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
 import { Song } from "../types/song";
 import {
@@ -74,11 +74,7 @@ export default function PlayerSettings({
                   className="inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
                   onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
                 >
-                  {isInAnyPlaylist(currentSongInfo!) ? (
-                    <FaStar />
-                  ) : (
-                    <FaRegStar />
-                  )}
+                  {isInAnyPlaylist(currentSongInfo!) ? <FaStar /> : <FaPlus />}
                 </Button>
               </Tooltip>
             </div>
@@ -145,9 +141,11 @@ export default function PlayerSettings({
         onClick={() => setOpenShereModal(true)}
         className="hidden md:inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
       >
-        <div className="inline-block w-5 h-5">
-          <FaShare className="relative top-1 left-1" />
-        </div>
+        <Tooltip label="現在の楽曲をシェア">
+          <div className="inline-block w-5 h-5">
+            <FaShare className="relative top-1 left-1" />
+          </div>
+        </Tooltip>
       </Button>
       <Button
         className="text-baseline inline-flex w-10 h-10 items-center p-2 text-sm font-medium text-center cursor-pointer rounded-full text-gray-900 bg-white hover:bg-light-gray-100 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"

@@ -21,7 +21,7 @@ interface SongListProps {
 }
 
 // 画面幅からGridの列数を推定
-const getGridCols = (width: number): number => {
+export const getGridCols = (width: number): number => {
   if (width >= 2560) return 5;
   if (width >= 1920) return 4;
   if (width >= 1280) return 3;
@@ -30,7 +30,10 @@ const getGridCols = (width: number): number => {
 };
 
 // 曲が同一であるかを判定
-const areSongsEqual = (songA: Song | null, songB: Song | null): boolean => {
+export const areSongsEqual = (
+  songA: Song | null,
+  songB: Song | null,
+): boolean => {
   if (!songA || !songB) return false;
   return (
     songA.video_id === songB.video_id &&
@@ -271,7 +274,7 @@ const SongsList = ({
         <ScrollArea
           viewportRef={parentRef}
           id="song-list-scrollbar"
-          className="h-full overflow-y-auto focus:outline-0 flex-grow"
+          className="h-full overflow-y-auto focus:outline-0 grow"
           viewportProps={{
             style: { contain: "strict" },
           }}
@@ -290,7 +293,7 @@ const SongsList = ({
 
           <ul
             id="song-list"
-            className="song-list mb-2 auto-rows-max grid grid-cols-1 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 flex-grow dark:text-gray-300"
+            className="song-list mb-2 auto-rows-max grid grid-cols-1 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 grow dark:text-gray-300"
           >
             {virtualRows.flatMap((virtualRow) => {
               const startItemIndex = virtualRow.index * colCount;

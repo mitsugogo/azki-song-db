@@ -296,11 +296,6 @@ export default function MainPlayer() {
         allSongs={allSongs}
         currentSongInfo={currentSongInfo}
         searchTerm={searchTerm}
-        availableSongTitles={availableSongTitles}
-        availableArtists={availableArtists}
-        availableSingers={availableSingers}
-        availableTags={availableTags}
-        availableMilestones={availableMilestones}
         hideFutureSongs={hideFutureSongs}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}

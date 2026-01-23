@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# playwright
+playwright-report/
+blob-report/
+test-results/
+playwright/.cache/
+
 # next.js
 /.next/
 /out/
@@ -46,4 +52,3 @@ next-env.d.ts
 **/public/workbox-*.js
 **/public/workbox-*.js.map
 
-.vercel
