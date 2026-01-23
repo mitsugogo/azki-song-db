@@ -422,9 +422,32 @@ const SearchPageClient = () => {
           </Link>
           <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
             {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("unit:")
-              ? `${currentSearchTerm.replace("unit:", "")}の検索結果`
-              : `「${currentSearchTerm}」の検索結果`}
+            {currentSearchTerm.startsWith("artist:") && <FaUser />}
+            {currentSearchTerm.startsWith("sing:") && <FaUser />}
+            {currentSearchTerm.startsWith("tag:") && <FaTag />}
+            {currentSearchTerm.startsWith("title:") && <FaMusic />}
+            {currentSearchTerm.startsWith("milestone:") && "⭐"}
+            {currentSearchTerm.startsWith("year:") && <FaCalendar />}
+            {currentSearchTerm.startsWith("season:") && "🌸"}
+            {(() => {
+              const prefixes = [
+                "unit:",
+                "artist:",
+                "sing:",
+                "tag:",
+                "title:",
+                "milestone:",
+                "year:",
+                "season:",
+              ];
+              const matchedPrefix = prefixes.find((p) =>
+                currentSearchTerm.startsWith(p),
+              );
+              if (matchedPrefix) {
+                return `${currentSearchTerm.replace(matchedPrefix, "")}の検索結果`;
+              }
+              return `「${currentSearchTerm}」の検索結果`;
+            })()}
           </h1>
           <div className="p-3">
             <p className="text-sm text-light-gray-400 mb-6">
@@ -518,9 +541,32 @@ const SearchPageClient = () => {
           </Link>
           <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
             {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("unit:")
-              ? `${currentSearchTerm.replace("unit:", "")}の検索結果`
-              : `「${currentSearchTerm}」の検索結果`}
+            {currentSearchTerm.startsWith("artist:") && <FaUser />}
+            {currentSearchTerm.startsWith("sing:") && <FaUser />}
+            {currentSearchTerm.startsWith("tag:") && <FaTag />}
+            {currentSearchTerm.startsWith("title:") && <FaMusic />}
+            {currentSearchTerm.startsWith("milestone:") && "⭐"}
+            {currentSearchTerm.startsWith("year:") && <FaCalendar />}
+            {currentSearchTerm.startsWith("season:") && "🌸"}
+            {(() => {
+              const prefixes = [
+                "unit:",
+                "artist:",
+                "sing:",
+                "tag:",
+                "title:",
+                "milestone:",
+                "year:",
+                "season:",
+              ];
+              const matchedPrefix = prefixes.find((p) =>
+                currentSearchTerm.startsWith(p),
+              );
+              if (matchedPrefix) {
+                return `${currentSearchTerm.replace(matchedPrefix, "")}の検索結果`;
+              }
+              return `「${currentSearchTerm}」の検索結果`;
+            })()}
           </h1>
           <div className="p-3">
             <p className="text-sm text-light-gray-400 mb-6">
