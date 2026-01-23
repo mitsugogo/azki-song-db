@@ -30,7 +30,7 @@ interface NowPlayingSongInfoDetailProps {
     song: Song | null,
     isInfoOnly?: boolean,
     videoId?: string,
-    startTime?: number
+    startTime?: number,
   ) => void;
 }
 
@@ -100,7 +100,7 @@ const NowPlayingSongInfoDetail = ({
                 <dd className="flex flex-wrap gap-1">
                   {currentSongInfo.artist.split("、").map((artist, index) => {
                     const existsSameArtist = searchTerm.includes(
-                      `artist:${artist}`
+                      `artist:${artist}`,
                     );
                     return (
                       <Badge
@@ -108,13 +108,13 @@ const NowPlayingSongInfoDetail = ({
                         onClick={() => {
                           if (existsSameArtist) {
                             setSearchTerm(
-                              searchTerm.replace(`artist:${artist}`, "").trim()
+                              searchTerm.replace(`artist:${artist}`, "").trim(),
                             );
                           } else {
                             setSearchTerm(
                               `${
                                 searchTerm ? `${searchTerm}|` : ""
-                              }artist:${artist}`
+                              }artist:${artist}`,
                             );
                           }
                         }}
@@ -141,7 +141,7 @@ const NowPlayingSongInfoDetail = ({
                 <dd className="flex flex-wrap gap-1">
                   {currentSongInfo.album.split("、").map((album, index) => {
                     const existsSameAlbum = searchTerm.includes(
-                      `album:${album}`
+                      `album:${album}`,
                     );
                     return (
                       <Badge
@@ -149,13 +149,13 @@ const NowPlayingSongInfoDetail = ({
                         onClick={() => {
                           if (existsSameAlbum) {
                             setSearchTerm(
-                              searchTerm.replace(`album:${album}`, "").trim()
+                              searchTerm.replace(`album:${album}`, "").trim(),
                             );
                           } else {
                             setSearchTerm(
                               `${
                                 searchTerm ? `${searchTerm}|` : ""
-                              }album:${album}`
+                              }album:${album}`,
                             );
                           }
                         }}
@@ -187,11 +187,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameSing) {
                           setSearchTerm(
-                            searchTerm.replace(`sing:${sing}`, "").trim()
+                            searchTerm.replace(`sing:${sing}`, "").trim(),
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm}|` : ""}sing:${sing}`
+                            `${searchTerm ? `${searchTerm}|` : ""}sing:${sing}`,
                           );
                         }
                       }}
@@ -239,28 +239,28 @@ const NowPlayingSongInfoDetail = ({
                   className={`text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
                     searchTerm.includes(
                       `date:${new Date(
-                        currentSongInfo.broadcast_at
-                      ).toLocaleDateString()}`
+                        currentSongInfo.broadcast_at,
+                      ).toLocaleDateString()}`,
                     )
                       ? "bg-cyan-300 dark:bg-cyan-800"
                       : ""
                   }`}
                   onClick={() => {
                     const broadcastDate = new Date(
-                      currentSongInfo.broadcast_at
+                      currentSongInfo.broadcast_at,
                     ).toLocaleDateString();
                     const existsSameDate = searchTerm.includes(
-                      `date:${broadcastDate}`
+                      `date:${broadcastDate}`,
                     );
                     if (existsSameDate) {
                       setSearchTerm(
-                        searchTerm.replace(`date:${broadcastDate}`, "").trim()
+                        searchTerm.replace(`date:${broadcastDate}`, "").trim(),
                       );
                     } else {
                       setSearchTerm(
                         `${
                           searchTerm ? `${searchTerm}|` : ""
-                        }date:${broadcastDate}`
+                        }date:${broadcastDate}`,
                       );
                     }
                   }}
@@ -289,11 +289,11 @@ const NowPlayingSongInfoDetail = ({
                       onClick={() => {
                         if (existsSameTag) {
                           setSearchTerm(
-                            searchTerm.replace(`tag:${tag}`, "").trim()
+                            searchTerm.replace(`tag:${tag}`, "").trim(),
                           );
                         } else {
                           setSearchTerm(
-                            `${searchTerm ? `${searchTerm}|` : ""}tag:${tag}`
+                            `${searchTerm ? `${searchTerm}|` : ""}tag:${tag}`,
                           );
                         }
                       }}
@@ -334,7 +334,7 @@ const NowPlayingSongInfoDetail = ({
                               (song) =>
                                 currentSongInfo?.title === song.title &&
                                 currentSongInfo.video_id === song.video_id &&
-                                currentSongInfo.start === song.start
+                                currentSongInfo.start === song.start,
                             );
 
                         return (
@@ -426,7 +426,7 @@ const NowPlayingSongInfoDetail = ({
                     .split(/[\r\n]/)
                     .map((call, index) => {
                       const match = call.match(
-                        /^(\d{1,2}:\d{2}:\d{2})\s*-\s*(\d{1,2}:\d{2}:\d{2})(.*)$/
+                        /^(\d{1,2}:\d{2}:\d{2})\s*-\s*(\d{1,2}:\d{2}:\d{2})(.*)$/,
                       );
 
                       let callstart = "";
@@ -462,7 +462,7 @@ const NowPlayingSongInfoDetail = ({
                                   currentSongInfo,
                                   false,
                                   currentSongInfo.video_id,
-                                  Math.max(0, timeToSeconds(callstart) - 2)
+                                  Math.max(0, timeToSeconds(callstart) - 2),
                                 );
                               }}
                             >
@@ -480,7 +480,7 @@ const NowPlayingSongInfoDetail = ({
                                   currentSongInfo,
                                   false,
                                   currentSongInfo.video_id,
-                                  timeToSeconds(callend)
+                                  timeToSeconds(callend),
                                 );
                               }}
                             >
@@ -516,7 +516,7 @@ const NowPlayingSongInfoDetail = ({
                         .replace(
                           /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
                           (url) =>
-                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`
+                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
                         )
                         .replace(/\n/g, "<br />"),
                     }}
@@ -540,7 +540,7 @@ const NowPlayingSongInfoDetail = ({
                       .replace(
                         /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
                         (url) =>
-                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`
+                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
                       )
                       .replace(/\n/g, "<br />"),
                   }}
@@ -562,7 +562,7 @@ const NowPlayingSongInfoDetail = ({
                 <Badge className="text-xs dark:bg-cyan-900 dark:text-gray-50">
                   {
                     allSongs.filter(
-                      (song) => song.title === currentSongInfo.title
+                      (song) => song.title === currentSongInfo.title,
                     ).length
                   }{" "}
                   回
@@ -584,7 +584,7 @@ const NowPlayingSongInfoDetail = ({
                   .sort(
                     (a, b) =>
                       new Date(b.broadcast_at).getTime() -
-                      new Date(a.broadcast_at).getTime()
+                      new Date(a.broadcast_at).getTime(),
                   )
                   .map((song, index) => (
                     <div key={index}>
@@ -596,7 +596,7 @@ const NowPlayingSongInfoDetail = ({
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
-                          }
+                          },
                         )}{" "}
                         -{" "}
                         <Link

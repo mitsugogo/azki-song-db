@@ -58,7 +58,7 @@ export default function YearSummaryClient({
   };
 
   const [fetchedInitialSongs, setFetchedInitialSongs] = useState<Song[] | null>(
-    null
+    null,
   );
 
   const allSongsForYear = useMemo(() => {
@@ -93,7 +93,7 @@ export default function YearSummaryClient({
         artist: example?.artist ?? "",
         video_id: example?.video_id ?? "",
         start: example?.start ?? "",
-      })
+      }),
     );
 
     entries.sort((a, b) => b.count - a.count || a.title.localeCompare(b.title));
@@ -130,11 +130,11 @@ export default function YearSummaryClient({
         artist,
         count,
         example,
-      })
+      }),
     );
 
     entries.sort(
-      (a, b) => b.count - a.count || a.artist.localeCompare(b.artist)
+      (a, b) => b.count - a.count || a.artist.localeCompare(b.artist),
     );
     if (entries.length === 0) return [];
 
@@ -161,7 +161,7 @@ export default function YearSummaryClient({
   const displayYear = isYearValid
     ? hasYear
       ? yearNumber
-      : clientYear ?? inferredYearFromSongs ?? "不明"
+      : (clientYear ?? inferredYearFromSongs ?? "不明")
     : "不明";
 
   useEffect(() => {
@@ -195,7 +195,7 @@ export default function YearSummaryClient({
       .sort(
         (a, b) =>
           new Date(a.broadcast_at).getTime() -
-          new Date(b.broadcast_at).getTime()
+          new Date(b.broadcast_at).getTime(),
       )
       .forEach((s) => {
         const date = new Date(s.broadcast_at);
@@ -250,7 +250,7 @@ export default function YearSummaryClient({
         .sort(
           (a, b) =>
             new Date(a.broadcast_at).getTime() -
-            new Date(b.broadcast_at).getTime()
+            new Date(b.broadcast_at).getTime(),
         )
         .reduce<
           Record<number, { broadcast_at: string; milestones: string[] }[]>
@@ -271,7 +271,7 @@ export default function YearSummaryClient({
           });
           return acc;
         }, {}),
-    [songsFiltered]
+    [songsFiltered],
   );
 
   return (
@@ -295,7 +295,7 @@ export default function YearSummaryClient({
             <a href={`/?q=year:${displayYear}|tag:歌枠`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("歌枠")
+                  s.tags.includes("歌枠"),
                 ).length
               }
             </a>
@@ -309,7 +309,7 @@ export default function YearSummaryClient({
             <a href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("ゲスト出演")
+                  s.tags.includes("ゲスト出演"),
                 ).length
               }
             </a>
@@ -327,9 +327,10 @@ export default function YearSummaryClient({
                   (fetchedInitialSongs ?? initialSongs)
                     .filter(
                       (s) =>
-                        s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")
+                        s.tags.includes("オリ曲") ||
+                        s.tags.includes("オリ曲MV"),
                     )
-                    .map((s) => s.title)
+                    .map((s) => s.title),
                 ).size
               }
             </a>
@@ -343,7 +344,7 @@ export default function YearSummaryClient({
             <a href={`/?q=year:${displayYear}|tag:カバー曲`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("カバー曲")
+                  s.tags.includes("カバー曲"),
                 ).length
               }
             </a>
@@ -453,7 +454,7 @@ export default function YearSummaryClient({
                           <div className="font-medium">
                             <a
                               href={`/?${new URLSearchParams(
-                                query
+                                query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
@@ -487,7 +488,7 @@ export default function YearSummaryClient({
               {(() => {
                 const maxCount = Math.max(
                   ...collabCountsBySinger.map((a) => a.count),
-                  1
+                  1,
                 );
                 return collabCountsBySinger.map((a) => {
                   const query: Record<string, string> = {};
@@ -506,7 +507,7 @@ export default function YearSummaryClient({
                           <div className="font-medium">
                             <a
                               href={`/?${new URLSearchParams(
-                                query
+                                query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
@@ -543,13 +544,15 @@ export default function YearSummaryClient({
                       style={{
                         width: `${
                           Math.max(
-                            ...monthsWithSongs.map(([_, songs]) => songs.length)
+                            ...monthsWithSongs.map(
+                              ([_, songs]) => songs.length,
+                            ),
                           ) !== 0
                             ? (songs.length /
                                 Math.max(
                                   ...monthsWithSongs.map(
-                                    ([_, songs]) => songs.length
-                                  )
+                                    ([_, songs]) => songs.length,
+                                  ),
                                 )) *
                               100
                             : 0
@@ -576,8 +579,8 @@ export default function YearSummaryClient({
           {
             songsFiltered.filter((s) =>
               (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲"
-              )
+                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+              ),
             ).length
           }
           )
@@ -600,13 +603,13 @@ export default function YearSummaryClient({
           {(songsFiltered || [])
             .filter((s) =>
               (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲"
-              )
+                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+              ),
             )
             .sort(
               (a, b) =>
                 new Date(a.broadcast_at).getTime() -
-                new Date(b.broadcast_at).getTime()
+                new Date(b.broadcast_at).getTime(),
             )
             .map((g, i) => (
               <article
