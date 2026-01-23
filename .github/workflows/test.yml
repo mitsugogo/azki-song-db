@@ -49,9 +49,19 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          YOUTUBE_DATA_API_KEY: ${{ secrets.YOUTUBE_DATA_API_KEY }}
+          PUBLIC_BASE_URL: http://localhost:3000
 
       - name: Run E2E tests
         run: npm run test:e2e
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          YOUTUBE_DATA_API_KEY: ${{ secrets.YOUTUBE_DATA_API_KEY }}
+          PUBLIC_BASE_URL: http://localhost:3000
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
