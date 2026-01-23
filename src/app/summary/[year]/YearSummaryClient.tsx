@@ -214,7 +214,7 @@ export default function YearSummaryClient({
     return (songsFiltered || [])
       .filter((s) => {
         const singers = s.sing.split("、").map((x) => x.trim());
-        return singers.length >= 2 && singers.length <= 8; // 全体曲は省く
+        return singers.length >= 2;
       })
       .sort((a, b) => {
         return (
