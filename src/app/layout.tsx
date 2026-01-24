@@ -4,6 +4,7 @@ import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
+import ClientProviders from "./components/ClientProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,8 +71,10 @@ export default function RootLayout({
         className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
       >
         <MantineProvider theme={theme}>
-          {children}
-          {shouldInjectToolbar && <VercelToolbar />}
+          <ClientProviders>
+            {children}
+            {shouldInjectToolbar && <VercelToolbar />}
+          </ClientProviders>
         </MantineProvider>
       </body>
     </html>
