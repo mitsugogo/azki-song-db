@@ -37,6 +37,64 @@ The development environment is set up using the following steps:
 3. Start the development server using `npm run dev`
 4. Open the web page at `http://localhost:3000`
 
+## Testing
+
+This project includes comprehensive test suites using Vitest and Playwright.
+
+### Unit Tests (Vitest)
+
+Unit tests are written for React hooks and components using Vitest and React Testing Library.
+
+**Run all unit tests:**
+```bash
+npm test
+```
+
+**Run tests in watch mode:**
+```bash
+npm run test:watch
+```
+
+**Run tests with coverage:**
+```bash
+npm run test:coverage
+```
+
+**Test files location:**
+- Hook tests: `src/app/hook/__tests__/*.test.tsx`
+- Component tests: `src/app/components/__tests__/*.test.tsx`
+
+### End-to-End Tests (Playwright)
+
+E2E tests are written using Playwright to test the application from a user's perspective.
+
+**Run all E2E tests:**
+```bash
+npm run test:e2e
+```
+
+**Run E2E tests in UI mode:**
+```bash
+npm run test:e2e:ui
+```
+
+**Run E2E tests in headed mode:**
+```bash
+npm run test:e2e:headed
+```
+
+**Test files location:**
+- E2E tests: `e2e/*.spec.ts`
+
+**Available E2E test suites:**
+- `home.spec.ts` - Home page functionality
+- `search.spec.ts` - Search functionality
+- `data.spec.ts` - Data page
+- `discography.spec.ts` - Discography page
+- `playlist.spec.ts` - Playlist functionality
+- `statistics.spec.ts` - Statistics page
+- `summary.spec.ts` - Summary page
+
 ## Environment variables
 
 The following environment variables are used in the project:
