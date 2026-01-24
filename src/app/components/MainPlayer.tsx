@@ -69,7 +69,7 @@ export default function MainPlayer() {
     changeCurrentSong,
     playRandomSong,
     handlePlayerOnReady: originalHandlePlayerOnReady,
-    handleStateChange,
+    handleStateChange: originalHandleStateChange,
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs);
 
@@ -78,12 +78,40 @@ export default function MainPlayer() {
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const playerRef = useRef<any>(null);
   const previousPathnameRef = useRef(pathname);
+  const [playerDuration, setPlayerDuration] = useState(0);
+  const [playerVolume, setPlayerVolume] = useState(100);
+  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+  const updatePlayerSnapshot = useCallback((playerInstance: any) => {
+    if (!playerInstance) return;
+    if (typeof playerInstance.getDuration === "function") {
+      const duration = playerInstance.getDuration();
+      if (Number.isFinite(duration)) {
+        setPlayerDuration(duration);
+      }
+    }
+    if (typeof playerInstance.getVolume === "function") {
+      const volume = playerInstance.getVolume();
+      if (Number.isFinite(volume)) {
+        setPlayerVolume(volume);
+      }
+    }
+    if (typeof playerInstance.getCurrentTime === "function") {
+      const currentTime = playerInstance.getCurrentTime();
+      if (Number.isFinite(currentTime)) {
+        setPlayerCurrentTime(currentTime);
+      }
+    }
+  }, []);
 
   // handlePlayerOnReadyをラップして再生位置を復元
   const handlePlayerOnReady = useCallback(
     (event: YouTubeEvent<number>) => {
       originalHandlePlayerOnReady(event);
       playerRef.current = event.target;
+      updatePlayerSnapshot(event.target);
+      setIsPlayerReady(true);
 
       // 動画IDが変わっていない場合のみ再生位置を復元
       const currentVideoId = currentSongInfo?.video_id;
@@ -111,8 +139,36 @@ export default function MainPlayer() {
       hasRestoredPosition,
       currentSongInfo?.video_id,
       previousVideoId,
+      updatePlayerSnapshot,
     ],
   );
+
+  const handlePlayerStateChange = useCallback(
+    (event: YouTubeEvent<number>) => {
+      originalHandleStateChange(event);
+      updatePlayerSnapshot(event.target);
+    },
+    [originalHandleStateChange, updatePlayerSnapshot],
+  );
+
+  // 再生中は定期的にcurrentTimeを更新
+  useEffect(() => {
+    if (!isPlayerReady || !playerRef.current) return;
+
+    const interval = setInterval(() => {
+      if (
+        playerRef.current &&
+        typeof playerRef.current.getCurrentTime === "function"
+      ) {
+        const currentTime = playerRef.current.getCurrentTime();
+        if (Number.isFinite(currentTime)) {
+          setPlayerCurrentTime(currentTime);
+        }
+      }
+    }, 100); // 100msごとに更新
+
+    return () => clearInterval(interval);
+  }, [isPlayerReady]);
 
   // グローバルプレイヤーと同期（動画が変わったときのみリセット）
   useEffect(() => {
@@ -140,6 +196,12 @@ export default function MainPlayer() {
   useEffect(() => {
     globalPlayer.setIsPlaying(isPlaying);
   }, [isPlaying, globalPlayer]);
+
+  useEffect(() => {
+    if (!currentSongInfo) {
+      setIsPlayerReady(false);
+    }
+  }, [currentSongInfo]);
 
   // 再生位置を定期的に保存
   useEffect(() => {
@@ -279,6 +341,65 @@ export default function MainPlayer() {
     setPreviousAndNextSongs(currentSongInfo, songsInVideo);
   };
 
+  const playVideo = useCallback(() => {
+    if (
+      playerRef.current &&
+      typeof playerRef.current.playVideo === "function"
+    ) {
+      playerRef.current.playVideo();
+    }
+  }, []);
+
+  const pauseVideo = useCallback(() => {
+    if (
+      playerRef.current &&
+      typeof playerRef.current.pauseVideo === "function"
+    ) {
+      playerRef.current.pauseVideo();
+    }
+  }, []);
+
+  const changeVolume = useCallback((volume: number) => {
+    if (
+      !playerRef.current ||
+      typeof playerRef.current.setVolume !== "function"
+    ) {
+      return;
+    }
+    const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
+    playerRef.current.setVolume(clampedVolume);
+    setPlayerVolume(clampedVolume);
+  }, []);
+
+  const seekToAbsolute = useCallback(
+    (absoluteSeconds: number) => {
+      if (
+        !playerRef.current ||
+        typeof playerRef.current.seekTo !== "function"
+      ) {
+        return;
+      }
+      const boundedAbsolute =
+        playerDuration > 0
+          ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
+          : Math.max(absoluteSeconds, 0);
+      playerRef.current.seekTo(boundedAbsolute, true);
+      globalPlayer.setCurrentTime(boundedAbsolute);
+    },
+    [playerDuration, globalPlayer],
+  );
+
+  const desktopPlayerControls = {
+    isReady: isPlayerReady && Boolean(playerRef.current),
+    play: playVideo,
+    pause: pauseVideo,
+    seekTo: seekToAbsolute,
+    setVolume: changeVolume,
+    currentTime: playerCurrentTime,
+    volume: playerVolume,
+    duration: playerDuration,
+  };
+
   // --- Spotlight Actions ---
   const searchActions: SpotlightActionData[] = [
     // アーティスト名検索
@@ -415,7 +536,7 @@ export default function MainPlayer() {
         setSongs={setSongs}
         searchSongs={searchSongs}
         handlePlayerOnReady={handlePlayerOnReady}
-        handleStateChange={handleStateChange}
+        handleStateChange={handlePlayerStateChange}
         changeCurrentSong={changeCurrentSong}
         playRandomSong={playRandomSong}
         setSongsToCurrentVideo={setSongsToCurrentVideo}
@@ -425,6 +546,7 @@ export default function MainPlayer() {
         isPlaying={isPlaying}
         playerKey={playerKey}
         hideFutureSongs={hideFutureSongs}
+        playerControls={desktopPlayerControls}
       />
 
       <SearchAndSongList

@@ -210,21 +210,27 @@ const SongsList = ({
       });
 
       // スクロール位置が変わったときのみstateを更新
-      // 配列の比較は面倒なので、IDの数で大まかに判定
-      if (
-        newVisibleIds.length !== visibleSongIds.length ||
-        newVisibleIds[0] !== visibleSongIds[0]
-      ) {
-        setVisibleSongIds(newVisibleIds);
-      }
+      setVisibleSongIds((prev) => {
+        // 配列の比較は面倒なので、IDの数で大まかに判定
+        if (
+          newVisibleIds.length !== prev.length ||
+          newVisibleIds[0] !== prev[0]
+        ) {
+          return newVisibleIds;
+        }
+        return prev;
+      });
     } else if (songs.length > 0) {
       // リストが空でない場合の初期値設定
       const initialId = `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`;
-      if (visibleSongIds.length === 0) {
-        setVisibleSongIds([initialId]);
-      }
+      setVisibleSongIds((prev) => {
+        if (prev.length === 0) {
+          return [initialId];
+        }
+        return prev;
+      });
     }
-  }, [virtualRows, songs, colCount, visibleSongIds]); // virtualRowsが変更されるたびに実行
+  }, [virtualRows, songs, colCount]); // virtualRowsが変更されるたびに実行
 
   /**
    * ページャーまたはリストからのクリック時に特定の曲にスクロールする関数
