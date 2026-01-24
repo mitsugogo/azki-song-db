@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.25.0](https://github.com/mitsugogo/azki-song-db/compare/v1.24.2...v1.25.0) (2026-01-24)
+
+
+### Features
+
+* PWAインストール機能を追加 ([3689e46](https://github.com/mitsugogo/azki-song-db/commit/3689e469aaf8bb44a6f206c4264da3ce16f8bd0d))
+* コントロールバーを追加 ([d81202f](https://github.com/mitsugogo/azki-song-db/commit/d81202f6f046fd831563e74cafb9f0374adaff94))
+* ミニプレイヤーのドラッグ機能を追加 ([ca63ed7](https://github.com/mitsugogo/azki-song-db/commit/ca63ed793cf01c401dca39e81e5f93f0853271f4))
+* ミニプレイヤーを実装 ([54aed87](https://github.com/mitsugogo/azki-song-db/commit/54aed87e3ef889c5f61d34b9b133ffd51fc945b1))
+
+
+### Bug Fixes
+
+* AnchorコンポーネントをLinkコンポーネントに置き換え ([2dfbc86](https://github.com/mitsugogo/azki-song-db/commit/2dfbc86a0ca3956bcda18a62b504d4f12cd82f57))
+* プレイリスト再生モードにすると固まる問題を修正 ([28d49bf](https://github.com/mitsugogo/azki-song-db/commit/28d49bf01ea79afaef21f8bde7447f97bedf91db))
+* ミニプレイヤーの動画情報更新と再生位置管理の改善 ([110eba3](https://github.com/mitsugogo/azki-song-db/commit/110eba3cdb18fa3e8b88149e1bcc2846e0984775))
+* 仮想化アイテムの取得処理を修正し、関連する依存関係を更新 ([6c40597](https://github.com/mitsugogo/azki-song-db/commit/6c40597ec1e9fd7dc5fcf8966fb0e9d1d4e6ecd2))
+* 再生位置保持の挙動を調整 ([d00ab99](https://github.com/mitsugogo/azki-song-db/commit/d00ab996729dc13e5a1558b3f0617c3e9f033a94))
+
 ### [1.24.2](https://github.com/mitsugogo/azki-song-db/compare/v1.24.1...v1.24.2) (2026-01-23)
 
 ### [1.24.1](https://github.com/mitsugogo/azki-song-db/compare/v1.24.0...v1.24.1) (2026-01-23)
