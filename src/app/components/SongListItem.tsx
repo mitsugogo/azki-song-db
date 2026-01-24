@@ -73,7 +73,7 @@ const SongListItem = React.memo(
               <span
                 className={`${
                   isHide
-                    ? `h-4 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                    ? `h-4 bg-light-gray-300 rounded-md dark:bg-gray-700 mb-1`
                     : ""
                 }`}
               >
@@ -90,7 +90,7 @@ const SongListItem = React.memo(
               <span
                 className={`${
                   isHide
-                    ? `h-2 bg-light-gray-300 rounded-lg dark:bg-gray-700 mb-1`
+                    ? `h-2 bg-light-gray-300 rounded-md dark:bg-gray-700 mb-1`
                     : ""
                 }`}
               >
