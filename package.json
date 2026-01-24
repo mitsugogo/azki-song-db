@@ -8,8 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
     "format": "npx prettier --write ."
   },
   "dependencies": {
@@ -78,6 +81,7 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "jsdom": "^26.0.0",

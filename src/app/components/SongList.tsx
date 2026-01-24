@@ -84,6 +84,7 @@ const SongsList = ({
     overscan: 4,
   });
 
+  // 仮想化アイテムの取得
   const virtualRows = virtualizer.getVirtualItems();
 
   // 現在の曲のインデックス
@@ -115,9 +116,6 @@ const SongsList = ({
     virtualRows.length > 0
       ? virtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
       : 0;
-
-  // 仮想化アイテムの取得
-  const virtualItems = virtualizer.getVirtualItems();
 
   // 連続スクロール処理を停止
   const stopScrolling = useCallback(() => {
@@ -192,11 +190,11 @@ const SongsList = ({
   }, [stopScrolling]);
 
   useEffect(() => {
-    if (virtualItems.length > 0) {
+    if (virtualRows.length > 0) {
       const newVisibleIds: string[] = [];
 
       // 画面に見えている全ての仮想アイテムを処理
-      virtualItems.forEach((item) => {
+      virtualRows.forEach((item) => {
         const startItemIndex = item.index * colCount;
 
         // 1行内の全ての曲をチェック
@@ -212,21 +210,27 @@ const SongsList = ({
       });
 
       // スクロール位置が変わったときのみstateを更新
-      // 配列の比較は面倒なので、IDの数で大まかに判定
-      if (
-        newVisibleIds.length !== visibleSongIds.length ||
-        newVisibleIds[0] !== visibleSongIds[0]
-      ) {
-        setVisibleSongIds(newVisibleIds);
-      }
+      setVisibleSongIds((prev) => {
+        // 配列の比較は面倒なので、IDの数で大まかに判定
+        if (
+          newVisibleIds.length !== prev.length ||
+          newVisibleIds[0] !== prev[0]
+        ) {
+          return newVisibleIds;
+        }
+        return prev;
+      });
     } else if (songs.length > 0) {
       // リストが空でない場合の初期値設定
       const initialId = `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`;
-      if (visibleSongIds.length === 0) {
-        setVisibleSongIds([initialId]);
-      }
+      setVisibleSongIds((prev) => {
+        if (prev.length === 0) {
+          return [initialId];
+        }
+        return prev;
+      });
     }
-  }, [virtualItems, songs, colCount, visibleSongIds]); // virtualItemsが変更されるたびに実行
+  }, [virtualRows, songs, colCount]); // virtualRowsが変更されるたびに実行
 
   /**
    * ページャーまたはリストからのクリック時に特定の曲にスクロールする関数

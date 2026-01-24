@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useEffect, useState } from "react";
 import { Song } from "../../types/song";
@@ -282,9 +282,9 @@ export default function YearSummaryClient({
             収録楽曲
           </div>
           <div className="text-2xl font-bold">
-            <a href={`/?q=year:${displayYear}`}>
+            <Link href={`/?q=year:${displayYear}`}>
               {(fetchedInitialSongs ?? initialSongs).length}
-            </a>
+            </Link>
           </div>
         </div>
         <div className="border rounded p-4">
@@ -292,13 +292,13 @@ export default function YearSummaryClient({
             歌枠で歌った曲数
           </div>
           <div className="text-2xl font-bold">
-            <a href={`/?q=year:${displayYear}|tag:歌枠`}>
+            <Link href={`/?q=year:${displayYear}|tag:歌枠`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
                   s.tags.includes("歌枠"),
                 ).length
               }
-            </a>
+            </Link>
           </div>
         </div>
         <div className="border rounded p-4">
@@ -306,13 +306,13 @@ export default function YearSummaryClient({
             ゲストで歌った曲数
           </div>
           <div className="text-2xl font-bold">
-            <a href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
+            <Link href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
                   s.tags.includes("ゲスト出演"),
                 ).length
               }
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -321,7 +321,7 @@ export default function YearSummaryClient({
             オリジナル楽曲
           </div>
           <div className="text-2xl font-bold">
-            <a href={`/?q=year:${displayYear}|tag:オリ曲`}>
+            <Link href={`/?q=year:${displayYear}|tag:オリ曲`}>
               {
                 new Set(
                   (fetchedInitialSongs ?? initialSongs)
@@ -333,7 +333,7 @@ export default function YearSummaryClient({
                     .map((s) => s.title),
                 ).size
               }
-            </a>
+            </Link>
           </div>
         </div>
         <div className="border rounded p-4">
@@ -341,13 +341,13 @@ export default function YearSummaryClient({
             カバー楽曲
           </div>
           <div className="text-2xl font-bold">
-            <a href={`/?q=year:${displayYear}|tag:カバー曲`}>
+            <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
                   s.tags.includes("カバー曲"),
                 ).length
               }
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -397,7 +397,7 @@ export default function YearSummaryClient({
                           style={{ width: `${pct}%` }}
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
-                          <a
+                          <Link
                             href={
                               query.v
                                 ? `/?${new URLSearchParams(query).toString()}`
@@ -411,7 +411,7 @@ export default function YearSummaryClient({
                                 &nbsp;-&nbsp;{t.artist}
                               </span>
                             </div>
-                          </a>
+                          </Link>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
                             {t.count}回
                           </div>
@@ -452,14 +452,14 @@ export default function YearSummaryClient({
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
                           <div className="font-medium">
-                            <a
+                            <Link
                               href={`/?${new URLSearchParams(
                                 query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
                               {a.artist}
-                            </a>
+                            </Link>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
                             {a.count}回
@@ -505,14 +505,14 @@ export default function YearSummaryClient({
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
                           <div className="font-medium">
-                            <a
+                            <Link
                               href={`/?${new URLSearchParams(
                                 query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
                               {a.singer}
-                            </a>
+                            </Link>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
                             {a.count}曲
@@ -584,20 +584,20 @@ export default function YearSummaryClient({
             ).length
           }
           )
-          <a
+          <Link
             href={`/?q=year:${displayYear}|tag:オリ曲`}
             className="ml-4 text-sm text-blue-600 hover:underline"
           >
             <FaPlay className="inline-block mr-1" />
             オリ曲
-          </a>
-          <a
+          </Link>
+          <Link
             href={`/?q=year:${displayYear}|tag:カバー曲`}
             className="ml-4 text-sm text-blue-600 hover:underline"
           >
             <FaPlay className="inline-block mr-1" />
             カバー曲
-          </a>
+          </Link>
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
           {(songsFiltered || [])
@@ -809,7 +809,7 @@ export default function YearSummaryClient({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               {v.id && !v.id.startsWith("noid-") && (
-                                <a
+                                <Link
                                   href={
                                     v.uri ||
                                     `https://www.youtube.com/watch?v=${v.id}`
@@ -823,9 +823,9 @@ export default function YearSummaryClient({
                                     alt={v.title}
                                     fill={true}
                                   />
-                                </a>
+                                </Link>
                               )}
-                              <a
+                              <Link
                                 href={
                                   v.uri ||
                                   `https://www.youtube.com/watch?v=${v.id}`
@@ -839,7 +839,7 @@ export default function YearSummaryClient({
                                   <br />
                                   {v.broadcast_at.toLocaleDateString()}
                                 </span>
-                              </a>
+                              </Link>
                             </div>
                             <div className="text-sm text-gray-700 dark:text-light-gray-400">
                               {v.songs.length}曲
@@ -848,7 +848,7 @@ export default function YearSummaryClient({
                           <ul className="mt-2 ml-3 pl-4 list-disc">
                             {v.songs.map((s: Song, idx: number) => (
                               <li key={`${v.id}-${idx}`} className="text-sm">
-                                <a
+                                <Link
                                   href={`/?v=${v.id}${
                                     s.start ? `&t=${s.start}s` : ""
                                   }&q=year:${displayYear}`}
@@ -861,7 +861,7 @@ export default function YearSummaryClient({
                                       - {s.artist}
                                     </span>
                                   )}
-                                </a>
+                                </Link>
                               </li>
                             ))}
                           </ul>

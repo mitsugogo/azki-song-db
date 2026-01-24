@@ -28,6 +28,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const currentSongInfoRef = useRef(currentSongInfo);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
+  const lastManualChangeRef = useRef<number>(0); // 手動で曲を変更した時刻
+  const isManualChangeInProgressRef = useRef<boolean>(false); // 手動変更中フラグ
 
   // ライブのコール指南メッセージ
   const [timedLiveCallText, setTimedLiveCallText] = useState<string | null>(
@@ -38,9 +40,21 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   >([]);
   const timedMessagesRef = useRef(timedMessages);
 
+  // songs配列とnextSongの最新値をrefで保持
+  const songsRef = useRef(songs);
+  const nextSongRef = useRef(nextSong);
+
   useEffect(() => {
     currentSongInfoRef.current = currentSongInfo;
   }, [currentSongInfo]);
+
+  useEffect(() => {
+    songsRef.current = songs;
+  }, [songs]);
+
+  useEffect(() => {
+    nextSongRef.current = nextSong;
+  }, [nextSong]);
 
   // セトリネタバレ防止モードをlocalStorageに保存する
   useEffect(() => {
@@ -136,6 +150,8 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       if (youtubeVideoIdRef.current !== song?.video_id) {
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = null;
+        // 動画IDが変わった場合はフラグを立てる
+        isManualChangeInProgressRef.current = true;
       }
       youtubeVideoIdRef.current = song?.video_id || "";
 
@@ -181,6 +197,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       }
 
       if (!infoOnly) {
+        // 手動で曲を変更したことを記録
+        lastManualChangeRef.current = Date.now();
+
         if (videoId && startTime) {
           setVideoId(videoId);
           setStartTime(startTime);
@@ -203,7 +222,14 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         setCurrentSong(song);
       }
     },
-    [songs, setPreviousAndNextSongs, currentSong, resetPlayer],
+    [
+      songs,
+      setPreviousAndNextSongs,
+      currentSong,
+      resetPlayer,
+      currentSongInfo,
+      sortedAllSongs,
+    ],
   );
 
   const playRandomSong = useCallback(
@@ -276,17 +302,18 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
             currentVideoId,
             currentTime,
           );
-          const isFoundSongInList = songs.some(
+          const isFoundSongInList = songsRef.current.some(
             (s) =>
               s.video_id === foundSong?.video_id &&
               s.start === foundSong?.start,
           );
 
-          if (!isFoundSongInList && nextSong) {
-            changeCurrentSong(nextSong);
-            return;
-          }
+          // 手動変更中フラグのチェック(曲情報の更新は常に許可)
+          const shouldBlockAutoChange =
+            isManualChangeInProgressRef.current &&
+            Date.now() - lastManualChangeRef.current <= 3000;
 
+          // フラグが立っている間でも、曲情報の更新(infoOnly)は実行
           if (foundSong) {
             if (
               foundSong.video_id !== currentSongInfoRef.current?.video_id ||
@@ -294,23 +321,41 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
             ) {
               changeCurrentSong(foundSong, true);
             }
-          } else if (nextSong) {
-            changeCurrentSong(nextSong);
+          }
+
+          // 3秒経過したらフラグをクリア
+          if (
+            shouldBlockAutoChange &&
+            Date.now() - lastManualChangeRef.current > 3000
+          ) {
+            isManualChangeInProgressRef.current = false;
+          }
+
+          // 曲の自動変更はフラグ中はブロック
+          if (shouldBlockAutoChange) {
+            return;
+          }
+
+          if (!isFoundSongInList && nextSongRef.current) {
+            changeCurrentSong(nextSongRef.current);
+            return;
           }
 
           if (foundSong?.end && foundSong.end < currentTime) {
             clearMonitorInterval();
-            changeCurrentSong(nextSong);
+            changeCurrentSong(nextSongRef.current);
+          } else if (!foundSong && nextSongRef.current) {
+            changeCurrentSong(nextSongRef.current);
           }
         }, 500);
       };
 
       const handleEndedState = () => {
         clearMonitorInterval();
-        if (nextSong) {
-          changeCurrentSong(nextSong);
-        } else if (songs.length > 0) {
-          changeCurrentSong(songs[0]);
+        if (nextSongRef.current) {
+          changeCurrentSong(nextSongRef.current);
+        } else if (songsRef.current.length > 0) {
+          changeCurrentSong(songsRef.current[0]);
         }
         // 再生終了時にメッセージをリセット
         setTimedLiveCallText(null);

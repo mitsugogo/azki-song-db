@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Song } from "../types/song";
-import useDebounce from "./useDebounce";
 import usePlaylists from "./usePlaylists";
-import { useDebouncedState } from "@mantine/hooks";
+import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
+import { useSearchParams } from "next/navigation";
 
 /**
  * 検索ロジックを管理するカスタムフック
@@ -13,10 +13,14 @@ const useSearch = (allSongs: Song[]) => {
   const [songs, setSongs] = useState<Song[]>([]);
 
   // 通常検索
-  const [searchTerm, setSearchTerm] = useDebouncedState("", 300);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
 
   // プレイリスト
   const { decodePlaylistUrlParam } = usePlaylists();
+
+  const searchParams = useSearchParams();
+  const isSyncingFromUrl = useRef(false);
 
   // 検索ロジック
   const filterCallback = useCallback(
@@ -186,27 +190,30 @@ const useSearch = (allSongs: Song[]) => {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
         if (playlistSongs) {
+          // Set/Mapを使用してO(n)に最適化
+          const playlistSongSet = new Set(
+            playlistSongs.songs.map(
+              (entry) => `${entry.videoId}-${entry.start}`,
+            ),
+          );
+
+          const playlistSongIndexMap = new Map(
+            playlistSongs.songs.map((entry, index) => [
+              `${entry.videoId}-${entry.start}`,
+              index,
+            ]),
+          );
+
           songsToFilter = allSongs
             .filter((song) =>
-              playlistSongs.songs.find(
-                (entry) =>
-                  entry.videoId === song.video_id &&
-                  Number(String(entry.start)) === Number(song.start),
-              ),
+              playlistSongSet.has(`${song.video_id}-${song.start}`),
             )
             .sort((a, b) => {
-              return (
-                playlistSongs.songs.findIndex(
-                  (entry) =>
-                    entry.videoId === a.video_id &&
-                    Number(String(entry.start)) === Number(a.start),
-                ) -
-                playlistSongs.songs.findIndex(
-                  (entry) =>
-                    entry.videoId === b.video_id &&
-                    Number(String(entry.start)) === Number(b.start),
-                )
-              );
+              const indexA =
+                playlistSongIndexMap.get(`${a.video_id}-${a.start}`) ?? 0;
+              const indexB =
+                playlistSongIndexMap.get(`${b.video_id}-${b.start}`) ?? 0;
+              return indexA - indexB;
             });
 
           // オリ曲モード解除
@@ -219,6 +226,12 @@ const useSearch = (allSongs: Song[]) => {
           // Headerなどに通知
           window.dispatchEvent(new Event("replacestate"));
         }
+      }
+      // プレイリストモードの場合は、playPlaylist関数で処理済みなので
+      // ここでは何もしない（URLパラメータだけ見て早期リターン）
+      else if (playlist) {
+        // プレイリストモードの場合は空配列を返す（実際の曲リストはplayPlaylistでセット済み）
+        return [];
       }
 
       const isExcluded = (song: Song, excludeWords: string[]) => {
@@ -261,32 +274,32 @@ const useSearch = (allSongs: Song[]) => {
     [allSongs],
   );
 
-  // 初期ロード時のURLパラメータ処理
+  // 検索パラメータ（?q=...）変更時に検索条件を同期
   useEffect(() => {
-    if (allSongs.length === 0) return;
+    if (!searchParams) return;
+    const queryFromUrl = searchParams.get("q") ?? "";
+    const playlistFromUrl = searchParams.get("playlist") ?? "";
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get("q");
-
-    let filteredSongs = allSongs;
-    filteredSongs = searchSongs(filteredSongs, query || "");
-    setSongs(filteredSongs);
-    if (query) {
-      setSearchTerm(query);
+    if (queryFromUrl !== searchTerm) {
+      isSyncingFromUrl.current = true;
+      setSearchTerm(queryFromUrl);
     }
-  }, [allSongs]);
 
-  // ページロード時はq=xxxのURLパラメータを取得して検索
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get("q");
-    if (query) {
-      setSearchTerm(query);
+    // playlistパラメータがある場合はsearchSongs内で処理されるので、
+    // ここで重複して処理しない
+    if (!playlistFromUrl) {
+      const filteredSongs = searchSongs(allSongs, queryFromUrl);
+      setSongs(filteredSongs);
     }
-  }, []);
+  }, [searchParams, allSongs, searchSongs]);
 
-  // リアルタイム検索とURL更新
+  // URL更新（即座に）
   useEffect(() => {
+    if (isSyncingFromUrl.current) {
+      isSyncingFromUrl.current = false;
+      return;
+    }
+
     const url = new URL(window.location.href);
     const currentQ = url.searchParams.get("q") || "";
 
@@ -297,14 +310,15 @@ const useSearch = (allSongs: Song[]) => {
         url.searchParams.delete("q");
       }
 
-      // ブラウザの履歴を更新
       history.replaceState(null, "", url.href);
-      // 他のコンポーネント（Header等）にURL変更を通知
       window.dispatchEvent(new Event("replacestate"));
     }
+  }, [searchTerm]);
 
+  // リアルタイム検索（debounce適用）
+  useEffect(() => {
     // 楽曲のフィルタリングを実行
-    const newSongs = searchSongs(allSongs, searchTerm);
+    const newSongs = searchSongs(allSongs, debouncedSearchTerm);
 
     // 配列の長さが異なるか、中身が異なる場合のみセットする
     if (
@@ -313,7 +327,7 @@ const useSearch = (allSongs: Song[]) => {
     ) {
       setSongs(newSongs);
     }
-  }, [searchTerm, allSongs, searchSongs]);
+  }, [debouncedSearchTerm, allSongs, searchSongs]);
 
   return {
     songs,

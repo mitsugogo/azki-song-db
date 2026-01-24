@@ -22,22 +22,26 @@ export const usePlaylistActions = ({
   // Plays a selected playlist
   const playPlaylist = useCallback(
     (playlist: Playlist) => {
+      // パフォーマンス最適化: Setを使って高速ルックアップ
+      const playlistSongSet = new Set(
+        playlist.songs.map((entry) => `${entry.videoId}-${entry.start}`),
+      );
+
+      // ソート用のインデックスマップを事前に作成
+      const songIndexMap = new Map(
+        playlist.songs.map((entry, index) => [
+          `${entry.videoId}-${entry.start}`,
+          index,
+        ]),
+      );
+
       const songs = allSongs
         .slice()
-        .filter((song) => isInPlaylist(playlist, song))
+        .filter((song) => playlistSongSet.has(`${song.video_id}-${song.start}`))
         .sort((a, b) => {
-          return (
-            playlist.songs.findIndex(
-              (entry) =>
-                entry.videoId === a.video_id &&
-                Number(String(entry.start)) === Number(a.start),
-            ) -
-            playlist.songs.findIndex(
-              (entry) =>
-                entry.videoId === b.video_id &&
-                Number(String(entry.start)) === Number(b.start),
-            )
-          );
+          const indexA = songIndexMap.get(`${a.video_id}-${a.start}`) ?? -1;
+          const indexB = songIndexMap.get(`${b.video_id}-${b.start}`) ?? -1;
+          return indexA - indexB;
         });
 
       setSongs(songs);
@@ -55,7 +59,13 @@ export const usePlaylistActions = ({
       // Headerなどに通知
       window.dispatchEvent(new Event("replacestate"));
     },
-    [allSongs, isInPlaylist, setSongs, changeCurrentSong, setSearchTerm],
+    [
+      allSongs,
+      setSongs,
+      changeCurrentSong,
+      setSearchTerm,
+      encodePlaylistUrlParam,
+    ],
   );
 
   // Disables playlist mode and resets the song list

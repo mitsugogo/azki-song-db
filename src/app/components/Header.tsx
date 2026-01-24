@@ -4,6 +4,7 @@ import { Button } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { FaGear, FaYoutube } from "react-icons/fa6";
+import { MdInstallMobile } from "react-icons/md";
 import Acknowledgment from "./Acknowledgment";
 import { Drawer, Burger, Modal, Tooltip } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -11,6 +12,7 @@ import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
 import { pageList } from "../pagelists";
 import FoldableToggle from "./FoldableToggle";
+import usePWAInstall from "../hook/usePWAInstall";
 
 export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -21,6 +23,8 @@ export function Header() {
   const [buildDate, setBuildDate] = useState("N/A");
 
   const isMobile = useMediaQuery("(max-width: 50em)");
+
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -96,11 +100,11 @@ export function Header() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
-                <a href="/">
+                <Link href="/">
                   <h1 className="text-lg lg:text-lg font-bold">
                     AZKi Song Database
                   </h1>
-                </a>
+                </Link>
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
@@ -164,6 +168,25 @@ export function Header() {
           </Link>
 
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 " />
+
+          {/* PWAインストールボタン */}
+          {isInstallable && !isInstalled && (
+            <>
+              <div
+                key="install-pwa"
+                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={() => {
+                  promptInstall();
+                  closeDrawer();
+                }}
+              >
+                <MdInstallMobile className="mr-2 inline text-xl" />
+                アプリをインストール
+              </div>
+              <hr className="my-6 border border-light-gray-200 dark:border-gray-600 " />
+            </>
+          )}
+
           <Link
             href="#"
             key="about"
