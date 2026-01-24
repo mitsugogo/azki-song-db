@@ -1,8 +1,9 @@
 "use client";
 
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
+import useSongs from "../hook/useSongs";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
@@ -20,23 +21,42 @@ export default function MiniPlayer() {
     setCurrentTime,
     maximizePlayer,
     setIsMinimized,
+    setCurrentSong,
   } = useGlobalPlayer();
+  const { allSongs } = useSongs();
   const pathname = usePathname();
   const router = useRouter();
   const [playerKey, setPlayerKey] = useState(0);
   const playerRef = useRef<any>(null);
   const [hasRestoredTime, setHasRestoredTime] = useState(false);
 
+  // 再生中の動画情報を保持（動画が変わったときだけ更新）
+  const [playingSong, setPlayingSong] = useState(currentSong);
+  const lastVideoIdRef = useRef<string | null>(null);
+  const lastPathnameRef = useRef<string>(pathname);
+
   // ホームページ（メインプレイヤーがある場所）ではミニプレイヤーを非表示
   const isHomePage = pathname === "/";
 
+  const sortedSongs = useMemo(() => {
+    return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
+  }, [allSongs]);
+
   useEffect(() => {
-    // ページ遷移時にプレイヤーをリセット
+    // ページ遷移または動画IDが変わったときにプレイヤーをリセット
     if (!isHomePage && currentSong) {
-      setPlayerKey((prev) => prev + 1);
-      setHasRestoredTime(false);
+      const videoIdChanged = currentSong.video_id !== lastVideoIdRef.current;
+      const pathnameChanged = pathname !== lastPathnameRef.current;
+
+      if (videoIdChanged || pathnameChanged) {
+        setPlayerKey((prev) => prev + 1);
+        setHasRestoredTime(false);
+        setPlayingSong(currentSong);
+        lastVideoIdRef.current = currentSong.video_id;
+        lastPathnameRef.current = pathname;
+      }
     }
-  }, [pathname, isHomePage, currentSong]);
+  }, [pathname, isHomePage, currentSong?.video_id]);
 
   const handlePlayerOnReady = (event: YouTubeEvent<number>) => {
     playerRef.current = event.target;
@@ -66,9 +86,9 @@ export default function MiniPlayer() {
     }
   };
 
-  // 再生位置を定期的に保存
+  // 再生位置を定期的に保存と曲の更新
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || !currentSong) return;
 
     const interval = setInterval(() => {
       if (
@@ -77,11 +97,24 @@ export default function MiniPlayer() {
       ) {
         const time = playerRef.current.getCurrentTime();
         setCurrentTime(time);
+
+        // 曲の更新チェック
+        const foundSong = sortedSongs.find(
+          (s) =>
+            s.video_id === currentSong.video_id && parseInt(s.start) <= time,
+        );
+        if (
+          foundSong &&
+          (foundSong.title !== currentSong.title ||
+            foundSong.start !== currentSong.start)
+        ) {
+          setCurrentSong(foundSong);
+        }
       }
     }, 1000); // 1秒ごとに保存
 
     return () => clearInterval(interval);
-  }, [isPlaying, setCurrentTime]);
+  }, [isPlaying, currentSong, setCurrentTime, setCurrentSong, sortedSongs]);
 
   const handleClose = () => {
     if (playerRef.current) {
@@ -104,6 +137,7 @@ export default function MiniPlayer() {
   return (
     <AnimatePresence>
       <motion.div
+        data-testid="mini-player"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -122,10 +156,18 @@ export default function MiniPlayer() {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold truncate">
+              <div
+                className="text-sm font-bold truncate"
+                data-testid="mini-player-song-title"
+              >
                 {currentSong.title}
               </div>
-              <div className="text-xs truncate">{currentSong.artist}</div>
+              <div
+                className="text-xs truncate"
+                data-testid="mini-player-artist"
+              >
+                {currentSong.artist}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 ml-2">
@@ -148,12 +190,14 @@ export default function MiniPlayer() {
 
         {/* プレイヤー */}
         <div className="relative aspect-video w-full bg-black">
-          <YouTubePlayer
-            key={`mini-player-${playerKey}`}
-            song={currentSong}
-            onReady={handlePlayerOnReady}
-            onStateChange={handleStateChange}
-          />
+          {playingSong && (
+            <YouTubePlayer
+              key={`mini-player-${playerKey}`}
+              song={playingSong}
+              onReady={handlePlayerOnReady}
+              onStateChange={handleStateChange}
+            />
+          )}
         </div>
       </motion.div>
     </AnimatePresence>

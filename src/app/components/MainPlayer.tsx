@@ -104,24 +104,28 @@ export default function MainPlayer() {
 
   // グローバルプレイヤーと同期（動画が変わったときのみリセット）
   useEffect(() => {
-    if (currentSong) {
-      const currentVideoId = currentSong.youtubeVideoId;
-
-      // 動画IDが変わった場合のみ再生位置をリセット
-      if (currentVideoId !== previousVideoId) {
-        if (previousVideoId !== null) {
-          // 初回以外で動画が変わった場合
-          globalPlayer.setCurrentTime(0);
-          setHasRestoredPosition(false);
-          // ミニプレイヤー状態もリセット
-          globalPlayer.setIsMinimized(false);
-        }
-        setPreviousVideoId(currentVideoId);
-      }
-
-      globalPlayer.setCurrentSong(currentSong);
+    if (!currentSongInfo) {
+      globalPlayer.setCurrentSong(null);
+      setPreviousVideoId(null);
+      return;
     }
-  }, [currentSong, globalPlayer, previousVideoId]);
+
+    const currentVideoId = currentSongInfo.video_id;
+
+    // 動画IDが変わった場合のみ再生位置をリセット
+    if (currentVideoId !== previousVideoId) {
+      if (previousVideoId !== null) {
+        // 初回以外で動画が変わった場合
+        globalPlayer.setCurrentTime(0);
+        setHasRestoredPosition(false);
+        // ミニプレイヤー状態もリセット
+        globalPlayer.setIsMinimized(false);
+      }
+      setPreviousVideoId(currentVideoId);
+    }
+
+    globalPlayer.setCurrentSong(currentSongInfo);
+  }, [currentSongInfo, globalPlayer, previousVideoId]);
 
   useEffect(() => {
     globalPlayer.setIsPlaying(isPlaying);
@@ -158,7 +162,7 @@ export default function MainPlayer() {
         // URLパラメータのvideoIdを取得
         const urlVideoId = urlParams.get("v") || urlParams.get("videoId");
         // 現在の動画と異なる場合のみ再生位置をリセット
-        if (urlVideoId && globalPlayer.currentSong?.videoId !== urlVideoId) {
+        if (urlVideoId && globalPlayer.currentSong?.video_id !== urlVideoId) {
           globalPlayer.setCurrentTime(0);
         }
       } else if (globalPlayer.currentSong && !currentSong) {
