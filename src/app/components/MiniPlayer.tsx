@@ -3,13 +3,21 @@
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import useSongs from "../hook/useSongs";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import YoutubeThumbnail from "./YoutubeThumbnail";
+
+type Position = {
+  x: number;
+  y: number;
+};
+
+const SNAP_DISTANCE = 50; // スナップ距離（ピクセル）
+const STORAGE_KEY = "mini-player-position";
 
 export default function MiniPlayer() {
   const {
@@ -35,12 +43,126 @@ export default function MiniPlayer() {
   const lastVideoIdRef = useRef<string | null>(null);
   const lastPathnameRef = useRef<string>(pathname);
 
+  // ドラッグ機能の状態
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
+  const miniPlayerRef = useRef<HTMLDivElement>(null);
+
   // ホームページ（メインプレイヤーがある場所）ではミニプレイヤーを非表示
   const isHomePage = pathname === "/";
 
   const sortedSongs = useMemo(() => {
     return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
   }, [allSongs]);
+
+  // 初期位置を設定（保存された位置またはデフォルト位置）
+  useEffect(() => {
+    const savedPosition = localStorage.getItem(STORAGE_KEY);
+    if (savedPosition) {
+      try {
+        const parsed = JSON.parse(savedPosition);
+        setPosition(parsed);
+      } catch {
+        // デフォルト位置（右下）
+        setPosition({
+          x: window.innerWidth - 336,
+          y: window.innerHeight - 240,
+        });
+      }
+    } else {
+      // デフォルト位置（右下）
+      setPosition({ x: window.innerWidth - 336, y: window.innerHeight - 240 });
+    }
+  }, []);
+
+  // 四隅にスナップする関数
+  const snapToCorner = useCallback((x: number, y: number): Position => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const playerWidth = 320; // w-80 = 320px
+    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+
+    let snappedX = x;
+    let snappedY = y;
+
+    // 左端にスナップ
+    if (x < SNAP_DISTANCE) {
+      snappedX = 16; // left-4 = 16px
+    }
+    // 右端にスナップ
+    else if (x + playerWidth > windowWidth - SNAP_DISTANCE) {
+      snappedX = windowWidth - playerWidth - 16;
+    }
+
+    // 上端にスナップ
+    if (y < SNAP_DISTANCE) {
+      snappedY = 16; // top-4 = 16px
+    }
+    // 下端にスナップ
+    else if (y + playerHeight > windowHeight - SNAP_DISTANCE) {
+      snappedY = windowHeight - playerHeight - 16;
+    }
+
+    return { x: snappedX, y: snappedY };
+  }, []);
+
+  // マウスダウンイベントハンドラ
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // ボタンのクリックは無視
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+
+    if (miniPlayerRef.current) {
+      const rect = miniPlayerRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  }, []);
+
+  // マウス移動イベントハンドラ
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+
+      // 画面外に出ないように制限
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const playerWidth = 320;
+      const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+
+      const clampedX = Math.max(0, Math.min(newX, windowWidth - playerWidth));
+      const clampedY = Math.max(0, Math.min(newY, windowHeight - playerHeight));
+
+      setPosition({ x: clampedX, y: clampedY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      // ドラッグ終了時に四隅にスナップ
+      setPosition((prev) => {
+        const snapped = snapToCorner(prev.x, prev.y);
+        // 位置を保存
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapped));
+        return snapped;
+      });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, dragOffset, snapToCorner]);
 
   useEffect(() => {
     // ページ遷移または動画IDが変わったときにプレイヤーをリセット
@@ -116,18 +238,18 @@ export default function MiniPlayer() {
     return () => clearInterval(interval);
   }, [isPlaying, currentSong, setCurrentTime, setCurrentSong, sortedSongs]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (playerRef.current) {
       playerRef.current.pauseVideo();
     }
     setIsPlaying(false);
     setIsMinimized(false);
-  };
+  }, [setIsPlaying, setIsMinimized]);
 
-  const handleMaximize = () => {
+  const handleMaximize = useCallback(() => {
     maximizePlayer();
     router.push("/");
-  };
+  }, [maximizePlayer, router]);
 
   // ホームページではミニプレイヤーを表示しない
   if (isHomePage || !isMinimized || !currentSong) {
@@ -137,15 +259,23 @@ export default function MiniPlayer() {
   return (
     <AnimatePresence>
       <motion.div
+        ref={miniPlayerRef}
         data-testid="mini-player"
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="fixed bottom-4 right-4 z-50 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700"
+        style={{
+          position: "fixed",
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          cursor: isDragging ? "grabbing" : "grab",
+        }}
+        className="z-50 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden"
+        onMouseDown={handleMouseDown}
       >
         {/* ヘッダー */}
-        <div className="flex items-center justify-between p-2 bg-primary-500 dark:bg-primary-700 text-white">
+        <div className="flex items-center justify-between p-2 bg-primary-500 dark:bg-primary-700 text-white select-none">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="w-10 h-10 flex-shrink-0 relative">
               <YoutubeThumbnail
@@ -172,14 +302,22 @@ export default function MiniPlayer() {
           </div>
           <div className="flex items-center gap-2 ml-2">
             <button
-              onClick={handleMaximize}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMaximize();
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
               className="p-1.5 hover:bg-primary-600 dark:hover:bg-primary-600 rounded transition-colors"
               title="プレイヤーを最大化"
             >
               <FaExpand className="w-4 h-4" />
             </button>
             <button
-              onClick={handleClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClose();
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
               className="p-1.5 hover:bg-primary-600 dark:hover:bg-primary-600 rounded transition-colors"
               title="閉じる"
             >

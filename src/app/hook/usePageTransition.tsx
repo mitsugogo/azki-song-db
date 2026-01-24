@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useGlobalPlayer } from "./useGlobalPlayer";
 
@@ -9,13 +9,18 @@ import { useGlobalPlayer } from "./useGlobalPlayer";
  */
 export default function usePageTransition() {
   const pathname = usePathname();
-  const { currentSong, minimizePlayer, isMinimized } = useGlobalPlayer();
+  const { currentSong, minimizePlayer } = useGlobalPlayer();
+  const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    // ホームページから他のページに遷移した場合、
-    // 動画が選択されていればミニプレイヤーを表示
-    if (pathname !== "/" && currentSong && !isMinimized) {
+    const previousPathname = previousPathnameRef.current;
+    const isLeavingHome = previousPathname === "/" && pathname !== "/";
+
+    // ホームページから他のページに遷移した瞬間だけ自動でミニプレイヤー化
+    if (isLeavingHome && currentSong) {
       minimizePlayer();
     }
-  }, [pathname, currentSong, isMinimized, minimizePlayer]);
+
+    previousPathnameRef.current = pathname;
+  }, [pathname, currentSong, minimizePlayer]);
 }

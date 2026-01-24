@@ -77,6 +77,7 @@ export default function MainPlayer() {
   const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const playerRef = useRef<any>(null);
+  const previousPathnameRef = useRef(pathname);
 
   // handlePlayerOnReadyをラップして再生位置を復元
   const handlePlayerOnReady = useCallback(
@@ -129,8 +130,6 @@ export default function MainPlayer() {
         // 初回以外で動画が変わった場合
         globalPlayer.setCurrentTime(0);
         setHasRestoredPosition(false);
-        // ミニプレイヤー状態もリセット
-        globalPlayer.setIsMinimized(false);
       }
       setPreviousVideoId(currentVideoId);
     }
@@ -160,8 +159,14 @@ export default function MainPlayer() {
   }, [isPlaying, globalPlayer]);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
+  // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
   useEffect(() => {
-    if (pathname === "/") {
+    const isHomePage = pathname === "/";
+    const previousPathname = previousPathnameRef.current;
+
+    if (!isHomePage && previousPathname === "/" && currentSongInfo) {
+      globalPlayer.setIsMinimized(true);
+    } else if (isHomePage) {
       globalPlayer.maximizePlayer();
       // URLパラメータがない場合のみ、グローバルプレイヤーから曲を復元
       const urlParams = new URLSearchParams(window.location.search);
@@ -180,13 +185,9 @@ export default function MainPlayer() {
         changeCurrentSong(globalPlayer.currentSong);
       }
     }
-  }, [
-    pathname,
-    globalPlayer,
-    globalPlayer.currentSong,
-    currentSong,
-    changeCurrentSong,
-  ]);
+
+    previousPathnameRef.current = pathname;
+  }, [pathname, currentSongInfo, globalPlayer, currentSong, changeCurrentSong]);
 
   useEffect(() => {
     if (!currentSongInfo) return;
