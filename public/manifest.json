@@ -22,5 +22,6 @@
   "short_name": "AZ SongDB",
   "id": "https://azki-song-db.vercel.app/",
   "description": "ホロライブ所属のAZKiさんの歌データベース",
-  "start_url": "/"
+  "start_url": "/",
+  "categories": ["music", "entertainment"]
 }
