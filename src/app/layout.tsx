@@ -11,6 +11,8 @@ const geistSans = Geist({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  preload: true,
+  adjustFontFallback: false,
 });
 
 const geistMono = Geist_Mono({
@@ -18,6 +20,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  preload: true,
+  adjustFontFallback: false,
 });
 
 const notoSans = Noto_Sans_JP({
@@ -25,6 +29,8 @@ const notoSans = Noto_Sans_JP({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  preload: true,
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -66,6 +72,10 @@ export default function RootLayout({
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="preconnect" href="https://i.ytimg.com" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
       </head>
       <body
         className={`antialiased dark:bg-gray-900 transition-colors duration-700`}

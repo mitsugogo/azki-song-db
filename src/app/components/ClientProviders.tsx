@@ -1,10 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { GlobalPlayerProvider } from "../hook/useGlobalPlayer";
-import MiniPlayer from "./MiniPlayer";
 import PageTransitionHandler from "./PageTransitionHandler";
 
-export default function ClientProviders({ children }: { children: React.ReactNode }) {
+// MiniPlayerを遅延読み込みし、初期レンダリングを高速化
+const MiniPlayer = dynamic(() => import("./MiniPlayer"), {
+  ssr: false,
+  loading: () => null,
+});
+
+export default function ClientProviders({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <GlobalPlayerProvider>
       {children}

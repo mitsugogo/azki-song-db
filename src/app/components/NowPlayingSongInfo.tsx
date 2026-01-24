@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { Song } from "../types/song";
 import { FaCompactDisc, FaShare } from "react-icons/fa6";
 import Marquee from "react-fast-marquee";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import NowPlayingSongInfoDetail from "./NowPlayingSongInfoDetail";
 import { FaTimes } from "react-icons/fa";
 import MilestoneBadge from "./MilestoneBadge";
@@ -41,22 +41,37 @@ const NowPlayingSongInfo = ({
   changeCurrentSong,
 }: NowPlayingSongInfoProps) => {
   const [opened, { open, close }] = useDisclosure(false);
-  const containerRef = useRef(null);
-  const textRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  useEffect(() => {
-    if (containerRef.current && textRef.current) {
-      const containerElement = containerRef.current as HTMLElement;
-      const containerWidth = Math.max(
-        0,
-        (containerElement.clientWidth ?? 0) - 25, // CDのアイコン分
-      );
-      const textWidth = (textRef.current as HTMLElement).scrollWidth ?? 0;
+  useLayoutEffect(() => {
+    if (!containerRef.current || !textRef.current) return;
 
-      // コンテナの幅よりもテキストの幅が大きい場合にオーバーフローと判断
-      setIsOverflowing(textWidth > containerWidth);
+    // ResizeObserverを使用してサイズ変化を検知
+    const observer = new ResizeObserver(() => {
+      if (!containerRef.current || !textRef.current) return;
+
+      // requestAnimationFrameでレイアウト計算をバッチ処理
+      requestAnimationFrame(() => {
+        if (!containerRef.current || !textRef.current) return;
+
+        const containerWidth = Math.max(
+          0,
+          containerRef.current.clientWidth - 25, // CDのアイコン分
+        );
+        const textWidth = textRef.current.scrollWidth;
+
+        setIsOverflowing(textWidth > containerWidth);
+      });
+    });
+
+    observer.observe(containerRef.current);
+    if (textRef.current) {
+      observer.observe(textRef.current);
     }
+
+    return () => observer.disconnect();
   }, [currentSongInfo]);
 
   return (
