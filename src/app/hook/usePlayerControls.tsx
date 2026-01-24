@@ -40,9 +40,21 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   >([]);
   const timedMessagesRef = useRef(timedMessages);
 
+  // songs配列とnextSongの最新値をrefで保持
+  const songsRef = useRef(songs);
+  const nextSongRef = useRef(nextSong);
+
   useEffect(() => {
     currentSongInfoRef.current = currentSongInfo;
   }, [currentSongInfo]);
+
+  useEffect(() => {
+    songsRef.current = songs;
+  }, [songs]);
+
+  useEffect(() => {
+    nextSongRef.current = nextSong;
+  }, [nextSong]);
 
   // セトリネタバレ防止モードをlocalStorageに保存する
   useEffect(() => {
@@ -290,7 +302,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
             currentVideoId,
             currentTime,
           );
-          const isFoundSongInList = songs.some(
+          const isFoundSongInList = songsRef.current.some(
             (s) =>
               s.video_id === foundSong?.video_id &&
               s.start === foundSong?.start,
@@ -324,26 +336,26 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
             return;
           }
 
-          if (!isFoundSongInList && nextSong) {
-            changeCurrentSong(nextSong);
+          if (!isFoundSongInList && nextSongRef.current) {
+            changeCurrentSong(nextSongRef.current);
             return;
           }
 
           if (foundSong?.end && foundSong.end < currentTime) {
             clearMonitorInterval();
-            changeCurrentSong(nextSong);
-          } else if (!foundSong && nextSong) {
-            changeCurrentSong(nextSong);
+            changeCurrentSong(nextSongRef.current);
+          } else if (!foundSong && nextSongRef.current) {
+            changeCurrentSong(nextSongRef.current);
           }
         }, 500);
       };
 
       const handleEndedState = () => {
         clearMonitorInterval();
-        if (nextSong) {
-          changeCurrentSong(nextSong);
-        } else if (songs.length > 0) {
-          changeCurrentSong(songs[0]);
+        if (nextSongRef.current) {
+          changeCurrentSong(nextSongRef.current);
+        } else if (songsRef.current.length > 0) {
+          changeCurrentSong(songsRef.current[0]);
         }
         // 再生終了時にメッセージをリセット
         setTimedLiveCallText(null);

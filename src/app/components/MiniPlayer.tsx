@@ -277,7 +277,7 @@ export default function MiniPlayer() {
         {/* ヘッダー */}
         <div className="flex items-center justify-between p-2 bg-primary-500 dark:bg-primary-700 text-white select-none">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-10 h-10 flex-shrink-0 relative">
+            <div className="w-10 h-10 shrink-0 relative">
               <YoutubeThumbnail
                 videoId={currentSong.video_id}
                 alt={currentSong.video_title}

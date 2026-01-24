@@ -1,5 +1,5 @@
 // SearchAndSongList.tsx
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
@@ -79,18 +79,21 @@ export default function SearchAndSongList({
   const { encodePlaylistUrlParam } = usePlaylists();
 
   // Handles playing a playlist
-  const handlePlayPlaylist = (playlist: Playlist) => {
-    playPlaylist(playlist);
-    setShowPlaylistSelector(false);
-    setCurrentPlaylist(playlist);
-  };
+  const handlePlayPlaylist = useCallback(
+    (playlist: Playlist) => {
+      playPlaylist(playlist);
+      setShowPlaylistSelector(false);
+      setCurrentPlaylist(playlist);
+    },
+    [playPlaylist],
+  );
 
   // Handles disabling playlist mode
-  const handleDisablePlaylistMode = () => {
+  const handleDisablePlaylistMode = useCallback(() => {
     disablePlaylistMode();
     setShowPlaylistSelector(false);
     setCurrentPlaylist(null);
-  };
+  }, [disablePlaylistMode]);
 
   const baseUrl = window.location.origin;
 
@@ -104,17 +107,14 @@ export default function SearchAndSongList({
   }, [searchTerm]);
 
   useEffect(() => {
-    // URLでプレイリストの指定があったら反映
+    // URLでプレイリストの指定があったら反映（初回マウント時のみ）
     const decodedPlaylist = decodePlaylistFromUrl();
 
-    // プレイリストが変更された場合にのみ状態を更新
-    if (
-      (!decodedPlaylist && currentPlaylist) ||
-      (decodedPlaylist && decodedPlaylist.id !== currentPlaylist?.id)
-    ) {
+    if (decodedPlaylist) {
       setCurrentPlaylist(decodedPlaylist);
     }
-  }, [decodePlaylistFromUrl, currentPlaylist]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 初回マウント時のみ実行
 
   return (
     <section className="flex md:w-1/2 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0 h-dvh md:h-full foldable:h-full lg:h-full sm:mx-0">
@@ -271,40 +271,7 @@ export default function SearchAndSongList({
                       )}
                       {playlist.name}
                     </div>
-                    <Tooltip
-                      withArrow
-                      label={`${
-                        isInPlaylist(playlist, currentSongInfo!)
-                          ? "現在の楽曲をプレイリストから削除します"
-                          : "現在の楽曲をプレイリストに追加します"
-                      }`}
-                    >
-                      <MantineButton
-                        size="xs"
-                        onClick={() => {
-                          if (currentSongInfo) {
-                            if (isInPlaylist(playlist, currentSongInfo)) {
-                              removeFromPlaylist(playlist, currentSongInfo);
-                            } else {
-                              addToPlaylist(playlist, currentSongInfo);
-                            }
-                          }
-                        }}
-                        bg={`${
-                          currentSongInfo &&
-                          isInPlaylist(playlist, currentSongInfo)
-                            ? "green"
-                            : "gray"
-                        }`}
-                      >
-                        {currentSongInfo &&
-                        isInPlaylist(playlist, currentSongInfo) ? (
-                          <MdCheck className="inline w-5 h-5" />
-                        ) : (
-                          <MdAdd className="inline w-5 h-5" />
-                        )}
-                      </MantineButton>
-                    </Tooltip>
+
                     <CopyButton
                       value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
                         playlist,

@@ -1,5 +1,6 @@
 import { Song } from "../types/song";
 import { useLocalStorage } from "@mantine/hooks";
+import { useCallback } from "react";
 
 export type Playlist = {
   id?: string;
@@ -37,21 +38,27 @@ const usePlaylists = () => {
   };
 
   // 該当のプレイリストに入っているかチェック
-  const isInPlaylist = (playlist: Playlist, song: Song) => {
+  const isInPlaylist = useCallback((playlist: Playlist, song: Song) => {
     const find = playlist.songs.find(
       (entry) => entry.videoId == song?.video_id && entry.start == song?.start,
     );
     return !!find;
-  };
+  }, []);
 
   // すべてのプレイリストの中のどれかにsongが入っているか
-  const isInAnyPlaylist = (song: Song) => {
-    return !!playlists.find((p) => isInPlaylist(p, song));
-  };
+  const isInAnyPlaylist = useCallback(
+    (song: Song) => {
+      return !!playlists.find((p) => isInPlaylist(p, song));
+    },
+    [playlists, isInPlaylist],
+  );
 
-  const isDuplicate = (name: string) => {
-    return !!playlists.find((p) => p.name === name);
-  };
+  const isDuplicate = useCallback(
+    (name: string) => {
+      return !!playlists.find((p) => p.name === name);
+    },
+    [playlists],
+  );
 
   const isLimit = (playlist: Playlist) => {
     // 300曲までを上限とする
@@ -138,7 +145,7 @@ const usePlaylists = () => {
     );
   };
 
-  const decodePlaylistUrlParam = (param: string) => {
+  const decodePlaylistUrlParam = useCallback((param: string) => {
     const binaryString = atob(param);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
@@ -161,9 +168,9 @@ const usePlaylists = () => {
       author: compressedJson?.author,
     };
     return playlist;
-  };
+  }, []);
 
-  const encodePlaylistUrlParam = (playlist: Playlist) => {
+  const encodePlaylistUrlParam = useCallback((playlist: Playlist) => {
     const compressedSongs = playlist.songs.map((entry) => ({
       v: entry.videoId,
       s: entry.start,
@@ -183,13 +190,13 @@ const usePlaylists = () => {
     const encoded = btoa(String.fromCharCode(...utf8Bytes));
 
     return encoded;
-  };
+  }, []);
 
-  const isNowPlayingPlaylist = () => {
+  const isNowPlayingPlaylist = useCallback(() => {
     const url = new URL(window.location.href);
     const param = url.searchParams.get("playlist");
     return !!param;
-  };
+  }, []);
 
   return {
     playlists,

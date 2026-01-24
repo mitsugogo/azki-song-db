@@ -289,43 +289,43 @@ export default function PlaylistDetailPage() {
       </div>
 
       <ScrollArea className="h-[calc(100vh-200px)] lg:h-[calc(100vh-260px)]">
-        <Table striped highlightOnHover withColumnBorders>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>並べ替え</Table.Th>
-              <Table.Th>
-                <Checkbox
-                  aria-label="Select deselect all rows"
-                  indeterminate={handlers.isSomeSelected()}
-                  checked={handlers.isAllSelected()}
-                  onChange={() => {
-                    if (handlers.isAllSelected()) {
-                      handlers.resetSelection();
-                    } else {
-                      handlers.setSelection(rowKeys);
-                    }
-                  }}
-                />
-              </Table.Th>
-              <Table.Th>#</Table.Th>
-              <Table.Th>曲/アーティスト</Table.Th>
-              <Table.Th>動画</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          {playlistSongs.length === 0 && (
-            <Table.Tbody>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <Table striped highlightOnHover withColumnBorders>
+            <Table.Thead>
               <Table.Tr>
-                <Table.Td colSpan={5} className="text-center">
-                  プレイリスト内に曲がありません
-                </Table.Td>
+                <Table.Th>並べ替え</Table.Th>
+                <Table.Th>
+                  <Checkbox
+                    aria-label="Select deselect all rows"
+                    indeterminate={handlers.isSomeSelected()}
+                    checked={handlers.isAllSelected()}
+                    onChange={() => {
+                      if (handlers.isAllSelected()) {
+                        handlers.resetSelection();
+                      } else {
+                        handlers.setSelection(rowKeys);
+                      }
+                    }}
+                  />
+                </Table.Th>
+                <Table.Th>#</Table.Th>
+                <Table.Th>曲/アーティスト</Table.Th>
+                <Table.Th>動画</Table.Th>
               </Table.Tr>
-            </Table.Tbody>
-          )}
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
+            </Table.Thead>
+            {playlistSongs.length === 0 && (
+              <Table.Tbody>
+                <Table.Tr>
+                  <Table.Td colSpan={5} className="text-center">
+                    プレイリスト内に曲がありません
+                  </Table.Td>
+                </Table.Tr>
+              </Table.Tbody>
+            )}
             <SortableContext items={rowKeys}>
               <Table.Tbody>
                 {playlistSongs.map((s, index) => {
@@ -352,8 +352,8 @@ export default function PlaylistDetailPage() {
                 })}
               </Table.Tbody>
             </SortableContext>
-          </DndContext>
-        </Table>
+          </Table>
+        </DndContext>
       </ScrollArea>
     </div>
   );
