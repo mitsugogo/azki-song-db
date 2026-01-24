@@ -79,7 +79,7 @@ const NowPlayingSongInfo = ({
       <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSongInfo && (
           <div className="song-info">
-            <div className="hidden lg:flex items-center gap-2 mb-1">
+            <div className="hidden lg:flex items-center gap-2 mb-1 border-b border-primary-600">
               <div className="w-full flex-auto self-baseline">
                 {currentSongInfo.milestones && (
                   <div className="flex items-center gap-1">

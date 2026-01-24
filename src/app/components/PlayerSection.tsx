@@ -621,17 +621,17 @@ export default function PlayerSection({
                   <FaStepForward className="text-xl text-white" />
                 </button>
 
-                <div className="flex items-center gap-2 text-[13px] font-medium tabular-nums text-white/90">
+                <div className="flex items-center gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none">
                   <span>{formattedCurrentTime}</span>
                   <span className="text-white/50">/</span>
                   <span className="text-white/70">{formattedDuration}</span>
                 </div>
 
                 <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
-                  <div className="truncate text-sm font-medium text-white">
+                  <div className="truncate text-sm font-medium text-white select-none">
                     {displaySongTitle}
                   </div>
-                  <div className="truncate text-xs text-white/60">
+                  <div className="truncate text-xs text-white/60 select-none">
                     {displaySongArtist}
                   </div>
                 </div>
