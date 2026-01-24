@@ -84,8 +84,14 @@ export default function MainPlayer() {
       originalHandlePlayerOnReady(event);
       playerRef.current = event.target;
 
-      // グローバルプレイヤーから再生位置を復元
-      if (globalPlayer.currentTime > 0 && !hasRestoredPosition) {
+      // 動画IDが変わっていない場合のみ再生位置を復元
+      const currentVideoId = currentSongInfo?.video_id;
+      const shouldRestorePosition =
+        currentVideoId === previousVideoId &&
+        globalPlayer.currentTime > 0 &&
+        !hasRestoredPosition;
+
+      if (shouldRestorePosition) {
         setTimeout(() => {
           const player = event.target;
           if (player && typeof player.seekTo === "function") {
@@ -93,12 +99,17 @@ export default function MainPlayer() {
             setHasRestoredPosition(true);
           }
         }, 500);
+      } else if (currentVideoId !== previousVideoId) {
+        // 動画IDが変わった場合は復元済みフラグをリセット
+        setHasRestoredPosition(false);
       }
     },
     [
       originalHandlePlayerOnReady,
       globalPlayer.currentTime,
       hasRestoredPosition,
+      currentSongInfo?.video_id,
+      previousVideoId,
     ],
   );
 
