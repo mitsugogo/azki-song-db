@@ -26,11 +26,9 @@ export default function YearSummaryClient({
   const yearNumber = Number(year);
   const hasYear = Number.isFinite(yearNumber);
 
-  // マウント時に一度だけ実行
-  useEffect(() => {
+  // 繝槭え繝ｳ繝域凾縺ｫ荳蠎ｦ縺縺大ｮ溯｡・  useEffect(() => {
     setMounted(true);
-    // ブラウザ側のグローバル変数に保存されたモードがあれば復元
-    if (
+    // 繝悶Λ繧ｦ繧ｶ蛛ｴ縺ｮ繧ｰ繝ｭ繝ｼ繝舌Ν螟画焚縺ｫ菫晏ｭ倥＆繧後◆繝｢繝ｼ繝峨′縺ゅｌ縺ｰ蠕ｩ蜈・    if (
       typeof window !== "undefined" &&
       typeof (window as any).__YEAR_VIEW_MODE === "string"
     ) {
@@ -108,7 +106,7 @@ export default function YearSummaryClient({
     const counts: Record<string, { count: number; example?: Song }> = {};
     songsFiltered.forEach((s) => {
       const artists = (s.artist || "")
-        .split("、")
+        .split("縲・)
         .map((a) => a.trim())
         .filter(Boolean);
       artists.forEach((artist) => {
@@ -161,8 +159,8 @@ export default function YearSummaryClient({
   const displayYear = isYearValid
     ? hasYear
       ? yearNumber
-      : (clientYear ?? inferredYearFromSongs ?? "不明")
-    : "不明";
+      : (clientYear ?? inferredYearFromSongs ?? "荳肴・")
+    : "荳肴・";
 
   useEffect(() => {
     if (Number.isFinite(year)) return;
@@ -209,11 +207,11 @@ export default function YearSummaryClient({
       .sort((a, b) => a[0] - b[0]);
   }, [songsFiltered]);
 
-  // コラボ曲一覧
+  // 繧ｳ繝ｩ繝懈峇荳隕ｧ
   const collaborativeSongs = useMemo(() => {
     return (songsFiltered || [])
       .filter((s) => {
-        const singers = s.sing.split("、").map((x) => x.trim());
+        const singers = s.sing.split("縲・).map((x) => x.trim());
         return singers.length >= 2;
       })
       .sort((a, b) => {
@@ -224,27 +222,25 @@ export default function YearSummaryClient({
       });
   }, [songsFiltered]);
 
-  // コラボした回数が多いホロメン
+  // 繧ｳ繝ｩ繝懊＠縺溷屓謨ｰ縺悟､壹＞繝帙Ο繝｡繝ｳ
   const collabCountsBySinger = useMemo(() => {
     const counts: Record<string, number> = {};
     (collaborativeSongs || []).forEach((s) => {
-      const singers = s.sing.split("、").map((x) => x.trim());
+      const singers = s.sing.split("縲・).map((x) => x.trim());
       singers.forEach((singer) => {
         counts[singer] = (counts[singer] || 0) + 1;
       });
     });
     return (
       Object.entries(counts)
-        // AZKi本人は除外する
-        .filter(([singer]) => singer !== "AZKi")
+        // AZKi譛ｬ莠ｺ縺ｯ髯､螟悶☆繧・        .filter(([singer]) => singer !== "AZKi")
         .map(([singer, count]) => ({ singer, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
     );
   }, [collaborativeSongs]);
 
-  // マイルストーンと達成日(broadcast_at)を取得
-  const milestonesByYear = useMemo(
+  // 繝槭う繝ｫ繧ｹ繝医・繝ｳ縺ｨ驕疲・譌･(broadcast_at)繧貞叙蠕・  const milestonesByYear = useMemo(
     () =>
       songsFiltered
         .sort(
@@ -258,9 +254,8 @@ export default function YearSummaryClient({
           const year = Number(s.year);
           if (Number.isNaN(year)) return acc;
           if (!acc[year]) acc[year] = [];
-          // 空のマイルストーンは除外
-          if (!s.milestones || s.milestones.length === 0) return acc;
-          // 重複するマイルストーンはスキップ
+          // 遨ｺ縺ｮ繝槭う繝ｫ繧ｹ繝医・繝ｳ縺ｯ髯､螟・          if (!s.milestones || s.milestones.length === 0) return acc;
+          // 驥崎､・☆繧九・繧､繝ｫ繧ｹ繝医・繝ｳ縺ｯ繧ｹ繧ｭ繝・・
           const existingMilestones =
             acc[year]?.map((m) => m.milestones)?.flat() || [];
           if (existingMilestones.includes(s.milestones[0])) return acc;
@@ -279,82 +274,82 @@ export default function YearSummaryClient({
       <div className="grid grid-cols-3 gap-4">
         <div className="border rounded p-4">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            収録楽曲
+            蜿朱鹸讌ｽ譖ｲ
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}`}>
+            <a href={`/?q=year:${displayYear}`}>
               {(fetchedInitialSongs ?? initialSongs).length}
-            </Link>
+            </a>
           </div>
         </div>
         <div className="border rounded p-4">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            歌枠で歌った曲数
+            豁梧棧縺ｧ豁後▲縺滓峇謨ｰ
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:歌枠`}>
+            <a href={`/?q=year:${displayYear}|tag:豁梧棧`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("歌枠"),
+                  s.tags.includes("豁梧棧"),
                 ).length
               }
-            </Link>
+            </a>
           </div>
         </div>
         <div className="border rounded p-4">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            ゲストで歌った曲数
+            繧ｲ繧ｹ繝医〒豁後▲縺滓峇謨ｰ
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
+            <a href={`/?q=year:${displayYear}|tag:繧ｲ繧ｹ繝亥・貍覗}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("ゲスト出演"),
+                  s.tags.includes("繧ｲ繧ｹ繝亥・貍・),
                 ).length
               }
-            </Link>
+            </a>
           </div>
         </div>
 
         <div className="border rounded p-4">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            オリジナル楽曲
+            繧ｪ繝ｪ繧ｸ繝翫Ν讌ｽ譖ｲ
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:オリ曲`}>
+            <a href={`/?q=year:${displayYear}|tag:繧ｪ繝ｪ譖ｲ`}>
               {
                 new Set(
                   (fetchedInitialSongs ?? initialSongs)
                     .filter(
                       (s) =>
-                        s.tags.includes("オリ曲") ||
-                        s.tags.includes("オリ曲MV"),
+                        s.tags.includes("繧ｪ繝ｪ譖ｲ") ||
+                        s.tags.includes("繧ｪ繝ｪ譖ｲMV"),
                     )
                     .map((s) => s.title),
                 ).size
               }
-            </Link>
+            </a>
           </div>
         </div>
         <div className="border rounded p-4">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            カバー楽曲
+            繧ｫ繝舌・讌ｽ譖ｲ
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
+            <a href={`/?q=year:${displayYear}|tag:繧ｫ繝舌・譖ｲ`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("カバー曲"),
+                  s.tags.includes("繧ｫ繝舌・譖ｲ"),
                 ).length
               }
-            </Link>
+            </a>
           </div>
         </div>
       </div>
 
       {displayYear && milestonesByYear[Number(displayYear)] ? (
         <section>
-          <h2 className="text-xl font-semibold mb-4">マイルストーン</h2>
+          <h2 className="text-xl font-semibold mb-4">繝槭う繝ｫ繧ｹ繝医・繝ｳ</h2>
           <ul className="space-y-2 list-disc ml-6">
             {milestonesByYear[Number(displayYear)].map((milestone, index) => (
               <li key={index}>
@@ -373,11 +368,10 @@ export default function YearSummaryClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
-          <h2 className="text-lg font-semibold mb-2">歌枠でよく歌った楽曲</h2>
+          <h2 className="text-lg font-semibold mb-2">豁梧棧縺ｧ繧医￥豁後▲縺滓･ｽ譖ｲ</h2>
           {top10.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
-            </p>
+              繝・・繧ｿ縺後≠繧翫∪縺帙ｓ縲・            </p>
           ) : (
             <ol className="list-decimal pl-5">
               {(() => {
@@ -397,7 +391,7 @@ export default function YearSummaryClient({
                           style={{ width: `${pct}%` }}
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
-                          <Link
+                          <a
                             href={
                               query.v
                                 ? `/?${new URLSearchParams(query).toString()}`
@@ -411,10 +405,9 @@ export default function YearSummaryClient({
                                 &nbsp;-&nbsp;{t.artist}
                               </span>
                             </div>
-                          </Link>
+                          </a>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
-                            {t.count}回
-                          </div>
+                            {t.count}蝗・                          </div>
                         </div>
                       </div>
                     </li>
@@ -427,12 +420,10 @@ export default function YearSummaryClient({
 
         <section>
           <h2 className="text-lg font-semibold mb-2">
-            歌枠でよく歌ったアーティスト
-          </h2>
+            豁梧棧縺ｧ繧医￥豁後▲縺溘い繝ｼ繝・ぅ繧ｹ繝・          </h2>
           {topArtists.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
-            </p>
+              繝・・繧ｿ縺後≠繧翫∪縺帙ｓ縲・            </p>
           ) : (
             <ol className="list-decimal pl-5">
               {(() => {
@@ -452,18 +443,17 @@ export default function YearSummaryClient({
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
                           <div className="font-medium">
-                            <Link
+                            <a
                               href={`/?${new URLSearchParams(
                                 query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
                               {a.artist}
-                            </Link>
+                            </a>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
-                            {a.count}回
-                          </div>
+                            {a.count}蝗・                          </div>
                         </div>
                       </div>
                     </li>
@@ -474,15 +464,13 @@ export default function YearSummaryClient({
           )}
         </section>
 
-        {/*　コラボ回数が多かったホロメン */}
+        {/*縲繧ｳ繝ｩ繝懷屓謨ｰ縺悟､壹°縺｣縺溘・繝ｭ繝｡繝ｳ */}
         <section>
           <h2 className="text-lg font-semibold mb-2">
-            歌でよくコラボしたホロメン・アーティスト
-          </h2>
+            豁後〒繧医￥繧ｳ繝ｩ繝懊＠縺溘・繝ｭ繝｡繝ｳ繝ｻ繧｢繝ｼ繝・ぅ繧ｹ繝・          </h2>
           {collabCountsBySinger.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
-            </p>
+              繝・・繧ｿ縺後≠繧翫∪縺帙ｓ縲・            </p>
           ) : (
             <ol className="list-decimal pl-5">
               {(() => {
@@ -505,17 +493,17 @@ export default function YearSummaryClient({
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
                           <div className="font-medium">
-                            <Link
+                            <a
                               href={`/?${new URLSearchParams(
                                 query,
                               ).toString()}`}
                               className="block hover:underline"
                             >
                               {a.singer}
-                            </Link>
+                            </a>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
-                            {a.count}曲
+                            {a.count}譖ｲ
                           </div>
                         </div>
                       </div>
@@ -527,13 +515,12 @@ export default function YearSummaryClient({
           )}
         </section>
 
-        {/* 月別曲数 */}
+        {/* 譛亥挨譖ｲ謨ｰ */}
         <section>
-          <h2 className="text-lg font-semibold mb-2">月別の歌唱曲数</h2>
+          <h2 className="text-lg font-semibold mb-2">譛亥挨縺ｮ豁悟罰譖ｲ謨ｰ</h2>
           {monthsWithSongs.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
-            </p>
+              繝・・繧ｿ縺後≠繧翫∪縺帙ｓ縲・            </p>
           ) : (
             <ul>
               {monthsWithSongs.map(([month, songs]) => (
@@ -560,9 +547,9 @@ export default function YearSummaryClient({
                       }}
                     />
                     <div className="relative z-10 flex items-center justify-between px-2 py-1">
-                      <div className="font-medium">{month}月</div>
+                      <div className="font-medium">{month}譛・/div>
                       <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
-                        {songs.length}曲
+                        {songs.length}譖ｲ
                       </div>
                     </div>
                   </div>
@@ -575,35 +562,35 @@ export default function YearSummaryClient({
 
       <section className="mt-6">
         <h2 className="text-lg font-semibold mb-2">
-          オリ曲・カバー曲MV (
+          繧ｪ繝ｪ譖ｲ繝ｻ繧ｫ繝舌・譖ｲMV (
           {
             songsFiltered.filter((s) =>
               (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                (t) => t === "繧ｪ繝ｪ譖ｲ" || t === "繧ｪ繝ｪ譖ｲMV" || t === "繧ｫ繝舌・譖ｲ",
               ),
             ).length
           }
           )
-          <Link
-            href={`/?q=year:${displayYear}|tag:オリ曲`}
+          <a
+            href={`/?q=year:${displayYear}|tag:繧ｪ繝ｪ譖ｲ`}
             className="ml-4 text-sm text-blue-600 hover:underline"
           >
             <FaPlay className="inline-block mr-1" />
-            オリ曲
-          </Link>
-          <Link
-            href={`/?q=year:${displayYear}|tag:カバー曲`}
+            繧ｪ繝ｪ譖ｲ
+          </a>
+          <a
+            href={`/?q=year:${displayYear}|tag:繧ｫ繝舌・譖ｲ`}
             className="ml-4 text-sm text-blue-600 hover:underline"
           >
             <FaPlay className="inline-block mr-1" />
-            カバー曲
-          </Link>
+            繧ｫ繝舌・譖ｲ
+          </a>
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
           {(songsFiltered || [])
             .filter((s) =>
               (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                (t) => t === "繧ｪ繝ｪ譖ｲ" || t === "繧ｪ繝ｪ譖ｲMV" || t === "繧ｫ繝舌・譖ｲ",
               ),
             )
             .sort(
@@ -646,10 +633,10 @@ export default function YearSummaryClient({
         </div>
       </section>
 
-      {/* 2人以上で歌唱した歌枠 */}
+      {/* 2莠ｺ莉･荳翫〒豁悟罰縺励◆豁梧棧 */}
       <section className="mt-6">
         <h2 className="text-lg font-semibold mb-2">
-          コラボ・デュエット・ゲスト参加 ({(collaborativeSongs || []).length})
+          繧ｳ繝ｩ繝懊・繝・Η繧ｨ繝・ヨ繝ｻ繧ｲ繧ｹ繝亥盾蜉 ({(collaborativeSongs || []).length})
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
           {(collaborativeSongs || []).map((s) => (
@@ -689,7 +676,7 @@ export default function YearSummaryClient({
 
       <section className="mt-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold">{displayYear}年の動画</h2>
+          <h2 className="text-lg font-semibold">{displayYear}蟷ｴ縺ｮ蜍慕判</h2>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -700,7 +687,7 @@ export default function YearSummaryClient({
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
-              タイル
+              繧ｿ繧､繝ｫ
             </button>
             <button
               type="button"
@@ -711,8 +698,7 @@ export default function YearSummaryClient({
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
-              リスト
-            </button>
+              繝ｪ繧ｹ繝・            </button>
           </div>
         </div>
 
@@ -739,14 +725,13 @@ export default function YearSummaryClient({
 
         {monthsWithSongs.length === 0 ? (
           <p className="text-sm text-gray-700 dark:text-light-gray-400">
-            該当する動画はありません。
-          </p>
+            隧ｲ蠖薙☆繧句虚逕ｻ縺ｯ縺ゅｊ縺ｾ縺帙ｓ縲・          </p>
         ) : (
           <div className="space-y-6">
             {monthsWithSongs.map(([month, monthSongs]) => (
               <div key={month}>
                 <h3 className="text-md font-semibold mb-2 bg-primary-200 dark:bg-primary-900 p-2 ">
-                  {month}月 ({monthSongs.length})
+                  {month}譛・({monthSongs.length})
                 </h3>
                 {mounted && videoViewMode === "grid" ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
@@ -793,7 +778,7 @@ export default function YearSummaryClient({
                         const id = s.video_id || `noid-${s.broadcast_at}`;
                         if (!byVideo[id])
                           byVideo[id] = {
-                            title: s.video_title || "(不明)",
+                            title: s.video_title || "(荳肴・)",
                             id,
                             uri: s.video_uri || "",
                             broadcast_at: new Date(s.broadcast_at),
@@ -809,7 +794,7 @@ export default function YearSummaryClient({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               {v.id && !v.id.startsWith("noid-") && (
-                                <Link
+                                <a
                                   href={
                                     v.uri ||
                                     `https://www.youtube.com/watch?v=${v.id}`
@@ -823,9 +808,9 @@ export default function YearSummaryClient({
                                     alt={v.title}
                                     fill={true}
                                   />
-                                </Link>
+                                </a>
                               )}
-                              <Link
+                              <a
                                 href={
                                   v.uri ||
                                   `https://www.youtube.com/watch?v=${v.id}`
@@ -839,16 +824,16 @@ export default function YearSummaryClient({
                                   <br />
                                   {v.broadcast_at.toLocaleDateString()}
                                 </span>
-                              </Link>
+                              </a>
                             </div>
                             <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                              {v.songs.length}曲
+                              {v.songs.length}譖ｲ
                             </div>
                           </div>
                           <ul className="mt-2 ml-3 pl-4 list-disc">
                             {v.songs.map((s: Song, idx: number) => (
                               <li key={`${v.id}-${idx}`} className="text-sm">
-                                <Link
+                                <a
                                   href={`/?v=${v.id}${
                                     s.start ? `&t=${s.start}s` : ""
                                   }&q=year:${displayYear}`}
@@ -861,7 +846,7 @@ export default function YearSummaryClient({
                                       - {s.artist}
                                     </span>
                                   )}
-                                </Link>
+                                </a>
                               </li>
                             ))}
                           </ul>
@@ -878,8 +863,7 @@ export default function YearSummaryClient({
 
       <div className="mt-6">
         <Link href="/summary" className="text-sm underline">
-          ← 年ごとのまとめに戻る
-        </Link>
+          竊・蟷ｴ縺斐→縺ｮ縺ｾ縺ｨ繧√↓謌ｻ繧・        </Link>
       </div>
     </div>
   );
