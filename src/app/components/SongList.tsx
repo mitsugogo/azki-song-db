@@ -84,6 +84,7 @@ const SongsList = ({
     overscan: 4,
   });
 
+  // 仮想化アイテムの取得
   const virtualRows = virtualizer.getVirtualItems();
 
   // 現在の曲のインデックス
@@ -115,9 +116,6 @@ const SongsList = ({
     virtualRows.length > 0
       ? virtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end
       : 0;
-
-  // 仮想化アイテムの取得
-  const virtualItems = virtualizer.getVirtualItems();
 
   // 連続スクロール処理を停止
   const stopScrolling = useCallback(() => {
@@ -192,11 +190,11 @@ const SongsList = ({
   }, [stopScrolling]);
 
   useEffect(() => {
-    if (virtualItems.length > 0) {
+    if (virtualRows.length > 0) {
       const newVisibleIds: string[] = [];
 
       // 画面に見えている全ての仮想アイテムを処理
-      virtualItems.forEach((item) => {
+      virtualRows.forEach((item) => {
         const startItemIndex = item.index * colCount;
 
         // 1行内の全ての曲をチェック
@@ -226,7 +224,7 @@ const SongsList = ({
         setVisibleSongIds([initialId]);
       }
     }
-  }, [virtualItems, songs, colCount, visibleSongIds]); // virtualItemsが変更されるたびに実行
+  }, [virtualRows, songs, colCount, visibleSongIds]); // virtualRowsが変更されるたびに実行
 
   /**
    * ページャーまたはリストからのクリック時に特定の曲にスクロールする関数
