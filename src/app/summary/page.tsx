@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import { Anchor, Breadcrumbs } from "@mantine/core";
+import { Breadcrumbs } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 
 const baseUrl =
@@ -54,9 +54,13 @@ export default async function Page() {
     },
     { title: "年ごとの活動記録", href: "/summary" },
   ].map((item, index) => (
-    <Anchor href={item.href} key={index}>
+    <Link
+      href={item.href}
+      key={index}
+      className="text-primary-700 hover:underline dark:text-primary-300"
+    >
       {item.title}
-    </Anchor>
+    </Link>
   ));
 
   // 年ごとのマイルストーンと達成日(broadcast_at)を取得
@@ -108,7 +112,7 @@ export default async function Page() {
               key={year}
               className="border rounded p-3 hover:shadow-md transition-shadow duration-150 dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-600"
             >
-              <a href={`/summary/${year}`}>
+              <Link href={`/summary/${year}`}>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold">{year}年</span>
                   <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1">
@@ -140,7 +144,7 @@ export default async function Page() {
                     </ul>
                   )}
                 </div>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
