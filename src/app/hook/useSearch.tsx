@@ -190,27 +190,30 @@ const useSearch = (allSongs: Song[]) => {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
         if (playlistSongs) {
+          // Set/Mapを使用してO(n)に最適化
+          const playlistSongSet = new Set(
+            playlistSongs.songs.map(
+              (entry) => `${entry.videoId}-${entry.start}`,
+            ),
+          );
+
+          const playlistSongIndexMap = new Map(
+            playlistSongs.songs.map((entry, index) => [
+              `${entry.videoId}-${entry.start}`,
+              index,
+            ]),
+          );
+
           songsToFilter = allSongs
             .filter((song) =>
-              playlistSongs.songs.find(
-                (entry) =>
-                  entry.videoId === song.video_id &&
-                  Number(String(entry.start)) === Number(song.start),
-              ),
+              playlistSongSet.has(`${song.video_id}-${song.start}`),
             )
             .sort((a, b) => {
-              return (
-                playlistSongs.songs.findIndex(
-                  (entry) =>
-                    entry.videoId === a.video_id &&
-                    Number(String(entry.start)) === Number(a.start),
-                ) -
-                playlistSongs.songs.findIndex(
-                  (entry) =>
-                    entry.videoId === b.video_id &&
-                    Number(String(entry.start)) === Number(b.start),
-                )
-              );
+              const indexA =
+                playlistSongIndexMap.get(`${a.video_id}-${a.start}`) ?? 0;
+              const indexB =
+                playlistSongIndexMap.get(`${b.video_id}-${b.start}`) ?? 0;
+              return indexA - indexB;
             });
 
           // オリ曲モード解除
@@ -223,6 +226,12 @@ const useSearch = (allSongs: Song[]) => {
           // Headerなどに通知
           window.dispatchEvent(new Event("replacestate"));
         }
+      }
+      // プレイリストモードの場合は、playPlaylist関数で処理済みなので
+      // ここでは何もしない（URLパラメータだけ見て早期リターン）
+      else if (playlist) {
+        // プレイリストモードの場合は空配列を返す（実際の曲リストはplayPlaylistでセット済み）
+        return [];
       }
 
       const isExcluded = (song: Song, excludeWords: string[]) => {
@@ -269,14 +278,19 @@ const useSearch = (allSongs: Song[]) => {
   useEffect(() => {
     if (!searchParams) return;
     const queryFromUrl = searchParams.get("q") ?? "";
+    const playlistFromUrl = searchParams.get("playlist") ?? "";
 
     if (queryFromUrl !== searchTerm) {
       isSyncingFromUrl.current = true;
       setSearchTerm(queryFromUrl);
     }
 
-    const filteredSongs = searchSongs(allSongs, queryFromUrl);
-    setSongs(filteredSongs);
+    // playlistパラメータがある場合はsearchSongs内で処理されるので、
+    // ここで重複して処理しない
+    if (!playlistFromUrl) {
+      const filteredSongs = searchSongs(allSongs, queryFromUrl);
+      setSongs(filteredSongs);
+    }
   }, [searchParams, allSongs, searchSongs]);
 
   // URL更新（即座に）

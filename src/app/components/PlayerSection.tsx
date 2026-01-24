@@ -406,7 +406,7 @@ export default function PlayerSection({
         </div>
 
         {canUsePlayerControls && (
-          <div className="hidden w-full flex-col rounded-b-lg bg-gradient-to-b from-black/95 to-black/98 px-3 pb-3 pt-2 text-white shadow-2xl backdrop-blur-sm lg:flex">
+          <div className="hidden w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-3 pb-3 pt-2 text-white shadow-2xl backdrop-blur-sm lg:flex">
             {/* Progress Bar */}
             <div className="group relative mb-2 flex items-center gap-2 px-1">
               <div className="relative flex-1">
@@ -601,7 +601,7 @@ export default function PlayerSection({
                   type="button"
                   onClick={handleTogglePlay}
                   disabled={!playerControls?.isReady}
-                  className="group flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label={isPlaying ? "一時停止" : "再生"}
                 >
                   {isPlaying ? (
@@ -614,7 +614,7 @@ export default function PlayerSection({
                 <button
                   type="button"
                   onClick={() => changeCurrentSong(nextSong)}
-                  className="group flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={!playerControls?.isReady || !nextSong}
                   aria-label="次の曲へ"
                 >
@@ -638,7 +638,7 @@ export default function PlayerSection({
               </div>
 
               {/* ボリューム */}
-              <div className="flex flex-shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
                   onClick={handleToggleMute}
@@ -696,7 +696,7 @@ export default function PlayerSection({
 
         {currentSongInfo?.live_call && (
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
-            <div className="flex items-center flex-shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
+            <div className="flex items-center shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
               <span className="ml-1 text-muted-foreground text-nowrap">
                 <span className="ml-1">コーレス</span>
                 <Tooltip
@@ -705,7 +705,7 @@ export default function PlayerSection({
                   multiline
                   withArrow
                 >
-                  <FaInfoCircle className="inline ml-1 mt-[-3px] text-light-gray-300 dark:text-gray-300" />
+                  <FaInfoCircle className="inline ml-1 -mt-0.75 text-light-gray-300 dark:text-gray-300" />
                 </Tooltip>
               </span>
             </div>
@@ -799,7 +799,7 @@ export default function PlayerSection({
                 }}
                 className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
-                <div className="flex-shrink-0 text-xs">
+                <div className="shrink-0 text-xs">
                   <LuCrown className="mr-2" />
                 </div>
                 <div className="flex-1 text-center">
