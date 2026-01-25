@@ -243,7 +243,7 @@ export default function ClientTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center w-full justify-center h-screen">
+      <div className="flex items-center w-full justify-center h-screen relative">
         <Loading />
       </div>
     );

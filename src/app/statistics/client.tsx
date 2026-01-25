@@ -46,11 +46,15 @@ export default function StatisticsPage() {
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return (
+      <div className="grow lg:p-6 lg:pb-0 relative">
+        <Loading />
+      </div>
+    );
   }
 
   return (
-    <div className="flex-grow lg:p-6 lg:pb-0">
+    <div className="grow lg:p-6 lg:pb-0">
       <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
