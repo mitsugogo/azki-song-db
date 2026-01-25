@@ -117,7 +117,7 @@ export default function SearchAndSongList({
   }, []); // 初回マウント時のみ実行
 
   return (
-    <section className="flex md:w-1/2 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0 h-dvh md:h-full foldable:h-full lg:h-full sm:mx-0">
+    <section className="flex lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0 h-dvh md:h-full foldable:h-full lg:h-full sm:mx-0">
       <div className="flex flex-col h-full bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0">
         <div className="mb-2 hidden lg:block foldable:block">
           <Button
@@ -139,7 +139,9 @@ export default function SearchAndSongList({
                 className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
               >
                 <LuCrown className="mr-1" />
-                <span className="text-sm">オリ曲モード</span>
+                <span className="text-sm">
+                  オリ曲<span className="hidden 2xl:inline">モード</span>
+                </span>
               </Button>
             </Grid.Col>
             <Grid.Col span={4}>
@@ -151,7 +153,9 @@ export default function SearchAndSongList({
                 className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
               >
                 <LuMusic className="mr-1" />
-                <span className="text-sm">楽曲紹介shorts</span>
+                <span className="text-sm">
+                  楽曲紹介<span className="hidden 2xl:inline">shorts</span>
+                </span>
               </Button>
             </Grid.Col>
             <Grid.Col span={4}>
@@ -172,18 +176,45 @@ export default function SearchAndSongList({
         </div>
 
         <div className="lg:hidden md:mt-2 mb-2 foldable:hidden">
-          <Button
-            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition ring-0 focus:ring-0  ${
-              isNowPlayingPlaylist()
-                ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
-                : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
-            }`}
-            onClick={() => {
-              setShowPlaylistSelector(true);
-            }}
-          >
-            プレイリスト
-          </Button>
+          <Grid grow gutter={{ base: 5 }}>
+            <Grid.Col span={4}>
+              <Button
+                onClick={() => playRandomSong(songs)}
+                className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0"
+              >
+                <span className="text-xs">
+                  <LuSparkles className="mr-1 inline" />
+                  Surprise<span className="hidden lg:inline"> Me</span>
+                </span>
+              </Button>
+            </Grid.Col>
+            <Grid.Col span={4} className="foldable:hidden">
+              <Button
+                onClick={() => {
+                  // オリ曲モードをセット
+                  setSearchTerm("original-songs");
+                }}
+                className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
+              >
+                <LuCrown className="mr-1" />
+                <span className="text-xs">オリ曲</span>
+              </Button>
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Button
+                className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 text-xs  ${
+                  isNowPlayingPlaylist()
+                    ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+                    : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+                }`}
+                onClick={() => {
+                  setShowPlaylistSelector(true);
+                }}
+              >
+                プレイリスト
+              </Button>
+            </Grid.Col>
+          </Grid>
         </div>
 
         <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">

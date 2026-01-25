@@ -4,7 +4,7 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { Button, ButtonGroup } from "flowbite-react";
 import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { LuShuffle, LuVolume2, LuVolumeX } from "react-icons/lu";
+import { LuShuffle, LuSparkles, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
@@ -15,6 +15,7 @@ import { Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 import useDebounce from "../hook/useDebounce";
+import { FaUser } from "react-icons/fa6";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -251,6 +252,8 @@ export default function PlayerSection({
   const [tempSeekValue, setTempSeekValue] = useState(displayCurrentTime);
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [isNarrowScreen, setIsNarrowScreen] = useState(false);
 
   // 空白時間の自動スキップ
   useEffect(() => {
@@ -328,6 +331,25 @@ export default function PlayerSection({
     setTempVolumeValue(volumeValue);
   }, [volumeValue]);
 
+  // 画面幅の監視
+  useEffect(() => {
+    const checkScreenWidth = () => {
+      setIsNarrowScreen(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkScreenWidth();
+    window.addEventListener("resize", checkScreenWidth);
+
+    return () => window.removeEventListener("resize", checkScreenWidth);
+  }, []);
+
+  // 画面幅が変わったときにスライダーを閉じる
+  useEffect(() => {
+    if (!isNarrowScreen) {
+      setShowVolumeSlider(false);
+    }
+  }, [isNarrowScreen]);
+
   const handleTogglePlay = () => {
     if (!playerControls) return;
     if (isPlaying) {
@@ -397,6 +419,15 @@ export default function PlayerSection({
     }
   };
 
+  const handleVolumeIconClick = () => {
+    if (!playerControls) return;
+    if (isNarrowScreen) {
+      setShowVolumeSlider(!showVolumeSlider);
+    } else {
+      handleToggleMute();
+    }
+  };
+
   useEffect(() => {
     // timedLiveCallText が何行か数える
     const lineCount = timedLiveCallText
@@ -434,7 +465,7 @@ export default function PlayerSection({
         </div>
 
         {canUsePlayerControls && (
-          <div className="hidden w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-3 pb-3 pt-2 text-white shadow-2xl backdrop-blur-sm lg:flex">
+          <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 pt-2 text-white shadow-2xl backdrop-blur-sm">
             {/* Progress Bar */}
             <div className="group relative mb-2 flex items-center gap-2 px-1">
               <div className="relative flex-1">
@@ -625,13 +656,13 @@ export default function PlayerSection({
             </div>
 
             {/* コントロールバー */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4 px-2 lg:px-3">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <button
                   type="button"
                   onClick={handleTogglePlay}
                   disabled={!playerControls?.isReady}
-                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label={isPlaying ? "一時停止" : "再生"}
                 >
                   {isPlaying ? (
@@ -644,20 +675,27 @@ export default function PlayerSection({
                 <button
                   type="button"
                   onClick={() => changeCurrentSong(nextSong)}
-                  className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={!playerControls?.isReady || !nextSong}
                   aria-label="次の曲へ"
                 >
                   <FaStepForward className="text-xl text-white" />
                 </button>
 
-                <div className="flex items-center gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none">
+                <div className="flex flex-col md:flex-row items-center gap-0.5 md:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
                   <span>{formattedCurrentTime}</span>
-                  <span className="text-white/50">/</span>
-                  <span className="text-white/70">{formattedDuration}</span>
+                  <div className="flex items-center gap-1 md:gap-2">
+                    <span className="text-white/50">/</span>
+                    <span className="text-white/70">{formattedDuration}</span>
+                  </div>
                 </div>
 
-                <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
+                <div
+                  className="min-w-0 flex-1 border-l border-white/10 pl-3"
+                  onClick={() => {
+                    setOpenShareModal(true);
+                  }}
+                >
                   <div className="truncate text-sm font-medium text-white select-none">
                     {displaySongTitle}
                   </div>
@@ -671,10 +709,16 @@ export default function PlayerSection({
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleToggleMute}
+                  onClick={handleVolumeIconClick}
                   disabled={!playerControls?.isReady}
                   className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={isMuted ? "ミュート解除" : "ミュート"}
+                  aria-label={
+                    isNarrowScreen
+                      ? "音量調整"
+                      : isMuted
+                        ? "ミュート解除"
+                        : "ミュート"
+                  }
                 >
                   {isMuted || volumeValue === 0 ? (
                     <LuVolumeX className="text-xl text-white" />
@@ -682,19 +726,21 @@ export default function PlayerSection({
                     <LuVolume2 className="text-xl text-white" />
                   )}
                 </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={tempVolumeValue}
-                  onInput={handleVolumeChange}
-                  onChange={handleVolumeChange}
-                  disabled={!playerControls?.isReady}
-                  className="youtube-volume-bar w-24"
-                  style={{
-                    background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
-                  }}
-                />
+                {(!isNarrowScreen || showVolumeSlider) && (
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={tempVolumeValue}
+                    onInput={handleVolumeChange}
+                    onChange={handleVolumeChange}
+                    disabled={!playerControls?.isReady}
+                    className="youtube-volume-bar w-24"
+                    style={{
+                      background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -729,14 +775,16 @@ export default function PlayerSection({
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
             <div className="flex items-center shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
               <span className="ml-1 text-muted-foreground text-nowrap">
-                <span className="ml-1">コーレス</span>
+                <span className="ml-1 hidden lg:inline">コーレス</span>
+                <FaUser className="inline lg:hidden" />
                 <Tooltip
                   label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                  className="hidden lg:inline"
                   w={300}
                   multiline
                   withArrow
                 >
-                  <FaInfoCircle className="inline ml-1 -mt-0.75 text-light-gray-300 dark:text-gray-300" />
+                  <FaInfoCircle className="hidden lg:inline ml-1 -mt-0.75 text-light-gray-300 dark:text-gray-300" />
                 </Tooltip>
               </span>
             </div>
@@ -781,73 +829,6 @@ export default function PlayerSection({
             </div>
           </div>
         )}
-
-        <div className="flex flex-col p-2 pl-2 pb-0 lg:px-0 text-sm text-foreground">
-          {/* Player Controls (Mobile) */}
-          <div className="flex lg:hidden justify-between w-full">
-            <ButtonGroup className="shadow-none rounded-md ">
-              <Button
-                onClick={() => changeCurrentSong(previousSong)}
-                disabled={!previousSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary border-none text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs border-r-2 border-r-gray-300 ring-0 focus:ring-0 focus:outline-none"
-              >
-                <GiPreviousButton />
-              </Button>
-              <Button
-                onClick={() => changeCurrentSong(nextSong)}
-                disabled={!nextSong}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer px-4 py-2 text-xs ring-0 focus:ring-0 focus:outline-none"
-              >
-                <GiNextButton />
-              </Button>
-            </ButtonGroup>
-            <div className="flex flex-row gap-2 flex-1 ml-2">
-              {/* 連続再生ボタン */}
-              <Button
-                onClick={setSongsToCurrentVideo}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition text-sm cursor-pointer truncate px-3 py-2 items-center justify-between ring-0 focus:ring-0 focus:outline-none"
-              >
-                <span className="text-xs">
-                  <RiPlayListFill />
-                </span>
-              </Button>
-
-              {/* ランダム再生ボタン */}
-              <Button
-                onClick={() => playRandomSong(songs)}
-                className="bg-primary hover:bg-primary dark:bg-primary-800 dark:hover:bg-primary text-white transition cursor-pointer truncate px-3 py-2 text-xs items-center justify-between ring-0 focus:ring-0 focus:outline-none"
-              >
-                <span className="text-xs">
-                  <LuShuffle />
-                </span>
-              </Button>
-
-              {/* オリ曲モード */}
-              <Button
-                onClick={() => {
-                  // オリ曲モードをセット
-                  setSearchTerm("original-songs");
-                }}
-                className="text-white transition cursor-pointer truncate px-3 py-2 text-xs flex-1 flex items-center justify-between ring-0 focus:ring-0 focus:outline-none bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
-              >
-                <div className="shrink-0 text-xs">
-                  <LuCrown className="mr-2" />
-                </div>
-                <div className="flex-1 text-center">
-                  <span className="text-xs">オリ曲</span>
-                </div>
-              </Button>
-            </div>
-            <div className="flex justify-end">
-              <PlayerSettings
-                currentSongInfo={currentSongInfo}
-                hideFutureSongs={hideFutureSongs}
-                setHideFutureSongs={setHideFutureSongs}
-                setOpenShereModal={setOpenShareModal}
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Now Playing Song Info */}
         <NowPlayingSongInfo
