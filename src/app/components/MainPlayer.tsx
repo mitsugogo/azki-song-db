@@ -151,9 +151,14 @@ export default function MainPlayer() {
     [originalHandleStateChange, updatePlayerSnapshot],
   );
 
-  // 再生中は定期的にcurrentTimeを更新
+  // 再生中は定期的にcurrentTimeを更新（ゆるめのポーリングで再レンダリングを抑制）
   useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
+    if (!isPlayerReady || !playerRef.current || !isPlaying) return;
+
+    let lastTime =
+      typeof playerRef.current.getCurrentTime === "function"
+        ? playerRef.current.getCurrentTime()
+        : 0;
 
     const interval = setInterval(() => {
       if (
@@ -162,13 +167,17 @@ export default function MainPlayer() {
       ) {
         const currentTime = playerRef.current.getCurrentTime();
         if (Number.isFinite(currentTime)) {
-          setPlayerCurrentTime(currentTime);
+          // 0.25秒以上動いたときだけstate更新して再レンダリング回数を削減
+          if (Math.abs(currentTime - lastTime) >= 0.25) {
+            lastTime = currentTime;
+            setPlayerCurrentTime(currentTime);
+          }
         }
       }
-    }, 100); // 100msごとに更新
+    }, 500); // 100ms→500ms に緩和
 
     return () => clearInterval(interval);
-  }, [isPlayerReady]);
+  }, [isPlayerReady, isPlaying]);
 
   // グローバルプレイヤーと同期（動画が変わったときのみリセット）
   useEffect(() => {
