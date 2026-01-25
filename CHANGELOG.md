@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.26.0](https://github.com/mitsugogo/azki-song-db/compare/v1.25.0...v1.26.0) (2026-01-25)
+
+
+### Features
+
+* 検索バーをヘッダーに移動 ([eb00cb7](https://github.com/mitsugogo/azki-song-db/commit/eb00cb7f783fe37b5923b82f6c64bcfd66894b70))
+* 歌った人のところにコラボユニット名を併記 ([c134d3d](https://github.com/mitsugogo/azki-song-db/commit/c134d3d36229787e10fec56f494ed18f62170665))
+
+
+### Bug Fixes
+
+* この曲を歌った歌枠のリンクが機能してなかったのを修正 ([358a08f](https://github.com/mitsugogo/azki-song-db/commit/358a08fcb3e04f3cb5cf5c4a8365b61c095c951d))
+* ヘッダーのリンク調整 ([4c95dc3](https://github.com/mitsugogo/azki-song-db/commit/4c95dc3de397b4fea29644f8338aa0182c199829))
+* 音量バーの初期化エラーを修正 ([c619872](https://github.com/mitsugogo/azki-song-db/commit/c61987262abe40465805316d96e0d9f08929bbd2))
+
 ## [1.25.0](https://github.com/mitsugogo/azki-song-db/compare/v1.24.2...v1.25.0) (2026-01-24)
 
 
