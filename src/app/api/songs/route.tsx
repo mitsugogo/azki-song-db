@@ -164,7 +164,8 @@ export async function GET() {
     // VercelのCDNサーバーに結果をキャッシュさせる
     return NextResponse.json(songs, {
       headers: {
-        "Cache-Control": "s-maxage=86400, stale-while-revalidate=300",
+        "Cache-Control":
+          "max-age=300, s-maxage=86400, stale-while-revalidate=300",
       },
     });
   } catch (error) {
