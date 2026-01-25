@@ -105,6 +105,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 import YearSummaryClient from "./YearSummaryClient";
 import React from "react";
 import { Anchor, Breadcrumbs } from "@mantine/core";
+import { FaHome } from "react-icons/fa";
 
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
@@ -139,19 +140,26 @@ export default async function Page({ params }: Props) {
 
   const breadcrumbItems = [
     {
-      title: React.createElement(
-        "span",
-        null,
-        React.createElement("span", { className: "inline-block mr-1" }, "Home"),
+      title: (
+        <span>
+          <FaHome className="inline-block mr-1" />
+        </span>
       ),
       href: "/",
     },
     { title: "年ごとの活動記録", href: "/summary" },
-    { title: displayYearServer ? `${displayYearServer}年` : `詳細` },
+    {
+      title: displayYearServer ? `${displayYearServer}年` : `詳細`,
+      href: `/summary/${rawYearParam}`,
+    },
   ].map((item, index) => (
-    <Anchor href={item.href} key={index}>
+    <Link
+      href={item.href}
+      key={index}
+      className="text-primary-700 hover:underline dark:text-primary-300"
+    >
       {item.title}
-    </Anchor>
+    </Link>
   ));
 
   return (

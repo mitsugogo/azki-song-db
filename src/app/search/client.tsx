@@ -305,7 +305,7 @@ const SearchPageClient = () => {
         <div className="mb-4">
           <Link
             href="/search"
-            className="text-blue-600 dark:text-blue-400 hover:underline text-sm p-3"
+            className="text-primary-700 dark:text-primary-300 hover:underline text-sm p-3"
           >
             ← 検索に戻る
           </Link>
@@ -375,7 +375,7 @@ const SearchPageClient = () => {
                 <Link
                   href={`/?v=${song.video_id}${
                     song.start ? `&t=${song.start}s` : ""
-                  }`}
+                  }&q=${encodeURIComponent(currentSearchTerm)}`}
                   className="block"
                 >
                   <div className="w-full aspect-video bg-black">

@@ -47,7 +47,6 @@ export default async function Page() {
       title: (
         <span>
           <FaHome className="inline-block mr-1" />
-          Home
         </span>
       ),
       href: "/",
