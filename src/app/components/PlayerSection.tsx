@@ -14,6 +14,7 @@ import { FaInfoCircle, FaPlay, FaPause, FaStepForward } from "react-icons/fa";
 import { Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
 import { ChangeEvent, useEffect, useState, useRef } from "react";
+import useDebounce from "../hook/useDebounce";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -247,6 +248,9 @@ export default function PlayerSection({
   const [isMuted, setIsMuted] = useState(false);
   const [volumeBeforeMute, setVolumeBeforeMute] = useState(100);
   const lastSeekTimeRef = useRef<number>(0);
+  const [tempSeekValue, setTempSeekValue] = useState(displayCurrentTime);
+  const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
+  const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
 
   // 空白時間の自動スキップ
   useEffect(() => {
@@ -303,6 +307,27 @@ export default function PlayerSection({
     currentSong,
   ]);
 
+  // tempシーク値をdisplayCurrentTimeの変化に応じて更新
+  useEffect(() => {
+    setTempSeekValue(displayCurrentTime);
+  }, [displayCurrentTime]);
+
+  // Debounced volume
+  useEffect(() => {
+    if (!playerControls?.isReady || debouncedVolumeValue === volumeValue)
+      return;
+    try {
+      playerControls.setVolume(debouncedVolumeValue);
+    } catch (error) {
+      console.error("Failed to set volume:", error);
+    }
+  }, [debouncedVolumeValue, volumeValue, playerControls]);
+
+  // tempボリューム変更
+  useEffect(() => {
+    setTempVolumeValue(volumeValue);
+  }, [volumeValue]);
+
   const handleTogglePlay = () => {
     if (!playerControls) return;
     if (isPlaying) {
@@ -348,8 +373,11 @@ export default function PlayerSection({
 
   const handleVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (!playerControls) return;
-    const nextValue = Number(event.target.value);
-    playerControls.setVolume(nextValue);
+    const nextValue = Math.min(
+      Math.max(Math.round(Number(event.target.value)), 0),
+      100,
+    );
+    setTempVolumeValue(nextValue);
     if (nextValue > 0 && isMuted) {
       setIsMuted(false);
     }
@@ -515,10 +543,12 @@ export default function PlayerSection({
                   type="range"
                   min={0}
                   max={allSongsHaveEnd ? totalSongsDuration : displayDuration}
-                  value={displayCurrentTime}
+                  value={tempSeekValue}
                   step="0.1"
+                  onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setTempSeekValue(Number(e.target.value))
+                  }
                   onChange={handleSeekChange}
-                  onInput={handleSeekChange}
                   onMouseMove={(e) => {
                     if (songsInVideo.length === 0) return;
 
@@ -582,11 +612,11 @@ export default function PlayerSection({
                   style={{
                     background: `linear-gradient(to right, #ff0000 0%, #ff0000 ${
                       displayDuration > 0
-                        ? (displayCurrentTime / displayDuration) * 100
+                        ? (tempSeekValue / displayDuration) * 100
                         : 0
                     }%, rgba(255,255,255,0.3) ${
                       displayDuration > 0
-                        ? (displayCurrentTime / displayDuration) * 100
+                        ? (tempSeekValue / displayDuration) * 100
                         : 0
                     }%, rgba(255,255,255,0.3) 100%)`,
                   }}
@@ -656,12 +686,13 @@ export default function PlayerSection({
                   type="range"
                   min={0}
                   max={100}
-                  value={volumeValue}
+                  value={tempVolumeValue}
+                  onInput={handleVolumeChange}
                   onChange={handleVolumeChange}
                   disabled={!playerControls?.isReady}
                   className="youtube-volume-bar w-24"
                   style={{
-                    background: `linear-gradient(to right, #fff 0%, #fff ${volumeValue}%, rgba(255,255,255,0.3) ${volumeValue}%, rgba(255,255,255,0.3) 100%)`,
+                    background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
                   }}
                 />
               </div>

@@ -346,7 +346,11 @@ export default function MainPlayer() {
       playerRef.current &&
       typeof playerRef.current.playVideo === "function"
     ) {
-      playerRef.current.playVideo();
+      try {
+        playerRef.current.playVideo();
+      } catch (error) {
+        console.error("Failed to play video:", error);
+      }
     }
   }, []);
 
@@ -355,7 +359,11 @@ export default function MainPlayer() {
       playerRef.current &&
       typeof playerRef.current.pauseVideo === "function"
     ) {
-      playerRef.current.pauseVideo();
+      try {
+        playerRef.current.pauseVideo();
+      } catch (error) {
+        console.error("Failed to pause video:", error);
+      }
     }
   }, []);
 
@@ -366,9 +374,13 @@ export default function MainPlayer() {
     ) {
       return;
     }
-    const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
-    playerRef.current.setVolume(clampedVolume);
-    setPlayerVolume(clampedVolume);
+    try {
+      const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
+      playerRef.current.setVolume(clampedVolume);
+      setPlayerVolume(clampedVolume);
+    } catch (error) {
+      console.error("Failed to set volume:", error);
+    }
   }, []);
 
   const seekToAbsolute = useCallback(
@@ -379,12 +391,16 @@ export default function MainPlayer() {
       ) {
         return;
       }
-      const boundedAbsolute =
-        playerDuration > 0
-          ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
-          : Math.max(absoluteSeconds, 0);
-      playerRef.current.seekTo(boundedAbsolute, true);
-      globalPlayer.setCurrentTime(boundedAbsolute);
+      try {
+        const boundedAbsolute =
+          playerDuration > 0
+            ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
+            : Math.max(absoluteSeconds, 0);
+        playerRef.current.seekTo(boundedAbsolute, true);
+        globalPlayer.setCurrentTime(boundedAbsolute);
+      } catch (error) {
+        console.error("Failed to seek:", error);
+      }
     },
     [playerDuration, globalPlayer],
   );
