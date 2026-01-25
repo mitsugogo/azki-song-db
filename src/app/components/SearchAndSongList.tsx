@@ -186,7 +186,7 @@ export default function SearchAndSongList({
           </Button>
         </div>
 
-        <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0">
+        <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
           {/* Search Bar */}
           <SearchInput
             allSongs={allSongs}

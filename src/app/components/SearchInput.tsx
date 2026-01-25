@@ -14,6 +14,7 @@ interface SearchInputProps {
   searchValue: string[];
   onSearchChange: (values: string[]) => void;
   placeholder?: string;
+  className?: string;
 }
 
 export default function SearchInput({
@@ -21,6 +22,7 @@ export default function SearchInput({
   searchValue,
   onSearchChange,
   placeholder = "検索",
+  className,
 }: SearchInputProps) {
   const searchData = useMemo(() => {
     const availableTags = Array.from(
@@ -75,9 +77,7 @@ export default function SearchInput({
       },
       {
         group: "マイルストーン",
-        items: availableMilestones.map(
-          (milestone) => `milestone:${milestone}`,
-        ),
+        items: availableMilestones.map((milestone) => `milestone:${milestone}`),
       },
       {
         group: "アーティスト",
@@ -152,6 +152,7 @@ export default function SearchInput({
         transitionProps: { transition: "pop", duration: 100 },
       }}
       clearable
+      className={className}
     />
   );
 }
