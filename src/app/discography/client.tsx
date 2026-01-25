@@ -648,7 +648,7 @@ export default function DiscographyPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center w-full justify-center h-screen">
+      <div className="flex items-center w-full justify-center h-screen relative">
         <Loading />
       </div>
     );

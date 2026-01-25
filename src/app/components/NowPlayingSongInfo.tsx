@@ -79,7 +79,7 @@ const NowPlayingSongInfo = ({
       <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSongInfo && (
           <div className="song-info">
-            <div className="hidden lg:flex items-center gap-2 mb-1">
+            <div className="hidden lg:flex items-center gap-2 mb-1 border-b border-primary-600">
               <div className="w-full flex-auto self-baseline">
                 {currentSongInfo.milestones && (
                   <div className="flex items-center gap-1">
@@ -121,51 +121,11 @@ const NowPlayingSongInfo = ({
               />
             </div>
 
-            <div ref={containerRef} className="lg:hidden p-1">
+            <div ref={containerRef} className="lg:hidden md:pb-3">
               <div
-                className="flex items-center cursor-pointer text-lg"
+                className="text-xs text-muted-foreground truncate w-full pt-2 cursor-pointer"
                 onClick={open}
               >
-                <div className="flex-none">
-                  <FaCompactDisc
-                    className={`${isPlaying ? "animate-spin" : ""} mr-2`}
-                    style={{ animationDuration: "3s" }}
-                  />
-                </div>
-                <div className="w-64 flex-auto">
-                  {isOverflowing ? (
-                    <Marquee
-                      className="flex-1"
-                      key={`${currentSongInfo.title}-${currentSongInfo.artist}-${currentSongInfo.video_id}`}
-                    >
-                      <span
-                        className="text-nowrap inline-block pr-6"
-                        ref={textRef}
-                      >
-                        <span className="font-semibold">
-                          {currentSongInfo.title}
-                        </span>{" "}
-                        <span className="text-gray-500 text-sm">
-                          - {currentSongInfo.artist}
-                        </span>
-                      </span>
-                    </Marquee>
-                  ) : (
-                    <span
-                      className="text-nowrap inline-block flex-1"
-                      ref={textRef}
-                    >
-                      <span className="font-semibold">
-                        {currentSongInfo.title}
-                      </span>{" "}
-                      <span className="text-gray-500 dark:text-gray-200 text-sm">
-                        - {currentSongInfo.artist}
-                      </span>
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground truncate w-full">
                 {currentSongInfo && (
                   <span>
                     {currentSongInfo.broadcast_at

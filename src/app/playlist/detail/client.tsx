@@ -241,7 +241,7 @@ export default function PlaylistDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-grow lg:p-6 lg:pb-0">
+      <div className="grow lg:p-6 lg:pb-0">
         <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
         <Loading />
       </div>
@@ -250,7 +250,7 @@ export default function PlaylistDetailPage() {
 
   if (!playlist) {
     return (
-      <div className="flex-grow lg:p-6 lg:pb-0">
+      <div className="grow lg:p-6 lg:pb-0">
         <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
         <div className="p-3">
           <p>このIDのプレイリストは見つかりません</p>
@@ -260,7 +260,7 @@ export default function PlaylistDetailPage() {
   }
 
   return (
-    <div className="flex-grow pt-3 p-1 lg:p-6 lg:pb-0">
+    <div className="grow pt-3 p-1 lg:p-6 lg:pb-0">
       <Breadcrumbs>{breadcrumbs}</Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3 pl-0">プレイリストの管理</h1>

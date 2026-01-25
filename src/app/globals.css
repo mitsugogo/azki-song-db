@@ -141,7 +141,7 @@ body {
 .youtube-progress-bar {
   -webkit-appearance: none;
   appearance: none;
-  height: 5px;
+  height: 4px;
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -172,7 +172,7 @@ body {
 }
 
 .youtube-progress-bar:hover {
-  height: 5px;
+  height: 4px;
 }
 
 .youtube-progress-bar:hover::-webkit-slider-thumb {

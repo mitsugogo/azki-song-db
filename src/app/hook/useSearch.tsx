@@ -320,11 +320,16 @@ const useSearch = (allSongs: Song[]) => {
     // 楽曲のフィルタリングを実行
     const newSongs = searchSongs(allSongs, debouncedSearchTerm);
 
-    // 配列の長さが異なるか、中身が異なる場合のみセットする
-    if (
-      newSongs.length !== songs.length ||
-      JSON.stringify(newSongs) !== JSON.stringify(songs)
-    ) {
+    // 配列の長さが異なるか、曲IDの並びが変わった場合のみセットする
+    const isSameOrder =
+      newSongs.length === songs.length &&
+      newSongs.every(
+        (song, index) =>
+          song.video_id === songs[index]?.video_id &&
+          song.start === songs[index]?.start,
+      );
+
+    if (!isSameOrder) {
       setSongs(newSongs);
     }
   }, [debouncedSearchTerm, allSongs, searchSongs]);

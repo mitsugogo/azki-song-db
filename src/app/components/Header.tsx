@@ -13,6 +13,10 @@ import ThemeToggle from "./ThemeToggle";
 import { pageList } from "../pagelists";
 import FoldableToggle from "./FoldableToggle";
 import usePWAInstall from "../hook/usePWAInstall";
+import useSongs from "../hook/useSongs";
+import useSearch from "../hook/useSearch";
+import SearchInput from "./SearchInput";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -25,6 +29,10 @@ export function Header() {
   const isMobile = useMediaQuery("(max-width: 50em)");
 
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
+
+  const { allSongs } = useSongs();
+  const { searchTerm, setSearchTerm } = useSearch(allSongs);
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -60,12 +68,15 @@ export function Header() {
   const isTopPage = useMemo(() => currentPath === "/", [currentPath]);
 
   const navigation = useMemo(() => {
-    const navItems = pageList.map((item) => ({
-      ...item,
-      current: item.href !== "#" && item.href === currentPath,
+    const navCategories = pageList.map((category) => ({
+      ...category,
+      items: category.items.map((item) => ({
+        ...item,
+        current: item.href !== "#" && item.href === currentPath,
+      })),
     }));
 
-    return navItems;
+    return navCategories;
   }, [currentPath, isTopPage]);
 
   useEffect(() => {
@@ -87,7 +98,7 @@ export function Header() {
 
   return (
     <>
-      <header className="relative bg-primary dark:bg-primary-900 text-white">
+      <header className="relative bg-primary dark:bg-gray-800 text-white shadow-md">
         <div className="w-full px-2">
           <div className="relative flex h-12 md:h-16 items-center">
             <div className="absolute inset-y-0 left-0 flex items-center z-10">
@@ -100,18 +111,59 @@ export function Header() {
             </div>
             <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
-                <Link href="/">
+                <a href="/">
                   <h1 className="text-lg lg:text-lg font-bold">
                     AZKi Song Database
                   </h1>
-                </Link>
+                </a>
+              </div>
+              {/* 検索フィールド - lg以上で表示 */}
+              <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:mx-4">
+                <div className="w-full max-w-md">
+                  <SearchInput
+                    allSongs={allSongs}
+                    searchValue={
+                      searchTerm
+                        ? searchTerm.split("|").filter((v) => v.trim())
+                        : []
+                    }
+                    onSearchChange={(values: string[]) => {
+                      const query = values.join("|");
+
+                      // 現在のパスを取得
+                      const path =
+                        typeof window !== "undefined"
+                          ? window.location.pathname
+                          : currentPath;
+
+                      // TOPページと検索ページ以外では、検索ページに遷移
+                      if (path !== "/" && path !== "/search") {
+                        const searchUrl = query
+                          ? `/search?q=${encodeURIComponent(query)}`
+                          : "/search";
+                        console.log("Navigating to search page:", searchUrl);
+                        router.push(searchUrl);
+                      } else {
+                        // TOPページと検索ページでは、URLパラメータを更新
+                        console.log("Updating URL params on current page");
+                        if (query) {
+                          router.push(`${path}?q=${encodeURIComponent(query)}`);
+                        } else {
+                          router.push(path);
+                        }
+                      }
+                    }}
+                    placeholder="曲名、アーティスト、タグなどで検索"
+                    className="[&_input]:h-7"
+                  />
+                </div>
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               <Link
                 href="https://www.youtube.com/@AZKi"
                 target="_blank"
-                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
+                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900/30 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
               >
                 <FaYoutube className="mr-1" />
                 AZKi Channel
@@ -130,33 +182,42 @@ export function Header() {
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
         <div className="flex-grow space-y-1">
-          {navigation.map((item) => {
-            const isCurrent = item.current;
-            const baseClasses =
-              "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
-            const activeClasses =
-              "bg-primary-600 dark:bg-primary-800 text-white";
-            const inactiveClasses =
-              "hover:bg-white/5 hover:text-primary dark:hover:text-white";
+          {navigation.map((category, categoryIndex) => (
+            <div key={categoryIndex}>
+              {category.category && (
+                <div className="ml-3 mt-4 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                  {category.category}
+                </div>
+              )}
+              {category.items.map((item) => {
+                const isCurrent = item.current;
+                const baseClasses =
+                  "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
+                const activeClasses =
+                  "bg-primary-600 dark:bg-primary-800 text-white";
+                const inactiveClasses =
+                  "hover:bg-white/5 hover:text-primary dark:hover:text-white";
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                aria-current={isCurrent ? "page" : undefined}
-                className={`${
-                  isCurrent ? activeClasses : inactiveClasses
-                } ${baseClasses}`}
-                onClick={() => closeDrawer()}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    aria-current={isCurrent ? "page" : undefined}
+                    className={`${
+                      isCurrent ? activeClasses : inactiveClasses
+                    } ${baseClasses}`}
+                    onClick={() => closeDrawer()}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 " />
 
           <div className="ml-3 text-xs text-light-gray-400 dark:text-gray-300">
-            <FaGear className="mr-0.5 inline" /> 管理機能
+            管理機能
           </div>
           <Link
             href="/playlist"
