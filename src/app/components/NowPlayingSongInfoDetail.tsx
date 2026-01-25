@@ -18,6 +18,7 @@ import MilestoneBadge from "./MilestoneBadge";
 import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
 import { FaInfoCircle } from "react-icons/fa";
+import { getCollabUnitName } from "../config/collabUnits";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
@@ -203,6 +204,40 @@ const NowPlayingSongInfoDetail = ({
                     </Badge>
                   );
                 })}
+                {(() => {
+                  const members = currentSongInfo.sing.split("、");
+                  const unitName = getCollabUnitName(members);
+                  if (!unitName) return null;
+
+                  const existsSameUnit = searchTerm.includes(
+                    `unit:${unitName}`,
+                  );
+                  return (
+                    <>
+                      {" - "}
+                      <Badge
+                        onClick={() => {
+                          if (existsSameUnit) {
+                            setSearchTerm(
+                              searchTerm.replace(`unit:${unitName}`, "").trim(),
+                            );
+                          } else {
+                            setSearchTerm(
+                              `${searchTerm ? `${searchTerm}|` : ""}unit:${unitName}`,
+                            );
+                          }
+                        }}
+                        className={`cursor-pointer dark:bg-purple-900 dark:text-gray-50 dark:hover:bg-purple-700 bg-purple-200 hover:bg-purple-300 ${
+                          existsSameUnit
+                            ? "bg-purple-500 text-white dark:bg-purple-700"
+                            : ""
+                        }`}
+                      >
+                        {unitName}
+                      </Badge>
+                    </>
+                  );
+                })()}
               </dd>
             </div>
 
