@@ -367,21 +367,31 @@ export default function MainPlayer() {
     }
   }, []);
 
-  const changeVolume = useCallback((volume: number) => {
-    if (
-      !playerRef.current ||
-      typeof playerRef.current.setVolume !== "function"
-    ) {
-      return;
-    }
-    try {
-      const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
-      playerRef.current.setVolume(clampedVolume);
-      setPlayerVolume(clampedVolume);
-    } catch (error) {
-      console.error("Failed to set volume:", error);
-    }
-  }, []);
+  const changeVolume = useCallback(
+    (volume: number) => {
+      // プレイヤーが準備できていない場合は何もしない
+      if (!isPlayerReady) {
+        return;
+      }
+
+      if (
+        !playerRef.current ||
+        typeof playerRef.current.setVolume !== "function"
+      ) {
+        return;
+      }
+
+      try {
+        const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
+        playerRef.current.setVolume(clampedVolume);
+        setPlayerVolume(clampedVolume);
+      } catch (error) {
+        // エラーが発生しても処理を継続（プレイヤーが完全に準備できていない可能性がある）
+        console.warn("Failed to set volume (player may not be ready):", error);
+      }
+    },
+    [isPlayerReady],
+  );
 
   const seekToAbsolute = useCallback(
     (absoluteSeconds: number) => {
