@@ -305,48 +305,62 @@ const SearchPageClient = () => {
         <div className="mb-4">
           <Link
             href="/search"
-            className="text-blue-600 dark:text-blue-400 hover:underline text-sm p-3"
+            className="text-primary-700 dark:text-primary-300 hover:underline text-sm p-3"
           >
             ← 検索に戻る
           </Link>
-          <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
-            {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("artist:") && <FaUser />}
-            {currentSearchTerm.startsWith("sing:") && <FaUser />}
-            {currentSearchTerm.startsWith("tag:") && <FaTag />}
-            {currentSearchTerm.startsWith("title:") && <FaMusic />}
-            {currentSearchTerm.startsWith("milestone:") && "⭐"}
-            {currentSearchTerm.startsWith("year:") && <FaCalendar />}
-            {currentSearchTerm.startsWith("season:") && "🌸"}
-            {(() => {
-              const prefixes = [
-                "unit:",
-                "artist:",
-                "sing:",
-                "tag:",
-                "title:",
-                "milestone:",
-                "year:",
-                "season:",
-              ];
-              const matchedPrefix = prefixes.find((p) =>
-                currentSearchTerm.startsWith(p),
-              );
-              if (matchedPrefix) {
-                return `${currentSearchTerm.replace(matchedPrefix, "")}の検索結果`;
-              }
-              return `「${currentSearchTerm}」の検索結果`;
-            })()}
-          </h1>
-          <div className="p-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
+          <div className="px-3 pb-3">
+            <div className="flex flex-wrap gap-2 mb-3">
+              {currentSearchTerm.split("|").map((term, index) => {
+                let icon = null;
+                let label = term;
+                
+                if (term.startsWith("unit:")) {
+                  icon = <FaUsers className="mr-1" />;
+                  label = term.replace("unit:", "");
+                } else if (term.startsWith("artist:")) {
+                  icon = <FaUser className="mr-1" />;
+                  label = term.replace("artist:", "");
+                } else if (term.startsWith("sing:")) {
+                  icon = <FaUser className="mr-1" />;
+                  label = term.replace("sing:", "");
+                } else if (term.startsWith("tag:")) {
+                  icon = <FaTag className="mr-1" />;
+                  label = term.replace("tag:", "");
+                } else if (term.startsWith("title:")) {
+                  icon = <FaMusic className="mr-1" />;
+                  label = term.replace("title:", "");
+                } else if (term.startsWith("milestone:")) {
+                  icon = <span className="mr-1">⭐</span>;
+                  label = term.replace("milestone:", "");
+                } else if (term.startsWith("year:")) {
+                  icon = <FaCalendar className="mr-1" />;
+                  label = term.replace("year:", "");
+                } else if (term.startsWith("season:")) {
+                  icon = <span className="mr-1">🌸</span>;
+                  label = term.replace("season:", "");
+                }
+                
+                return (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200"
+                  >
+                    {icon}
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {filteredSongs.length} 件の楽曲が見つかりました
             </p>
           </div>
         </div>
 
-        {/* 検索バー */}
-        <div className="mb-4 px-3">
+        {/* 検索バー - 画面幅が狭い場合のみ表示 */}
+        <div className="mb-4 px-3 lg:hidden">
           <SearchInput
             allSongs={allSongs}
             searchValue={searchValue}
@@ -375,7 +389,7 @@ const SearchPageClient = () => {
                 <Link
                   href={`/?v=${song.video_id}${
                     song.start ? `&t=${song.start}s` : ""
-                  }`}
+                  }&q=${encodeURIComponent(currentSearchTerm)}`}
                   className="block"
                 >
                   <div className="w-full aspect-video bg-black">
@@ -417,44 +431,58 @@ const SearchPageClient = () => {
           >
             ← 検索に戻る
           </Link>
-          <h1 className="font-extrabold text-2xl p-3 flex items-center gap-2">
-            {currentSearchTerm.startsWith("unit:") && <FaUsers />}
-            {currentSearchTerm.startsWith("artist:") && <FaUser />}
-            {currentSearchTerm.startsWith("sing:") && <FaUser />}
-            {currentSearchTerm.startsWith("tag:") && <FaTag />}
-            {currentSearchTerm.startsWith("title:") && <FaMusic />}
-            {currentSearchTerm.startsWith("milestone:") && "⭐"}
-            {currentSearchTerm.startsWith("year:") && <FaCalendar />}
-            {currentSearchTerm.startsWith("season:") && "🌸"}
-            {(() => {
-              const prefixes = [
-                "unit:",
-                "artist:",
-                "sing:",
-                "tag:",
-                "title:",
-                "milestone:",
-                "year:",
-                "season:",
-              ];
-              const matchedPrefix = prefixes.find((p) =>
-                currentSearchTerm.startsWith(p),
-              );
-              if (matchedPrefix) {
-                return `${currentSearchTerm.replace(matchedPrefix, "")}の検索結果`;
-              }
-              return `「${currentSearchTerm}」の検索結果`;
-            })()}
-          </h1>
-          <div className="p-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
+          <div className="px-3 pb-3">
+            <div className="flex flex-wrap gap-2 mb-3">
+              {currentSearchTerm.split("|").map((term, index) => {
+                let icon = null;
+                let label = term;
+                
+                if (term.startsWith("unit:")) {
+                  icon = <FaUsers className="mr-1" />;
+                  label = term.replace("unit:", "");
+                } else if (term.startsWith("artist:")) {
+                  icon = <FaUser className="mr-1" />;
+                  label = term.replace("artist:", "");
+                } else if (term.startsWith("sing:")) {
+                  icon = <FaUser className="mr-1" />;
+                  label = term.replace("sing:", "");
+                } else if (term.startsWith("tag:")) {
+                  icon = <FaTag className="mr-1" />;
+                  label = term.replace("tag:", "");
+                } else if (term.startsWith("title:")) {
+                  icon = <FaMusic className="mr-1" />;
+                  label = term.replace("title:", "");
+                } else if (term.startsWith("milestone:")) {
+                  icon = <span className="mr-1">⭐</span>;
+                  label = term.replace("milestone:", "");
+                } else if (term.startsWith("year:")) {
+                  icon = <FaCalendar className="mr-1" />;
+                  label = term.replace("year:", "");
+                } else if (term.startsWith("season:")) {
+                  icon = <span className="mr-1">🌸</span>;
+                  label = term.replace("season:", "");
+                }
+                
+                return (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200"
+                  >
+                    {icon}
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               該当する曲がありません
             </p>
           </div>
         </div>
 
         {/* 検索バー */}
-        <div className="mb-4 px-3">
+        <div className="mb-4 px-3 lg:hidden">
           <SearchInput
             allSongs={allSongs}
             searchValue={searchValue}
@@ -555,8 +583,8 @@ const SearchPageClient = () => {
         </div>
       </div>
 
-      {/* 検索バー */}
-      <div className="mb-4 px-3">
+      {/* 検索バー - 画面幅が狭い場合のみ表示 */}
+      <div className="mb-4 px-3 lg:hidden">
         <SearchInput
           allSongs={allSongs}
           searchValue={searchValue}

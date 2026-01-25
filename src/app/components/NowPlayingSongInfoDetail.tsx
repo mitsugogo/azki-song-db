@@ -18,6 +18,7 @@ import MilestoneBadge from "./MilestoneBadge";
 import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
 import { FaInfoCircle } from "react-icons/fa";
+import { getCollabUnitName } from "../config/collabUnits";
 
 interface NowPlayingSongInfoDetailProps {
   currentSongInfo: Song;
@@ -62,11 +63,11 @@ const NowPlayingSongInfoDetail = ({
   return (
     <>
       {currentSongInfo && (
-        <div className="flex-grow mb-5 bg-gray-50/20 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm dark:text-gray-50">
+        <div className="grow mb-5 bg-gray-50/20 dark:bg-gray-800 rounded-sm p-4 inset-shadow-sm dark:text-gray-50">
           <dl className="flex flex-col gap-3 lg:gap-1">
             {currentSongInfo.title && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaCompactDisc className="text-base" />
                     <span className="ml-1">タイトル:</span>
@@ -91,7 +92,7 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo.artist && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaUser className="text-base" />
                     <span className="ml-1">アーティスト:</span>
@@ -132,7 +133,7 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo.album && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoAlbums className="text-base" />
                     <span className="ml-1">アルバム:</span>
@@ -172,7 +173,7 @@ const NowPlayingSongInfoDetail = ({
             )}
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <PiMicrophoneStageFill className="text-base" />
                   <span className="ml-1">歌った人:</span>
@@ -203,11 +204,45 @@ const NowPlayingSongInfoDetail = ({
                     </Badge>
                   );
                 })}
+                {(() => {
+                  const members = currentSongInfo.sing.split("、");
+                  const unitName = getCollabUnitName(members);
+                  if (!unitName) return null;
+
+                  const existsSameUnit = searchTerm.includes(
+                    `unit:${unitName}`,
+                  );
+                  return (
+                    <>
+                      {" - "}
+                      <Badge
+                        onClick={() => {
+                          if (existsSameUnit) {
+                            setSearchTerm(
+                              searchTerm.replace(`unit:${unitName}`, "").trim(),
+                            );
+                          } else {
+                            setSearchTerm(
+                              `${searchTerm ? `${searchTerm}|` : ""}unit:${unitName}`,
+                            );
+                          }
+                        }}
+                        className={`cursor-pointer dark:bg-purple-900 dark:text-gray-50 dark:hover:bg-purple-700 bg-purple-200 hover:bg-purple-300 ${
+                          existsSameUnit
+                            ? "bg-purple-500 text-white dark:bg-purple-700"
+                            : ""
+                        }`}
+                      >
+                        {unitName}
+                      </Badge>
+                    </>
+                  );
+                })()}
               </dd>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaYoutube className="text-base" />
                   <span className="ml-1">動画タイトル:</span>
@@ -228,7 +263,7 @@ const NowPlayingSongInfoDetail = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaCalendar className="text-base" />
                   <span className="ml-1">配信日:</span>
@@ -271,7 +306,7 @@ const NowPlayingSongInfoDetail = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaTag className="text-base" />
                   <span className="ml-1">タグ:</span>
@@ -307,13 +342,13 @@ const NowPlayingSongInfoDetail = ({
 
             {videoTimestamps.length > 1 && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoTime className="text-base" />
                     <span className="ml-1">セトリ:</span>
                   </span>
                 </dt>
-                <dd className="flex-grow flex flex-col gap-1 text-xs lg:text-sm relative">
+                <dd className="grow flex flex-col gap-1 text-xs lg:text-sm relative">
                   {!isTimestampExpand && (
                     <button
                       type="button"
@@ -407,7 +442,7 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo && currentSongInfo.live_call && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2 border-t border-gray-300/70 select-none">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <MdSpeakerNotes className="text-base" />
                     <span className="ml-1">コーレス:</span>
@@ -488,7 +523,7 @@ const NowPlayingSongInfoDetail = ({
                             </Link>
                           </span>
                           <span
-                            className="break-words break-all"
+                            className="wrap-break-word break-all"
                             dangerouslySetInnerHTML={{
                               __html: calltext.replace(/\\n/g, "<br>"),
                             }}
@@ -502,7 +537,7 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo && currentSongInfo.live_note && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <MdSpeakerNotes className="text-base" />
                     <span className="ml-1">ライブノート:</span>
@@ -510,7 +545,7 @@ const NowPlayingSongInfoDetail = ({
                 </dt>
                 <dd>
                   <div
-                    className="break-words break-all"
+                    className="wrap-break-word break-all"
                     dangerouslySetInnerHTML={{
                       __html: currentSongInfo.live_note
                         .replace(
@@ -527,14 +562,14 @@ const NowPlayingSongInfoDetail = ({
 
             {currentSongInfo && currentSongInfo.extra && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1 mt-2 pt-2 border-t border-gray-300/70">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaBook className="text-base" />
                     <span className="ml-1">追加情報:</span>
                   </span>
                 </dt>
                 <dd
-                  className="break-words break-all"
+                  className="wrap-break-word break-all"
                   dangerouslySetInnerHTML={{
                     __html: currentSongInfo.extra
                       .replace(
@@ -552,14 +587,14 @@ const NowPlayingSongInfoDetail = ({
 
             {/* 歌った回数 */}
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaRepeat className="text-base" />
                   <span className="ml-1">歌った回数:</span>
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
-                <Badge className="text-xs dark:bg-cyan-900 dark:text-gray-50">
+                <Badge className="text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50">
                   {
                     allSongs.filter(
                       (song) => song.title === currentSongInfo.title,
@@ -572,7 +607,7 @@ const NowPlayingSongInfoDetail = ({
 
             {/* 歌った歌枠の動画リンク */}
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-              <dt className="text-muted-foreground flex items-start w-full lg:w-48 flex-shrink-0">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaYoutube className="text-base" />
                   <span className="ml-1">この曲を歌った枠:</span>
@@ -604,6 +639,10 @@ const NowPlayingSongInfoDetail = ({
                           href={`/?v=${song.video_id}&t=${song.start}s`}
                           rel="noopener noreferrer"
                           className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changeCurrentSong(song);
+                          }}
                         >
                           {song.video_title}
                         </Link>

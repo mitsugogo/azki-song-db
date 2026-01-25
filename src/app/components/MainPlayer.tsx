@@ -151,9 +151,14 @@ export default function MainPlayer() {
     [originalHandleStateChange, updatePlayerSnapshot],
   );
 
-  // 再生中は定期的にcurrentTimeを更新
+  // 再生中は定期的にcurrentTimeを更新（ゆるめのポーリングで再レンダリングを抑制）
   useEffect(() => {
-    if (!isPlayerReady || !playerRef.current) return;
+    if (!isPlayerReady || !playerRef.current || !isPlaying) return;
+
+    let lastTime =
+      typeof playerRef.current.getCurrentTime === "function"
+        ? playerRef.current.getCurrentTime()
+        : 0;
 
     const interval = setInterval(() => {
       if (
@@ -162,13 +167,17 @@ export default function MainPlayer() {
       ) {
         const currentTime = playerRef.current.getCurrentTime();
         if (Number.isFinite(currentTime)) {
-          setPlayerCurrentTime(currentTime);
+          // 0.25秒以上動いたときだけstate更新して再レンダリング回数を削減
+          if (Math.abs(currentTime - lastTime) >= 0.25) {
+            lastTime = currentTime;
+            setPlayerCurrentTime(currentTime);
+          }
         }
       }
-    }, 100); // 100msごとに更新
+    }, 500); // 100ms→500ms に緩和
 
     return () => clearInterval(interval);
-  }, [isPlayerReady]);
+  }, [isPlayerReady, isPlaying]);
 
   // グローバルプレイヤーと同期（動画が変わったときのみリセット）
   useEffect(() => {
@@ -346,7 +355,11 @@ export default function MainPlayer() {
       playerRef.current &&
       typeof playerRef.current.playVideo === "function"
     ) {
-      playerRef.current.playVideo();
+      try {
+        playerRef.current.playVideo();
+      } catch (error) {
+        console.error("Failed to play video:", error);
+      }
     }
   }, []);
 
@@ -355,21 +368,39 @@ export default function MainPlayer() {
       playerRef.current &&
       typeof playerRef.current.pauseVideo === "function"
     ) {
-      playerRef.current.pauseVideo();
+      try {
+        playerRef.current.pauseVideo();
+      } catch (error) {
+        console.error("Failed to pause video:", error);
+      }
     }
   }, []);
 
-  const changeVolume = useCallback((volume: number) => {
-    if (
-      !playerRef.current ||
-      typeof playerRef.current.setVolume !== "function"
-    ) {
-      return;
-    }
-    const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
-    playerRef.current.setVolume(clampedVolume);
-    setPlayerVolume(clampedVolume);
-  }, []);
+  const changeVolume = useCallback(
+    (volume: number) => {
+      // プレイヤーが準備できていない場合は何もしない
+      if (!isPlayerReady) {
+        return;
+      }
+
+      if (
+        !playerRef.current ||
+        typeof playerRef.current.setVolume !== "function"
+      ) {
+        return;
+      }
+
+      try {
+        const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
+        playerRef.current.setVolume(clampedVolume);
+        setPlayerVolume(clampedVolume);
+      } catch (error) {
+        // エラーが発生しても処理を継続（プレイヤーが完全に準備できていない可能性がある）
+        console.warn("Failed to set volume (player may not be ready):", error);
+      }
+    },
+    [isPlayerReady],
+  );
 
   const seekToAbsolute = useCallback(
     (absoluteSeconds: number) => {
@@ -379,12 +410,16 @@ export default function MainPlayer() {
       ) {
         return;
       }
-      const boundedAbsolute =
-        playerDuration > 0
-          ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
-          : Math.max(absoluteSeconds, 0);
-      playerRef.current.seekTo(boundedAbsolute, true);
-      globalPlayer.setCurrentTime(boundedAbsolute);
+      try {
+        const boundedAbsolute =
+          playerDuration > 0
+            ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
+            : Math.max(absoluteSeconds, 0);
+        playerRef.current.seekTo(boundedAbsolute, true);
+        globalPlayer.setCurrentTime(boundedAbsolute);
+      } catch (error) {
+        console.error("Failed to seek:", error);
+      }
     },
     [playerDuration, globalPlayer],
   );
