@@ -123,7 +123,7 @@ const NowPlayingSongInfo = ({
 
             <div ref={containerRef} className="lg:hidden md:pb-3">
               <div
-                className="text-xs text-muted-foreground truncate w-full pt-2 cursor-pointer"
+                className="text-xs text-muted-foreground w-full pt-2 cursor-pointer line-clamp-1"
                 onClick={open}
               >
                 {currentSongInfo && (
