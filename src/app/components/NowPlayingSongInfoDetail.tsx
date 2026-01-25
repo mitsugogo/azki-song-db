@@ -559,7 +559,7 @@ const NowPlayingSongInfoDetail = ({
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
-                <Badge className="text-xs dark:bg-cyan-900 dark:text-gray-50">
+                <Badge className="text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50">
                   {
                     allSongs.filter(
                       (song) => song.title === currentSongInfo.title,
