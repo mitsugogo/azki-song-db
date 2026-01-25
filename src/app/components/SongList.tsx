@@ -346,6 +346,7 @@ const SongsList = ({
                 currentSongIds={visibleSongIds}
                 onPagerItemClick={scrollToSong}
                 currentSongInfo={currentSongInfo}
+                songListScrollRef={parentRef}
               />
             </ScrollArea>
           </div>

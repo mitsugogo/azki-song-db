@@ -441,7 +441,7 @@ export default function PlayerSection({
   }, [timedLiveCallText]);
 
   return (
-    <aside className="flex lg:w-2/3 xl:w-9/12 sm:w-full foldable:w-1/2 pr-0">
+    <aside className="flex lg:w-2/3 xl:w-9/12 w-full foldable:w-1/2 pr-0">
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"

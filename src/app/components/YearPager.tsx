@@ -16,6 +16,7 @@ interface YearPagerProps {
   currentSongIds: string[];
   currentSongInfo: Song | null;
   onPagerItemClick: (id: string) => void;
+  songListScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 // ドットの最大表示数
@@ -72,6 +73,7 @@ const YearPager: React.FC<YearPagerProps> = ({
   currentSongIds,
   currentSongInfo,
   onPagerItemClick,
+  songListScrollRef,
 }) => {
   const pagerData = useMemo(() => generatePagerData(songs), [songs]);
   const pagerRef = useRef<HTMLDivElement>(null);
@@ -89,6 +91,21 @@ const YearPager: React.FC<YearPagerProps> = ({
       songs.find((s) => `${s.video_id}-${s.start}-${s.title}` === id),
     )
     .filter((s): s is Song => s !== undefined);
+
+  // マウスホイールで楽曲一覧をスクロール
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (!songListScrollRef?.current) return;
+      e.preventDefault();
+      // スクロール量は楽曲一覧の1/2画面分
+      const scrollAmount = songListScrollRef.current.clientHeight / 2;
+      songListScrollRef.current.scrollBy({
+        top: e.deltaY > 0 ? scrollAmount : -scrollAmount,
+        behavior: "smooth",
+      });
+    },
+    [songListScrollRef],
+  );
 
   // 見えている曲がない場合の処理
   if (visibleSongs.length === 0) {
@@ -219,7 +236,13 @@ const YearPager: React.FC<YearPagerProps> = ({
   );
 
   return (
-    <div className="h-full w-9" ref={pagerRef}>
+    <div
+      className="h-full w-9"
+      ref={pagerRef}
+      onWheel={handleWheel}
+      tabIndex={0}
+      style={{ outline: "none" }}
+    >
       <div className="relative h-full">
         {pagerData.map((item) => {
           const itemYear = item.year;
