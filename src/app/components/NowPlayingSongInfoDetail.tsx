@@ -604,6 +604,10 @@ const NowPlayingSongInfoDetail = ({
                           href={`/?v=${song.video_id}&t=${song.start}s`}
                           rel="noopener noreferrer"
                           className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            changeCurrentSong(song);
+                          }}
                         >
                           {song.video_title}
                         </Link>
