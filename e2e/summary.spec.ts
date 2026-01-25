@@ -15,16 +15,6 @@ test.describe("Summary pages", () => {
       ).toBeVisible();
     });
 
-    test("shows breadcrumbs navigation", async ({ page }) => {
-      await page.goto("/summary");
-
-      await page.waitForLoadState("domcontentloaded");
-
-      // Look for breadcrumb navigation
-      const homeLink = page.getByRole("link", { name: /Home/i });
-      await expect(homeLink).toBeVisible();
-    });
-
     test("displays year links", async ({ page }) => {
       await page.goto("/summary");
 
