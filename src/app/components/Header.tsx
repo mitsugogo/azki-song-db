@@ -2,7 +2,7 @@
 
 import { Button } from "flowbite-react";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { FaGear, FaYoutube } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import Acknowledgment from "./Acknowledgment";
@@ -100,7 +100,7 @@ export function Header() {
     <>
       <header className="relative bg-primary dark:bg-gray-800 text-white shadow-md">
         <div className="w-full px-2">
-          <div className="relative flex h-12 md:h-16 items-center">
+          <div className="relative flex h-10 lg:h-16 items-center">
             <div className="absolute inset-y-0 left-0 flex items-center z-10">
               <Burger
                 opened={drawerOpened}
@@ -119,7 +119,7 @@ export function Header() {
               </div>
               {/* 検索フィールド - lg以上で表示 */}
               <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:mx-4">
-                <div className="w-full max-w-md">
+                <div className="min-w-md max-w-full">
                   <SearchInput
                     allSongs={allSongs}
                     searchValue={
@@ -141,11 +141,9 @@ export function Header() {
                         const searchUrl = query
                           ? `/search?q=${encodeURIComponent(query)}`
                           : "/search";
-                        console.log("Navigating to search page:", searchUrl);
                         router.push(searchUrl);
                       } else {
                         // TOPページと検索ページでは、URLパラメータを更新
-                        console.log("Updating URL params on current page");
                         if (query) {
                           router.push(`${path}?q=${encodeURIComponent(query)}`);
                         } else {
