@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.26.1](https://github.com/mitsugogo/azki-song-db/compare/v1.26.0...v1.26.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* 動画タイトルが長いときにレイアウトが破綻する場合があるのを修正 ([6a56564](https://github.com/mitsugogo/azki-song-db/commit/6a56564defd3aeaf665a03753c95a8bed9b497df))
+
 ## [1.26.0](https://github.com/mitsugogo/azki-song-db/compare/v1.25.0...v1.26.0) (2026-01-25)
 
 
