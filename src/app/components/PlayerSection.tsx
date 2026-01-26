@@ -1,18 +1,12 @@
 import { Song } from "../types/song";
 import YouTubePlayer from "./YouTubePlayer";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
-import YoutubeThumbnail from "./YoutubeThumbnail";
-import { Button, ButtonGroup } from "flowbite-react";
-import { GiPreviousButton, GiNextButton } from "react-icons/gi";
-import { LuShuffle, LuSparkles, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-import { RiPlayListFill } from "react-icons/ri";
 import { YouTubeEvent } from "react-youtube";
-import PlayerSettings from "./PlayerSettings";
-import { LuCrown } from "react-icons/lu";
-import { FaInfoCircle, FaPlay, FaPause, FaStepForward } from "react-icons/fa";
+import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
+import PlayerControlsBar from "./PlayerControlsBar";
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 import useDebounce from "../hook/useDebounce";
 import { FaUser } from "react-icons/fa6";
@@ -244,7 +238,7 @@ export default function PlayerSection({
   const [hoveredChapter, setHoveredChapter] = useState<{
     song: Song;
     x: number;
-    y: number;
+    containerWidth: number;
   } | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volumeBeforeMute, setVolumeBeforeMute] = useState(100);
@@ -465,310 +459,37 @@ export default function PlayerSection({
         </div>
 
         {canUsePlayerControls && (
-          <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 pt-2 text-white shadow-2xl backdrop-blur-sm">
-            {/* Progress Bar */}
-            <div className="group relative mb-2 flex items-center gap-2 px-1">
-              <div className="relative flex-1">
-                {/* Chapter markers */}
-                {songsInVideo.length > 0 && (
-                  <div className="pointer-events-none absolute inset-0 flex">
-                    {allSongsHaveEnd
-                      ? // 空白を除いた連続表示
-                        songCumulativeMap.map((item, idx) => {
-                          const startPosition =
-                            totalSongsDuration > 0
-                              ? (item.cumulativeStart / totalSongsDuration) *
-                                100
-                              : 0;
-                          const width =
-                            totalSongsDuration > 0
-                              ? (item.duration / totalSongsDuration) * 100
-                              : 0;
-                          const isHovered =
-                            hoveredChapter?.song?.title === item.song.title &&
-                            hoveredChapter?.song?.start === item.song.start;
-
-                          return (
-                            <div key={`chapter-${idx}`}>
-                              {/* 曲の範囲を示す半透明の背景（ホバー時のみ表示） */}
-                              {isHovered && (
-                                <div
-                                  className="absolute h-1.5 bg-white/30"
-                                  style={{
-                                    left: `${startPosition}%`,
-                                    width: `${width}%`,
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                  }}
-                                />
-                              )}
-                              {/* 曲の開始位置マーカー */}
-                              <div
-                                className="absolute h-1.5 w-0.5 bg-white/60"
-                                style={{
-                                  left: `${startPosition}%`,
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                }}
-                              />
-                            </div>
-                          );
-                        })
-                      : // 絶対時間表示
-                        songsInVideo.map((song, idx) => {
-                          const songStart = Number(song.start);
-                          // endが0の場合は次の曲のstartを使用
-                          const nextSong = songsInVideo[idx + 1];
-                          const songEnd =
-                            song.end && Number(song.end) > 0
-                              ? Number(song.end)
-                              : nextSong
-                                ? Number(nextSong.start)
-                                : videoDuration;
-                          const seekBarRange = videoDuration - videoStartTime;
-                          const startPosition =
-                            seekBarRange > 0
-                              ? ((songStart - videoStartTime) / seekBarRange) *
-                                100
-                              : 0;
-                          const endPosition =
-                            seekBarRange > 0
-                              ? ((songEnd - videoStartTime) / seekBarRange) *
-                                100
-                              : 0;
-                          const width = endPosition - startPosition;
-                          const isHovered =
-                            hoveredChapter?.song?.title === song.title &&
-                            hoveredChapter?.song?.start === song.start;
-
-                          return (
-                            <div key={`chapter-${idx}`}>
-                              {/* 曲の範囲を示す半透明の背景（ホバー時のみ表示） */}
-                              {isHovered && (
-                                <div
-                                  className="absolute h-1.5 bg-white/30"
-                                  style={{
-                                    left: `${startPosition}%`,
-                                    width: `${width}%`,
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                  }}
-                                />
-                              )}
-                              {/* 曲の開始位置マーカー */}
-                              <div
-                                className="absolute h-1.5 w-0.5 bg-white/60"
-                                style={{
-                                  left: `${startPosition}%`,
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
-                  </div>
-                )}
-
-                <input
-                  type="range"
-                  min={0}
-                  max={allSongsHaveEnd ? totalSongsDuration : displayDuration}
-                  value={tempSeekValue}
-                  step="0.1"
-                  onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setTempSeekValue(Number(e.target.value))
-                  }
-                  onChange={handleSeekChange}
-                  onMouseMove={(e) => {
-                    if (songsInVideo.length === 0) return;
-
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percentage = (x / rect.width) * 100;
-
-                    let foundSongData: {
-                      song: any;
-                      x: number;
-                      y: number;
-                    } | null = null;
-
-                    if (allSongsHaveEnd) {
-                      // 連続時間での検出
-                      const hoveredCumulativeTime =
-                        (totalSongsDuration * percentage) / 100;
-                      const foundItem = songCumulativeMap.find((item) => {
-                        return (
-                          hoveredCumulativeTime >= item.cumulativeStart &&
-                          hoveredCumulativeTime <= item.cumulativeEnd
-                        );
-                      });
-
-                      if (foundItem) {
-                        foundSongData = {
-                          song: foundItem.song,
-                          x: e.clientX,
-                          y: rect.top,
-                        };
-                      }
-                    } else {
-                      // 絶対時間での検出
-                      const seekBarRange = videoDuration - videoStartTime;
-                      const hoverTime =
-                        videoStartTime + (seekBarRange * percentage) / 100;
-
-                      const foundSong = songsInVideo
-                        .slice()
-                        .reverse()
-                        .find((s) => {
-                          const start = Number(s.start);
-                          const end = s.end ? Number(s.end) : Infinity;
-                          return hoverTime >= start && hoverTime < end;
-                        });
-
-                      if (foundSong) {
-                        foundSongData = {
-                          song: foundSong,
-                          x: e.clientX,
-                          y: rect.top,
-                        };
-                      }
-                    }
-
-                    setHoveredChapter(foundSongData);
-                  }}
-                  onMouseLeave={() => setHoveredChapter(null)}
-                  disabled={videoDuration <= 0 || !playerControls?.isReady}
-                  className="youtube-progress-bar relative z-20 w-full"
-                  style={{
-                    background: `linear-gradient(to right, #ff0000 0%, #ff0000 ${
-                      displayDuration > 0
-                        ? (tempSeekValue / displayDuration) * 100
-                        : 0
-                    }%, rgba(255,255,255,0.3) ${
-                      displayDuration > 0
-                        ? (tempSeekValue / displayDuration) * 100
-                        : 0
-                    }%, rgba(255,255,255,0.3) 100%)`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* コントロールバー */}
-            <div className="flex items-center justify-between gap-4 px-2 lg:px-3">
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleTogglePlay}
-                  disabled={!playerControls?.isReady}
-                  className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={isPlaying ? "一時停止" : "再生"}
-                >
-                  {isPlaying ? (
-                    <FaPause className="text-xl text-white" />
-                  ) : (
-                    <FaPlay className="ml-0.5 text-xl text-white" />
-                  )}
-                </button>
-                {/* 次の曲へ */}
-                <button
-                  type="button"
-                  onClick={() => changeCurrentSong(nextSong)}
-                  className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={!playerControls?.isReady || !nextSong}
-                  aria-label="次の曲へ"
-                >
-                  <FaStepForward className="text-xl text-white" />
-                </button>
-
-                <div className="flex flex-col md:flex-row items-center gap-0.5 md:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
-                  <span>{formattedCurrentTime}</span>
-                  <div className="flex items-center gap-1 md:gap-2">
-                    <span className="text-white/50">/</span>
-                    <span className="text-white/70">{formattedDuration}</span>
-                  </div>
-                </div>
-
-                <div
-                  className="min-w-0 flex-1 border-l border-white/10 pl-3"
-                  onClick={() => {
-                    setOpenShareModal(true);
-                  }}
-                >
-                  <div className="truncate text-sm font-medium text-white select-none">
-                    {displaySongTitle}
-                  </div>
-                  <div className="truncate text-xs text-white/60 select-none">
-                    {displaySongArtist}
-                  </div>
-                </div>
-              </div>
-
-              {/* ボリューム */}
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleVolumeIconClick}
-                  disabled={!playerControls?.isReady}
-                  className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={
-                    isNarrowScreen
-                      ? "音量調整"
-                      : isMuted
-                        ? "ミュート解除"
-                        : "ミュート"
-                  }
-                >
-                  {isMuted || volumeValue === 0 ? (
-                    <LuVolumeX className="text-xl text-white" />
-                  ) : (
-                    <LuVolume2 className="text-xl text-white" />
-                  )}
-                </button>
-                {(!isNarrowScreen || showVolumeSlider) && (
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={tempVolumeValue}
-                    onInput={handleVolumeChange}
-                    onChange={handleVolumeChange}
-                    disabled={!playerControls?.isReady}
-                    className="youtube-volume-bar w-24"
-                    style={{
-                      background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Chapter Tooltip */}
-        {hoveredChapter && (
-          <div
-            className="pointer-events-none fixed z-50 max-w-xs rounded-lg bg-black/95 px-3 py-2 text-white shadow-2xl backdrop-blur-sm"
-            style={{
-              left: `${hoveredChapter.x}px`,
-              top: `${hoveredChapter.y - 80}px`,
-              transform:
-                hoveredChapter.x < 160
-                  ? "translateX(0)"
-                  : typeof window !== "undefined" &&
-                      hoveredChapter.x > window.innerWidth - 160
-                    ? "translateX(-100%)"
-                    : "translateX(-50%)",
-            }}
-          >
-            <div className="text-sm font-semibold">
-              {hoveredChapter.song.title}
-            </div>
-            <div className="text-xs text-white/70">
-              {hoveredChapter.song.artist}
-            </div>
-          </div>
+          <PlayerControlsBar
+            songsInVideo={songsInVideo}
+            allSongsHaveEnd={allSongsHaveEnd}
+            songCumulativeMap={songCumulativeMap}
+            totalSongsDuration={totalSongsDuration}
+            videoDuration={videoDuration}
+            videoStartTime={videoStartTime}
+            displayDuration={displayDuration}
+            tempSeekValue={tempSeekValue}
+            setTempSeekValue={setTempSeekValue}
+            handleSeekChange={handleSeekChange}
+            hoveredChapter={hoveredChapter}
+            setHoveredChapter={setHoveredChapter}
+            isPlaying={isPlaying}
+            onTogglePlay={handleTogglePlay}
+            disabled={!playerControls?.isReady}
+            isMuted={isMuted}
+            onNext={nextSong ? () => changeCurrentSong(nextSong) : undefined}
+            nextDisabled={!nextSong}
+            formattedCurrentTime={formattedCurrentTime}
+            formattedDuration={formattedDuration}
+            displaySongTitle={displaySongTitle}
+            displaySongArtist={displaySongArtist}
+            onOpenShareModal={() => setOpenShareModal(true)}
+            volumeValue={volumeValue}
+            tempVolumeValue={tempVolumeValue}
+            onVolumeIconClick={handleVolumeIconClick}
+            isNarrowScreen={isNarrowScreen}
+            showVolumeSlider={showVolumeSlider}
+            onVolumeChange={handleVolumeChange}
+          />
         )}
 
         {currentSongInfo?.live_call && (
