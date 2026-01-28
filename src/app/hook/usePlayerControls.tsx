@@ -136,7 +136,13 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       videoId?: string,
       startTime?: number,
     ) => {
-      if (!song || (song === currentSongInfo && !videoId)) {
+      if (!song) return;
+
+      const isSameSongById =
+        song.video_id === currentSongInfo?.video_id &&
+        song.start === currentSongInfo?.start;
+
+      if (isSameSongById && !videoId) {
         return;
       }
 
@@ -214,7 +220,11 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         } else {
           setVideoId("");
           setStartTime(0);
-          if (currentSong === song) {
+          // 同一曲判定は参照ではなく ID/開始時刻で判定する
+          const isSameAsCurrent =
+            currentSong?.video_id === song?.video_id &&
+            currentSong?.start === song?.start;
+          if (isSameAsCurrent) {
             resetPlayer();
           }
         }

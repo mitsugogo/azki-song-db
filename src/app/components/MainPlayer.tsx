@@ -239,21 +239,32 @@ export default function MainPlayer() {
       globalPlayer.setIsMinimized(true);
     } else if (isHomePage) {
       globalPlayer.maximizePlayer();
-      // URLパラメータがない場合のみ、グローバルプレイヤーから曲を復元
       const urlParams = new URLSearchParams(window.location.search);
-      const hasUrlParams =
-        urlParams.has("v") ||
-        urlParams.has("videoId") ||
-        urlParams.has("playlist");
-      if (hasUrlParams) {
-        // URLパラメータのvideoIdを取得
-        const urlVideoId = urlParams.get("v") || urlParams.get("videoId");
-        // 現在の動画と異なる場合のみ再生位置をリセット
-        if (urlVideoId && globalPlayer.currentSong?.video_id !== urlVideoId) {
-          globalPlayer.setCurrentTime(0);
+
+      // 検索クエリで遷移してきたらグローバルプレイヤーを初期化
+      if (urlParams.has("q")) {
+        globalPlayer.setCurrentSong(null);
+        globalPlayer.setIsPlaying(false);
+        globalPlayer.setIsMinimized(false);
+        globalPlayer.setCurrentTime(0);
+        setHasRestoredPosition(false);
+        setPreviousVideoId(null);
+      } else {
+        // URLパラメータがない場合のみ、グローバルプレイヤーから曲を復元
+        const hasUrlParams =
+          urlParams.has("v") ||
+          urlParams.has("videoId") ||
+          urlParams.has("playlist");
+        if (hasUrlParams) {
+          // URLパラメータのvideoIdを取得
+          const urlVideoId = urlParams.get("v") || urlParams.get("videoId");
+          // 現在の動画と異なる場合のみ再生位置をリセット
+          if (urlVideoId && globalPlayer.currentSong?.video_id !== urlVideoId) {
+            globalPlayer.setCurrentTime(0);
+          }
+        } else if (globalPlayer.currentSong && !currentSong) {
+          changeCurrentSong(globalPlayer.currentSong);
         }
-      } else if (globalPlayer.currentSong && !currentSong) {
-        changeCurrentSong(globalPlayer.currentSong);
       }
     }
 

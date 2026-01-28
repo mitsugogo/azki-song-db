@@ -447,7 +447,7 @@ export default function PlayerSection({
           <div className="absolute top-0 left-0 w-full h-full">
             {currentSong && (
               <YouTubePlayer
-                key={`youtube-player-${playerKey}`}
+                key={`youtube-player-${playerKey}-${currentSong?.video_id ?? "none"}-${currentSong?.start ?? 0}`}
                 song={currentSong}
                 video_id={videoId}
                 startTime={startTime}
