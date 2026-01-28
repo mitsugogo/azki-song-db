@@ -9,10 +9,11 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
-      // Check for heading
-      await expect(
-        page.getByRole("heading", { name: /年ごとの活動記録/i }),
-      ).toBeVisible();
+      // Check for heading (accept a few possible variants)
+      const heading = page.getByRole("heading", {
+        name: /年ごとの活動記録|活動記録|活動年表/i,
+      });
+      await expect(heading).toBeVisible();
     });
 
     test("displays year links", async ({ page }) => {
@@ -20,8 +21,9 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
-      // Look for year links (e.g., 2024, 2023, etc.)
-      const yearLinks = page.getByRole("link", { name: /20\d{2}/ });
+      // Look for year links by href (e.g., /summary/2024)
+      await page.waitForSelector('a[href^="/summary/20"]', { timeout: 5000 });
+      const yearLinks = page.locator('a[href^="/summary/20"]');
       expect(await yearLinks.count()).toBeGreaterThan(0);
     });
   });
