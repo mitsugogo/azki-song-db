@@ -29,10 +29,11 @@ const useSearch = (allSongs: Song[]) => {
     allSongs.forEach((song) => {
       if (song.milestones) {
         song.milestones.forEach((milestone) => {
-          if (!map.has(milestone)) {
-            map.set(milestone, new Set());
+          const key = milestone.toLowerCase();
+          if (!map.has(key)) {
+            map.set(key, new Set());
           }
-          map.get(milestone)?.add(song.video_id);
+          map.get(key)?.add(song.video_id);
         });
       }
     });
@@ -80,7 +81,10 @@ const useSearch = (allSongs: Song[]) => {
           return s.year === yearNumber;
         },
         "milestone:": (s, v) => {
-          const videoIdSet = milestoneVideoIdMap.current.get(v);
+          if (v === "*") {
+            return Boolean(s.milestones && s.milestones.length > 0);
+          }
+          const videoIdSet = milestoneVideoIdMap.current.get(v.toLowerCase());
           if (!videoIdSet) return false;
           return videoIdSet.has(s.video_id);
         },
