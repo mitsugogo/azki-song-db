@@ -91,7 +91,7 @@ export default function PlayerControlsBar({
         <div className="relative flex-1">
           {/* Chapter markers */}
           {songsInVideo.length > 0 && (
-            <div className="pointer-events-none absolute inset-0 flex">
+            <div className="pointer-events-none absolute inset-0 flex mt-4 z-50">
               {allSongsHaveEnd
                 ? // 空白を除いた連続表示
                   songCumulativeMap.map((item, idx) => {
