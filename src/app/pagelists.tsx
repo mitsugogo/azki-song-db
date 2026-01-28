@@ -20,8 +20,8 @@ export const pageList: PageCategory[] = [
     items: [
       { name: "Discography", href: "/discography" },
       { name: "統計情報", href: "/statistics" },
+      { name: "活動記録", href: "/summary" },
       { name: "全データ", href: "/data" },
-      { name: "年ごとの活動記録", href: "/summary" },
     ],
   },
 ];
