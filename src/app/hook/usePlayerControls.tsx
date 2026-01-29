@@ -10,6 +10,7 @@ import YouTube, { YouTubeEvent } from "react-youtube";
  */
 const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const currentSongRef = useRef(currentSong);
   const [currentSongInfo, setCurrentSongInfo] = useState<Song | null>(null);
   const [previousSong, setPreviousSong] = useState<Song | null>(null);
   const [nextSong, setNextSong] = useState<Song | null>(null);
@@ -44,6 +45,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   const songsRef = useRef(songs);
   const nextSongRef = useRef(nextSong);
 
+  useEffect(() => {
+    currentSongRef.current = currentSong;
+  }, [currentSong]);
   useEffect(() => {
     currentSongInfoRef.current = currentSongInfo;
   }, [currentSongInfo]);
@@ -136,15 +140,10 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       videoId?: string,
       startTime?: number,
     ) => {
-      if (!song) return;
+      if (!song && !videoId) return;
 
-      const isSameSongById =
-        song.video_id === currentSongInfo?.video_id &&
-        song.start === currentSongInfo?.start;
-
-      if (isSameSongById && !videoId) {
-        return;
-      }
+      const targetVideoId = videoId ?? song?.video_id;
+      const targetStartTime = startTime ?? (song ? Number(song.start) : 0);
 
       const url = new URL(window.location.href);
       url.searchParams.delete("v");
@@ -153,13 +152,22 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       // Headerなどに通知
       window.dispatchEvent(new Event("replacestate"));
 
-      if (youtubeVideoIdRef.current !== song?.video_id) {
+      if (youtubeVideoIdRef.current !== targetVideoId) {
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = null;
         // 動画IDが変わった場合はフラグを立てる
         isManualChangeInProgressRef.current = true;
       }
-      youtubeVideoIdRef.current = song?.video_id || "";
+      youtubeVideoIdRef.current = targetVideoId || "";
+
+      if (!song && targetVideoId) {
+        const targetSongs = sortedAllSongs
+          .slice()
+          .filter((s) => s.video_id === targetVideoId)
+          .sort((a, b) => parseInt(b.start) - parseInt(a.start));
+        song =
+          targetSongs.find((s) => parseInt(s.start) <= targetStartTime) ?? null;
+      }
 
       if (song) {
         setPreviousAndNextSongs(song, songs);
@@ -170,7 +178,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       // 曲が変わったらメッセージと表示済みリストをリセット
       setTimedLiveCallText(null);
 
-      if (song.live_call) {
+      if (song && song.live_call) {
         // ライブコール場所を秒数に変換しながらパース
         const timedMessages = song.live_call
           .split(/[\r\n]/)
@@ -206,27 +214,21 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         // 手動で曲を変更したことを記録
         lastManualChangeRef.current = Date.now();
 
-        if (videoId && startTime) {
+        if (videoId && typeof startTime === "number") {
           setVideoId(videoId);
           setStartTime(startTime);
-
-          // videoIdとstartTimeを直指定で再生する場合、指定からsongを推定する
-          const targetSongs = sortedAllSongs
-            .slice()
-            .filter((s) => s.video_id === videoId)
-            .sort((a, b) => parseInt(b.start) - parseInt(a.start));
-          song =
-            targetSongs.find((s) => parseInt(s.start) <= startTime) ?? null;
         } else {
           setVideoId("");
           setStartTime(0);
-          // 同一曲判定は参照ではなく ID/開始時刻で判定する
-          const isSameAsCurrent =
-            currentSong?.video_id === song?.video_id &&
-            currentSong?.start === song?.start;
-          if (isSameAsCurrent) {
-            resetPlayer();
-          }
+        }
+
+        // 同一再生中の曲が渡された場合は変更を無視する
+        const isSameAsPlaying =
+          currentSong?.video_id === song?.video_id &&
+          currentSong?.start === song?.start;
+
+        if (isSameAsPlaying && !videoId && typeof startTime !== "number") {
+          return;
         }
 
         setCurrentSong(song);
@@ -329,7 +331,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
               foundSong.video_id !== currentSongInfoRef.current?.video_id ||
               foundSong.title !== currentSongInfoRef.current?.title
             ) {
-              changeCurrentSong(foundSong, true);
+              // changeCurrentSong(foundSong, true);
             }
           }
 
@@ -407,8 +409,10 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   return {
     currentSong,
     setCurrentSong,
+    currentSongRef,
     currentSongInfo,
     setCurrentSongInfo,
+    currentSongInfoRef,
     previousSong,
     nextSong,
     isPlaying,

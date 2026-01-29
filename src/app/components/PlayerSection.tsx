@@ -244,6 +244,7 @@ export default function PlayerSection({
   const [volumeBeforeMute, setVolumeBeforeMute] = useState(100);
   const lastSeekTimeRef = useRef<number>(0);
   const [tempSeekValue, setTempSeekValue] = useState(displayCurrentTime);
+  const isSeekingRef = useRef(false);
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -306,6 +307,7 @@ export default function PlayerSection({
 
   // tempシーク値をdisplayCurrentTimeの変化に応じて更新
   useEffect(() => {
+    if (isSeekingRef.current) return;
     setTempSeekValue(displayCurrentTime);
   }, [displayCurrentTime]);
 
@@ -353,38 +355,66 @@ export default function PlayerSection({
     }
   };
 
-  const handleSeekChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const seekToFromDisplayValue = (displayValue: number, force = false) => {
     if (!playerControls) return;
-    const nextValue = Number(event.target.value);
 
-    // 連続時間を実際の動画時間に変換
+    // ドラッグ中は強制フラグがない限り自動で曲変更しない
+    if (isSeekingRef.current && !force) {
+      return;
+    }
+
     const actualTime = allSongsHaveEnd
-      ? cumulativeToActual(nextValue)
-      : nextValue + videoStartTime;
+      ? cumulativeToActual(displayValue)
+      : displayValue + videoStartTime;
 
-    // その時間に対応する曲を探す
-    const targetSong = songsInVideo.find((song) => {
-      const start = Number(song.start);
-      const end = song.end ? Number(song.end) : Infinity;
-      return actualTime >= start && actualTime < end;
-    });
+    // actualTimeを分秒に変換
+    const minutes = Math.floor(actualTime / 60);
+    const seconds = Math.floor(actualTime % 60);
+    console.log("actualTime:", actualTime);
+    console.log(`actualTime: ${minutes}m ${seconds}s`);
 
-    // 曲が見つかり、現在の曲と異なる場合は曲を変更
+    console.log("songsInVideo:", songsInVideo);
+
+    const targetSong = songsInVideo
+      .sort((a: Song, b: Song) => Number(b.start) - Number(a.start))
+      .find((song) => {
+        const start = Number(song.start);
+        const end = song.end ? Number(song.end) : Infinity;
+        return start <= actualTime && actualTime < end;
+      });
+
     if (targetSong) {
       const currentId = `${currentSongInfo?.video_id}-${currentSongInfo?.start}`;
       const targetId = `${targetSong.video_id}-${targetSong.start}`;
 
       if (currentId !== targetId) {
         // 曲を変更（シークは自動的に行われる）
-        changeCurrentSong(targetSong, false, targetSong.video_id, actualTime);
+        console.log("曲を変更", targetSong);
+        changeCurrentSong(targetSong, true, targetSong.video_id, actualTime);
+        playerControls.seekTo(actualTime);
       } else {
-        // 同じ曲内ならシークのみ
         playerControls.seekTo(actualTime);
       }
     } else {
-      // 曲が見つからない場合（空白時間など）は単純にシーク
       playerControls.seekTo(actualTime);
     }
+  };
+
+  const handleSeekChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = Number(event.target.value);
+    setTempSeekValue(nextValue);
+    seekToFromDisplayValue(nextValue);
+  };
+
+  const handleSeekStart = () => {
+    isSeekingRef.current = true;
+  };
+
+  const handleSeekEnd = () => {
+    if (!isSeekingRef.current) return;
+    isSeekingRef.current = false;
+    // リリース時は必ず最終値にシークを当てる
+    seekToFromDisplayValue(tempSeekValue, true);
   };
 
   const handleVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -470,6 +500,8 @@ export default function PlayerSection({
             tempSeekValue={tempSeekValue}
             setTempSeekValue={setTempSeekValue}
             handleSeekChange={handleSeekChange}
+            onSeekStart={handleSeekStart}
+            onSeekEnd={handleSeekEnd}
             hoveredChapter={hoveredChapter}
             setHoveredChapter={setHoveredChapter}
             isPlaying={isPlaying}

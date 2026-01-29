@@ -57,6 +57,8 @@ export default function MainPlayer() {
   const {
     currentSong,
     currentSongInfo,
+    currentSongRef,
+    currentSongInfoRef,
     previousSong,
     nextSong,
     isPlaying,
@@ -174,7 +176,7 @@ export default function MainPlayer() {
           }
         }
       }
-    }, 500); // 100ms→500ms に緩和
+    }, 500);
 
     return () => clearInterval(interval);
   }, [isPlayerReady, isPlaying]);

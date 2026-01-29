@@ -51,6 +51,8 @@ type Props = {
   isNarrowScreen: boolean;
   showVolumeSlider: boolean;
   onVolumeChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onSeekStart?: () => void;
+  onSeekEnd?: () => void;
 };
 
 export default function PlayerControlsBar({
@@ -64,6 +66,8 @@ export default function PlayerControlsBar({
   tempSeekValue,
   setTempSeekValue,
   handleSeekChange,
+  onSeekStart,
+  onSeekEnd,
   hoveredChapter,
   setHoveredChapter,
   isPlaying,
@@ -84,6 +88,7 @@ export default function PlayerControlsBar({
   showVolumeSlider,
   onVolumeChange,
 }: Props) {
+  // seek start/end are handled by parent via optional handlers
   return (
     <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-2xl backdrop-blur-sm">
       {/* Progress Bar */}
@@ -191,6 +196,10 @@ export default function PlayerControlsBar({
             onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
               setTempSeekValue(Number(e.target.value))
             }
+            onTouchStart={() => onSeekStart?.()}
+            onMouseDown={() => onSeekStart?.()}
+            onMouseUp={() => onSeekEnd?.()}
+            onTouchEnd={() => onSeekEnd?.()}
             onChange={handleSeekChange}
             onMouseMove={(e: React.MouseEvent<HTMLInputElement>) => {
               if (songsInVideo.length === 0) return;
