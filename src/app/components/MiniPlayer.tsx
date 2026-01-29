@@ -59,20 +59,25 @@ export default function MiniPlayer() {
   // 初期位置を設定（保存された位置またはデフォルト位置）
   useEffect(() => {
     const savedPosition = localStorage.getItem(STORAGE_KEY);
+
+    const playerWidth = 320; // w-80 = 320px
+    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const defaultPosition = {
+      x: window.innerWidth - playerWidth - 16, // 右端スナップ（余白16px）
+      y: window.innerHeight - playerHeight - 16, // 下端スナップ（余白16px）
+    };
+
     if (savedPosition) {
       try {
         const parsed = JSON.parse(savedPosition);
         setPosition(parsed);
       } catch {
-        // デフォルト位置（右下）
-        setPosition({
-          x: window.innerWidth - 336,
-          y: window.innerHeight - 240,
-        });
+        // デフォルト位置（右下のスナップ位置）
+        setPosition(defaultPosition);
       }
     } else {
-      // デフォルト位置（右下）
-      setPosition({ x: window.innerWidth - 336, y: window.innerHeight - 240 });
+      // デフォルト位置（右下のスナップ位置）
+      setPosition(defaultPosition);
     }
   }, []);
 
