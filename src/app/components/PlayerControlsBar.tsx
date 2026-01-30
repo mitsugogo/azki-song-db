@@ -1,7 +1,24 @@
-import React, { ChangeEvent } from "react";
-import { FaPlay, FaPause, FaStepForward } from "react-icons/fa";
+import React, { ChangeEvent, useState } from "react";
+import {
+  FaPlay,
+  FaPause,
+  FaStepForward,
+  FaPlus,
+  FaStar,
+  FaShare,
+} from "react-icons/fa";
 import { LuVolume2, LuVolumeX } from "react-icons/lu";
+import { BiHide } from "react-icons/bi";
 import { Song } from "../types/song";
+import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
+import { useClickOutside, useMediaQuery } from "@mantine/hooks";
+import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import {
+  MdOutlineCreateNewFolder,
+  MdPlaylistAdd,
+  MdPlaylistAddCheck,
+} from "react-icons/md";
+import CreatePlaylistModal from "./CreatePlaylistModal";
 
 type Hovered = {
   song: Song;
@@ -53,6 +70,11 @@ type Props = {
   onVolumeChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSeekStart?: () => void;
   onSeekEnd?: () => void;
+
+  // player settings
+  currentSongInfo: Song | null;
+  hideFutureSongs: boolean;
+  setHideFutureSongs: (value: boolean) => void;
 };
 
 export default function PlayerControlsBar({
@@ -87,7 +109,44 @@ export default function PlayerControlsBar({
   isNarrowScreen,
   showVolumeSlider,
   onVolumeChange,
+  currentSongInfo,
+  hideFutureSongs,
+  setHideFutureSongs,
 }: Props) {
+  // Mobile menu state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useClickOutside(() => setIsMenuOpen(false));
+
+  // Playlist menu state
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
+  const playlistRef = useClickOutside(() => setShowPlaylistMenu(false));
+
+  // Create playlist modal
+  const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
+
+  // Playlists
+  const {
+    playlists,
+    addToPlaylist,
+    isInPlaylist,
+    removeFromPlaylist,
+    isInAnyPlaylist,
+  } = usePlaylists();
+
+  const addOrRemovePlaylist = (playlist: Playlist) => {
+    if (currentSongInfo && isInPlaylist(playlist, currentSongInfo)) {
+      removeFromPlaylist(playlist, currentSongInfo);
+    } else if (currentSongInfo) {
+      addToPlaylist(playlist, currentSongInfo);
+    }
+  };
+
+  // Check if it's PC screen (md breakpoint)
+  const isPcScreen = useMediaQuery("(min-width: 768px)");
+
+  // Volume slider hover state for PC
+  const [isVolumeHovered, setIsVolumeHovered] = useState(false);
+
   // seek start/end are handled by parent via optional handlers
   return (
     <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-2xl backdrop-blur-sm">
@@ -355,6 +414,67 @@ export default function PlayerControlsBar({
             <FaStepForward className="text-xl text-white" />
           </button>
 
+          <div
+            className="flex items-center gap-0"
+            onMouseEnter={() => !isNarrowScreen && setIsVolumeHovered(true)}
+            onMouseLeave={() => !isNarrowScreen && setIsVolumeHovered(false)}
+          >
+            <button
+              type="button"
+              onClick={onVolumeIconClick}
+              disabled={disabled}
+              className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label={
+                isNarrowScreen
+                  ? "音量調整"
+                  : isMuted || volumeValue === 0
+                    ? "ミュート解除"
+                    : "ミュート"
+              }
+            >
+              {isMuted || volumeValue === 0 ? (
+                <LuVolumeX className="text-xl text-white" />
+              ) : (
+                <LuVolume2 className="text-xl text-white" />
+              )}
+            </button>
+            <div
+              className="flex items-center transition-all duration-300 ease-in-out py-1"
+              style={{
+                width: isNarrowScreen
+                  ? showVolumeSlider
+                    ? "6rem"
+                    : "0"
+                  : isVolumeHovered || showVolumeSlider
+                    ? "6rem"
+                    : "0",
+                opacity: isNarrowScreen
+                  ? showVolumeSlider
+                    ? 1
+                    : 0
+                  : isVolumeHovered || showVolumeSlider
+                    ? 1
+                    : 0,
+              }}
+            >
+              <div className="overflow-visible w-full flex items-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={tempVolumeValue}
+                  onInput={onVolumeChange}
+                  onChange={onVolumeChange}
+                  disabled={disabled}
+                  className="youtube-volume-bar w-24 cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col md:flex-row items-center gap-0.5 md:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
             <span>{formattedCurrentTime}</span>
             <div className="flex items-center gap-1 md:gap-2">
@@ -363,56 +483,282 @@ export default function PlayerControlsBar({
             </div>
           </div>
 
-          <div
-            className="min-w-0 flex-1 border-l border-white/10 pl-3"
-            onClick={onOpenShareModal}
-          >
-            <div className="truncate text-sm font-medium text-white select-none">
+          <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
+            <div className="line-clamp-1 text-sm font-medium text-white select-none">
               {displaySongTitle}
             </div>
-            <div className="truncate text-xs text-white/60 select-none">
+            <div className="line-clamp-1 text-xs text-white/60 select-none">
               {displaySongArtist}
             </div>
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={onVolumeIconClick}
-            disabled={disabled}
-            className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label={
-              isNarrowScreen
-                ? "音量調整"
-                : isMuted || volumeValue === 0
-                  ? "ミュート解除"
-                  : "ミュート"
-            }
-          >
-            {isMuted || volumeValue === 0 ? (
-              <LuVolumeX className="text-xl text-white" />
-            ) : (
-              <LuVolume2 className="text-xl text-white" />
-            )}
-          </button>
-          {(!isNarrowScreen || showVolumeSlider) && (
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={tempVolumeValue}
-              onInput={onVolumeChange}
-              onChange={onVolumeChange}
-              disabled={disabled}
-              className="youtube-volume-bar w-24"
-              style={{
-                background: `linear-gradient(to right, #fff 0%, #fff ${tempVolumeValue}%, rgba(255,255,255,0.3) ${tempVolumeValue}%, rgba(255,255,255,0.3) 100%)`,
-              }}
-            />
+          {/* PC: Show 3 buttons */}
+          {isPcScreen && currentSongInfo && (
+            <>
+              {/* Playlist button */}
+              <div className="relative" ref={playlistRef}>
+                <Menu width={300} withArrow opened={showPlaylistMenu}>
+                  <Menu.Target>
+                    <Tooltip
+                      label={
+                        isInAnyPlaylist(currentSongInfo)
+                          ? "プレイリスト追加済み"
+                          : "プレイリストに追加"
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
+                        className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
+                        aria-label={
+                          isInAnyPlaylist(currentSongInfo)
+                            ? "プレイリスト追加済み"
+                            : "プレイリストに追加"
+                        }
+                      >
+                        {isInAnyPlaylist(currentSongInfo) ? (
+                          <FaStar className="text-base" />
+                        ) : (
+                          <FaPlus className="text-base" />
+                        )}
+                      </button>
+                    </Tooltip>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Label>プレイリスト</Menu.Label>
+
+                    {playlists.length === 0 && (
+                      <div className="ml-3 mb-3">
+                        <span className="text-sm text-light-gray-300 dark:text-gray-300">
+                          プレイリストはありません
+                        </span>
+                      </div>
+                    )}
+
+                    <ScrollArea mah={200}>
+                      {playlists.map((playlist, index) => (
+                        <MenuItem
+                          key={index}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            addOrRemovePlaylist(playlist);
+
+                            if (playlists.length === 1) {
+                              setShowPlaylistMenu(false);
+                            }
+                          }}
+                          leftSection={
+                            isInPlaylist(playlist, currentSongInfo) ? (
+                              <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
+                            ) : (
+                              <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
+                            )
+                          }
+                          component="div"
+                          bg={
+                            isInPlaylist(playlist, currentSongInfo)
+                              ? "blue"
+                              : ""
+                          }
+                          color={
+                            isInPlaylist(playlist, currentSongInfo)
+                              ? "white"
+                              : ""
+                          }
+                          className="mb-0.5"
+                        >
+                          {playlist.name}
+                        </MenuItem>
+                      ))}
+                    </ScrollArea>
+
+                    <Menu.Divider />
+                    <MenuItem
+                      onClick={() => {
+                        setShowPlaylistMenu(false);
+                        setOpenCreatePlaylistModal(true);
+                      }}
+                      name="新しいプレイリストを作成"
+                    >
+                      <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                      新しいプレイリストを作成
+                    </MenuItem>
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
+
+              {/* Share button */}
+              <Tooltip label="現在の楽曲をシェア">
+                <button
+                  type="button"
+                  onClick={onOpenShareModal}
+                  className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
+                  aria-label="現在の楽曲をシェア"
+                >
+                  <FaShare className="text-base" />
+                </button>
+              </Tooltip>
+
+              {/* Hide future songs button */}
+              <Tooltip label="セトリネタバレ防止モード">
+                <button
+                  type="button"
+                  onClick={() => setHideFutureSongs(!hideFutureSongs)}
+                  className={`flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 ${
+                    hideFutureSongs ? "text-pink-400" : "text-white/60"
+                  }`}
+                  aria-label="セトリネタバレ防止モード"
+                >
+                  <BiHide className="text-xl" />
+                </button>
+              </Tooltip>
+            </>
+          )}
+
+          {/* Mobile: Show menu button */}
+          {!isPcScreen && currentSongInfo && (
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
+                aria-label="メニュー"
+              >
+                <svg
+                  className="w-5 h-5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 16 3"
+                >
+                  <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+                </svg>
+              </button>
+
+              {isMenuOpen && (
+                <div className="absolute bottom-12 right-0 z-50 bg-white divide-y rounded-lg shadow-lg w-72 divide-gray-200 dark:bg-gray-700 dark:divide-gray-600">
+                  <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-100">
+                    <li>
+                      <div className="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <Switch
+                          checked={hideFutureSongs}
+                          onChange={(event) =>
+                            setHideFutureSongs(event.target.checked)
+                          }
+                          color="pink"
+                          label="セトリネタバレ防止モード"
+                          className="cursor-pointer w-full"
+                        />
+                      </div>
+                    </li>
+                  </ul>
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        onOpenShareModal();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                    >
+                      <FaShare className="inline mr-2" />
+                      現在の楽曲をシェア
+                    </button>
+                  </div>
+                  <div className="py-2">
+                    <Menu width={260} withArrow opened={showPlaylistMenu}>
+                      <Menu.Target>
+                        <button
+                          onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                        >
+                          {isInAnyPlaylist(currentSongInfo) ? (
+                            <FaStar className="inline mr-2" />
+                          ) : (
+                            <FaPlus className="inline mr-2" />
+                          )}
+                          {isInAnyPlaylist(currentSongInfo)
+                            ? "プレイリスト追加済み"
+                            : "プレイリストに追加"}
+                        </button>
+                      </Menu.Target>
+
+                      <Menu.Dropdown>
+                        <Menu.Label>プレイリスト</Menu.Label>
+
+                        {playlists.length === 0 && (
+                          <div className="ml-3 mb-3">
+                            <span className="text-sm text-gray-300">
+                              プレイリストはありません
+                            </span>
+                          </div>
+                        )}
+
+                        <ScrollArea mah={200}>
+                          {playlists.map((playlist, index) => (
+                            <MenuItem
+                              key={index}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                addOrRemovePlaylist(playlist);
+                                if (playlists.length === 1) {
+                                  setShowPlaylistMenu(false);
+                                  setIsMenuOpen(false);
+                                }
+                              }}
+                              leftSection={
+                                isInPlaylist(playlist, currentSongInfo) ? (
+                                  <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
+                                ) : (
+                                  <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
+                                )
+                              }
+                              component="div"
+                              bg={
+                                isInPlaylist(playlist, currentSongInfo)
+                                  ? "blue"
+                                  : ""
+                              }
+                              color={
+                                isInPlaylist(playlist, currentSongInfo)
+                                  ? "white"
+                                  : ""
+                              }
+                              className="mb-0.5"
+                            >
+                              {playlist.name}
+                            </MenuItem>
+                          ))}
+                        </ScrollArea>
+
+                        <Menu.Divider />
+                        <MenuItem
+                          onClick={() => {
+                            setShowPlaylistMenu(false);
+                            setIsMenuOpen(false);
+                            setOpenCreatePlaylistModal(true);
+                          }}
+                        >
+                          <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                          新しいプレイリストを作成
+                        </MenuItem>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Create Playlist Modal */}
+      <CreatePlaylistModal
+        onenModal={openCreatePlaylistModal}
+        setOpenModal={setOpenCreatePlaylistModal}
+      />
     </div>
   );
 }

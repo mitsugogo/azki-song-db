@@ -521,6 +521,9 @@ export default function PlayerSection({
             isNarrowScreen={isNarrowScreen}
             showVolumeSlider={showVolumeSlider}
             onVolumeChange={handleVolumeChange}
+            currentSongInfo={currentSongInfo}
+            hideFutureSongs={hideFutureSongs}
+            setHideFutureSongs={setHideFutureSongs}
           />
         )}
 
