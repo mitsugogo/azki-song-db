@@ -331,7 +331,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
               foundSong.video_id !== currentSongInfoRef.current?.video_id ||
               foundSong.title !== currentSongInfoRef.current?.title
             ) {
-              // changeCurrentSong(foundSong, true);
+              changeCurrentSong(foundSong, true);
             }
           }
 
