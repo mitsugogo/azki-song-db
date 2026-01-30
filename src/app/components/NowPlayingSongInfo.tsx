@@ -79,7 +79,7 @@ const NowPlayingSongInfo = ({
       <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSongInfo && (
           <div className="song-info">
-            <div className="hidden lg:flex items-center gap-2 mb-1 border-b border-primary-600">
+            <div className="hidden lg:flex items-center gap-2 pb-2">
               <div className="w-full flex-auto self-baseline">
                 {currentSongInfo.milestones && (
                   <div className="flex items-center gap-1">
@@ -91,34 +91,10 @@ const NowPlayingSongInfo = ({
                     />
                   </div>
                 )}
-                <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white m-0">
-                  <FaCompactDisc
-                    className={`relative mr-2 inline ${
-                      isPlaying ? "animate-spin" : ""
-                    }`}
-                    style={{
-                      top: "-2px",
-                      animationDuration: "3s",
-                    }}
-                  />
-                  {currentSongInfo.title}
-
-                  {currentSongInfo.artist && (
-                    <>
-                      <span className="font-normal text-lg">
-                        {" "}
-                        - {currentSongInfo.artist}
-                      </span>
-                    </>
-                  )}
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white m-0 line-clamp-2">
+                  {currentSongInfo.video_title}
                 </h2>
               </div>
-              <PlayerSettings
-                currentSongInfo={currentSongInfo}
-                hideFutureSongs={hideFutureSongs}
-                setHideFutureSongs={setHideFutureSongs}
-                setOpenShereModal={setOpenShereModal}
-              />
             </div>
 
             <div ref={containerRef} className="lg:hidden md:pb-3">
@@ -157,7 +133,13 @@ const NowPlayingSongInfo = ({
           </div>
         )}
       </div>
-      <Modal opened={opened} onClose={close} title="楽曲情報">
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="楽曲情報"
+        size="2xl"
+        centered
+      >
         {currentSongInfo && (
           <>
             <div className="mb-2 relative">
@@ -181,13 +163,15 @@ const NowPlayingSongInfo = ({
             <hr className="my-4" />
             <Group className="flex items-center">
               <Button
+                color="pink"
                 onClick={close}
-                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer mr-3"
+                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
               >
                 <FaTimes />
-                &nbsp;Close
+                &nbsp;閉じる
               </Button>
               <Button
+                color="pink"
                 onClick={() => setOpenShereModal(true)}
                 className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
               >
