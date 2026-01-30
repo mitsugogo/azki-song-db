@@ -5,6 +5,7 @@ import {
   FaStepForward,
   FaPlus,
   FaStar,
+  FaRegStar,
   FaShare,
 } from "react-icons/fa";
 import { LuVolume2, LuVolumeX } from "react-icons/lu";
@@ -13,6 +14,7 @@ import { Song } from "../types/song";
 import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
 import { useClickOutside, useMediaQuery } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import useFavorites from "../hook/useFavorites";
 import {
   MdOutlineCreateNewFolder,
   MdPlaylistAdd,
@@ -132,6 +134,9 @@ export default function PlayerControlsBar({
     removeFromPlaylist,
     isInAnyPlaylist,
   } = usePlaylists();
+
+  // Favorites
+  const { isInFavorites, toggleFavorite } = useFavorites();
 
   const addOrRemovePlaylist = (playlist: Playlist) => {
     if (currentSongInfo && isInPlaylist(playlist, currentSongInfo)) {
@@ -494,9 +499,35 @@ export default function PlayerControlsBar({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* PC: Show 3 buttons */}
+          {/* PC: Show 4 buttons */}
           {isPcScreen && currentSongInfo && (
             <>
+              {/* Favorite button */}
+              <Tooltip
+                label={
+                  isInFavorites(currentSongInfo)
+                    ? "お気に入りから削除"
+                    : "お気に入りに追加"
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(currentSongInfo)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
+                  aria-label={
+                    isInFavorites(currentSongInfo)
+                      ? "お気に入りから削除"
+                      : "お気に入りに追加"
+                  }
+                >
+                  {isInFavorites(currentSongInfo) ? (
+                    <FaStar className="text-base text-yellow-400 dark:text-yellow-500" />
+                  ) : (
+                    <FaRegStar className="text-base" />
+                  )}
+                </button>
+              </Tooltip>
+
               {/* Playlist button */}
               <div className="relative" ref={playlistRef}>
                 <Menu width={300} withArrow opened={showPlaylistMenu}>
@@ -655,6 +686,24 @@ export default function PlayerControlsBar({
                       </div>
                     </li>
                   </ul>
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        toggleFavorite(currentSongInfo);
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                    >
+                      {isInFavorites(currentSongInfo) ? (
+                        <FaStar className="inline mr-2 text-yellow-400" />
+                      ) : (
+                        <FaRegStar className="inline mr-2" />
+                      )}
+                      {isInFavorites(currentSongInfo)
+                        ? "お気に入りから削除"
+                        : "お気に入りに追加"}
+                    </button>
+                  </div>
                   <div className="py-2">
                     <button
                       onClick={() => {

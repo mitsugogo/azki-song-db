@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
+import useFavorites from "../../hook/useFavorites";
 import { Song } from "@/app/types/song";
 import Link from "next/link";
 import Loading from "@/app/loading";
@@ -116,7 +117,14 @@ export default function PlaylistDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { playlists, updatePlaylist, encodePlaylistUrlParam, clearAllSongs } =
     usePlaylists();
+  const {
+    favorites,
+    reorderFavorites,
+    clearAllFavorites,
+    removeMultipleFavorites,
+  } = useFavorites();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [isFavoritesMode, setIsFavoritesMode] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -151,6 +159,7 @@ export default function PlaylistDetailPage() {
     const url = new URL(window.location.href);
     const id = url.searchParams.get("id");
     setId(id || "");
+    setIsFavoritesMode(id === "system-favorites");
     fetch("/api/songs")
       .then((res) => res.json())
       .then((data) => {
@@ -161,6 +170,36 @@ export default function PlaylistDetailPage() {
 
   useEffect(() => {
     if (!id) return;
+
+    // お気に入りモードの場合
+    if (isFavoritesMode) {
+      const favoritesPlaylist: Playlist = {
+        id: "system-favorites",
+        name: "お気に入り",
+        songs: favorites,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setPlaylist(favoritesPlaylist);
+
+      const songsWithInfo = favorites
+        .map((s) => {
+          const songInfo = allSongs.find(
+            (song) =>
+              song.video_id === s.videoId &&
+              Number(String(song.start)) === Number(s.start),
+          );
+          return songInfo
+            ? { ...s, start: Number(s.start), songinfo: songInfo }
+            : null;
+        })
+        .filter((s) => s !== null);
+
+      setPlaylistSongs(songsWithInfo as PlaylistWithSongs["songs"]);
+      return;
+    }
+
+    // 通常のプレイリストの場合
     const currentPlaylist = playlists.find((p) => p.id === id);
     if (!currentPlaylist) {
       setPlaylist(null);
@@ -183,11 +222,23 @@ export default function PlaylistDetailPage() {
       .filter((s) => s !== null);
 
     setPlaylistSongs(songsWithInfo as PlaylistWithSongs["songs"]);
-  }, [playlists, allSongs, id]);
+  }, [playlists, allSongs, id, isFavoritesMode, favorites]);
 
   const handleDeleteSelected = () => {
     if (!playlist) return;
     const keysToDelete = selection;
+
+    // お気に入りモードの場合
+    if (isFavoritesMode) {
+      const entriesToDelete = favorites.filter((s) =>
+        keysToDelete.includes(`${s.videoId}-${s.start}`),
+      );
+      removeMultipleFavorites(entriesToDelete);
+      handlers.resetSelection();
+      return;
+    }
+
+    // 通常のプレイリストの場合
     const updatedSongs = playlist.songs.filter(
       (s) => !keysToDelete.includes(`${s.videoId}-${s.start}`),
     );
@@ -226,6 +277,17 @@ export default function PlaylistDetailPage() {
 
       setPlaylistSongs(newSongs);
 
+      // お気に入りモードの場合
+      if (isFavoritesMode) {
+        const updatedFavorites = newSongs.map((s) => ({
+          videoId: s.videoId,
+          start: String(s.start),
+        }));
+        reorderFavorites(updatedFavorites);
+        return;
+      }
+
+      // 通常のプレイリストの場合
       if (playlist) {
         const updatedPlaylist = {
           ...playlist,
@@ -277,7 +339,9 @@ export default function PlaylistDetailPage() {
           </Button>
           <Button
             color="red"
-            onClick={() => clearAllSongs(playlist)}
+            onClick={() =>
+              isFavoritesMode ? clearAllFavorites() : clearAllSongs(playlist)
+            }
             disabled={playlist.songs.length === 0}
             className="sm:hidden"
           >

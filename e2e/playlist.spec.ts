@@ -46,12 +46,12 @@ test.describe("プレイリスト機能", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // プレイリストボタンをクリック
-    await page.locator('button[name="プレイリストに追加"]').last().click();
+    await page.getByRole("button", { name: "プレイリストに追加" }).click();
     await page.waitForTimeout(1000);
 
     // 「プレイリストを作成」ボタンをクリック
     await page
-      .getByRole("menuitem", { name: "新しいプレイリストを作成" })
+      .getByRole("menuitem", { name: "新しいプレイリストを作成" })
       .first()
       .click();
     await page.waitForTimeout(500);
@@ -73,13 +73,13 @@ test.describe("プレイリスト機能", () => {
       await page.waitForTimeout(1500);
 
       // 作成したプレイリスト名をクリックして追加
-      await page.locator('button[name="プレイリストに追加"]').last().click();
+      await page.getByRole("button", { name: "プレイリストに追加" }).click();
       await page.getByText(playlistName, { exact: true }).click();
       await page.waitForTimeout(500);
     }
 
     // プレイリストボタンをクリックしてメニューを開く
-    await page.getByRole("button", { name: "プレイリスト" }).click();
+    await page.getByRole("button", { name: "プレイリスト" }).last().click();
     await page.waitForTimeout(500);
 
     // プレイリスト名が表示されるのを待つ

@@ -27,7 +27,7 @@ test.describe("Player Control Bar", () => {
       await nextBtn.click();
       // 曲情報が切り替わることを確認（タイトル表示など）
       const songTitle = page
-        .locator(".truncate.text-sm.font-medium.text-white")
+        .locator(".line-clamp-1.text-sm.font-medium.text-white")
         .first();
       await expect(songTitle).not.toHaveText("");
     }
