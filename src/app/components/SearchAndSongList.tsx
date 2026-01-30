@@ -253,7 +253,7 @@ export default function SearchAndSongList({
         title="プレイリスト"
       >
         <Modal.Body>
-          {playlists.length === 0 ? (
+          {playlists.length === 0 && favorites.length === 0 ? (
             <>
               <div>
                 プレイリストを作成して、自分だけのセットリストを作成しましょう！
