@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { metadata } from "../layout";
 import { Breadcrumbs } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
+import SummaryTopClient from "./client";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
@@ -30,17 +31,39 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const res = await fetch(`${baseUrl}/api/songs`, { cache: "no-store" });
-  const songs = (await res.json()) as any[];
+  const activityStart = new Date(2018, 10, 15);
+  const now = new Date();
+  const activityDays =
+    Math.floor(
+      (now.getTime() - activityStart.getTime()) / (1000 * 60 * 60 * 24),
+    ) + 1;
 
-  const counts = songs.reduce<Record<number, number>>((acc, s) => {
-    const y = Number(s.year);
-    if (!Number.isNaN(y)) acc[y] = (acc[y] || 0) + 1;
-    return acc;
-  }, {});
-  const years = Object.keys(counts)
-    .map((k) => Number(k))
-    .sort((a, b) => b - a);
+  const avtivityDurationStr = (() => {
+    let years = now.getFullYear() - activityStart.getFullYear();
+    let months = now.getMonth() - activityStart.getMonth();
+    let days = now.getDate() - activityStart.getDate();
+
+    // 日がマイナスになった場合、1ヶ月分戻して日数を調整
+    if (days < 0) {
+      months -= 1;
+      // 前月の末日を取得して、足りない日数を足す
+      const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += previousMonthEnd.getDate();
+    }
+
+    // 月がマイナスになった場合、1年分戻して月数を調整
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+    let result = "";
+    if (years > 0) {
+      result += `${years}年`;
+    }
+    result += `${months}ヶ月`;
+    result += `${days}日`;
+    return result;
+  })();
 
   const breadcrumbItems = [
     {
@@ -51,7 +74,7 @@ export default async function Page() {
       ),
       href: "/",
     },
-    { title: "年ごとの活動記録", href: "/summary" },
+    { title: "活動記録", href: "/summary" },
   ].map((item, index) => (
     <Link
       href={item.href}
@@ -62,91 +85,23 @@ export default async function Page() {
     </Link>
   ));
 
-  // 年ごとのマイルストーンと達成日(broadcast_at)を取得
-  const milestonesByYear = songs
-    .sort(
-      (a, b) =>
-        new Date(a.broadcast_at).getTime() - new Date(b.broadcast_at).getTime(),
-    )
-    .reduce<Record<number, { broadcast_at: string; milestones: string[] }[]>>(
-      (acc, song) => {
-        const year = Number(song.year);
-        if (Number.isNaN(year)) return acc;
-        if (!acc[year]) acc[year] = [];
-        // 空のマイルストーンは除外
-        if (!song.milestones || song.milestones.length === 0) return acc;
-
-        // 重複するマイルストーンはスキップ
-        if (
-          acc[year].some((entry) =>
-            entry.milestones.includes(song.milestones[0]),
-          )
-        )
-          return acc;
-
-        acc[year].push({
-          broadcast_at: song.broadcast_at,
-          milestones: song.milestones || [],
-        });
-        return acc;
-      },
-      {},
-    );
-
   return (
-    <div className="flex-grow lg:p-6 lg:pb-0">
+    <div className="grow lg:p-6 lg:pb-0">
       <div className="mb-4">
         <Breadcrumbs separator="›">{breadcrumbItems}</Breadcrumbs>
       </div>
-      <h1 className="font-extrabold text-2xl p-3">年ごとの活動記録</h1>
+      <h1 className="font-extrabold text-2xl p-3">活動記録</h1>
 
       <div className="p-3">
         <p className="text-sm text-light-gray-400 mb-4">
           各年ごとの活動の要約ページです。年をクリックすると詳細ページへ移動します。
         </p>
+        <p className="text-sm text-light-gray-400 mb-4">
+          活動日数: <span className="font-semibold">{activityDays}</span>
+          日目（2018/11/15 から {avtivityDurationStr}経過）
+        </p>
 
-        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {years.map((year) => (
-            <li
-              key={year}
-              className="border rounded p-3 hover:shadow-md transition-shadow duration-150 dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-600"
-            >
-              <Link href={`/summary/${year}`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold">{year}年</span>
-                  <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1">
-                    {counts[year]}曲
-                  </span>
-                </div>
-                <div>
-                  {milestonesByYear[year] && (
-                    <ul className="mt-2 space-y-1">
-                      {milestonesByYear[year]
-                        .flat()
-                        .map(
-                          (
-                            s: { broadcast_at: string; milestones: string[] },
-                            idx: number,
-                          ) => (
-                            <li
-                              key={idx}
-                              className="text-sm text-light-gray-600 dark:text-light-gray-400"
-                            >
-                              • {s.milestones.join(", ")} (
-                              {new Date(s.broadcast_at).toLocaleDateString(
-                                "ja-JP",
-                              )}
-                              )
-                            </li>
-                          ),
-                        )}
-                    </ul>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <SummaryTopClient />
       </div>
     </div>
   );

@@ -151,7 +151,8 @@ afterEach(() => {
 describe("getGridCols", () => {
   it("returns expected column counts for breakpoints", () => {
     expect(getGridCols(500)).toBe(1);
-    expect(getGridCols(800)).toBe(2);
+    expect(getGridCols(800)).toBe(1);
+    expect(getGridCols(1024)).toBe(2);
     expect(getGridCols(1400)).toBe(3);
     expect(getGridCols(2000)).toBe(4);
     expect(getGridCols(3000)).toBe(5);

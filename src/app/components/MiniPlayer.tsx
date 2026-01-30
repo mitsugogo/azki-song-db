@@ -45,6 +45,13 @@ export default function MiniPlayer() {
 
   // ドラッグ機能の状態
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const positionRef = useRef<Position>(position);
+  const snappedRef = useRef({
+    left: false,
+    right: false,
+    top: false,
+    bottom: false,
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const miniPlayerRef = useRef<HTMLDivElement>(null);
@@ -59,21 +66,91 @@ export default function MiniPlayer() {
   // 初期位置を設定（保存された位置またはデフォルト位置）
   useEffect(() => {
     const savedPosition = localStorage.getItem(STORAGE_KEY);
+
+    const playerWidth = 320; // w-80 = 320px
+    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const defaultPosition = {
+      x: window.innerWidth - playerWidth - 16, // 右端スナップ（余白16px）
+      y: window.innerHeight - playerHeight - 16, // 下端スナップ（余白16px）
+    };
+
     if (savedPosition) {
       try {
         const parsed = JSON.parse(savedPosition);
         setPosition(parsed);
       } catch {
-        // デフォルト位置（右下）
-        setPosition({
-          x: window.innerWidth - 336,
-          y: window.innerHeight - 240,
-        });
+        // デフォルト位置（右下のスナップ位置）
+        setPosition(defaultPosition);
       }
     } else {
-      // デフォルト位置（右下）
-      setPosition({ x: window.innerWidth - 336, y: window.innerHeight - 240 });
+      // デフォルト位置（右下のスナップ位置）
+      setPosition(defaultPosition);
     }
+  }, []);
+
+  // position の最新値を参照できるように ref と同期
+  useEffect(() => {
+    positionRef.current = position;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const playerWidth = 320;
+    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const minX = 16;
+    const minY = 16;
+
+    snappedRef.current.left = position.x <= minX + SNAP_DISTANCE;
+    snappedRef.current.right =
+      position.x >= windowWidth - playerWidth - 16 - SNAP_DISTANCE;
+    snappedRef.current.top = position.y <= minY + SNAP_DISTANCE;
+    snappedRef.current.bottom =
+      position.y >= windowHeight - playerHeight - 16 - SNAP_DISTANCE;
+  }, [position]);
+
+  // ウィンドウリサイズ時にミニプレイヤーが画面外に出ていれば追従（クランプ）する
+  useEffect(() => {
+    const handleResize = () => {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const playerWidth = 320;
+      const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+
+      const minX = 16;
+      const minY = 16;
+      const maxX = Math.max(minX, windowWidth - playerWidth - 16);
+      const maxY = Math.max(minY, windowHeight - playerHeight - 16);
+
+      const cur = positionRef.current;
+
+      // スナップされていた辺を保持している場合は、その辺に追従させる
+      let clampedX = cur.x;
+      if (snappedRef.current.left) {
+        clampedX = minX;
+      } else if (snappedRef.current.right) {
+        clampedX = maxX;
+      } else {
+        clampedX = Math.min(Math.max(cur.x, minX), maxX);
+      }
+
+      let clampedY = cur.y;
+      if (snappedRef.current.top) {
+        clampedY = minY;
+      } else if (snappedRef.current.bottom) {
+        clampedY = maxY;
+      } else {
+        clampedY = Math.min(Math.max(cur.y, minY), maxY);
+      }
+
+      if (clampedX !== cur.x || clampedY !== cur.y) {
+        setPosition({ x: clampedX, y: clampedY });
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ x: clampedX, y: clampedY }),
+        );
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // 四隅にスナップする関数

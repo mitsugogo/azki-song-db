@@ -340,6 +340,49 @@ const NowPlayingSongInfoDetail = ({
               </dd>
             </div>
 
+            {/** マイルストーン */}
+            {currentSongInfo.milestones &&
+              currentSongInfo.milestones.length > 0 && (
+                <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+                  <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
+                    <span className="inline-flex items-center">
+                      <FaBook className="text-base" />
+                      <span className="ml-1">マイルストーン:</span>
+                    </span>
+                  </dt>
+                  <dd className="flex flex-wrap gap-1">
+                    {currentSongInfo.milestones.map((milestone) => (
+                      <Badge
+                        key={milestone}
+                        className="text-xs bg-primary text-white dark:text-white hover:bg-primary-500 cursor-pointer dark:bg-primary-700 dark:hover:bg-primary-600"
+                        onClick={() => {
+                          const existsSameMilestone = searchTerm.includes(
+                            `milestone:${milestone}`,
+                          );
+                          if (existsSameMilestone) {
+                            setSearchTerm(
+                              searchTerm
+                                .replace(`milestone:${milestone}`, "")
+                                .trim(),
+                            );
+                          } else {
+                            setSearchTerm(
+                              `${
+                                searchTerm ? `${searchTerm}|` : ""
+                              }milestone:${milestone}`,
+                            );
+                          }
+                        }}
+                        title={milestone}
+                        aria-label={milestone}
+                      >
+                        {milestone}
+                      </Badge>
+                    ))}
+                  </dd>
+                </div>
+              )}
+
             {videoTimestamps.length > 1 && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">

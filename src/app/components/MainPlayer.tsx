@@ -57,6 +57,8 @@ export default function MainPlayer() {
   const {
     currentSong,
     currentSongInfo,
+    currentSongRef,
+    currentSongInfoRef,
     previousSong,
     nextSong,
     isPlaying,
@@ -104,6 +106,45 @@ export default function MainPlayer() {
       }
     }
   }, []);
+
+  const seekTo = useCallback((seconds: number) => {
+    if (
+      playerRef.current &&
+      typeof playerRef.current.seekTo === "function" &&
+      typeof playerRef.current.getCurrentTime === "function"
+    ) {
+      const currentTime = playerRef.current.getCurrentTime();
+      const newTime = Math.max(0, currentTime + seconds);
+      playerRef.current.seekTo(newTime, true);
+    }
+  }, []);
+
+  // キーボードイベント: 左右キーで動画を10秒前後させる
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // 入力フィールドやテキストエリアにフォーカスがある場合は無視
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // 左右キーの処理
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        seekTo(-10);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        seekTo(10);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [seekTo]);
 
   // handlePlayerOnReadyをラップして再生位置を復元
   const handlePlayerOnReady = useCallback(
@@ -174,7 +215,7 @@ export default function MainPlayer() {
           }
         }
       }
-    }, 500); // 100ms→500ms に緩和
+    }, 500);
 
     return () => clearInterval(interval);
   }, [isPlayerReady, isPlaying]);
@@ -239,21 +280,32 @@ export default function MainPlayer() {
       globalPlayer.setIsMinimized(true);
     } else if (isHomePage) {
       globalPlayer.maximizePlayer();
-      // URLパラメータがない場合のみ、グローバルプレイヤーから曲を復元
       const urlParams = new URLSearchParams(window.location.search);
-      const hasUrlParams =
-        urlParams.has("v") ||
-        urlParams.has("videoId") ||
-        urlParams.has("playlist");
-      if (hasUrlParams) {
-        // URLパラメータのvideoIdを取得
-        const urlVideoId = urlParams.get("v") || urlParams.get("videoId");
-        // 現在の動画と異なる場合のみ再生位置をリセット
-        if (urlVideoId && globalPlayer.currentSong?.video_id !== urlVideoId) {
-          globalPlayer.setCurrentTime(0);
+
+      // 検索クエリで遷移してきたらグローバルプレイヤーを初期化
+      if (urlParams.has("q")) {
+        globalPlayer.setCurrentSong(null);
+        globalPlayer.setIsPlaying(false);
+        globalPlayer.setIsMinimized(false);
+        globalPlayer.setCurrentTime(0);
+        setHasRestoredPosition(false);
+        setPreviousVideoId(null);
+      } else {
+        // URLパラメータがない場合のみ、グローバルプレイヤーから曲を復元
+        const hasUrlParams =
+          urlParams.has("v") ||
+          urlParams.has("videoId") ||
+          urlParams.has("playlist");
+        if (hasUrlParams) {
+          // URLパラメータのvideoIdを取得
+          const urlVideoId = urlParams.get("v") || urlParams.get("videoId");
+          // 現在の動画と異なる場合のみ再生位置をリセット
+          if (urlVideoId && globalPlayer.currentSong?.video_id !== urlVideoId) {
+            globalPlayer.setCurrentTime(0);
+          }
+        } else if (globalPlayer.currentSong && !currentSong) {
+          changeCurrentSong(globalPlayer.currentSong);
         }
-      } else if (globalPlayer.currentSong && !currentSong) {
-        changeCurrentSong(globalPlayer.currentSong);
       }
     }
 
@@ -430,6 +482,16 @@ export default function MainPlayer() {
     pause: pauseVideo,
     seekTo: seekToAbsolute,
     setVolume: changeVolume,
+    mute: () => {
+      if (playerRef.current && typeof playerRef.current.mute === "function") {
+        playerRef.current.mute();
+      }
+    },
+    unMute: () => {
+      if (playerRef.current && typeof playerRef.current.unMute === "function") {
+        playerRef.current.unMute();
+      }
+    },
     currentTime: playerCurrentTime,
     volume: playerVolume,
     duration: playerDuration,

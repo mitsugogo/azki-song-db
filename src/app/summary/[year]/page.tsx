@@ -28,13 +28,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // Debug: log incoming params so we can see what value Next is passing here
-  try {
-    // eslint-disable-next-line no-console
-    console.debug("generateMetadata params (raw):", { params });
-  } catch (e) {
-    // ignore logging errors
-  }
+  // incoming params
 
   // `params` may be a Promise in Next.js dynamic API handlers — await it before
   // accessing its properties to avoid the runtime error shown in dev logs.
@@ -42,13 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     | { year?: string | string[] }
     | undefined;
 
-  // Debug resolved params
-  try {
-    // eslint-disable-next-line no-console
-    console.debug("generateMetadata params (resolved):", { resolvedParams });
-  } catch (e) {
-    // ignore
-  }
+  // resolved params processed
 
   const rawYearParam = String(resolvedParams?.year ?? "");
   // If params.year is an array (shouldn't be for [year], but handle defensively)

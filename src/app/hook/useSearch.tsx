@@ -22,6 +22,24 @@ const useSearch = (allSongs: Song[]) => {
   const searchParams = useSearchParams();
   const isSyncingFromUrl = useRef(false);
 
+  // マイルストーンごとのvideo_id一覧を事前に集計
+  const milestoneVideoIdMap = useRef<Map<string, Set<string>>>(new Map());
+  useEffect(() => {
+    const map = new Map<string, Set<string>>();
+    allSongs.forEach((song) => {
+      if (song.milestones) {
+        song.milestones.forEach((milestone) => {
+          const key = milestone.toLowerCase();
+          if (!map.has(key)) {
+            map.set(key, new Set());
+          }
+          map.get(key)?.add(song.video_id);
+        });
+      }
+    });
+    milestoneVideoIdMap.current = map;
+  }, [allSongs]);
+
   // 検索ロジック
   const filterCallback = useCallback(
     (word: string) => (song: Song) => {
@@ -62,10 +80,14 @@ const useSearch = (allSongs: Song[]) => {
           const yearNumber = Number(v);
           return s.year === yearNumber;
         },
-        "milestone:": (s, v) =>
-          v === "*"
-            ? (s.milestones?.length ?? 0) > 0
-            : (s.milestones?.some((m) => m.includes(v)) ?? false),
+        "milestone:": (s, v) => {
+          if (v === "*") {
+            return Boolean(s.milestones && s.milestones.length > 0);
+          }
+          const videoIdSet = milestoneVideoIdMap.current.get(v.toLowerCase());
+          if (!videoIdSet) return false;
+          return videoIdSet.has(s.video_id);
+        },
         "season:": (s, v) => {
           const month = new Date(s.broadcast_at).getMonth() + 1;
           switch (v) {
@@ -114,18 +136,7 @@ const useSearch = (allSongs: Song[]) => {
           return prefixSearches[prefix](song, word.substring(prefix.length));
         }
       }
-
-      return (
-        song.title.toLowerCase().includes(word) ||
-        song.artist.toLowerCase().includes(word) ||
-        song.album.toLowerCase().includes(word) ||
-        song.sing.toLowerCase().includes(word) ||
-        song.tags.some((tag) => tag.toLowerCase().includes(word)) ||
-        song.video_title.toLowerCase().includes(word) ||
-        (song.extra && song.extra.toLowerCase().includes(word)) ||
-        (song.milestones &&
-          song.milestones.some((m) => m.toLowerCase().includes(word)))
-      );
+      return false;
     },
     [],
   );

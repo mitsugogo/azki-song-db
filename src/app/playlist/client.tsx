@@ -13,8 +13,9 @@ import {
   Table,
 } from "@mantine/core";
 import usePlaylists from "../hook/usePlaylists";
+import useFavorites from "../hook/useFavorites";
 import Link from "next/link";
-import { FaCheck, FaPlay } from "react-icons/fa6";
+import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
 
 export default function PlaylistPage() {
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
@@ -43,6 +44,21 @@ export default function PlaylistPage() {
 
   const { playlists, deletePlaylist, encodePlaylistUrlParam, getMaxLimit } =
     usePlaylists();
+
+  const { favorites } = useFavorites();
+
+  // お気に入りを仮想プレイリストとして作成
+  const favoritesPlaylist = {
+    id: "system-favorites",
+    name: "お気に入り",
+    songs: favorites,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  // お気に入りを最上段に配置
+  const allPlaylists =
+    favorites.length > 0 ? [favoritesPlaylist, ...playlists] : playlists;
 
   const breadcrumbs = [{ title: "プレイリスト", href: "/playlist" }].map(
     (item, index) => (
@@ -97,77 +113,101 @@ export default function PlaylistPage() {
 
       {/* モバイル用カードリスト（デフォルト表示） */}
       <div className="mt-6 p-2 space-y-4 lg:hidden">
-        {playlists.map((playlist) => (
-          <div
-            key={playlist.id}
-            className="p-4 border border-gray-200 rounded-lg shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Checkbox
-                  aria-label="Select playlist"
-                  checked={selectedRows.includes(playlist.id || "")}
-                  onChange={(event) =>
-                    setSelectedRows(
-                      event.currentTarget.checked
-                        ? [...selectedRows, playlist.id || ""]
-                        : selectedRows.filter(
-                            (position) => position !== playlist.id,
-                          ),
-                    )
-                  }
-                />
+        {allPlaylists.map((playlist) => {
+          const isFavorites = playlist.id === "system-favorites";
+          return (
+            <div
+              key={playlist.id}
+              className={`p-4 border rounded-lg shadow-md ${
+                isFavorites
+                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
+                  : "border-gray-200"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  {!isFavorites && (
+                    <Checkbox
+                      aria-label="Select playlist"
+                      checked={selectedRows.includes(playlist.id || "")}
+                      onChange={(event) =>
+                        setSelectedRows(
+                          event.currentTarget.checked
+                            ? [...selectedRows, playlist.id || ""]
+                            : selectedRows.filter(
+                                (position) => position !== playlist.id,
+                              ),
+                        )
+                      }
+                    />
+                  )}
+                  {isFavorites ? (
+                    <Link
+                      href={`/playlist/detail?id=system-favorites`}
+                      className="flex items-center hover:underline"
+                    >
+                      <FaStar className="text-yellow-500 mr-2" size={20} />
+                      <span className="font-semibold text-lg">
+                        {playlist.name}
+                      </span>
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/playlist/detail?id=${playlist.id}`}
+                      className="ml-3 font-semibold text-lg hover:underline"
+                    >
+                      {playlist.name}
+                    </Link>
+                  )}
+                </div>
                 <Link
-                  href={`/playlist/detail?id=${playlist.id}`}
-                  className="ml-3 font-semibold text-lg hover:underline"
+                  href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                  className="text-primary hover:text-primary-600 dark:hover:text-primary-500"
                 >
-                  {playlist.name}
+                  <FaPlay size={20} />
                 </Link>
               </div>
-              <Link
-                href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
-                className="text-primary hover:text-primary-600 dark:hover:text-primary-500"
-              >
-                <FaPlay size={20} />
-              </Link>
+              <div className="mt-2 text-sm text-gray-300">
+                <p>
+                  曲数: {playlist.songs.length}
+                  {!isFavorites && ` / ${getMaxLimit()}`}
+                </p>
+                {!isFavorites && (
+                  <p>
+                    更新日:{" "}
+                    {new Date(playlist.updatedAt as string).toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="mt-4 flex justify-end">
+                {playlist.songs.length > 0 && (
+                  <CopyButton
+                    value={
+                      window.location.origin +
+                      "?playlist=" +
+                      encodePlaylistUrlParam(playlist)
+                    }
+                    timeout={3000}
+                  >
+                    {({ copied, copy }) => (
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        color={copied ? "teal" : "blue"}
+                        onClick={() => {
+                          copy();
+                          setShowCopylinkToast(true);
+                        }}
+                      >
+                        {copied ? "コピーしました" : "共有用URLコピー"}
+                      </Button>
+                    )}
+                  </CopyButton>
+                )}
+              </div>
             </div>
-            <div className="mt-2 text-sm text-gray-300">
-              <p>
-                曲数: {playlist.songs.length} / {getMaxLimit()}
-              </p>
-              <p>
-                更新日:{" "}
-                {new Date(playlist.updatedAt as string).toLocaleString()}
-              </p>
-            </div>
-            <div className="mt-4 flex justify-end">
-              {playlist.songs.length > 0 && (
-                <CopyButton
-                  value={
-                    window.location.origin +
-                    "?playlist=" +
-                    encodePlaylistUrlParam(playlist)
-                  }
-                  timeout={3000}
-                >
-                  {({ copied, copy }) => (
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      color={copied ? "teal" : "blue"}
-                      onClick={() => {
-                        copy();
-                        setShowCopylinkToast(true);
-                      }}
-                    >
-                      {copied ? "コピーしました" : "共有用URLコピー"}
-                    </Button>
-                  )}
-                </CopyButton>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* デスクトップ用テーブル（モバイルでは非表示） */}
@@ -187,94 +227,123 @@ export default function PlaylistPage() {
           </Table.Thead>
 
           <Table.Tbody>
-            {playlists.map((playlist) => (
-              <Table.Tr
-                key={playlist.id}
-                bg={`${
-                  selectedRows.includes(playlist.id || "")
-                    ? "var(--mantine-color-blue-light)"
-                    : ""
-                }`}
-              >
-                <Table.Td>
-                  <Checkbox
-                    aria-label="Select row"
-                    checked={selectedRows.includes(playlist.id || "")}
-                    onChange={(event) =>
-                      setSelectedRows(
-                        event.currentTarget.checked
-                          ? [...selectedRows, playlist.id || ""]
-                          : selectedRows.filter(
-                              (position) => position !== playlist.id,
-                            ),
-                      )
-                    }
-                  />
-                </Table.Td>
-                <Table.Td>
-                  <Link
-                    href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
-                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
-                  >
-                    <Button size="xs" color="gray" radius={"sm"}>
-                      <FaPlay className="mr-1" />
-                      再生
-                    </Button>
-                  </Link>
-                </Table.Td>
-                <Table.Td>
-                  <Link
-                    href={`/playlist/detail?id=${playlist.id}`}
-                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
-                  >
-                    {playlist.id}
-                  </Link>
-                </Table.Td>
-                <Table.Td className="font-semibold">
-                  <Link
-                    href={`/playlist/detail?id=${playlist.id}`}
-                    className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
-                  >
-                    {playlist.name}
-                  </Link>
-                </Table.Td>
-                <Table.Td>
-                  {playlist.songs.length} / {getMaxLimit()}
-                </Table.Td>
-                <Table.Td>
-                  {new Date(playlist.createdAt as string).toLocaleString()}
-                </Table.Td>
-                <Table.Td>
-                  {new Date(playlist.updatedAt as string).toLocaleString()}
-                </Table.Td>
-                <Table.Td>
-                  {playlist.songs.length > 0 && (
-                    <CopyButton
-                      value={
-                        window.location.origin +
-                        "?playlist=" +
-                        encodePlaylistUrlParam(playlist)
-                      }
-                      timeout={3000}
+            {allPlaylists.map((playlist) => {
+              const isFavorites = playlist.id === "system-favorites";
+              return (
+                <Table.Tr
+                  key={playlist.id}
+                  bg={`${
+                    isFavorites
+                      ? "var(--mantine-color-yellow-light)"
+                      : selectedRows.includes(playlist.id || "")
+                        ? "var(--mantine-color-blue-light)"
+                        : ""
+                  }`}
+                >
+                  <Table.Td>
+                    {!isFavorites && (
+                      <Checkbox
+                        aria-label="Select row"
+                        checked={selectedRows.includes(playlist.id || "")}
+                        onChange={(event) =>
+                          setSelectedRows(
+                            event.currentTarget.checked
+                              ? [...selectedRows, playlist.id || ""]
+                              : selectedRows.filter(
+                                  (position) => position !== playlist.id,
+                                ),
+                          )
+                        }
+                      />
+                    )}
+                  </Table.Td>
+                  <Table.Td>
+                    <Link
+                      href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                      className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
                     >
-                      {({ copied, copy }) => (
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          color={copied ? "teal" : "blue"}
-                          onClick={() => {
-                            copy();
-                            setShowCopylinkToast(true);
-                          }}
-                        >
-                          {copied ? "コピーしました" : "共有用URLコピー"}
-                        </Button>
-                      )}
-                    </CopyButton>
-                  )}
-                </Table.Td>
-              </Table.Tr>
-            ))}
+                      <Button size="xs" color="gray" radius={"sm"}>
+                        <FaPlay className="mr-1" />
+                        再生
+                      </Button>
+                    </Link>
+                  </Table.Td>
+                  <Table.Td>
+                    {isFavorites ? (
+                      <Link
+                        href={`/playlist/detail?id=system-favorites`}
+                        className="text-yellow-500 hover:text-yellow-600 hover:underline"
+                      >
+                        <FaStar className="inline" />
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/playlist/detail?id=${playlist.id}`}
+                        className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                      >
+                        {playlist.id}
+                      </Link>
+                    )}
+                  </Table.Td>
+                  <Table.Td className="font-semibold">
+                    {isFavorites ? (
+                      <Link
+                        href={`/playlist/detail?id=system-favorites`}
+                        className="flex items-center gap-2 text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                      >
+                        <FaStar className="text-yellow-500" />
+                        {playlist.name}
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/playlist/detail?id=${playlist.id}`}
+                        className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
+                      >
+                        {playlist.name}
+                      </Link>
+                    )}
+                  </Table.Td>
+                  <Table.Td>
+                    {playlist.songs.length}
+                    {!isFavorites && ` / ${getMaxLimit()}`}
+                  </Table.Td>
+                  <Table.Td>
+                    {!isFavorites &&
+                      new Date(playlist.createdAt as string).toLocaleString()}
+                  </Table.Td>
+                  <Table.Td>
+                    {!isFavorites &&
+                      new Date(playlist.updatedAt as string).toLocaleString()}
+                  </Table.Td>
+                  <Table.Td>
+                    {playlist.songs.length > 0 && (
+                      <CopyButton
+                        value={
+                          window.location.origin +
+                          "?playlist=" +
+                          encodePlaylistUrlParam(playlist)
+                        }
+                        timeout={3000}
+                      >
+                        {({ copied, copy }) => (
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            color={copied ? "teal" : "blue"}
+                            onClick={() => {
+                              copy();
+                              setShowCopylinkToast(true);
+                            }}
+                          >
+                            {copied ? "コピーしました" : "共有用URLコピー"}
+                          </Button>
+                        )}
+                      </CopyButton>
+                    )}
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
           </Table.Tbody>
         </Table>
       </div>

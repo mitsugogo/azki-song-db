@@ -16,6 +16,8 @@ import {
 } from "@mantine/core";
 import SearchInput from "./SearchInput";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
+import useFavorites from "../hook/useFavorites";
+import { FaStar } from "react-icons/fa6";
 import {
   MdCheck,
   MdContentCopy,
@@ -61,6 +63,7 @@ export default function SearchAndSongList({
 
   const { playlists, addToPlaylist, removeFromPlaylist, isNowPlayingPlaylist } =
     usePlaylists();
+  const { favorites } = useFavorites();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
 
@@ -250,7 +253,7 @@ export default function SearchAndSongList({
         title="プレイリスト"
       >
         <Modal.Body>
-          {playlists.length === 0 ? (
+          {playlists.length === 0 && favorites.length === 0 ? (
             <>
               <div>
                 プレイリストを作成して、自分だけのセットリストを作成しましょう！
@@ -280,6 +283,75 @@ export default function SearchAndSongList({
                 再生するプレイリストを選択してください
               </div>
               <ScrollArea h={400}>
+                {/* お気に入りを最上段に表示 */}
+                {favorites.length > 0 &&
+                  (() => {
+                    const favoritesPlaylist: Playlist = {
+                      id: "system-favorites",
+                      name: "お気に入り",
+                      songs: favorites,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
+                    };
+                    const isCurrent =
+                      favoritesPlaylist.id === currentPlaylist?.id;
+                    return (
+                      <div
+                        key="system-favorites"
+                        className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
+                          isCurrent
+                            ? "bg-yellow-100 dark:bg-yellow-900/30"
+                            : "bg-yellow-50 dark:bg-yellow-900/10"
+                        } border-l-4 border-yellow-400`}
+                      >
+                        <div
+                          className="flex grow items-center rounded cursor-pointer"
+                          onClick={() => {
+                            handlePlayPlaylist(favoritesPlaylist);
+                          }}
+                        >
+                          {isCurrent ? (
+                            <MdPlayArrow className="mr-2 inline w-5 h-5" />
+                          ) : (
+                            <FaStar className="mr-2 inline w-5 h-5 text-yellow-500" />
+                          )}
+                          <span className="font-semibold">
+                            {favoritesPlaylist.name}
+                          </span>
+                          <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
+                            ({favorites.length}曲)
+                          </span>
+                        </div>
+
+                        <CopyButton
+                          value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
+                            favoritesPlaylist,
+                          )}`}
+                          timeout={2000}
+                        >
+                          {({ copied, copy }) => (
+                            <Tooltip
+                              withArrow
+                              label="URLをコピーしてプレイリストをシェアできます"
+                            >
+                              <MantineButton
+                                onClick={copy}
+                                color={`${copied ? "green" : "gray"}`}
+                                size="xs"
+                              >
+                                {copied ? (
+                                  <MdCheck className="inline w-5 h-5" />
+                                ) : (
+                                  <MdContentCopy className="inline w-5 h-5" />
+                                )}
+                              </MantineButton>
+                            </Tooltip>
+                          )}
+                        </CopyButton>
+                      </div>
+                    );
+                  })()}
+
                 {playlists.map((playlist, index) => (
                   <div
                     key={`${index}-${playlist.id}`}
@@ -300,7 +372,10 @@ export default function SearchAndSongList({
                       ) : (
                         <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
                       )}
-                      {playlist.name}
+                      <span className="font-semibold">{playlist.name}</span>
+                      <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
+                        ({playlist.songs.length}曲)
+                      </span>
                     </div>
 
                     <CopyButton

@@ -25,7 +25,8 @@ export const getGridCols = (width: number): number => {
   if (width >= 2560) return 5;
   if (width >= 1920) return 4;
   if (width >= 1280) return 3;
-  if (width >= 768) return 2;
+  if (width >= 1024) return 2;
+  if (width >= 768) return 1;
   return 1;
 };
 
@@ -85,7 +86,7 @@ const SongsList = ({
   });
 
   // 仮想化アイテムの取得
-  const virtualRows = virtualizer.getVirtualItems();
+  const virtualRows = virtualizer ? virtualizer.getVirtualItems() : [];
 
   // 現在の曲のインデックス
   const currentSongIndex = useMemo(() => {
@@ -297,7 +298,7 @@ const SongsList = ({
 
           <ul
             id="song-list"
-            className="song-list mb-2 auto-rows-max grid grid-cols-1 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 grow dark:text-gray-300"
+            className="song-list mb-2 auto-rows-max grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-2 grow dark:text-gray-300"
           >
             {virtualRows.flatMap((virtualRow) => {
               const startItemIndex = virtualRow.index * colCount;
@@ -334,7 +335,7 @@ const SongsList = ({
           </ul>
 
           {/* 下部のスペーサー */}
-          <div style={{ height: `${endOffset + 1}px` }} />
+          <div style={{ height: `${endOffset}px` }} />
         </ScrollArea>
 
         {/* 右端の縦型ページャー */}
