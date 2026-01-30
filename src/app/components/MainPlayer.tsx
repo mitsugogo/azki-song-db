@@ -107,6 +107,45 @@ export default function MainPlayer() {
     }
   }, []);
 
+  const seekTo = useCallback((seconds: number) => {
+    if (
+      playerRef.current &&
+      typeof playerRef.current.seekTo === "function" &&
+      typeof playerRef.current.getCurrentTime === "function"
+    ) {
+      const currentTime = playerRef.current.getCurrentTime();
+      const newTime = Math.max(0, currentTime + seconds);
+      playerRef.current.seekTo(newTime, true);
+    }
+  }, []);
+
+  // キーボードイベント: 左右キーで動画を10秒前後させる
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // 入力フィールドやテキストエリアにフォーカスがある場合は無視
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // 左右キーの処理
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        seekTo(-10);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        seekTo(10);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [seekTo]);
+
   // handlePlayerOnReadyをラップして再生位置を復元
   const handlePlayerOnReady = useCallback(
     (event: YouTubeEvent<number>) => {
