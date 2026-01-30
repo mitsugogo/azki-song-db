@@ -17,6 +17,8 @@ type DesktopPlayerControls = {
   pause: () => void;
   seekTo: (absoluteSeconds: number) => void;
   setVolume: (volume: number) => void;
+  mute: () => void;
+  unMute: () => void;
   currentTime: number;
   volume: number;
   duration: number;
@@ -248,7 +250,7 @@ export default function PlayerSection({
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // 空白時間の自動スキップ
   useEffect(() => {
@@ -322,29 +324,61 @@ export default function PlayerSection({
     }
   }, [debouncedVolumeValue, volumeValue, playerControls]);
 
-  // tempボリューム変更
+  // tempボリューム変更（ミュート中は同期しない）
   useEffect(() => {
-    setTempVolumeValue(volumeValue);
-  }, [volumeValue]);
+    if (!isMuted) {
+      setTempVolumeValue(volumeValue);
+    }
+  }, [volumeValue, isMuted]);
 
   // 画面幅の監視
   useEffect(() => {
-    const checkScreenWidth = () => {
-      setIsNarrowScreen(window.innerWidth < 1024); // lg breakpoint
+    const checkTouch = () => {
+      const hasTouchPoints = navigator.maxTouchPoints > 0;
+      const supportsTouchEvent =
+        typeof window !== "undefined" && "ontouchstart" in window;
+      const coarsePointer =
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: coarse)").matches;
+
+      setIsTouchDevice(hasTouchPoints || supportsTouchEvent || coarsePointer);
     };
 
-    checkScreenWidth();
-    window.addEventListener("resize", checkScreenWidth);
+    checkTouch();
+    // listen to changes in pointer media if supported
+    let mq: MediaQueryList | null = null;
+    if (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function"
+    ) {
+      mq = window.matchMedia("(pointer: coarse)");
+      const handler = () => checkTouch();
+      try {
+        mq.addEventListener?.("change", handler);
+      } catch (e) {
+        // some browsers use addListener
+        // @ts-ignore
+        mq.addListener?.(handler);
+      }
 
-    return () => window.removeEventListener("resize", checkScreenWidth);
+      return () => {
+        try {
+          mq?.removeEventListener?.("change", checkTouch);
+        } catch (e) {
+          // @ts-ignore
+          mq?.removeListener?.(checkTouch);
+        }
+      };
+    }
   }, []);
 
-  // 画面幅が変わったときにスライダーを閉じる
+  // タッチ判定が変わったときにスライダーを閉じる
   useEffect(() => {
-    if (!isNarrowScreen) {
+    if (!isTouchDevice) {
       setShowVolumeSlider(false);
     }
-  }, [isNarrowScreen]);
+  }, [isTouchDevice]);
 
   const handleTogglePlay = () => {
     if (!playerControls) return;
@@ -424,7 +458,9 @@ export default function PlayerSection({
       100,
     );
     setTempVolumeValue(nextValue);
+    // 音量を変更したらミュート解除
     if (nextValue > 0 && isMuted) {
+      playerControls.unMute();
       setIsMuted(false);
     }
   };
@@ -433,19 +469,18 @@ export default function PlayerSection({
     if (!playerControls) return;
     if (isMuted) {
       // ミュート解除
-      playerControls.setVolume(volumeBeforeMute);
+      playerControls.unMute();
       setIsMuted(false);
     } else {
-      // ミュート
-      setVolumeBeforeMute(playerControls.volume);
-      playerControls.setVolume(0);
+      // ミュート（YouTube APIが音量値を保持するため、tempVolumeValueは変更しない）
+      playerControls.mute();
       setIsMuted(true);
     }
   };
 
   const handleVolumeIconClick = () => {
     if (!playerControls) return;
-    if (isNarrowScreen) {
+    if (isTouchDevice) {
       setShowVolumeSlider(!showVolumeSlider);
     } else {
       handleToggleMute();
@@ -516,9 +551,9 @@ export default function PlayerSection({
             displaySongArtist={displaySongArtist}
             onOpenShareModal={() => setOpenShareModal(true)}
             volumeValue={volumeValue}
-            tempVolumeValue={tempVolumeValue}
+            tempVolumeValue={isMuted ? 0 : tempVolumeValue}
             onVolumeIconClick={handleVolumeIconClick}
-            isNarrowScreen={isNarrowScreen}
+            isTouchDevice={isTouchDevice}
             showVolumeSlider={showVolumeSlider}
             onVolumeChange={handleVolumeChange}
             currentSongInfo={currentSongInfo}

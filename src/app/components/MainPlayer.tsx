@@ -482,6 +482,16 @@ export default function MainPlayer() {
     pause: pauseVideo,
     seekTo: seekToAbsolute,
     setVolume: changeVolume,
+    mute: () => {
+      if (playerRef.current && typeof playerRef.current.mute === "function") {
+        playerRef.current.mute();
+      }
+    },
+    unMute: () => {
+      if (playerRef.current && typeof playerRef.current.unMute === "function") {
+        playerRef.current.unMute();
+      }
+    },
     currentTime: playerCurrentTime,
     volume: playerVolume,
     duration: playerDuration,

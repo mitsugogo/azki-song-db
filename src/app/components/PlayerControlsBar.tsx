@@ -65,7 +65,7 @@ type Props = {
   volumeValue: number;
   tempVolumeValue: number;
   onVolumeIconClick: () => void;
-  isNarrowScreen: boolean;
+  isTouchDevice: boolean;
   showVolumeSlider: boolean;
   onVolumeChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSeekStart?: () => void;
@@ -106,7 +106,7 @@ export default function PlayerControlsBar({
   volumeValue,
   tempVolumeValue,
   onVolumeIconClick,
-  isNarrowScreen,
+  isTouchDevice,
   showVolumeSlider,
   onVolumeChange,
   currentSongInfo,
@@ -416,8 +416,8 @@ export default function PlayerControlsBar({
 
           <div
             className="flex items-center gap-0"
-            onMouseEnter={() => !isNarrowScreen && setIsVolumeHovered(true)}
-            onMouseLeave={() => !isNarrowScreen && setIsVolumeHovered(false)}
+            onMouseEnter={() => !isTouchDevice && setIsVolumeHovered(true)}
+            onMouseLeave={() => !isTouchDevice && setIsVolumeHovered(false)}
           >
             <button
               type="button"
@@ -425,7 +425,7 @@ export default function PlayerControlsBar({
               disabled={disabled}
               className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={
-                isNarrowScreen
+                isTouchDevice
                   ? "音量調整"
                   : isMuted || volumeValue === 0
                     ? "ミュート解除"
@@ -441,14 +441,14 @@ export default function PlayerControlsBar({
             <div
               className="flex items-center transition-all duration-300 ease-in-out py-1"
               style={{
-                width: isNarrowScreen
+                width: isTouchDevice
                   ? showVolumeSlider
                     ? "6rem"
                     : "0"
                   : isVolumeHovered || showVolumeSlider
                     ? "6rem"
                     : "0",
-                opacity: isNarrowScreen
+                opacity: isTouchDevice
                   ? showVolumeSlider
                     ? 1
                     : 0
