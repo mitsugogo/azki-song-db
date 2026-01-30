@@ -335,10 +335,10 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
             }
           }
 
-          // 3秒経過したらフラグをクリア
+          // 一定時間経過したらフラグをクリア
           if (
             shouldBlockAutoChange &&
-            Date.now() - lastManualChangeRef.current > 3000
+            Date.now() - lastManualChangeRef.current > 300
           ) {
             isManualChangeInProgressRef.current = false;
           }
