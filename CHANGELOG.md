@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.0](https://github.com/mitsugogo/azki-song-db/compare/v1.26.1...v1.27.0) (2026-01-30)
+
+
+### Features
+
+* お気に入り機能 ([0aafccf](https://github.com/mitsugogo/azki-song-db/commit/0aafccfe5929d2a59a63da96d12d8e7d07e3193b))
+* 左右キーで10秒シーク ([1ca4ce9](https://github.com/mitsugogo/azki-song-db/commit/1ca4ce953006d07ea2200f1da10870f9c833ccee))
+* 年表を追加 ([1bfb731](https://github.com/mitsugogo/azki-song-db/commit/1bfb73146e20236035c9f97b035f1d5f86fa69ee))
+
+
+### Bug Fixes
+
+* globalPlayerの初期化バグ修正 ([6bbbd48](https://github.com/mitsugogo/azki-song-db/commit/6bbbd4830dce35f6328ed0fc3ec9341c0b1fc93b))
+* お気に入りしかないときにプレイリスト一覧に出てこないのを修正 ([6df5d6d](https://github.com/mitsugogo/azki-song-db/commit/6df5d6dfb49686b42bf831ea98955dbea56b9424))
+* ミニプレイヤーの初期位置を右下スナップ位置になっていなかったのを修正 ([67b5966](https://github.com/mitsugogo/azki-song-db/commit/67b5966d8bc8237b6285b19fbdd4c537b1e5f234))
+* ミニプレイヤーの追従処理を修正 ([b641ffd](https://github.com/mitsugogo/azki-song-db/commit/b641ffdc4d83cb430594d9955275d14aad996e84))
+* 不安定だった曲切り替えを改善 ([bff2a85](https://github.com/mitsugogo/azki-song-db/commit/bff2a856fe6582d48639b511416ec59e2f404a5e))
+* 再生中に次の曲にいったときに曲名が変わらないのを修正 ([c1f165d](https://github.com/mitsugogo/azki-song-db/commit/c1f165dfdadf870d4c12f2157d34f7d526deadf4))
+* 曲変更処理の待機時間修正 ([c7ec601](https://github.com/mitsugogo/azki-song-db/commit/c7ec601a7c266dd5aed8d9ddb1095896ae1d0761))
+* 特定の画面サイズで曲スクロールができなくなるバグを修正 ([8edb64b](https://github.com/mitsugogo/azki-song-db/commit/8edb64b907bb56fd39708a14d1d0554e39fef097))
+* 音量バーとミュートの挙動修正 ([5655447](https://github.com/mitsugogo/azki-song-db/commit/56554479c2170d0065456a21783495efecb60e85))
+
 ### [1.26.1](https://github.com/mitsugogo/azki-song-db/compare/v1.26.0...v1.26.1) (2026-01-25)
 
 
