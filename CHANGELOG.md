@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.27.1](https://github.com/mitsugogo/azki-song-db/compare/v1.27.0...v1.27.1) (2026-02-01)
+
+
+### Bug Fixes
+
+* prefixなし検索ができなくなっていたのを修正 ([71b7e8a](https://github.com/mitsugogo/azki-song-db/commit/71b7e8ad56c03b602fab17d557fead2d7038c163))
+* ミニプレイヤーが画面外になる場合があったのを修正 ([60f9d2a](https://github.com/mitsugogo/azki-song-db/commit/60f9d2a7ef00cbec3f138a09b6df63fc9f6d09fb))
+* 検索結果を仮想化 ([e10d648](https://github.com/mitsugogo/azki-song-db/commit/e10d648eddc8d41d4b7f99ed4fcc846d8927d4ae))
+
 ## [1.27.0](https://github.com/mitsugogo/azki-song-db/compare/v1.26.1...v1.27.0) (2026-01-30)
 
 
