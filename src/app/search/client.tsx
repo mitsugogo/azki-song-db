@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Song } from "../types/song";
 import SongListItem from "../components/SongListItem";
@@ -9,6 +9,7 @@ import useSongs from "../hook/useSongs";
 import usePlayerControls from "../hook/usePlayerControls";
 import useSearch from "../hook/useSearch";
 import Link from "next/link";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { LoadingOverlay, Button } from "@mantine/core";
 import { FaMusic, FaUser, FaTag, FaUsers } from "react-icons/fa6";
 import { FaCalendar } from "react-icons/fa";
@@ -25,13 +26,17 @@ interface TagCategory {
   filter: (songs: Song[]) => Song[];
 }
 
-// 画面幅からGridの列数を推定
+// 画面幅からGridの列数を推定（より多く表示するためにさらに列数を増加）
 const getGridCols = (width: number): number => {
-  if (width >= 2560) return 5;
-  if (width >= 1920) return 4;
-  if (width >= 1280) return 3;
-  if (width >= 768) return 2;
-  return 1;
+  if (width >= 5120) return 20;
+  if (width >= 3840) return 16;
+  if (width >= 2560) return 12;
+  if (width >= 1920) return 10;
+  if (width >= 1440) return 8;
+  if (width >= 1280) return 6;
+  if (width >= 1024) return 5;
+  if (width >= 768) return 4;
+  return 3;
 };
 
 // あいうえお順ソート関数
@@ -175,6 +180,54 @@ const SearchPageClient = () => {
     return [];
   }, [tagParam, allSongs, tagCategories]);
 
+  // 仮想化用のスクロール親要素とバーチャライザ（Hooksは条件分岐の外で宣言）
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const cols = Math.max(colCount, 1);
+  const rowCount = Math.ceil(filteredSongs.length / cols);
+  const [estimatedRowHeight, setEstimatedRowHeight] = useState<number>(320);
+  const [estimatedItemWidth, setEstimatedItemWidth] = useState<number>(240);
+  const [wrapperWidth, setWrapperWidth] = useState<number | "100%">("100%");
+
+  // 親要素幅に基づいて行高さを推定
+  useEffect(() => {
+    const compute = () => {
+      const containerWidth =
+        parentRef.current?.clientWidth || windowWidth || 1024;
+      const gap = 16; // CSS gap: 1rem (~16px)
+      const totalGap = Math.max(cols - 1, 0) * gap;
+      const padding = 24; // 両端のパディング等の余白推定
+      const rawItemWidth = (containerWidth - totalGap - padding) / cols;
+      const itemWidth = Math.max(Math.floor(rawItemWidth), 120);
+      const thumbHeight = itemWidth * (9 / 16); // 16:9 サムネ比率
+      const infoHeight = 76; // タイトル等の高さ見積もり
+      const rowHeight = Math.round(thumbHeight + infoHeight + 8);
+      setEstimatedRowHeight(rowHeight);
+      setEstimatedItemWidth(itemWidth);
+
+      // 固定幅コンテナを設定（ユーザー許容の固定幅）
+      // wrapperWidthはタイル幅 * cols + gap合計 + padding
+      const computedWrapper = itemWidth * cols + totalGap + padding;
+      // wrapperWidth should not exceed actual container width to avoid horizontal overflow
+      setWrapperWidth(Math.min(computedWrapper, containerWidth));
+    };
+
+    compute();
+    const ro = new ResizeObserver(() => compute());
+    if (parentRef.current) ro.observe(parentRef.current);
+    window.addEventListener("resize", compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [windowWidth, cols]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimatedRowHeight,
+    overscan: 5,
+  });
+
   // フィルターモード用データ生成
   const filterModeData = useMemo(() => {
     if (filterMode === "title") {
@@ -300,7 +353,7 @@ const SearchPageClient = () => {
   // 検索結果が存在する場合はそれを表示
   if (currentSearchTerm && filteredSongs.length > 0) {
     return (
-      <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
+      <div ref={parentRef} className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
         {/* タイトルと説明 */}
         <div className="mb-4">
           <Link
@@ -315,7 +368,7 @@ const SearchPageClient = () => {
               {currentSearchTerm.split("|").map((term, index) => {
                 let icon = null;
                 let label = term;
-                
+
                 if (term.startsWith("unit:")) {
                   icon = <FaUsers className="mr-1" />;
                   label = term.replace("unit:", "");
@@ -341,7 +394,7 @@ const SearchPageClient = () => {
                   icon = <span className="mr-1">🌸</span>;
                   label = term.replace("season:", "");
                 }
-                
+
                 return (
                   <span
                     key={index}
@@ -378,42 +431,111 @@ const SearchPageClient = () => {
           />
         </div>
 
-        {/* グリッド */}
-        <div className="p-3">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-            {filteredSongs.map((song) => (
-              <article
-                key={`${song.video_id}-${song.start}-${song.title}`}
-                className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
-              >
-                <Link
-                  href={`/?v=${song.video_id}${
-                    song.start ? `&t=${song.start}s` : ""
-                  }&q=${encodeURIComponent(currentSearchTerm)}`}
-                  className="block"
-                >
-                  <div className="w-full aspect-video bg-black">
-                    <YoutubeThumbnail
-                      videoId={song.video_id}
-                      alt={song.title}
-                      fill={true}
+        {/* 仮想化されたグリッド（SongList と同様の行単位仮想化パターン） */}
+        <div className="p-3 lg:ml-6">
+          {/* 上部のスペーサー */}
+          <div
+            style={{
+              height: `${rowVirtualizer.getVirtualItems().length > 0 ? rowVirtualizer.getVirtualItems()[0].start : 0}px`,
+            }}
+          />
+
+          <ul
+            id="search-result-list"
+            className="song-list mb-2 auto-rows-max grid grid-cols-1 gap-2 grow dark:text-gray-300"
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${cols}, ${estimatedItemWidth}px)`,
+              justifyContent: "center",
+              gap: "1rem",
+              boxSizing: "border-box",
+              width:
+                typeof wrapperWidth === "number"
+                  ? `${wrapperWidth}px`
+                  : wrapperWidth,
+              maxWidth: "100%",
+              margin: "0 auto",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().flatMap((virtualRow) => {
+              const startItemIndex = virtualRow.index * cols;
+              const rowItems = filteredSongs.slice(
+                startItemIndex,
+                startItemIndex + cols,
+              );
+
+              return rowItems.map((song, itemIndexInRow) => {
+                const globalIndex = startItemIndex + itemIndexInRow;
+                if (!song) {
+                  return (
+                    <li
+                      key={`${virtualRow.index}-${itemIndexInRow}`}
+                      style={{
+                        width: estimatedItemWidth,
+                        flex: `0 0 ${estimatedItemWidth}px`,
+                        boxSizing: "border-box",
+                      }}
                     />
-                  </div>
-                  <div className="p-3">
-                    <div className="font-medium line-clamp-2">{song.title}</div>
-                    {song.artist && (
-                      <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
-                        {song.artist}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {new Date(song.broadcast_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                </Link>
-              </article>
-            ))}
-          </div>
+                  );
+                }
+
+                const shouldBeHidden = false; // 検索結果側では将来曲非表示は不要（必要なら条件を追加）
+
+                return (
+                  <li
+                    key={`${song.video_id}-${song.start}-${song.title}`}
+                    data-index={globalIndex}
+                    data-row-index={virtualRow.index}
+                    ref={
+                      itemIndexInRow === 0 && cols > 1
+                        ? rowVirtualizer.measureElement
+                        : undefined
+                    }
+                    style={{
+                      width: estimatedItemWidth,
+                      flex: `0 0 ${estimatedItemWidth}px`,
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <article className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-100/50 dark:hover:bg-primary-900/20 shadow-sm h-full">
+                      <Link
+                        href={`/?v=${song.video_id}${song.start ? `&t=${song.start}s` : ""}&q=${encodeURIComponent(currentSearchTerm)}`}
+                        className="block"
+                      >
+                        <div className="w-full aspect-video bg-black">
+                          <YoutubeThumbnail
+                            videoId={song.video_id}
+                            alt={song.title}
+                            fill={true}
+                          />
+                        </div>
+                        <div className="p-3 pt-1">
+                          <div className="font-medium line-clamp-2 dark:text-gray-100">
+                            {song.title}
+                          </div>
+                          {song.artist && (
+                            <div className="text-sm text-gray-300 dark:text-gray-200 line-clamp-1">
+                              {song.artist}
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-200 dark:text-gray-300 mt-1">
+                            {new Date(song.broadcast_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </Link>
+                    </article>
+                  </li>
+                );
+              });
+            })}
+          </ul>
+
+          {/* 下部のスペーサー */}
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize() - (rowVirtualizer.getVirtualItems().length > 0 ? rowVirtualizer.getVirtualItems()[rowVirtualizer.getVirtualItems().length - 1].end : 0)}px`,
+            }}
+          />
         </div>
       </div>
     );
@@ -437,7 +559,7 @@ const SearchPageClient = () => {
               {currentSearchTerm.split("|").map((term, index) => {
                 let icon = null;
                 let label = term;
-                
+
                 if (term.startsWith("unit:")) {
                   icon = <FaUsers className="mr-1" />;
                   label = term.replace("unit:", "");
@@ -463,7 +585,7 @@ const SearchPageClient = () => {
                   icon = <span className="mr-1">🌸</span>;
                   label = term.replace("season:", "");
                 }
-                
+
                 return (
                   <span
                     key={index}
