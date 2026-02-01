@@ -136,7 +136,25 @@ const useSearch = (allSongs: Song[]) => {
           return prefixSearches[prefix](song, word.substring(prefix.length));
         }
       }
-      return false;
+
+      // プレフィックスがない場合は全文検索
+      return (
+        song.title.toLowerCase().includes(word) ||
+        song.artist.toLowerCase().includes(word) ||
+        song.album.toLowerCase().includes(word) ||
+        song.sing
+          .toLowerCase()
+          .split("、")
+          .some((sing) => sing.includes(word)) ||
+        song.tags
+          .join(",")
+          .toLowerCase()
+          .split(",")
+          .some((tag) => tag.includes(word)) ||
+        song.video_id.toLowerCase().includes(word) ||
+        song.video_title.toLowerCase().includes(word) ||
+        (song.extra?.toLowerCase().includes(word) ?? false)
+      );
     },
     [],
   );

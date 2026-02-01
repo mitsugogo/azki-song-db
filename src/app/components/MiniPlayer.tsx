@@ -4,6 +4,7 @@ import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import useSongs from "../hook/useSongs";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 import YouTubePlayer from "./YouTubePlayer";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
@@ -37,6 +38,10 @@ export default function MiniPlayer() {
   const [playerKey, setPlayerKey] = useState(0);
   const playerRef = useRef<any>(null);
   const [hasRestoredTime, setHasRestoredTime] = useState(false);
+  const [storedPosition, setStoredPosition] = useLocalStorage<Position | null>({
+    key: STORAGE_KEY,
+    defaultValue: null,
+  });
 
   // 再生中の動画情報を保持（動画が変わったときだけ更新）
   const [playingSong, setPlayingSong] = useState(currentSong);
@@ -65,38 +70,79 @@ export default function MiniPlayer() {
 
   // 初期位置を設定（保存された位置またはデフォルト位置）
   useEffect(() => {
-    const savedPosition = localStorage.getItem(STORAGE_KEY);
-
+    const savedPosition = storedPosition
+      ? JSON.stringify(storedPosition)
+      : null;
     const playerWidth = 320; // w-80 = 320px
     const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+
+    const safeWindowWidth =
+      typeof window !== "undefined" ? window.innerWidth : playerWidth + 32;
+    const safeWindowHeight =
+      typeof window !== "undefined" ? window.innerHeight : playerHeight + 32;
+
+    const minX = 16;
+    const minY = 16;
+
     const defaultPosition = {
-      x: window.innerWidth - playerWidth - 16, // 右端スナップ（余白16px）
-      y: window.innerHeight - playerHeight - 16, // 下端スナップ（余白16px）
+      x: Math.max(minX, safeWindowWidth - playerWidth - 16), // 右端スナップ（余白16px）
+      y: Math.max(minY, safeWindowHeight - playerHeight - 16), // 下端スナップ（余白16px）
     };
+
+    const clamp = (p: Position) => ({
+      x: Math.max(
+        minX,
+        Math.min(p.x, Math.max(minX, safeWindowWidth - playerWidth - 16)),
+      ),
+      y: Math.max(
+        minY,
+        Math.min(p.y, Math.max(minY, safeWindowHeight - playerHeight - 16)),
+      ),
+    });
 
     if (savedPosition) {
       try {
-        const parsed = JSON.parse(savedPosition);
-        setPosition(parsed);
+        const parsed = JSON.parse(savedPosition) as any;
+        const px =
+          parsed && typeof parsed.x !== "undefined" ? Number(parsed.x) : NaN;
+        const py =
+          parsed && typeof parsed.y !== "undefined" ? Number(parsed.y) : NaN;
+        if (!Number.isFinite(px) || !Number.isFinite(py)) {
+          setPosition(defaultPosition);
+          setStoredPosition(defaultPosition);
+        } else {
+          const clamped = clamp({ x: px, y: py });
+          setPosition(clamped);
+          setStoredPosition(clamped);
+        }
       } catch {
         // デフォルト位置（右下のスナップ位置）
         setPosition(defaultPosition);
+        setStoredPosition(defaultPosition);
       }
     } else {
       // デフォルト位置（右下のスナップ位置）
       setPosition(defaultPosition);
+      setStoredPosition(defaultPosition);
     }
   }, []);
 
   // position の最新値を参照できるように ref と同期
   useEffect(() => {
     positionRef.current = position;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
     const playerWidth = 320;
     const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
     const minX = 16;
     const minY = 16;
+
+    const windowWidth =
+      typeof window !== "undefined"
+        ? window.innerWidth
+        : position.x + playerWidth + 16 + SNAP_DISTANCE;
+    const windowHeight =
+      typeof window !== "undefined"
+        ? window.innerHeight
+        : position.y + playerHeight + 16 + SNAP_DISTANCE;
 
     snappedRef.current.left = position.x <= minX + SNAP_DISTANCE;
     snappedRef.current.right =
@@ -109,6 +155,8 @@ export default function MiniPlayer() {
   // ウィンドウリサイズ時にミニプレイヤーが画面外に出ていれば追従（クランプ）する
   useEffect(() => {
     const handleResize = () => {
+      if (typeof window === "undefined") return;
+
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const playerWidth = 320;
@@ -142,10 +190,7 @@ export default function MiniPlayer() {
 
       if (clampedX !== cur.x || clampedY !== cur.y) {
         setPosition({ x: clampedX, y: clampedY });
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ x: clampedX, y: clampedY }),
-        );
+        setStoredPosition({ x: clampedX, y: clampedY });
       }
     };
 
@@ -155,10 +200,14 @@ export default function MiniPlayer() {
 
   // 四隅にスナップする関数
   const snapToCorner = useCallback((x: number, y: number): Position => {
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
     const playerWidth = 320; // w-80 = 320px
     const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const windowWidth =
+      typeof window !== "undefined" ? window.innerWidth : x + playerWidth + 16;
+    const windowHeight =
+      typeof window !== "undefined"
+        ? window.innerHeight
+        : y + playerHeight + 16;
 
     let snappedX = x;
     let snappedY = y;
@@ -227,7 +276,7 @@ export default function MiniPlayer() {
       setPosition((prev) => {
         const snapped = snapToCorner(prev.x, prev.y);
         // 位置を保存
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapped));
+        setStoredPosition(snapped);
         return snapped;
       });
     };
