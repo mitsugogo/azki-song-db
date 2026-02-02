@@ -154,6 +154,30 @@ export default function MainPlayer() {
       updatePlayerSnapshot(event.target);
       setIsPlayerReady(true);
 
+      // Apply persisted volume from localStorage (if present)
+      try {
+        const stored = localStorage.getItem("player-volume");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (typeof parsed === "number" && Number.isFinite(parsed)) {
+            const vol = Math.min(Math.max(Math.round(parsed), 0), 100);
+            if (
+              playerRef.current &&
+              typeof playerRef.current.setVolume === "function"
+            ) {
+              try {
+                playerRef.current.setVolume(vol);
+                setPlayerVolume(vol);
+              } catch (err) {
+                // ignore
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // ignore JSON parse errors
+      }
+
       // 動画IDが変わっていない場合のみ再生位置を復元
       const currentVideoId = currentSongInfo?.video_id;
       const shouldRestorePosition =
