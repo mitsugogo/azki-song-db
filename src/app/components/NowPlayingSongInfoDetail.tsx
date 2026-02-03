@@ -131,6 +131,148 @@ const NowPlayingSongInfoDetail = ({
               </div>
             )}
 
+            {currentSongInfo.lyricist && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaUser className="text-base" />
+                    <span className="ml-1">作詞:</span>
+                  </span>
+                </dt>
+                <dd className="flex flex-wrap gap-1">
+                  {currentSongInfo.lyricist
+                    .split("、")
+                    .map((lyricist, index) => {
+                      const existsSameLyricist = searchTerm.includes(
+                        `lyricist:${lyricist}`,
+                      );
+                      return (
+                        <Badge
+                          key={index}
+                          onClick={() => {
+                            if (existsSameLyricist) {
+                              setSearchTerm(
+                                searchTerm
+                                  .replace(`lyricist:${lyricist}`, "")
+                                  .trim(),
+                              );
+                            } else {
+                              setSearchTerm(
+                                `${
+                                  searchTerm ? `${searchTerm}|` : ""
+                                }lyricist:${lyricist}`,
+                              );
+                            }
+                          }}
+                          className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                            existsSameLyricist
+                              ? "bg-cyan-300 dark:bg-cyan-800"
+                              : ""
+                          }`}
+                        >
+                          {lyricist}
+                        </Badge>
+                      );
+                    })}
+                </dd>
+              </div>
+            )}
+
+            {currentSongInfo.composer && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaUser className="text-base" />
+                    <span className="ml-1">作曲:</span>
+                  </span>
+                </dt>
+                <dd className="flex flex-wrap gap-1">
+                  {currentSongInfo.composer
+                    .split("、")
+                    .map((composer, index) => {
+                      const existsSameComposer = searchTerm.includes(
+                        `composer:${composer}`,
+                      );
+                      return (
+                        <Badge
+                          key={index}
+                          onClick={() => {
+                            if (existsSameComposer) {
+                              setSearchTerm(
+                                searchTerm
+                                  .replace(`composer:${composer}`, "")
+                                  .trim(),
+                              );
+                            } else {
+                              setSearchTerm(
+                                `${
+                                  searchTerm ? `${searchTerm}|` : ""
+                                }composer:${composer}`,
+                              );
+                            }
+                          }}
+                          className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                            existsSameComposer
+                              ? "bg-cyan-300 dark:bg-cyan-800"
+                              : ""
+                          }`}
+                        >
+                          {composer}
+                        </Badge>
+                      );
+                    })}
+                </dd>
+              </div>
+            )}
+
+            {currentSongInfo.arranger && (
+              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
+                  <span className="inline-flex items-center">
+                    <FaUser className="text-base" />
+                    <span className="ml-1">編曲:</span>
+                  </span>
+                </dt>
+                <dd className="flex flex-wrap gap-1">
+                  {currentSongInfo.arranger
+
+                    .split("、")
+                    .map((arranger, index) => {
+                      const existsSameArranger = searchTerm.includes(
+                        `arranger:${arranger}`,
+                      );
+                      return (
+                        <Badge
+                          key={index}
+                          onClick={() => {
+                            if (existsSameArranger) {
+                              setSearchTerm(
+                                searchTerm
+                                  .replace(`arranger:${arranger}`, "")
+                                  .trim(),
+                              );
+                            } else {
+                              setSearchTerm(
+                                `${
+                                  searchTerm ? `${searchTerm}|` : ""
+                                }arranger:${arranger}`,
+                              );
+                            }
+                          }}
+                          className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                            existsSameArranger
+                              ? "bg-cyan-300 dark:bg-cyan-800"
+                              : ""
+                          }`}
+                        >
+                          {arranger}
+                        </Badge>
+                      );
+                    })}
+                </dd>
+              </div>
+            )}
+
             {currentSongInfo.album && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
@@ -613,6 +755,22 @@ const NowPlayingSongInfoDetail = ({
                 </dt>
                 <dd
                   className="wrap-break-word break-all"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    const a = target.closest(
+                      "a[data-t]",
+                    ) as HTMLAnchorElement | null;
+                    if (a && currentSongInfo) {
+                      e.preventDefault();
+                      const t = parseInt(a.getAttribute("data-t") || "0", 10);
+                      changeCurrentSong(
+                        currentSongInfo,
+                        false,
+                        currentSongInfo.video_id,
+                        t,
+                      );
+                    }
+                  }}
                   dangerouslySetInnerHTML={{
                     __html: currentSongInfo.extra
                       .replace(
@@ -620,7 +778,12 @@ const NowPlayingSongInfoDetail = ({
                         (url) =>
                           `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
                       )
-                      .replace(/\n/g, "<br />"),
+                      .replace(/\n/g, "<br />")
+                      // hh:mm:ss 形式のタイムスタンプを data-t 属性付きのリンクに置換
+                      .replace(/(\d{1,2}:\d{2}:\d{2})/g, (timestamp) => {
+                        const seconds = timeToSeconds(timestamp);
+                        return `<a href="#" data-t="${seconds}" class="timestamp-link text-primary hover:underline dark:text-primary-300">${timestamp}</a>`;
+                      }),
                   }}
                 />
               </div>

@@ -15,6 +15,9 @@ const useSongs = () => {
   const [availableTitleAndArtists, setAvailableTitleAndArtists] = useState<
     { title: string; artist: string }[]
   >([]);
+  const [availableLyricists, setAvailableLyricists] = useState<string[]>([]);
+  const [availableComposers, setAvailableComposers] = useState<string[]>([]);
+  const [availableArrangers, setAvailableArrangers] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/songs")
@@ -40,6 +43,27 @@ const useSongs = () => {
           ...new Set(
             data.flatMap((song) =>
               song.artist.split(/、/).map((s) => s.trim()),
+            ),
+          ),
+        ].sort();
+        const lyricists = [
+          ...new Set(
+            data.flatMap((song) =>
+              song.lyricist.split(/、/).map((s) => s.trim()),
+            ),
+          ),
+        ].sort();
+        const composers = [
+          ...new Set(
+            data.flatMap((song) =>
+              song.composer.split(/、/).map((s) => s.trim()),
+            ),
+          ),
+        ].sort();
+        const arrangers = [
+          ...new Set(
+            data.flatMap((song) =>
+              song.arranger.split(/、/).map((s) => s.trim()),
             ),
           ),
         ].sort();
@@ -69,6 +93,9 @@ const useSongs = () => {
         setAvailableSongTitles(songTitles);
         setAvailableSingers(singers);
         setAvailableArtists(artists);
+        setAvailableLyricists(lyricists);
+        setAvailableComposers(composers);
+        setAvailableArrangers(arrangers);
         setAvailableMilestones(milestones);
         setAvailableTitleAndArtists(
           uniquedTitleAndArtists
@@ -88,6 +115,9 @@ const useSongs = () => {
     availableSongTitles,
     availableMilestones,
     availableTitleAndArtists,
+    availableLyricists,
+    availableComposers,
+    availableArrangers,
   };
 };
 

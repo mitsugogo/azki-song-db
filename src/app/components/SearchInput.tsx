@@ -52,6 +52,38 @@ export default function SearchInput({
       new Set(allSongs.map((song) => song.title)),
     ).filter((title) => title !== "");
 
+    const availableLyricists = Array.from(
+      new Set(
+        allSongs.flatMap((song) =>
+          song.lyricist
+            .split("、")
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+        ),
+      ),
+    );
+
+    const availableComposers = Array.from(
+      new Set(
+        allSongs.flatMap((song) =>
+          song.composer
+            .split("、")
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+        ),
+      ),
+    );
+    const availableArrangers = Array.from(
+      new Set(
+        allSongs.flatMap((song) =>
+          song.arranger
+            .split("、")
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+        ),
+      ),
+    );
+
     // ユニット（コラボ通称）のリスト作成
     const availableUnits = collabUnits
       .filter((unit) => {
@@ -96,6 +128,18 @@ export default function SearchInput({
         items: availableTitles.map((title) => `title:${title}`),
       },
       {
+        group: "作詞",
+        items: availableLyricists.map((lyricist) => `lyricist:${lyricist}`),
+      },
+      {
+        group: "作曲",
+        items: availableComposers.map((composer) => `composer:${composer}`),
+      },
+      {
+        group: "編曲",
+        items: availableArrangers.map((arranger) => `arranger:${arranger}`),
+      },
+      {
         group: "配信年",
         items: Array.from(new Set(allSongs.map((song) => song.year)))
           .filter((year): year is number => year !== undefined)
@@ -121,6 +165,9 @@ export default function SearchInput({
       {option.value.includes("milestone:") && "★"}
       {option.value.includes("year:") && <FaCalendar />}
       {option.value.includes("season:") && "季節:"}
+      {option.value.includes("lyricist:") && "作詞:"}
+      {option.value.includes("composer:") && "作曲:"}
+      {option.value.includes("arranger:") && "編曲:"}
       <div>
         <Text size="sm">
           {option.value
@@ -129,6 +176,10 @@ export default function SearchInput({
             .replace("sing:", "")
             .replace("unit:", "")
             .replace("tag:", "")
+            .replace("lyricist:", "")
+            .replace("composer:", "")
+            .replace("arranger:", "")
+            .replace("year:", "")
             .replace("milestone:", "")
             .replace("season:", "")}
         </Text>
