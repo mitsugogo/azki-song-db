@@ -573,119 +573,124 @@ export default function YearSummaryClient({
         </section>
       </div>
 
-      <section className="mt-6">
-        <h2 className="text-lg font-semibold mb-2">
-          オリ曲・カバー曲MV (
-          {
-            songsFiltered.filter((s) =>
-              (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
-              ),
-            ).length
-          }
-          )
-          <Link
-            href={`/?q=year:${displayYear}|tag:オリ曲`}
-            className="ml-4 text-sm text-blue-600 hover:underline"
-          >
-            <FaPlay className="inline-block mr-1" />
-            オリ曲
-          </Link>
-          <Link
-            href={`/?q=year:${displayYear}|tag:カバー曲`}
-            className="ml-4 text-sm text-blue-600 hover:underline"
-          >
-            <FaPlay className="inline-block mr-1" />
-            カバー曲
-          </Link>
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-          {(songsFiltered || [])
-            .filter((s) =>
-              (s.tags || []).some(
-                (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
-              ),
+      {/* オリ曲・カバー曲MV */}
+      {songsFiltered.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">
+            オリ曲・カバー曲MV (
+            {
+              songsFiltered.filter((s) =>
+                (s.tags || []).some(
+                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                ),
+              ).length
+            }
             )
-            .sort(
-              (a, b) =>
-                new Date(a.broadcast_at).getTime() -
-                new Date(b.broadcast_at).getTime(),
-            )
-            .map((g, i) => (
+            <Link
+              href={`/?q=year:${displayYear}|tag:オリ曲`}
+              className="ml-4 text-sm text-blue-600 hover:underline"
+            >
+              <FaPlay className="inline-block mr-1" />
+              オリ曲
+            </Link>
+            <Link
+              href={`/?q=year:${displayYear}|tag:カバー曲`}
+              className="ml-4 text-sm text-blue-600 hover:underline"
+            >
+              <FaPlay className="inline-block mr-1" />
+              カバー曲
+            </Link>
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            {(songsFiltered || [])
+              .filter((s) =>
+                (s.tags || []).some(
+                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                ),
+              )
+              .sort(
+                (a, b) =>
+                  new Date(a.broadcast_at).getTime() -
+                  new Date(b.broadcast_at).getTime(),
+              )
+              .map((g, i) => (
+                <article
+                  key={`${g.video_id || i}-special-${i}`}
+                  className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
+                >
+                  <Link
+                    href={`/?v=${g.video_id || ""}${
+                      g.start ? `&t=${g.start}s` : ""
+                    }&q=year:${displayYear}`}
+                    className="block"
+                  >
+                    <div className="w-full aspect-video bg-black">
+                      <YoutubeThumbnail
+                        videoId={g.video_id}
+                        alt={g.title}
+                        fill={true}
+                      />
+                    </div>
+                    <div className="p-3">
+                      <div className="font-medium line-clamp-2">{g.title}</div>
+                      {g.artist && (
+                        <div className="text-sm text-gray-700 dark:text-light-gray-400">
+                          {g.artist}
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
+                        {new Date(g.broadcast_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+          </div>
+        </section>
+      )}
+
+      {/* 2人以上で歌唱した歌枠 */}
+      {collaborativeSongs.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">
+            コラボ・デュエット・ゲスト参加 ({(collaborativeSongs || []).length})
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            {(collaborativeSongs || []).map((s) => (
               <article
-                key={`${g.video_id || i}-special-${i}`}
+                key={`${s.video_id || ""}-collab-${s.start || ""}`}
                 className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
               >
                 <Link
-                  href={`/?v=${g.video_id || ""}${
-                    g.start ? `&t=${g.start}s` : ""
+                  href={`/?v=${s.video_id || ""}${
+                    s.start ? `&t=${s.start}s` : ""
                   }&q=year:${displayYear}`}
-                  className="block"
                 >
                   <div className="w-full aspect-video bg-black">
                     <YoutubeThumbnail
-                      videoId={g.video_id}
-                      alt={g.title}
+                      videoId={s.video_id}
+                      alt={s.title}
                       fill={true}
                     />
                   </div>
                   <div className="p-3">
-                    <div className="font-medium line-clamp-2">{g.title}</div>
-                    {g.artist && (
-                      <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                        {g.artist}
-                      </div>
-                    )}
+                    <div className="font-medium line-clamp-2">{s.title}</div>
+                    <div className="text-sm text-gray-700 dark:text-light-gray-400">
+                      {s.artist}
+                    </div>
+                    <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1 line-clamp-1">
+                      {s.sing}
+                    </div>
                     <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                      {new Date(g.broadcast_at).toLocaleDateString()}
+                      {new Date(s.broadcast_at).toLocaleDateString()}
                     </div>
                   </div>
                 </Link>
               </article>
             ))}
-        </div>
-      </section>
-
-      {/* 2人以上で歌唱した歌枠 */}
-      <section className="mt-6">
-        <h2 className="text-lg font-semibold mb-2">
-          コラボ・デュエット・ゲスト参加 ({(collaborativeSongs || []).length})
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-          {(collaborativeSongs || []).map((s) => (
-            <article
-              key={`${s.video_id || ""}-collab-${s.start || ""}`}
-              className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
-            >
-              <Link
-                href={`/?v=${s.video_id || ""}${
-                  s.start ? `&t=${s.start}s` : ""
-                }&q=year:${displayYear}`}
-              >
-                <div className="w-full aspect-video bg-black">
-                  <YoutubeThumbnail
-                    videoId={s.video_id}
-                    alt={s.title}
-                    fill={true}
-                  />
-                </div>
-                <div className="p-3">
-                  <div className="font-medium line-clamp-2">{s.title}</div>
-                  <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                    {s.artist}
-                  </div>
-                  <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1 line-clamp-1">
-                    {s.sing}
-                  </div>
-                  <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                    {new Date(s.broadcast_at).toLocaleDateString()}
-                  </div>
-                </div>
-              </Link>
-            </article>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       <section className="mt-6">
         <div className="flex items-center justify-between mb-2">
