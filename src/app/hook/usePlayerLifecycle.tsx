@@ -10,7 +10,7 @@ export default function usePlayerLifecycle(options: {
   originalHandlePlayerOnReady: (event: YouTubeEvent<number>) => void;
   originalHandleStateChange: (event: YouTubeEvent<number>) => void;
   globalPlayer: any;
-  currentSongInfo: any | null;
+  currentSong: any | null;
   isPlaying: boolean;
   applyPersistedVolume?: (playerInstance: any) => void;
   playerRef?: { current: any } | undefined;
@@ -19,7 +19,7 @@ export default function usePlayerLifecycle(options: {
     originalHandlePlayerOnReady,
     originalHandleStateChange,
     globalPlayer,
-    currentSongInfo,
+    currentSong,
     isPlaying,
     applyPersistedVolume,
   } = options;
@@ -65,7 +65,7 @@ export default function usePlayerLifecycle(options: {
       }
 
       // restore logic: if same video and globalPlayer has time and not restored
-      const currentVideoId = currentSongInfo?.video_id;
+      const currentVideoId = currentSong?.video_id;
       const shouldRestorePosition =
         currentVideoId === previousVideoId &&
         globalPlayer.currentTime > 0 &&
@@ -87,7 +87,7 @@ export default function usePlayerLifecycle(options: {
       originalHandlePlayerOnReady,
       globalPlayer.currentTime,
       hasRestoredPosition,
-      currentSongInfo?.video_id,
+      currentSong?.video_id,
       previousVideoId,
       updatePlayerSnapshot,
       applyPersistedVolume,
@@ -146,15 +146,15 @@ export default function usePlayerLifecycle(options: {
     return () => clearInterval(interval);
   }, [isPlaying, globalPlayer]);
 
-  // synchronize global player currentSong and previousVideoId when currentSongInfo changes
+  // synchronize global player currentSong and previousVideoId when currentSong changes
   useEffect(() => {
-    if (!currentSongInfo) {
+    if (!currentSong) {
       globalPlayer.setCurrentSong(null);
       setPreviousVideoId(null);
       return;
     }
 
-    const currentVideoId = currentSongInfo.video_id;
+    const currentVideoId = currentSong.video_id;
 
     if (currentVideoId !== previousVideoId) {
       if (previousVideoId !== null) {
@@ -164,8 +164,8 @@ export default function usePlayerLifecycle(options: {
       setPreviousVideoId(currentVideoId);
     }
 
-    globalPlayer.setCurrentSong(currentSongInfo);
-  }, [currentSongInfo, globalPlayer, previousVideoId]);
+    globalPlayer.setCurrentSong(currentSong);
+  }, [currentSong, globalPlayer, previousVideoId]);
 
   return {
     playerRef,

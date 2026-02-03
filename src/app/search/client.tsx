@@ -8,6 +8,7 @@ import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import useSongs from "../hook/useSongs";
 import usePlayerControls from "../hook/usePlayerControls";
 import useSearch from "../hook/useSearch";
+import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { LoadingOverlay, Button } from "@mantine/core";
@@ -54,6 +55,7 @@ type FilterMode =
 
 const SearchPageClient = () => {
   const { allSongs, isLoading } = useSongs();
+  const globalPlayer = useGlobalPlayer();
   const [windowWidth, setWindowWidth] = useState(0);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -81,9 +83,10 @@ const SearchPageClient = () => {
   }, [qParam, setSearchTerm]);
 
   // 全曲リストで usePlayerControls を初期化
-  const { currentSongInfo, changeCurrentSong } = usePlayerControls(
+  const { currentSong, changeCurrentSong } = usePlayerControls(
     allSongs,
     allSongs,
+    globalPlayer,
   );
 
   // タグカテゴリーの定義

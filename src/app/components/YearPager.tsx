@@ -14,7 +14,7 @@ interface PagerItem {
 interface YearPagerProps {
   songs: Song[];
   currentSongIds: string[];
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   onPagerItemClick: (id: string) => void;
   songListScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -71,7 +71,7 @@ const generatePagerData = (songs: Song[]): PagerItem[] => {
 const YearPager: React.FC<YearPagerProps> = ({
   songs,
   currentSongIds,
-  currentSongInfo,
+  currentSong,
   onPagerItemClick,
   songListScrollRef,
 }) => {
@@ -135,8 +135,8 @@ const YearPager: React.FC<YearPagerProps> = ({
   );
 
   // 現在再生中の曲の年と、その年の中でのインデックスを特定
-  const currentSongYear = currentSongInfo
-    ? new Date(currentSongInfo.broadcast_at).getFullYear()
+  const currentSongYear = currentSong
+    ? new Date(currentSong.broadcast_at).getFullYear()
     : null;
 
   const yearHeader = (item: PagerItem, yearColorClass: string) => (
@@ -193,9 +193,9 @@ const YearPager: React.FC<YearPagerProps> = ({
             onClick={() => {
               let songIdToScroll = targetSongId;
 
-              if (isHighlightedDot && currentSongInfo) {
+              if (isHighlightedDot && currentSong) {
                 // ハイライトされているドットをクリックした場合は、現在再生中の曲にスクロールする
-                songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+                songIdToScroll = `${currentSong.video_id}-${currentSong.start}-${currentSong.title}`;
               }
 
               onPagerItemClick(songIdToScroll);
@@ -219,8 +219,8 @@ const YearPager: React.FC<YearPagerProps> = ({
                   e.stopPropagation();
                   let songIdToScroll = targetSongId;
 
-                  if (isHighlightedDot && currentSongInfo) {
-                    songIdToScroll = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+                  if (isHighlightedDot && currentSong) {
+                    songIdToScroll = `${currentSong.video_id}-${currentSong.start}-${currentSong.title}`;
                   }
                   onPagerItemClick(songIdToScroll);
                   triggerHaptic();
@@ -332,12 +332,12 @@ const YearPager: React.FC<YearPagerProps> = ({
           }
 
           // 現在再生中の曲
-          if (isCurrentYear && currentSongInfo) {
+          if (isCurrentYear && currentSong) {
             const songsInYear = item.songs;
             const currentSongIndexInYear = songsInYear.findIndex(
               (s) =>
-                s.video_id === currentSongInfo.video_id &&
-                s.start === currentSongInfo.start,
+                s.video_id === currentSong.video_id &&
+                s.start === currentSong.start,
             );
 
             if (currentSongIndexInYear !== -1) {

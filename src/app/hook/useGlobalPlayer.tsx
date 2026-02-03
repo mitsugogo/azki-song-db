@@ -5,11 +5,12 @@ import {
   useContext,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
 import { Song } from "../types/song";
 
-interface GlobalPlayerContextType {
+export interface GlobalPlayerContextType {
   currentSong: Song | null;
   isPlaying: boolean;
   isMinimized: boolean;
@@ -20,6 +21,8 @@ interface GlobalPlayerContextType {
   setCurrentTime: (time: number) => void;
   minimizePlayer: () => void;
   maximizePlayer: () => void;
+  seekTo: (absoluteSeconds: number) => void;
+  setSeekTo: (fn: ((absoluteSeconds: number) => void) | null) => void;
 }
 
 const GlobalPlayerContext = createContext<GlobalPlayerContextType | undefined>(
@@ -31,6 +34,18 @@ export function GlobalPlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const seekToRef = useRef<((absoluteSeconds: number) => void) | null>(null);
+
+  const setSeekTo = useCallback(
+    (fn: ((absoluteSeconds: number) => void) | null) => {
+      seekToRef.current = fn;
+    },
+    [],
+  );
+
+  const seekTo = useCallback((absoluteSeconds: number) => {
+    seekToRef.current?.(absoluteSeconds);
+  }, []);
 
   const minimizePlayer = useCallback(() => {
     setIsMinimized(true);
@@ -53,6 +68,8 @@ export function GlobalPlayerProvider({ children }: { children: ReactNode }) {
         setCurrentTime,
         minimizePlayer,
         maximizePlayer,
+        seekTo,
+        setSeekTo,
       }}
     >
       {children}
@@ -60,7 +77,7 @@ export function GlobalPlayerProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useGlobalPlayer() {
+export function useGlobalPlayer(): GlobalPlayerContextType {
   const context = useContext(GlobalPlayerContext);
   if (context === undefined) {
     throw new Error(

@@ -56,9 +56,7 @@ vi.mock("../../hook/usePlayerControls", () => {
   return {
     default: (songs: any, allSongs: any) => ({
       currentSong: null,
-      currentSongInfo: null,
       currentSongRef: {},
-      currentSongInfoRef: {},
       previousSong: null,
       nextSong: null,
       isPlaying: false,
@@ -86,6 +84,8 @@ vi.mock("../../hook/useGlobalPlayer", () => ({
     setIsMinimized: () => {},
     maximizePlayer: () => {},
     setIsMinimizedForced: () => {},
+    setSeekTo: () => {},
+    seekTo: () => {},
   }),
 }));
 

@@ -36,34 +36,36 @@ const useSongs = () => {
         const songTitles = [...new Set(data.map((song) => song.title))].sort();
         const singers = [
           ...new Set(
-            data.flatMap((song) => song.sing.split(/、/).map((s) => s.trim())),
+            data.flatMap((song) =>
+              (song.sing ?? "").split(/、/).map((s) => s.trim()),
+            ),
           ),
         ].sort();
         const artists = [
           ...new Set(
             data.flatMap((song) =>
-              song.artist.split(/、/).map((s) => s.trim()),
+              (song.artist ?? "").split(/、/).map((s) => s.trim()),
             ),
           ),
         ].sort();
         const lyricists = [
           ...new Set(
             data.flatMap((song) =>
-              song.lyricist.split(/、/).map((s) => s.trim()),
+              (song.lyricist ?? "").split(/、/).map((s) => s.trim()),
             ),
           ),
         ].sort();
         const composers = [
           ...new Set(
             data.flatMap((song) =>
-              song.composer.split(/、/).map((s) => s.trim()),
+              (song.composer ?? "").split(/、/).map((s) => s.trim()),
             ),
           ),
         ].sort();
         const arrangers = [
           ...new Set(
             data.flatMap((song) =>
-              song.arranger.split(/、/).map((s) => s.trim()),
+              (song.arranger ?? "").split(/、/).map((s) => s.trim()),
             ),
           ),
         ].sort();
