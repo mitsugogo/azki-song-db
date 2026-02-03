@@ -209,12 +209,6 @@ const useSearch = (allSongs: Song[]) => {
               new Date(b.broadcast_at || "").getTime()
             );
           });
-
-        // playlist削除
-        urlParams.delete("playlist");
-        window.history.replaceState({}, "", `?${urlParams.toString()}`);
-        // Headerなどに通知
-        window.dispatchEvent(new Event("replacestate"));
       } else if (playlist) {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
@@ -250,10 +244,6 @@ const useSearch = (allSongs: Song[]) => {
           normalWords = normalWords.filter(
             (word) => word !== "sololive2025" && word !== "original-songs",
           );
-          urlParams.delete("q");
-          window.history.replaceState({}, "", `?${urlParams.toString()}`);
-          // Headerなどに通知
-          window.dispatchEvent(new Event("replacestate"));
         }
       }
       // プレイリストモードの場合は、playPlaylist関数で処理済みなので
