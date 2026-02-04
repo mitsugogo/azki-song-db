@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.0](https://github.com/mitsugogo/azki-song-db/compare/v1.27.1...v1.28.0) (2026-02-04)
+
+
+### Features
+
+* 作詞、作曲、編曲の表示に対応 ([e199ce3](https://github.com/mitsugogo/azki-song-db/commit/e199ce3fb7fbaed28f490b5fabe53680eb178e0b))
+
+
+### Bug Fixes
+
+* 「オリ曲モード」を選んだ場合に固まる場合があったのを修正 ([12e84e4](https://github.com/mitsugogo/azki-song-db/commit/12e84e44980b62e7c6d3a57d719df413959be29b))
+* **summary:** 該当楽曲がない場合は項目を非表示 ([7e06bd8](https://github.com/mitsugogo/azki-song-db/commit/7e06bd8e712a3dab12090aa626a578d068cf270e))
+
 ### [1.27.1](https://github.com/mitsugogo/azki-song-db/compare/v1.27.0...v1.27.1) (2026-02-01)
 
 
