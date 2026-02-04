@@ -74,7 +74,7 @@ type Props = {
   onSeekEnd?: () => void;
 
   // player settings
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   hideFutureSongs: boolean;
   setHideFutureSongs: (value: boolean) => void;
 };
@@ -111,7 +111,7 @@ export default function PlayerControlsBar({
   isTouchDevice,
   showVolumeSlider,
   onVolumeChange,
-  currentSongInfo,
+  currentSong,
   hideFutureSongs,
   setHideFutureSongs,
 }: Props) {
@@ -139,10 +139,10 @@ export default function PlayerControlsBar({
   const { isInFavorites, toggleFavorite } = useFavorites();
 
   const addOrRemovePlaylist = (playlist: Playlist) => {
-    if (currentSongInfo && isInPlaylist(playlist, currentSongInfo)) {
-      removeFromPlaylist(playlist, currentSongInfo);
-    } else if (currentSongInfo) {
-      addToPlaylist(playlist, currentSongInfo);
+    if (currentSong && isInPlaylist(playlist, currentSong)) {
+      removeFromPlaylist(playlist, currentSong);
+    } else if (currentSong) {
+      addToPlaylist(playlist, currentSong);
     }
   };
 
@@ -500,27 +500,27 @@ export default function PlayerControlsBar({
 
         <div className="flex shrink-0 items-center gap-2">
           {/* PC: Show 4 buttons */}
-          {isPcScreen && currentSongInfo && (
+          {isPcScreen && currentSong && (
             <>
               {/* Favorite button */}
               <Tooltip
                 label={
-                  isInFavorites(currentSongInfo)
+                  isInFavorites(currentSong)
                     ? "お気に入りから削除"
                     : "お気に入りに追加"
                 }
               >
                 <button
                   type="button"
-                  onClick={() => toggleFavorite(currentSongInfo)}
+                  onClick={() => toggleFavorite(currentSong)}
                   className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
                   aria-label={
-                    isInFavorites(currentSongInfo)
+                    isInFavorites(currentSong)
                       ? "お気に入りから削除"
                       : "お気に入りに追加"
                   }
                 >
-                  {isInFavorites(currentSongInfo) ? (
+                  {isInFavorites(currentSong) ? (
                     <FaStar className="text-base text-yellow-400 dark:text-yellow-500" />
                   ) : (
                     <FaRegStar className="text-base" />
@@ -534,7 +534,7 @@ export default function PlayerControlsBar({
                   <Menu.Target>
                     <Tooltip
                       label={
-                        isInAnyPlaylist(currentSongInfo)
+                        isInAnyPlaylist(currentSong)
                           ? "プレイリスト追加済み"
                           : "プレイリストに追加"
                       }
@@ -544,12 +544,12 @@ export default function PlayerControlsBar({
                         onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
                         className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
                         aria-label={
-                          isInAnyPlaylist(currentSongInfo)
+                          isInAnyPlaylist(currentSong)
                             ? "プレイリスト追加済み"
                             : "プレイリストに追加"
                         }
                       >
-                        {isInAnyPlaylist(currentSongInfo) ? (
+                        {isInAnyPlaylist(currentSong) ? (
                           <FaStar className="text-base" />
                         ) : (
                           <FaPlus className="text-base" />
@@ -582,22 +582,16 @@ export default function PlayerControlsBar({
                             }
                           }}
                           leftSection={
-                            isInPlaylist(playlist, currentSongInfo) ? (
+                            isInPlaylist(playlist, currentSong) ? (
                               <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
                             ) : (
                               <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
                             )
                           }
                           component="div"
-                          bg={
-                            isInPlaylist(playlist, currentSongInfo)
-                              ? "blue"
-                              : ""
-                          }
+                          bg={isInPlaylist(playlist, currentSong) ? "blue" : ""}
                           color={
-                            isInPlaylist(playlist, currentSongInfo)
-                              ? "white"
-                              : ""
+                            isInPlaylist(playlist, currentSong) ? "white" : ""
                           }
                           className="mb-0.5"
                         >
@@ -650,7 +644,7 @@ export default function PlayerControlsBar({
           )}
 
           {/* Mobile: Show menu button */}
-          {!isPcScreen && currentSongInfo && (
+          {!isPcScreen && currentSong && (
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
@@ -689,17 +683,17 @@ export default function PlayerControlsBar({
                   <div className="py-2">
                     <button
                       onClick={() => {
-                        toggleFavorite(currentSongInfo);
+                        toggleFavorite(currentSong);
                         setIsMenuOpen(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                     >
-                      {isInFavorites(currentSongInfo) ? (
+                      {isInFavorites(currentSong) ? (
                         <FaStar className="inline mr-2 text-yellow-400" />
                       ) : (
                         <FaRegStar className="inline mr-2" />
                       )}
-                      {isInFavorites(currentSongInfo)
+                      {isInFavorites(currentSong)
                         ? "お気に入りから削除"
                         : "お気に入りに追加"}
                     </button>
@@ -723,12 +717,12 @@ export default function PlayerControlsBar({
                           onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                         >
-                          {isInAnyPlaylist(currentSongInfo) ? (
+                          {isInAnyPlaylist(currentSong) ? (
                             <FaStar className="inline mr-2" />
                           ) : (
                             <FaPlus className="inline mr-2" />
                           )}
-                          {isInAnyPlaylist(currentSongInfo)
+                          {isInAnyPlaylist(currentSong)
                             ? "プレイリスト追加済み"
                             : "プレイリストに追加"}
                         </button>
@@ -758,7 +752,7 @@ export default function PlayerControlsBar({
                                 }
                               }}
                               leftSection={
-                                isInPlaylist(playlist, currentSongInfo) ? (
+                                isInPlaylist(playlist, currentSong) ? (
                                   <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
                                 ) : (
                                   <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
@@ -766,12 +760,12 @@ export default function PlayerControlsBar({
                               }
                               component="div"
                               bg={
-                                isInPlaylist(playlist, currentSongInfo)
+                                isInPlaylist(playlist, currentSong)
                                   ? "blue"
                                   : ""
                               }
                               color={
-                                isInPlaylist(playlist, currentSongInfo)
+                                isInPlaylist(playlist, currentSong)
                                   ? "white"
                                   : ""
                               }

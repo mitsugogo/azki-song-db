@@ -2,6 +2,23 @@ import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import usePlayerControls from "../usePlayerControls";
 import type { Song } from "../../types/song";
+import type { GlobalPlayerContextType } from "../useGlobalPlayer";
+
+// モック用のglobalPlayerを作成
+const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
+  currentSong: null,
+  isPlaying: false,
+  isMinimized: false,
+  currentTime: 0,
+  setCurrentSong: vi.fn(),
+  setIsPlaying: vi.fn(),
+  setIsMinimized: vi.fn(),
+  setCurrentTime: vi.fn(),
+  minimizePlayer: vi.fn(),
+  maximizePlayer: vi.fn(),
+  seekTo: vi.fn(),
+  setSeekTo: vi.fn(),
+});
 
 describe("usePlayerControls", () => {
   const mockSongs: Song[] = [
@@ -62,10 +79,12 @@ describe("usePlayerControls", () => {
   ];
 
   let originalLocation: Location;
+  let mockGlobalPlayer: GlobalPlayerContextType;
 
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    mockGlobalPlayer = createMockGlobalPlayer();
     // window.locationを簡易モック
     originalLocation = window.location;
     delete (window as any).location;
@@ -87,7 +106,7 @@ describe("usePlayerControls", () => {
 
   it("初期状態が正しく設定される", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     expect(result.current.currentSong).toBeNull();
@@ -97,7 +116,7 @@ describe("usePlayerControls", () => {
 
   it("changeCurrentSongで曲情報と再生曲を切り替えられる", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -105,20 +124,7 @@ describe("usePlayerControls", () => {
     });
 
     expect(result.current.currentSong?.video_id).toBe("vid1");
-    expect(result.current.currentSongInfo?.title).toBe("Song 1");
-  });
-
-  it("infoOnlyフラグが真のときはcurrentSongは更新せずcurrentSongInfoのみ更新する", () => {
-    const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
-    );
-
-    act(() => {
-      result.current.changeCurrentSong(mockSongs[0], true);
-    });
-
-    expect(result.current.currentSong).toBeNull();
-    expect(result.current.currentSongInfo?.video_id).toBe("vid1");
+    expect(result.current.currentSong?.title).toBe("Song 1");
   });
 
   it("songがnullでvideoIdとstartTimeが与えられた場合、該当する曲を選ぶ", () => {
@@ -129,23 +135,23 @@ describe("usePlayerControls", () => {
       { ...mockSongs[0], video_id: "vidX", start: "20" },
     ];
 
-    const { result } = renderHook(() => usePlayerControls(allSongs, allSongs));
+    const { result } = renderHook(() =>
+      usePlayerControls(allSongs, allSongs, mockGlobalPlayer),
+    );
 
     act(() => {
       // targetStartTime=15 なので start=10 のエントリが選ばれるはず
-      result.current.changeCurrentSong(null, false, "vidX", 15);
+      result.current.changeCurrentSong(null, "vidX", 15);
     });
 
-    expect(result.current.currentSongInfo).toBeTruthy();
-    expect(result.current.currentSongInfo?.video_id).toBe("vidX");
-    expect(parseInt(result.current.currentSongInfo!.start)).toBeLessThanOrEqual(
-      15,
-    );
+    expect(result.current.currentSong).toBeTruthy();
+    expect(result.current.currentSong?.video_id).toBe("vidX");
+    expect(parseInt(result.current.currentSong!.start)).toBeLessThanOrEqual(15);
   });
 
   it("nullだけ渡すと何もしない", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -153,31 +159,34 @@ describe("usePlayerControls", () => {
     });
 
     expect(result.current.currentSong).toBeNull();
-    expect(result.current.currentSongInfo).toBeNull();
+    expect(result.current.videoId).toBe("");
+    expect(result.current.startTime).toBe(0);
   });
 
-  it("URLのクエリがリセットされ、replaceStateとreplacestateイベントが発生する", () => {
-    const replaceSpy = vi.spyOn(window.history, "replaceState");
+  it("URLのクエリがリセットされ、replacestateイベントが発生する", () => {
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
       result.current.changeCurrentSong(mockSongs[0]);
     });
 
-    expect(replaceSpy).toHaveBeenCalled();
-    expect(dispatchSpy).toHaveBeenCalled();
+    // replacestateイベントが発火される
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event));
+    const calledEvent = dispatchSpy.mock.calls.find(
+      (call) => (call[0] as Event).type === "replacestate",
+    );
+    expect(calledEvent).toBeTruthy();
 
-    replaceSpy.mockRestore();
     dispatchSpy.mockRestore();
   });
 
   it("setPreviousAndNextSongsで前後の曲が正しく設定される", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -194,7 +203,7 @@ describe("usePlayerControls", () => {
 
   it("先頭の曲ではpreviousSongがnull", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -207,7 +216,7 @@ describe("usePlayerControls", () => {
 
   it("最後の曲ではnextSongがnull", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -220,7 +229,7 @@ describe("usePlayerControls", () => {
 
   it("setHideFutureSongsでlocalStorageに保存される", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -242,7 +251,7 @@ describe("usePlayerControls", () => {
     localStorage.setItem("hideFutureSongs", "true");
 
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     expect(result.current.hideFutureSongs).toBe(true);
@@ -252,7 +261,7 @@ describe("usePlayerControls", () => {
     const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.5);
 
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -260,14 +269,14 @@ describe("usePlayerControls", () => {
     });
 
     expect(result.current.currentSong).toBeTruthy();
-    expect(result.current.currentSongInfo?.video_id).toBe("vid2"); // 0.5 * 3 = 1.5 -> index 1
+    expect(result.current.currentSong?.video_id).toBe("vid2"); // 0.5 * 3 = 1.5 -> index 1
 
     randomSpy.mockRestore();
   });
 
   it("playRandomSongで空のリストを渡すと何もしない", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -284,14 +293,18 @@ describe("usePlayerControls", () => {
     };
 
     const { result } = renderHook(() =>
-      usePlayerControls([songWithLiveCall], [songWithLiveCall]),
+      usePlayerControls(
+        [songWithLiveCall],
+        [songWithLiveCall],
+        mockGlobalPlayer,
+      ),
     );
 
     act(() => {
       result.current.changeCurrentSong(songWithLiveCall);
     });
 
-    expect(result.current.currentSongInfo?.live_call).toBe(
+    expect(result.current.currentSong?.live_call).toBe(
       songWithLiveCall.live_call,
     );
     // timedLiveCallTextは初期状態ではnull
@@ -300,7 +313,7 @@ describe("usePlayerControls", () => {
 
   it("同一の曲を再度changeCurrentSongで設定しても無視される", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -319,7 +332,7 @@ describe("usePlayerControls", () => {
 
   it("document.titleが再生状態に応じて変更される", () => {
     const { result, rerender } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     // 初期状態
@@ -336,7 +349,7 @@ describe("usePlayerControls", () => {
 
   it("videoIdが変わるとvideoIdRefが更新される", () => {
     const { result } = renderHook(() =>
-      usePlayerControls(mockSongs, mockSongs),
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
     );
 
     act(() => {
@@ -358,20 +371,23 @@ describe("usePlayerControls", () => {
       { ...mockSongs[0], video_id: "directVid", start: "100" },
     ];
 
-    const { result } = renderHook(() => usePlayerControls(allSongs, allSongs));
+    const { result } = renderHook(() =>
+      usePlayerControls(allSongs, allSongs, mockGlobalPlayer),
+    );
 
     act(() => {
-      result.current.changeCurrentSong(null, false, "directVid", 100);
+      result.current.changeCurrentSong(null, "directVid", 100);
     });
 
     expect(result.current.videoId).toBe("directVid");
     expect(result.current.startTime).toBe(100);
-    expect(result.current.currentSongInfo?.video_id).toBe("directVid");
+    expect(result.current.currentSong?.video_id).toBe("directVid");
   });
 
   it("songsが変わって現在の曲がリストにない場合は先頭曲を再生", () => {
     const { result, rerender } = renderHook(
-      ({ songs, allSongs }) => usePlayerControls(songs, allSongs),
+      ({ songs, allSongs }) =>
+        usePlayerControls(songs, allSongs, mockGlobalPlayer),
       { initialProps: { songs: mockSongs, allSongs: mockSongs } },
     );
 
@@ -379,7 +395,7 @@ describe("usePlayerControls", () => {
       result.current.changeCurrentSong(mockSongs[1]);
     });
 
-    expect(result.current.currentSongInfo?.video_id).toBe("vid2");
+    expect(result.current.currentSong?.video_id).toBe("vid2");
 
     // songsを別のリストに変更（現在の曲が含まれない）
     const newSongs: Song[] = [mockSongs[0]];
@@ -389,6 +405,230 @@ describe("usePlayerControls", () => {
     });
 
     // 先頭の曲に自動切り替え
-    expect(result.current.currentSongInfo?.video_id).toBe("vid1");
+    expect(result.current.currentSong?.video_id).toBe("vid1");
+  });
+
+  // ===== 同一動画内での曲切り替えテスト =====
+
+  describe("同一動画内での曲切り替え", () => {
+    // 同一動画内に複数の曲があるモックデータ
+    const sameVideoSongs: Song[] = [
+      {
+        video_id: "sameVid",
+        start: "0",
+        end: "",
+        title: "Song A",
+        artist: "Artist A",
+        album: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        sing: "",
+        video_title: "",
+        video_uri: "",
+        broadcast_at: "",
+        year: 0,
+        tags: [],
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+      },
+      {
+        video_id: "sameVid",
+        start: "100",
+        end: "",
+        title: "Song B",
+        artist: "Artist B",
+        album: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        sing: "",
+        video_title: "",
+        video_uri: "",
+        broadcast_at: "",
+        year: 0,
+        tags: [],
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+      },
+      {
+        video_id: "sameVid",
+        start: "200",
+        end: "",
+        title: "Song C",
+        artist: "Artist C",
+        album: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        sing: "",
+        video_title: "",
+        video_uri: "",
+        broadcast_at: "",
+        year: 0,
+        tags: [],
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+      },
+    ];
+
+    it("同一動画内で別の曲を選択するとseekToが呼ばれる", () => {
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択（異なる動画への切り替えなのでseekToは呼ばれない）
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      expect(result.current.currentSong?.title).toBe("Song A");
+      expect(result.current.videoId).toBe("sameVid");
+      // 初回の動画読み込みなのでseekToは呼ばれない
+      expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+
+      // 同一動画内の別の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[1]);
+      });
+
+      // 曲情報が更新される
+      expect(result.current.currentSong?.title).toBe("Song B");
+      // seekToがsong.startの値で呼ばれる
+      expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(100);
+    });
+
+    it("同一動画内で曲を選択してもvideoIdは再設定されない（プレイヤーリロードなし）", () => {
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      expect(result.current.videoId).toBe("sameVid");
+      const initialVideoId = result.current.videoId;
+
+      // 同一動画内の別の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[2]);
+      });
+
+      // videoIdは同じまま
+      expect(result.current.videoId).toBe(initialVideoId);
+      // 曲情報のみ更新
+      expect(result.current.currentSong?.title).toBe("Song C");
+    });
+
+    it("skipSeek: trueの場合はseekToが呼ばれない（自動遷移用）", () => {
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      vi.clearAllMocks();
+
+      // skipSeek: trueで曲を変更（自動遷移をシミュレート）
+      act(() => {
+        result.current.changeCurrentSong(
+          sameVideoSongs[1],
+          undefined,
+          undefined,
+          { skipSeek: true },
+        );
+      });
+
+      // 曲情報は更新される
+      expect(result.current.currentSong?.title).toBe("Song B");
+      // seekToは呼ばれない
+      expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+    });
+
+    it("explicitStartTimeが渡された場合はその値でシークする", () => {
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      vi.clearAllMocks();
+
+      // 明示的なstartTimeを渡す
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[1], "sameVid", 150);
+      });
+
+      // 渡されたexplicitStartTimeでseekToが呼ばれる
+      expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(150);
+    });
+
+    it("異なる動画への切り替え時はseekToではなくvideoIdとstartTimeがセットされる", () => {
+      const differentVideoSongs: Song[] = [
+        ...sameVideoSongs,
+        {
+          video_id: "differentVid",
+          start: "50",
+          end: "",
+          title: "Song D",
+          artist: "Artist D",
+          album: "",
+          album_list_uri: "",
+          album_release_at: "",
+          album_is_compilation: false,
+          sing: "",
+          video_title: "",
+          video_uri: "",
+          broadcast_at: "",
+          year: 0,
+          tags: [],
+          milestones: [],
+          lyricist: "",
+          composer: "",
+          arranger: "",
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        usePlayerControls(
+          differentVideoSongs,
+          differentVideoSongs,
+          mockGlobalPlayer,
+        ),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(differentVideoSongs[0]);
+      });
+
+      vi.clearAllMocks();
+
+      // 異なる動画の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(differentVideoSongs[3]);
+      });
+
+      // seekToは呼ばれない（動画の再読み込みになる）
+      expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+      // videoIdとstartTimeが新しい値にセットされる
+      expect(result.current.videoId).toBe("differentVid");
+      expect(result.current.startTime).toBe(50);
+      expect(result.current.currentSong?.title).toBe("Song D");
+    });
   });
 });

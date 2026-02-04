@@ -11,7 +11,7 @@ interface SongListItemProps {
   song: Song;
   isSelected: boolean;
   isHide: boolean;
-  changeCurrentSong: (song: Song, isRandom: boolean) => void;
+  changeCurrentSong: (song: Song) => void;
 }
 
 const SongListItem = React.memo(
@@ -38,7 +38,7 @@ const SongListItem = React.memo(
               : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
           onClick={() => {
-            changeCurrentSong(song, false);
+            changeCurrentSong(song);
           }}
           data-video-id={song.video_id}
           data-start-time={song.start}

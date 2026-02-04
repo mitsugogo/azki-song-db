@@ -1,38 +1,48 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
+import { GlobalPlayerContextType } from "./useGlobalPlayer";
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
- * @param songs - 表示中の曲リスト
+ *
+ * 責務:
+ * - 現在/次/前の曲の状態管理
+ * - 曲の切り替えロジック
+ * - YouTube プレイヤーのイベントハンドリング
+ * - 再生状態の管理
+ *
+ * @param songs - 表示中の曲リスト（フィルタ後）
  * @param allSongs - 全ての曲のリスト
- * @param timedMessages - 指定秒数で表示するメッセージのリスト
+ * @param globalPlayer - グローバルプレイヤーコンテキスト
  */
-const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
+const usePlayerControls = (
+  songs: Song[],
+  allSongs: Song[],
+  globalPlayer: GlobalPlayerContextType,
+) => {
+  // === 曲の状態管理 ===
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const currentSongRef = useRef(currentSong);
-  const [currentSongInfo, setCurrentSongInfo] = useState<Song | null>(null);
   const [previousSong, setPreviousSong] = useState<Song | null>(null);
   const [nextSong, setNextSong] = useState<Song | null>(null);
 
-  // videoIdとstartTimeを直指定で再生する場合
+  // === 再生制御 ===
   const [videoId, setVideoId] = useState("");
   const [startTime, setStartTime] = useState(0);
-
   const [playerKey, setPlayerKey] = useState(0);
-
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // セトリのネタバレを回避するモード
+  // === セトリネタバレ防止モード ===
   const [hideFutureSongs, setHideFutureSongs] = useState(false);
 
-  const currentSongInfoRef = useRef(currentSongInfo);
+  // === 内部参照 ===
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
-  const lastManualChangeRef = useRef<number>(0); // 手動で曲を変更した時刻
-  const isManualChangeInProgressRef = useRef<boolean>(false); // 手動変更中フラグ
+  const lastManualChangeRef = useRef<number>(0);
+  const isManualChangeInProgressRef = useRef<boolean>(false);
 
-  // ライブのコール指南メッセージ
+  // === ライブコール関連 ===
   const [timedLiveCallText, setTimedLiveCallText] = useState<string | null>(
     null,
   );
@@ -44,13 +54,20 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
   // songs配列とnextSongの最新値をrefで保持
   const songsRef = useRef(songs);
   const nextSongRef = useRef(nextSong);
+  // changeCurrentSongの最新値をrefで保持（setInterval内で使用）
+  const changeCurrentSongRef = useRef<
+    (
+      song: Song | null,
+      explicitVideoId?: string,
+      explicitStartTime?: number,
+      options?: { skipSeek?: boolean },
+    ) => void
+  >(() => {});
 
+  // === ref同期 ===
   useEffect(() => {
     currentSongRef.current = currentSong;
   }, [currentSong]);
-  useEffect(() => {
-    currentSongInfoRef.current = currentSongInfo;
-  }, [currentSongInfo]);
 
   useEffect(() => {
     songsRef.current = songs;
@@ -60,7 +77,9 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     nextSongRef.current = nextSong;
   }, [nextSong]);
 
-  // セトリネタバレ防止モードをlocalStorageに保存する
+  // changeCurrentSong の ref 同期は後で定義
+
+  // === セトリネタバレ防止モードのlocalStorage同期 ===
   useEffect(() => {
     const hideFutureSongs = localStorage.getItem("hideFutureSongs");
     if (hideFutureSongs === "true") {
@@ -76,54 +95,54 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     }
   }, [hideFutureSongs]);
 
-  // songsが変わったら前後の楽曲をセットする
-  useEffect(() => {
-    if (!currentSong) return;
-
-    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
-    const isExists = songs.some(
-      (song) =>
-        song.video_id === currentSongInfo?.video_id &&
-        song.start === currentSongInfo?.start,
-    );
-    if (!isExists) {
-      changeCurrentSong(songs[0]);
-      return;
-    }
-
-    if (currentSongInfo && songs.length > 0) {
-      setPreviousAndNextSongs(currentSongInfo, songs);
-    }
-  }, [songs, currentSongInfo]);
-
+  // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
       const currentIndex = songsList.findIndex(
         (s) => s.video_id === song.video_id && s.start === song.start,
       );
 
-      const previousSong =
-        currentIndex > 0 ? songsList[currentIndex - 1] : null;
-      const nextSong =
+      const prev = currentIndex > 0 ? songsList[currentIndex - 1] : null;
+      const next =
         currentIndex < songsList.length - 1
           ? songsList[currentIndex + 1]
           : null;
-      setPreviousSong(previousSong);
-      setNextSong(nextSong);
+      setPreviousSong(prev);
+      setNextSong(next);
     },
     [],
   );
 
+  // songsが変わったら前後の楽曲を再計算
+  useEffect(() => {
+    if (!currentSong) return;
+
+    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
+    const isExists = songs.some(
+      (song) =>
+        song.video_id === currentSong?.video_id &&
+        song.start === currentSong?.start,
+    );
+    if (!isExists && songs.length > 0) {
+      changeCurrentSong(songs[0]);
+      return;
+    }
+
+    if (currentSong && songs.length > 0) {
+      setPreviousAndNextSongs(currentSong, songs);
+    }
+  }, [songs, currentSong, setPreviousAndNextSongs]);
+
   // 現在の楽曲が変わったらtitleを変更する
   useEffect(() => {
     const title =
-      isPlaying && currentSongInfo
-        ? `♪${currentSongInfo.title} / ${currentSongInfo.artist} - AZKi Song Database`
+      isPlaying && currentSong
+        ? `♪${currentSong.title} / ${currentSong.artist} - AZKi Song Database`
         : "AZKi Song Database";
-
     document.title = title;
-  }, [currentSongInfo, isPlaying]);
+  }, [currentSong, isPlaying]);
 
+  // 全曲をstart降順でソート（曲検索用）
   const sortedAllSongs = useMemo(() => {
     return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
   }, [allSongs]);
@@ -133,33 +152,56 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
     setPlayerKey((prevKey) => prevKey + 1);
   }, []);
 
+  // ライブコールメッセージを設定
+  const setLivecallTimedMessages = useCallback(
+    (messages: { start: number; end: number; text: string }[]) => {
+      setTimedMessages(messages);
+      timedMessagesRef.current = messages;
+    },
+    [],
+  );
+
+  // ライブコールをパースするヘルパー関数
+  const parseLiveCallMessages = useCallback((liveCall: string) => {
+    return liveCall
+      .split(/[\r\n]/)
+      .map((line) => line.match(/(\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)(.*)$/))
+      .filter((match) => !!match)
+      .map((match) => {
+        const startHours = parseInt(match![1]);
+        const startMinutes = parseInt(match![2]);
+        const startSeconds = parseInt(match![3]);
+        const startInSeconds =
+          startHours * 3600 + startMinutes * 60 + startSeconds;
+
+        const endHours = parseInt(match![4]);
+        const endMinutes = parseInt(match![5]);
+        const endSeconds = parseInt(match![6]);
+        const endInSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
+
+        return {
+          start: startInSeconds,
+          end: endInSeconds,
+          text: match![7].trim(),
+        };
+      });
+  }, []);
+
+  // === 曲を変更する ===
   const changeCurrentSong = useCallback(
     (
       song: Song | null,
-      infoOnly?: boolean,
-      videoId?: string,
-      startTime?: number,
+      explicitVideoId?: string,
+      explicitStartTime?: number,
+      options?: { skipSeek?: boolean },
     ) => {
-      if (!song && !videoId) return;
+      if (!song && !explicitVideoId) return;
 
-      const targetVideoId = videoId ?? song?.video_id;
-      const targetStartTime = startTime ?? (song ? Number(song.start) : 0);
+      const targetVideoId = explicitVideoId ?? song?.video_id;
+      const targetStartTime =
+        explicitStartTime ?? (song ? Number(song.start) : 0);
 
-      const url = new URL(window.location.href);
-      url.searchParams.delete("v");
-      url.searchParams.delete("t");
-      history.replaceState(null, "", url);
-      // Headerなどに通知
-      window.dispatchEvent(new Event("replacestate"));
-
-      if (youtubeVideoIdRef.current !== targetVideoId) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        // 動画IDが変わった場合はフラグを立てる
-        isManualChangeInProgressRef.current = true;
-      }
-      youtubeVideoIdRef.current = targetVideoId || "";
-
+      // 曲が指定されていない場合、videoIdとstartTimeからsongを特定
       if (!song && targetVideoId) {
         const targetSongs = sortedAllSongs
           .slice()
@@ -168,81 +210,86 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
         song =
           targetSongs.find((s) => parseInt(s.start) <= targetStartTime) ?? null;
       }
+      if (!song) return;
 
-      if (song) {
-        setPreviousAndNextSongs(song, songs);
+      // 同一再生中の曲が渡された場合は変更を無視する
+      const isSameAsPlaying =
+        currentSong?.video_id === song?.video_id &&
+        currentSong?.start === song?.start;
+
+      if (
+        isSameAsPlaying &&
+        !explicitVideoId &&
+        typeof explicitStartTime !== "number"
+      ) {
+        return;
       }
 
-      setCurrentSongInfo(song);
-
-      // 曲が変わったらメッセージと表示済みリストをリセット
+      // ライブコール場所を秒数に変換しながらパース
       setTimedLiveCallText(null);
-
-      if (song && song.live_call) {
-        // ライブコール場所を秒数に変換しながらパース
-        const timedMessages = song.live_call
-          .split(/[\r\n]/)
-          .map((line) =>
-            line.match(/(\d+):(\d+):(\d+) - (\d+):(\d+):(\d+)(.*)$/),
-          )
-          .filter((match) => !!match) // nullを除外
-          .map((match) => {
-            // 開始時間を秒に変換
-            const startHours = parseInt(match![1]);
-            const startMinutes = parseInt(match![2]);
-            const startSeconds = parseInt(match![3]);
-            const startInSeconds =
-              startHours * 3600 + startMinutes * 60 + startSeconds;
-
-            // 終了時間を秒に変換
-            const endHours = parseInt(match![4]);
-            const endMinutes = parseInt(match![5]);
-            const endSeconds = parseInt(match![6]);
-            const endInSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
-
-            return {
-              start: startInSeconds,
-              end: endInSeconds,
-              text: match![7].trim(),
-            };
-          });
-        setTimedMessages(timedMessages);
-        timedMessagesRef.current = timedMessages;
+      if (song.live_call) {
+        const timedMessagesParsed = parseLiveCallMessages(song.live_call);
+        setTimedMessages(timedMessagesParsed);
+        timedMessagesRef.current = timedMessagesParsed;
       }
 
-      if (!infoOnly) {
-        // 手動で曲を変更したことを記録
-        lastManualChangeRef.current = Date.now();
+      // 前後の曲をセット
+      setPreviousAndNextSongs(song, songs);
 
-        if (videoId && typeof startTime === "number") {
-          setVideoId(videoId);
-          setStartTime(startTime);
-        } else {
-          setVideoId("");
-          setStartTime(0);
-        }
-
-        // 同一再生中の曲が渡された場合は変更を無視する
-        const isSameAsPlaying =
-          currentSong?.video_id === song?.video_id &&
-          currentSong?.start === song?.start;
-
-        if (isSameAsPlaying && !videoId && typeof startTime !== "number") {
-          return;
-        }
-
+      // === 同一動画内での曲変更 ===
+      if (
+        youtubeVideoIdRef.current &&
+        targetVideoId &&
+        youtubeVideoIdRef.current === targetVideoId
+      ) {
         setCurrentSong(song);
+        // skipSeekオプションがない場合はシークを行う
+        // 自動遷移時のみskipSeek: trueで呼び出される
+        if (!options?.skipSeek) {
+          const seekTime =
+            typeof explicitStartTime === "number"
+              ? explicitStartTime
+              : Number(song.start);
+          globalPlayer.seekTo(seekTime);
+        }
+        return;
       }
+
+      // === 異なる動画への切り替え ===
+      // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
+      const url = new URL(window.location.href);
+      url.searchParams.delete("v");
+      url.searchParams.delete("t");
+      // Headerなどに通知
+      window.dispatchEvent(new Event("replacestate"));
+
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      // 動画IDが変わった場合はフラグを立てる
+      isManualChangeInProgressRef.current = true;
+      youtubeVideoIdRef.current = targetVideoId || "";
+
+      // 手動で曲を変更したことを記録
+      lastManualChangeRef.current = Date.now();
+
+      // 新しい動画を読み込む
+      setVideoId(targetVideoId || "");
+      setStartTime(targetStartTime);
+      setCurrentSong(song);
     },
     [
       songs,
       setPreviousAndNextSongs,
       currentSong,
-      resetPlayer,
-      currentSongInfo,
       sortedAllSongs,
+      parseLiveCallMessages,
     ],
   );
+
+  // changeCurrentSong の ref 同期（setInterval 内で最新の関数を使うため）
+  useEffect(() => {
+    changeCurrentSongRef.current = changeCurrentSong;
+  }, [changeCurrentSong]);
 
   const playRandomSong = useCallback(
     (songsList: Song[]) => {
@@ -278,17 +325,21 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
       if (youtubeVideoIdRef.current !== videoId) {
         clearMonitorInterval();
+        // 動画IDが変わったら youtubeVideoIdRef を更新
+        if (videoId) {
+          youtubeVideoIdRef.current = videoId;
+        }
       }
 
       const handlePlayingState = () => {
         if (intervalRef.current) return;
-        changeCurrentSong(currentSongInfoRef.current, true);
 
         // ループ内でtimedMessagesをチェック
         const sortedTimedMessages = [...timedMessagesRef.current].sort(
           (a, b) => a.start - b.start,
         );
 
+        // 再生中の監視タイマー
         intervalRef.current = setInterval(() => {
           const currentTime = player.getCurrentTime();
           const currentVideoId = player.getVideoData()?.video_id;
@@ -299,9 +350,7 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
 
           // 現在時刻が指定秒数を超えて、かつ未表示のメッセージを探す
           const nextMessage = sortedTimedMessages.find(
-            (msg) =>
-              currentTime + 1 >= msg.start && // 1秒前にメッセージを表示する
-              currentTime < msg.end,
+            (msg) => currentTime + 1 >= msg.start && currentTime < msg.end,
           );
 
           if (nextMessage) {
@@ -320,20 +369,30 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
               s.start === foundSong?.start,
           );
 
-          // 手動変更中フラグのチェック(曲情報の更新は常に許可)
+          // 自動切替: 同一動画内で再生位置が次の曲に移った場合、曲名を自動で更新する
+          const currentPlayingVideoId = currentSongRef.current?.video_id;
+          const isSameVideoPlaying =
+            currentPlayingVideoId && currentVideoId === currentPlayingVideoId;
+          if (
+            foundSong &&
+            isFoundSongInList &&
+            isSameVideoPlaying &&
+            (foundSong.start !== currentSongRef.current?.start ||
+              foundSong.video_id !== currentSongRef.current?.video_id) &&
+            !isManualChangeInProgressRef.current
+          ) {
+            // 自動的な切り替えは ref 経由で最新の changeCurrentSong を呼ぶ
+            // 自動遷移なのでシークはスキップ（表示のみ更新）
+            changeCurrentSongRef.current(foundSong, undefined, undefined, {
+              skipSeek: true,
+            });
+            return;
+          }
+
+          // 手動変更中フラグのチェック
           const shouldBlockAutoChange =
             isManualChangeInProgressRef.current &&
             Date.now() - lastManualChangeRef.current <= 3000;
-
-          // フラグが立っている間でも、曲情報の更新(infoOnly)は実行
-          if (foundSong) {
-            if (
-              foundSong.video_id !== currentSongInfoRef.current?.video_id ||
-              foundSong.title !== currentSongInfoRef.current?.title
-            ) {
-              changeCurrentSong(foundSong, true);
-            }
-          }
 
           // 一定時間経過したらフラグをクリア
           if (
@@ -349,15 +408,15 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
           }
 
           if (!isFoundSongInList && nextSongRef.current) {
-            changeCurrentSong(nextSongRef.current);
+            changeCurrentSongRef.current(nextSongRef.current);
             return;
           }
 
           if (foundSong?.end && foundSong.end < currentTime) {
             clearMonitorInterval();
-            changeCurrentSong(nextSongRef.current);
+            changeCurrentSongRef.current(nextSongRef.current);
           } else if (!foundSong && nextSongRef.current) {
-            changeCurrentSong(nextSongRef.current);
+            changeCurrentSongRef.current(nextSongRef.current);
           }
         }, 500);
       };
@@ -365,14 +424,13 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
       const handleEndedState = () => {
         clearMonitorInterval();
         if (nextSongRef.current) {
-          changeCurrentSong(nextSongRef.current);
+          changeCurrentSongRef.current(nextSongRef.current);
         } else if (songsRef.current.length > 0) {
-          changeCurrentSong(songsRef.current[0]);
+          changeCurrentSongRef.current(songsRef.current[0]);
         }
         // 再生終了時にメッセージをリセット
         setTimedLiveCallText(null);
       };
-
       switch (event.data) {
         case YouTube.PlayerState.UNSTARTED:
         case YouTube.PlayerState.PAUSED:
@@ -390,29 +448,28 @@ const usePlayerControls = (songs: Song[], allSongs: Song[]) => {
           break;
       }
     },
-    [
-      songs,
-      nextSong,
-      changeCurrentSong,
-      playRandomSong,
-      searchCurrentSongOnVideo,
-      timedMessages,
-    ],
+    [songs, nextSong, playRandomSong, searchCurrentSongOnVideo, timedMessages],
   );
 
   const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
     const player = event.target;
     player.playVideo();
     setIsPlaying(true);
+
+    // URLに「v」と「t」がセットで存在する場合、再生開始後にパラメータを削除
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("v") && url.searchParams.has("t")) {
+      url.searchParams.delete("v");
+      url.searchParams.delete("t");
+      window.history.replaceState(null, "", url.toString());
+      window.dispatchEvent(new Event("replacestate"));
+    }
   }, []);
 
   return {
     currentSong,
     setCurrentSong,
     currentSongRef,
-    currentSongInfo,
-    setCurrentSongInfo,
-    currentSongInfoRef,
     previousSong,
     nextSong,
     isPlaying,

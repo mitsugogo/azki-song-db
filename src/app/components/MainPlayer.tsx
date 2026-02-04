@@ -7,13 +7,13 @@ import {
   createSpotlight,
   spotlight,
 } from "@mantine/spotlight";
-import { YouTubeEvent } from "react-youtube";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
 import usePlayerControls from "../hook/usePlayerControls";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
+import usePlayerLifecycle from "../hook/usePlayerLifecycle";
 import { usePathname } from "next/navigation";
 
 // Components
@@ -56,9 +56,7 @@ export default function MainPlayer() {
 
   const {
     currentSong,
-    currentSongInfo,
     currentSongRef,
-    currentSongInfoRef,
     previousSong,
     nextSong,
     isPlaying,
@@ -73,51 +71,46 @@ export default function MainPlayer() {
     handlePlayerOnReady: originalHandlePlayerOnReady,
     handleStateChange: originalHandleStateChange,
     setPreviousAndNextSongs,
-  } = usePlayerControls(songs, allSongs);
+  } = usePlayerControls(songs, allSongs, globalPlayer);
 
-  // 再生位置復元のためのフラグと前回の動画ID
-  const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
-  const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
-  const playerRef = useRef<any>(null);
-  const previousPathnameRef = useRef(pathname);
-  const [playerDuration, setPlayerDuration] = useState(0);
+  // プレイヤーライフサイクル管理
+  const {
+    playerRef,
+    isPlayerReady,
+    playerDuration,
+    playerCurrentTime,
+    handlePlayerOnReady,
+    handlePlayerStateChange,
+    hasRestoredPosition,
+    setHasRestoredPosition,
+    previousVideoId,
+    setPreviousVideoId,
+  } = usePlayerLifecycle({
+    originalHandlePlayerOnReady,
+    originalHandleStateChange,
+    globalPlayer,
+    currentSong,
+    isPlaying,
+  });
+
+  // プレイヤーボリューム（ローカル状態）
   const [playerVolume, setPlayerVolume] = useState(100);
-  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const previousPathnameRef = useRef(pathname);
 
-  const updatePlayerSnapshot = useCallback((playerInstance: any) => {
-    if (!playerInstance) return;
-    if (typeof playerInstance.getDuration === "function") {
-      const duration = playerInstance.getDuration();
-      if (Number.isFinite(duration)) {
-        setPlayerDuration(duration);
+  const seekTo = useCallback(
+    (seconds: number) => {
+      if (
+        playerRef.current &&
+        typeof playerRef.current.seekTo === "function" &&
+        typeof playerRef.current.getCurrentTime === "function"
+      ) {
+        const currentTime = playerRef.current.getCurrentTime();
+        const newTime = Math.max(0, currentTime + seconds);
+        playerRef.current.seekTo(newTime, true);
       }
-    }
-    if (typeof playerInstance.getVolume === "function") {
-      const volume = playerInstance.getVolume();
-      if (Number.isFinite(volume)) {
-        setPlayerVolume(volume);
-      }
-    }
-    if (typeof playerInstance.getCurrentTime === "function") {
-      const currentTime = playerInstance.getCurrentTime();
-      if (Number.isFinite(currentTime)) {
-        setPlayerCurrentTime(currentTime);
-      }
-    }
-  }, []);
-
-  const seekTo = useCallback((seconds: number) => {
-    if (
-      playerRef.current &&
-      typeof playerRef.current.seekTo === "function" &&
-      typeof playerRef.current.getCurrentTime === "function"
-    ) {
-      const currentTime = playerRef.current.getCurrentTime();
-      const newTime = Math.max(0, currentTime + seconds);
-      playerRef.current.seekTo(newTime, true);
-    }
-  }, []);
+    },
+    [playerRef],
+  );
 
   // キーボードイベント: 左右キーで動画を10秒前後させる
   useEffect(() => {
@@ -146,128 +139,9 @@ export default function MainPlayer() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [seekTo]);
 
-  // handlePlayerOnReadyをラップして再生位置を復元
-  const handlePlayerOnReady = useCallback(
-    (event: YouTubeEvent<number>) => {
-      originalHandlePlayerOnReady(event);
-      playerRef.current = event.target;
-      updatePlayerSnapshot(event.target);
-      setIsPlayerReady(true);
-
-      // 動画IDが変わっていない場合のみ再生位置を復元
-      const currentVideoId = currentSongInfo?.video_id;
-      const shouldRestorePosition =
-        currentVideoId === previousVideoId &&
-        globalPlayer.currentTime > 0 &&
-        !hasRestoredPosition;
-
-      if (shouldRestorePosition) {
-        setTimeout(() => {
-          const player = event.target;
-          if (player && typeof player.seekTo === "function") {
-            player.seekTo(globalPlayer.currentTime, true);
-            setHasRestoredPosition(true);
-          }
-        }, 500);
-      } else if (currentVideoId !== previousVideoId) {
-        // 動画IDが変わった場合は復元済みフラグをリセット
-        setHasRestoredPosition(false);
-      }
-    },
-    [
-      originalHandlePlayerOnReady,
-      globalPlayer.currentTime,
-      hasRestoredPosition,
-      currentSongInfo?.video_id,
-      previousVideoId,
-      updatePlayerSnapshot,
-    ],
-  );
-
-  const handlePlayerStateChange = useCallback(
-    (event: YouTubeEvent<number>) => {
-      originalHandleStateChange(event);
-      updatePlayerSnapshot(event.target);
-    },
-    [originalHandleStateChange, updatePlayerSnapshot],
-  );
-
-  // 再生中は定期的にcurrentTimeを更新（ゆるめのポーリングで再レンダリングを抑制）
-  useEffect(() => {
-    if (!isPlayerReady || !playerRef.current || !isPlaying) return;
-
-    let lastTime =
-      typeof playerRef.current.getCurrentTime === "function"
-        ? playerRef.current.getCurrentTime()
-        : 0;
-
-    const interval = setInterval(() => {
-      if (
-        playerRef.current &&
-        typeof playerRef.current.getCurrentTime === "function"
-      ) {
-        const currentTime = playerRef.current.getCurrentTime();
-        if (Number.isFinite(currentTime)) {
-          // 0.25秒以上動いたときだけstate更新して再レンダリング回数を削減
-          if (Math.abs(currentTime - lastTime) >= 0.25) {
-            lastTime = currentTime;
-            setPlayerCurrentTime(currentTime);
-          }
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [isPlayerReady, isPlaying]);
-
-  // グローバルプレイヤーと同期（動画が変わったときのみリセット）
-  useEffect(() => {
-    if (!currentSongInfo) {
-      globalPlayer.setCurrentSong(null);
-      setPreviousVideoId(null);
-      return;
-    }
-
-    const currentVideoId = currentSongInfo.video_id;
-
-    // 動画IDが変わった場合のみ再生位置をリセット
-    if (currentVideoId !== previousVideoId) {
-      if (previousVideoId !== null) {
-        // 初回以外で動画が変わった場合
-        globalPlayer.setCurrentTime(0);
-        setHasRestoredPosition(false);
-      }
-      setPreviousVideoId(currentVideoId);
-    }
-
-    globalPlayer.setCurrentSong(currentSongInfo);
-  }, [currentSongInfo, globalPlayer, previousVideoId]);
-
+  // isPlaying をグローバルプレイヤーに同期
   useEffect(() => {
     globalPlayer.setIsPlaying(isPlaying);
-  }, [isPlaying, globalPlayer]);
-
-  useEffect(() => {
-    if (!currentSongInfo) {
-      setIsPlayerReady(false);
-    }
-  }, [currentSongInfo]);
-
-  // 再生位置を定期的に保存
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    const interval = setInterval(() => {
-      if (
-        playerRef.current &&
-        typeof playerRef.current.getCurrentTime === "function"
-      ) {
-        const time = playerRef.current.getCurrentTime();
-        globalPlayer.setCurrentTime(time);
-      }
-    }, 1000); // 1秒ごとに保存
-
-    return () => clearInterval(interval);
   }, [isPlaying, globalPlayer]);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
@@ -276,7 +150,7 @@ export default function MainPlayer() {
     const isHomePage = pathname === "/";
     const previousPathname = previousPathnameRef.current;
 
-    if (!isHomePage && previousPathname === "/" && currentSongInfo) {
+    if (!isHomePage && previousPathname === "/" && currentSong) {
       globalPlayer.setIsMinimized(true);
     } else if (isHomePage) {
       globalPlayer.maximizePlayer();
@@ -310,12 +184,12 @@ export default function MainPlayer() {
     }
 
     previousPathnameRef.current = pathname;
-  }, [pathname, currentSongInfo, globalPlayer, currentSong, changeCurrentSong]);
+  }, [pathname, currentSong, globalPlayer, currentSong, changeCurrentSong]);
 
   useEffect(() => {
-    if (!currentSongInfo) return;
-    setPreviousAndNextSongs(currentSongInfo, songs);
-  }, [currentSongInfo]);
+    if (!currentSong) return;
+    setPreviousAndNextSongs(currentSong, songs);
+  }, [currentSong]);
 
   // 曲を再生
   useEffect(() => {
@@ -367,18 +241,18 @@ export default function MainPlayer() {
 
     // それ以外 → ランダム再生
     playRandomSong(songs);
-  }, [songs, currentSongInfo, searchTerm, changeCurrentSong, playRandomSong]);
+  }, [songs, currentSong, searchTerm, changeCurrentSong, playRandomSong]);
 
   // URLにvとtが揃ったリクエストが新たに発生した場合
   useEffect(() => {
-    if (!currentSongInfo) return;
+    if (!currentSong) return;
     const urlParams = new URLSearchParams(window.location.search);
     const videoId = urlParams.get("v");
     const startTime = Number(urlParams.get("t")?.replace("s", "")) || 0;
-    if (videoId && Number(currentSongInfo.start) === startTime) {
-      changeCurrentSong(null, false, videoId, startTime);
+    if (videoId && Number(currentSong.start) === startTime) {
+      changeCurrentSong(null, videoId, startTime);
     }
-  }, [currentSongInfo]);
+  }, [currentSong]);
 
   // --- State for UI ---
   const [baseUrl, setBaseUrl] = useState("");
@@ -393,13 +267,13 @@ export default function MainPlayer() {
   }, [allSongs]);
 
   const setSongsToCurrentVideo = () => {
-    if (!currentSongInfo) return;
+    if (!currentSong) return;
     const songsInVideo = allSongs.filter(
-      (song) => song.video_id === currentSongInfo.video_id,
+      (song) => song.video_id === currentSong.video_id,
     );
-    setSearchTerm(`video_id:${currentSongInfo.video_id}`);
-    changeCurrentSong(currentSongInfo, true);
-    setPreviousAndNextSongs(currentSongInfo, songsInVideo);
+    setSearchTerm(`video_id:${currentSong.video_id}`);
+    setSongs(songsInVideo);
+    setPreviousAndNextSongs(currentSong, songsInVideo);
   };
 
   const playVideo = useCallback(() => {
@@ -475,6 +349,14 @@ export default function MainPlayer() {
     },
     [playerDuration, globalPlayer],
   );
+
+  // seekToAbsolute を globalPlayer に登録
+  useEffect(() => {
+    globalPlayer.setSeekTo(seekToAbsolute);
+    return () => {
+      globalPlayer.setSeekTo(null);
+    };
+  }, [seekToAbsolute, globalPlayer]);
 
   const desktopPlayerControls = {
     isReady: isPlayerReady && Boolean(playerRef.current),
@@ -621,7 +503,6 @@ export default function MainPlayer() {
     <>
       <PlayerSection
         currentSong={currentSong}
-        currentSongInfo={currentSongInfo}
         previousSong={previousSong}
         nextSong={nextSong}
         allSongs={allSongs}
@@ -649,7 +530,7 @@ export default function MainPlayer() {
       <SearchAndSongList
         songs={songs}
         allSongs={allSongs}
-        currentSongInfo={currentSongInfo}
+        currentSong={currentSong}
         searchTerm={searchTerm}
         hideFutureSongs={hideFutureSongs}
         changeCurrentSong={changeCurrentSong}
@@ -668,7 +549,7 @@ export default function MainPlayer() {
 
       <ShareModal
         openShareModal={openShareModal}
-        currentSongInfo={currentSongInfo}
+        currentSong={currentSong}
         baseUrl={baseUrl}
         onClose={() => setOpenShareModal(false)}
       />

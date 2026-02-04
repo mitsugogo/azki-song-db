@@ -34,7 +34,7 @@ import Loading from "../loading";
 type SearchAndSongListProps = {
   songs: Song[];
   allSongs: Song[];
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   searchTerm: string;
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song | null) => void;
@@ -48,7 +48,7 @@ export default function SearchAndSongList({
   songs,
   allSongs,
   searchTerm,
-  currentSongInfo,
+  currentSong,
   hideFutureSongs,
   changeCurrentSong,
   playRandomSong,
@@ -241,8 +241,8 @@ export default function SearchAndSongList({
         <Suspense fallback={<Loading />}>
           <SongsList
             songs={songs}
-            currentSongInfo={currentSongInfo}
-            changeCurrentSong={changeCurrentSong}
+            currentSong={currentSong}
+            changeCurrentSong={changeCurrentSong as any}
             hideFutureSongs={hideFutureSongs}
           />
         </Suspense>
