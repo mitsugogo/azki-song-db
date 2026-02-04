@@ -119,6 +119,52 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               : song.firstVideo.title}
           </h2>
           <p className="text-sm">アーティスト: {song.firstVideo.artist}</p>
+          {!song.isAlbum && (
+            <>
+              {song.firstVideo.lyricist && (
+                <p className="text-sm">
+                  作詞:{" "}
+                  {song.firstVideo.lyricist.split("、").map((n, i) => (
+                    <Link
+                      key={i}
+                      href={`/?q=lyricist:${n}`}
+                      className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                    >
+                      {n}
+                    </Link>
+                  ))}
+                </p>
+              )}
+              {song.firstVideo.composer && (
+                <p className="text-sm">
+                  作曲:{" "}
+                  {song.firstVideo.composer.split("、").map((n, i) => (
+                    <Link
+                      key={i}
+                      href={`/?q=composer:${n}`}
+                      className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                    >
+                      {n}
+                    </Link>
+                  ))}
+                </p>
+              )}
+              {song.firstVideo.arranger && (
+                <p className="text-sm">
+                  編曲:{" "}
+                  {song.firstVideo.arranger.split("、").map((n, i) => (
+                    <Link
+                      key={i}
+                      href={`/?q=arranger:${n}`}
+                      className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                    >
+                      {n}
+                    </Link>
+                  ))}
+                </p>
+              )}
+            </>
+          )}
           {song.song.tags.includes("カバー曲") && (
             <p className="text-sm">カバー: {coverArtists.join("、")}</p>
           )}
@@ -149,6 +195,9 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       <TableHeadCell className="px-2 py-1">
                         アーティスト
                       </TableHeadCell>
+                      <TableHeadCell className="px-2 py-1">作詞</TableHeadCell>
+                      <TableHeadCell className="px-2 py-1">作曲</TableHeadCell>
+                      <TableHeadCell className="px-2 py-1">編曲</TableHeadCell>
                       <TableHeadCell className="px-2 py-1">
                         動画公開日
                       </TableHeadCell>
@@ -184,6 +233,48 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                           >
                             {s.artist}
                           </Link>
+                        </TableCell>
+                        <TableCell className="px-2 py-1">
+                          {s.lyricist &&
+                            s.lyricist.split("、").map((n, i, arr) => (
+                              <span key={i}>
+                                <Link
+                                  href={`/?q=lyricist:${n}`}
+                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                                >
+                                  {n}
+                                </Link>
+                                {i < arr.length - 1 ? "、" : ""}
+                              </span>
+                            ))}
+                        </TableCell>
+                        <TableCell className="px-2 py-1">
+                          {s.composer &&
+                            s.composer.split("、").map((n, i, arr) => (
+                              <span key={i}>
+                                <Link
+                                  href={`/?q=composer:${n}`}
+                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                                >
+                                  {n}
+                                </Link>
+                                {i < arr.length - 1 ? "、" : ""}
+                              </span>
+                            ))}
+                        </TableCell>
+                        <TableCell className="px-2 py-1">
+                          {s.arranger &&
+                            s.arranger.split("、").map((n, i, arr) => (
+                              <span key={i}>
+                                <Link
+                                  href={`/?q=arranger:${n}`}
+                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                                >
+                                  {n}
+                                </Link>
+                                {i < arr.length - 1 ? "、" : ""}
+                              </span>
+                            ))}
                         </TableCell>
                         <TableCell className="px-2 py-1">
                           {new Date(s.broadcast_at).toLocaleDateString()}

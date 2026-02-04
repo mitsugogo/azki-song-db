@@ -2,6 +2,9 @@ export interface Song {
   title: string;
   artist: string;
   album: string;
+  lyricist: string;
+  composer: string;
+  arranger: string;
   album_list_uri: string;
   album_release_at: string;
   album_is_compilation: boolean;

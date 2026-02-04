@@ -15,9 +15,9 @@ import YearPager from "./YearPager";
 
 interface SongListProps {
   songs: Song[];
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   hideFutureSongs: boolean;
-  changeCurrentSong: (song: Song, isRandom: boolean) => void;
+  changeCurrentSong: (song: Song) => void;
 }
 
 // 画面幅からGridの列数を推定
@@ -45,7 +45,7 @@ export const areSongsEqual = (
 
 const SongsList = ({
   songs,
-  currentSongInfo,
+  currentSong,
   hideFutureSongs,
   changeCurrentSong,
 }: SongListProps) => {
@@ -90,16 +90,14 @@ const SongsList = ({
 
   // 現在の曲のインデックス
   const currentSongIndex = useMemo(() => {
-    if (!currentSongInfo) return -1;
-    return songs.findIndex((song) => areSongsEqual(song, currentSongInfo));
-  }, [songs, currentSongInfo]);
+    if (!currentSong) return -1;
+    return songs.findIndex((song) => areSongsEqual(song, currentSong));
+  }, [songs, currentSong]);
 
   // 現在の曲へスクロール
   useEffect(() => {
-    if (currentSongInfo && colCount > 0 && virtualizer && parentRef.current) {
-      const index = songs.findIndex((song) =>
-        areSongsEqual(song, currentSongInfo),
-      );
+    if (currentSong && colCount > 0 && virtualizer && parentRef.current) {
+      const index = songs.findIndex((song) => areSongsEqual(song, currentSong));
       if (index !== -1) {
         const rowIndex = Math.floor(index / colCount);
         virtualizer.scrollToIndex(rowIndex, {
@@ -109,7 +107,7 @@ const SongsList = ({
         virtualizer.scrollToIndex(0);
       }
     }
-  }, [currentSongInfo, virtualizer, songs, colCount]);
+  }, [currentSong, virtualizer, songs, colCount]);
 
   // スペーサーのサイズを計算
   const startOffset = virtualRows.length > 0 ? virtualRows[0].start : 0;
@@ -267,11 +265,11 @@ const SongsList = ({
    * 現在再生中の曲をハイライトする
    */
   useEffect(() => {
-    if (currentSongInfo) {
-      const playingId = `${currentSongInfo.video_id}-${currentSongInfo.start}-${currentSongInfo.title}`;
+    if (currentSong) {
+      const playingId = `${currentSong.video_id}-${currentSong.start}-${currentSong.title}`;
       setCurrentSongId(playingId);
     }
-  }, [currentSongInfo]);
+  }, [currentSong]);
 
   return (
     <>
@@ -318,7 +316,7 @@ const SongsList = ({
                   <SongListItem
                     key={`${virtualRow.key}-${itemIndexInRow}`}
                     song={song}
-                    isSelected={areSongsEqual(currentSongInfo, song)}
+                    isSelected={areSongsEqual(currentSong, song)}
                     changeCurrentSong={changeCurrentSong}
                     isHide={shouldBeHidden}
                     ref={
@@ -346,7 +344,7 @@ const SongsList = ({
                 songs={songs}
                 currentSongIds={visibleSongIds}
                 onPagerItemClick={scrollToSong}
-                currentSongInfo={currentSongInfo}
+                currentSong={currentSong}
                 songListScrollRef={parentRef}
               />
             </ScrollArea>

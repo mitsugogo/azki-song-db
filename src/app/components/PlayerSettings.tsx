@@ -13,14 +13,14 @@ import {
 import CreatePlaylistModal from "./CreatePlaylistModal";
 
 interface PlayerSettingPropps {
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   hideFutureSongs: boolean;
   setHideFutureSongs: (value: boolean) => void;
   setOpenShereModal: (value: boolean) => void;
 }
 
 export default function PlayerSettings({
-  currentSongInfo,
+  currentSong,
   hideFutureSongs,
   setHideFutureSongs,
   setOpenShereModal,
@@ -47,10 +47,10 @@ export default function PlayerSettings({
   } = usePlaylists();
 
   const addOrRemovePlaylist = (playlist: Playlist) => {
-    if (isInPlaylist(playlist, currentSongInfo!)) {
-      removeFromPlaylist(playlist, currentSongInfo!);
+    if (isInPlaylist(playlist, currentSong!)) {
+      removeFromPlaylist(playlist, currentSong!);
     } else {
-      addToPlaylist(playlist, currentSongInfo!);
+      addToPlaylist(playlist, currentSong!);
     }
   };
 
@@ -65,7 +65,7 @@ export default function PlayerSettings({
             <div className="flex items-center justify-center h-full">
               <Tooltip
                 label={`${
-                  isInAnyPlaylist(currentSongInfo!)
+                  isInAnyPlaylist(currentSong!)
                     ? "プレイリスト追加済み"
                     : "プレイリストに追加"
                 }`}
@@ -73,13 +73,9 @@ export default function PlayerSettings({
                 <Button
                   className="inline-flex w-10 h-10 items-center justify-center p-2 text-sm font-medium text-center cursor-pointer text-gray-900 bg-white rounded-full hover:bg-light-gray-100 ring-0 focus:ring-0 focus:outline-none dark:text-white dark:bg-gray-900 hover:dark:bg-gray-800"
                   onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
-                  name={`${
-                    isInAnyPlaylist(currentSongInfo!)
-                      ? "プレイリスト追加済み"
-                      : "プレイリストに追加"
-                  }`}
+                  name={`${isInAnyPlaylist(currentSong!) ? "プレイリスト追加済み" : "プレイリストに追加"}`}
                 >
-                  {isInAnyPlaylist(currentSongInfo!) ? <FaStar /> : <FaPlus />}
+                  {isInAnyPlaylist(currentSong!) ? <FaStar /> : <FaPlus />}
                 </Button>
               </Tooltip>
             </div>
@@ -110,17 +106,15 @@ export default function PlayerSettings({
                     }
                   }}
                   leftSection={
-                    isInPlaylist(playlist, currentSongInfo!) ? (
+                    isInPlaylist(playlist, currentSong!) ? (
                       <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
                     ) : (
                       <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
                     )
                   }
                   component="div"
-                  bg={isInPlaylist(playlist, currentSongInfo!) ? "blue" : ""}
-                  color={
-                    isInPlaylist(playlist, currentSongInfo!) ? "white" : ""
-                  }
+                  bg={isInPlaylist(playlist, currentSong!) ? "blue" : ""}
+                  color={isInPlaylist(playlist, currentSong!) ? "white" : ""}
                   className="mb-0.5"
                 >
                   {playlist.name}

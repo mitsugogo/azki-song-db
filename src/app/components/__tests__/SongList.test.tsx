@@ -120,7 +120,7 @@ const renderSongList = (
     <SongsList
       songs={songs}
       hideFutureSongs={options?.hideFuture ?? false}
-      currentSongInfo={options?.currentSong ?? null}
+      currentSong={options?.currentSong ?? null}
       changeCurrentSong={vi.fn()}
     />,
   );

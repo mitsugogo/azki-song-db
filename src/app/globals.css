@@ -146,6 +146,8 @@ body {
   outline: none;
   cursor: pointer;
   transition: height 0.1s ease;
+  position: relative;
+  top: 4px; /* nudge the whole track down so the red gradient overlays the semi-transparent white area */
 }
 
 .youtube-progress-bar::-webkit-slider-thumb {
@@ -158,6 +160,8 @@ body {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.1s ease;
+  /* center the larger thumb relative to the thin track; tuned to match track vertical center */
+  margin-top: -1.5px;
 }
 
 .youtube-progress-bar::-moz-range-thumb {
@@ -169,6 +173,8 @@ body {
   border: none;
   opacity: 0;
   transition: opacity 0.1s ease;
+  /* Firefox: nudge thumb vertically to center on 4px track */
+  transform: translateY(0px);
 }
 
 .youtube-progress-bar:hover {

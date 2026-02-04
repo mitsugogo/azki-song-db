@@ -8,27 +8,27 @@ import { useState } from "react";
 // Propsの型定義
 type ShareModalProps = {
   openShareModal: boolean;
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   baseUrl: string;
   onClose: () => void;
 };
 
 export default function ShareModal({
   openShareModal,
-  currentSongInfo,
+  currentSong,
   baseUrl,
   onClose,
 }: ShareModalProps) {
   const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
 
-  const youtubeUrl = `https://www.youtube.com/watch?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
-  const databaseUrl = `${baseUrl}/?v=${currentSongInfo?.video_id}&t=${currentSongInfo?.start}s`;
+  const youtubeUrl = `https://www.youtube.com/watch?v=${currentSong?.video_id}&t=${currentSong?.start}s`;
+  const databaseUrl = `${baseUrl}/?v=${currentSong?.video_id}&t=${currentSong?.start}s`;
 
   const handleShareToX = (isDatabaseUrl: boolean) => {
     const text = isDatabaseUrl
-      ? `♪${currentSongInfo?.title} / ${currentSongInfo?.artist} \n${currentSongInfo?.video_title} \n${databaseUrl}`
-      : `${currentSongInfo?.video_title} \n${youtubeUrl}`;
+      ? `♪${currentSong?.title} / ${currentSong?.artist} \n${currentSong?.video_title} \n${databaseUrl}`
+      : `${currentSong?.video_title} \n${youtubeUrl}`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 
@@ -89,8 +89,8 @@ export default function ShareModal({
                 size="xs"
                 onClick={() => {
                   const shareData = {
-                    title: currentSongInfo?.video_title,
-                    text: currentSongInfo?.video_title,
+                    title: currentSong?.video_title,
+                    text: currentSong?.video_title,
                     url: youtubeUrl,
                   };
                   navigator.share(shareData);
@@ -141,8 +141,8 @@ export default function ShareModal({
               size="xs"
               onClick={() => {
                 const shareData = {
-                  title: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
-                  text: `${currentSongInfo?.title} - ${currentSongInfo?.artist}`,
+                  title: `${currentSong?.title} - ${currentSong?.artist}`,
+                  text: `${currentSong?.title} - ${currentSong?.artist}`,
                   url: databaseUrl,
                 };
                 navigator.share(shareData);

@@ -10,7 +10,7 @@ import MilestoneBadge from "./MilestoneBadge";
 import PlayerSettings from "./PlayerSettings";
 
 interface NowPlayingSongInfoProps {
-  currentSongInfo: Song | null;
+  currentSong: Song | null;
   allSongs: Song[];
   searchTerm: string;
   isPlaying: boolean;
@@ -20,7 +20,6 @@ interface NowPlayingSongInfoProps {
   setOpenShereModal: (value: boolean) => void;
   changeCurrentSong: (
     song: Song | null,
-    isInfoOnly?: boolean,
     videoId?: string,
     startTime?: number,
   ) => void;
@@ -30,7 +29,7 @@ interface NowPlayingSongInfoProps {
  * 再生中の曲情報を表示するコンポーネント
  */
 const NowPlayingSongInfo = ({
-  currentSongInfo,
+  currentSong,
   allSongs,
   searchTerm,
   isPlaying,
@@ -72,19 +71,19 @@ const NowPlayingSongInfo = ({
     }
 
     return () => observer.disconnect();
-  }, [currentSongInfo]);
+  }, [currentSong]);
 
   return (
     <>
       <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
-        {currentSongInfo && (
+        {currentSong && (
           <div className="song-info">
             <div className="hidden lg:flex items-center gap-2 pb-2">
               <div className="w-full flex-auto self-baseline">
-                {currentSongInfo.milestones && (
+                {currentSong.milestones && (
                   <div className="flex items-center gap-1">
                     <MilestoneBadge
-                      song={currentSongInfo}
+                      song={currentSong}
                       onClick={(event, song, milestone) => {
                         setSearchTerm(`milestone:${milestone}`);
                       }}
@@ -92,7 +91,7 @@ const NowPlayingSongInfo = ({
                   </div>
                 )}
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white m-0 line-clamp-2">
-                  {currentSongInfo.video_title}
+                  {currentSong.video_title}
                 </h2>
               </div>
             </div>
@@ -102,18 +101,19 @@ const NowPlayingSongInfo = ({
                 className="text-xs text-muted-foreground w-full pt-2 cursor-pointer line-clamp-1"
                 onClick={open}
               >
-                {currentSongInfo && (
+                {currentSong && (
                   <span>
-                    {currentSongInfo.broadcast_at
-                      ? new Date(
-                          currentSongInfo.broadcast_at,
-                        ).toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }) + "配信 - "
+                    {currentSong.broadcast_at
+                      ? new Date(currentSong.broadcast_at).toLocaleDateString(
+                          "ja-JP",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          },
+                        ) + "配信 - "
                       : ""}
-                    {currentSongInfo.video_title}
+                    {currentSong.video_title}
                   </span>
                 )}
               </div>
@@ -121,7 +121,7 @@ const NowPlayingSongInfo = ({
 
             <div className="hidden md:block foldable:block">
               <NowPlayingSongInfoDetail
-                currentSongInfo={currentSongInfo}
+                currentSong={currentSong}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}
@@ -140,19 +140,19 @@ const NowPlayingSongInfo = ({
         size="2xl"
         centered
       >
-        {currentSongInfo && (
+        {currentSong && (
           <>
             <div className="mb-2 relative">
-              <span className="font-semibold">{currentSongInfo.title}</span>
-              {currentSongInfo.artist && (
+              <span className="font-semibold">{currentSong.title}</span>
+              {currentSong.artist && (
                 <span className="text-gray-500 dark:text-gray-200 text-sm">
                   {" "}
-                  - {currentSongInfo.artist}
+                  - {currentSong.artist}
                 </span>
               )}
             </div>
             <NowPlayingSongInfoDetail
-              currentSongInfo={currentSongInfo}
+              currentSong={currentSong}
               allSongs={allSongs}
               searchTerm={searchTerm}
               isPlaying={isPlaying}

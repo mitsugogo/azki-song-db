@@ -54,6 +54,9 @@ const useSearch = (allSongs: Song[]) => {
             .toLowerCase()
             .split("、")
             .some((sing) => sing.includes(v)),
+        "lyricist:": (s, v) => s.lyricist.toLowerCase().includes(v),
+        "composer:": (s, v) => s.composer.toLowerCase().includes(v),
+        "arranger:": (s, v) => s.arranger.toLowerCase().includes(v),
         "tag:": (s, v) =>
           s.tags
             .join(",")
@@ -171,7 +174,9 @@ const useSearch = (allSongs: Song[]) => {
       // 通常検索ワードの定義
       let normalWords = searchWords.filter((word) => !word.startsWith("-"));
       // 除外検索ワードの定義
-      const excludeWords = searchWords.filter((word) => word.startsWith("-"));
+      const excludeWords = searchWords.filter(
+        (word) => word.startsWith("-") && word.length > 1,
+      );
 
       // 特殊モード判定
       const isOriginalSongsMode = searchWords.some(
@@ -209,12 +214,6 @@ const useSearch = (allSongs: Song[]) => {
               new Date(b.broadcast_at || "").getTime()
             );
           });
-
-        // playlist削除
-        urlParams.delete("playlist");
-        window.history.replaceState({}, "", `?${urlParams.toString()}`);
-        // Headerなどに通知
-        window.dispatchEvent(new Event("replacestate"));
       } else if (playlist) {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
@@ -250,10 +249,6 @@ const useSearch = (allSongs: Song[]) => {
           normalWords = normalWords.filter(
             (word) => word !== "sololive2025" && word !== "original-songs",
           );
-          urlParams.delete("q");
-          window.history.replaceState({}, "", `?${urlParams.toString()}`);
-          // Headerなどに通知
-          window.dispatchEvent(new Event("replacestate"));
         }
       }
       // プレイリストモードの場合は、playPlaylist関数で処理済みなので
