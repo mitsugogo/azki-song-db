@@ -3,11 +3,11 @@
 import { Button } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { FaGear, FaYoutube } from "react-icons/fa6";
+import { FaGithub, FaYoutube } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import Acknowledgment from "./Acknowledgment";
 import { Drawer, Burger, Modal, Tooltip } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery, useViewportSize } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
 import { pageList } from "../pagelists";
@@ -15,6 +15,7 @@ import FoldableToggle from "./FoldableToggle";
 import usePWAInstall from "../hook/usePWAInstall";
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
+import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import SearchInput from "./SearchInput";
 import { useRouter } from "next/navigation";
 
@@ -30,9 +31,10 @@ export function Header() {
 
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
 
-  const { allSongs } = useSongs();
+  const { allSongs, songsFetchedAt } = useSongs();
   const { searchTerm, setSearchTerm } = useSearch(allSongs);
   const router = useRouter();
+  const { currentSong } = useGlobalPlayer();
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -78,6 +80,10 @@ export function Header() {
 
     return navCategories;
   }, [currentPath, isTopPage]);
+
+  // 高さが不足している場合は左下固定をやめる
+  const { height } = useViewportSize();
+  const isShortViewport = (height || 0) < 840;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -258,7 +264,13 @@ export function Header() {
             このサイトについて
           </Link>
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
-          <div className="block relative md:absolute md:bottom-6 md:left-3">
+          <div
+            className={`block relative ${
+              isShortViewport
+                ? "md:static"
+                : "md:absolute md:bottom-6 md:left-3"
+            }`}
+          >
             <Link
               href="https://www.youtube.com/@AZKi"
               target="_blank"
@@ -292,12 +304,48 @@ export function Header() {
 
             <hr className="my-2 border border-light-gray-200 dark:border-gray-600 w-full" />
 
-            {buildDate && (
-              <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
-                Last Updated:{" "}
-                {buildDate ? new Date(buildDate).toLocaleDateString() : ""}
-              </div>
-            )}
+            <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
+              {buildDate && songsFetchedAt && (
+                <>
+                  Last Update:{" "}
+                  {buildDate ? new Date(buildDate).toLocaleDateString() : ""}
+                  <span className="ml-3"></span>
+                  Songs -{" "}
+                  {songsFetchedAt
+                    ? new Date(songsFetchedAt).toLocaleDateString()
+                    : ""}
+                </>
+              )}
+            </div>
+
+            <div className="text-[12px] text-gray-400 dark:text-light-gray-500 pl-3">
+              <Link
+                href="https://github.com/mitsugogo/azki-song-db"
+                target="_blank"
+                className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={() => closeDrawer()}
+              >
+                <FaGithub className="inline -mt-1 mr-1" /> GitHub
+              </Link>
+              <span className="ml-3"></span>
+              <a
+                href={(() => {
+                  const base =
+                    "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
+                  const s = currentSong;
+                  const debug = s
+                    ? `title:${s.title}&artist:${s.artist}&video_id:${s.video_id}&start:${s.start}`
+                    : "";
+                  return base + encodeURIComponent(debug);
+                })()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={() => closeDrawer()}
+              >
+                不具合報告
+              </a>
+            </div>
           </div>
         </div>
       </Drawer>

@@ -18,10 +18,38 @@ const useSongs = () => {
   const [availableLyricists, setAvailableLyricists] = useState<string[]>([]);
   const [availableComposers, setAvailableComposers] = useState<string[]>([]);
   const [availableArrangers, setAvailableArrangers] = useState<string[]>([]);
+  const [songsFetchedAt, setSongsFetchedAt] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/songs")
-      .then((res) => res.json())
+      .then((res) => {
+        const headers = (res && (res as any).headers) || null;
+
+        // try to read useful headers (prefer explicit x-data-updated)
+        const explicit = headers?.get?.("x-data-updated");
+        if (explicit) {
+          setSongsFetchedAt(explicit);
+        } else {
+          const lastModified = headers?.get?.("last-modified");
+          if (lastModified) {
+            setSongsFetchedAt(new Date(lastModified).toISOString());
+          } else {
+            const date = headers?.get?.("date");
+            if (date) setSongsFetchedAt(new Date(date).toISOString());
+            else {
+              const cache =
+                headers?.get?.("x-vercel-cache") ||
+                headers?.get?.("x-now-cache");
+              if (cache) {
+                const d = headers?.get?.("date");
+                const stamp = d ? new Date(d).toISOString() : null;
+                setSongsFetchedAt(stamp ? `${stamp} (${cache})` : `(${cache})`);
+              }
+            }
+          }
+        }
+        return res.json();
+      })
       .then((data: Song[]) => {
         data.sort((a, b) => {
           return (
@@ -120,6 +148,7 @@ const useSongs = () => {
     availableLyricists,
     availableComposers,
     availableArrangers,
+    songsFetchedAt,
   };
 };
 

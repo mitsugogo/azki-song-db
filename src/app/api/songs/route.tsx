@@ -169,10 +169,14 @@ export async function GET() {
     });
 
     // VercelのCDNサーバーに結果をキャッシュさせる
+    const now = new Date();
     return NextResponse.json(songs, {
       headers: {
         "Cache-Control":
           "max-age=300, s-maxage=86400, stale-while-revalidate=300",
+        // カスタムヘッダでデータ取得時刻を通知
+        "x-data-updated": now.toISOString(),
+        "Last-Modified": now.toUTCString(),
       },
     });
   } catch (error) {

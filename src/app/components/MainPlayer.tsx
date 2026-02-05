@@ -14,6 +14,7 @@ import useSearch from "../hook/useSearch";
 import usePlayerControls from "../hook/usePlayerControls";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import usePlayerLifecycle from "../hook/usePlayerLifecycle";
+import usePlayerVolume from "../hook/usePlayerVolume";
 import { usePathname } from "next/navigation";
 
 // Components
@@ -93,8 +94,12 @@ export default function MainPlayer() {
     isPlaying,
   });
 
-  // プレイヤーボリューム（ローカル状態）
-  const [playerVolume, setPlayerVolume] = useState(100);
+  // プレイヤーボリューム（ローカル状態はフックで管理）
+  const {
+    playerVolume,
+    setPlayerVolume,
+    changeVolume: changePlayerVolume,
+  } = usePlayerVolume(playerRef, isPlayerReady);
   const previousPathnameRef = useRef(pathname);
 
   const seekTo = useCallback(
@@ -304,28 +309,9 @@ export default function MainPlayer() {
 
   const changeVolume = useCallback(
     (volume: number) => {
-      // プレイヤーが準備できていない場合は何もしない
-      if (!isPlayerReady) {
-        return;
-      }
-
-      if (
-        !playerRef.current ||
-        typeof playerRef.current.setVolume !== "function"
-      ) {
-        return;
-      }
-
-      try {
-        const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
-        playerRef.current.setVolume(clampedVolume);
-        setPlayerVolume(clampedVolume);
-      } catch (error) {
-        // エラーが発生しても処理を継続（プレイヤーが完全に準備できていない可能性がある）
-        console.warn("Failed to set volume (player may not be ready):", error);
-      }
+      changePlayerVolume(volume);
     },
-    [isPlayerReady],
+    [changePlayerVolume],
   );
 
   const seekToAbsolute = useCallback(
