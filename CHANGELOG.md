@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.28.1](https://github.com/mitsugogo/azki-song-db/compare/v1.28.0...v1.28.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* ロード時にボリュームの位置復元が出来ていないのを修正 ([1fd7f3c](https://github.com/mitsugogo/azki-song-db/commit/1fd7f3cecebbc61b12cc419a7283af8b0c2e6e20))
+* 曲データの取得時にヘッダーの取得方法を修正 ([142044a](https://github.com/mitsugogo/azki-song-db/commit/142044a72739c764543765c461904eb883d24575))
+
 ## [1.28.0](https://github.com/mitsugogo/azki-song-db/compare/v1.27.1...v1.28.0) (2026-02-04)
 
 
