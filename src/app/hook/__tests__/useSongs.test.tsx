@@ -21,6 +21,9 @@ const mockSongs: Song[] = [
     broadcast_at: "2024-01-01",
     video_title: "Video One",
     video_uri: "",
+    lyricist: "",
+    composer: "",
+    arranger: "",
   },
   {
     video_id: "test2",
@@ -39,6 +42,9 @@ const mockSongs: Song[] = [
     broadcast_at: "2024-01-02",
     video_title: "Video Two",
     video_uri: "",
+    lyricist: "",
+    composer: "",
+    arranger: "",
   },
   {
     video_id: "test3",
@@ -57,6 +63,9 @@ const mockSongs: Song[] = [
     video_title: "Video Three",
     video_uri: "",
     milestones: ["1st Live"],
+    lyricist: "",
+    composer: "",
+    arranger: "",
   },
 ];
 
