@@ -456,9 +456,9 @@ const usePlayerControls = (
     player.playVideo();
     setIsPlaying(true);
 
-    // URLに「v」と「t」がセットで存在する場合、再生開始後にパラメータを削除
+    // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
     const url = new URL(window.location.href);
-    if (url.searchParams.has("v") && url.searchParams.has("t")) {
+    if (url.searchParams.has("v") || url.searchParams.has("t")) {
       url.searchParams.delete("v");
       url.searchParams.delete("t");
       window.history.replaceState(null, "", url.toString());
