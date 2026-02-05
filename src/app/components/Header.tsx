@@ -3,7 +3,7 @@
 import { Button } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { FaGear, FaYoutube } from "react-icons/fa6";
+import { FaGear, FaGithub, FaYoutube } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import Acknowledgment from "./Acknowledgment";
 import { Drawer, Burger, Modal, Tooltip } from "@mantine/core";
@@ -15,6 +15,7 @@ import FoldableToggle from "./FoldableToggle";
 import usePWAInstall from "../hook/usePWAInstall";
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
+import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import SearchInput from "./SearchInput";
 import { useRouter } from "next/navigation";
 
@@ -33,6 +34,7 @@ export function Header() {
   const { allSongs } = useSongs();
   const { searchTerm, setSearchTerm } = useSearch(allSongs);
   const router = useRouter();
+  const { currentSong } = useGlobalPlayer();
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -259,6 +261,34 @@ export function Header() {
           </Link>
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
           <div className="block relative md:absolute md:bottom-6 md:left-3">
+            <Link
+              href="https://github.com/mitsugogo/azki-song-db"
+              target="_blank"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={() => closeDrawer()}
+            >
+              <FaGithub className="inline -mt-1 mr-1" /> GitHub
+              <LiaExternalLinkAltSolid className="-mt-1 ml-3 inline text-right" />
+            </Link>
+            <a
+              href={(() => {
+                const base =
+                  "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
+                const s = currentSong;
+                const debug = s
+                  ? `title:${s.title}&artist:${s.artist}&video_id:${s.video_id}&start:${s.start}`
+                  : "";
+                return base + encodeURIComponent(debug);
+              })()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={() => closeDrawer()}
+            >
+              不具合報告
+              <LiaExternalLinkAltSolid className="-mt-1 ml-3 inline text-right" />
+            </a>
+
             <Link
               href="https://www.youtube.com/@AZKi"
               target="_blank"
