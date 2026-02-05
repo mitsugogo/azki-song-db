@@ -1,4 +1,4 @@
-import { Badge } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import { Song } from "../types/song";
 import {
   FaBook,
@@ -7,6 +7,7 @@ import {
   FaRepeat,
   FaTag,
   FaUser,
+  FaUsers,
   FaYoutube,
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
@@ -77,11 +78,13 @@ const NowPlayingSongInfoDetail = ({
                     onClick={() => {
                       setSearchTerm(`title:${currentSong.title}`);
                     }}
-                    className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                    color={
                       searchTerm.includes(`title:${currentSong.title}`)
-                        ? "bg-cyan-300 dark:bg-cyan-800"
-                        : ""
-                    }`}
+                        ? "blue"
+                        : "gray"
+                    }
+                    radius="sm"
+                    style={{ cursor: "pointer" }}
                   >
                     {currentSong.title}
                   </Badge>
@@ -116,9 +119,9 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameArtist ? "bg-cyan-300 dark:bg-cyan-800" : ""
-                        }`}
+                        color={`${existsSameArtist ? "blue" : "gray"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                       >
                         {artist}
                       </Badge>
@@ -157,11 +160,9 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameLyricist
-                            ? "bg-cyan-300 dark:bg-cyan-800"
-                            : ""
-                        }`}
+                        color={`${existsSameLyricist ? "blue" : "gray"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                       >
                         {lyricist}
                       </Badge>
@@ -187,6 +188,9 @@ const NowPlayingSongInfoDetail = ({
                     return (
                       <Badge
                         key={index}
+                        color={`${existsSameComposer ? "blue" : "gray"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (existsSameComposer) {
                             setSearchTerm(
@@ -200,11 +204,6 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameComposer
-                            ? "bg-cyan-300 dark:bg-cyan-800"
-                            : ""
-                        }`}
                       >
                         {composer}
                       </Badge>
@@ -230,6 +229,9 @@ const NowPlayingSongInfoDetail = ({
                     return (
                       <Badge
                         key={index}
+                        color={`${existsSameArranger ? "blue" : "gray"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (existsSameArranger) {
                             setSearchTerm(
@@ -243,11 +245,6 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameArranger
-                            ? "bg-cyan-300 dark:bg-cyan-800"
-                            : ""
-                        }`}
                       >
                         {arranger}
                       </Badge>
@@ -273,6 +270,9 @@ const NowPlayingSongInfoDetail = ({
                     return (
                       <Badge
                         key={index}
+                        color={`${existsSameAlbum ? "blue" : "gray"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (existsSameAlbum) {
                             setSearchTerm(
@@ -284,9 +284,6 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                          existsSameAlbum ? "bg-cyan-300 dark:bg-cyan-800" : ""
-                        }`}
                       >
                         {album}
                       </Badge>
@@ -309,6 +306,9 @@ const NowPlayingSongInfoDetail = ({
                   return (
                     <Badge
                       key={index}
+                      color={`${existsSameSing ? "blue" : "gray"}`}
+                      radius="sm"
+                      style={{ cursor: "pointer" }}
                       onClick={() => {
                         if (existsSameSing) {
                           setSearchTerm(
@@ -320,9 +320,6 @@ const NowPlayingSongInfoDetail = ({
                           );
                         }
                       }}
-                      className={`cursor-pointer inline-flex whitespace-nowrap dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50  ${
-                        existsSameSing ? "bg-cyan-300 dark:bg-cyan-800" : ""
-                      }`}
                     >
                       {sing}
                     </Badge>
@@ -340,6 +337,11 @@ const NowPlayingSongInfoDetail = ({
                     <>
                       {" - "}
                       <Badge
+                        key={unitName}
+                        leftSection={<FaUsers className="mt-0.5" />}
+                        color={`${existsSameUnit ? "blue" : "indigo"}`}
+                        radius="sm"
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           if (existsSameUnit) {
                             setSearchTerm(
@@ -351,11 +353,6 @@ const NowPlayingSongInfoDetail = ({
                             );
                           }
                         }}
-                        className={`cursor-pointer dark:bg-purple-900 dark:text-gray-50 dark:hover:bg-purple-700 bg-purple-200 hover:bg-purple-300 ${
-                          existsSameUnit
-                            ? "bg-purple-500 text-white dark:bg-purple-700"
-                            : ""
-                        }`}
                       >
                         {unitName}
                       </Badge>
@@ -379,8 +376,21 @@ const NowPlayingSongInfoDetail = ({
                   rel="noopener noreferrer"
                   className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
                 >
-                  <FaYoutube className="inline" /> {currentSong.video_title}
+                  {currentSong.video_title}
                 </a>
+                &nbsp;
+                <Badge
+                  radius="sm"
+                  size="xs"
+                  color="red"
+                  style={{ cursor: "pointer" }}
+                  target="_blank"
+                  component={Link}
+                  href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
+                  leftSection={<FaYoutube />}
+                >
+                  YouTube
+                </Badge>
               </dd>
             </div>
 
@@ -393,13 +403,15 @@ const NowPlayingSongInfoDetail = ({
               </dt>
               <dd className="flex flex-wrap gap-1">
                 <Badge
-                  className={`text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
+                  radius="sm"
+                  color={`${
                     searchTerm.includes(
                       `date:${new Date(currentSong.broadcast_at).toLocaleDateString()}`,
                     )
-                      ? "bg-cyan-300 dark:bg-cyan-800"
-                      : ""
+                      ? "blue"
+                      : "gray"
                   }`}
+                  style={{ cursor: "pointer" }}
                   onClick={() => {
                     const broadcastDate = new Date(
                       currentSong.broadcast_at,
@@ -436,9 +448,9 @@ const NowPlayingSongInfoDetail = ({
                   return (
                     <Badge
                       key={tag}
-                      className={`text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50 ${
-                        existsSameTag ? "bg-cyan-300 dark:bg-cyan-800" : ""
-                      }`}
+                      radius="sm"
+                      color={`${existsSameTag ? "blue" : "gray"}`}
+                      style={{ cursor: "pointer" }}
                       onClick={() => {
                         if (existsSameTag) {
                           setSearchTerm(
@@ -471,7 +483,9 @@ const NowPlayingSongInfoDetail = ({
                   {currentSong.milestones.map((milestone) => (
                     <Badge
                       key={milestone}
-                      className="text-xs bg-primary text-white dark:text-white hover:bg-primary-500 cursor-pointer dark:bg-primary-700 dark:hover:bg-primary-600"
+                      radius="sm"
+                      color={`${searchTerm.includes(`milestone:${milestone}`) ? "pink" : "gray"}`}
+                      style={{ cursor: "pointer" }}
                       onClick={() => {
                         const existsSameMilestone = searchTerm.includes(
                           `milestone:${milestone}`,
@@ -760,7 +774,7 @@ const NowPlayingSongInfoDetail = ({
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
-                <Badge className="text-xs cursor-pointer dark:bg-cyan-900 dark:hover:bg-cyan-700 dark:text-gray-50">
+                <Badge radius="sm">
                   {
                     allSongs.filter((song) => song.title === currentSong.title)
                       .length
@@ -788,7 +802,7 @@ const NowPlayingSongInfoDetail = ({
                   )
                   .map((song, index) => (
                     <div key={index}>
-                      {" "}
+                      &nbsp;
                       <span className="text-xs">
                         {new Date(song.broadcast_at).toLocaleDateString(
                           "ja-JP",
@@ -811,14 +825,18 @@ const NowPlayingSongInfoDetail = ({
                         >
                           {song.video_title}
                         </Link>
-                        <a
-                          key={`${index}-${song.video_id}`}
+                        <Badge
+                          color="gray"
+                          size="xs"
+                          radius="sm"
+                          leftSection={<FaYoutube />}
+                          style={{ cursor: "pointer" }}
+                          component={Link}
                           href={`${song.video_uri}&t=${song.start}s`}
                           target="_blank"
-                          className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 ml-1"
                         >
-                          <FaYoutube className="inline" />
-                        </a>
+                          YouTube
+                        </Badge>
                       </span>
                     </div>
                   ))}
