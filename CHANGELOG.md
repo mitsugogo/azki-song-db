@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.28.2](https://github.com/mitsugogo/azki-song-db/compare/v1.28.1...v1.28.2) (2026-02-05)
+
+
+### Bug Fixes
+
+* URLにvやtが含まれていると曲を変更出来ないのを修正 ([3c8f6fb](https://github.com/mitsugogo/azki-song-db/commit/3c8f6fb0204b27e8f11d890a666f25f8600f5d87))
+
 ### [1.28.1](https://github.com/mitsugogo/azki-song-db/compare/v1.28.0...v1.28.1) (2026-02-05)
 
 
