@@ -59,7 +59,11 @@ export default function usePlayerLifecycle(options: {
       updatePlayerSnapshot(event.target);
       setIsPlayerReady(true);
       try {
-        applyPersistedVolumeToPlayer(event.target);
+        if (typeof applyPersistedVolume === "function") {
+          applyPersistedVolume(event.target);
+        } else {
+          applyPersistedVolumeToPlayer(event.target);
+        }
       } catch (err) {
         // ignore
       }

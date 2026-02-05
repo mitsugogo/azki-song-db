@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 
 type PlayerRef = { current: any } | undefined;
@@ -67,6 +67,16 @@ export default function usePlayerVolume(
     },
     [playerVolume, setPlayerVolume],
   );
+
+  useEffect(() => {
+    if (!isPlayerReady) return;
+    if (!playerRef || !playerRef.current) return;
+    try {
+      applyPersistedVolume(playerRef.current);
+    } catch (_) {
+      // ignore
+    }
+  }, [isPlayerReady, playerRef, applyPersistedVolume]);
 
   return { playerVolume, setPlayerVolume, changeVolume, applyPersistedVolume };
 }
