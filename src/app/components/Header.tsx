@@ -7,7 +7,7 @@ import { FaGear, FaGithub, FaYoutube } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import Acknowledgment from "./Acknowledgment";
 import { Drawer, Burger, Modal, Tooltip } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery, useViewportSize } from "@mantine/hooks";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import ThemeToggle from "./ThemeToggle";
 import { pageList } from "../pagelists";
@@ -80,6 +80,10 @@ export function Header() {
 
     return navCategories;
   }, [currentPath, isTopPage]);
+
+  // 高さが不足している場合は左下固定をやめる
+  const { height } = useViewportSize();
+  const isShortViewport = (height || 0) < 840;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -260,7 +264,13 @@ export function Header() {
             このサイトについて
           </Link>
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
-          <div className="block relative md:absolute md:bottom-6 md:left-3">
+          <div
+            className={`block relative ${
+              isShortViewport
+                ? "md:static"
+                : "md:absolute md:bottom-6 md:left-3"
+            }`}
+          >
             <Link
               href="https://github.com/mitsugogo/azki-song-db"
               target="_blank"
