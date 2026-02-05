@@ -146,8 +146,8 @@ export default function PlayerControlsBar({
     }
   };
 
-  // Check if it's PC screen (md breakpoint)
-  const isPcScreen = useMediaQuery("(min-width: 768px)");
+  // Check if it's PC screen (lg breakpoint)
+  const isPcScreen = useMediaQuery("(min-width: 1024px)");
 
   // Volume slider hover state for PC
   const [isVolumeHovered, setIsVolumeHovered] = useState(false);
@@ -480,9 +480,9 @@ export default function PlayerControlsBar({
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-0.5 md:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-0.5 lg:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
             <span>{formattedCurrentTime}</span>
-            <div className="flex items-center gap-1 md:gap-2">
+            <div className="flex items-end lg:items-center gap-1 lg:gap-2">
               <span className="text-white/50">/</span>
               <span className="text-white/70">{formattedDuration}</span>
             </div>

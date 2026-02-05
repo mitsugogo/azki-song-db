@@ -1,8 +1,16 @@
-import { createTheme } from "@mantine/core";
+import { createTheme, Badge } from "@mantine/core";
 import { CustomFlowbiteTheme } from "flowbite-react/types";
 import { createTheme as createFlowbiteTheme } from "flowbite-react";
 
-export const theme = createTheme({});
+export const theme = createTheme({
+  components: {
+    Badge: {
+      defaultProps: {
+        tt: "none",
+      },
+    },
+  },
+});
 
 export const flowbiteTheme: CustomFlowbiteTheme = createFlowbiteTheme({
   textInput: {
