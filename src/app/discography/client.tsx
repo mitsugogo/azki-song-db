@@ -303,7 +303,9 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               href={
                 song.isAlbum
                   ? `/?q=album:${song.firstVideo.album}&v=${song.firstVideo.video_id}`
-                  : `/?q=title:${song.firstVideo.title}|tag:オリ曲`
+                  : song.song.tags.includes("カバー曲")
+                    ? `/?q=title:${song.firstVideo.title}|tag:カバー曲`
+                    : `/?q=title:${song.firstVideo.title}|tag:オリ曲`
               }
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
             >
