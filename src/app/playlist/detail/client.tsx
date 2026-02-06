@@ -1,14 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import {
-  Anchor,
-  Breadcrumbs,
-  Button,
-  Checkbox,
-  ScrollArea,
-  Table,
-} from "@mantine/core";
+import { Button, Checkbox, ScrollArea, Table } from "@mantine/core";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import useFavorites from "../../hook/useFavorites";
@@ -33,6 +27,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { HiHome } from "react-icons/hi";
 
 type PlaylistWithSongs = {
   id: string;
@@ -143,17 +138,7 @@ export default function PlaylistDetailPage() {
     defaultSelection: [],
   });
 
-  const breadcrumbs = [
-    { title: "プレイリスト", href: "/playlist" },
-    {
-      title: `#${playlist?.id} (${playlist?.name})`,
-      href: `/playlist/detail?id=${playlist?.id}`,
-    },
-  ].map((item, index) => (
-    <Anchor href={item.href} key={index} underline="hover" c="pink" size="sm">
-      {item.title}
-    </Anchor>
-  ));
+  // Flowbite breadcrumb will be rendered in JSX below
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -323,7 +308,15 @@ export default function PlaylistDetailPage() {
 
   return (
     <div className="grow pt-3 p-1 lg:p-6 lg:pb-0">
-      <Breadcrumbs>{breadcrumbs}</Breadcrumbs>
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem href="/playlist">プレイリスト</BreadcrumbItem>
+        <BreadcrumbItem>
+          {`#${playlist?.id} (${playlist?.name})`}
+        </BreadcrumbItem>
+      </Breadcrumb>
 
       <h1 className="font-extrabold text-2xl p-3 pl-0">プレイリストの管理</h1>
 

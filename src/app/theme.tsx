@@ -90,7 +90,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = createFlowbiteTheme({
   },
   breadcrumb: {
     root: {
-      base: "bg-light-gray-100 px-5 py-3 dark:bg-gray-800 rounded-md",
+      base: "bg-light-gray-100 px-5 py-3 dark:bg-gray-800 rounded-md hidden lg:block",
       list: "flex items-center",
     },
     item: {

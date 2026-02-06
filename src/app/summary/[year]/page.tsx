@@ -92,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 import YearSummaryClient from "./YearSummaryClient";
 import React from "react";
-import { Anchor, Breadcrumbs } from "@mantine/core";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { FaHome } from "react-icons/fa";
 
 export default async function Page({ params }: Props) {
@@ -126,34 +126,18 @@ export default async function Page({ params }: Props) {
       ? Number(songsOfYear[0].year)
       : null;
 
-  const breadcrumbItems = [
-    {
-      title: (
-        <span>
-          <FaHome className="inline-block mr-1" />
-        </span>
-      ),
-      href: "/",
-    },
-    { title: "年ごとの活動記録", href: "/summary" },
-    {
-      title: displayYearServer ? `${displayYearServer}年` : `詳細`,
-      href: `/summary/${rawYearParam}`,
-    },
-  ].map((item, index) => (
-    <Link
-      href={item.href}
-      key={index}
-      className="text-primary-700 hover:underline dark:text-primary-300"
-    >
-      {item.title}
-    </Link>
-  ));
-
   return (
     <div className="flex-grow p-2 lg:p-6 lg:pb-0 overflow-auto">
       <div className="mb-4">
-        <Breadcrumbs separator="›">{breadcrumbItems}</Breadcrumbs>
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <FaHome className="inline mr-1" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/summary">年ごとの活動記録</BreadcrumbItem>
+          <BreadcrumbItem href={`/summary/${rawYearParam}`}>
+            {displayYearServer ? `${displayYearServer}年` : `詳細`}
+          </BreadcrumbItem>
+        </Breadcrumb>
       </div>
 
       <div className="flex items-center justify-between mb-3">
