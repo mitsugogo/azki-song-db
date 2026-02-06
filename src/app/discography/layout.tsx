@@ -21,7 +21,7 @@ export default function StatsLayout({
         <ThemeProvider theme={flowbiteTheme}>
           <div className="flex flex-col h-dvh">
             <Header />
-            <div className="flex flex-col flex-grow md:flex-row overflow-y-hidden w-full">
+            <div className="flex flex-col flex-grow md:flex-row overflow-y-auto w-full">
               {children}
             </div>
             <Footer />

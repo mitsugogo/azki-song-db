@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useDeferredValue } from "react";
+import { useSearchParams } from "next/navigation";
+import { useScrollIntoView } from "@mantine/hooks";
 import { Song } from "../types/song";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
   Table,
   TableBody,
   TableCell,
@@ -11,6 +15,7 @@ import {
   TableRow,
   ToggleSwitch,
 } from "flowbite-react";
+import { HiHome } from "react-icons/hi";
 
 import { FaCompactDisc, FaDatabase, FaMusic, FaYoutube } from "react-icons/fa6";
 import { BsPlayCircle } from "react-icons/bs";
@@ -176,116 +181,125 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               </p>
             </>
           )}
-          {song.isAlbum && (
-            <>
-              <p className="text-sm">
-                発売日:{" "}
-                {new Date(
-                  song.firstVideo.album_release_at,
-                ).toLocaleDateString()}
-              </p>
-              <p className="text-sm">収録曲数: {song.count}曲</p>
 
-              <div className="mt-4 overflow-y-auto max-h-[250px]">
-                <Table striped hoverable border={3}>
-                  <TableHead className="sticky top-0">
-                    <TableRow>
-                      <TableHeadCell className="px-2 py-1"></TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">曲名</TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">
-                        アーティスト
-                      </TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">作詞</TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">作曲</TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">編曲</TableHeadCell>
-                      <TableHeadCell className="px-2 py-1">
-                        動画公開日
-                      </TableHeadCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {song.videos.map((s, index) => (
-                      <TableRow
-                        key={index}
-                        onMouseEnter={() => setHoveredVideo(s.video_id)}
-                        onMouseLeave={() => setHoveredVideo(null)}
+          <p className="text-sm">
+            発売日:{" "}
+            {new Date(song.firstVideo.album_release_at).toLocaleDateString()}
+          </p>
+          <p className="text-sm">収録曲数: {song.count}曲</p>
+
+          <div className="mt-4 overflow-y-auto max-h-62.5">
+            <Table striped hoverable border={3}>
+              <TableHead className="sticky top-0">
+                <TableRow>
+                  <TableHeadCell className="px-2 py-1"></TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    曲名
+                  </TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    アーティスト
+                  </TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    作詞
+                  </TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    作曲
+                  </TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    編曲
+                  </TableHeadCell>
+                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                    動画公開日
+                  </TableHeadCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {song.videos.map((s, index) => (
+                  <TableRow
+                    key={index}
+                    onMouseEnter={() => setHoveredVideo(s.video_id)}
+                    onMouseLeave={() => setHoveredVideo(null)}
+                  >
+                    <TableCell className="px-2 py-1 dark:text-light-gray-500">
+                      <Link
+                        href={`${s.tags.includes("カバー曲") ? `/?q=tag:カバー曲&v=${s.video_id}&t=${s.start ?? 0}s` : `/?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
+                        className=" hover:text-primary-600 dark:hover:text-white"
                       >
-                        <TableCell className="px-2 py-1">
-                          <Link
-                            href={`/?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}
-                            className=" hover:text-primary-600 dark:hover:text-white"
-                          >
-                            <BsPlayCircle size={24} />
-                          </Link>
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Link
-                            href={`/?q=title:${s.title}|tag:オリ曲|album:${s.album}`}
-                            className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-                          >
-                            {s.title}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Link
-                            href={`/?q=artist:${s.artist}`}
-                            className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-                          >
-                            {s.artist}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          {s.lyricist &&
-                            s.lyricist.split("、").map((n, i, arr) => (
-                              <span key={i}>
-                                <Link
-                                  href={`/?q=lyricist:${n}`}
-                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                                >
-                                  {n}
-                                </Link>
-                                {i < arr.length - 1 ? "、" : ""}
-                              </span>
-                            ))}
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          {s.composer &&
-                            s.composer.split("、").map((n, i, arr) => (
-                              <span key={i}>
-                                <Link
-                                  href={`/?q=composer:${n}`}
-                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                                >
-                                  {n}
-                                </Link>
-                                {i < arr.length - 1 ? "、" : ""}
-                              </span>
-                            ))}
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          {s.arranger &&
-                            s.arranger.split("、").map((n, i, arr) => (
-                              <span key={i}>
-                                <Link
-                                  href={`/?q=arranger:${n}`}
-                                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                                >
-                                  {n}
-                                </Link>
-                                {i < arr.length - 1 ? "、" : ""}
-                              </span>
-                            ))}
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          {new Date(s.broadcast_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
-          )}
+                        <BsPlayCircle size={24} />
+                      </Link>
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      <Link
+                        href={`${
+                          s.tags.includes("カバー曲")
+                            ? `/?q=tag:カバー曲&v=${s.video_id}&t=${s.start ?? 0}s`
+                            : `/discography/${
+                                s.slug ?? encodeURIComponent(s.title)
+                              }`
+                        }`}
+                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+                      >
+                        {s.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      <Link
+                        href={`/?q=artist:${s.artist}`}
+                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+                      >
+                        {s.artist}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      {s.lyricist &&
+                        s.lyricist.split("、").map((n, i, arr) => (
+                          <span key={i}>
+                            <Link
+                              href={`/?q=lyricist:${n}`}
+                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                            >
+                              {n}
+                            </Link>
+                            {i < arr.length - 1 ? "、" : ""}
+                          </span>
+                        ))}
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      {s.composer &&
+                        s.composer.split("、").map((n, i, arr) => (
+                          <span key={i}>
+                            <Link
+                              href={`/?q=composer:${n}`}
+                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                            >
+                              {n}
+                            </Link>
+                            {i < arr.length - 1 ? "、" : ""}
+                          </span>
+                        ))}
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      {s.arranger &&
+                        s.arranger.split("、").map((n, i, arr) => (
+                          <span key={i}>
+                            <Link
+                              href={`/?q=arranger:${n}`}
+                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                            >
+                              {n}
+                            </Link>
+                            {i < arr.length - 1 ? "、" : ""}
+                          </span>
+                        ))}
+                    </TableCell>
+                    <TableCell className="px-2 py-1 dark:text-light-gray-500">
+                      {new Date(s.broadcast_at).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link
               href={
@@ -419,6 +433,10 @@ export default function DiscographyPage() {
   };
   const [gridCols, setGridCols] = useState(getGridCols());
 
+  const { scrollIntoView, targetRef } = useScrollIntoView();
+  const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
+  const skipClearOnTabChange = useRef(false);
+
   useEffect(() => {
     const handleResize = () => {
       setGridCols(getGridCols());
@@ -435,6 +453,166 @@ export default function DiscographyPage() {
         setLoading(false);
       });
   }, []);
+
+  // URL の `album` クエリがあれば、そのアルバム表示に切り替える
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (loading) return;
+    try {
+      const albumParam = searchParams?.get("album");
+      if (!albumParam) return;
+      const decoded = albumParam;
+
+      // groupByAlbum を有効にして、該当アルバムの統計項目を探す
+      setGroupByAlbum(true);
+
+      // 各タブ向けの統計を作成して、どのタブに該当するかを判定する
+      const originals = songs.filter(
+        (s) =>
+          s.tags && (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")),
+      );
+      const originalStats = createStatistics(
+        originals,
+        (s) => s.album || s.title,
+        true,
+      );
+
+      const units = songs.filter(
+        (s) =>
+          ((s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
+            s.tags.includes("ユニット曲")) ||
+          s.tags.includes("ゲスト参加"),
+      );
+      const unitStats = createStatistics(
+        units,
+        (s) => s.album || s.title,
+        true,
+      );
+
+      const covers = songs.filter((s) => s.tags.includes("カバー曲"));
+      const coverStats = createStatistics(
+        covers,
+        (s) => s.album || s.title,
+        true,
+      );
+
+      // 優先順位: ユニット曲 -> オリジナル -> カバー
+      let matched =
+        unitStats.find(
+          (it) =>
+            it.firstVideo.album === decoded ||
+            it.key === decoded ||
+            it.song.album === decoded,
+        ) ?? null;
+      let targetTab = 1;
+      if (!matched) {
+        matched =
+          originalStats.find(
+            (it) =>
+              it.firstVideo.album === decoded ||
+              it.key === decoded ||
+              it.song.album === decoded,
+          ) ?? null;
+        targetTab = 0;
+      }
+      if (!matched) {
+        matched =
+          coverStats.find(
+            (it) =>
+              it.firstVideo.album === decoded ||
+              it.key === decoded ||
+              it.song.album === decoded,
+          ) ?? null;
+        targetTab = 2;
+      }
+
+      if (matched) {
+        skipClearOnTabChange.current = true;
+        setTimeout(() => {
+          skipClearOnTabChange.current = false;
+        }, 300);
+        setActiveTab(targetTab);
+        // 展開対象を設定（key は createStatistics の生成による）
+        setExpandedItem(matched.key as string);
+
+        // 展開レンダリングが反映された後に該当詳細要素へスクロールする
+        setAnchorToScroll(matched.key as string);
+        (async () => {
+          const key = matched.key as string;
+          const maxAttempts = 20;
+          const delayMs = 100;
+          for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+              const anchor = document.querySelector(
+                `[data-discography-anchor="album-${key}"]`,
+              ) as HTMLElement | null;
+              // 要素が見つかり、レイアウトに反映されていればスクロール実行
+              if (anchor && anchor.getBoundingClientRect().height > 0) {
+                // nearest scrollable ancestor を探してスクロールする
+                let ancestor: HTMLElement | null = anchor.parentElement;
+                while (ancestor && ancestor !== document.body) {
+                  const style = window.getComputedStyle(ancestor);
+                  const overflowY = style.overflowY;
+                  if (
+                    (overflowY === "auto" || overflowY === "scroll") &&
+                    ancestor.scrollHeight > ancestor.clientHeight
+                  ) {
+                    break;
+                  }
+                  ancestor = ancestor.parentElement;
+                }
+
+                const header = document.querySelector("header");
+                const headerHeight = header ? header.clientHeight : 0;
+
+                // anchor 内に sticky 要素があればその高さも考慮する
+                const stickyEl = anchor.querySelector(
+                  ".sticky",
+                ) as HTMLElement | null;
+                const stickyHeight = stickyEl
+                  ? stickyEl.getBoundingClientRect().height
+                  : 0;
+
+                if (!ancestor || ancestor === document.body) {
+                  const top =
+                    anchor.getBoundingClientRect().top +
+                    window.scrollY -
+                    headerHeight -
+                    stickyHeight -
+                    12;
+                  window.scrollTo({ top, behavior: "smooth" });
+                } else {
+                  const ancestorRect = ancestor.getBoundingClientRect();
+                  const elRect = anchor.getBoundingClientRect();
+                  const offsetWithinAncestor =
+                    elRect.top - ancestorRect.top + ancestor.scrollTop;
+                  const desired =
+                    offsetWithinAncestor - headerHeight - stickyHeight - 12;
+                  try {
+                    ancestor.scrollTo({ top: desired, behavior: "smooth" });
+                  } catch (e) {
+                    ancestor.scrollTop = desired;
+                  }
+                }
+
+                setAnchorToScroll(null);
+                return;
+              }
+            } catch (e) {
+              // ignore and retry
+            }
+            await new Promise((r) => setTimeout(r, delayMs));
+          }
+          // タイムアウトしたら anchorToScroll をリセット
+          setAnchorToScroll(null);
+        })();
+      } else {
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [loading, songs, searchParams]);
 
   const originalSongCountsByReleaseDate = useMemo(() => {
     const originals = songs.filter((s) => {
@@ -635,6 +813,8 @@ export default function DiscographyPage() {
                         <div
                           key={`${s.key}-details`}
                           className="col-span-2 md:col-span-3 xl:col-span-4"
+                          data-discography-anchor={`album-${s.key}`}
+                          ref={anchorToScroll === s.key ? targetRef : undefined}
                         >
                           <SongDetails song={s} />
                         </div>
@@ -675,7 +855,7 @@ export default function DiscographyPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
           {data.map((song, index) => (
             <SongItem
-              key={song.key}
+              key={`${song.key}-${index}`}
               song={song}
               isVisible={visibleItems[tabIndex]?.[index] || false}
               groupByAlbum={groupByAlbum}
@@ -715,6 +895,8 @@ export default function DiscographyPage() {
               <div
                 key={`${song.key}-details`}
                 className="col-span-2 md:col-span-3 xl:col-span-4"
+                data-discography-anchor={`album-${song.key}`}
+                ref={anchorToScroll === song.key ? targetRef : undefined}
               >
                 <SongDetails song={song} />
               </div>
@@ -739,14 +921,6 @@ export default function DiscographyPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center w-full justify-center h-screen relative">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
     <OverlayScrollbarsComponent
       element="div"
@@ -754,6 +928,13 @@ export default function DiscographyPage() {
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem>楽曲一覧</BreadcrumbItem>
+      </Breadcrumb>
+
       <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 
       <div className="flex items-center justify-end mb-4 space-x-4">
@@ -790,8 +971,14 @@ export default function DiscographyPage() {
 
       <TabGroup
         selectedIndex={activeTab}
-        onChange={() => {
-          setExpandedItem(null);
+        onChange={(index) => {
+          setActiveTab(index);
+          if (skipClearOnTabChange.current) {
+            // programmatic change — consume flag and keep expandedItem
+            skipClearOnTabChange.current = false;
+          } else {
+            setExpandedItem(null);
+          }
         }}
       >
         <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
@@ -799,6 +986,7 @@ export default function DiscographyPage() {
             as="button"
             onClick={() => {
               setActiveTab(0);
+              setExpandedItem(null);
             }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
@@ -823,6 +1011,7 @@ export default function DiscographyPage() {
             as="button"
             onClick={() => {
               setActiveTab(1);
+              setExpandedItem(null);
             }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
@@ -839,6 +1028,7 @@ export default function DiscographyPage() {
             as="button"
             onClick={() => {
               setActiveTab(2);
+              setExpandedItem(null);
             }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer

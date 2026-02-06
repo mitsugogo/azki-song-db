@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import { compose } from "node:stream";
+import slugify from "../../lib/slugify";
 
 export async function GET() {
   try {
@@ -32,6 +33,8 @@ export async function GET() {
       // 1日を秒単位に変換 (24時間 * 60分 * 60秒)
       return Math.round(numberValue * 24 * 60 * 60);
     }
+
+    // slugify を共通化（src/app/lib/slugify.ts）
 
     // ヘッダー定義：Googleシートのヘッダー名 -> { fieldName, defaultIndex }
     const headerSchema = {
@@ -119,8 +122,12 @@ export async function GET() {
               /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
             )?.[1] || "";
 
+          const title = getString("曲名");
+          const slug = title ? slugify(title) : videoId || "";
+
           songs.push({
-            title: getString("曲名"),
+            title,
+            slug,
             artist: getString("アーティスト"),
             sing: getString("歌った人"),
             lyricist: getString("作詞"),

@@ -1,4 +1,5 @@
 export interface Song {
+  slug?: string;
   title: string;
   artist: string;
   album: string;
