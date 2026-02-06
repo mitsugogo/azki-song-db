@@ -4,9 +4,12 @@ import Link from "next/link";
 import { Song } from "../../types/song";
 import { LuAlbum, LuFolder } from "react-icons/lu";
 import slugify from "../../lib/slugify";
-import { FaPlay, FaYoutube } from "react-icons/fa6";
+import { ROUTE_RANGES } from "../../config/timelineRoutes";
+import { VISUAL_CHANGES } from "../../config/timelineVisuals";
+import { FaPlay, FaTwitter, FaX, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
+import { Badge, Button } from "@mantine/core";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ??
@@ -56,12 +59,29 @@ export async function generateMetadata({
       (s.album && slugify(s.album) === slug),
   );
   if (!matched) return { title: slug };
-
   const title = matched.title
-    ? `${matched.title} - ${matched.artist} | AZKi Song Database`
-    : `${matched.album} - ${matched.artist} | AZKi Song Database`;
-  const description = matched.extra ?? `${matched.title} - ${matched.artist}`;
-  const ogImage = `https://i.ytimg.com/vi/${matched.video_id}/maxresdefault.jpg`;
+    ? `${matched.title} | ${matched.artist} | Discography | AZKi Song Database`
+    : `${matched.album} | ${matched.artist} | Discography | AZKi Song Database`;
+  const description =
+    matched.extra ?? `${matched.title} - ${matched.artist}の楽曲情報`;
+
+  // OGP 画像生成を移植（app/page.tsx を参考）
+  let ogImageUrl = new URL("/api/og", baseUrl);
+  const ogTitle = matched.title
+    ? `${matched.title} / ${matched.artist}`
+    : matched.album
+      ? `${matched.album} / ${matched.artist}`
+      : "AZKi Song Database";
+  const ogSubtitle = matched.extra ?? "AZKi Song Database";
+
+  ogImageUrl.searchParams.set("title", ogTitle);
+  ogImageUrl.searchParams.set(
+    "subtitle",
+    Array.from(ogSubtitle).slice(0, 100).join(""),
+  );
+  ogImageUrl.searchParams.set("titlecolor", "b81e8a");
+  ogImageUrl.searchParams.set("w", "1200");
+  ogImageUrl.searchParams.set("h", "630");
 
   return {
     title,
@@ -69,7 +89,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImage],
+      images: [ogImageUrl.toString()],
     },
   };
 }
@@ -101,6 +121,32 @@ export default async function SongPage({
   }
 
   const first = matched[0];
+
+  // 発売日からルートと衣装を特定する
+  const toYMD = (d?: string | null) => {
+    if (!d) return null;
+    try {
+      return new Date(d).toISOString().slice(0, 10);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const releaseYMD = toYMD(first.album_release_at);
+
+  const matchedRoute =
+    releaseYMD && ROUTE_RANGES
+      ? ROUTE_RANGES.find(
+          (r) => r.from <= releaseYMD && (r.to === null || releaseYMD <= r.to),
+        ) || null
+      : null;
+
+  const matchedVisual =
+    releaseYMD && VISUAL_CHANGES
+      ? VISUAL_CHANGES.find(
+          (v) => v.from <= releaseYMD && (v.to === null || releaseYMD <= v.to),
+        ) || null
+      : null;
 
   // 関連動画: 同一アルバムの別動画を優先し、なければ同タイトルの別動画を候補とする。
   // 重複（同一video_id）は排除して最大8件取得する。
@@ -154,9 +200,8 @@ export default async function SongPage({
         </div>
 
         <div className="col-span-2">
-          <h1 className="text-3xl font-extrabold mb-2">{first.title}</h1>
           {first.album && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               <LuFolder className="inline mr-1" />{" "}
               <Link
                 href={`/discography/?album=${encodeURIComponent(first.album)}`}
@@ -165,6 +210,7 @@ export default async function SongPage({
               </Link>
             </p>
           )}
+          <h1 className="text-3xl font-extrabold mb-2">{first.title}</h1>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             {first.artist}
           </p>
@@ -172,6 +218,12 @@ export default async function SongPage({
           {first.lyricist && <p className="text-sm">作詞: {first.lyricist}</p>}
           {first.composer && <p className="text-sm">作曲: {first.composer}</p>}
           {first.arranger && <p className="text-sm">編曲: {first.arranger}</p>}
+
+          {first.album_release_at && (
+            <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
+              発売日: {new Date(first.album_release_at).toLocaleDateString()}
+            </p>
+          )}
 
           <div className="mt-4 space-y-3">
             <div>
@@ -193,13 +245,38 @@ export default async function SongPage({
               >
                 <FaPlay className="inline mr-1 -mt-1" /> 再生
               </Link>
+
+              {/** シェアボタン */}
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                  `${first.title} - ${first.artist} \nhttps://${process.env.NEXT_PUBLIC_VERCEL_URL ? process.env.NEXT_PUBLIC_VERCEL_URL : "azki-song-db.vercel.app"}/discography/${encodeURIComponent(
+                    first.slug
+                      ? first.slug
+                      : `${first.album}/${encodeURIComponent(first.title)}`,
+                  )}`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
+              >
+                <FaX className="inline mr-1 -mt-1" /> シェア
+              </a>
             </div>
 
-            {first.extra && (
-              <div>
-                <p className="whitespace-pre-wrap">{first.extra}</p>
-              </div>
-            )}
+            <div className="mt-6">
+              {/** 発売日からルートと衣装を特定 */}
+              {matchedRoute && <Badge color="gray">{matchedRoute.label}</Badge>}
+              {matchedVisual && (
+                <Badge className="ml-2" color="gray">
+                  {matchedVisual.label}
+                </Badge>
+              )}
+              {first.extra && (
+                <div className="mt-1">
+                  <p className="whitespace-pre-wrap">{first.extra}</p>
+                </div>
+              )}
+            </div>
 
             <div>
               {/** YouTubeの動画をiframeで配置 */}
@@ -209,7 +286,7 @@ export default async function SongPage({
                   title={first.video_title}
                   allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full max-w-2xl aspect-video"
+                  className="w-full h-full max-w-2xl aspect-video shadow-lg"
                 ></iframe>
               </div>
             </div>
