@@ -34,8 +34,6 @@ export async function GET() {
       return Math.round(numberValue * 24 * 60 * 60);
     }
 
-    // slugify を共通化（src/app/lib/slugify.ts）
-
     // ヘッダー定義：Googleシートのヘッダー名 -> { fieldName, defaultIndex }
     const headerSchema = {
       曲名: { field: "title", defaultIndex: 2 },

@@ -138,8 +138,6 @@ export default function PlaylistDetailPage() {
     defaultSelection: [],
   });
 
-  // Flowbite breadcrumb will be rendered in JSX below
-
   useEffect(() => {
     const url = new URL(window.location.href);
     const id = url.searchParams.get("id");
