@@ -6,13 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "node scripts/pre-build.js && next build",
     "start": "next start",
-    "lint": "next lint",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "lint": "npx prettier . --check",
     "format": "npx prettier --write ."
   },
   "dependencies": {
