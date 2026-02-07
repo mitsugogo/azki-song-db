@@ -282,7 +282,7 @@ export default function SearchAndSongList({
                     changeCurrentSong={changeCurrentSong as any}
                     hideFutureSongs={hideFutureSongs}
                     isInOverlay={true}
-                    onOverlayClose={() => setShowPlaylistSelector(true)}
+                    onSelectSong={() => setIsOverlayOpen?.(false)}
                   />
                 </Suspense>
               </div>

@@ -161,7 +161,7 @@ export default function PlayerSection({
         </div>
 
         {/* Mobile: オーバーレイ検索ボタン */}
-        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 p-2">
+        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 p-2 invert">
           <button
             aria-label="Open song list"
             onClick={() => setOpenSongListOverlay?.(true)}

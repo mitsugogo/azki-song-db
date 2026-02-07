@@ -19,7 +19,7 @@ interface SongListProps {
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song) => void;
   isInOverlay?: boolean;
-  onOverlayClose?: () => void;
+  onSelectSong?: () => void;
 }
 
 // 画面幅からGridの列数を推定
@@ -51,7 +51,7 @@ const SongsList = ({
   hideFutureSongs,
   changeCurrentSong,
   isInOverlay = false,
-  onOverlayClose,
+  onSelectSong,
 }: SongListProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
@@ -340,7 +340,7 @@ const SongsList = ({
                     data-index={globalIndex}
                     data-row-index={virtualRow.index}
                     isInOverlay={isInOverlay}
-                    onOverlayClose={onOverlayClose}
+                    onSelectSong={onSelectSong}
                   />
                 );
               });
