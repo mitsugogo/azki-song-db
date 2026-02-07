@@ -13,7 +13,7 @@ interface SongListItemProps {
   isHide: boolean;
   changeCurrentSong: (song: Song) => void;
   isInOverlay?: boolean;
-  onOverlayClose?: () => void;
+  onSelectSong?: () => void;
 }
 
 const SongListItem = React.memo(
@@ -25,7 +25,7 @@ const SongListItem = React.memo(
         isHide,
         changeCurrentSong,
         isInOverlay = false,
-        onOverlayClose,
+        onSelectSong,
       }: SongListItemProps,
       ref,
     ) => {
@@ -49,7 +49,7 @@ const SongListItem = React.memo(
           onClick={() => {
             changeCurrentSong(song);
             if (isInOverlay) {
-              onOverlayClose?.();
+              onSelectSong?.();
             }
           }}
           data-video-id={song.video_id}
