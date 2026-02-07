@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.29.0](https://github.com/mitsugogo/azki-song-db/compare/v1.28.2...v1.29.0) (2026-02-07)
+
+
+### Features
+
+* 楽曲紹介ページ（オリ曲、ユニット楽曲のみ） ([c4c508a](https://github.com/mitsugogo/azki-song-db/commit/c4c508ab7122d4d732f1daa9b37f028a6d00151a))
+
+
+### Bug Fixes
+
+* startTimeとendの型を明示的にNumberに変換 ([8b51205](https://github.com/mitsugogo/azki-song-db/commit/8b51205cebe2a46ca81f3292ba845de5de5e0a22))
+* カバー曲が考慮されていなかったのを修正 ([2b41e1a](https://github.com/mitsugogo/azki-song-db/commit/2b41e1a1ff3759cf24963ec995ad9d12df79d251))
+* 特定条件で次の曲に移動しないバグを修正 ([ef08e73](https://github.com/mitsugogo/azki-song-db/commit/ef08e73bbc5779927ddf54412c9bf3149fab5419))
+
 ### [1.28.2](https://github.com/mitsugogo/azki-song-db/compare/v1.28.1...v1.28.2) (2026-02-05)
 
 
