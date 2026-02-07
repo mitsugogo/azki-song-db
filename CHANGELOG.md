@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.29.3](https://github.com/mitsugogo/azki-song-db/compare/v1.29.2...v1.29.3) (2026-02-07)
+
+
+### Bug Fixes
+
+* スマホで曲が選べないバグを修正 ([711b933](https://github.com/mitsugogo/azki-song-db/commit/711b933bd2a0a6ea86353958c4e8b48f4a8d96b2))
+
 ### [1.29.2](https://github.com/mitsugogo/azki-song-db/compare/v1.29.1...v1.29.2) (2026-02-07)
 
 
