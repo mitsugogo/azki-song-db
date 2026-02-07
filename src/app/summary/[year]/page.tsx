@@ -133,7 +133,7 @@ export default async function Page({ params }: Props) {
           <BreadcrumbItem href="/">
             <FaHome className="inline mr-1" /> Home
           </BreadcrumbItem>
-          <BreadcrumbItem href="/summary">年ごとの活動記録</BreadcrumbItem>
+          <BreadcrumbItem href="/summary">活動記録</BreadcrumbItem>
           <BreadcrumbItem href={`/summary/${rawYearParam}`}>
             {displayYearServer ? `${displayYearServer}年` : `詳細`}
           </BreadcrumbItem>
