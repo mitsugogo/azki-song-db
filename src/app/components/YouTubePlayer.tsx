@@ -20,8 +20,8 @@ function YouTubePlayerComponent({
   onStateChange,
 }: YouTubePlayerProps) {
   const videoId = video_id || song.video_id;
-  const start = startTime || song.start || 0;
-  const end = song.end || 0;
+  const start = Number(startTime ?? song.start ?? 0);
+  const end = Number(song.end ?? 0);
 
   const opts = useMemo(() => {
     const playerVars: Record<string, number> = {
