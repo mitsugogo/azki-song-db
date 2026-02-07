@@ -53,6 +53,7 @@ const ThemeToggle = () => {
   return (
     <button
       type="button"
+      aria-label="Toggle theme"
       className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-800 p-2 rounded-md"
       onClick={handleClick}
     >

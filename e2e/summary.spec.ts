@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Summary pages", () => {
+  test.describe.configure({ mode: "serial" });
   test.describe("Summary index page", () => {
     test("displays yearly activity summary", async ({ page }) => {
       await page.goto("/summary");
@@ -20,6 +21,12 @@ test.describe("Summary pages", () => {
       await page.goto("/summary");
 
       await page.waitForLoadState("domcontentloaded");
+
+      // Wait for API to load data
+      await page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/songs") && response.status() === 200,
+      );
 
       // Look for year links by href (e.g., /summary/2024)
       await page.waitForSelector('a[href^="/summary/20"]', { timeout: 5000 });

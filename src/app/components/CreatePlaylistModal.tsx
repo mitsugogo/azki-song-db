@@ -20,12 +20,12 @@ export default function CreatePlaylistModal({
     <Modal
       opened={onenModal}
       onClose={() => setOpenModal(false)}
-      title="新規プレイリストを作成"
+      title="新規プレイリストを作成"
       centered
     >
-      <Input.Wrapper label="プレイリスト名" required withAsterisk>
+      <Input.Wrapper label="プレイリスト名" required withAsterisk>
         <Input
-          placeholder="プレイリスト名を入力..."
+          placeholder="プレイリスト名を入力..."
           value={newPlaylistName}
           onChange={(event) =>
             setNewPlaylistName(event.target.value.substring(0, 200))
@@ -36,7 +36,7 @@ export default function CreatePlaylistModal({
       </Input.Wrapper>
       {isDuplicate(newPlaylistName) && (
         <p className="text-red-500 text-xs">
-          同じ名前のプレイリストは作成できません
+          同じ名前のプレイリストは作成できません
         </p>
       )}
       <Button

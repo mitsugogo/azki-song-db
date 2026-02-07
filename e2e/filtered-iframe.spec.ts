@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Filtered TOP iframe updates", () => {
+  test.describe.configure({ mode: "serial" });
   test("clicking a song from a milestone-filtered TOP updates YouTube iframe", async ({
     page,
   }) => {

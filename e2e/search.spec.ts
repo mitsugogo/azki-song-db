@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Search page", () => {
+  test.describe.configure({ mode: "serial" });
   test("renders search interface", async ({ page }) => {
     await page.goto("/search");
 
-    await expect(page).toHaveTitle(/AZKi Song Database/);
+    await expect(page).toHaveTitle(/検索|AZKi Song Database/);
 
     await page.waitForLoadState("domcontentloaded");
   });
@@ -28,6 +29,12 @@ test.describe("Search page", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
+    // Wait for API to load songs
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/songs") && response.status() === 200,
+    );
+
     // Wait for song list to load
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
@@ -40,7 +47,9 @@ test.describe("Search page", () => {
     const initialTotal = initialMatch ? parseInt(initialMatch[2]) : 0;
 
     // Enter search term (TagsInput accepts typing)
-    const searchInput = page.getByRole("textbox", { name: /検索/ });
+    const searchInput = page.getByRole("textbox", {
+      name: "曲名、アーティスト、タグなどで検索",
+    });
     await searchInput.click();
     await searchInput.fill("year:2025");
     await searchInput.press("Enter");
@@ -73,11 +82,19 @@ test.describe("Search page", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
+    // Wait for API to load songs
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/songs") && response.status() === 200,
+    );
+
     // Wait for song list to load
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     // Enter search term
-    const searchInput = page.getByRole("textbox", { name: /検索/ });
+    const searchInput = page.getByRole("textbox", {
+      name: "曲名、アーティスト、タグなどで検索",
+    });
     await searchInput.click();
     await searchInput.fill("tag:オリ曲");
     await searchInput.press("Enter");

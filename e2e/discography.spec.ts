@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Discography page", () => {
+  test.describe.configure({ mode: "serial" });
   test("renders discography page with album information", async ({ page }) => {
     await page.goto("/discography");
 

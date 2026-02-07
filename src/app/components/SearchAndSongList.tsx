@@ -294,7 +294,7 @@ export default function SearchAndSongList({
       <Modal
         opened={showPlaylistSelector}
         onClose={() => setShowPlaylistSelector(false)}
-        title="プレイリスト"
+        title="プレイリスト"
       >
         <Modal.Body>
           {playlists.length === 0 && favorites.length === 0 ? (
@@ -307,7 +307,7 @@ export default function SearchAndSongList({
                 className="mt-2"
               >
                 <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                プレイリストを作成
+                プレイリストを作成
               </MantineButton>
             </>
           ) : (
@@ -461,7 +461,7 @@ export default function SearchAndSongList({
                     <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
                   }
                 >
-                  プレイリスト再生モードを解除
+                  プレイリスト再生モードを解除
                 </MantineButton>
               </div>
             </>
@@ -473,7 +473,7 @@ export default function SearchAndSongList({
           className="ml-3"
           onClick={() => setShowPlaylistSelector(false)}
         >
-          閉じる
+          閉じる
         </MantineButton>
       </Modal>
 

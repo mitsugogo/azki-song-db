@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Playlist page", () => {
+  test.describe.configure({ mode: "serial" });
   test("displays playlist management interface", async ({ page }) => {
     await page.goto("/playlist");
 
@@ -42,7 +43,7 @@ test.describe("プレイリスト機能", () => {
 
   test("追加・再生", async ({ page }) => {
     // トップページへ
-    await page.goto("http://localhost:3000/");
+    await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
     // プレイリストボタンをクリック
@@ -57,7 +58,14 @@ test.describe("プレイリスト機能", () => {
     await page.waitForTimeout(500);
 
     // プレイリスト名を入力
-    const nameInput = page.getByRole("textbox", { name: "プレイリスト名" });
+    const createModal = page
+      .locator('[role="dialog"]')
+      .filter({ hasText: "新規プレイリストを作成" });
+    await expect(createModal).toBeVisible({ timeout: 10000 });
+
+    const nameInput = createModal.getByRole("textbox", {
+      name: /プレイリスト名/,
+    });
     await nameInput.fill(playlistName);
     await page.waitForTimeout(300);
 
