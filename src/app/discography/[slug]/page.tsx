@@ -221,7 +221,8 @@ export default async function SongPage({
 
           {first.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-              発売日: {new Date(first.album_release_at).toLocaleDateString()}
+              発売日:{" "}
+              {new Date(first.album_release_at).toLocaleDateString("ja-JP")}
             </p>
           )}
 
