@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.29.2](https://github.com/mitsugogo/azki-song-db/compare/v1.29.1...v1.29.2) (2026-02-07)
+
+
+### Bug Fixes
+
+* Discographyの日付書式を日本化 ([8aa9840](https://github.com/mitsugogo/azki-song-db/commit/8aa9840440a6fc62524f9827bc8e1f9c72153c83))
+
 ### [1.29.1](https://github.com/mitsugogo/azki-song-db/compare/v1.29.0...v1.29.1) (2026-02-07)
 
 ## [1.29.0](https://github.com/mitsugogo/azki-song-db/compare/v1.28.2...v1.29.0) (2026-02-07)
