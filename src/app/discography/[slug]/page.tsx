@@ -274,24 +274,24 @@ export default async function SongPage({
               {first.extra && (
                 <div className="mt-1 whitespace-pre-wrap">
                   {first.extra
-                  .split(/(\bhttps?:\/\/[^\s]+|\n)/g)
-                  .map((part, index) =>
-                    part.match(/^https?:\/\//) ? (
-                    <a
-                      key={index}
-                      href={part}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 underline"
-                    >
-                      {part}
-                    </a>
-                    ) : part === "\n" ? (
-                    <br key={index} />
-                    ) : (
-                    <span key={index}>{part}</span>
-                    ),
-                  )}
+                    .split(/(\bhttps?:\/\/[^\s]+|\n)/g)
+                    .map((part, index) =>
+                      part.match(/^https?:\/\//) ? (
+                        <a
+                          key={index}
+                          href={part}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 underline"
+                        >
+                          {part}
+                        </a>
+                      ) : part === "\n" ? (
+                        <br key={index} />
+                      ) : (
+                        <span key={index}>{part}</span>
+                      ),
+                    )}
                 </div>
               )}
             </div>
