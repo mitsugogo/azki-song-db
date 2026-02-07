@@ -9,7 +9,9 @@ import { AnimatePresence, motion } from "motion/react";
 import PlayerControlsBar from "./PlayerControlsBar";
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa6";
+import { IoChevronUp } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
+import MobileActionButtons from "./MobileActionButtons";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -52,6 +54,7 @@ type PlayerSectionProps = {
   setOpenShareModal: (isOpen: boolean) => void;
   setSearchTerm: (term: string) => void;
   setHideFutureSongs: (value: boolean) => void;
+  setOpenSongListOverlay?: (open: boolean) => void;
   playerControls?: DesktopPlayerControls;
 };
 
@@ -79,6 +82,7 @@ export default function PlayerSection({
   setSearchTerm,
   setHideFutureSongs,
   playerControls,
+  setOpenSongListOverlay,
 }: PlayerSectionProps) {
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
@@ -107,7 +111,7 @@ export default function PlayerSection({
   }, [timedLiveCallText]);
 
   return (
-    <aside className="flex lg:w-2/3 xl:w-9/12 w-full foldable:w-1/2 pr-0">
+    <aside className="flex md:w-2/3 xl:w-9/12 w-full foldable:w-full md:foldable:w-1/2 pr-0">
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
@@ -128,6 +132,17 @@ export default function PlayerSection({
               />
             )}
           </div>
+        </div>
+
+        {/* Mobile handle to open song list overlay - fixed at bottom of viewport */}
+        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+          <button
+            aria-label="Open song list"
+            onClick={() => setOpenSongListOverlay?.(true)}
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-white/95 dark:bg-gray-800/95 shadow-lg text-gray-800 dark:text-white"
+          >
+            <IoChevronUp className="w-6 h-6" />
+          </button>
         </div>
 
         {controlBar.canUsePlayerControls && (
@@ -170,6 +185,14 @@ export default function PlayerSection({
             setHideFutureSongs={setHideFutureSongs}
           />
         )}
+
+        <div className="block md:hidden mx-2 mt-2">
+          <MobileActionButtons
+            onSurprise={() => playRandomSong?.(songs)}
+            onOriginal={() => setSearchTerm?.("original-songs")}
+            onPlaylist={() => setOpenSongListOverlay?.(true)}
+          />
+        </div>
 
         {currentSong?.live_call && (
           <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">

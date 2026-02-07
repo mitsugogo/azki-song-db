@@ -96,30 +96,7 @@ const NowPlayingSongInfo = ({
               </div>
             </div>
 
-            <div ref={containerRef} className="lg:hidden md:pb-3">
-              <div
-                className="text-xs text-muted-foreground w-full pt-2 cursor-pointer line-clamp-1"
-                onClick={open}
-              >
-                {currentSong && (
-                  <span>
-                    {currentSong.broadcast_at
-                      ? new Date(currentSong.broadcast_at).toLocaleDateString(
-                          "ja-JP",
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          },
-                        ) + "配信 - "
-                      : ""}
-                    {currentSong.video_title}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="hidden md:block foldable:block">
+            <div>
               <NowPlayingSongInfoDetail
                 currentSong={currentSong}
                 allSongs={allSongs}

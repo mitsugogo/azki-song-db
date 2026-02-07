@@ -18,6 +18,7 @@ interface SongListProps {
   currentSong: Song | null;
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song) => void;
+  isInOverlay?: boolean;
 }
 
 // 画面幅からGridの列数を推定
@@ -48,6 +49,7 @@ const SongsList = ({
   currentSong,
   hideFutureSongs,
   changeCurrentSong,
+  isInOverlay = false,
 }: SongListProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
@@ -271,18 +273,27 @@ const SongsList = ({
     }
   }, [currentSong]);
 
+  const outerClass = isInOverlay
+    ? "flex w-full h-full overflow-hidden items-stretch bg-white dark:bg-gray-900"
+    : "flex w-full h-full overflow-hidden items-stretch";
+
+  const overlayScrollStyle = isInOverlay
+    ? { height: "calc(80vh - 88px)", contain: "strict" }
+    : { contain: "strict" };
+
   return (
     <>
-      <div className="flex w-full h-screen overflow-hidden">
+      <div className={outerClass}>
         <ScrollArea
           viewportRef={parentRef}
           id="song-list-scrollbar"
-          className="h-full overflow-y-auto focus:outline-0 grow"
+          className="h-full overflow-y-auto focus:outline-0 grow self-stretch"
           viewportProps={{
-            style: { contain: "strict" },
+            style: overlayScrollStyle,
           }}
           style={{
             contain: "strict",
+            height: "100%",
           }}
           scrollHideDelay={0}
           onKeyUp={handleKeyUp}
