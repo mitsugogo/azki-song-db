@@ -52,3 +52,6 @@ next-env.d.ts
 **/public/workbox-*.js
 **/public/workbox-*.js.map
 
+# copilot
+.github/copilot-instructions.md
+.github/for_copilot/*

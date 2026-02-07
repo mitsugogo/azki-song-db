@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import { Breadcrumbs } from "@mantine/core";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { FaHome } from "react-icons/fa";
 import SummaryTopClient from "./client";
 
@@ -65,30 +65,17 @@ export default async function Page() {
     return result;
   })();
 
-  const breadcrumbItems = [
-    {
-      title: (
-        <span>
-          <FaHome className="inline-block mr-1" />
-        </span>
-      ),
-      href: "/",
-    },
-    { title: "活動記録", href: "/summary" },
-  ].map((item, index) => (
-    <Link
-      href={item.href}
-      key={index}
-      className="text-primary-700 hover:underline dark:text-primary-300"
-    >
-      {item.title}
-    </Link>
-  ));
+  // Flowbite Breadcrumb will be rendered directly in JSX below
 
   return (
     <div className="grow lg:p-6 lg:pb-0">
       <div className="mb-4">
-        <Breadcrumbs separator="›">{breadcrumbItems}</Breadcrumbs>
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <FaHome className="inline mr-1" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/summary">活動記録</BreadcrumbItem>
+        </Breadcrumb>
       </div>
       <h1 className="font-extrabold text-2xl p-3">活動記録</h1>
 

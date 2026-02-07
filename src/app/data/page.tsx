@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import ClientTable from "./client";
 import Loading from "../loading";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
+import { HiHome } from "react-icons/hi";
 
 import type { Metadata, ResolvingMetadata } from "next";
 import { metadata } from "../layout";
@@ -43,10 +45,17 @@ export async function generateMetadata(
 
 export default async function DataPage() {
   return (
-    <>
+    <div className="grow lg:p-6 lg:pb-0">
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem href="/data">収録データ</BreadcrumbItem>
+      </Breadcrumb>
+
       <Suspense fallback={<Loading />}>
         <ClientTable />
       </Suspense>
-    </>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import { compose } from "node:stream";
+import slugify from "../../lib/slugify";
 
 export async function GET() {
   try {
@@ -119,8 +120,12 @@ export async function GET() {
               /(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=|shorts\/))([^&\n]{11})/,
             )?.[1] || "";
 
+          const title = getString("曲名");
+          const slug = title ? slugify(title) : videoId || "";
+
           songs.push({
-            title: getString("曲名"),
+            title,
+            slug,
             artist: getString("アーティスト"),
             sing: getString("歌った人"),
             lyricist: getString("作詞"),

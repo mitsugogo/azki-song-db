@@ -34,10 +34,10 @@ const Acknowledgment = () => {
       <div className="text-sm text-muted mt-1">
         <p>
           集計対象は、YouTube上で一般公開されている歌枠・記念ライブ・生放送・Music
-          Video・カバー楽曲・MV・ゲスト出演など、AZKiさん御本人の歌唱動画を対象にしています。
+          Video・カバー楽曲・MV・ゲスト出演など、AZKiさんの歌唱動画を対象にしています。
         </p>
         <p className="mt-2">
-          「0期生の記念ライブ」などの配信については、AZKiさんが歌唱していない部分も収録している場合があります。
+          「0期生記念ライブ」など一部の配信については、AZKiさんが歌唱していない部分も収録している場合があります。
         </p>
         <p className="mt-2">
           メンバーシップ限定動画や非公開動画、有料配信など広く閲覧できない動画は対象外としています。
@@ -54,8 +54,17 @@ const Acknowledgment = () => {
             rel="noopener noreferrer"
           >
             @mitsugogo
-          </Link>
-          までご連絡ください。
+          </Link>{" "}
+          や{" "}
+          <a
+            href="https://github.com/mitsugogo/azki-song-db"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub className="inline mr-1" />
+            GitHub
+          </a>{" "}
+          までご連絡ください。
         </p>
       </div>
 
@@ -79,34 +88,6 @@ const Acknowledgment = () => {
         </p>
       </div>
 
-      <h3 className="mt-5 font-semibold">使用ライブラリ</h3>
-      <div className="text-sm mt-1">
-        <p>以下のライブラリを使用しています。</p>
-        <List className="mt-2" listStyleType="disc">
-          <List.Item>flowbite-react</List.Item>
-          <List.Item>overlayscrollbars-react</List.Item>
-          <List.Item>react-fast-marquee</List.Item>
-          <List.Item>react-icons</List.Item>
-          <List.Item>react-youtube</List.Item>
-          <List.Item>styled-components</List.Item>
-          <List.Item>postcss</List.Item>
-          <List.Item>@emotion/react</List.Item>
-          <List.Item>@emotion/styled</List.Item>
-          <List.Item>@fortawesome/free-brands-svg-icons</List.Item>
-          <List.Item>@fortawesome/free-solid-svg-icons</List.Item>
-          <List.Item>@fortawesome/react-fontawesome</List.Item>
-          <List.Item>@headlessui/react</List.Item>
-          <List.Item>@heroicons/react</List.Item>
-          <List.Item>@mui/icons-material</List.Item>
-          <List.Item>@mui/material</List.Item>
-          <List.Item>@mui/styled-engine-sc</List.Item>
-          <List.Item>@vercel/analytics</List.Item>
-          <List.Item>@vercel/og</List.Item>
-          <List.Item>@vercel/speed-insights</List.Item>
-          <List.Item>googleapis</List.Item>
-        </List>
-      </div>
-
       <h3 className="mt-5 font-semibold">更新履歴</h3>
 
       <div className="text-sm text-muted">
@@ -119,7 +100,8 @@ const Acknowledgment = () => {
           >
             <FaGithub className="inline-block mr-1" />
             CHANGELOG
-          </Link>
+          </Link>{" "}
+          を参照
         </p>
       </div>
 
@@ -144,6 +126,22 @@ const Acknowledgment = () => {
             rel="noopener noreferrer"
           >
             (@mitsugogo)
+          </Link>
+        </p>
+      </div>
+
+      <h3 className="mt-5 font-semibold">ライセンス</h3>
+      <div className="text-sm text-muted">
+        <p>
+          MIT{" "}
+          <Link
+            href="https://github.com/mitsugogo/azki-song-db/blob/main/LICENSE"
+            className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub className="inline-block mr-1" />
+            LICENSE
           </Link>
         </p>
       </div>

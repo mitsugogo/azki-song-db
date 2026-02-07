@@ -104,14 +104,6 @@ export default function SearchInput({
 
     return [
       {
-        group: "タグ",
-        items: availableTags.map((tag) => `tag:${tag}`),
-      },
-      {
-        group: "マイルストーン",
-        items: availableMilestones.map((milestone) => `milestone:${milestone}`),
-      },
-      {
         group: "アーティスト",
         items: availableArtists.map((artist) => `artist:${artist}`),
       },
@@ -138,6 +130,14 @@ export default function SearchInput({
       {
         group: "編曲",
         items: availableArrangers.map((arranger) => `arranger:${arranger}`),
+      },
+      {
+        group: "タグ",
+        items: availableTags.map((tag) => `tag:${tag}`),
+      },
+      {
+        group: "マイルストーン",
+        items: availableMilestones.map((milestone) => `milestone:${milestone}`),
       },
       {
         group: "配信年",
@@ -200,10 +200,11 @@ export default function SearchInput({
       splitChars={["|"]}
       comboboxProps={{
         shadow: "md",
-        transitionProps: { transition: "pop", duration: 100 },
+        transitionProps: { transition: "fade", duration: 100 },
       }}
       clearable
       className={className}
+      acceptValueOnBlur
     />
   );
 }
