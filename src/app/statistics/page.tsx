@@ -2,6 +2,8 @@ import StatisticsPage from "./client";
 
 import type { Metadata } from "next";
 import { metadata } from "../layout";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
+import { HiHome } from "react-icons/hi";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
@@ -31,5 +33,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Page() {
-  return <StatisticsPage />;
+  return (
+    <div className="grow lg:p-6 lg:pb-0">
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem href="/statistics">統計情報</BreadcrumbItem>
+      </Breadcrumb>
+      <StatisticsPage />
+    </div>
+  );
 }

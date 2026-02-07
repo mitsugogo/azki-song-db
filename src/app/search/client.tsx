@@ -10,6 +10,8 @@ import usePlayerControls from "../hook/usePlayerControls";
 import useSearch from "../hook/useSearch";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import Link from "next/link";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
+import { HiHome } from "react-icons/hi";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { LoadingOverlay, Button } from "@mantine/core";
 import { FaMusic, FaUser, FaTag, FaUsers } from "react-icons/fa6";
@@ -343,6 +345,12 @@ const SearchPageClient = () => {
   if (isLoading) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto relative">
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
+        </Breadcrumb>
         <LoadingOverlay
           visible={true}
           zIndex={1000}
@@ -356,15 +364,16 @@ const SearchPageClient = () => {
   // 検索結果が存在する場合はそれを表示
   if (currentSearchTerm && filteredSongs.length > 0) {
     return (
-      <div ref={parentRef} className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
+      <div ref={parentRef} className="grow lg:p-6 lg:pb-0 overflow-auto">
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
+          <BreadcrumbItem>「{currentSearchTerm}」の検索結果</BreadcrumbItem>
+        </Breadcrumb>
         {/* タイトルと説明 */}
         <div className="mb-4">
-          <Link
-            href="/search"
-            className="text-primary-700 dark:text-primary-300 hover:underline text-sm p-3"
-          >
-            ← 検索に戻る
-          </Link>
           <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
           <div className="px-3 pb-3">
             <div className="flex flex-wrap gap-2 mb-3">
@@ -548,14 +557,14 @@ const SearchPageClient = () => {
   if (currentSearchTerm && filteredSongs.length === 0) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
+        </Breadcrumb>
         {/* タイトルと説明 */}
         <div className="mb-4">
-          <Link
-            href="/search"
-            className="text-blue-600 dark:text-blue-400 hover:underline text-sm p-3"
-          >
-            ← 検索に戻る
-          </Link>
           <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
           <div className="px-3 pb-3">
             <div className="flex flex-wrap gap-2 mb-3">
@@ -635,6 +644,15 @@ const SearchPageClient = () => {
     );
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
+        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+          <BreadcrumbItem href="/">
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
+          <BreadcrumbItem href={`/search?tag=${encodeURIComponent(tagParam)}`}>
+            {selectedCategory?.label}
+          </BreadcrumbItem>
+        </Breadcrumb>
         {/* タイトルと説明 */}
         <div className="mb-4">
           <Link
@@ -697,13 +715,20 @@ const SearchPageClient = () => {
   // カテゴリー表示（検索がない場合）
   return (
     <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem href="/search">検索</BreadcrumbItem>
+      </Breadcrumb>
       {/* タイトルと説明 */}
       <div>
         <h1 className="font-extrabold text-2xl p-3">検索</h1>
         <div className="p-3">
           <p className="text-sm text-gray-600 dark:text-light-gray-400 mb-6">
             楽曲を検索できます。全{allSongs.length}
-            曲を収録。各カテゴリーの最新16曲を表示しています。
+            曲、{Array.from(new Set(allSongs.map((s) => s.video_id))).length}
+            動画を収録。
           </p>
         </div>
       </div>

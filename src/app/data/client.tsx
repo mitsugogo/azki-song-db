@@ -262,7 +262,7 @@ export default function ClientTable() {
           />
           <OverlayScrollbarsComponent
             ref={tableContainerRef}
-            className="h-[calc(100dvh-230px)] md:h-[calc(100dvh-250px)] lg:h-[calc(100dvh-296px)]"
+            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-290px)] lg:h-[calc(100dvh-375px)]"
           >
             <div className="relative">
               <div className="w-full text-sm text-left">

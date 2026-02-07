@@ -12,12 +12,21 @@ interface SongListItemProps {
   isSelected: boolean;
   isHide: boolean;
   changeCurrentSong: (song: Song) => void;
+  isInOverlay?: boolean;
+  onOverlayClose?: () => void;
 }
 
 const SongListItem = React.memo(
   React.forwardRef<HTMLLIElement, SongListItemProps>(
     (
-      { song, isSelected, isHide, changeCurrentSong }: SongListItemProps,
+      {
+        song,
+        isSelected,
+        isHide,
+        changeCurrentSong,
+        isInOverlay = false,
+        onOverlayClose,
+      }: SongListItemProps,
       ref,
     ) => {
       const url = new URL(window.location.href);
@@ -39,6 +48,9 @@ const SongListItem = React.memo(
           }`}
           onClick={() => {
             changeCurrentSong(song);
+            if (isInOverlay) {
+              onOverlayClose?.();
+            }
           }}
           data-video-id={song.video_id}
           data-start-time={song.start}

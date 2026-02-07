@@ -88,4 +88,19 @@ export const flowbiteTheme: CustomFlowbiteTheme = createFlowbiteTheme({
       popup: "border-t",
     },
   },
+  breadcrumb: {
+    root: {
+      base: "bg-light-gray-100 px-5 py-3 dark:bg-gray-800 rounded-md hidden lg:block",
+      list: "flex items-center",
+    },
+    item: {
+      base: "group flex items-center",
+      chevron: "mx-1 h-4 w-4 text-gray-400 group-first:hidden md:mx-2",
+      href: {
+        off: "flex items-center text-sm font-medium text-gray-500 dark:text-gray-200",
+        on: "flex items-center text-sm font-medium text-gray-700 hover:text-gray-200 dark:text-gray-300 dark:hover:text-gray-100",
+      },
+      icon: "mr-2 h-4 w-4",
+    },
+  },
 });

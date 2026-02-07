@@ -93,11 +93,13 @@ export async function GET(req: NextRequest) {
           </div>
           <div
             style={{
-              width: "100%",
+              display: "block",
               fontSize: 40,
               fontStyle: "normal",
               color: `#${subTitleColor}`,
               lineHeight: 1.3,
+              flex: 1,
+              lineClamp: '3 "..."',
             }}
           >
             {subTitle}

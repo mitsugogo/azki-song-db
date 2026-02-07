@@ -4,18 +4,18 @@ import { useEffect, useState } from "react";
 import CreatePlaylistModal from "../components/CreatePlaylistModal";
 import { MdPlaylistAdd } from "react-icons/md";
 import {
-  Anchor,
-  Breadcrumbs,
   Button,
   Checkbox,
   CopyButton,
   Notification,
   Table,
 } from "@mantine/core";
+import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
 import Link from "next/link";
 import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
+import { HiHome } from "react-icons/hi";
 
 export default function PlaylistPage() {
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
@@ -60,17 +60,16 @@ export default function PlaylistPage() {
   const allPlaylists =
     favorites.length > 0 ? [favoritesPlaylist, ...playlists] : playlists;
 
-  const breadcrumbs = [{ title: "プレイリスト", href: "/playlist" }].map(
-    (item, index) => (
-      <Anchor href={item.href} key={index} underline="hover" c="pink" size="sm">
-        {item.title}
-      </Anchor>
-    ),
-  );
+  // Flowbite breadcrumb will be rendered below
 
   return (
     <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
-      <Breadcrumbs>{breadcrumbs}</Breadcrumbs>
+      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
+        <BreadcrumbItem href="/">
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </BreadcrumbItem>
+        <BreadcrumbItem href="/playlist">プレイリスト</BreadcrumbItem>
+      </Breadcrumb>
 
       <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
 

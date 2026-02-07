@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Statistics page", () => {
+  test.describe.configure({ mode: "serial" });
   test("displays statistics dashboard", async ({ page }) => {
     await page.goto("/statistics");
 

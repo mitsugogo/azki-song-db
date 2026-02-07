@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Home page", () => {
+  test.describe.configure({ mode: "serial" });
   test("renders header controls and navigation drawer", async ({ page }) => {
     await page.goto("/");
 
