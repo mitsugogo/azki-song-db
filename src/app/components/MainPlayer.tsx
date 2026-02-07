@@ -263,6 +263,7 @@ export default function MainPlayer() {
   const [baseUrl, setBaseUrl] = useState("");
   // Mobile song list overlay state
   const [isSongListOverlayOpen, setIsSongListOverlayOpen] = useState(false);
+  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [openShareModal, setOpenShareModal] = useState(false);
@@ -510,6 +511,7 @@ export default function MainPlayer() {
         setSearchTerm={setSearchTerm}
         setHideFutureSongs={setHideFutureSongs}
         setOpenSongListOverlay={setIsSongListOverlayOpen}
+        setShowPlaylistSelector={setShowPlaylistSelector}
         isPlaying={isPlaying}
         playerKey={playerKey}
         hideFutureSongs={hideFutureSongs}
@@ -527,6 +529,8 @@ export default function MainPlayer() {
         setSearchTerm={setSearchTerm}
         setSongs={setSongs}
         searchSongs={searchSongs}
+        showPlaylistSelector={showPlaylistSelector}
+        setShowPlaylistSelector={setShowPlaylistSelector}
         isOverlayOpen={isSongListOverlayOpen}
         setIsOverlayOpen={setIsSongListOverlayOpen}
       />

@@ -19,6 +19,7 @@ interface SongListProps {
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song) => void;
   isInOverlay?: boolean;
+  onOverlayClose?: () => void;
 }
 
 // 画面幅からGridの列数を推定
@@ -50,6 +51,7 @@ const SongsList = ({
   hideFutureSongs,
   changeCurrentSong,
   isInOverlay = false,
+  onOverlayClose,
 }: SongListProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
@@ -278,7 +280,7 @@ const SongsList = ({
     : "flex w-full h-full overflow-hidden items-stretch";
 
   const overlayScrollStyle = isInOverlay
-    ? { height: "calc(80vh - 88px)", contain: "strict" }
+    ? { height: "calc(90vh - 88px)", contain: "strict" }
     : { contain: "strict" };
 
   return (
@@ -337,6 +339,8 @@ const SongsList = ({
                     }
                     data-index={globalIndex}
                     data-row-index={virtualRow.index}
+                    isInOverlay={isInOverlay}
+                    onOverlayClose={onOverlayClose}
                   />
                 );
               });

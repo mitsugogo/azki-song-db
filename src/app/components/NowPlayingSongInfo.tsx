@@ -1,13 +1,8 @@
-import { Button, Group, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Song } from "../types/song";
-import { FaCompactDisc, FaShare } from "react-icons/fa6";
-import Marquee from "react-fast-marquee";
 import { useLayoutEffect, useRef, useState } from "react";
 import NowPlayingSongInfoDetail from "./NowPlayingSongInfoDetail";
-import { FaTimes } from "react-icons/fa";
 import MilestoneBadge from "./MilestoneBadge";
-import PlayerSettings from "./PlayerSettings";
 
 interface NowPlayingSongInfoProps {
   currentSong: Song | null;
@@ -75,7 +70,7 @@ const NowPlayingSongInfo = ({
 
   return (
     <>
-      <div className="flex sm:mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
+      <div className="flex mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSong && (
           <div className="song-info">
             <div className="hidden lg:flex items-center gap-2 pb-2">
@@ -110,55 +105,6 @@ const NowPlayingSongInfo = ({
           </div>
         )}
       </div>
-      <Modal
-        opened={opened}
-        onClose={close}
-        title="楽曲情報"
-        size="2xl"
-        centered
-      >
-        {currentSong && (
-          <>
-            <div className="mb-2 relative">
-              <span className="font-semibold">{currentSong.title}</span>
-              {currentSong.artist && (
-                <span className="text-gray-500 dark:text-gray-200 text-sm">
-                  {" "}
-                  - {currentSong.artist}
-                </span>
-              )}
-            </div>
-            <NowPlayingSongInfoDetail
-              currentSong={currentSong}
-              allSongs={allSongs}
-              searchTerm={searchTerm}
-              isPlaying={isPlaying}
-              hideFutureSongs={hideFutureSongs}
-              setSearchTerm={setSearchTerm}
-              changeCurrentSong={changeCurrentSong}
-            />
-            <hr className="my-4" />
-            <Group className="flex items-center">
-              <Button
-                color="pink"
-                onClick={close}
-                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
-              >
-                <FaTimes />
-                &nbsp;閉じる
-              </Button>
-              <Button
-                color="pink"
-                onClick={() => setOpenShereModal(true)}
-                className="bg-primary hover:bg-primary dark:bg-primary dark:hover:bg-primary text-white transition text-sm cursor-pointer"
-              >
-                <FaShare />
-                &nbsp;Share
-              </Button>
-            </Group>
-          </>
-        )}
-      </Modal>
     </>
   );
 };

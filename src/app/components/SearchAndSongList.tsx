@@ -3,7 +3,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
-import { LuCrown, LuMusic } from "react-icons/lu";
+import { LuCrown, LuMusic, LuX } from "react-icons/lu";
 import { MdAdd } from "react-icons/md";
 import { LuSparkles } from "react-icons/lu";
 import {
@@ -43,6 +43,8 @@ type SearchAndSongListProps = {
   setSearchTerm: (term: string) => void;
   setSongs: (songs: Song[]) => void;
   searchSongs: (songsToFilter: Song[], term: string) => Song[];
+  showPlaylistSelector: boolean;
+  setShowPlaylistSelector: (open: boolean) => void;
 };
 
 type SearchAndSongListPropsExt = {
@@ -61,13 +63,15 @@ export default function SearchAndSongList({
   setSearchTerm,
   setSongs,
   searchSongs,
+  showPlaylistSelector,
+  setShowPlaylistSelector,
   isOverlayOpen,
   setIsOverlayOpen,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
   const [isLoading, setIsLoading] = useState(true);
+  const overlayOpen = Boolean(isOverlayOpen);
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
-  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
   const { playlists, addToPlaylist, removeFromPlaylist, isNowPlayingPlaylist } =
     usePlaylists();
@@ -226,62 +230,66 @@ export default function SearchAndSongList({
         </div>
       </div>
 
-      {/* Mobile: overlay that slides up from bottom */}
-      {/* Mobile overlay (hidden on md and above) */}
-      {/** Overlay backdrop */}
-      {isOverlayOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/90 z-50 md:hidden"
-            onClick={() => setIsOverlayOpen?.(false)}
-          />
+      {/** Mobile: オーバーレイ検索 */}
+      <>
+        <div
+          aria-hidden={!overlayOpen}
+          className={`fixed inset-0 bg-black/70 backdrop-blur-md z-50 md:hidden transition-opacity duration-300 ${
+            overlayOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setIsOverlayOpen?.(false)}
+        />
 
-          <div
-            className={`fixed inset-x-0 bottom-0 md:hidden z-[60] transform transition-transform duration-300 ${
-              isOverlayOpen ? "translate-y-0" : "translate-y-full"
-            }`}
-          >
-            <div className="h-[80vh] max-h-[80vh] bg-white dark:bg-gray-900 rounded-t-lg shadow-lg overflow-hidden flex flex-col">
-              <div className="px-3 pt-3 pb-2 bg-white dark:bg-gray-900">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <SearchInput
-                      allSongs={allSongs}
-                      searchValue={searchValue}
-                      onSearchChange={(values: string[]) => {
-                        setSearchValue(values);
-                        setSearchTerm(values.join("|"));
-                      }}
-                      placeholder="検索"
-                    />
-                  </div>
+        <div
+          aria-hidden={!overlayOpen}
+          className={`fixed inset-x-0 bottom-0 md:hidden z-60 transform transition-transform duration-300 ${
+            overlayOpen ? "translate-y-0" : "translate-y-full"
+          } ${overlayOpen ? "" : "pointer-events-none"}`}
+        >
+          <div className="h-[90vh] max-h-[90vh] bg-white dark:bg-gray-900 rounded-t-lg shadow-lg overflow-hidden flex flex-col">
+            <div className="px-3 pt-3 pb-2 bg-white dark:bg-gray-900">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <SearchInput
+                    allSongs={allSongs}
+                    searchValue={searchValue}
+                    onSearchChange={(values: string[]) => {
+                      setSearchValue(values);
+                      setSearchTerm(values.join("|"));
+                    }}
+                    placeholder="検索"
+                  />
+                </div>
+                <Tooltip withArrow label="閉じる">
                   <button
                     aria-label="Close song list"
                     onClick={() => setIsOverlayOpen?.(false)}
-                    className="px-3 py-2 rounded bg-light-gray-200 dark:bg-gray-700"
+                    className="p-2 rounded-full bg-light-gray-200 dark:bg-gray-700"
                   >
-                    閉じる
+                    {/* Close Icon */}
+                    <LuX className="w-5 h-5" />
                   </button>
-                </div>
+                </Tooltip>
               </div>
+            </div>
 
-              <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900">
-                <div className="h-full">
-                  <Suspense fallback={<Loading />}>
-                    <SongsList
-                      songs={songs}
-                      currentSong={currentSong}
-                      changeCurrentSong={changeCurrentSong as any}
-                      hideFutureSongs={hideFutureSongs}
-                      isInOverlay={true}
-                    />
-                  </Suspense>
-                </div>
+            <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 mt-2 ml-3 mr-1">
+              <div className="h-full">
+                <Suspense fallback={<Loading />}>
+                  <SongsList
+                    songs={songs}
+                    currentSong={currentSong}
+                    changeCurrentSong={changeCurrentSong as any}
+                    hideFutureSongs={hideFutureSongs}
+                    isInOverlay={true}
+                    onOverlayClose={() => setShowPlaylistSelector(true)}
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </>
 
       <Modal
         opened={showPlaylistSelector}

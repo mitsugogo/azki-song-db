@@ -52,7 +52,7 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
-      const summaryLink = page.getByRole("link", { name: /年ごとの活動記録/i });
+      const summaryLink = page.getByRole("link", { name: /活動記録/i });
       await expect(summaryLink).toBeVisible();
     });
   });

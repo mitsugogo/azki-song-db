@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "motion/react";
 import PlayerControlsBar from "./PlayerControlsBar";
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa6";
-import { IoChevronUp } from "react-icons/io5";
+import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
 import MobileActionButtons from "./MobileActionButtons";
 
@@ -55,6 +55,7 @@ type PlayerSectionProps = {
   setSearchTerm: (term: string) => void;
   setHideFutureSongs: (value: boolean) => void;
   setOpenSongListOverlay?: (open: boolean) => void;
+  setShowPlaylistSelector?: (open: boolean) => void;
   playerControls?: DesktopPlayerControls;
 };
 
@@ -83,6 +84,7 @@ export default function PlayerSection({
   setHideFutureSongs,
   playerControls,
   setOpenSongListOverlay,
+  setShowPlaylistSelector,
 }: PlayerSectionProps) {
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
@@ -134,14 +136,14 @@ export default function PlayerSection({
           </div>
         </div>
 
-        {/* Mobile handle to open song list overlay - fixed at bottom of viewport */}
-        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        {/* Mobile: オーバーレイ検索ボタン */}
+        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 p-2">
           <button
             aria-label="Open song list"
             onClick={() => setOpenSongListOverlay?.(true)}
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-white/95 dark:bg-gray-800/95 shadow-lg text-gray-800 dark:text-white"
+            className="w-12 h-12 flex items-center justify-center rounded-full cursor-pointer bg-white/95 dark:bg-gray-800/95 shadow-md border border-gray-100 dark:border-gray-500 text-gray-800 dark:text-white"
           >
-            <IoChevronUp className="w-6 h-6" />
+            <IoSearch className="w-6 h-6" />
           </button>
         </div>
 
@@ -190,7 +192,7 @@ export default function PlayerSection({
           <MobileActionButtons
             onSurprise={() => playRandomSong?.(songs)}
             onOriginal={() => setSearchTerm?.("original-songs")}
-            onPlaylist={() => setOpenSongListOverlay?.(true)}
+            onPlaylist={() => setShowPlaylistSelector?.(true)}
           />
         </div>
 
