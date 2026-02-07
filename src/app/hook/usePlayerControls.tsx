@@ -147,6 +147,25 @@ const usePlayerControls = (
     return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
   }, [allSongs]);
 
+  const songsByVideo = useMemo(() => {
+    const map = new Map<string, Song[]>();
+    sortedAllSongs.forEach((song) => {
+      if (!song.video_id) return;
+      const list = map.get(song.video_id) ?? [];
+      list.push(song);
+      map.set(song.video_id, list);
+    });
+    map.forEach((list) => {
+      list.sort((a, b) => Number(a.start) - Number(b.start));
+    });
+    return map;
+  }, [sortedAllSongs]);
+
+  const getSongKey = useCallback((song: Song) => {
+    if (song.slug) return song.slug;
+    return `${song.title}::${song.artist}`;
+  }, []);
+
   // 強制的にPlayerをリセットする
   const resetPlayer = useCallback(() => {
     setPlayerKey((prevKey) => prevKey + 1);
@@ -310,6 +329,27 @@ const usePlayerControls = (
     [allSongs],
   );
 
+  const getNextSongInVideo = useCallback(
+    (song: Song | null) => {
+      if (!song?.video_id) return null;
+      const list = songsByVideo.get(song.video_id);
+      if (!list) return null;
+      const currentIndex = list.findIndex(
+        (s) => s.video_id === song.video_id && s.start === song.start,
+      );
+      if (currentIndex < 0) return null;
+      const currentKey = getSongKey(song);
+      for (let i = currentIndex + 1; i < list.length; i += 1) {
+        const candidate = list[i];
+        if (getSongKey(candidate) !== currentKey) {
+          return candidate;
+        }
+      }
+      return null;
+    },
+    [songsByVideo, getSongKey],
+  );
+
   const handleStateChange = useCallback(
     (event: YouTubeEvent<number>) => {
       const player = event.target;
@@ -363,6 +403,10 @@ const usePlayerControls = (
             currentVideoId,
             currentTime,
           );
+          const currentSongForNext =
+            currentSongRef.current ?? foundSong ?? null;
+          const nextSongInVideo = getNextSongInVideo(currentSongForNext);
+          const autoNextSong = nextSongInVideo ?? nextSongRef.current ?? null;
           const isFoundSongInList = songsRef.current.some(
             (s) =>
               s.video_id === foundSong?.video_id &&
@@ -407,24 +451,28 @@ const usePlayerControls = (
             return;
           }
 
-          if (!isFoundSongInList && nextSongRef.current) {
-            changeCurrentSongRef.current(nextSongRef.current);
+          if (!isFoundSongInList && autoNextSong) {
+            changeCurrentSongRef.current(autoNextSong);
             return;
           }
 
           if (foundSong?.end && foundSong.end < currentTime) {
             clearMonitorInterval();
-            changeCurrentSongRef.current(nextSongRef.current);
-          } else if (!foundSong && nextSongRef.current) {
-            changeCurrentSongRef.current(nextSongRef.current);
+            if (autoNextSong) {
+              changeCurrentSongRef.current(autoNextSong);
+            }
+          } else if (!foundSong && autoNextSong) {
+            changeCurrentSongRef.current(autoNextSong);
           }
         }, 500);
       };
 
       const handleEndedState = () => {
         clearMonitorInterval();
-        if (nextSongRef.current) {
-          changeCurrentSongRef.current(nextSongRef.current);
+        const nextSongInVideo = getNextSongInVideo(currentSongRef.current);
+        const autoNextSong = nextSongInVideo ?? nextSongRef.current;
+        if (autoNextSong) {
+          changeCurrentSongRef.current(autoNextSong);
         } else if (songsRef.current.length > 0) {
           changeCurrentSongRef.current(songsRef.current[0]);
         }
@@ -448,7 +496,14 @@ const usePlayerControls = (
           break;
       }
     },
-    [songs, nextSong, playRandomSong, searchCurrentSongOnVideo, timedMessages],
+    [
+      songs,
+      nextSong,
+      playRandomSong,
+      searchCurrentSongOnVideo,
+      timedMessages,
+      getNextSongInVideo,
+    ],
   );
 
   const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {

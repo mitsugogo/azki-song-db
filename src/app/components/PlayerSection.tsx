@@ -7,7 +7,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
 import PlayerControlsBar from "./PlayerControlsBar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
@@ -100,6 +100,29 @@ export default function PlayerSection({
     changeCurrentSong,
   });
 
+  const getSongKey = useCallback((song: Song) => {
+    if (song.slug) return song.slug;
+    return `${song.title}::${song.artist}`;
+  }, []);
+
+  const hasNextInVideo = useMemo(() => {
+    if (!currentSong) return false;
+    const songsInVideo = controlBar.songsInVideo;
+    const currentIndex = songsInVideo.findIndex(
+      (song) =>
+        song.video_id === currentSong.video_id &&
+        song.start === currentSong.start,
+    );
+    if (currentIndex < 0) return false;
+    const currentKey = getSongKey(currentSong);
+    for (let i = currentIndex + 1; i < songsInVideo.length; i += 1) {
+      if (getSongKey(songsInVideo[i]) !== currentKey) {
+        return true;
+      }
+    }
+    return false;
+  }, [controlBar.songsInVideo, currentSong, getSongKey]);
+
   // timedLiveCallText が変更されたら行数を計算
   useEffect(() => {
     const lineCount = timedLiveCallText
@@ -129,6 +152,7 @@ export default function PlayerSection({
                 song={currentSong}
                 video_id={videoId}
                 startTime={startTime}
+                disableEnd={hasNextInVideo}
                 onReady={handlePlayerOnReady}
                 onStateChange={handleStateChange}
               />

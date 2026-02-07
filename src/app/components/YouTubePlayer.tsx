@@ -6,6 +6,7 @@ interface YouTubePlayerProps {
   song: Song;
   video_id?: string;
   startTime?: number;
+  disableEnd?: boolean;
   onReady: (event: YouTubeEvent<number>) => void;
   onStateChange: (event: YouTubeEvent<number>) => void;
 }
@@ -14,6 +15,7 @@ function YouTubePlayerComponent({
   song,
   video_id,
   startTime,
+  disableEnd,
   onReady,
   onStateChange,
 }: YouTubePlayerProps) {
@@ -21,18 +23,20 @@ function YouTubePlayerComponent({
   const start = startTime || song.start || 0;
   const end = song.end || 0;
 
-  const opts = useMemo(
-    () => ({
+  const opts = useMemo(() => {
+    const playerVars: Record<string, number> = {
+      autoplay: 1,
+      start,
+    };
+    if (!disableEnd && end > 0) {
+      playerVars.end = end;
+    }
+    return {
       width: "100%",
       height: "100%",
-      playerVars: {
-        autoplay: 1,
-        start,
-        end,
-      },
-    }),
-    [videoId, start, end],
-  );
+      playerVars,
+    };
+  }, [videoId, start, end, disableEnd]);
 
   return (
     <YouTube
@@ -54,7 +58,8 @@ const YouTubePlayer = React.memo(
       prevProps.song.start === nextProps.song.start &&
       prevProps.song.end === nextProps.song.end &&
       prevProps.video_id === nextProps.video_id &&
-      prevProps.startTime === nextProps.startTime
+      prevProps.startTime === nextProps.startTime &&
+      prevProps.disableEnd === nextProps.disableEnd
       // onStateChange は比較しない
     );
   },
