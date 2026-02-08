@@ -36,6 +36,13 @@ const DescriptionCollapsible = ({
     setExpanded((v) => !v);
   };
 
+  // uploadDateがnew Date()で有効な日付文字列かどうか
+  const isDateString = (s: string | null | undefined) => {
+    if (!s) return false;
+    const d = new Date(s);
+    return !isNaN(d.getTime());
+  };
+
   return (
     <div>
       <div
@@ -49,7 +56,10 @@ const DescriptionCollapsible = ({
             {expanded
               ? viewCount?.toLocaleString() + " 回視聴"
               : formatedViewCount}{" "}
-            {uploadDate && "・"} {uploadDate}
+            {uploadDate && "・"}{" "}
+            {isDateString(uploadDate)
+              ? new Date(uploadDate || "").toLocaleDateString()
+              : uploadDate}
           </div>
         )}
         {renderLinkedText(expanded || !isTruncatable ? text : collapsedText)}
@@ -57,7 +67,7 @@ const DescriptionCollapsible = ({
 
       {isTruncatable && (
         <div
-          className="text-xs text-muted-foreground mt-1 cursor-pointer text-gray-200 dark:text-gray-600 hover:text-gray-50 dark:hover:text-gray-200"
+          className="text-xs text-muted-foreground mt-1 cursor-pointer text-gray-200 dark:text-gray-100 hover:text-gray-50 dark:hover:text-gray-200"
           onClick={handleToggle}
         >
           {expanded ? "折りたたむ" : "続きを表示"}
@@ -203,11 +213,11 @@ const NowPlayingSongInfo = ({
             <div className="channel-info">
               <div className="flex flex-col gap-2 mb-2 w-full sm:flex-row sm:items-start sm:gap-4">
                 <div className="w-full">
-                  <div className="flex flex-wrap items-start gap-3">
+                  <div className="flex flex-wrap items-start gap-1">
                     {loading
                       ? // Skeleton for channel(s)
                         [0, 1, 2].slice(0, 1).map((i) => (
-                          <div className="flex items-center gap-3" key={i}>
+                          <div className="flex items-center gap-1" key={i}>
                             <Skeleton circle height={36} width={36} />
                             <div className="flex flex-col leading-tight">
                               <Skeleton height={12} width={120} mb={6} />
@@ -221,7 +231,7 @@ const NowPlayingSongInfo = ({
                             href={`https://www.youtube.com/channel/${ch.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 min-w-0 rounded-md px-2 py-1 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-[calc(50%-0.375rem)] sm:basis-[220px]"
+                            className="flex items-center gap-1 min-w-0 rounded-md px-2 py-1 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-[calc(50%-0.375rem)] sm:basis-[220px]"
                             title={`${ch.name ?? ""}`}
                           >
                             <Avatar
@@ -235,7 +245,7 @@ const NowPlayingSongInfo = ({
                               size={36}
                             />
                             <div className="flex flex-col leading-tight min-w-0">
-                              <span className="text-sm text-foreground dark:text-white font-medium truncate">
+                              <span className="text-sm text-foreground dark:text-white font-medium line-clamp-1">
                                 {ch.name ?? ""}
                               </span>
                               {ch.subscriberCount !== null && (
