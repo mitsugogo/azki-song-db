@@ -267,21 +267,23 @@ const NowPlayingSongInfo = ({
                     <Tooltip
                       content={`最終更新: ${new Date(videoInfo.lastFetchedAt).toLocaleString()}`}
                       placement="top"
-                      className="cursor-pointer"
+                      className="pointer-events-none"
                     >
-                      {videoInfo.viewCount != null && (
-                        <div className="text-xs text-muted-foreground flex items-center cursor-pointer whitespace-nowrap">
-                          <FaPlay className="inline mr-1" />
-                          {videoInfo.viewCount}
-                        </div>
-                      )}
+                      <div className="cursor-pointer">
+                        {videoInfo.viewCount != null && (
+                          <div className="text-xs text-muted-foreground flex items-center whitespace-nowrap">
+                            <FaPlay className="inline mr-1" />
+                            {videoInfo.viewCount}
+                          </div>
+                        )}
 
-                      {videoInfo.likeCount != null && (
-                        <div className="text-xs text-muted-foreground flex items-center cursor-pointer whitespace-nowrap">
-                          <FaThumbsUp className="inline mr-1" />
-                          {Number(videoInfo.likeCount).toLocaleString()}
-                        </div>
-                      )}
+                        {videoInfo.likeCount != null && (
+                          <div className="text-xs text-muted-foreground flex items-center whitespace-nowrap">
+                            <FaThumbsUp className="inline mr-1" />
+                            {Number(videoInfo.likeCount).toLocaleString()}
+                          </div>
+                        )}
+                      </div>
                     </Tooltip>
                   )}
                 </div>

@@ -221,16 +221,18 @@ describe("SongsList", () => {
   it("marks songs after the current one as hidden when hideFutureSongs is enabled", async () => {
     const songs = [
       createSong({ title: "First", video_id: "video-1" }),
-      createSong({ title: "Second", video_id: "video-2" }),
-      createSong({ title: "Third", video_id: "video-3" }),
+      createSong({ title: "Second", video_id: "video-1" }),
+      createSong({ title: "Third", video_id: "video-1" }),
+      createSong({ title: "Fourth", video_id: "video-2" }),
     ];
 
     renderSongList(songs, { currentSong: songs[1], hideFuture: true });
 
     const items = await screen.findAllByTestId("song-list-item");
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
     expect(items[0]).toHaveAttribute("data-is-hide", "false");
     expect(items[1]).toHaveAttribute("data-is-hide", "false");
     expect(items[2]).toHaveAttribute("data-is-hide", "true");
+    expect(items[3]).toHaveAttribute("data-is-hide", "false");
   });
 });
