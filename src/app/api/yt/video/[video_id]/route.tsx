@@ -47,7 +47,7 @@ const formatSubscriberCountLabel = (
   return `チャンネル登録者数 ${display.replace(/\.0$/, "")}万人`;
 };
 
-const extractCollaborationHandles = (description?: string | null) => {
+export const extractCollaborationHandles = (description?: string | null) => {
   if (!description) return [];
   const lines = description.split(/\r\n|\n/).splice(0, 50);
   const normalizeLine = (line: string) =>
@@ -63,7 +63,7 @@ const extractCollaborationHandles = (description?: string | null) => {
   const sectionStartPattern =
     /^[-*・◆◇■●]?\s*(ライブゲスト|ゲスト|出演|参加|共演|コラボ|with|guest)\s*[:：]?\s*$/i;
   const ignoreLinePattern =
-    /(mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|animation|director|modeling|編集|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影)/i;
+    /(mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|illustrated|animation|director|modeling|edited|edited by|directed|production|assist|assistant|assisted|master|mastered|pre-?mix|illustrator|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影)/i;
 
   const sectionIndex = targetLines.findIndex((line) =>
     sectionStartPattern.test(normalizeLine(line)),
@@ -74,19 +74,51 @@ const extractCollaborationHandles = (description?: string | null) => {
   const firstHandleIndex = candidateLines.findIndex((line) =>
     handlePattern.test(normalizeLine(line)),
   );
-  if (firstHandleIndex < 0) return [];
+
+  // ハンドルが見つからない場合、candidateLines 内の YouTube チャンネル URL を探す
+  if (firstHandleIndex < 0) {
+    const channelUrlRegex =
+      /https?:\/\/(?:www\.)?youtube\.com\/(?:@([0-9A-Za-z._-]{2,30})|channel\/([0-9A-Za-z_-]{20,}))/i;
+    const urlHandles: string[] = [];
+    for (const rawLine of candidateLines) {
+      const line = normalizeLine(rawLine);
+      if (!line) continue;
+      const m = channelUrlRegex.exec(line);
+      if (!m) continue;
+      if (m[1]) {
+        const h = m[1].replace("＠", "@");
+        urlHandles.push(h.startsWith("@") ? h : `@${h}`);
+      } else if (m[2]) {
+        urlHandles.push(m[2]);
+      }
+    }
+
+    if (urlHandles.length > 0)
+      return Array.from(new Set(urlHandles)).slice(0, 12);
+  }
 
   const handles: string[] = [];
-  for (const rawLine of candidateLines.slice(firstHandleIndex)) {
-    const line = normalizeLine(rawLine);
-    if (!line) break;
-    if (/https?:\/\//i.test(line)) break;
-    if (ignoreLinePattern.test(line)) break;
+  if (firstHandleIndex >= 0) {
+    for (const rawLine of candidateLines.slice(firstHandleIndex)) {
+      const line = normalizeLine(rawLine);
+      if (!line) break;
+      // URL 行でも @ ハンドルや /channel/ID を含む場合は処理を継続する
+      if (/https?:\/\//i.test(line) && !/@|channel\//i.test(line)) break;
+      if (ignoreLinePattern.test(line)) continue;
 
-    const matches = line.match(handlePatternGlobal) ?? [];
-    if (matches.length === 0) break;
+      const matches = line.match(handlePatternGlobal) ?? [];
+      if (matches.length === 0) {
+        // /channel/UC... のような URL からチャンネルIDを抽出
+        const ch = /youtube\.com\/channel\/([0-9A-Za-z_-]{20,})/i.exec(line);
+        if (ch && ch[1]) {
+          handles.push(ch[1]);
+          continue;
+        }
+        continue;
+      }
 
-    handles.push(...matches.map((handle) => handle.replace("＠", "@")));
+      handles.push(...matches.map((handle) => handle.replace("＠", "@")));
+    }
   }
 
   const unique = Array.from(new Set(handles));
@@ -107,6 +139,15 @@ const extractCollaborationHandles = (description?: string | null) => {
     const idx = hm.index;
     const inUrl = urlRanges.some(([s, e]) => idx >= s && idx < e);
     if (inUrl) continue;
+    // フォールバックでも、該当ハンドルがクレジット系の行に含まれている場合は除外する
+    const lineStart = Math.max(0, description.lastIndexOf("\n", idx) + 1);
+    const lineEnd = description.indexOf("\n", idx);
+    const rawLine = description.slice(
+      lineStart,
+      lineEnd === -1 ? description.length : lineEnd,
+    );
+    const norm = normalizeLine(rawLine);
+    if (ignoreLinePattern.test(norm)) continue;
     fallbackHandles.push(hm[0].replace("＠", "@"));
   }
 
@@ -353,7 +394,23 @@ const fetchFromYouTubeDataApi = async (
       item?.snippet?.description,
     );
     for (const handle of collaborationHandles) {
-      const channelItem = await fetchChannelByHandle(youtubeData, handle);
+      let channelItem: any = null;
+
+      // チャンネル ID の可能性 (例: UC...)
+      if (/^UC[0-9A-Za-z_-]{10,}$/i.test(handle)) {
+        try {
+          const chResp = await youtubeData.channels.list({
+            part: ["snippet", "statistics"],
+            id: [handle],
+          });
+          channelItem = chResp?.data?.items?.[0] ?? null;
+        } catch (error) {
+          channelItem = null;
+        }
+      } else {
+        channelItem = await fetchChannelByHandle(youtubeData, handle);
+      }
+
       if (!channelItem) {
         collaborationChannels.push({
           id: handle,
@@ -364,7 +421,8 @@ const fetchFromYouTubeDataApi = async (
         continue;
       }
 
-      const channelId = channelItem.id ?? handle;
+      const channelId =
+        channelItem.id ?? (handle.startsWith("@") ? null : handle);
       if (channelId && channelId === item?.snippet?.channelId) {
         continue;
       }
@@ -381,7 +439,7 @@ const fetchFromYouTubeDataApi = async (
         : null;
 
       collaborationChannels.push({
-        id: channelId,
+        id: channelId ?? handle,
         name: channelItem?.snippet?.title ?? handle,
         subscriberCount,
         thumbnails,
