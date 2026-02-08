@@ -355,7 +355,7 @@ export function Header() {
         onClose={() => setShowAcknowledgment(false)}
         size="auto"
         title="このサイトについて"
-        overlayProps={{ opacity: 0.5, blur: 4 }}
+        overlayProps={{ backgroundOpacity: 0.5, blur: 5 }}
         fullScreen={isMobile}
       >
         <Acknowledgment />
