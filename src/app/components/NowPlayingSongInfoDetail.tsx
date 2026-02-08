@@ -561,8 +561,18 @@ const NowPlayingSongInfoDetail = ({
                                 currentSong.start === song.start,
                             );
 
+                        // 今再生中の曲かどうか
+                        const isCurrentSong = song === currentSong;
+
                         return (
-                          <div key={song.start} className="w-full flex">
+                          <div
+                            key={song.start}
+                            className={`w-full flex rounded px-1 border  text-xs ${
+                              isCurrentSong
+                                ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60 py-0.5"
+                                : "border-transparent"
+                            }`}
+                          >
                             <div className="flex tabular-nums">
                               <Link
                                 href={`?v=${song.video_id}&t=${song.start}`}
@@ -578,18 +588,6 @@ const NowPlayingSongInfoDetail = ({
                               </Link>
                             </div>
                             <div className="flex ml-3">
-                              {currentSong === song && (
-                                <FaCompactDisc
-                                  className={`relative inline ${
-                                    isPlaying ? "animate-spin" : ""
-                                  }`}
-                                  style={{
-                                    top: "2px",
-                                    marginRight: "3px",
-                                    animationDuration: "3s",
-                                  }}
-                                />
-                              )}
                               <span
                                 className={`${
                                   isHide

@@ -6,7 +6,7 @@ import { LuAlbum, LuFolder } from "react-icons/lu";
 import slugify from "../../lib/slugify";
 import { ROUTE_RANGES } from "../../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../../config/timelineVisuals";
-import { FaPlay, FaTwitter, FaX, FaYoutube } from "react-icons/fa6";
+import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import { Badge, Button } from "@mantine/core";
@@ -260,7 +260,7 @@ export default async function SongPage({
                 rel="noopener noreferrer"
                 className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
               >
-                <FaX className="inline mr-1 -mt-1" /> シェア
+                <FaXTwitter className="inline mr-1 -mt-1" /> シェア
               </a>
             </div>
 
