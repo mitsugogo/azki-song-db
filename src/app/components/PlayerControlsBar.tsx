@@ -576,7 +576,12 @@ export default function PlayerControlsBar({
                       </ul>
 
                       <div className="py-2">
-                        <Menu width={260} withArrow opened={showPlaylistMenu}>
+                        <Menu
+                          width={260}
+                          withArrow
+                          opened={showPlaylistMenu}
+                          withinPortal={false}
+                        >
                           <Menu.Target>
                             <button
                               onClick={() =>
@@ -732,7 +737,12 @@ export default function PlayerControlsBar({
                     </button>
                   </div>
                   <div className="py-2">
-                    <Menu width={260} withArrow opened={showPlaylistMenu}>
+                    <Menu
+                      width={260}
+                      withArrow
+                      opened={showPlaylistMenu}
+                      withinPortal={false}
+                    >
                       <Menu.Target>
                         <button
                           onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
