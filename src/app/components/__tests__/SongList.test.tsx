@@ -103,6 +103,9 @@ const baseSong: Song = {
   year: 2020,
   tags: [],
   milestones: [],
+  lyricist: "",
+  composer: "",
+  arranger: "",
 };
 
 const createSong = (overrides: Partial<Song> = {}): Song => ({

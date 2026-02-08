@@ -1,5 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import YouTube from "react-youtube";
 import usePlayerControls from "../usePlayerControls";
 import type { Song } from "../../types/song";
 import type { GlobalPlayerContextType } from "../useGlobalPlayer";
@@ -20,6 +21,22 @@ const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
   setSeekTo: vi.fn(),
 });
 
+const createMockPlayer = (initialVideoId = "vid1", initialTime = 0) => {
+  let currentTime = initialTime;
+  let videoId = initialVideoId;
+  return {
+    getVideoData: vi.fn(() => ({ video_id: videoId })),
+    getCurrentTime: vi.fn(() => currentTime),
+    playVideo: vi.fn(),
+    __setCurrentTime: (time: number) => {
+      currentTime = time;
+    },
+    __setVideoId: (id: string) => {
+      videoId = id;
+    },
+  };
+};
+
 describe("usePlayerControls", () => {
   const mockSongs: Song[] = [
     {
@@ -39,6 +56,9 @@ describe("usePlayerControls", () => {
       year: 0,
       tags: [],
       milestones: [],
+      lyricist: "",
+      composer: "",
+      arranger: "",
     },
     {
       video_id: "vid2",
@@ -57,6 +77,9 @@ describe("usePlayerControls", () => {
       year: 0,
       tags: [],
       milestones: [],
+      lyricist: "",
+      composer: "",
+      arranger: "",
     },
     {
       video_id: "vid3",
@@ -75,6 +98,9 @@ describe("usePlayerControls", () => {
       year: 0,
       tags: [],
       milestones: [],
+      lyricist: "",
+      composer: "",
+      arranger: "",
     },
   ];
 
@@ -577,6 +603,24 @@ describe("usePlayerControls", () => {
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(150);
     });
 
+    it("同一曲でもexplicitStartTimeがあれば再シークされる", () => {
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      vi.clearAllMocks();
+
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0], "sameVid", 50);
+      });
+
+      expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(50);
+    });
+
     it("異なる動画への切り替え時はseekToではなくvideoIdとstartTimeがセットされる", () => {
       const differentVideoSongs: Song[] = [
         ...sameVideoSongs,
@@ -629,6 +673,255 @@ describe("usePlayerControls", () => {
       expect(result.current.videoId).toBe("differentVid");
       expect(result.current.startTime).toBe(50);
       expect(result.current.currentSong?.title).toBe("Song D");
+    });
+  });
+
+  describe("handlePlayerOnReady", () => {
+    it("再生開始とURLパラメータの削除が行われる", () => {
+      (window as any).location.href = "http://localhost/?v=vid1&t=120";
+      const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+      const player = createMockPlayer();
+
+      const { result } = renderHook(() =>
+        usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.handlePlayerOnReady({ target: player } as any);
+      });
+
+      expect(player.playVideo).toHaveBeenCalled();
+      expect(result.current.isPlaying).toBe(true);
+
+      const replaceArgs = (window.history.replaceState as any).mock.calls[0];
+      expect(replaceArgs[2]).not.toContain("v=");
+      expect(replaceArgs[2]).not.toContain("t=");
+
+      const calledEvent = dispatchSpy.mock.calls.find(
+        (call) => (call[0] as Event).type === "replacestate",
+      );
+      expect(calledEvent).toBeTruthy();
+
+      dispatchSpy.mockRestore();
+    });
+  });
+
+  describe("handleStateChange", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-02-08T00:00:00Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("PLAYINGでライブコールが更新され、範囲外で消える", () => {
+      const songWithLiveCall: Song = {
+        ...mockSongs[0],
+        video_id: "liveVid",
+        live_call: "0:00:10 - 0:00:20 コールA",
+      };
+      const player = createMockPlayer("liveVid", 10);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(
+          [songWithLiveCall],
+          [songWithLiveCall],
+          mockGlobalPlayer,
+        ),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songWithLiveCall);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(result.current.timedLiveCallText).toBe("コールA");
+
+      act(() => {
+        player.__setCurrentTime(25);
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(result.current.timedLiveCallText).toBeNull();
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PAUSED,
+        } as any);
+      });
+    });
+
+    it("PAUSEDで監視タイマーが停止しisPlayingがfalseになる", () => {
+      const clearSpy = vi.spyOn(global, "clearInterval");
+      const player = createMockPlayer("vid1", 5);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(mockSongs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PAUSED,
+        } as any);
+      });
+
+      expect(clearSpy).toHaveBeenCalled();
+      expect(result.current.isPlaying).toBe(false);
+
+      clearSpy.mockRestore();
+    });
+
+    it("BUFFERINGで監視タイマーが停止しisPlayingがfalseになる", () => {
+      const clearSpy = vi.spyOn(global, "clearInterval");
+      const player = createMockPlayer("vid1", 5);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(mockSongs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.BUFFERING,
+        } as any);
+      });
+
+      expect(clearSpy).toHaveBeenCalled();
+      expect(result.current.isPlaying).toBe(false);
+
+      clearSpy.mockRestore();
+    });
+
+    it("ENDEDで次の曲に遷移しメッセージがリセットされる", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "endVid", start: "0" },
+        { ...mockSongs[1], video_id: "endVid", start: "100" },
+      ];
+      const player = createMockPlayer("endVid", 10);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.ENDED,
+        } as any);
+      });
+
+      expect(result.current.currentSong?.start).toBe("100");
+      expect(result.current.isPlaying).toBe(false);
+      expect(result.current.timedLiveCallText).toBeNull();
+    });
+
+    it("自動遷移ではskipSeekが使われる", () => {
+      const sameVideoSongs: Song[] = [
+        { ...mockSongs[0], video_id: "autoVid", start: "0" },
+        { ...mockSongs[1], video_id: "autoVid", start: "100" },
+      ];
+      const player = createMockPlayer("autoVid", 120);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(sameVideoSongs, sameVideoSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(sameVideoSongs[0]);
+      });
+
+      act(() => {
+        vi.setSystemTime(new Date("2026-02-08T00:00:01Z"));
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(result.current.currentSong?.start).toBe("100");
+      expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+    });
+
+    it("フィルタ外の曲検出時は次曲に自動遷移する", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "filterVid", start: "100" },
+        { ...mockSongs[1], video_id: "filterVid", start: "200" },
+      ];
+      const allSongs: Song[] = [
+        { ...mockSongs[2], video_id: "filterVid", start: "50" },
+        ...songs,
+      ];
+      const player = createMockPlayer("filterVid", 60);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, allSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        vi.setSystemTime(new Date("2026-02-08T00:00:01Z"));
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(result.current.currentSong?.start).toBe("200");
     });
   });
 });
