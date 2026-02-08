@@ -32,6 +32,7 @@ const usePlayerControls = (
   const [startTime, setStartTime] = useState(0);
   const [playerKey, setPlayerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // === セトリネタバレ防止モード ===
   const [hideFutureSongs, setHideFutureSongs] = useState(false);
