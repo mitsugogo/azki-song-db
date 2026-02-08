@@ -159,7 +159,7 @@ export default function PlayerControlsBar({
 
   // seek start/end are handled by parent via optional handlers
   return (
-    <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-2xl backdrop-blur-sm">
+    <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm">
       {/* Progress Bar */}
       <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-4">
         <div className="relative flex-1">
