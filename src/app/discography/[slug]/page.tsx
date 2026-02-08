@@ -10,6 +10,7 @@ import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import { Badge, Button } from "@mantine/core";
+import { renderLinkedText } from "@/app/lib/textLinkify";
 
 const baseUrl =
   process.env.PUBLIC_BASE_URL ??
@@ -274,25 +275,7 @@ export default async function SongPage({
               )}
               {first.extra && (
                 <div className="mt-1 whitespace-pre-wrap">
-                  {first.extra
-                    .split(/(\bhttps?:\/\/[^\s]+|\n)/g)
-                    .map((part, index) =>
-                      part.match(/^https?:\/\//) ? (
-                        <a
-                          key={index}
-                          href={part}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 underline"
-                        >
-                          {part}
-                        </a>
-                      ) : part === "\n" ? (
-                        <br key={index} />
-                      ) : (
-                        <span key={index}>{part}</span>
-                      ),
-                    )}
+                  {renderLinkedText(first.extra)}
                 </div>
               )}
             </div>

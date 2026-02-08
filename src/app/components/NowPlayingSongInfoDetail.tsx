@@ -20,6 +20,7 @@ import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
 import { FaInfoCircle } from "react-icons/fa";
 import { getCollabUnitName } from "../config/collabUnits";
+import { renderLinkedText } from "../lib/textLinkify";
 
 interface NowPlayingSongInfoDetailProps {
   currentSong: Song;
@@ -276,7 +277,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoAlbums className="text-base" />
-                    <span className="ml-1">アルバム:</span>
+                    <span className="ml-1">アルバム:</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -644,7 +645,7 @@ const NowPlayingSongInfoDetail = ({
                   </span>
                 </dt>
                 <dd className="text-xs lg:text-sm">
-                  {currentSong.live_call.split(/[\r\n]/).map((call, index) => {
+                  {currentSong.live_call.split(/\r?\n/).map((call, index) => {
                     const match = call.match(
                       /^(\d{1,2}:\d{2}:\d{2})\s*-\s*(\d{1,2}:\d{2}:\d{2})(.*)$/,
                     );
@@ -723,18 +724,9 @@ const NowPlayingSongInfoDetail = ({
                   </span>
                 </dt>
                 <dd>
-                  <div
-                    className="wrap-break-word break-all"
-                    dangerouslySetInnerHTML={{
-                      __html: currentSong.live_note
-                        .replace(
-                          /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
-                          (url) =>
-                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
-                        )
-                        .replace(/\n/g, "<br />"),
-                    }}
-                  ></div>
+                  <div className="wrap-break-word break-all">
+                    {renderLinkedText(currentSong.live_note)}
+                  </div>
                 </dd>
               </div>
             )}
@@ -760,21 +752,11 @@ const NowPlayingSongInfoDetail = ({
                       changeCurrentSong(currentSong, currentSong.video_id, t);
                     }
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: currentSong.extra
-                      .replace(
-                        /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
-                        (url) =>
-                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
-                      )
-                      .replace(/\n/g, "<br />")
-                      // hh:mm:ss 形式のタイムスタンプを data-t 属性付きのリンクに置換
-                      .replace(/(\d{1,2}:\d{2}:\d{2})/g, (timestamp) => {
-                        const seconds = timeToSeconds(timestamp);
-                        return `<a href="#" data-t="${seconds}" class="timestamp-link text-primary hover:underline dark:text-primary-300">${timestamp}</a>`;
-                      }),
-                  }}
-                />
+                >
+                  {renderLinkedText(currentSong.extra, {
+                    timestampToSeconds: timeToSeconds,
+                  })}
+                </dd>
               </div>
             )}
 

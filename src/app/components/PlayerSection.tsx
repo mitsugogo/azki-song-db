@@ -12,6 +12,7 @@ import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
 import MobileActionButtons from "./MobileActionButtons";
+import { renderLinkedText } from "../lib/textLinkify";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -268,11 +269,9 @@ export default function PlayerSection({
                       },
                     }}
                     className="truncate w-full absolute top-0 left-0"
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        timedLiveCallText?.replace(/\\r\\n|\\n/g, "<br>") ?? "",
-                    }}
-                  ></motion.p>
+                  >
+                    {renderLinkedText(timedLiveCallText ?? "")}
+                  </motion.p>
                 )}
               </AnimatePresence>
             </div>
