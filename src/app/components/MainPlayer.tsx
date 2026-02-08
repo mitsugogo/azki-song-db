@@ -65,6 +65,9 @@ export default function MainPlayer() {
     playerKey,
     hideFutureSongs,
     videoId,
+    videoTitle,
+    videoData,
+    videoInfo,
     startTime,
     timedLiveCallText,
     setHideFutureSongs,
@@ -385,6 +388,9 @@ export default function MainPlayer() {
         searchTerm={searchTerm}
         videoId={videoId}
         startTime={startTime}
+        videoTitle={videoTitle}
+        videoData={videoData}
+        videoInfo={videoInfo}
         timedLiveCallText={timedLiveCallText ?? ""}
         setSongs={setSongs}
         searchSongs={searchSongs}

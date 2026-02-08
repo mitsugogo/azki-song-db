@@ -12,7 +12,7 @@ export type LinkifyTextOptions = {
 };
 
 const combinedRegex =
-  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})/g;
+  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-]+)/g;
 
 export const renderLinkedText = (
   text: string,
@@ -47,7 +47,6 @@ export const renderLinkedText = (
             key={`url-${lineIndex}-${matchIndex}`}
             href={url}
             target="_blank"
-            rel="noopener noreferrer"
             className={linkClassName}
           >
             {url}
@@ -68,6 +67,19 @@ export const renderLinkedText = (
         );
       } else if (match[2]) {
         nodes.push(match[2]);
+      } else if (match[3]) {
+        const handle = match[3]; // includes leading @
+        const url = `https://www.youtube.com/${handle}`;
+        nodes.push(
+          <a
+            key={`handle-${lineIndex}-${matchIndex}`}
+            href={url}
+            target="_blank"
+            className={linkClassName}
+          >
+            {handle}
+          </a>,
+        );
       }
 
       lastIndex = matchIndex + match[0].length;
