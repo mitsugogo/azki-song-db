@@ -591,7 +591,7 @@ const NowPlayingSongInfoDetail = ({
                               <span
                                 className={`${
                                   isHide
-                                    ? "h-4.5 bg-gray-300 rounded-lg dark:bg-gray-700"
+                                    ? "h-4 bg-gray-300 rounded-sm dark:bg-gray-700"
                                     : ""
                                 }`}
                               >
