@@ -45,11 +45,23 @@ const NowPlayingSongInfoDetail = ({
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
   const [isTimestampExpand, setIsTimestampExpand] = useState(false);
+  const [isSangFrameExpand, setIsSangFrameExpand] = useState(false);
 
   // タイムスタンプ
   const videoTimestamps = allSongs
     .filter((song) => song.video_id === currentSong?.video_id)
     .sort((a, b) => (parseInt(a.start) || 0) - (parseInt(b.start) || 0));
+
+  const sameTitleSongs = allSongs
+    .filter((song) => song.title === currentSong?.title)
+    .sort(
+      (a, b) =>
+        new Date(b.broadcast_at).getTime() - new Date(a.broadcast_at).getTime(),
+    );
+  const hasMoreSangFrames = sameTitleSongs.length > 3;
+  const visibleSangFrames = isSangFrameExpand
+    ? sameTitleSongs
+    : sameTitleSongs.slice(0, 3);
 
   function timeToSeconds(timeString: string): number {
     const parts = timeString.split(":");
@@ -793,17 +805,20 @@ const NowPlayingSongInfoDetail = ({
                 </span>
               </dt>
               <dd className="flex flex-col gap-1">
-                {allSongs
-                  .filter((song) => song.title === currentSong.title)
-                  .sort(
-                    (a, b) =>
-                      new Date(b.broadcast_at).getTime() -
-                      new Date(a.broadcast_at).getTime(),
-                  )
-                  .map((song, index) => (
-                    <div key={index}>
-                      &nbsp;
-                      <span className="text-xs">
+                {visibleSangFrames.map((song, index) => {
+                  const isCurrentSangFrame =
+                    song.video_id === currentSong.video_id &&
+                    song.start === currentSong.start;
+
+                  return (
+                    <div key={`${song.video_id}-${song.start}-${index}`}>
+                      <span
+                        className={`text-xs inline-flex flex-wrap items-center gap-1 rounded px-1 py-0.5 border ${
+                          isCurrentSangFrame
+                            ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60"
+                            : "border-transparent"
+                        }`}
+                      >
                         {new Date(song.broadcast_at).toLocaleDateString(
                           "ja-JP",
                           {
@@ -839,7 +854,18 @@ const NowPlayingSongInfoDetail = ({
                         </Badge>
                       </span>
                     </div>
-                  ))}
+                  );
+                })}
+                {!isSangFrameExpand && hasMoreSangFrames && (
+                  <button
+                    type="button"
+                    className="w-full text-center bg-gray-50/50 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
+                    onClick={() => setIsSangFrameExpand(true)}
+                  >
+                    クリックして展開&nbsp;
+                    <HiChevronDown className="inline" />
+                  </button>
+                )}
               </dd>
             </div>
           </dl>
@@ -850,4 +876,3 @@ const NowPlayingSongInfoDetail = ({
 };
 
 export default NowPlayingSongInfoDetail;
-// hh:mm:ss 形式のタイムスタンプを data-t 属性付きのリンクに置換
