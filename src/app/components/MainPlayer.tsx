@@ -39,6 +39,7 @@ export default function MainPlayer() {
   // グローバルプレイヤー
   const globalPlayer = useGlobalPlayer();
   const pathname = usePathname();
+  const sharedPlayerRef = useRef<any>(null);
 
   // --- Hooks ---
   const {
@@ -74,7 +75,6 @@ export default function MainPlayer() {
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs, globalPlayer);
 
-  // プレイヤーライフサイクル管理
   const {
     playerRef,
     isPlayerReady,
@@ -92,6 +92,7 @@ export default function MainPlayer() {
     globalPlayer,
     currentSong,
     isPlaying,
+    playerRef: sharedPlayerRef,
   });
 
   // プレイヤーボリューム（ローカル状態はフックで管理）
@@ -99,7 +100,10 @@ export default function MainPlayer() {
     playerVolume,
     setPlayerVolume,
     changeVolume: changePlayerVolume,
-  } = usePlayerVolume(playerRef, isPlayerReady);
+    isMuted: persistedIsMuted,
+    setMuted: setPersistedMuted,
+  } = usePlayerVolume(sharedPlayerRef, isPlayerReady);
+
   const previousPathnameRef = useRef(pathname);
 
   const seekTo = useCallback(
@@ -354,17 +358,14 @@ export default function MainPlayer() {
     seekTo: seekToAbsolute,
     setVolume: changeVolume,
     mute: () => {
-      if (playerRef.current && typeof playerRef.current.mute === "function") {
-        playerRef.current.mute();
-      }
+      setPersistedMuted?.(true);
     },
     unMute: () => {
-      if (playerRef.current && typeof playerRef.current.unMute === "function") {
-        playerRef.current.unMute();
-      }
+      setPersistedMuted?.(false);
     },
     currentTime: playerCurrentTime,
     volume: playerVolume,
+    isMuted: persistedIsMuted,
     duration: playerDuration,
   };
 

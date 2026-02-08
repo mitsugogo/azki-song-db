@@ -74,4 +74,60 @@ describe("usePlayerVolume", () => {
 
     expect(playerInstance.setVolume).toHaveBeenCalledWith(55);
   });
+
+  it("ミュート状態を永続化して新しいプレイヤーに適用できる", () => {
+    localStorage.setItem("player-volume", "20");
+    localStorage.setItem("player-muted", "true");
+
+    const playerRef = {
+      current: {
+        setVolume: vi.fn(),
+        mute: vi.fn(),
+        unMute: vi.fn(),
+      },
+    };
+
+    const { result } = renderHook(() => usePlayerVolume(playerRef, true));
+
+    act(() => {
+      // applyPersistedVolume は副作用でも走るが明示的にも呼ぶ
+      result.current.applyPersistedVolume(playerRef.current);
+    });
+
+    expect(playerRef.current.setVolume).toHaveBeenCalledWith(20);
+    expect(playerRef.current.mute).toHaveBeenCalled();
+    expect(result.current.isMuted).toBe(true);
+    expect(localStorage.getItem("player-muted")).toBe("true");
+  });
+
+  it("changeVolumeで音量を上げるとミュート解除される", () => {
+    // persist initial muted state
+    localStorage.setItem("player-muted", "true");
+
+    const playerRef = {
+      current: {
+        setVolume: vi.fn(),
+        mute: vi.fn(),
+        unMute: vi.fn(),
+      },
+    };
+
+    const { result } = renderHook(() => usePlayerVolume(playerRef, true));
+
+    // ensure initial state was applied
+    act(() => {
+      result.current.applyPersistedVolume(playerRef.current);
+    });
+
+    expect(result.current.isMuted).toBe(true);
+
+    act(() => {
+      result.current.changeVolume(30);
+    });
+
+    expect(playerRef.current.setVolume).toHaveBeenCalledWith(30);
+    expect(playerRef.current.unMute).toHaveBeenCalled();
+    expect(result.current.playerVolume).toBe(30);
+    expect(localStorage.getItem("player-muted")).toBe("false");
+  });
 });

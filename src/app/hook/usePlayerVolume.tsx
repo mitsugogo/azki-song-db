@@ -13,6 +13,10 @@ export default function usePlayerVolume(
     key: "player-volume",
     defaultValue: 100,
   });
+  const [isMuted, setIsMuted] = useLocalStorage<boolean>({
+    key: "player-muted",
+    defaultValue: false,
+  });
 
   const changeVolume = useCallback(
     (volume: number) => {
@@ -24,11 +28,20 @@ export default function usePlayerVolume(
           playerRef.current.setVolume(clampedVolume);
         }
         setPlayerVolume(clampedVolume);
+        // if volume is increased from 0, clear muted flag
+        if (clampedVolume > 0 && isMuted) {
+          try {
+            if (typeof playerRef.current.unMute === "function") {
+              playerRef.current.unMute();
+            }
+          } catch (_) {}
+          setIsMuted(false);
+        }
       } catch (error) {
         // ignore errors from player not being fully ready
       }
     },
-    [isPlayerReady, playerRef, setPlayerVolume],
+    [isPlayerReady, playerRef, setPlayerVolume, isMuted, setIsMuted],
   );
 
   const applyPersistedVolume = useCallback(
@@ -58,14 +71,49 @@ export default function usePlayerVolume(
           : 100;
       }
 
+      // apply muted state if persisted
+      let muted = false;
+      try {
+        const rawMuted = localStorage.getItem("player-muted");
+        if (rawMuted !== null) {
+          try {
+            const parsedMuted = JSON.parse(rawMuted);
+            if (typeof parsedMuted === "boolean") {
+              muted = parsedMuted;
+            } else if (rawMuted === "true") {
+              muted = true;
+            }
+          } catch (_) {
+            if (rawMuted === "true") muted = true;
+          }
+        }
+      } catch (_) {
+        muted = Boolean(isMuted);
+      }
+
       try {
         playerInstance.setVolume(vol);
         setPlayerVolume(vol);
+        if (muted) {
+          try {
+            if (typeof playerInstance.mute === "function") {
+              playerInstance.mute();
+            }
+            setIsMuted(true);
+          } catch (_) {}
+        } else {
+          try {
+            if (typeof playerInstance.unMute === "function") {
+              playerInstance.unMute();
+            }
+            setIsMuted(false);
+          } catch (_) {}
+        }
       } catch (_) {
         // ignore
       }
     },
-    [playerVolume, setPlayerVolume],
+    [playerVolume, setPlayerVolume, isMuted, setIsMuted],
   );
 
   useEffect(() => {
@@ -78,7 +126,34 @@ export default function usePlayerVolume(
     }
   }, [isPlayerReady, playerRef, applyPersistedVolume]);
 
-  return { playerVolume, setPlayerVolume, changeVolume, applyPersistedVolume };
+  const setMuted = useCallback(
+    (muted: boolean) => {
+      try {
+        if (playerRef && playerRef.current) {
+          if (muted) {
+            if (typeof playerRef.current.mute === "function") {
+              playerRef.current.mute();
+            }
+          } else {
+            if (typeof playerRef.current.unMute === "function") {
+              playerRef.current.unMute();
+            }
+          }
+        }
+      } catch (_) {}
+      setIsMuted(muted);
+    },
+    [playerRef, setIsMuted],
+  );
+
+  return {
+    playerVolume,
+    setPlayerVolume,
+    changeVolume,
+    applyPersistedVolume,
+    isMuted,
+    setMuted,
+  };
 }
 
 export function applyPersistedVolumeToPlayer(playerInstance: any) {
@@ -105,6 +180,25 @@ export function applyPersistedVolumeToPlayer(playerInstance: any) {
 
   try {
     playerInstance.setVolume(vol);
+    // apply persisted mute flag
+    try {
+      const rawMuted = localStorage.getItem("player-muted");
+      let muted = false;
+      if (rawMuted !== null) {
+        try {
+          const parsedMuted = JSON.parse(rawMuted);
+          if (typeof parsedMuted === "boolean") muted = parsedMuted;
+          else if (rawMuted === "true") muted = true;
+        } catch (_) {
+          if (rawMuted === "true") muted = true;
+        }
+      }
+      if (muted && typeof playerInstance.mute === "function") {
+        playerInstance.mute();
+      } else if (!muted && typeof playerInstance.unMute === "function") {
+        playerInstance.unMute();
+      }
+    } catch (_) {}
   } catch (_) {
     // ignore
   }

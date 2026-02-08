@@ -30,6 +30,7 @@ type PlayerControls = {
   currentTime: number;
   volume: number;
   duration: number;
+  isMuted?: boolean;
 };
 
 type UseControlBarOptions = {
@@ -334,6 +335,26 @@ export default function useControlBar({
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
+
+  // Sync local muted state from playerControls (or fallback to volume===0)
+  useEffect(() => {
+    if (!playerControls) return;
+    if (typeof playerControls.isReady !== "undefined") {
+      // Prefer explicit isMuted flag if provided
+      if (typeof playerControls.isMuted === "boolean") {
+        setIsMuted(playerControls.isMuted);
+        return;
+      }
+      // fallback: consider volume 0 as muted
+      const vol =
+        typeof playerControls.volume === "number" ? playerControls.volume : 100;
+      setIsMuted(vol === 0);
+    }
+  }, [
+    playerControls?.isReady,
+    playerControls?.isMuted,
+    playerControls?.volume,
+  ]);
 
   // Debounced volume適用
   useEffect(() => {
