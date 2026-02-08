@@ -143,125 +143,130 @@ const NowPlayingSongInfoDetail = ({
               </div>
             )}
 
-            {currentSong.lyricist && (
+            {(currentSong.lyricist ||
+              currentSong.composer ||
+              currentSong.arranger) && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaUser className="text-base" />
-                    <span className="ml-1">作詞:</span>
+                    <span className="ml-1">作詞/作曲/編曲:</span>
                   </span>
                 </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.lyricist.split("、").map((lyricist, index) => {
-                    const existsSameLyricist = searchTerm.includes(
-                      `lyricist:${lyricist}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        onClick={() => {
-                          if (existsSameLyricist) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`lyricist:${lyricist}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}lyricist:${lyricist}`,
-                            );
-                          }
-                        }}
-                        color={`${existsSameLyricist ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                      >
-                        {lyricist}
-                      </Badge>
-                    );
-                  })}
-                </dd>
-              </div>
-            )}
+                <dd className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-3">
+                  {currentSong.lyricist && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        作詞
+                      </span>
+                      {currentSong.lyricist
+                        .split("、")
+                        .map((lyricist, index) => {
+                          const existsSameLyricist = searchTerm.includes(
+                            `lyricist:${lyricist}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              onClick={() => {
+                                if (existsSameLyricist) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`lyricist:${lyricist}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}lyricist:${lyricist}`,
+                                  );
+                                }
+                              }}
+                              color={`${existsSameLyricist ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                            >
+                              {lyricist}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
 
-            {currentSong.composer && (
-              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
-                  <span className="inline-flex items-center">
-                    <FaUser className="text-base" />
-                    <span className="ml-1">作曲:</span>
-                  </span>
-                </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.composer.split("、").map((composer, index) => {
-                    const existsSameComposer = searchTerm.includes(
-                      `composer:${composer}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        color={`${existsSameComposer ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          if (existsSameComposer) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`composer:${composer}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}composer:${composer}`,
-                            );
-                          }
-                        }}
-                      >
-                        {composer}
-                      </Badge>
-                    );
-                  })}
-                </dd>
-              </div>
-            )}
+                  {currentSong.composer && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        作曲
+                      </span>
+                      {currentSong.composer
+                        .split("、")
+                        .map((composer, index) => {
+                          const existsSameComposer = searchTerm.includes(
+                            `composer:${composer}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              color={`${existsSameComposer ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                if (existsSameComposer) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`composer:${composer}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}composer:${composer}`,
+                                  );
+                                }
+                              }}
+                            >
+                              {composer}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
 
-            {currentSong.arranger && (
-              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
-                  <span className="inline-flex items-center">
-                    <FaUser className="text-base" />
-                    <span className="ml-1">編曲:</span>
-                  </span>
-                </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.arranger.split("、").map((arranger, index) => {
-                    const existsSameArranger = searchTerm.includes(
-                      `arranger:${arranger}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        color={`${existsSameArranger ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          if (existsSameArranger) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`arranger:${arranger}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}arranger:${arranger}`,
-                            );
-                          }
-                        }}
-                      >
-                        {arranger}
-                      </Badge>
-                    );
-                  })}
+                  {currentSong.arranger && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        編曲
+                      </span>
+                      {currentSong.arranger
+                        .split("、")
+                        .map((arranger, index) => {
+                          const existsSameArranger = searchTerm.includes(
+                            `arranger:${arranger}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              color={`${existsSameArranger ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                if (existsSameArranger) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`arranger:${arranger}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}arranger:${arranger}`,
+                                  );
+                                }
+                              }}
+                            >
+                              {arranger}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
                 </dd>
               </div>
             )}
