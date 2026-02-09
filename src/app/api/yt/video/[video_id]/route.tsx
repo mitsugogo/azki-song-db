@@ -63,7 +63,7 @@ export const extractCollaborationHandles = (description?: string | null) => {
   const sectionStartPattern =
     /^[-*・◆◇■●]?\s*(ライブゲスト|ゲスト|出演|参加|共演|コラボ|with|guest)\s*[:：]?\s*$/i;
   const ignoreLinePattern =
-    /(mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|illustrated|animation|director|modeling|edited|edited by|directed|production|assist|assistant|assisted|master|mastered|pre-?mix|illustrator|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影)/i;
+    /(mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|illustrated|illust|animation|director|movie|video|modeling|edited|edited by|directed|production|assist|assistant|assisted|master|mastered|pre-?mix|illustrator|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影)/i;
 
   const sectionIndex = targetLines.findIndex((line) =>
     sectionStartPattern.test(normalizeLine(line)),
