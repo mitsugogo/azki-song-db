@@ -3,7 +3,7 @@ import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
-import { YouTubeApiVideoResult } from "../types/api/yt/video";
+import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
@@ -33,9 +33,6 @@ const usePlayerControls = (
   const [videoId, setVideoId] = useState("");
   const [videoTitle, setVideoTitle] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<YouTubeVideoData | null>(null);
-  const [videoInfo, setVideoInfo] = useState<YouTubeApiVideoResult | null>(
-    null,
-  );
   const videoTitleRef = useRef<string | null>(null);
   const videoDataRef = useRef<YouTubeVideoData | null>(null);
   const [startTime, setStartTime] = useState(0);
@@ -540,32 +537,7 @@ const usePlayerControls = (
     ],
   );
 
-  const getVideoInfo = useCallback(
-    (retryCount = 0) => {
-      fetch(`/api/yt/video/${videoId}`)
-        .then((response) => response.json())
-        .then((data: YouTubeApiVideoResult) => {
-          setVideoInfo(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching video info:", error);
-          // 1回だけリトライ
-          if (retryCount >= 1) return;
-          setTimeout(() => {
-            getVideoInfo(retryCount + 1);
-          }, 300);
-        });
-    },
-    [videoId],
-  );
-
-  useEffect(() => {
-    // videoIdが変更されたら、情報を取得
-    setVideoInfo(null); // 初期化してSkeletonを表示
-    if (videoId) {
-      getVideoInfo();
-    }
-  }, [videoId, getVideoInfo]);
+  const { videoInfo } = useYoutubeVideoInfo(videoId);
 
   const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
     const player = event.target;
