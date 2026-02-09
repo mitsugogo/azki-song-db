@@ -70,8 +70,7 @@
     "react-youtube": "^10.1.0",
     "recharts": "^3.6.0",
     "styled-components": "^6.3.8",
-    "use-haptic": "^1.1.13",
-    "youtubei": "^1.8.4"
+    "use-haptic": "^1.1.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

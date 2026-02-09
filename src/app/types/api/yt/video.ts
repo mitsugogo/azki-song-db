@@ -9,6 +9,7 @@ export interface ChannelSummary {
   id: string | null;
   name: string | null;
   subscriberCount?: string | null;
+  artistname?: string | null;
   thumbnails?: Thumbnail[] | null;
 }
 

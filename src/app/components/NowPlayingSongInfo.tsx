@@ -186,6 +186,17 @@ const NowPlayingSongInfo = ({
   const channels =
     videoInfo?.channels || (videoInfo?.channel ? [videoInfo.channel] : []);
   const loading = !videoInfo;
+  const [showAllChannels, setShowAllChannels] = useState(false);
+  // 重複するチャンネルが入るケースがあるため、`id` で重複排除する
+  const dedupedChannels = (() => {
+    const arr = channels ?? [];
+    const map = new Map<string, (typeof arr)[number]>();
+    arr.forEach((c, i) => {
+      const key = (c as any)?.id ?? `__${i}`;
+      if (!map.has(key)) map.set(key, c);
+    });
+    return Array.from(map.values());
+  })();
 
   return (
     <>
@@ -225,41 +236,69 @@ const NowPlayingSongInfo = ({
                             </div>
                           </div>
                         ))
-                      : channels?.slice(0, 8).map((ch) => (
-                          <Link
-                            key={ch.id}
-                            href={`https://www.youtube.com/channel/${ch.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 min-w-0 rounded-md px-2 py-1 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-[calc(50%-0.375rem)] sm:basis-[220px]"
-                            title={`${ch.name ?? ""}`}
-                          >
-                            <Avatar
-                              src={
-                                ch.thumbnails?.sort(
-                                  (a, b) => (b?.width ?? 0) - (a?.width ?? 0),
-                                )[0]?.url
-                              }
-                              alt={ch.name ?? "Channel Avatar"}
-                              radius="xl"
-                              size={36}
-                            />
-                            <div className="flex flex-col leading-tight min-w-0">
-                              <span className="text-sm text-foreground dark:text-white font-medium line-clamp-1">
-                                {ch.name ?? ""}
-                              </span>
-                              {ch.subscriberCount !== null && (
-                                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                  チャンネル登録者{" "}
-                                  {formatSubscribersJP(
-                                    parseSubscriberCount(ch.subscriberCount),
-                                    ch.subscriberCount,
-                                  )}
-                                </span>
+                      : (() => {
+                          const maxShow = showAllChannels
+                            ? dedupedChannels.length
+                            : 3;
+                          const shown =
+                            dedupedChannels?.slice(0, maxShow) ?? [];
+                          const remaining =
+                            (dedupedChannels?.length ?? 0) - shown.length;
+                          return (
+                            <>
+                              {shown.map((ch) => (
+                                <Link
+                                  key={ch.id}
+                                  href={`https://www.youtube.com/channel/${ch.id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 min-w-0 rounded-md px-2 py-1 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-[calc(50%-0.375rem)] sm:basis-[220px]"
+                                  title={`${ch.name ?? ""}`}
+                                >
+                                  <Avatar
+                                    src={
+                                      ch.thumbnails?.sort(
+                                        (a, b) =>
+                                          (b?.width ?? 0) - (a?.width ?? 0),
+                                      )[0]?.url
+                                    }
+                                    alt={ch.name ?? "Channel Avatar"}
+                                    radius="xl"
+                                    size={36}
+                                  />
+                                  <div className="flex flex-col leading-tight min-w-0">
+                                    <span className="text-sm text-foreground dark:text-white font-medium line-clamp-1">
+                                      {ch.name ?? ""}
+                                    </span>
+                                    {ch.subscriberCount !== null && (
+                                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                        チャンネル登録者{" "}
+                                        {formatSubscribersJP(
+                                          parseSubscriberCount(
+                                            ch.subscriberCount,
+                                          ),
+                                          ch.subscriberCount,
+                                        )}
+                                      </span>
+                                    )}
+                                  </div>
+                                </Link>
+                              ))}
+
+                              {remaining > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAllChannels((v) => !v)}
+                                  className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-primary-600 hover:bg-gray-50/30 dark:hover:bg-gray-800/60"
+                                >
+                                  {showAllChannels
+                                    ? `折りたたむ`
+                                    : `他 ${remaining} チャンネル`}
+                                </button>
                               )}
-                            </div>
-                          </Link>
-                        ))}
+                            </>
+                          );
+                        })()}
                   </div>
                 </div>
 
@@ -283,7 +322,7 @@ const NowPlayingSongInfo = ({
                         {videoInfo.viewCount != null && (
                           <div className="text-xs text-muted-foreground flex items-center whitespace-nowrap">
                             <FaPlay className="inline mr-1" />
-                            {videoInfo.viewCount}
+                            {videoInfo.viewCount.toLocaleString()}
                           </div>
                         )}
 

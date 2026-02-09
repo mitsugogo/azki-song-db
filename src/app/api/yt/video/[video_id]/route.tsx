@@ -1,26 +1,158 @@
-import { Client } from "youtubei";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 import { YouTubeApiVideoResult } from "@/app/types/api/yt/video";
 
-const youtube = new Client({
-  // 日本語ロケールを明示
-  youtubeClientOptions: {
-    hl: "ja",
-    gl: "JP",
-  },
-  fetchOptions: {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36",
-      "Accept-Language": "ja-JP,ja;q=0.8,en-US;q=0.5,en;q=0.3",
-    },
-  },
-});
-
 type FetchVideoOutcome = {
   result: YouTubeApiVideoResult | null;
   notFound: boolean;
+};
+
+// キャッシュ付きで Google スプレッドシートの `channels` シートを読み込み、
+// チャンネルID(UC...) と ハンドル(@...) で検索できるマップを返す
+type ChannelRegistryEntry = {
+  youtubeId?: string | null;
+  handle?: string | null;
+  name?: string | null;
+  artistname?: string | null;
+  subscriberCount?: string | null;
+  iconUrl?: string | null;
+};
+
+let _channelsRegistryPromise: Promise<{
+  byId: Map<string, ChannelRegistryEntry>;
+  byHandle: Map<string, ChannelRegistryEntry>;
+}> | null = null;
+
+const loadChannelsRegistry = async () => {
+  if (_channelsRegistryPromise) return _channelsRegistryPromise;
+
+  _channelsRegistryPromise = (async () => {
+    const res = {
+      byId: new Map<string, ChannelRegistryEntry>(),
+      byHandle: new Map<string, ChannelRegistryEntry>(),
+    };
+
+    try {
+      // スプレッドシートからチャンネル情報を取得
+      const sheets = google.sheets({
+        version: "v4",
+        auth: process.env.GOOGLE_API_KEY,
+      });
+      const spreadsheetId = process.env.SPREADSHEET_ID;
+      if (!spreadsheetId) return res;
+
+      const response = await sheets.spreadsheets.get({
+        spreadsheetId,
+        ranges: ["channels!A:Z"],
+        includeGridData: true,
+        fields: "sheets.data.rowData.values(userEnteredValue,formattedValue)",
+      });
+
+      const sheet = response.data.sheets?.[0];
+      const rows = sheet?.data?.[0]?.rowData || [];
+      if (!rows || rows.length < 2) return res;
+
+      const headerValues = rows[0].values || [];
+      const headers: string[] = headerValues.map((v: any) => {
+        return (
+          v?.userEnteredValue?.stringValue ||
+          v?.formattedValue ||
+          ""
+        ).toString();
+      });
+
+      const findHeaderIndex = (pred: (h: string) => boolean) =>
+        headers.findIndex((h) => pred(h.toString().trim().toLowerCase()));
+
+      const idxYoutubeId = findHeaderIndex(
+        (h) =>
+          (h.includes("youtube") && h.includes("id")) ||
+          h.includes("youtubeid") ||
+          h.includes("youtube id"),
+      );
+      const idxArtist = findHeaderIndex(
+        (h) =>
+          h.includes("アーティスト") ||
+          h.includes("artist") ||
+          h.includes("アーティスト名"),
+      );
+      const idxHandle = findHeaderIndex(
+        (h) =>
+          h.includes("ハンドル") ||
+          h.includes("handle") ||
+          h.includes("ハンド"),
+      );
+      const idxName = findHeaderIndex(
+        (h) =>
+          h.includes("チャンネル名") ||
+          h.includes("channel") ||
+          h.includes("name"),
+      );
+      const idxSubscribers = findHeaderIndex(
+        (h) =>
+          h.includes("登録") ||
+          h.includes("subscriber") ||
+          h.includes("登録者"),
+      );
+      const idxIcon = findHeaderIndex(
+        (h) =>
+          h.includes("アイコン") ||
+          h.includes("icon") ||
+          h.includes("thumbnail"),
+      );
+
+      const getCell = (row: any[], idx: number) => {
+        if (!row || idx < 0) return "";
+        const v = row[idx];
+        return (
+          v?.userEnteredValue?.stringValue ??
+          v?.formattedValue ??
+          ""
+        ).toString();
+      };
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i].values || [];
+        const youtubeId =
+          idxYoutubeId >= 0 ? getCell(row, idxYoutubeId).trim() : "";
+        const artist = idxArtist >= 0 ? getCell(row, idxArtist).trim() : "";
+        const handleRaw = idxHandle >= 0 ? getCell(row, idxHandle).trim() : "";
+        const name = idxName >= 0 ? getCell(row, idxName).trim() : "";
+        const subs =
+          idxSubscribers >= 0 ? getCell(row, idxSubscribers).trim() : "";
+        const icon = idxIcon >= 0 ? getCell(row, idxIcon).trim() : "";
+
+        const entry: ChannelRegistryEntry = {
+          youtubeId: youtubeId || null,
+          handle: handleRaw || null,
+          name: name || null,
+          artistname: artist || null,
+          subscriberCount: subs || null,
+          iconUrl: icon || null,
+        };
+
+        if (entry.youtubeId) {
+          res.byId.set(entry.youtubeId, entry);
+        }
+        if (entry.handle) {
+          const normalized = entry.handle.startsWith("@")
+            ? entry.handle
+            : `@${entry.handle}`;
+          res.byHandle.set(normalized, entry);
+          res.byHandle.set(entry.handle.replace(/^@/, ""), entry);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load channels registry from spreadsheet:",
+        error,
+      );
+    }
+
+    return res;
+  })();
+
+  return _channelsRegistryPromise;
 };
 
 const parseIsoDurationToSeconds = (duration: string | null | undefined) => {
@@ -55,15 +187,17 @@ export const extractCollaborationHandles = (description?: string | null) => {
   const handlePattern = /[@＠][0-9A-Za-z._-]{2,30}/;
   const handlePatternGlobal = /[@＠][0-9A-Za-z._-]{2,30}/g;
   const stopIndex = lines.findIndex((line) =>
-    /(^[-_]{3,}$|\[?credits?\]?|クレジット|スタッフ)/i.test(
+    /(\[?credits?\]?|クレジット|スタッフ|お借りしている音源)/i.test(
       normalizeLine(line),
     ),
   );
   const targetLines = stopIndex >= 0 ? lines.slice(0, stopIndex) : lines;
   const sectionStartPattern =
     /^[-*・◆◇■●]?\s*(ライブゲスト|ゲスト|出演|参加|共演|コラボ|with|guest)\s*[:：]?\s*$/i;
+  // ソーシャルメディア表記（Twitter/X, Instagram, SNS 等）、クレジット語、
+  // そして配信スケジュール等の短い単独メンションを示す語を除外する
   const ignoreLinePattern =
-    /(mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|illustrated|illust|animation|director|movie|video|modeling|edited|edited by|directed|production|assist|assistant|assisted|master|mastered|pre-?mix|illustrator|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影)/i;
+    /(twitter|ツイッター|\bx\b|instagram|インスタ|sns|次は|宅から|mix|inst|vocal|lyrics|lyric|arrange|composer|illustration|illustrated|illust|animation|director|movie|video|modeling|edited|edited by|directed|production|assist|assistant|assisted|master|mastered|pre-?mix|illustrator|design|costume|constume|衣装|作曲|編曲|作詞|ミックス|インスト|イラスト|アニメ|監督|原画|動画|撮影|編集|歌唱|歌[:：])/i;
 
   const sectionIndex = targetLines.findIndex((line) =>
     sectionStartPattern.test(normalizeLine(line)),
@@ -71,9 +205,30 @@ export const extractCollaborationHandles = (description?: string | null) => {
   const candidateLines =
     sectionIndex >= 0 ? targetLines.slice(sectionIndex + 1) : targetLines;
 
-  const firstHandleIndex = candidateLines.findIndex((line) =>
-    handlePattern.test(normalizeLine(line)),
-  );
+  const inListSection = sectionIndex >= 0;
+
+  const firstHandleIndex = candidateLines.findIndex((line, idx) => {
+    const nl = normalizeLine(line);
+    if (!handlePattern.test(nl)) return false;
+    // セクションヘッダ（ライブゲスト等）の末尾に続く行なら、
+    // 単独のハンドル記載でもコラボ参加とみなす
+    if (inListSection) return true;
+    // 行内に参加を示す語がある場合は有効
+    const participationRegex =
+      /\b(Vocal|song|song:|出演|ゲスト|guest|with|feat|feat\.|collab|コラボ)\b|歌|・|／|,/i;
+    if (participationRegex.test(nl)) return true;
+    // 同一行に複数のハンドルが含まれる場合は参加表記とみなす
+    if ((nl.match(handlePatternGlobal) || []).length > 1) return true;
+    // 前後の文脈を参照して参加語があればコラボとみなす
+    const windowStart = Math.max(0, idx - 2);
+    const windowEnd = Math.min(candidateLines.length, idx + 3);
+    const context = candidateLines
+      .slice(windowStart, windowEnd)
+      .map((l) => normalizeLine(l))
+      .join(" ");
+    if (participationRegex.test(context)) return true;
+    return false; // 単独メンションはコラボとして扱わない
+  });
 
   // ハンドルが見つからない場合、candidateLines 内の YouTube チャンネル URL を探す
   if (firstHandleIndex < 0) {
@@ -101,7 +256,7 @@ export const extractCollaborationHandles = (description?: string | null) => {
   if (firstHandleIndex >= 0) {
     for (const rawLine of candidateLines.slice(firstHandleIndex)) {
       const line = normalizeLine(rawLine);
-      if (!line) break;
+      if (!line) continue;
       // URL 行でも @ ハンドルや /channel/ID を含む場合は処理を継続する
       if (/https?:\/\//i.test(line) && !/@|channel\//i.test(line)) break;
       if (ignoreLinePattern.test(line)) continue;
@@ -135,10 +290,15 @@ export const extractCollaborationHandles = (description?: string | null) => {
   const fallbackHandles: string[] = [];
   const localHandleRegex = /[@＠][0-9A-Za-z._-]{2,30}/g;
   let hm: RegExpExecArray | null = null;
+  const creditHeaderRegex =
+    /(^[-_]{3,}$|\[?credits?\]?|クレジット|スタッフ|お借りしている音源)/i;
+  const creditMatch = creditHeaderRegex.exec(description);
+  const creditIndex = creditMatch ? creditMatch.index : -1;
   while ((hm = localHandleRegex.exec(description)) !== null) {
     const idx = hm.index;
     const inUrl = urlRanges.some(([s, e]) => idx >= s && idx < e);
     if (inUrl) continue;
+    if (creditIndex >= 0 && idx > creditIndex) continue;
     // フォールバックでも、該当ハンドルがクレジット系の行に含まれている場合は除外する
     const lineStart = Math.max(0, description.lastIndexOf("\n", idx) + 1);
     const lineEnd = description.indexOf("\n", idx);
@@ -171,71 +331,6 @@ const fetchChannelByHandle = async (
   }
 };
 
-const mapYoutubeiResult = (v: any, videoId: string): YouTubeApiVideoResult => {
-  const safeThumbnails = Array.isArray(v.thumbnails)
-    ? v.thumbnails.map((t: any) => ({
-        url: t.url ?? null,
-        width: t.width ?? null,
-        height: t.height ?? null,
-      }))
-    : null;
-
-  const safeChannel = v.channel
-    ? {
-        id: v.channel.id ?? null, // channel id
-        name: v.channel.name ?? null,
-        subscriberCount: v.channel.subscriberCount ?? null,
-        thumbnails: Array.isArray(v.channel.thumbnails)
-          ? v.channel.thumbnails.map((t: any) => ({
-              url: t.url ?? null,
-              width: t.width ?? null,
-              height: t.height ?? null,
-            }))
-          : null,
-      }
-    : null;
-
-  const safeChannels = Array.isArray(v.channels)
-    ? v.channels.map((ch: any) => ({
-        id: ch.id ?? null,
-        name: ch.name ?? null,
-        subscriberCount: ch.subscriberCount ?? null,
-        thumbnails: Array.isArray(ch.thumbnails)
-          ? ch.thumbnails.map((t: any) => ({
-              url: t.url ?? null,
-              width: t.width ?? null,
-              height: t.height ?? null,
-            }))
-          : null,
-      }))
-    : null;
-
-  return {
-    id: v.id ?? v.videoId ?? videoId,
-    title: v.title ?? null,
-    uploadDate: v.uploadDate ?? v.published ?? null,
-    viewCount: v.viewCount ?? v.views ?? null,
-    isLiveContent: v.isLiveContent ?? v.isLive ?? false,
-    thumbnails: safeThumbnails,
-    channel: safeChannel,
-    channels: safeChannels,
-    likeCount: v.likeCount ?? null,
-    tags: Array.isArray(v.tags) ? v.tags : [],
-    description: v.description ?? null,
-    duration: v.duration ?? v.lengthSeconds ?? null,
-    chapters: Array.isArray(v.chapters) ? v.chapters : [],
-    music: v.music
-      ? {
-          imageUrl: v.music.imageUrl ?? v.music.image ?? null,
-          title: v.music.title ?? null,
-          artist: v.music.artist ?? null,
-          album: v.music.album ?? null,
-        }
-      : null,
-    lastFetchedAt: new Date().toISOString(),
-  };
-};
-
 const mapYouTubeDataApiResult = (
   item: any,
   videoId: string,
@@ -248,6 +343,7 @@ const mapYouTubeDataApiResult = (
   collaborationChannels: Array<{
     id: string | null;
     name: string | null;
+    artistname: string | null;
     subscriberCount: string | null;
     thumbnails: Array<{
       url: string | null;
@@ -255,6 +351,7 @@ const mapYouTubeDataApiResult = (
       height: number | null;
     }> | null;
   }>,
+  primaryArtistName: string | null = null,
 ): YouTubeApiVideoResult => {
   const thumbnails = item?.snippet?.thumbnails
     ? Object.values(item.snippet.thumbnails).map((t: any) => ({
@@ -268,6 +365,7 @@ const mapYouTubeDataApiResult = (
     ? {
         id: item.snippet.channelId ?? null,
         name: item.snippet.channelTitle ?? null,
+        artistname: primaryArtistName ?? null,
         subscriberCount: channelSubscriberCount,
         thumbnails: channelThumbnails,
       }
@@ -300,22 +398,6 @@ const mapYouTubeDataApiResult = (
     music: null,
     lastFetchedAt: new Date().toISOString(),
   };
-};
-
-const fetchFromYoutubei = async (
-  videoId: string,
-): Promise<FetchVideoOutcome> => {
-  try {
-    const video = await youtube.getVideo(videoId);
-    if (!video) {
-      return { result: null, notFound: true };
-    }
-    const v: any = video;
-    return { result: mapYoutubeiResult(v, videoId), notFound: false };
-  } catch (error) {
-    console.error("Failed to fetch YouTube video data (youtubei):", error);
-    return { result: null, notFound: false };
-  }
 };
 
 const fetchFromYouTubeDataApi = async (
@@ -351,6 +433,7 @@ const fetchFromYouTubeDataApi = async (
     const collaborationChannels: Array<{
       id: string | null;
       name: string | null;
+      artistname: string | null;
       subscriberCount: string | null;
       thumbnails: Array<{
         url: string | null;
@@ -393,28 +476,76 @@ const fetchFromYouTubeDataApi = async (
     const collaborationHandles = extractCollaborationHandles(
       item?.snippet?.description,
     );
+    const registry = await loadChannelsRegistry();
     for (const handle of collaborationHandles) {
       let channelItem: any = null;
+      let regArtistName: string | null = null;
 
-      // チャンネル ID の可能性 (例: UC...)
-      if (/^UC[0-9A-Za-z_-]{10,}$/i.test(handle)) {
-        try {
-          const chResp = await youtubeData.channels.list({
-            part: ["snippet", "statistics"],
-            id: [handle],
-          });
-          channelItem = chResp?.data?.items?.[0] ?? null;
-        } catch (error) {
-          channelItem = null;
+      // まずスプレッドシートのレジストリを参照してみる
+      try {
+        let regEntry: ChannelRegistryEntry | null = null;
+        if (/^UC[0-9A-Za-z_-]{10,}$/i.test(handle)) {
+          regEntry = registry.byId.get(handle) ?? null;
+        } else {
+          const normalized = handle.startsWith("@") ? handle : `@${handle}`;
+          regEntry =
+            registry.byHandle.get(normalized) ??
+            registry.byHandle.get(handle.replace(/^@/, "")) ??
+            null;
         }
-      } else {
-        channelItem = await fetchChannelByHandle(youtubeData, handle);
+
+        if (regEntry) {
+          regArtistName = regEntry.artistname ?? null;
+          channelItem = {
+            id: regEntry.youtubeId ?? (handle.startsWith("@") ? null : handle),
+            snippet: {
+              title: regEntry.name ?? handle,
+              thumbnails: regEntry.iconUrl
+                ? { default: { url: regEntry.iconUrl } }
+                : undefined,
+            },
+            statistics: regEntry.subscriberCount
+              ? {
+                  subscriberCount: String(regEntry.subscriberCount).replace(
+                    /[^0-9]/g,
+                    "",
+                  ),
+                }
+              : undefined,
+          } as any;
+        }
+      } catch (e) {
+        // ignore registry errors and fall back to API
+        channelItem = null;
+      }
+
+      // レジストリに見つからなければ YouTube Data API を使う
+      if (!channelItem) {
+        console.log(
+          "Fetching collaboration channel from YouTube Data API:",
+          handle,
+        );
+        // チャンネル ID の可能性 (例: UC...)
+        if (/^UC[0-9A-Za-z_-]{10,}$/i.test(handle)) {
+          try {
+            const chResp = await youtubeData.channels.list({
+              part: ["snippet", "statistics"],
+              id: [handle],
+            });
+            channelItem = chResp?.data?.items?.[0] ?? null;
+          } catch (error) {
+            channelItem = null;
+          }
+        } else {
+          channelItem = await fetchChannelByHandle(youtubeData, handle);
+        }
       }
 
       if (!channelItem) {
         collaborationChannels.push({
           id: handle,
           name: handle,
+          artistname: null,
           subscriberCount: null,
           thumbnails: null,
         });
@@ -438,13 +569,28 @@ const fetchFromYouTubeDataApi = async (
         ? formatSubscriberCountLabel(channelItem.statistics.subscriberCount)
         : null;
 
+      // regArtistName が未設定の場合、channelId でスプレッドシートを再検索して補完する
+      let finalArtistName: string | null = regArtistName ?? null;
+      if (!finalArtistName && channelId) {
+        try {
+          const regById = registry.byId.get(channelId) ?? null;
+          if (regById?.artistname) finalArtistName = regById.artistname;
+        } catch (e) {
+          // ignore
+        }
+      }
+
       collaborationChannels.push({
         id: channelId ?? handle,
         name: channelItem?.snippet?.title ?? handle,
+        artistname: finalArtistName ?? null,
         subscriberCount,
         thumbnails,
       });
     }
+
+    const primaryArtistName =
+      registry.byId.get(item?.snippet?.channelId ?? "")?.artistname ?? null;
 
     return {
       result: mapYouTubeDataApiResult(
@@ -453,6 +599,7 @@ const fetchFromYouTubeDataApi = async (
         channelThumbnails,
         channelSubscriberCount,
         collaborationChannels,
+        primaryArtistName,
       ),
       notFound: false,
     };
@@ -474,47 +621,10 @@ export async function GET(
     );
   }
 
-  const url = new URL(req.url);
-  let forceFallback = url.searchParams.get("fallback") === "1";
-
-  // [temporary] 常にフォールバックを使う
-  // TODO: うまくいったら戻したい
-  forceFallback = true;
-
-  if (!forceFallback) {
-    const primary = await fetchFromYoutubei(video_id);
-    if (primary.result) {
-      return NextResponse.json(primary.result, {
-        headers: {
-          "Cache-Control":
-            "max-age=3600, s-maxage=3600, stale-while-revalidate=300",
-        },
-      });
-    }
-
-    const fallback = await fetchFromYouTubeDataApi(video_id);
-    if (fallback.result) {
-      return NextResponse.json(fallback.result, {
-        headers: {
-          "Cache-Control":
-            "max-age=3600, s-maxage=3600, stale-while-revalidate=300",
-        },
-      });
-    }
-
-    if (primary.notFound || fallback.notFound) {
-      return NextResponse.json({ error: "Video not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(
-      { error: "Failed to fetch video data" },
-      { status: 500 },
-    );
-  }
-
-  const fallback = await fetchFromYouTubeDataApi(video_id);
-  if (fallback.result) {
-    return NextResponse.json(fallback.result, {
+  // YouTube Data API を使って動画情報を取得
+  const result = await fetchFromYouTubeDataApi(video_id);
+  if (result.result) {
+    return NextResponse.json(result.result, {
       headers: {
         "Cache-Control":
           "max-age=3600, s-maxage=3600, stale-while-revalidate=300",
@@ -522,7 +632,7 @@ export async function GET(
     });
   }
 
-  if (fallback.notFound) {
+  if (result.notFound) {
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
   }
 
