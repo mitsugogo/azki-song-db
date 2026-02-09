@@ -55,3 +55,7 @@ next-env.d.ts
 # copilot
 .github/copilot-instructions.md
 .github/for_copilot/*
+
+
+# exclude test
+extractCollaborationHandles.test.ts
