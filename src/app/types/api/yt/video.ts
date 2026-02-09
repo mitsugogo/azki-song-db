@@ -5,14 +5,6 @@ export interface Thumbnail {
   height: number | null;
 }
 
-export interface ChannelSummary {
-  id: string | null;
-  name: string | null;
-  subscriberCount?: string | null;
-  artistname?: string | null;
-  thumbnails?: Thumbnail[] | null;
-}
-
 export interface MusicInfo {
   imageUrl?: string | null;
   title?: string | null;
@@ -29,12 +21,11 @@ export interface Chapter {
 export interface YouTubeApiVideoResult {
   id: string;
   title: string | null;
+  author: string | null;
   uploadDate: string | null;
   viewCount: number | null;
   isLiveContent: boolean;
   thumbnails: Thumbnail[] | null;
-  channel?: ChannelSummary | null;
-  channels?: ChannelSummary[] | null;
   likeCount?: number | null;
   tags: string[];
   description: string | null;

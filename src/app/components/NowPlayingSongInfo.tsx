@@ -8,13 +8,28 @@ import Link from "next/link";
 import { FaThumbsUp } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "flowbite-react";
+import useChannels from "../hook/useChannels";
+import { ChannelEntry } from "../types/api/yt/channels";
 
 type DescriptionCollapsibleProps = {
   text: string;
   viewCount?: string | number | null;
   uploadDate?: string | null;
+};
+
+type MergedChannelInfo = {
+  id: string | null;
+  name: string;
+  subscriberCount: string | null;
+  artistname: string;
+  thumbnails: Array<{
+    url: string;
+    width: null;
+    height: null;
+  }> | null;
+  channelUrl: string;
 };
 
 const DescriptionCollapsible = ({
@@ -183,16 +198,104 @@ const NowPlayingSongInfo = ({
   videoData,
   videoInfo,
 }: NowPlayingSongInfoProps) => {
-  const channels =
-    videoInfo?.channels || (videoInfo?.channel ? [videoInfo.channel] : []);
-  const loading = !videoInfo;
+  const { channels: channelsRegistry, isLoading: channelsLoading } =
+    useChannels();
+
+  const channelsByArtist = useMemo(() => {
+    const map = new Map<string, ChannelEntry>();
+    channelsRegistry.forEach((entry) => {
+      const key = (entry.artistName ?? "").trim();
+      if (!key) return;
+      if (!map.has(key)) map.set(key, entry);
+    });
+    return map;
+  }, [channelsRegistry]);
+
+  const uploadChannel = useMemo(() => {
+    const authorName = (videoInfo?.author ?? "").trim();
+    if (!authorName) return null;
+    const entry = channelsRegistry.find((ch) => {
+      const channelName = (ch.channelName ?? "").trim();
+      return channelName && channelName === authorName;
+    });
+    if (!entry) return null;
+    const handle = entry.handle
+      ? entry.handle.startsWith("@")
+        ? entry.handle
+        : `@${entry.handle}`
+      : "";
+    const channelUrl = entry.youtubeId
+      ? `https://www.youtube.com/channel/${entry.youtubeId}`
+      : handle
+        ? `https://www.youtube.com/${handle}`
+        : "";
+    if (!channelUrl) return null;
+    return {
+      id: entry.youtubeId || null,
+      name: entry.channelName || entry.artistName || authorName,
+      subscriberCount: entry.subscriberCount || null,
+      artistname: entry.artistName || authorName,
+      thumbnails: entry.iconUrl
+        ? [{ url: entry.iconUrl || "", width: null, height: null }]
+        : null,
+      channelUrl,
+    } satisfies MergedChannelInfo;
+  }, [channelsRegistry, videoInfo?.author]);
+
+  const channels: MergedChannelInfo[] = useMemo(() => {
+    if (!currentSong?.video_id) return [];
+    const singerNames = allSongs
+      .filter((song) => song.video_id === currentSong.video_id)
+      .flatMap((song) =>
+        (song.sing ?? "")
+          .split("、")
+          .map((name) => name.trim())
+          .filter(Boolean),
+      )
+      .filter((name, idx, arr) => arr.indexOf(name) === idx);
+
+    const singerChannels = singerNames
+      .map((name) => {
+        const entry = channelsByArtist.get(name);
+        if (!entry) return null;
+        const handle = entry.handle
+          ? entry.handle.startsWith("@")
+            ? entry.handle
+            : `@${entry.handle}`
+          : "";
+        const channelUrl = entry.youtubeId
+          ? `https://www.youtube.com/channel/${entry.youtubeId}`
+          : handle
+            ? `https://www.youtube.com/${handle}`
+            : "";
+        if (!channelUrl) return null;
+        return {
+          id: entry.youtubeId || null,
+          name: entry.channelName || entry.artistName || name,
+          subscriberCount: entry.subscriberCount || null,
+          artistname: entry.artistName || name,
+          thumbnails: entry.iconUrl
+            ? [{ url: entry.iconUrl || "", width: null, height: null }]
+            : null,
+          channelUrl,
+        } satisfies MergedChannelInfo;
+      })
+      .filter((val): val is MergedChannelInfo => val !== null);
+
+    return uploadChannel ? [uploadChannel, ...singerChannels] : singerChannels;
+  }, [allSongs, currentSong?.video_id, channelsByArtist, uploadChannel]);
+
+  const loading = !videoInfo || channelsLoading;
   const [showAllChannels, setShowAllChannels] = useState(false);
+  useEffect(() => {
+    setShowAllChannels(false);
+  }, [currentSong?.video_id]);
   // 重複するチャンネルが入るケースがあるため、`id` で重複排除する
   const dedupedChannels = (() => {
     const arr = channels ?? [];
     const map = new Map<string, (typeof arr)[number]>();
     arr.forEach((c, i) => {
-      const key = (c as any)?.id ?? `__${i}`;
+      const key = c.id || c.channelUrl || c.artistname || `__${i}`;
       if (!map.has(key)) map.set(key, c);
     });
     return Array.from(map.values());
@@ -248,8 +351,13 @@ const NowPlayingSongInfo = ({
                             <>
                               {shown.map((ch) => (
                                 <Link
-                                  key={ch.id}
-                                  href={`https://www.youtube.com/channel/${ch.id}`}
+                                  key={
+                                    ch.channelUrl ??
+                                    ch.id ??
+                                    ch.name ??
+                                    "channel"
+                                  }
+                                  href={ch.channelUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-1 min-w-0 rounded-md px-2 py-1 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-[calc(50%-0.375rem)] sm:basis-[220px]"
@@ -289,7 +397,7 @@ const NowPlayingSongInfo = ({
                                 <button
                                   type="button"
                                   onClick={() => setShowAllChannels((v) => !v)}
-                                  className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-primary-600 hover:bg-gray-50/30 dark:hover:bg-gray-800/60"
+                                  className="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center"
                                 >
                                   {showAllChannels
                                     ? `折りたたむ`
