@@ -342,7 +342,9 @@ const NowPlayingSongInfo = ({
                       : (() => {
                           const maxShow = showAllChannels
                             ? dedupedChannels.length
-                            : 3;
+                            : dedupedChannels.length === 4
+                              ? 4
+                              : 3;
                           const shown =
                             dedupedChannels?.slice(0, maxShow) ?? [];
                           const remaining =
@@ -393,7 +395,7 @@ const NowPlayingSongInfo = ({
                                 </Link>
                               ))}
 
-                              {remaining > 0 && (
+                              {remaining > 1 && (
                                 <button
                                   type="button"
                                   onClick={() => setShowAllChannels((v) => !v)}
