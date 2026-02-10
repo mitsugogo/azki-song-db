@@ -24,11 +24,13 @@ const corsOptions = {
 };
 
 function isAllowedOrigin(origin: string): boolean {
-  // localhostは許可
-  if (origin.startsWith("http://localhost")) return true;
-  if (origin.startsWith("http://127.0.0.1")) return true;
-  if (origin.startsWith("https://localhost")) return true;
-  if (origin.startsWith("https://127.0.0.1")) return true;
+  // 開発モードのときは localhost を許可
+  if (process.env.NODE_ENV === "development") {
+    if (origin.startsWith("http://localhost")) return true;
+    if (origin.startsWith("http://127.0.0.1")) return true;
+    if (origin.startsWith("https://localhost")) return true;
+    if (origin.startsWith("https://127.0.0.1")) return true;
+  }
 
   if (allowedOrigins.includes(origin)) return true;
   if (vercelPreviewPattern.test(origin)) return true;
