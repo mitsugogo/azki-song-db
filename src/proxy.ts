@@ -8,6 +8,9 @@ const allowedOrigins = [
   "https://azki-song-db-git-develop-mitsugogos-projects.vercel.app",
   // main branch
   "https://azki-song-db-git-main-mitsugogos-projects.vercel.app",
+
+  // 環境変数から許可オリジンを取得
+  process.env.PUBLIC_BASE_URL,
 ];
 
 // 動的な Vercel プレビュー URL パターン（PR ブランチ用）
@@ -64,10 +67,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // API routes
-    "/api/:path*",
-    // All other paths (excluding static files)
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-  ],
+  matcher: ["/api/:path*"],
 };
