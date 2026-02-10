@@ -9,10 +9,11 @@ export type LinkifyTextOptions = {
   includeLineBreaks?: boolean;
   timestampToSeconds?: (timestamp: string) => number;
   timestampLinkClassName?: string;
+  hashtagPlatform?: "youtube" | "x";
 };
 
 const combinedRegex =
-  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-]+)/g;
+  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(#[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g;
 
 export const renderLinkedText = (
   text: string,
@@ -21,6 +22,7 @@ export const renderLinkedText = (
     includeLineBreaks = true,
     timestampToSeconds,
     timestampLinkClassName = DEFAULT_TIMESTAMP_CLASS,
+    hashtagPlatform = "x",
   }: LinkifyTextOptions = {},
 ): ReactNode[] => {
   if (!text) return [];
@@ -78,6 +80,23 @@ export const renderLinkedText = (
             className={linkClassName}
           >
             {handle}
+          </a>,
+        );
+      } else if (match[4]) {
+        const hashtag = match[4]; // includes leading #
+        const tag = hashtag.slice(1);
+        const url =
+          hashtagPlatform === "youtube"
+            ? `https://www.youtube.com/hashtag/${tag}`
+            : `https://x.com/hashtag/${tag}`;
+        nodes.push(
+          <a
+            key={`hashtag-${lineIndex}-${matchIndex}`}
+            href={url}
+            target="_blank"
+            className={linkClassName}
+          >
+            {hashtag}
           </a>,
         );
       }
