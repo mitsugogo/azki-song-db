@@ -14,7 +14,9 @@ import useSearch from "../hook/useSearch";
 import usePlayerControls from "../hook/usePlayerControls";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import usePlayerLifecycle from "../hook/usePlayerLifecycle";
-import usePlayerVolume from "../hook/usePlayerVolume";
+import usePlayerVolume, {
+  applyPersistedVolumeToPlayer,
+} from "../hook/usePlayerVolume";
 import { usePathname } from "next/navigation";
 
 // Components
@@ -155,6 +157,17 @@ export default function MainPlayer() {
   useEffect(() => {
     globalPlayer.setIsPlaying(isPlaying);
   }, [isPlaying, globalPlayer]);
+
+  // ミニプレイヤーからメインに戻ったときに、保存された音量/ミュートをメインのプレイヤーに適用
+  useEffect(() => {
+    if (!isPlayerReady) return;
+    if (globalPlayer.isMinimized) return;
+    try {
+      if (playerRef.current) {
+        applyPersistedVolumeToPlayer(playerRef.current);
+      }
+    } catch (_) {}
+  }, [isPlayerReady, globalPlayer.isMinimized, playerRef]);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
   // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
