@@ -425,7 +425,7 @@ const NowPlayingSongInfo = ({
                                     href={ch.channelUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-auto sm:basis-[200px] md:basis-[260px]"
+                                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-auto sm:basis-50 md:basis-65"
                                     title={`${ch.name ?? ""}`}
                                   >
                                     <Avatar
@@ -439,7 +439,7 @@ const NowPlayingSongInfo = ({
                                       radius="xl"
                                       size={28}
                                     />
-                                    <div className="flex flex-col leading-tight min-w-0">
+                                    <div className="flex flex-col leading-tight min-w-0 ml-1">
                                       <span className="text-sm text-foreground dark:text-white font-medium truncate whitespace-nowrap">
                                         {ch.name ?? ""}
                                       </span>
@@ -478,7 +478,7 @@ const NowPlayingSongInfo = ({
                   </div>
 
                   {hasAuthorInRegistry && (
-                    <div className="hidden md:flex flex-col items-start gap-1 self-center mt-2 mr-1">
+                    <div className="hidden md:flex flex-col items-start gap-1 self-start mr-1 bg-gray-50/20 dark:bg-gray-800 rounded-md px-6 py-1">
                       {loading ? (
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
