@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Navigation drawer", () => {
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("opens and closes navigation drawer", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");

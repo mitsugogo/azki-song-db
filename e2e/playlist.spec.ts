@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Playlist page", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("displays playlist management interface", async ({ page }) => {
     await page.goto("/playlist");
 

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 // コントロールバーのテスト
 // 再生・一時停止・次の曲・ボリューム・ミュートなど
@@ -6,6 +7,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Player Control Bar", () => {
   test.describe.configure({ mode: "serial" });
   test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
     await page.goto("/");
     // プレイヤーが表示されるまで待機
     await expect(page.locator(".youtube-progress-bar")).toBeVisible();
@@ -58,6 +60,7 @@ test.describe("Player Control Bar", () => {
 
 test.describe("同一動画内での曲切り替え", () => {
   test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
     await page.goto("/");
     // プレイヤーとソングリストが表示されるまで待機
     await expect(page.locator(".youtube-progress-bar")).toBeVisible();

@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Discography page", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("renders discography page with album information", async ({ page }) => {
     await page.goto("/discography");
 
@@ -77,7 +83,7 @@ test.describe("Discography page", () => {
     await page.goto("/discography");
     await page.waitForLoadState("domcontentloaded");
 
-    const unitTab = page.getByRole("tab", { name: /ユニット楽曲/ });
+    const unitTab = page.getByRole("tab", { name: /ユニット・ゲスト楽曲/ });
     const coverTab = page.getByRole("tab", { name: /カバー楽曲/ });
 
     await unitTab.click();

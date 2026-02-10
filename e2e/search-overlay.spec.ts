@@ -1,8 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Search overlay (mobile)", () => {
   test.describe.configure({ mode: "serial" });
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
 
   test("opens and closes the song list overlay", async ({ page }) => {
     await page.goto("/");

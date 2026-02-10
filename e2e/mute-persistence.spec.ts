@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Mute persistence across video change", () => {
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("muting persists and is applied after switching videos", async ({
     page,
   }) => {
