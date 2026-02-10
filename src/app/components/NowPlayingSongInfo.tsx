@@ -17,6 +17,7 @@ type DescriptionCollapsibleProps = {
   text: string;
   viewCount?: string | number | null;
   uploadDate?: string | null;
+  tags?: string[];
 };
 
 type MergedChannelInfo = {
@@ -36,6 +37,7 @@ const DescriptionCollapsible = ({
   text,
   viewCount,
   uploadDate,
+  tags,
 }: DescriptionCollapsibleProps) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -67,7 +69,9 @@ const DescriptionCollapsible = ({
         style={{ lineHeight: "1.25rem" }}
       >
         {formatedViewCount && (
-          <div className="font-semibold text-muted-foreground mr-2 mb-1">
+          <div
+            className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
+          >
             {expanded
               ? viewCount?.toLocaleString() + " 回視聴"
               : formatedViewCount}{" "}
@@ -75,6 +79,33 @@ const DescriptionCollapsible = ({
             {isDateString(uploadDate)
               ? new Date(uploadDate || "").toLocaleDateString()
               : uploadDate}
+            {tags && tags.length > 0 && (
+              <>
+                <span className="mr-2"></span>
+                {tags.map((tag) =>
+                  expanded ? (
+                    <Link
+                      key={tag}
+                      href={`https://www.youtube.com/hashtag/${encodeURIComponent(
+                        tag,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-sm text-gray-300 dark:text-gray-200 mr-1 hover:text-gray-600 dark:hover:text-gray-100"
+                    >
+                      #{tag}
+                    </Link>
+                  ) : (
+                    <span
+                      key={tag}
+                      className="inline-block text-sm text-gray-300 dark:text-gray-200 mr-1"
+                    >
+                      #{tag}
+                    </span>
+                  ),
+                )}
+              </>
+            )}
           </div>
         )}
         {renderLinkedText(expanded || !isTruncatable ? text : collapsedText)}
@@ -467,6 +498,7 @@ const NowPlayingSongInfo = ({
                     text={videoInfo.description}
                     viewCount={videoInfo.viewCount}
                     uploadDate={videoInfo.uploadDate}
+                    tags={videoInfo.tags}
                   />
                 </div>
               </div>
