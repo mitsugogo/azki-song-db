@@ -14,7 +14,9 @@ import useSearch from "../hook/useSearch";
 import usePlayerControls from "../hook/usePlayerControls";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import usePlayerLifecycle from "../hook/usePlayerLifecycle";
-import usePlayerVolume from "../hook/usePlayerVolume";
+import usePlayerVolume, {
+  applyPersistedVolumeToPlayer,
+} from "../hook/usePlayerVolume";
 import { usePathname } from "next/navigation";
 
 // Components
@@ -39,6 +41,7 @@ export default function MainPlayer() {
   // グローバルプレイヤー
   const globalPlayer = useGlobalPlayer();
   const pathname = usePathname();
+  const sharedPlayerRef = useRef<any>(null);
 
   // --- Hooks ---
   const {
@@ -64,6 +67,9 @@ export default function MainPlayer() {
     playerKey,
     hideFutureSongs,
     videoId,
+    videoTitle,
+    videoData,
+    videoInfo,
     startTime,
     timedLiveCallText,
     setHideFutureSongs,
@@ -74,7 +80,6 @@ export default function MainPlayer() {
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs, globalPlayer);
 
-  // プレイヤーライフサイクル管理
   const {
     playerRef,
     isPlayerReady,
@@ -92,6 +97,7 @@ export default function MainPlayer() {
     globalPlayer,
     currentSong,
     isPlaying,
+    playerRef: sharedPlayerRef,
   });
 
   // プレイヤーボリューム（ローカル状態はフックで管理）
@@ -99,7 +105,10 @@ export default function MainPlayer() {
     playerVolume,
     setPlayerVolume,
     changeVolume: changePlayerVolume,
-  } = usePlayerVolume(playerRef, isPlayerReady);
+    isMuted: persistedIsMuted,
+    setMuted: setPersistedMuted,
+  } = usePlayerVolume(sharedPlayerRef, isPlayerReady);
+
   const previousPathnameRef = useRef(pathname);
 
   const seekTo = useCallback(
@@ -148,6 +157,17 @@ export default function MainPlayer() {
   useEffect(() => {
     globalPlayer.setIsPlaying(isPlaying);
   }, [isPlaying, globalPlayer]);
+
+  // ミニプレイヤーからメインに戻ったときに、保存された音量/ミュートをメインのプレイヤーに適用
+  useEffect(() => {
+    if (!isPlayerReady) return;
+    if (globalPlayer.isMinimized) return;
+    try {
+      if (playerRef.current) {
+        applyPersistedVolumeToPlayer(playerRef.current);
+      }
+    } catch (_) {}
+  }, [isPlayerReady, globalPlayer.isMinimized, playerRef]);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
   // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
@@ -354,17 +374,14 @@ export default function MainPlayer() {
     seekTo: seekToAbsolute,
     setVolume: changeVolume,
     mute: () => {
-      if (playerRef.current && typeof playerRef.current.mute === "function") {
-        playerRef.current.mute();
-      }
+      setPersistedMuted?.(true);
     },
     unMute: () => {
-      if (playerRef.current && typeof playerRef.current.unMute === "function") {
-        playerRef.current.unMute();
-      }
+      setPersistedMuted?.(false);
     },
     currentTime: playerCurrentTime,
     volume: playerVolume,
+    isMuted: persistedIsMuted,
     duration: playerDuration,
   };
 
@@ -384,6 +401,9 @@ export default function MainPlayer() {
         searchTerm={searchTerm}
         videoId={videoId}
         startTime={startTime}
+        videoTitle={videoTitle}
+        videoData={videoData}
+        videoInfo={videoInfo}
         timedLiveCallText={timedLiveCallText ?? ""}
         setSongs={setSongs}
         searchSongs={searchSongs}

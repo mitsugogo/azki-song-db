@@ -1,8 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Mobile action buttons", () => {
   test.use({ viewport: { width: 390, height: 844 } });
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
 
   test("displays mobile action buttons", async ({ page }) => {
     await page.goto("/");

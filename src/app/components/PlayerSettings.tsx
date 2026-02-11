@@ -60,7 +60,12 @@ export default function PlayerSettings({
       ref={settingsRef}
     >
       <div className="hidden md:block">
-        <Menu width={300} withArrow opened={showPlaylistMenu}>
+        <Menu
+          width={300}
+          withArrow
+          opened={showPlaylistMenu}
+          withinPortal={false}
+        >
           <Menu.Target>
             <div className="flex items-center justify-center h-full">
               <Tooltip

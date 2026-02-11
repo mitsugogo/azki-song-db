@@ -25,6 +25,7 @@ function YouTubePlayerComponent({
 
   const opts = useMemo(() => {
     const playerVars: Record<string, number> = {
+      enablejsapi: 1,
       autoplay: 1,
       start,
     };

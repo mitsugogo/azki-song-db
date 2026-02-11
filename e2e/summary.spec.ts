@@ -1,7 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Summary pages", () => {
   test.describe.configure({ mode: "serial" });
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
   test.describe("Summary index page", () => {
     test("displays yearly activity summary", async ({ page }) => {
       await page.goto("/summary");
@@ -13,6 +17,7 @@ test.describe("Summary pages", () => {
       // Check for heading (accept a few possible variants)
       const heading = page.getByRole("heading", {
         name: /年ごとの活動記録|活動記録|活動年表/i,
+        level: 1,
       });
       await expect(heading).toBeVisible();
     });
@@ -22,14 +27,8 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
-      // Wait for API to load data
-      await page.waitForResponse(
-        (response) =>
-          response.url().includes("/api/songs") && response.status() === 200,
-      );
-
-      // Look for year links by href (e.g., /summary/2024)
-      await page.waitForSelector('a[href^="/summary/20"]', { timeout: 5000 });
+      // Wait for year links to appear (rendered client-side)
+      await page.waitForSelector('a[href^="/summary/20"]', { timeout: 10000 });
       const yearLinks = page.locator('a[href^="/summary/20"]');
       expect(await yearLinks.count()).toBeGreaterThan(0);
     });
@@ -41,6 +40,11 @@ test.describe("Summary pages", () => {
       await page.goto("/summary/2024");
 
       await page.waitForLoadState("domcontentloaded");
+
+      // Check that page has loaded some content - look for h1 heading
+      await expect(
+        page.getByRole("heading", { name: "2024年", exact: true, level: 1 }),
+      ).toBeVisible();
     });
 
     test("shows year-specific statistics", async ({ page }) => {
@@ -48,7 +52,8 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
-      // Check for year heading (h1)
+      // Check for year heading (h1) - wait for it to be visible
+      await page.waitForSelector('h1:has-text("2024年")', { timeout: 10000 });
       await expect(
         page.getByRole("heading", { name: "2024年", exact: true, level: 1 }),
       ).toBeVisible();
@@ -59,6 +64,10 @@ test.describe("Summary pages", () => {
 
       await page.waitForLoadState("domcontentloaded");
 
+      // Wait for breadcrumb to be visible
+      await page.waitForSelector('nav[aria-label="Breadcrumb"]', {
+        timeout: 10000,
+      });
       const summaryLink = page.getByRole("link", { name: /活動記録/i });
       await expect(summaryLink).toBeVisible();
     });

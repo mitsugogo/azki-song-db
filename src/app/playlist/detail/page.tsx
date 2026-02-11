@@ -2,7 +2,11 @@ import PlaylistDetailPage from "./client";
 import type { Metadata } from "next";
 
 const baseUrl =
-  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  process.env.PUBLIC_BASE_URL ??
+  (process.env.NODE_ENV === "development"
+    ? `http://localhost:${process.env.PORT ?? 3000}`
+    : "https://azki-song-db.vercel.app/");
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "プレイリスト";

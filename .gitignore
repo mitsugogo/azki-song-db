@@ -18,6 +18,7 @@ playwright-report/
 blob-report/
 test-results/
 playwright/.cache/
+e2e/.cache/
 
 # next.js
 /.next/
@@ -55,3 +56,4 @@ next-env.d.ts
 # copilot
 .github/copilot-instructions.md
 .github/for_copilot/*
+

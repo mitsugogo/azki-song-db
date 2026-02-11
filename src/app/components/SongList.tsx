@@ -323,7 +323,8 @@ const SongsList = ({
                 const shouldBeHidden =
                   hideFutureSongs &&
                   currentSongIndex !== -1 &&
-                  globalIndex > currentSongIndex;
+                  globalIndex > currentSongIndex &&
+                  currentSong?.video_id === song.video_id;
 
                 return (
                   <SongListItem

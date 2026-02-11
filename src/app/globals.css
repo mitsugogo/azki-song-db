@@ -86,6 +86,11 @@
 /* 折りたたみモード */
 @custom-variant foldable (&:where(.foldable, .foldable *));
 
+/* Flowbiteのツールチップが背後の操作を妨げないようにする */
+[data-testid="flowbite-tooltip"] {
+  pointer-events: none;
+}
+
 :root {
   --font-sans:
     "Noto Sans JP", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",

@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Discography page", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("renders discography page with album information", async ({ page }) => {
     await page.goto("/discography");
 
@@ -41,7 +47,9 @@ test.describe("Discography page", () => {
     // Prefer asserting the song title (or album) header is visible to avoid
     // matching hidden global h1s like the site title.
     const expectedTitle = withSlug.title ?? withSlug.album ?? null;
-    await expect(page.locator("h1").first()).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator("h1").filter({ hasText: expectedTitle }),
+    ).toBeVisible({ timeout: 10000 });
     // iframe (YouTube) should be present
     await expect(page.locator("iframe").first()).toBeVisible({
       timeout: 10000,
@@ -64,6 +72,12 @@ test.describe("Discography page", () => {
     await page.goto(`/discography?album=${encodeURIComponent(album)}`);
     await page.waitForLoadState("domcontentloaded");
 
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
+
     // The album name should be visible and an expanded anchor should exist
     await expect(page.locator(`text=${album}`).first()).toBeVisible({
       timeout: 10000,
@@ -77,7 +91,13 @@ test.describe("Discography page", () => {
     await page.goto("/discography");
     await page.waitForLoadState("domcontentloaded");
 
-    const unitTab = page.getByRole("tab", { name: /ユニット楽曲/ });
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
+
+    const unitTab = page.getByRole("tab", { name: /ユニット・ゲスト楽曲/ });
     const coverTab = page.getByRole("tab", { name: /カバー楽曲/ });
 
     await unitTab.click();

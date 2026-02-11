@@ -6,21 +6,55 @@ import { LuAlbum, LuFolder } from "react-icons/lu";
 import slugify from "../../lib/slugify";
 import { ROUTE_RANGES } from "../../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../../config/timelineVisuals";
-import { FaPlay, FaTwitter, FaX, FaYoutube } from "react-icons/fa6";
+import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import { Badge, Button } from "@mantine/core";
+import { renderLinkedText } from "@/app/lib/textLinkify";
 
 const baseUrl =
-  process.env.PUBLIC_BASE_URL ??
   process.env.NEXT_PUBLIC_BASE_URL ??
+  process.env.PUBLIC_BASE_URL ??
   (process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
+    ? `http://localhost:${process.env.PORT ?? 3000}`
     : "https://azki-song-db.vercel.app/");
 
+async function fetchSongsFromApi(): Promise<Song[]> {
+  const candidates = [
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.PUBLIC_BASE_URL,
+    process.env.NEXT_PUBLIC_BASE_URL ??
+      (process.env.NODE_ENV === "development"
+        ? `http://127.0.0.1:${process.env.PORT ?? 3001}`
+        : undefined),
+  ].filter(Boolean) as string[];
+
+  for (const base of candidates) {
+    try {
+      const res = await fetch(new URL(`/api/songs`, base));
+      if (res.ok) {
+        return (await res.json()) as Song[];
+      }
+    } catch (e) {
+      // 一時的な失敗は次の候補へフォールバック
+    }
+  }
+
+  // 最後の手段として production を試す
+  try {
+    const res = await fetch("https://azki-song-db.vercel.app/api/songs");
+    if (res.ok) {
+      return (await res.json()) as Song[];
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  throw new Error("Failed to fetch songs from any known base URL");
+}
+
 export async function generateStaticParams() {
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
@@ -44,8 +78,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const resolved = await params;
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
   const slug = decodeURIComponent(resolved.slug);
   // slugify は共通ユーティリティを使用
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
@@ -101,8 +134,7 @@ export default async function SongPage({
 }) {
   const resolved = await params;
   const slug = decodeURIComponent(resolved.slug);
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
@@ -260,7 +292,7 @@ export default async function SongPage({
                 rel="noopener noreferrer"
                 className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
               >
-                <FaX className="inline mr-1 -mt-1" /> シェア
+                <FaXTwitter className="inline mr-1 -mt-1" /> シェア
               </a>
             </div>
 
@@ -274,25 +306,7 @@ export default async function SongPage({
               )}
               {first.extra && (
                 <div className="mt-1 whitespace-pre-wrap">
-                  {first.extra
-                    .split(/(\bhttps?:\/\/[^\s]+|\n)/g)
-                    .map((part, index) =>
-                      part.match(/^https?:\/\//) ? (
-                        <a
-                          key={index}
-                          href={part}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 underline"
-                        >
-                          {part}
-                        </a>
-                      ) : part === "\n" ? (
-                        <br key={index} />
-                      ) : (
-                        <span key={index}>{part}</span>
-                      ),
-                    )}
+                  {renderLinkedText(first.extra)}
                 </div>
               )}
             </div>

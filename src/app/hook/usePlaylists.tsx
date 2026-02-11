@@ -26,6 +26,13 @@ const usePlaylists = () => {
     defaultValue: [],
   });
 
+  const isSamePlaylist = (a: Playlist, b: Playlist) => {
+    if (a.id && b.id) {
+      return a.id === b.id;
+    }
+    return a.name === b.name;
+  };
+
   // プレイリストを保存
   const savePlaylist = (playlist: Playlist) => {
     const isNew = !playlists.find((p) => p.name === playlist.name);
@@ -72,7 +79,7 @@ const usePlaylists = () => {
 
   // プレイリストを削除
   const deletePlaylist = (playlist: Playlist) => {
-    setPlaylists((prev) => prev.filter((p) => p.id !== playlist.id));
+    setPlaylists((prev) => prev.filter((p) => !isSamePlaylist(p, playlist)));
   };
 
   // プレイリストに追加
@@ -83,9 +90,11 @@ const usePlaylists = () => {
     // 上限判定
     if (isLimit(playlist)) return;
 
+    if (isInPlaylist(playlist, song)) return;
+
     setPlaylists((prev) =>
       prev.map((p) =>
-        p.id === playlist.id
+        isSamePlaylist(p, playlist)
           ? {
               ...p,
               songs: [...p.songs, { videoId, start }],
@@ -102,11 +111,11 @@ const usePlaylists = () => {
     const start = song.start;
     setPlaylists((prev) =>
       prev.map((p) =>
-        p.id === playlist.id
+        isSamePlaylist(p, playlist)
           ? {
               ...p,
               songs: p.songs.filter(
-                (entry) => entry.videoId !== videoId && entry.start !== start,
+                (entry) => entry.videoId !== videoId || entry.start !== start,
               ),
               updatedAt: new Date().toISOString(),
             }
@@ -119,7 +128,7 @@ const usePlaylists = () => {
   const updatePlaylist = (playlist: Playlist) => {
     playlist.updatedAt = new Date().toISOString();
     setPlaylists((prev) =>
-      prev.map((p) => (p.id === playlist.id ? playlist : p)),
+      prev.map((p) => (isSamePlaylist(p, playlist) ? playlist : p)),
     );
   };
 
@@ -127,7 +136,7 @@ const usePlaylists = () => {
   const renamePlaylist = (playlist: Playlist, newName: string) => {
     setPlaylists((prev) =>
       prev.map((p) =>
-        p.id === playlist.id
+        isSamePlaylist(p, playlist)
           ? { ...p, name: newName, updatedAt: new Date().toISOString() }
           : p,
       ),
@@ -138,7 +147,7 @@ const usePlaylists = () => {
   const clearAllSongs = (playlist: Playlist) => {
     setPlaylists((prev) =>
       prev.map((p) =>
-        p.id === playlist.id
+        isSamePlaylist(p, playlist)
           ? { ...p, songs: [], updatedAt: new Date().toISOString() }
           : p,
       ),

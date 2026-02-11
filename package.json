@@ -91,5 +91,9 @@
     "tailwindcss": "^4.1.13",
     "typescript": "^5",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "cookie": "^0.7.1",
+    "path-to-regexp": "^6.2.3"
   }
 }

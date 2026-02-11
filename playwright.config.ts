@@ -1,8 +1,24 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = process.env.PORT ?? "3000";
+const PORT = process.env.PORT ?? "3001";
 const HOST = process.env.HOST ?? "127.0.0.1";
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://${HOST}:${PORT}`;
+const defaultBase = `http://${HOST}:${PORT}`;
+const rawBase =
+  process.env.PLAYWRIGHT_BASE_URL ??
+  process.env.BASE_URL ??
+  process.env.NEXT_PUBLIC_BASE_URL;
+let baseURL: string;
+try {
+  if (!rawBase) {
+    baseURL = defaultBase;
+  } else {
+    // rawBase が絶対URLならそのまま使用、そうでなければ defaultBase を基に解決
+    new URL(rawBase);
+    baseURL = rawBase;
+  }
+} catch {
+  baseURL = new URL(rawBase as string, defaultBase).toString();
+}
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,6 +28,7 @@ export default defineConfig({
   workers: 3,
   timeout: 30000,
   reporter: [["html", { open: "never" }], ["list"], ["github"]],
+  globalSetup: require.resolve("./e2e/global-setup.ts"),
   use: {
     baseURL,
     trace: "on-first-retry",
@@ -25,6 +42,9 @@ export default defineConfig({
     timeout: 180_000,
     stdout: "pipe",
     stderr: "pipe",
+    env: {
+      NEXT_PUBLIC_BASE_URL: baseURL,
+    },
   },
   projects: [
     {
