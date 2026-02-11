@@ -12,14 +12,14 @@ export async function GET(req: NextRequest) {
       ? searchParams.get("title")?.slice(0, 100)
       : "AZKi Song Database";
 
-    const titleColor = searchParams.get("titlecolor") || "000";
+    const titleColor = searchParams.get("titlecolor") || "ffffff";
 
     const hasSubTitle = searchParams.has("subtitle");
     const subTitle = hasSubTitle
       ? searchParams.get("subtitle")?.slice(0, 100)
-      : "🎵 AZKi Song Database";
+      : "";
 
-    const subTitleColor = searchParams.get("subtitlecolor") || "000";
+    const subTitleColor = searchParams.get("subtitlecolor") || "ffe3f0";
 
     const width = searchParams.get("w") || "1200";
     const height = searchParams.get("h") || "630";
@@ -57,36 +57,94 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "#1a0a12",
+          backgroundImage:
+            "linear-gradient(135deg, #1a0a12 0%, #3a0e2a 45%, #1d0a1b 100%)",
           backgroundSize: "100% 100%",
           height: "100%",
           width: "100%",
           display: "flex",
           textAlign: "left",
-          alignItems: "flex-start",
+          alignItems: "stretch",
           justifyContent: "space-between",
           flexDirection: "column",
           flexWrap: "nowrap",
-          border: "30px solid #b81e8a",
           fontFamily: "Noto Sans JP",
-          padding: "90px 120px",
+          padding: "80px 96px",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* 背景の装飾レイヤー */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.9,
+            backgroundImage:
+              "radial-gradient(650px 300px at 90% 15%, rgba(244, 52, 139, 0.45), transparent 60%), radial-gradient(500px 260px at 10% 90%, rgba(209, 28, 118, 0.4), transparent 60%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: "-120px",
+            top: "-80px",
+            width: "420px",
+            height: "420px",
+            borderRadius: "999px",
+            background:
+              "linear-gradient(140deg, rgba(252, 52, 136, 0.55), rgba(244, 52, 139, 0.2))",
+            filter: "blur(2px)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: "-160px",
+            bottom: "-140px",
+            width: "520px",
+            height: "520px",
+            borderRadius: "999px",
+            background:
+              "linear-gradient(160deg, rgba(209, 28, 118, 0.35), rgba(26, 10, 18, 0.35))",
+          }}
+        />
         <div
           style={{
             display: "flex",
             flexDirection: "column",
+            gap: "28px",
+            position: "relative",
           }}
         >
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "10px 18px",
+              borderRadius: "999px",
+              backgroundColor: "rgba(255, 255, 255, 0.12)",
+              color: "#ffe3f0",
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              alignSelf: "flex-start",
+            }}
+          >
+            AZKi Song Database
+          </div>
+          <div
+            style={{
               width: "100%",
-              fontSize: 60,
+              fontSize: 64,
               fontStyle: "normal",
-              fontWeight: "bold",
+              fontWeight: 700,
               color: `#${titleColor}`,
-              lineHeight: 1.3,
-              marginBottom: "30px",
+              lineHeight: 1.15,
+              letterSpacing: "0.01em",
+              textShadow: "0 12px 30px rgba(0, 0, 0, 0.35)",
             }}
           >
             {title}
@@ -94,30 +152,32 @@ export async function GET(req: NextRequest) {
           <div
             style={{
               display: "block",
-              fontSize: 40,
+              fontSize: 36,
               fontStyle: "normal",
               color: `#${subTitleColor}`,
-              lineHeight: 1.3,
-              flex: 1,
-              lineClamp: '3 "..."',
+              lineHeight: 1.4,
+              maxWidth: "850px",
             }}
           >
             {subTitle}
           </div>
         </div>
-        {/* サイト名用のコンテナ */}
         <div
           style={{
-            width: "100%",
-            fontSize: 24,
-            fontStyle: "normal",
-            color: "#333", // サイト名の色を調整
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            position: "relative",
+            paddingTop: "32px",
+            color: "#f7cfe1",
+            fontSize: 22,
             fontWeight: 400,
-            textAlign: "left", // 左揃え
-            marginTop: "auto", // 親要素の末尾に配置
           }}
         >
-          AZKi Song Database
+          <div style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            AZKi Song Database
+          </div>
+          <div style={{ fontSize: 20, color: "#fc3488" }}>azki-song-db</div>
         </div>
       </div>,
       {
