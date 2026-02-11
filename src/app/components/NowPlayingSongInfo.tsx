@@ -30,7 +30,7 @@ type DescriptionCollapsibleProps = {
 type MergedChannelInfo = {
   id: string | null;
   name: string;
-  subscriberCount: string | null;
+  subscriberCount: number;
   artistname: string;
   thumbnails: Array<{
     url: string;
@@ -85,7 +85,7 @@ const DescriptionCollapsible = ({
             className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
           >
             {expanded
-              ? viewCount?.toLocaleString() + " 回視聴"
+              ? Number(viewCount ?? 0).toLocaleString() + " 回視聴"
               : formatedViewCount}{" "}
             {uploadDate && "・"}{" "}
             {isDateString(uploadDate)
@@ -312,7 +312,7 @@ const MainChannelInfo = ({
 };
 
 // 数値を日本語の "万人" 表示に整形
-function formatSubscribersJP(count: string | null) {
+function formatSubscribersJP(count: number) {
   if (count == null) return count ?? "";
   const num = Number(count);
   if (!Number.isFinite(num)) return "";
@@ -428,7 +428,7 @@ const NowPlayingSongInfo = ({
     return {
       id: entry.youtubeId || null,
       name: entry.channelName || entry.artistName || authorName,
-      subscriberCount: entry.subscriberCount || null,
+      subscriberCount: entry.subscriberCount,
       artistname: entry.artistName || authorName,
       thumbnails: entry.iconUrl
         ? [{ url: entry.iconUrl || "", width: null, height: null }]
@@ -468,7 +468,7 @@ const NowPlayingSongInfo = ({
         return {
           id: entry.youtubeId || null,
           name: entry.channelName || entry.artistName || name,
-          subscriberCount: entry.subscriberCount || null,
+          subscriberCount: entry.subscriberCount,
           artistname: entry.artistName || name,
           thumbnails: entry.iconUrl
             ? [{ url: entry.iconUrl || "", width: null, height: null }]
