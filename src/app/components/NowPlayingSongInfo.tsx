@@ -400,7 +400,12 @@ const NowPlayingSongInfo = ({
           (channelName && channelName === authorName) ||
           (artistName && artistName === authorName)
         );
-      }) ?? null
+      }) ??
+      channelsRegistry.find((ch) => {
+        const channelName = (ch.channelName ?? "").trim();
+        return channelName && channelName === authorName;
+      }) ??
+      null
     );
   }, [channelsRegistry, videoInfo?.snippet?.channelTitle]);
 
@@ -614,7 +619,15 @@ const NowPlayingSongInfo = ({
                                               Math.min(3, remaining),
                                           )
                                           .map((ch) => (
-                                            <Tooltip label={`${ch.name ?? ""}`}>
+                                            <Tooltip
+                                              label={`${ch.name ?? ""}`}
+                                              key={
+                                                ch.channelUrl ??
+                                                ch.id ??
+                                                ch.name ??
+                                                "channel_tip"
+                                              }
+                                            >
                                               <Avatar
                                                 key={
                                                   ch.channelUrl ??
