@@ -18,6 +18,7 @@ playwright-report/
 blob-report/
 test-results/
 playwright/.cache/
+e2e/.cache/
 
 # next.js
 /.next/
@@ -56,6 +57,3 @@ next-env.d.ts
 .github/copilot-instructions.md
 .github/for_copilot/*
 
-
-# exclude test
-extractCollaborationHandles.test.ts

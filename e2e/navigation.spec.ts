@@ -14,6 +14,12 @@ test.describe("Navigation drawer", () => {
         response.url().includes("/api/songs") && response.status() === 200,
     );
 
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
+
     // Navigation toggle button should be visible
     const navToggle = page.getByRole("button", { name: "Toggle navigation" });
     await expect(navToggle).toBeVisible();
@@ -42,6 +48,12 @@ test.describe("Navigation drawer", () => {
   test("navigates to different pages from drawer", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
+
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
 
     // Open navigation drawer
     const navToggle = page.getByRole("button", { name: /toggle navigation/i });

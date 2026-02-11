@@ -25,16 +25,11 @@ test.describe("Data page", () => {
   test("allows filtering and searching data", async ({ page }) => {
     await page.goto("/data");
 
-    // Wait for data to load
+    // Wait for data to load and search input to appear
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
-
-    // Look for search input
     const searchInput = page.getByPlaceholder("検索...");
     await expect(searchInput).toBeVisible({ timeout: 15000 });
+
     await searchInput.fill("AZKi");
     await page.waitForTimeout(500);
 

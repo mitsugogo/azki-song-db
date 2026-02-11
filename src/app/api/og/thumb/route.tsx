@@ -5,7 +5,11 @@ import { Song } from "@/app/types/song";
 export const runtime = "edge";
 
 const baseUrl =
-  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  process.env.PUBLIC_BASE_URL ??
+  (process.env.NODE_ENV === "development"
+    ? `http://localhost:${process.env.PORT ?? 3000}`
+    : "https://azki-song-db.vercel.app/");
 
 export async function GET(req: NextRequest) {
   try {

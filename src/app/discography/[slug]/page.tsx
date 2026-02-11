@@ -13,15 +13,48 @@ import { Badge, Button } from "@mantine/core";
 import { renderLinkedText } from "@/app/lib/textLinkify";
 
 const baseUrl =
-  process.env.PUBLIC_BASE_URL ??
   process.env.NEXT_PUBLIC_BASE_URL ??
+  process.env.PUBLIC_BASE_URL ??
   (process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
+    ? `http://localhost:${process.env.PORT ?? 3000}`
     : "https://azki-song-db.vercel.app/");
 
+async function fetchSongsFromApi(): Promise<Song[]> {
+  const candidates = [
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.PUBLIC_BASE_URL,
+    process.env.NEXT_PUBLIC_BASE_URL ??
+      (process.env.NODE_ENV === "development"
+        ? `http://127.0.0.1:${process.env.PORT ?? 3001}`
+        : undefined),
+  ].filter(Boolean) as string[];
+
+  for (const base of candidates) {
+    try {
+      const res = await fetch(new URL(`/api/songs`, base));
+      if (res.ok) {
+        return (await res.json()) as Song[];
+      }
+    } catch (e) {
+      // 一時的な失敗は次の候補へフォールバック
+    }
+  }
+
+  // 最後の手段として production を試す
+  try {
+    const res = await fetch("https://azki-song-db.vercel.app/api/songs");
+    if (res.ok) {
+      return (await res.json()) as Song[];
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  throw new Error("Failed to fetch songs from any known base URL");
+}
+
 export async function generateStaticParams() {
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
@@ -45,8 +78,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const resolved = await params;
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
   const slug = decodeURIComponent(resolved.slug);
   // slugify は共通ユーティリティを使用
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
@@ -102,8 +134,7 @@ export default async function SongPage({
 }) {
   const resolved = await params;
   const slug = decodeURIComponent(resolved.slug);
-  const res = await fetch(new URL(`/api/songs`, baseUrl));
-  const songs: Song[] = await res.json();
+  const songs: Song[] = await fetchSongsFromApi();
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
