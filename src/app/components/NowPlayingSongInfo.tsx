@@ -589,59 +589,66 @@ const NowPlayingSongInfo = ({
                                   />
                                 ))}
 
-                                <button
-                                  type="button"
-                                  onClick={() => setShowAllChannels((v) => !v)}
-                                  className={`flex text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
-                                >
-                                  {showAllChannels
-                                    ? `折りたたむ`
-                                    : `他 ${remaining} チャンネル`}
-                                  <Tooltip.Group
-                                    openDelay={100}
-                                    closeDelay={100}
+                                {remaining > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setShowAllChannels((v) => !v)
+                                    }
+                                    className={`flex text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
                                   >
-                                    <AvatarGroup>
-                                      {dedupedChannels
-                                        .slice(
-                                          shown.length,
-                                          shown.length + Math.min(3, remaining),
-                                        )
-                                        .map((ch) => (
-                                          <Tooltip label={`${ch.name ?? ""}`}>
-                                            <Avatar
-                                              key={
-                                                ch.channelUrl ??
-                                                ch.id ??
-                                                ch.name ??
-                                                "channel"
-                                              }
-                                              src={
-                                                ch.thumbnails?.sort(
-                                                  (a, b) =>
-                                                    (b?.width ?? 0) -
-                                                    (a?.width ?? 0),
-                                                )[0]?.url
-                                              }
-                                              alt={ch.name ?? "Channel Avatar"}
-                                              radius="xl"
-                                              size={32}
-                                            />
-                                          </Tooltip>
-                                        ))}
-                                      {remaining > 3 && (
-                                        <Avatar
-                                          radius="xl"
-                                          size={28}
-                                          color="gray"
-                                          top={4}
-                                        >
-                                          +{remaining - 3}
-                                        </Avatar>
-                                      )}
-                                    </AvatarGroup>
-                                  </Tooltip.Group>
-                                </button>
+                                    {showAllChannels
+                                      ? `折りたたむ`
+                                      : `他 ${remaining} チャンネル`}
+                                    <Tooltip.Group
+                                      openDelay={100}
+                                      closeDelay={100}
+                                    >
+                                      <AvatarGroup>
+                                        {dedupedChannels
+                                          .slice(
+                                            shown.length,
+                                            shown.length +
+                                              Math.min(3, remaining),
+                                          )
+                                          .map((ch) => (
+                                            <Tooltip label={`${ch.name ?? ""}`}>
+                                              <Avatar
+                                                key={
+                                                  ch.channelUrl ??
+                                                  ch.id ??
+                                                  ch.name ??
+                                                  "channel"
+                                                }
+                                                src={
+                                                  ch.thumbnails?.sort(
+                                                    (a, b) =>
+                                                      (b?.width ?? 0) -
+                                                      (a?.width ?? 0),
+                                                  )[0]?.url
+                                                }
+                                                alt={
+                                                  ch.name ?? "Channel Avatar"
+                                                }
+                                                radius="xl"
+                                                size={32}
+                                              />
+                                            </Tooltip>
+                                          ))}
+                                        {remaining > 3 && (
+                                          <Avatar
+                                            radius="xl"
+                                            size={28}
+                                            color="gray"
+                                            top={4}
+                                          >
+                                            +{remaining - 3}
+                                          </Avatar>
+                                        )}
+                                      </AvatarGroup>
+                                    </Tooltip.Group>
+                                  </button>
+                                )}
                               </div>
                               <div className="self-center">
                                 {unitName && (
