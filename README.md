@@ -1,18 +1,24 @@
 # AZKi Song Database
 
+> [!NOTE]  
+> 日本語のREADME -> [README_ja.md](./README_ja.md)
+
+
 This is a [Next.js](https://nextjs.org) project that is used to generate a song database for AZKi, a virtual YouTuber.
 
 [AZKi Song Database](https://azki-song-db.vercel.app/)
 
 ## Features
 
-- Song database with YouTube video links and song information (title, artist, album, etc.)
-- Song search function
-- Song list with pagination and filter by song type (e.g. original song, cover song, etc.)
-- Song detail page with YouTube video player and song information
-- Responsive design for mobile and desktop devices
-- Analytics for tracking page views and user behavior
-- Dark mode
+- Song database with YouTube video links and rich song metadata (title, artist, album, release date, tags, start/end timestamps)
+- Data sourced from Google Sheets via the Google Sheets API (requires `GOOGLE_API_KEY` and `SPREADSHEET_ID`)
+- YouTube metadata integration and embedded YouTube player with start/end time support
+- Instant search overlay with filters (title, artist, tags, song type) and stable locators
+- Song list with pagination and filtering; pages generated with Next.js data fetching
+- Song detail page showing metadata, lyrics/notes and the embedded player
+- Player controls (play/pause/seek, mute persistence) and iframe communication
+- Responsive design for mobile and desktop, plus Dark Mode support
+
 
 ## Development Note
 
@@ -27,6 +33,13 @@ The data is managed using Google Spread Sheets. The table structure is as follow
 | 1   | TRUE    | Sample Music | Artist | Singer   | Video title | 0:00:00 |     | 2025/08/01   | tagA,tagB              | Any notes... | Debut MV  |
 
 - Video title should include a link to YouTube video using Google Sheets' hyperlink function (e.g. =HYPERLINK("https://www.youtube.com/watch?v=aA1WjJfRQ3Q", "Video title"))
+- For the header row of the spreadsheet, please refer to the code in `api/songs`
+
+### Sample Sheet
+
+Please copy the sample sheet and use it as a reference for your own sheet. The sample sheet includes the data structure and some sample data.
+
+https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSasY8/edit?usp=sharing
 
 ## Development
 
@@ -86,14 +99,6 @@ npm run test:e2e:headed
 **Test files location:**
 - E2E tests: `e2e/*.spec.ts`
 
-**Available E2E test suites:**
-- `home.spec.ts` - Home page functionality
-- `search.spec.ts` - Search functionality
-- `data.spec.ts` - Data page
-- `discography.spec.ts` - Discography page
-- `playlist.spec.ts` - Playlist functionality
-- `statistics.spec.ts` - Statistics page
-- `summary.spec.ts` - Summary page
 
 ## Environment variables
 
@@ -101,7 +106,7 @@ The following environment variables are used in the project:
 
 | Variable name          | Description                                                |
 | ---------------------- | ---------------------------------------------------------- |
-| `GOOGLE_API_KEY`       | Google Sheets API key for reading data from Google Sheets  |
+| `GOOGLE_API_KEY`       | Google Sheets API key for reading data from Google Sheets |
 | `SPREADSHEET_ID`       | Google Sheets ID for reading data from Google Sheets       |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API key for reading YouTube video information |
 | `PUBLIC_BASE_URL`      | Base URL for the production environment                    |
