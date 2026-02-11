@@ -9,8 +9,15 @@ test.describe("Player Control Bar", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
     await page.goto("/");
-    // プレイヤーが表示されるまで待機
-    await expect(page.locator(".youtube-progress-bar")).toBeVisible();
+    // 曲リストが表示されるまで待機
+    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+    // 最初の曲をクリックして iframe を表示
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    await songItems.first().click();
+    // iframe が表示されるまで待機
+    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
   });
 
   test("再生・一時停止ボタンが動作する", async ({ page }) => {
@@ -49,11 +56,13 @@ test.describe("Player Control Bar", () => {
       'button[aria-label="ミュート"], button[aria-label="ミュート解除"]',
     );
     await expect(muteBtn).toBeVisible();
+    const initialLabel = await muteBtn.getAttribute("aria-label");
     await muteBtn.click();
+    await page.waitForTimeout(500);
     // 状態変化を確認（アイコンやaria-labelが切り替わる）
     await expect(muteBtn).toHaveAttribute(
       "aria-label",
-      /ミュート|ミュート解除/,
+      initialLabel === "ミュート" ? "ミュート解除" : "ミュート",
     );
   });
 });
@@ -62,9 +71,15 @@ test.describe("同一動画内での曲切り替え", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
     await page.goto("/");
-    // プレイヤーとソングリストが表示されるまで待機
-    await expect(page.locator(".youtube-progress-bar")).toBeVisible();
+    // 曲リストが表示されるまで待機
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+    // 最初の曲をクリックして iframe を表示
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    await songItems.first().click();
+    // iframe が表示されるまで待機
+    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
   });
 
   test("曲リストから曲を選択すると曲情報が切り替わる", async ({ page }) => {
@@ -76,8 +91,8 @@ test.describe("同一動画内での曲切り替え", () => {
 
     // 曲リストから別の曲をクリック
     const songItems = page
-      .locator('div[role="button"]')
-      .filter({ hasText: /\d{4}\/\d{2}\/\d{2}/ });
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
     const songCount = await songItems.count();
 
     if (songCount > 1) {
@@ -118,8 +133,8 @@ test.describe("同一動画内での曲切り替え", () => {
   test("曲選択時にURLパラメータが更新される", async ({ page }) => {
     // 曲リストから曲をクリック
     const songItems = page
-      .locator('div[role="button"]')
-      .filter({ hasText: /\d{4}\/\d{2}\/\d{2}/ });
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
     const songCount = await songItems.count();
 
     if (songCount > 0) {
@@ -146,8 +161,8 @@ test.describe("同一動画内での曲切り替え", () => {
 
     // 曲リストから別の曲をクリック（異なる動画の曲を探す）
     const songItems = page
-      .locator('div[role="button"]')
-      .filter({ hasText: /\d{4}\/\d{2}\/\d{2}/ });
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
     const songCount = await songItems.count();
 
     // 異なる動画の曲を見つけてクリック

@@ -220,9 +220,9 @@ const usePlayerControls = (
       explicitStartTime?: number,
       options?: { skipSeek?: boolean },
     ) => {
-      if (!song && !explicitVideoId) return;
-
       const targetVideoId = explicitVideoId ?? song?.video_id;
+      if (!targetVideoId) return;
+
       const targetStartTime =
         explicitStartTime ?? (song ? Number(song.start) : 0);
 

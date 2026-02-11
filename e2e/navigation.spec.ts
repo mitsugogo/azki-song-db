@@ -22,14 +22,14 @@ test.describe("Navigation drawer", () => {
     await navToggle.click({ force: true });
 
     // Drawer should show navigation links
-    const playlistLink = page.getByRole("link", { name: /プレイリスト/ });
+    const playlistLink = page.getByRole("button", { name: /プレイリスト/ });
     const statsLink = page.getByRole("link", { name: /統計/ });
     const discographyLink = page.getByRole("link", {
       name: /ディスコグラフィー|Discography/,
     });
     await expect(playlistLink).toBeVisible({ timeout: 15000 });
-    await expect(statsLink).toBeVisible();
-    await expect(discographyLink).toBeVisible();
+    await expect(statsLink).toBeVisible({ timeout: 15000 });
+    await expect(discographyLink).toBeVisible({ timeout: 15000 });
 
     // Click toggle again to close
     await navToggle.click({ force: true });
