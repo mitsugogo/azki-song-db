@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import YouTubePlayer from "./YouTubePlayer";
+import { applyPersistedVolumeToPlayer } from "../hook/usePlayerVolume";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
@@ -308,6 +309,9 @@ export default function MiniPlayer() {
 
   const handlePlayerOnReady = (event: YouTubeEvent<number>) => {
     playerRef.current = event.target;
+    try {
+      applyPersistedVolumeToPlayer(event.target);
+    } catch (_) {}
     // 保存された再生位置から開始
     if (currentTime > 0 && !hasRestoredTime) {
       setTimeout(() => {

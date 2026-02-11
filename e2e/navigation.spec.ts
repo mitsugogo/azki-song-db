@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Navigation drawer", () => {
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("opens and closes navigation drawer", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
@@ -8,6 +13,12 @@ test.describe("Navigation drawer", () => {
       (response) =>
         response.url().includes("/api/songs") && response.status() === 200,
     );
+
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
 
     // Navigation toggle button should be visible
     const navToggle = page.getByRole("button", { name: "Toggle navigation" });
@@ -17,14 +28,14 @@ test.describe("Navigation drawer", () => {
     await navToggle.click({ force: true });
 
     // Drawer should show navigation links
-    const playlistLink = page.getByRole("link", { name: /プレイリスト/ });
+    const playlistLink = page.getByRole("button", { name: /プレイリスト/ });
     const statsLink = page.getByRole("link", { name: /統計/ });
     const discographyLink = page.getByRole("link", {
       name: /ディスコグラフィー|Discography/,
     });
     await expect(playlistLink).toBeVisible({ timeout: 15000 });
-    await expect(statsLink).toBeVisible();
-    await expect(discographyLink).toBeVisible();
+    await expect(statsLink).toBeVisible({ timeout: 15000 });
+    await expect(discographyLink).toBeVisible({ timeout: 15000 });
 
     // Click toggle again to close
     await navToggle.click({ force: true });
@@ -37,6 +48,12 @@ test.describe("Navigation drawer", () => {
   test("navigates to different pages from drawer", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
+
+    // Wait for loading overlay to disappear
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
 
     // Open navigation drawer
     const navToggle = page.getByRole("button", { name: /toggle navigation/i });

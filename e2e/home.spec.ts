@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Home page", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("renders header controls and navigation drawer", async ({ page }) => {
     await page.goto("/");
 

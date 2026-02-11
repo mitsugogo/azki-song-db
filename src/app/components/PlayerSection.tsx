@@ -1,4 +1,5 @@
 import { Song } from "../types/song";
+import type { YouTubeVideoData } from "../types/youtube";
 import YouTubePlayer from "./YouTubePlayer";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
@@ -12,6 +13,8 @@ import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
 import MobileActionButtons from "./MobileActionButtons";
+import { renderLinkedText } from "../lib/textLinkify";
+import { YouTubeApiVideoResult } from "../types/api/yt/video";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -38,6 +41,9 @@ type PlayerSectionProps = {
   playerKey: number;
   hideFutureSongs: boolean;
   videoId?: string;
+  videoTitle?: string | null;
+  videoData?: YouTubeVideoData | null;
+  videoInfo?: YouTubeApiVideoResult | null;
   startTime?: number;
   timedLiveCallText?: string;
   handlePlayerOnReady: (event: YouTubeEvent) => void;
@@ -70,6 +76,9 @@ export default function PlayerSection({
   playerKey,
   hideFutureSongs,
   videoId,
+  videoTitle,
+  videoData,
+  videoInfo,
   startTime,
   timedLiveCallText,
   handlePlayerOnReady,
@@ -268,11 +277,9 @@ export default function PlayerSection({
                       },
                     }}
                     className="truncate w-full absolute top-0 left-0"
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        timedLiveCallText?.replace(/\\r\\n|\\n/g, "<br>") ?? "",
-                    }}
-                  ></motion.p>
+                  >
+                    {renderLinkedText(timedLiveCallText ?? "")}
+                  </motion.p>
                 )}
               </AnimatePresence>
             </div>
@@ -289,6 +296,9 @@ export default function PlayerSection({
           setSearchTerm={setSearchTerm}
           setOpenShereModal={setOpenShareModal}
           changeCurrentSong={changeCurrentSong}
+          videoTitle={videoTitle}
+          videoData={videoData}
+          videoInfo={videoInfo}
           setHideFutureSongs={setHideFutureSongs}
         />
       </OverlayScrollbarsComponent>

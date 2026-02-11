@@ -167,7 +167,7 @@ const useSearch = (allSongs: Song[]) => {
     (songsToFilter: Song[], term: string) => {
       // 検索ワードの分割(q=xxx|yyy|zzz)
       const searchWords = term
-        .split(/[\s|\|]+/)
+        .split(/[\|]+/)
         .map((word) => word.trim().toLowerCase())
         .filter(Boolean);
 

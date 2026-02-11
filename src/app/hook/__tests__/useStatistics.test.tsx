@@ -1,8 +1,9 @@
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useStatistics } from "../useStatistics";
 import type { Song } from "../../types/song";
 import type { VideoInfo } from "../../types/videoInfo";
+import { createStatistics } from "../../lib/statisticsHelpers";
 
 // createStatisticsをモック
 vi.mock("../../lib/statisticsHelpers", () => ({
@@ -20,6 +21,12 @@ vi.mock("../../lib/statisticsHelpers", () => ({
 }));
 
 describe("useStatistics", () => {
+  const createStatisticsMock = vi.mocked(createStatistics);
+
+  beforeEach(() => {
+    createStatisticsMock.mockClear();
+  });
+
   const mockSongs: Song[] = [
     {
       video_id: "test1",
@@ -31,6 +38,16 @@ describe("useStatistics", () => {
       tags: ["オリ曲", "tag1"],
       broadcast_at: "2024-01-01",
       video_title: "Video One",
+      lyricist: "",
+      composer: "",
+      arranger: "",
+      album_list_uri: "",
+      album_release_at: "",
+      album_is_compilation: false,
+      video_uri: "",
+      end: "",
+      year: 0,
+      milestones: [],
     },
     {
       video_id: "test2",
@@ -42,30 +59,56 @@ describe("useStatistics", () => {
       tags: ["カバー曲", "tag2"],
       broadcast_at: "2024-01-02",
       video_title: "Video Two",
+      lyricist: "",
+      composer: "",
+      arranger: "",
+      album_list_uri: "",
+      album_release_at: "",
+      album_is_compilation: false,
+      video_uri: "",
+      end: "",
+      year: 0,
+      milestones: [],
     },
   ];
 
   const mockCoverSongInfo: VideoInfo[] = [
     {
-      id: "test2",
+      videoId: "test2",
       title: "Cover Video",
-      description: "Description",
-      publishedAt: "2024-01-02T00:00:00Z",
-      viewCount: "1000",
-      likeCount: "100",
-      commentCount: "10",
+      thumbnailUrl: "",
+      snippet: {
+        publishedAt: "",
+        channelId: "",
+        title: "",
+        description: "",
+      },
+      statistics: {
+        viewCount: "",
+        likeCount: "",
+        favoriteCount: "",
+        commentCount: "",
+      },
     },
   ];
 
   const mockOriginalSongInfo: VideoInfo[] = [
     {
-      id: "test1",
+      videoId: "test1",
       title: "Original Video",
-      description: "Description",
-      publishedAt: "2024-01-01T00:00:00Z",
-      viewCount: "2000",
-      likeCount: "200",
-      commentCount: "20",
+      thumbnailUrl: "",
+      snippet: {
+        publishedAt: "",
+        channelId: "",
+        title: "",
+        description: "",
+      },
+      statistics: {
+        viewCount: "",
+        likeCount: "",
+        favoriteCount: "",
+        commentCount: "",
+      },
     },
   ];
 
@@ -115,6 +158,16 @@ describe("useStatistics", () => {
         tags: ["tag3"],
         broadcast_at: "2024-01-03",
         video_title: "Video Three",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+        milestones: [],
       },
     ];
 
@@ -164,5 +217,217 @@ describe("useStatistics", () => {
     expect(Array.isArray(result.current.coverSongCountsByReleaseDate)).toBe(
       true,
     );
+  });
+
+  it("オリ曲判定のフィルタ条件が正しく適用される", () => {
+    const songs: Song[] = [
+      {
+        video_id: "ori-1",
+        start: "0",
+        title: "Original 1",
+        artist: "AZKi、Guest",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        broadcast_at: "2024-01-01",
+        video_title: "Video O1",
+        milestones: ["m1"],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+      {
+        video_id: "ori-2",
+        start: "0",
+        title: "Original 2",
+        artist: "Guest",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        broadcast_at: "2024-01-02",
+        video_title: "Video O2",
+        milestones: ["m2"],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+    ];
+
+    renderHook(() =>
+      useStatistics({
+        songs,
+        coverSongInfo: mockCoverSongInfo,
+        originalSongInfo: mockOriginalSongInfo,
+      }),
+    );
+
+    const originalCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+        calledSongs.length === 1 &&
+        calledSongs[0].title === "Original 1" &&
+        keyFn(calledSongs[0]) === "Original 1" &&
+        !sortFn &&
+        !videoInfos,
+    );
+
+    expect(originalCall).toBeTruthy();
+  });
+
+  it("リリース日ソート用のデータが正しく渡される", () => {
+    const songs: Song[] = [
+      {
+        video_id: "ori-3",
+        start: "0",
+        title: "Original 3",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        broadcast_at: "2024-01-03",
+        video_title: "Video O3",
+        milestones: ["m3"],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+      {
+        video_id: "cover-1",
+        start: "0",
+        title: "Cover 1",
+        artist: "Artist X",
+        album: "",
+        sing: "AZKi",
+        tags: ["カバー曲"],
+        broadcast_at: "2024-01-04",
+        video_title: "Video C1",
+        milestones: ["m4"],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+    ];
+
+    renderHook(() =>
+      useStatistics({
+        songs,
+        coverSongInfo: mockCoverSongInfo,
+        originalSongInfo: mockOriginalSongInfo,
+      }),
+    );
+
+    const originalByReleaseCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+        calledSongs.length === 1 &&
+        calledSongs[0].title === "Original 3" &&
+        keyFn(calledSongs[0]) === "Original 3" &&
+        typeof sortFn === "function" &&
+        videoInfos === mockOriginalSongInfo,
+    );
+
+    expect(originalByReleaseCall).toBeTruthy();
+
+    const coverByReleaseCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+        calledSongs.length === 1 &&
+        calledSongs[0].title === "Cover 1" &&
+        keyFn(calledSongs[0]) === "Cover 1 (Artist X) (AZKi)" &&
+        typeof sortFn === "function" &&
+        videoInfos === mockCoverSongInfo,
+    );
+
+    expect(coverByReleaseCall).toBeTruthy();
+
+    const sortFn = originalByReleaseCall?.[2] as (a: any, b: any) => number;
+    const compareResult = sortFn(
+      { firstVideo: { broadcast_at: "2024-02-01" } },
+      { firstVideo: { broadcast_at: "2024-01-01" } },
+    );
+    expect(compareResult).toBeLessThan(0);
+  });
+
+  it("マイルストーンと動画IDの集計が正しく渡される", () => {
+    const songs: Song[] = [
+      {
+        video_id: "milestone-1",
+        start: "0",
+        title: "Milestone Song",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["tag"],
+        broadcast_at: "2024-01-05",
+        video_title: "Video M1",
+        milestones: ["first", "second"],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+    ];
+
+    renderHook(() =>
+      useStatistics({
+        songs,
+        coverSongInfo: mockCoverSongInfo,
+        originalSongInfo: mockOriginalSongInfo,
+      }),
+    );
+
+    const milestoneCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+        calledSongs.length === 1 &&
+        Array.isArray(keyFn(calledSongs[0])) &&
+        (keyFn(calledSongs[0]) as string[]).includes("first") &&
+        typeof sortFn === "function" &&
+        !videoInfos,
+    );
+
+    expect(milestoneCall).toBeTruthy();
+
+    const videoIdCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+        calledSongs.length === 1 &&
+        keyFn(calledSongs[0]) === "milestone-1" &&
+        !sortFn &&
+        !videoInfos,
+    );
+
+    expect(videoIdCall).toBeTruthy();
+
+    const sortFn = milestoneCall?.[2] as (a: any, b: any) => number;
+    const compareResult = sortFn(
+      { lastVideo: { broadcast_at: "2024-02-01" } },
+      { lastVideo: { broadcast_at: "2024-01-01" } },
+    );
+    expect(compareResult).toBeLessThan(0);
   });
 });

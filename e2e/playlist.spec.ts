@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { setupApiMocks } from "./mocks";
 
 test.describe("Playlist page", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+  });
+
   test("displays playlist management interface", async ({ page }) => {
     await page.goto("/playlist");
 
@@ -46,6 +52,10 @@ test.describe("プレイリスト機能", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
+    // 設定ボタンをクリック
+    await page.getByRole("button", { name: "設定" }).click();
+    await page.waitForTimeout(1000);
+
     // プレイリストボタンをクリック
     await page.getByRole("button", { name: "プレイリストに追加" }).click();
     await page.waitForTimeout(1000);
@@ -81,6 +91,8 @@ test.describe("プレイリスト機能", () => {
       await page.waitForTimeout(1500);
 
       // 作成したプレイリスト名をクリックして追加
+      await page.getByRole("button", { name: "設定" }).click();
+      await page.waitForTimeout(300);
       await page.getByRole("button", { name: "プレイリストに追加" }).click();
       await page.getByText(playlistName, { exact: true }).click();
       await page.waitForTimeout(500);

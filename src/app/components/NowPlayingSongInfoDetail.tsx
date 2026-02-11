@@ -20,6 +20,7 @@ import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
 import { FaInfoCircle } from "react-icons/fa";
 import { getCollabUnitName } from "../config/collabUnits";
+import { renderLinkedText } from "../lib/textLinkify";
 
 interface NowPlayingSongInfoDetailProps {
   currentSong: Song;
@@ -45,11 +46,23 @@ const NowPlayingSongInfoDetail = ({
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
   const [isTimestampExpand, setIsTimestampExpand] = useState(false);
+  const [isSangFrameExpand, setIsSangFrameExpand] = useState(false);
 
   // タイムスタンプ
   const videoTimestamps = allSongs
     .filter((song) => song.video_id === currentSong?.video_id)
     .sort((a, b) => (parseInt(a.start) || 0) - (parseInt(b.start) || 0));
+
+  const sameTitleSongs = allSongs
+    .filter((song) => song.title === currentSong?.title)
+    .sort(
+      (a, b) =>
+        new Date(b.broadcast_at).getTime() - new Date(a.broadcast_at).getTime(),
+    );
+  const hasMoreSangFrames = sameTitleSongs.length > 3;
+  const visibleSangFrames = isSangFrameExpand
+    ? sameTitleSongs
+    : sameTitleSongs.slice(0, 3);
 
   function timeToSeconds(timeString: string): number {
     const parts = timeString.split(":");
@@ -131,125 +144,130 @@ const NowPlayingSongInfoDetail = ({
               </div>
             )}
 
-            {currentSong.lyricist && (
+            {(currentSong.lyricist ||
+              currentSong.composer ||
+              currentSong.arranger) && (
               <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaUser className="text-base" />
-                    <span className="ml-1">作詞:</span>
+                    <span className="ml-1">作詞/作曲/編曲:</span>
                   </span>
                 </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.lyricist.split("、").map((lyricist, index) => {
-                    const existsSameLyricist = searchTerm.includes(
-                      `lyricist:${lyricist}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        onClick={() => {
-                          if (existsSameLyricist) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`lyricist:${lyricist}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}lyricist:${lyricist}`,
-                            );
-                          }
-                        }}
-                        color={`${existsSameLyricist ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                      >
-                        {lyricist}
-                      </Badge>
-                    );
-                  })}
-                </dd>
-              </div>
-            )}
+                <dd className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-3">
+                  {currentSong.lyricist && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        作詞
+                      </span>
+                      {currentSong.lyricist
+                        .split("、")
+                        .map((lyricist, index) => {
+                          const existsSameLyricist = searchTerm.includes(
+                            `lyricist:${lyricist}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              onClick={() => {
+                                if (existsSameLyricist) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`lyricist:${lyricist}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}lyricist:${lyricist}`,
+                                  );
+                                }
+                              }}
+                              color={`${existsSameLyricist ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                            >
+                              {lyricist}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
 
-            {currentSong.composer && (
-              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
-                  <span className="inline-flex items-center">
-                    <FaUser className="text-base" />
-                    <span className="ml-1">作曲:</span>
-                  </span>
-                </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.composer.split("、").map((composer, index) => {
-                    const existsSameComposer = searchTerm.includes(
-                      `composer:${composer}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        color={`${existsSameComposer ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          if (existsSameComposer) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`composer:${composer}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}composer:${composer}`,
-                            );
-                          }
-                        }}
-                      >
-                        {composer}
-                      </Badge>
-                    );
-                  })}
-                </dd>
-              </div>
-            )}
+                  {currentSong.composer && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        作曲
+                      </span>
+                      {currentSong.composer
+                        .split("、")
+                        .map((composer, index) => {
+                          const existsSameComposer = searchTerm.includes(
+                            `composer:${composer}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              color={`${existsSameComposer ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                if (existsSameComposer) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`composer:${composer}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}composer:${composer}`,
+                                  );
+                                }
+                              }}
+                            >
+                              {composer}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
 
-            {currentSong.arranger && (
-              <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
-                <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
-                  <span className="inline-flex items-center">
-                    <FaUser className="text-base" />
-                    <span className="ml-1">編曲:</span>
-                  </span>
-                </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {currentSong.arranger.split("、").map((arranger, index) => {
-                    const existsSameArranger = searchTerm.includes(
-                      `arranger:${arranger}`,
-                    );
-                    return (
-                      <Badge
-                        key={index}
-                        color={`${existsSameArranger ? "blue" : "gray"}`}
-                        radius="sm"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          if (existsSameArranger) {
-                            setSearchTerm(
-                              searchTerm
-                                .replace(`arranger:${arranger}`, "")
-                                .trim(),
-                            );
-                          } else {
-                            setSearchTerm(
-                              `${searchTerm ? `${searchTerm}|` : ""}arranger:${arranger}`,
-                            );
-                          }
-                        }}
-                      >
-                        {arranger}
-                      </Badge>
-                    );
-                  })}
+                  {currentSong.arranger && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-muted-foreground text-sm">
+                        編曲
+                      </span>
+                      {currentSong.arranger
+                        .split("、")
+                        .map((arranger, index) => {
+                          const existsSameArranger = searchTerm.includes(
+                            `arranger:${arranger}`,
+                          );
+                          return (
+                            <Badge
+                              key={index}
+                              color={`${existsSameArranger ? "blue" : "gray"}`}
+                              radius="sm"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                if (existsSameArranger) {
+                                  setSearchTerm(
+                                    searchTerm
+                                      .replace(`arranger:${arranger}`, "")
+                                      .trim(),
+                                  );
+                                } else {
+                                  setSearchTerm(
+                                    `${searchTerm ? `${searchTerm}|` : ""}arranger:${arranger}`,
+                                  );
+                                }
+                              }}
+                            >
+                              {arranger}
+                            </Badge>
+                          );
+                        })}
+                    </div>
+                  )}
                 </dd>
               </div>
             )}
@@ -259,7 +277,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoAlbums className="text-base" />
-                    <span className="ml-1">アルバム:</span>
+                    <span className="ml-1">アルバム:</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -544,8 +562,18 @@ const NowPlayingSongInfoDetail = ({
                                 currentSong.start === song.start,
                             );
 
+                        // 今再生中の曲かどうか
+                        const isCurrentSong = song === currentSong;
+
                         return (
-                          <div key={song.start} className="w-full flex">
+                          <div
+                            key={song.start}
+                            className={`w-full flex rounded px-1 border  text-xs ${
+                              isCurrentSong
+                                ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60 py-0.5"
+                                : "border-transparent"
+                            }`}
+                          >
                             <div className="flex tabular-nums">
                               <Link
                                 href={`?v=${song.video_id}&t=${song.start}`}
@@ -561,22 +589,10 @@ const NowPlayingSongInfoDetail = ({
                               </Link>
                             </div>
                             <div className="flex ml-3">
-                              {currentSong === song && (
-                                <FaCompactDisc
-                                  className={`relative inline ${
-                                    isPlaying ? "animate-spin" : ""
-                                  }`}
-                                  style={{
-                                    top: "2px",
-                                    marginRight: "3px",
-                                    animationDuration: "3s",
-                                  }}
-                                />
-                              )}
                               <span
                                 className={`${
                                   isHide
-                                    ? "h-4.5 bg-gray-300 rounded-lg dark:bg-gray-700"
+                                    ? "h-4 bg-gray-300 rounded-sm dark:bg-gray-700"
                                     : ""
                                 }`}
                               >
@@ -629,7 +645,7 @@ const NowPlayingSongInfoDetail = ({
                   </span>
                 </dt>
                 <dd className="text-xs lg:text-sm">
-                  {currentSong.live_call.split(/[\r\n]/).map((call, index) => {
+                  {currentSong.live_call.split(/\r?\n/).map((call, index) => {
                     const match = call.match(
                       /^(\d{1,2}:\d{2}:\d{2})\s*-\s*(\d{1,2}:\d{2}:\d{2})(.*)$/,
                     );
@@ -708,18 +724,9 @@ const NowPlayingSongInfoDetail = ({
                   </span>
                 </dt>
                 <dd>
-                  <div
-                    className="wrap-break-word break-all"
-                    dangerouslySetInnerHTML={{
-                      __html: currentSong.live_note
-                        .replace(
-                          /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
-                          (url) =>
-                            `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
-                        )
-                        .replace(/\n/g, "<br />"),
-                    }}
-                  ></div>
+                  <div className="wrap-break-word break-all">
+                    {renderLinkedText(currentSong.live_note)}
+                  </div>
                 </dd>
               </div>
             )}
@@ -745,21 +752,11 @@ const NowPlayingSongInfoDetail = ({
                       changeCurrentSong(currentSong, currentSong.video_id, t);
                     }
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: currentSong.extra
-                      .replace(
-                        /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g,
-                        (url) =>
-                          `<a href="${url}" target="_blank" class="text-primary hover:underline dark:text-primary-300" rel="noopener noreferrer">${url}</a>`,
-                      )
-                      .replace(/\n/g, "<br />")
-                      // hh:mm:ss 形式のタイムスタンプを data-t 属性付きのリンクに置換
-                      .replace(/(\d{1,2}:\d{2}:\d{2})/g, (timestamp) => {
-                        const seconds = timeToSeconds(timestamp);
-                        return `<a href="#" data-t="${seconds}" class="timestamp-link text-primary hover:underline dark:text-primary-300">${timestamp}</a>`;
-                      }),
-                  }}
-                />
+                >
+                  {renderLinkedText(currentSong.extra, {
+                    timestampToSeconds: timeToSeconds,
+                  })}
+                </dd>
               </div>
             )}
 
@@ -793,17 +790,20 @@ const NowPlayingSongInfoDetail = ({
                 </span>
               </dt>
               <dd className="flex flex-col gap-1">
-                {allSongs
-                  .filter((song) => song.title === currentSong.title)
-                  .sort(
-                    (a, b) =>
-                      new Date(b.broadcast_at).getTime() -
-                      new Date(a.broadcast_at).getTime(),
-                  )
-                  .map((song, index) => (
-                    <div key={index}>
-                      &nbsp;
-                      <span className="text-xs">
+                {visibleSangFrames.map((song, index) => {
+                  const isCurrentSangFrame =
+                    song.video_id === currentSong.video_id &&
+                    song.start === currentSong.start;
+
+                  return (
+                    <div key={`${song.video_id}-${song.start}-${index}`}>
+                      <span
+                        className={`text-xs inline-flex flex-wrap items-center gap-1 rounded px-1 py-0.5 border ${
+                          isCurrentSangFrame
+                            ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60"
+                            : "border-transparent"
+                        }`}
+                      >
                         {new Date(song.broadcast_at).toLocaleDateString(
                           "ja-JP",
                           {
@@ -839,7 +839,18 @@ const NowPlayingSongInfoDetail = ({
                         </Badge>
                       </span>
                     </div>
-                  ))}
+                  );
+                })}
+                {!isSangFrameExpand && hasMoreSangFrames && (
+                  <button
+                    type="button"
+                    className="w-full text-center bg-gray-50/50 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
+                    onClick={() => setIsSangFrameExpand(true)}
+                  >
+                    クリックして展開&nbsp;
+                    <HiChevronDown className="inline" />
+                  </button>
+                )}
               </dd>
             </div>
           </dl>
@@ -850,4 +861,3 @@ const NowPlayingSongInfoDetail = ({
 };
 
 export default NowPlayingSongInfoDetail;
-// hh:mm:ss 形式のタイムスタンプを data-t 属性付きのリンクに置換

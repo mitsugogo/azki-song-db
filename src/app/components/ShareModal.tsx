@@ -1,7 +1,7 @@
 import { Song } from "../types/song";
 import { Modal, TextInput, Button, Divider } from "@mantine/core";
 import { HiClipboardCopy } from "react-icons/hi";
-import { FaDatabase, FaShare, FaX, FaYoutube } from "react-icons/fa6";
+import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Label } from "flowbite-react";
 import { useState } from "react";
 
@@ -81,7 +81,7 @@ export default function ShareModal({
                 className="mr-2"
                 onClick={() => handleShareToX(false)}
               >
-                <FaX className="w-4 h-4" />
+                <FaXTwitter className="w-4 h-4" />
               </Button>
               <Button
                 variant="filled"
@@ -133,7 +133,7 @@ export default function ShareModal({
               size="xs"
               onClick={() => handleShareToX(true)}
             >
-              <FaX className="w-4 h-4" />
+              <FaXTwitter className="w-4 h-4" />
             </Button>
             <Button
               variant="filled"

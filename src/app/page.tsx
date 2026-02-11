@@ -5,7 +5,11 @@ import { Song } from "./types/song";
 import { Playlist } from "./hook/usePlaylists";
 
 const baseUrl =
-  process.env.PUBLIC_BASE_URL ?? "https://azki-song-db.vercel.app/";
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  process.env.PUBLIC_BASE_URL ??
+  (process.env.NODE_ENV === "development"
+    ? `http://localhost:${process.env.PORT ?? 3000}`
+    : "https://azki-song-db.vercel.app/");
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

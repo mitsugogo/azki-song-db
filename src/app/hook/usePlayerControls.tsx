@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
+import type { YouTubeVideoData } from "../types/youtube";
+import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
@@ -29,6 +31,10 @@ const usePlayerControls = (
 
   // === 再生制御 ===
   const [videoId, setVideoId] = useState("");
+  const [videoTitle, setVideoTitle] = useState<string | null>(null);
+  const [videoData, setVideoData] = useState<YouTubeVideoData | null>(null);
+  const videoTitleRef = useRef<string | null>(null);
+  const videoDataRef = useRef<YouTubeVideoData | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [playerKey, setPlayerKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -214,9 +220,9 @@ const usePlayerControls = (
       explicitStartTime?: number,
       options?: { skipSeek?: boolean },
     ) => {
-      if (!song && !explicitVideoId) return;
-
       const targetVideoId = explicitVideoId ?? song?.video_id;
+      if (!targetVideoId) return;
+
       const targetStartTime =
         explicitStartTime ?? (song ? Number(song.start) : 0);
 
@@ -293,6 +299,10 @@ const usePlayerControls = (
 
       // 新しい動画を読み込む
       setVideoId(targetVideoId || "");
+      setVideoTitle(null);
+      videoTitleRef.current = null;
+      setVideoData(null);
+      videoDataRef.current = null;
       setStartTime(targetStartTime);
       setCurrentSong(song);
     },
@@ -353,8 +363,29 @@ const usePlayerControls = (
   const handleStateChange = useCallback(
     (event: YouTubeEvent<number>) => {
       const player = event.target;
-      const videoData = player.getVideoData();
-      const videoId = videoData?.video_id;
+      const fetchedVideoData = player.getVideoData?.() ?? null;
+      const videoId = fetchedVideoData?.video_id;
+      const title = fetchedVideoData?.title ?? null;
+
+      // 比較ヘルパー（最低限のフィールドで判定）
+      const isVideoDataEqual = (
+        a: YouTubeVideoData | null,
+        b: YouTubeVideoData | null,
+      ) => {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        return a.video_id === b.video_id && a.title === b.title;
+      };
+
+      if (title && title !== videoTitleRef.current) {
+        setVideoTitle(title);
+        videoTitleRef.current = title;
+      }
+
+      if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
+        setVideoData(fetchedVideoData);
+        videoDataRef.current = fetchedVideoData;
+      }
 
       const clearMonitorInterval = () => {
         if (intervalRef.current) {
@@ -506,8 +537,32 @@ const usePlayerControls = (
     ],
   );
 
+  const { videoInfo } = useYoutubeVideoInfo(videoId);
+
   const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
     const player = event.target;
+    const fetchedVideoData = player.getVideoData?.() ?? null;
+    const title = fetchedVideoData?.title ?? null;
+
+    const isVideoDataEqual = (
+      a: YouTubeVideoData | null,
+      b: YouTubeVideoData | null,
+    ) => {
+      if (a === b) return true;
+      if (!a || !b) return false;
+      return a.video_id === b.video_id && a.title === b.title;
+    };
+
+    if (title && title !== videoTitleRef.current) {
+      setVideoTitle(title);
+      videoTitleRef.current = title;
+    }
+
+    if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
+      setVideoData(fetchedVideoData);
+      videoDataRef.current = fetchedVideoData;
+    }
+
     player.playVideo();
     setIsPlaying(true);
 
@@ -531,6 +586,9 @@ const usePlayerControls = (
     playerKey,
     hideFutureSongs,
     videoId,
+    videoTitle,
+    videoData,
+    videoInfo,
     startTime,
     timedLiveCallText,
     setHideFutureSongs,
