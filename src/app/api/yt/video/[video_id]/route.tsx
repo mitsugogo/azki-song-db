@@ -7,51 +7,9 @@ type FetchVideoOutcome = {
   notFound: boolean;
 };
 
-const parseIsoDurationToSeconds = (duration: string | null | undefined) => {
-  if (!duration) return null;
-  const match = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(duration) ?? [];
-  const hours = match[1] ? Number.parseInt(match[1], 10) : 0;
-  const minutes = match[2] ? Number.parseInt(match[2], 10) : 0;
-  const seconds = match[3] ? Number.parseInt(match[3], 10) : 0;
-  return hours * 3600 + minutes * 60 + seconds;
-};
-
-const mapYouTubeDataApiResult = (
-  item: any,
-  videoId: string,
-): YouTubeApiVideoResult => {
-  const thumbnails = item?.snippet?.thumbnails
-    ? Object.values(item.snippet.thumbnails).map((t: any) => ({
-        url: t?.url ?? null,
-        width: t?.width ?? null,
-        height: t?.height ?? null,
-      }))
-    : null;
-
-  return {
-    id: item?.id ?? videoId,
-    title: item?.snippet?.title ?? null,
-    author: item?.snippet?.channelTitle ?? null,
-    uploadDate: item?.snippet?.publishedAt ?? null,
-    viewCount: item?.statistics?.viewCount
-      ? Number.parseInt(item.statistics.viewCount, 10)
-      : null,
-    isLiveContent: item?.snippet?.liveBroadcastContent === "live",
-    thumbnails,
-    likeCount: item?.statistics?.likeCount
-      ? Number.parseInt(item.statistics.likeCount, 10)
-      : null,
-    tags: Array.isArray(item?.snippet?.tags) ? item.snippet.tags : [],
-    description: item?.snippet?.description ?? null,
-    duration: parseIsoDurationToSeconds(item?.contentDetails?.duration),
-    chapters: [],
-    music: null,
-    lastFetchedAt: new Date().toISOString(),
-  };
-};
-
 const fetchFromYouTubeDataApi = async (
   videoId: string,
+  hl: string,
 ): Promise<FetchVideoOutcome> => {
   const apiKey = process.env.YOUTUBE_DATA_API_KEY;
   if (!apiKey) {
@@ -65,8 +23,20 @@ const fetchFromYouTubeDataApi = async (
     });
 
     const response = await youtubeData.videos.list({
-      part: ["id", "snippet", "statistics", "contentDetails"],
+      part: [
+        "id",
+        "snippet",
+        "statistics",
+        "contentDetails",
+        "liveStreamingDetails",
+        "status",
+        "topicDetails",
+        "recordingDetails",
+        "player",
+        "localizations",
+      ],
       id: [videoId],
+      hl: hl,
     });
 
     const item = response?.data?.items?.[0];
@@ -75,7 +45,7 @@ const fetchFromYouTubeDataApi = async (
     }
 
     return {
-      result: mapYouTubeDataApiResult(item, videoId),
+      result: { ...item, lastFetchedAt: new Date().toISOString() },
       notFound: false,
     };
   } catch (error) {
@@ -86,9 +56,9 @@ const fetchFromYouTubeDataApi = async (
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ video_id: string }> },
+  { params }: { params: Promise<{ video_id: string; hl?: string }> },
 ) {
-  const { video_id } = await params;
+  const { video_id, hl } = await params;
   if (!video_id) {
     return NextResponse.json(
       { error: "video_id is required" },
@@ -96,13 +66,17 @@ export async function GET(
     );
   }
 
+  // TODO:言語コードごとに取得するとAPIレートが厳しそうなので、今は日本語で固定
+  // 将来的にはキャッシュを工夫して対応する
+  const language = "ja";
+
   // YouTube Data API を使って動画情報を取得
-  const result = await fetchFromYouTubeDataApi(video_id);
+  const result = await fetchFromYouTubeDataApi(video_id, language);
   if (result.result) {
     return NextResponse.json(result.result, {
       headers: {
         "Cache-Control":
-          "max-age=3600, s-maxage=3600, stale-while-revalidate=300",
+          "max-age=3600, s-maxage=86400, stale-while-revalidate=300",
       },
     });
   }

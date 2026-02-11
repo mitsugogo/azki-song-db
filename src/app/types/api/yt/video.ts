@@ -1,3 +1,5 @@
+import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
+
 // 詳細な API 用型定義 — /api/yt/video が返す構造に対応
 export interface Thumbnail {
   url: string | null;
@@ -18,22 +20,6 @@ export interface Chapter {
   endTime?: number | null;
 }
 
-export interface YouTubeApiVideoResult {
-  id: string;
-  title: string | null;
-  author: string | null;
-  uploadDate: string | null;
-  viewCount: number | null;
-  isLiveContent: boolean;
-  thumbnails: Thumbnail[] | null;
-  likeCount?: number | null;
-  tags: string[];
-  description: string | null;
-  duration: number | null;
-  chapters: Chapter[];
-  music?: MusicInfo | null;
+export interface YouTubeApiVideoResult extends youtube_v3.Schema$Video {
   lastFetchedAt: string;
-
-  // その他の未知のプロパティを許容
-  [key: string]: any;
 }
