@@ -8,7 +8,7 @@ import Link from "next/link";
 import { FaThumbsUp } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { Tooltip } from "flowbite-react";
 import useChannels from "../hook/useChannels";
 import { ChannelEntry } from "../types/api/yt/channels";
@@ -231,6 +231,11 @@ const NowPlayingSongInfo = ({
 }: NowPlayingSongInfoProps) => {
   const { channels: channelsRegistry, isLoading: channelsLoading } =
     useChannels();
+
+  // debug!!
+  useEffect(() => {
+    console.log("videoData:", videoData);
+  }, [videoData]);
 
   const channelsByArtist = useMemo(() => {
     const map = new Map<string, ChannelEntry>();
@@ -477,7 +482,7 @@ const NowPlayingSongInfo = ({
                     </div>
                   </div>
 
-                  {hasAuthorInRegistry && (
+                  {hasAuthorInRegistry && videoInfo?.lastFetchedAt && (
                     <div className="hidden md:flex flex-col items-start gap-1 self-start mr-1 bg-gray-50/20 dark:bg-gray-800 rounded-md px-6 py-1">
                       {loading ? (
                         <div className="flex flex-col gap-1">
