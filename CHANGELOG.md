@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.30.0](https://github.com/mitsugogo/azki-song-db/compare/v1.29.3...v1.30.0) (2026-02-11)
+
+
+### Features
+
+* チャンネル名、動画詳細表示に対応 ([c2c06c7](https://github.com/mitsugogo/azki-song-db/commit/c2c06c724117bfae89a0a434959195104e37a089))
+
+
+### Bug Fixes
+
+* プレイリストを作成が開かないバグを修正 ([a507f4a](https://github.com/mitsugogo/azki-song-db/commit/a507f4a0cdc204da0ebf84f21538c2c315c545a9))
+* ミニプレイヤー移行時に音量の維持がされないのを修正 ([e4d5782](https://github.com/mitsugogo/azki-song-db/commit/e4d5782c5a3e43428a8107e6b99d64a700904c4e))
+* ミュートが維持されないことがあるのを修正 ([52dbd0d](https://github.com/mitsugogo/azki-song-db/commit/52dbd0d331bb25cd8401340f8b4bee57d184c04e))
+* 公式チャンネル系のアイコン画像が出ないのを修正 ([d07174d](https://github.com/mitsugogo/azki-song-db/commit/d07174d3f20e8cc7457d199a8dd2f56de07eaf78))
+
 ### [1.29.3](https://github.com/mitsugogo/azki-song-db/compare/v1.29.2...v1.29.3) (2026-02-07)
 
 
