@@ -153,7 +153,7 @@ const MainChannelInfo = ({
   if (collabChs && collabChs.length <= 2) {
     const collabs = collabChs.slice(0, 2);
     return (
-      <div className="inline-flex flex-wrap items-start content-start gap-x-2 gap-y-1 min-w-0">
+      <div className="inline-flex items-start gap-x-2 gap-y-1 min-w-0">
         <div className="shrink-0 self-start">
           <TooltipGroup openDelay={100} closeDelay={100}>
             <AvatarGroup>
@@ -239,7 +239,7 @@ const MainChannelInfo = ({
           </Link>
         </div>
 
-        <div className="hidden lg:flex flex-wrap items-start gap-x-4 gap-y-1 ml-1 min-w-0 self-start">
+        <div className="hidden lg:flex flex-nowrap items-center gap-x-4 ml-1 min-w-0 self-start overflow-hidden">
           {collabs.map((c, idx) => (
             <Link
               key={c.channelUrl ?? c.id ?? c.name ?? `collab-${idx}`}
@@ -566,9 +566,9 @@ const NowPlayingSongInfo = ({
                           return (
                             <>
                               <div
-                                className={`flex flex-wrap items-start gap-1 ${unitName ? "border border-blue-300/30 dark:border-blue-900/30 px-2 py-1 rounded-md relative bg-blue-50 dark:bg-blue-950/30" : ""}`}
+                                className={`flex flex-wrap items-center gap-2 ${unitName ? "border border-blue-300/30 dark:border-blue-900/30 px-2 py-1 rounded-md relative bg-blue-50 dark:bg-blue-950/30" : ""}`}
                               >
-                                <div className="flex min-w-0 flex-1 flex-wrap items-start gap-1">
+                                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                                   {shown.map((ch) => (
                                     <MainChannelInfo
                                       key={
@@ -597,7 +597,7 @@ const NowPlayingSongInfo = ({
                                     onClick={() =>
                                       setShowAllChannels((v) => !v)
                                     }
-                                    className={`flex flex-none text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
+                                    className={`ml-auto flex flex-none text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
                                   >
                                     {showAllChannels
                                       ? `折りたたむ`
