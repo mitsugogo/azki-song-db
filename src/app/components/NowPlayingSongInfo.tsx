@@ -153,7 +153,7 @@ const MainChannelInfo = ({
   if (collabChs && collabChs.length <= 2) {
     const collabs = collabChs.slice(0, 2);
     return (
-      <div className="flex flex-wrap items-start content-start gap-x-2 gap-y-1 min-w-0">
+      <div className="inline-flex flex-wrap items-start content-start gap-x-2 gap-y-1 min-w-0">
         <div className="shrink-0 self-start">
           <TooltipGroup openDelay={100} closeDelay={100}>
             <AvatarGroup>
@@ -566,28 +566,30 @@ const NowPlayingSongInfo = ({
                           return (
                             <>
                               <div
-                                className={`flex items-center gap-1 ${unitName ? "border border-blue-300/30 dark:border-blue-900/30 px-2 py-1 rounded-md relative bg-blue-50 dark:bg-blue-950/30" : ""}`}
+                                className={`flex flex-wrap items-start gap-1 ${unitName ? "border border-blue-300/30 dark:border-blue-900/30 px-2 py-1 rounded-md relative bg-blue-50 dark:bg-blue-950/30" : ""}`}
                               >
-                                {shown.map((ch) => (
-                                  <MainChannelInfo
-                                    key={
-                                      ch.channelUrl ??
-                                      ch.id ??
-                                      ch.name ??
-                                      "channel"
-                                    }
-                                    ch={ch}
-                                    collabChs={
-                                      remaining >= 1
-                                        ? dedupedChannels.slice(
-                                            shown.length,
-                                            shown.length +
-                                              Math.min(5, remaining),
-                                          )
-                                        : undefined
-                                    }
-                                  />
-                                ))}
+                                <div className="flex min-w-0 flex-1 flex-wrap items-start gap-1">
+                                  {shown.map((ch) => (
+                                    <MainChannelInfo
+                                      key={
+                                        ch.channelUrl ??
+                                        ch.id ??
+                                        ch.name ??
+                                        "channel"
+                                      }
+                                      ch={ch}
+                                      collabChs={
+                                        remaining >= 1
+                                          ? dedupedChannels.slice(
+                                              shown.length,
+                                              shown.length +
+                                                Math.min(5, remaining),
+                                            )
+                                          : undefined
+                                      }
+                                    />
+                                  ))}
+                                </div>
 
                                 {remaining > 0 && (
                                   <button
@@ -595,7 +597,7 @@ const NowPlayingSongInfo = ({
                                     onClick={() =>
                                       setShowAllChannels((v) => !v)
                                     }
-                                    className={`flex text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
+                                    className={`flex flex-none text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
                                   >
                                     {showAllChannels
                                       ? `折りたたむ`
