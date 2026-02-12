@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.30.2](https://github.com/mitsugogo/azki-song-db/compare/v1.30.1...v1.30.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* チャンネル登録者数が出ない場合があるのを修正 ([2579ee8](https://github.com/mitsugogo/azki-song-db/commit/2579ee85d7563b2945f493e150d59a6bc585144c))
+
 ### [1.30.1](https://github.com/mitsugogo/azki-song-db/compare/v1.30.0...v1.30.1) (2026-02-11)
 
 ## [1.30.0](https://github.com/mitsugogo/azki-song-db/compare/v1.29.3...v1.30.0) (2026-02-11)
