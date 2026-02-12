@@ -77,6 +77,7 @@ export async function GET() {
       const v = row[idx];
       return (
         v?.userEnteredValue?.stringValue ??
+        v?.userEnteredValue?.numberValue ??
         v?.formattedValue ??
         ""
       ).toString();
@@ -107,7 +108,9 @@ export async function GET() {
           idxChannelName >= 0 ? getCellString(row, idxChannelName).trim() : "",
         handle: idxHandle >= 0 ? getCellString(row, idxHandle).trim() : "",
         subscriberCount:
-          idxSubscribers >= 0 ? getCellString(row, idxSubscribers).trim() : "",
+          idxSubscribers >= 0
+            ? Number(getCellString(row, idxSubscribers).trim() ?? 0)
+            : 0,
         iconUrl:
           idxIcon >= 0
             ? getCellHyperlink(row, idxIcon) ||

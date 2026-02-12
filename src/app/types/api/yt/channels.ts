@@ -6,7 +6,7 @@ export interface ChannelEntry {
   youtubeId: string;
   channelName: string;
   handle: string;
-  subscriberCount: string;
+  subscriberCount: number;
   iconUrl: string;
 }
 

@@ -89,6 +89,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
             ["rgba(99,102,241,0.12)", "rgba(99,102,241,0.6)"],
             ["rgba(16,185,129,0.12)", "rgba(16,185,129,0.6)"],
             ["rgba(234,88,12,0.12)", "rgba(234,88,12,0.6)"],
+            ["rgba(219,39,119,0.12)", "rgba(219,39,119,0.6)"],
           ];
 
           const visualRanges = VISUAL_CHANGES.map((v) => {
