@@ -290,7 +290,7 @@ test.describe("同一動画内での曲切り替え", () => {
     await page.keyboard.press("ArrowRight");
 
     // 少し待つ
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
 
     // 時間が進んでいることを確認
     const afterRightTime = await timeElement.textContent();
