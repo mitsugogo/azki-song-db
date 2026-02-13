@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { Options } from "youtube-player/dist/types";
+import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 
 interface YouTubePlayerProps {
   song: Song;
@@ -9,8 +10,8 @@ interface YouTubePlayerProps {
   startTime?: number;
   disableEnd?: boolean;
   showNativeControls?: boolean;
-  onReady: (event: YouTubeEvent<number>) => void;
-  onStateChange: (event: YouTubeEvent<number>) => void;
+  onReady: (event: YouTubeEvent<any>) => void;
+  onStateChange: (event: YouTubeEvent<any>) => void;
 }
 
 function YouTubePlayerComponent({
