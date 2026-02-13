@@ -279,6 +279,19 @@ test.describe("同一動画内での曲切り替え", () => {
     // ページにフォーカスを当てる
     await page.focus("body");
 
+    // 「オリ曲」を検索して絞り込み
+    const searchInput = page
+      .getByRole("textbox", { name: "曲名、アーティスト、タグなどで検索" })
+      .first();
+    await searchInput.fill("オリ曲");
+    await searchInput.press("Enter");
+    await page.waitForTimeout(3000);
+
+    // 曲リストの最初の曲をクリックして再生
+    const songItems = page.locator("#song-list").locator("li");
+    await songItems.first().click();
+    await page.waitForTimeout(1000);
+
     // 現在の時間を取得
     const timeElement = page
       .locator("span")
