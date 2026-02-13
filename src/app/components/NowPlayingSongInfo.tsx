@@ -373,11 +373,6 @@ const NowPlayingSongInfo = ({
   const { channels: channelsRegistry, isLoading: channelsLoading } =
     useChannels();
 
-  // debug!!
-  useEffect(() => {
-    console.log("videoData:", videoData);
-  }, [videoData]);
-
   const channelsByArtist = useMemo(() => {
     const map = new Map<string, ChannelEntry>();
     channelsRegistry.forEach((entry) => {
