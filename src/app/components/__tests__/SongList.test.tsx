@@ -119,6 +119,15 @@ const renderSongList = (
   songs: Song[],
   options?: Partial<{ currentSong: Song | null; hideFuture: boolean }>,
 ) => {
+  // 仮想アイテムをsongsの長さに合わせて設定
+  virtualItems = createVirtualItems(songs.length);
+  mockVirtualizer.getVirtualItems.mockImplementation(() =>
+    virtualItems.map((item) => ({ ...item })),
+  );
+  mockVirtualizer.getTotalSize.mockImplementation(() =>
+    virtualItems.length ? virtualItems[virtualItems.length - 1].end + 100 : 0,
+  );
+
   render(
     <SongsList
       songs={songs}
@@ -132,19 +141,13 @@ const renderSongList = (
 let virtualItems: VirtualRow[] = [];
 
 beforeEach(() => {
-  virtualItems = createVirtualItems(50);
-  window.innerWidth = 500;
-
-  mockVirtualizer.getVirtualItems.mockImplementation(() =>
-    virtualItems.map((item) => ({ ...item })),
-  );
-  mockVirtualizer.getTotalSize.mockImplementation(() =>
-    virtualItems.length ? virtualItems[virtualItems.length - 1].end + 100 : 0,
-  );
+  // リセット
   mockVirtualizer.scrollToIndex.mockClear();
   mockVirtualizer.getVirtualItems.mockClear();
   mockVirtualizer.getTotalSize.mockClear();
   mockVirtualizer.measureElement.mockClear();
+
+  window.innerWidth = 500;
 });
 
 afterEach(() => {
@@ -198,9 +201,7 @@ describe("SongsList", () => {
 
     renderSongList(songs);
 
-    await waitFor(() =>
-      expect(screen.getByTestId("year-pager")).toBeInTheDocument(),
-    );
+    expect(screen.getByTestId("year-pager")).toBeInTheDocument();
     expect(screen.getAllByTestId("song-list-item")).toHaveLength(16);
   });
 
@@ -215,7 +216,7 @@ describe("SongsList", () => {
 
     renderSongList(songs);
 
-    await waitFor(() => expect(screen.queryByTestId("year-pager")).toBeNull());
+    expect(screen.queryByTestId("year-pager")).toBeNull();
   });
 
   it("marks songs after the current one as hidden when hideFutureSongs is enabled", async () => {
@@ -228,7 +229,7 @@ describe("SongsList", () => {
 
     renderSongList(songs, { currentSong: songs[1], hideFuture: true });
 
-    const items = await screen.findAllByTestId("song-list-item");
+    const items = screen.getAllByTestId("song-list-item");
     expect(items).toHaveLength(4);
     expect(items[0]).toHaveAttribute("data-is-hide", "false");
     expect(items[1]).toHaveAttribute("data-is-hide", "false");
