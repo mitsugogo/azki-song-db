@@ -159,7 +159,10 @@ export default function PlayerControlsBar({
 
   // seek start/end are handled by parent via optional handlers
   return (
-    <div className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm">
+    <div
+      id="player-controls-bar"
+      className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
+    >
       {/* Progress Bar */}
       <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-4">
         <div className="relative flex-1">
@@ -494,10 +497,16 @@ export default function PlayerControlsBar({
           </div>
 
           <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
-            <div className="line-clamp-1 text-sm font-medium text-white select-none">
+            <div
+              className="line-clamp-1 text-sm font-medium text-white select-none"
+              aria-label="曲名"
+            >
               {displaySongTitle}
             </div>
-            <div className="line-clamp-1 text-xs text-white/60 select-none">
+            <div
+              className="line-clamp-1 text-xs text-white/60 select-none"
+              aria-label="アーティスト"
+            >
               {displaySongArtist}
             </div>
           </div>

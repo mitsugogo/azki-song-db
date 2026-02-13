@@ -674,6 +674,73 @@ describe("usePlayerControls", () => {
       expect(result.current.startTime).toBe(50);
       expect(result.current.currentSong?.title).toBe("Song D");
     });
+
+    it("start/endの指定がある楽曲が一つの動画で連続再生される場合、正しくシークされる", () => {
+      const videoSongs: Song[] = [
+        {
+          video_id: "vidSeq",
+          start: "30",
+          end: "90",
+          title: "Segment 1",
+          artist: "Artist S",
+          album: "",
+          album_list_uri: "",
+          album_release_at: "",
+          album_is_compilation: false,
+          sing: "",
+          video_title: "",
+          video_uri: "",
+          broadcast_at: "",
+          year: 0,
+          tags: [],
+          milestones: [],
+          lyricist: "",
+          composer: "",
+          arranger: "",
+        },
+        {
+          video_id: "vidSeq",
+          start: "100",
+          end: "150",
+          title: "Segment 2",
+          artist: "Artist S",
+          album: "",
+          album_list_uri: "",
+          album_release_at: "",
+          album_is_compilation: false,
+          sing: "",
+          video_title: "",
+          video_uri: "",
+          broadcast_at: "",
+          year: 0,
+          tags: [],
+          milestones: [],
+          lyricist: "",
+          composer: "",
+          arranger: "",
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        usePlayerControls(videoSongs, videoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(videoSongs[0]);
+      });
+
+      expect(result.current.currentSong?.title).toBe("Segment 1");
+
+      // 同一動画内で次の曲に切り替え
+      act(() => {
+        result.current.changeCurrentSong(videoSongs[1]);
+      });
+
+      // startに基づいて正しくシークされる
+      expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(100);
+      expect(result.current.currentSong?.title).toBe("Segment 2");
+    });
   });
 
   describe("handlePlayerOnReady", () => {
@@ -884,7 +951,7 @@ describe("usePlayerControls", () => {
           target: player,
           data: YouTube.PlayerState.PLAYING,
         } as any);
-        vi.advanceTimersByTime(500);
+        vi.advanceTimersByTime(3001); // 手動変更の猶予時間を過ぎる
         vi.advanceTimersByTime(500);
       });
 
@@ -921,7 +988,7 @@ describe("usePlayerControls", () => {
         vi.advanceTimersByTime(500);
       });
 
-      expect(result.current.currentSong?.start).toBe("200");
+      expect(result.current.currentSong?.start).toBe("100");
     });
   });
 });

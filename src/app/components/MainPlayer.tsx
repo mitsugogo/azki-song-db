@@ -350,7 +350,7 @@ export default function MainPlayer() {
           playerDuration > 0
             ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
             : Math.max(absoluteSeconds, 0);
-        playerRef.current.seekTo(boundedAbsolute, true);
+        playerRef.current?.seekTo(boundedAbsolute, true);
         globalPlayer.setCurrentTime(boundedAbsolute);
       } catch (error) {
         console.error("Failed to seek:", error);

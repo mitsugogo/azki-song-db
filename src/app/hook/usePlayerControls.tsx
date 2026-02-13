@@ -262,11 +262,21 @@ const usePlayerControls = (
       setPreviousAndNextSongs(song, songs);
 
       // === 同一動画内での曲変更 ===
-      if (
-        youtubeVideoIdRef.current &&
-        targetVideoId &&
-        youtubeVideoIdRef.current === targetVideoId
-      ) {
+      const isSameVideo =
+        Boolean(youtubeVideoIdRef.current) &&
+        youtubeVideoIdRef.current === targetVideoId;
+      const isSameAsCurrentSong =
+        currentSong?.video_id && currentSong.video_id === targetVideoId;
+      const isSameAsVideoIdState = videoId && videoId === targetVideoId;
+
+      if (isSameVideo || isSameAsCurrentSong || isSameAsVideoIdState) {
+        youtubeVideoIdRef.current = targetVideoId;
+        if (!options?.skipSeek) {
+          isManualChangeInProgressRef.current = true;
+          lastManualChangeRef.current = Date.now();
+          setStartTime(targetStartTime);
+          setPlayerKey((prevKey) => prevKey + 1);
+        }
         setCurrentSong(song);
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
@@ -465,15 +475,13 @@ const usePlayerControls = (
           }
 
           // 手動変更中フラグのチェック
+          const now = Date.now();
+          const elapsed = now - lastManualChangeRef.current;
           const shouldBlockAutoChange =
-            isManualChangeInProgressRef.current &&
-            Date.now() - lastManualChangeRef.current <= 3000;
+            isManualChangeInProgressRef.current && elapsed <= 3000;
 
-          // 一定時間経過したらフラグをクリア
-          if (
-            shouldBlockAutoChange &&
-            Date.now() - lastManualChangeRef.current > 300
-          ) {
+          // 手動変更の猶予時間が過ぎたらフラグをクリア
+          if (isManualChangeInProgressRef.current && elapsed > 3000) {
             isManualChangeInProgressRef.current = false;
           }
 
