@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
-import YouTube, { YouTubeEvent } from "react-youtube";
+import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
+
+// YouTubePlayer に getVideoData メソッドを追加した拡張型
+type YouTubePlayerWithVideoData = YouTubePlayer & {
+  getVideoData: () => YouTubeVideoData;
+};
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
@@ -371,7 +376,7 @@ const usePlayerControls = (
   );
 
   const handleStateChange = useCallback(
-    (event: YouTubeEvent<number>) => {
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       const player = event.target;
       const fetchedVideoData = player.getVideoData?.() ?? null;
       const videoId = fetchedVideoData?.video_id;
@@ -422,7 +427,7 @@ const usePlayerControls = (
 
         // 再生中の監視タイマー
         intervalRef.current = setInterval(() => {
-          const currentTime = player.getCurrentTime();
+          const currentTime = Number(player.getCurrentTime());
           const currentVideoId = player.getVideoData()?.video_id;
 
           if (!currentVideoId) {
@@ -495,7 +500,7 @@ const usePlayerControls = (
             return;
           }
 
-          if (foundSong?.end && foundSong.end < currentTime) {
+          if (foundSong?.end && Number(foundSong.end ?? 0) < currentTime) {
             clearMonitorInterval();
             if (autoNextSong) {
               changeCurrentSongRef.current(autoNextSong);
@@ -547,42 +552,45 @@ const usePlayerControls = (
 
   const { videoInfo } = useYoutubeVideoInfo(videoId);
 
-  const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
-    const player = event.target;
-    const fetchedVideoData = player.getVideoData?.() ?? null;
-    const title = fetchedVideoData?.title ?? null;
+  const handlePlayerOnReady = useCallback(
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+      const player = event.target;
+      const fetchedVideoData = player.getVideoData?.() ?? null;
+      const title = fetchedVideoData?.title ?? null;
 
-    const isVideoDataEqual = (
-      a: YouTubeVideoData | null,
-      b: YouTubeVideoData | null,
-    ) => {
-      if (a === b) return true;
-      if (!a || !b) return false;
-      return a.video_id === b.video_id && a.title === b.title;
-    };
+      const isVideoDataEqual = (
+        a: YouTubeVideoData | null,
+        b: YouTubeVideoData | null,
+      ) => {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        return a.video_id === b.video_id && a.title === b.title;
+      };
 
-    if (title && title !== videoTitleRef.current) {
-      setVideoTitle(title);
-      videoTitleRef.current = title;
-    }
+      if (title && title !== videoTitleRef.current) {
+        setVideoTitle(title);
+        videoTitleRef.current = title;
+      }
 
-    if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
-      setVideoData(fetchedVideoData);
-      videoDataRef.current = fetchedVideoData;
-    }
+      if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
+        setVideoData(fetchedVideoData);
+        videoDataRef.current = fetchedVideoData;
+      }
 
-    player.playVideo();
-    setIsPlaying(true);
+      player.playVideo();
+      setIsPlaying(true);
 
-    // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("v") || url.searchParams.has("t")) {
-      url.searchParams.delete("v");
-      url.searchParams.delete("t");
-      window.history.replaceState(null, "", url.toString());
-      window.dispatchEvent(new Event("replacestate"));
-    }
-  }, []);
+      // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("v") || url.searchParams.has("t")) {
+        url.searchParams.delete("v");
+        url.searchParams.delete("t");
+        window.history.replaceState(null, "", url.toString());
+        window.dispatchEvent(new Event("replacestate"));
+      }
+    },
+    [],
+  );
 
   return {
     currentSong,
