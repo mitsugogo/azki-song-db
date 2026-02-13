@@ -19,6 +19,7 @@ blob-report/
 test-results/
 playwright/.cache/
 e2e/.cache/
+.playwright-mcp
 
 # next.js
 /.next/
