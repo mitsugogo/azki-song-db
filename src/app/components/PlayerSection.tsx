@@ -13,6 +13,7 @@ import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
 import MobileActionButtons from "./MobileActionButtons";
+import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 
@@ -46,8 +47,12 @@ type PlayerSectionProps = {
   videoInfo?: YouTubeApiVideoResult | null;
   startTime?: number;
   timedLiveCallText?: string;
-  handlePlayerOnReady: (event: YouTubeEvent) => void;
-  handleStateChange: (event: YouTubeEvent) => void;
+  handlePlayerOnReady: (
+    event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
+  ) => void;
+  handleStateChange: (
+    event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
+  ) => void;
   changeCurrentSong: (
     song: Song | null,
     videoId?: string,
@@ -162,8 +167,12 @@ export default function PlayerSection({
                 video_id={videoId}
                 startTime={startTime}
                 disableEnd={hasNextInVideo}
-                onReady={handlePlayerOnReady}
-                onStateChange={handleStateChange}
+                onReady={
+                  handlePlayerOnReady as (event: YouTubeEvent<any>) => void
+                }
+                onStateChange={
+                  handleStateChange as (event: YouTubeEvent<any>) => void
+                }
               />
             )}
           </div>

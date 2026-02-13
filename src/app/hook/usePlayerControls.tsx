@@ -617,3 +617,4 @@ const usePlayerControls = (
 };
 
 export default usePlayerControls;
+export type { YouTubePlayerWithVideoData };

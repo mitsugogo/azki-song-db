@@ -5,7 +5,13 @@ import { useLocalStorage } from "@mantine/hooks";
 import usePlayerControls from "./usePlayerControls";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { Song } from "../types/song";
-import type { YouTubeEvent } from "react-youtube";
+import type { YouTubeEvent, YouTubePlayer } from "react-youtube";
+import type { YouTubeVideoData } from "../types/youtube";
+
+// YouTubePlayer に getVideoData メソッドを追加した拡張型
+type YouTubePlayerWithVideoData = YouTubePlayer & {
+  getVideoData: () => YouTubeVideoData;
+};
 
 type UseMainPlayerControlsOptions = {
   songs: Song[];
@@ -107,7 +113,7 @@ export default function useMainPlayerControls({
   );
 
   const handlePlayerOnReady = useCallback(
-    (event: YouTubeEvent<number>) => {
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandlePlayerOnReady(event);
       playerRef.current = event.target;
       updatePlayerSnapshot(event.target);
@@ -146,7 +152,7 @@ export default function useMainPlayerControls({
   );
 
   const handlePlayerStateChange = useCallback(
-    (event: YouTubeEvent<number>) => {
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandleStateChange(event);
       updatePlayerSnapshot(event.target);
     },
