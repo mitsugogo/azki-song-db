@@ -274,4 +274,36 @@ test.describe("同一動画内での曲切り替え", () => {
       idATitleText,
     );
   });
+
+  test("キーボードの左右キーでシークできる", async ({ page }) => {
+    // ページにフォーカスを当てる
+    await page.focus("body");
+
+    // 現在の時間を取得
+    const timeElement = page
+      .locator("span")
+      .filter({ hasText: /^\d+:\d+$/ })
+      .first();
+    const initialTime = await timeElement.textContent();
+
+    // 右キーを押して10秒進める
+    await page.keyboard.press("ArrowRight");
+
+    // 少し待つ
+    await page.waitForTimeout(500);
+
+    // 時間が進んでいることを確認
+    const afterRightTime = await timeElement.textContent();
+    expect(afterRightTime).not.toBe(initialTime);
+
+    // 左キーを押して10秒戻す
+    await page.keyboard.press("ArrowLeft");
+
+    // 少し待つ
+    await page.waitForTimeout(500);
+
+    // 時間が戻っていることを確認
+    const afterLeftTime = await timeElement.textContent();
+    expect(afterLeftTime).not.toBe(afterRightTime);
+  });
 });
