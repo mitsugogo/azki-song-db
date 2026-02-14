@@ -270,7 +270,7 @@ describe("usePlayerControls", () => {
     });
 
     expect(result.current.hideFutureSongs).toBe(false);
-    expect(localStorage.getItem("hideFutureSongs")).toBeNull();
+    expect(localStorage.getItem("hideFutureSongs")).toBe("false");
   });
 
   it("localStorageからhideFutureSongsを復元できる", () => {
