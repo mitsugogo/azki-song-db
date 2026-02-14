@@ -28,6 +28,7 @@ export default function usePlayerVolume(
           playerRef.current.setVolume(clampedVolume);
         }
         setPlayerVolume(clampedVolume);
+
         // if volume is increased from 0, clear muted flag
         if (clampedVolume > 0 && isMuted) {
           try {
@@ -36,6 +37,14 @@ export default function usePlayerVolume(
             }
           } catch (_) {}
           setIsMuted(false);
+        } else if (clampedVolume === 0 && !isMuted) {
+          // 音量が0になったらミュート扱いにする
+          try {
+            if (typeof playerRef.current.mute === "function") {
+              playerRef.current.mute();
+            }
+          } catch (_) {}
+          setIsMuted(true);
         }
       } catch (error) {
         // ignore errors from player not being fully ready

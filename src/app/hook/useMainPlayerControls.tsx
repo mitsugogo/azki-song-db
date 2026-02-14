@@ -175,6 +175,14 @@ export default function useMainPlayerControls({
             }
           } catch (_) {}
           setIsMuted(false);
+        } else if (clampedVolume === 0 && !isMuted) {
+          // 音量が0になったらミュート扱いにする
+          try {
+            if (typeof playerRef.current.mute === "function") {
+              playerRef.current.mute();
+            }
+          } catch (_) {}
+          setIsMuted(true);
         }
       } catch (_) {
         // ignore
