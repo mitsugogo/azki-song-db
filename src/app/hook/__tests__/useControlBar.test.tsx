@@ -101,4 +101,44 @@ describe("useControlBar (seek behavior)", () => {
     });
     expect(mockPlayerControls.seekTo).toHaveBeenCalledTimes(1);
   });
+
+  it("異なる動画の次へ操作ではseekは呼ばれず changeCurrentSong のみ行われる", () => {
+    const mockChangeCurrentSong = vi.fn();
+    const differentSong: Song = { ...songB, video_id: "vidY", start: "10" };
+
+    const mockPlayerControls = {
+      isReady: true,
+      play: () => {},
+      pause: () => {},
+      seekTo: vi.fn(),
+      setVolume: () => {},
+      currentTime: 0,
+      seekInFlight: null,
+      volume: 100,
+      duration: 600,
+      isMuted: false,
+    } as any;
+
+    const { result } = renderHook(() =>
+      useControlBar({
+        allSongs: [songA, differentSong],
+        currentSong: songA,
+        nextSong: differentSong,
+        isPlaying: false,
+        playerControls: mockPlayerControls,
+        changeCurrentSong: mockChangeCurrentSong,
+      }),
+    );
+
+    act(() => {
+      result.current.handleNext();
+    });
+
+    expect(mockChangeCurrentSong).toHaveBeenCalledWith(
+      differentSong,
+      differentSong.video_id,
+      Number(differentSong.start),
+    );
+    expect(mockPlayerControls.seekTo).not.toHaveBeenCalled();
+  });
 });

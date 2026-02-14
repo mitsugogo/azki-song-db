@@ -140,6 +140,33 @@ describe("useMainPlayerControls", () => {
     expect(result.current.playerControls.isReady).toBe(true);
   });
 
+  it("曲を異なるvideoへ変更したときにplayerControls.isReadyがfalseになる", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+
+    act(() => {
+      // 最初の曲を選択してプレイヤーを準備する
+      result.current.changeCurrentSong(mockSongs[0]);
+      result.current.handlePlayerOnReady({ target: mockPlayer } as any);
+    });
+
+    expect(result.current.playerControls.isReady).toBe(true);
+
+    act(() => {
+      // 異なるvideoに切り替える
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    expect(result.current.playerControls.isReady).toBe(false);
+  });
+
   it("キーボードイベントでシークできる", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({
