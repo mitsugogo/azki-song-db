@@ -3,6 +3,7 @@ import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  distDir: process.env.NEXT_PLW ? ".next-playwright" : ".next",
   images: {
     remotePatterns: [new URL("https://img.youtube.com/**")],
     unoptimized: true,

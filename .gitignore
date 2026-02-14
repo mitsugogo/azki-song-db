@@ -20,6 +20,7 @@ test-results/
 playwright/.cache/
 e2e/.cache/
 .playwright-mcp
+.next-playwright
 
 # next.js
 /.next/
