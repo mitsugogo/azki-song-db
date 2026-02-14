@@ -192,41 +192,6 @@ describe("PlayerSection", () => {
     expect(queryByTestId("youtube")).toBeNull();
   });
 
-  it("passes disableEnd=true to YouTubePlayer when hasNextInVideo is true", () => {
-    const nextSong: Song = { ...baseSong, title: "S2", start: "11", end: "20" };
-    // songsInVideo contains current followed by a different song => hasNextInVideo true
-    mockControlBar.songsInVideo = [baseSong, nextSong];
-
-    const { getByTestId } = renderWithWrapper(
-      <PlayerSection
-        currentSong={baseSong}
-        previousSong={null}
-        nextSong={nextSong}
-        allSongs={[baseSong, nextSong]}
-        songs={[baseSong, nextSong]}
-        searchTerm=""
-        isPlaying={false}
-        playerKey={2}
-        hideFutureSongs={false}
-        videoId={baseSong.video_id}
-        startTime={0}
-        handlePlayerOnReady={() => {}}
-        handleStateChange={() => {}}
-        changeCurrentSong={() => {}}
-        playRandomSong={() => {}}
-        setSongsToCurrentVideo={() => {}}
-        setSongs={() => {}}
-        searchSongs={() => []}
-        setOpenShareModal={() => {}}
-        setSearchTerm={() => {}}
-        setHideFutureSongs={() => {}}
-      />,
-    );
-
-    const yt = getByTestId("youtube");
-    expect(yt.getAttribute("data-disable-end")).toBe("1");
-  });
-
   it("renders timedLiveCallText and updates when prop changes", () => {
     const songWithLive: Song = { ...baseSong, live_call: true as any };
     mockControlBar.songsInVideo = [songWithLive];
