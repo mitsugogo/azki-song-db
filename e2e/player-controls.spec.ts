@@ -144,90 +144,91 @@ test.describe("Player Control Bar", () => {
     expect(true).toBe(true);
   });
 
-  test("start/endの指定がある楽曲が一つの動画で連続再生される場合、正しくシークされる", async ({
-    page,
-  }) => {
-    // 検索窓に「ぺこーら24」と入力して絞り込み
-    // NOTE:「ぺこーら24」は同一動画内でstart/end指定がある楽曲が2つ(ロウワーとHappinessが)存在する。
-    const searchInput = page.getByRole("textbox", { name: /検索/ }).first();
-    await searchInput.fill("ぺこーら24");
-    await searchInput.press("Enter");
-    await page.waitForTimeout(3000);
+  for (const keyword of ["ぺこーら24", "そらのハロウィンパーティ"]) {
+    test(`start/endの指定がある楽曲が一つの動画で連続再生される場合、正しくシークされる (${keyword})`, async ({
+      page,
+    }) => {
+      // 検索窓にキーワードを入力して絞り込み
+      const searchInput = page.getByRole("textbox", { name: /検索/ }).first();
+      await searchInput.fill(keyword);
+      await searchInput.press("Enter");
+      await page.waitForTimeout(3000);
 
-    // song list の要素（data属性で video-id と start-time が付与されている）
-    const songItems = page.locator("#song-list").locator("li");
-    const count = await songItems.count();
+      // song list の要素（data属性で video-id と start-time が付与されている）
+      const songItems = page.locator("#song-list").locator("li");
+      const count = await songItems.count();
 
-    // 同じ video_id を持つアイテムを探す
-    const map: Record<string, number[]> = {};
-    for (let i = 0; i < count; i++) {
-      const el = songItems.nth(i);
-      const vid = await el.getAttribute("data-video-id");
-      const start = Number((await el.getAttribute("data-start-time")) || 0);
-      if (!vid) continue;
-      map[vid] = map[vid] || [];
-      map[vid].push(i);
-      if (map[vid].length >= 2) break;
-    }
+      // 同じ video_id を持つアイテムを探す
+      const map: Record<string, number[]> = {};
+      for (let i = 0; i < count; i++) {
+        const el = songItems.nth(i);
+        const vid = await el.getAttribute("data-video-id");
+        const start = Number((await el.getAttribute("data-start-time")) || 0);
+        if (!vid) continue;
+        map[vid] = map[vid] || [];
+        map[vid].push(i);
+        if (map[vid].length >= 2) break;
+      }
 
-    // 見つかった video_id を選択（なければテストをスキップ扱いで通す）
-    const pair = Object.values(map).find((arr) => arr.length >= 2);
-    if (!pair) {
-      expect(true).toBe(true);
-      return;
-    }
+      // 見つかった video_id を選択（なければテストをスキップ扱いで通す）
+      const pair = Object.values(map).find((arr) => arr.length >= 2);
+      if (!pair) {
+        expect(true).toBe(true);
+        return;
+      }
 
-    const idxA = pair[0];
-    const idxB = pair[1];
+      const idxA = pair[0];
+      const idxB = pair[1];
 
-    // 先に再生する曲と次の曲の start を取得
-    const startA = Number(
-      (await songItems.nth(idxA).getAttribute("data-start-time")) || 0,
-    );
-    const startB = Number(
-      (await songItems.nth(idxB).getAttribute("data-start-time")) || 0,
-    );
-    const videoId = await songItems.nth(idxA).getAttribute("data-video-id");
+      // 先に再生する曲と次の曲の start を取得
+      const startA = Number(
+        (await songItems.nth(idxA).getAttribute("data-start-time")) || 0,
+      );
+      const startB = Number(
+        (await songItems.nth(idxB).getAttribute("data-start-time")) || 0,
+      );
+      const videoId = await songItems.nth(idxA).getAttribute("data-video-id");
 
-    // 小さい方を videoStart とする
-    const videoStart = Math.min(startA, startB);
+      // 小さい方を videoStart とする
+      const videoStart = Math.min(startA, startB);
 
-    // 最初の曲をクリックして再生
-    await songItems.nth(idxA).click();
-    await page.waitForTimeout(500);
+      // 最初の曲をクリックして再生
+      await songItems.nth(idxA).click();
+      await page.waitForTimeout(500);
 
-    // iframe は同じ videoId を使っていること
-    const frameSrc = await page
-      .locator('iframe[src*="youtube.com"]')
-      .first()
-      .getAttribute("src");
-    const iframeVid = frameSrc?.match(/\/embed\/([^?]+)/)?.[1];
-    expect(iframeVid).toBe(videoId);
+      // iframe は同じ videoId を使っていること
+      const frameSrc = await page
+        .locator('iframe[src*="youtube.com"]')
+        .first()
+        .getAttribute("src");
+      const iframeVid = frameSrc?.match(/\/embed\/([^?]+)/)?.[1];
+      expect(iframeVid).toBe(videoId);
 
-    // コントロールバーの現在曲名を取得
-    const idxATitle = page.locator("#player-controls-bar").getByLabel("曲名");
-    await expect(idxATitle).toBeVisible();
-    const idATitleText = await idxATitle.textContent();
-    expect(idATitleText).toBeTruthy();
+      // コントロールバーの現在曲名を取得
+      const idxATitle = page.locator("#player-controls-bar").getByLabel("曲名");
+      await expect(idxATitle).toBeVisible();
+      const idATitleText = await idxATitle.textContent();
+      expect(idATitleText).toBeTruthy();
 
-    // 同一動画内の次の曲をクリック（シークされるはず）
-    await songItems.nth(idxB).click();
-    await page.waitForTimeout(700);
+      // 同一動画内の次の曲をクリック（シークされるはず）
+      await songItems.nth(idxB).click();
+      await page.waitForTimeout(700);
 
-    // iframe の videoId は変わっていない（シークのみ）
-    const newFrameSrc = await page
-      .locator('iframe[src*="youtube.com"]')
-      .first()
-      .getAttribute("src");
-    const newIframeVid = newFrameSrc?.match(/\/embed\/([^?]+)/)?.[1];
-    expect(newIframeVid).toBe(videoId);
-    // コントロールバーの曲名が変わっている
-    const idxBTitle = page.locator("#player-controls-bar").getByLabel("曲名");
-    await expect(idxBTitle).toBeVisible();
-    expect(await idxBTitle.textContent(), "曲名が変わっていません").not.toBe(
-      idATitleText,
-    );
-  });
+      // iframe の videoId は変わっていない（シークのみ）
+      const newFrameSrc = await page
+        .locator('iframe[src*="youtube.com"]')
+        .first()
+        .getAttribute("src");
+      const newIframeVid = newFrameSrc?.match(/\/embed\/([^?]+)/)?.[1];
+      expect(newIframeVid).toBe(videoId);
+      // コントロールバーの曲名が変わっている
+      const idxBTitle = page.locator("#player-controls-bar").getByLabel("曲名");
+      await expect(idxBTitle).toBeVisible();
+      expect(await idxBTitle.textContent(), "曲名が変わっていません").not.toBe(
+        idATitleText,
+      );
+    });
+  }
 
   test("キーボードの左右キーでシークできる", async ({ page }) => {
     // ページにフォーカスを当てる
