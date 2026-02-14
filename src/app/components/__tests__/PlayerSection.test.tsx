@@ -44,7 +44,6 @@ let mockControlBar: any = {
   videoStartTime: 0,
   displayDuration: 0,
   tempSeekValue: 0,
-  setTempSeekValue: () => {},
   handleSeekChange: () => {},
   handleSeekStart: () => {},
   handleSeekEnd: () => {},

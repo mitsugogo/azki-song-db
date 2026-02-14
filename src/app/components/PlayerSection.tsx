@@ -199,7 +199,6 @@ export default function PlayerSection({
             videoStartTime={controlBar.videoStartTime}
             displayDuration={controlBar.displayDuration}
             tempSeekValue={controlBar.tempSeekValue}
-            setTempSeekValue={controlBar.setTempSeekValue}
             handleSeekChange={controlBar.handleSeekChange}
             onSeekStart={controlBar.handleSeekStart}
             onSeekEnd={controlBar.handleSeekEnd}

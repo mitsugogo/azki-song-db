@@ -323,6 +323,32 @@ describe("useMainPlayerControls", () => {
     expect(mockGlobalPlayer.setCurrentTime).toHaveBeenCalledWith(75);
   });
 
+  it("連続して同一時刻へシークされた場合は重複を抑止する", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+
+    act(() => {
+      result.current.handlePlayerOnReady({ target: mockPlayer } as any);
+    });
+
+    act(() => {
+      // 連続して同じ位置へシーク要求を出す
+      result.current.playerControls.seekTo(50);
+      result.current.playerControls.seekTo(50);
+    });
+
+    // 実プレイヤーへの seekTo 呼び出しは 1 回だけに抑止される
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(1);
+    expect(mockPlayer.seekTo).toHaveBeenCalledWith(50, true);
+  });
+
   it("currentSongがnullの場合、globalPlayerがリセットされる", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

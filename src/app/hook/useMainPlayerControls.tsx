@@ -32,6 +32,11 @@ export default function useMainPlayerControls({
   globalPlayer,
 }: UseMainPlayerControlsOptions) {
   const playerRef = useRef<any>(null);
+  const pendingSeekRef = useRef<number | null>(null);
+  // seek-in-flight tracking
+  const seekInFlightRef = useRef<number | null>(null);
+  const [seekInFlight, setSeekInFlight] = useState<number | null>(null);
+
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [playerDuration, setPlayerDuration] = useState(0);
   const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
@@ -139,6 +144,20 @@ export default function useMainPlayerControls({
       } else if (currentVideoId !== previousVideoId) {
         setHasRestoredPosition(false);
       }
+
+      // if any seek was requested before the player was ready, perform it now
+      if (pendingSeekRef.current !== null) {
+        try {
+          const s = pendingSeekRef.current;
+          pendingSeekRef.current = null;
+          if (typeof event.target.seekTo === "function") {
+            event.target.seekTo(s, true);
+            globalPlayer.setCurrentTime(s);
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
     },
     [
       originalHandlePlayerOnReady,
@@ -239,21 +258,83 @@ export default function useMainPlayerControls({
     }
   }, []);
 
+  // avoid issuing duplicate/concurrent seeks to the SAME absolute time
+  // - protects against UI + synthetic events causing duplicate player.seekTo calls
+  // - small time window tolerance (500ms) and value tolerance (0.25s)
+  const lastRequestedSeekRef = useRef<{ value: number; ts: number } | null>(
+    null,
+  );
+
   const seekToAbsolute = useCallback(
     (absoluteSeconds: number) => {
+      // debug
+      // eslint-disable-next-line no-console
+      console.debug("seekToAbsolute called", {
+        absoluteSeconds,
+        playerDuration,
+      });
+
+      // if player instance isn't ready yet, queue the seek for when it becomes ready
       if (
         !playerRef.current ||
         typeof playerRef.current.seekTo !== "function"
       ) {
+        pendingSeekRef.current = absoluteSeconds;
         return;
       }
+
       try {
         const boundedAbsolute =
           playerDuration > 0
             ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
             : Math.max(absoluteSeconds, 0);
+
+        // DEDUP: if a seek to the same time is currently in-flight, ignore it
+        if (
+          seekInFlightRef.current !== null &&
+          Math.abs((seekInFlightRef.current || 0) - boundedAbsolute) < 0.25
+        ) {
+          // already seeking to the same location — skip duplicate
+          return;
+        }
+
+        // DEDUP: ignore repeated identical requests within a short window
+        const now = Date.now();
+        const last = lastRequestedSeekRef.current;
+        if (
+          last &&
+          Math.abs(last.value - boundedAbsolute) < 0.25 &&
+          now - last.ts < 500
+        ) {
+          return;
+        }
+        lastRequestedSeekRef.current = { value: boundedAbsolute, ts: now };
+
+        // mark seek-in-flight (handshake)
+        seekInFlightRef.current = boundedAbsolute;
+        setSeekInFlight(boundedAbsolute);
+
+        // debug helper for E2E: expose last requested seek time to window
+        try {
+          (window as any).__lastSeekRequest = boundedAbsolute;
+        } catch (_) {}
+
         playerRef.current.seekTo(boundedAbsolute, true);
+
+        // optimistic update so UI reflects the committed seek immediately and
+        // avoids tempSeekValue being overwritten by a stale poll value.
+        try {
+          setPlayerCurrentTime(boundedAbsolute);
+        } catch (_) {}
         globalPlayer.setCurrentTime(boundedAbsolute);
+
+        // guard: clear stuck in-flight seek after 3s
+        setTimeout(() => {
+          if (seekInFlightRef.current === boundedAbsolute) {
+            seekInFlightRef.current = null;
+            setSeekInFlight(null);
+          }
+        }, 3000);
       } catch (error) {
         console.error("Failed to seek:", error);
       }
@@ -291,6 +372,19 @@ export default function useMainPlayerControls({
       ) {
         const currentTime = playerRef.current.getCurrentTime();
         if (Number.isFinite(currentTime)) {
+          // detect seek-in-flight completion
+          const inFlight = seekInFlightRef.current;
+          if (inFlight !== null && Math.abs(currentTime - inFlight) <= 1.0) {
+            // consider seek completed
+            seekInFlightRef.current = null;
+            setSeekInFlight(null);
+            // ensure UI reflects the final settled time
+            setPlayerCurrentTime(currentTime);
+            try {
+              globalPlayer.setCurrentTime(currentTime);
+            } catch (_) {}
+          }
+
           if (Math.abs(currentTime - lastTime) >= 0.25) {
             lastTime = currentTime;
             setPlayerCurrentTime(currentTime);
@@ -394,6 +488,8 @@ export default function useMainPlayerControls({
     mute: () => setMuted(true),
     unMute: () => setMuted(false),
     currentTime: playerCurrentTime,
+    /** currently requested seek (seconds) or null */
+    seekInFlight: seekInFlight,
     volume: playerVolume,
     isMuted,
     duration: playerDuration,
