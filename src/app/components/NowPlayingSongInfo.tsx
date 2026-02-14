@@ -10,12 +10,13 @@ import {
   Tooltip,
   TooltipGroup,
 } from "@mantine/core";
+import { useTextSelection } from "@mantine/hooks";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import Link from "next/link";
 import { FaPlus, FaThumbsUp, FaUsers } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState, useRef } from "react";
 import useChannels from "../hook/useChannels";
 import { ChannelEntry } from "../types/api/yt/channels";
 import { getCollabUnitName } from "../config/collabUnits";
@@ -58,10 +59,57 @@ const DescriptionCollapsible = ({
   const collapsedText = lines.slice(0, 3).join("\n");
   const formatedViewCount = formatViewCountJP(viewCount);
 
+  // Mantine hook: 現在のテキスト選択を取得
+  const selection = useTextSelection();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const preventToggleRef = useRef(false);
+
+  // MouseDown の段階で選択状態を確認しておく（click が選択を消す前に判定するため）
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const sel =
+      selection ??
+      (typeof window !== "undefined" ? window.getSelection() : null);
+    if (sel && sel.toString().trim().length > 0) {
+      const anchor = sel.anchorNode;
+      const focus = sel.focusNode;
+      const isInsideSelection =
+        (anchor && containerRef.current?.contains(anchor)) ||
+        (focus && containerRef.current?.contains(focus));
+      if (isInsideSelection) {
+        preventToggleRef.current = true;
+        // クリック後にフラグをリセット（安全のため短時間で）
+        setTimeout(() => {
+          preventToggleRef.current = false;
+        }, 0);
+      }
+    }
+  };
+
   const handleToggle = (e: React.MouseEvent) => {
     const el = e.target as HTMLElement;
     if (el.closest("a")) return; // リンククリックは展開/折りたたみしない
     if (!isTruncatable) return;
+
+    // MouseDown で判定したフラグが立っている場合はトグルしない
+    if (preventToggleRef.current) {
+      preventToggleRef.current = false;
+      return;
+    }
+
+    // 最終チェック: 現在の選択がコンポーネント内にあるなら無視する
+    const liveSelection =
+      selection ??
+      (typeof window !== "undefined" ? window.getSelection() : null);
+
+    if (liveSelection && liveSelection.toString().trim().length > 0) {
+      const anchor = liveSelection.anchorNode;
+      const focus = liveSelection.focusNode;
+      const isInsideSelection =
+        (anchor && containerRef.current?.contains(anchor)) ||
+        (focus && containerRef.current?.contains(focus));
+      if (isInsideSelection) return;
+    }
+
     setExpanded((v) => !v);
   };
 
@@ -75,6 +123,8 @@ const DescriptionCollapsible = ({
   return (
     <div>
       <div
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
         onClick={handleToggle}
         aria-expanded={expanded}
         className={`cursor-pointer rounded transition-colors p-0`}
@@ -120,7 +170,11 @@ const DescriptionCollapsible = ({
             )}
           </div>
         )}
-        {renderLinkedText(expanded || !isTruncatable ? text : collapsedText)}
+        <div
+          className={`${expanded ? "" : "line-clamp-3 select-none"} ${text.length > 200 ? "wrap-break-word" : "break-all"}`}
+        >
+          {renderLinkedText(expanded || !isTruncatable ? text : collapsedText)}
+        </div>
       </div>
 
       {isTruncatable && (
@@ -742,7 +796,7 @@ const NowPlayingSongInfo = ({
                     if (el.closest("a")) return;
                   }}
                   className={
-                    "whitespace-pre-wrap break-words text-sm text-foreground dark:text-white mt-2"
+                    "whitespace-pre-wrap wrap-break-word text-sm text-foreground dark:text-white mt-2"
                   }
                 >
                   <DescriptionCollapsible

@@ -66,6 +66,47 @@ test.describe("Player Control Bar", () => {
     );
   });
 
+  test("説明文の選択中は折りたたみトグルが発火しない", async ({ page }) => {
+    // 説明文が読み込まれるまで待機
+    await expect(page.getByText("E2E description line 1")).toBeVisible();
+
+    // 折りたたみトグル（'続きを表示' または '折りたたむ'）が表示されることを確認
+    const toggle = page.getByText(/続きを表示|折りたたむ/).first();
+    await expect(toggle).toBeVisible();
+    const initialToggleText = (await toggle.textContent()) || "";
+
+    // 説明文内のテキストを選択してから、同じ要素に対して click イベントを dispatch
+    const descText = page.getByText("E2E description line 1").first();
+    // Playwright のマウス操作でテキストをドラッグして選択（より実際のユーザー操作に近い）
+    const box = await descText.boundingBox();
+    if (box) {
+      const startX = box.x + 5;
+      const startY = box.y + box.height / 2;
+      const endX = box.x + Math.min(80, box.width - 5);
+      const endY = startY;
+
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(endX, endY, { steps: 5 });
+      await page.mouse.up();
+
+      // 選択したままクリック（mousedown -> click の順）
+      await page.mouse.move(startX + 2, startY);
+      await page.mouse.down();
+      await page.mouse.up();
+    } else {
+      throw new Error("failed to get bounding box for description element");
+    }
+
+    await page.waitForTimeout(200);
+
+    // トグルのテキストが変わっていないこと（選択中は toggle 発火しない）
+    const currentToggle = page.getByText(/続きを表示|折りたたむ/).first();
+    const currentToggleText = (await currentToggle.textContent()) || "";
+    expect(currentToggleText.trim()).toBe(initialToggleText.trim());
+    await expect(currentToggle).toBeVisible();
+  });
+
   test("異なる動画の曲を選択するとiframeのsrcが変わる", async ({ page }) => {
     // 初期のiframe URLを取得
     const initialFrameUrl = await page
