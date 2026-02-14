@@ -428,6 +428,36 @@ describe("useMainPlayerControls", () => {
     expect(result.current.playerControls.isMuted).toBe(false);
   });
 
+  it("ボリュームを0にするとミュートされ、永続化される", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    act(() => {
+      result.current.playerControls.setVolume(0);
+    });
+
+    expect(mockPlayer.setVolume).toHaveBeenCalledWith(0);
+    expect(mockPlayer.mute).toHaveBeenCalled();
+    expect(result.current.playerControls.isMuted).toBe(true);
+    expect(Storage.prototype.setItem).toHaveBeenCalledWith(
+      "player-muted",
+      "true",
+    );
+  });
+
   it("プレイヤーが準備されていない場合、操作が無視される", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

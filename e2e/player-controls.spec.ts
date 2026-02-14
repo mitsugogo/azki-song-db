@@ -65,91 +65,6 @@ test.describe("Player Control Bar", () => {
       initialLabel === "ミュート" ? "ミュート解除" : "ミュート",
     );
   });
-});
-
-test.describe("同一動画内での曲切り替え", () => {
-  test.beforeEach(async ({ page }) => {
-    await setupApiMocks(page);
-    await page.goto("/");
-    // 曲リストが表示されるまで待機
-    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
-    // 最初の曲をクリックして iframe を表示
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
-    await songItems.first().click();
-    // iframe が表示されるまで待機
-    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
-  });
-
-  test("曲リストから曲を選択すると曲情報が切り替わる", async ({ page }) => {
-    // 現在の曲タイトルを取得
-    const songTitle = page
-      .locator(".line-clamp-1.text-sm.font-medium.text-white")
-      .first();
-    const initialTitle = await songTitle.textContent();
-
-    // 曲リストから別の曲をクリック
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
-    const songCount = await songItems.count();
-
-    if (songCount > 1) {
-      // 2番目の曲をクリック
-      await songItems.nth(1).click();
-      await page.waitForTimeout(500);
-
-      // 曲タイトルが変わったことを確認
-      const newTitle = await songTitle.textContent();
-      expect(newTitle).not.toBe(initialTitle);
-    }
-  });
-
-  test("次の曲へボタンで同一動画内の曲に切り替わった場合、表示が更新される", async ({
-    page,
-  }) => {
-    // 曲タイトル要素
-    const songTitle = page
-      .locator(".line-clamp-1.text-sm.font-medium.text-white")
-      .first();
-    const initialTitle = await songTitle.textContent();
-
-    // 次の曲へボタンをクリック
-    const nextBtn = page.locator('button[aria-label="次の曲へ"]');
-    await expect(nextBtn).toBeVisible();
-
-    if (await nextBtn.isEnabled()) {
-      await nextBtn.click();
-      await page.waitForTimeout(500);
-
-      // 曲情報が切り替わることを確認
-      const newTitle = await songTitle.textContent();
-      expect(newTitle).toBeTruthy();
-      // 曲リストの設定によっては同じ曲に戻る可能性もあるため、タイトルが存在することのみ確認
-    }
-  });
-
-  test("曲選択時にURLパラメータが更新される", async ({ page }) => {
-    // 曲リストから曲をクリック
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
-    const songCount = await songItems.count();
-
-    if (songCount > 0) {
-      // 初期URLを取得
-      const initialUrl = page.url();
-
-      // 曲をクリック
-      await songItems.first().click();
-      await page.waitForTimeout(500);
-
-      // URLが更新されていることを確認（vパラメータが含まれる）
-      const newUrl = page.url();
-      expect(newUrl).toBeTruthy();
-    }
-  });
 
   test("異なる動画の曲を選択するとiframeのsrcが変わる", async ({ page }) => {
     // 初期のiframe URLを取得
@@ -193,9 +108,7 @@ test.describe("同一動画内での曲切り替え", () => {
   }) => {
     // 検索窓に「ぺこーら24」と入力して絞り込み
     // NOTE:「ぺこーら24」は同一動画内でstart/end指定がある楽曲が2つ(ロウワーとHappinessが)存在する。
-    const searchInput = page
-      .getByRole("textbox", { name: "曲名、アーティスト、タグなどで検索" })
-      .first();
+    const searchInput = page.getByRole("textbox", { name: /検索/ }).first();
     await searchInput.fill("ぺこーら24");
     await searchInput.press("Enter");
     await page.waitForTimeout(3000);
@@ -318,5 +231,90 @@ test.describe("同一動画内での曲切り替え", () => {
     // 時間が戻っていることを確認
     const afterLeftTime = await timeElement.textContent();
     expect(afterLeftTime).not.toBe(afterRightTime);
+  });
+});
+
+test.describe("同一動画内での曲切り替え", () => {
+  test.beforeEach(async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/");
+    // 曲リストが表示されるまで待機
+    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+    // 最初の曲をクリックして iframe を表示
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    await songItems.first().click();
+    // iframe が表示されるまで待機
+    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
+  });
+
+  test("曲リストから曲を選択すると曲情報が切り替わる", async ({ page }) => {
+    // 現在の曲タイトルを取得
+    const songTitle = page
+      .locator(".line-clamp-1.text-sm.font-medium.text-white")
+      .first();
+    const initialTitle = await songTitle.textContent();
+
+    // 曲リストから別の曲をクリック
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songCount = await songItems.count();
+
+    if (songCount > 1) {
+      // 2番目の曲をクリック
+      await songItems.nth(1).click();
+      await page.waitForTimeout(500);
+
+      // 曲タイトルが変わったことを確認
+      const newTitle = await songTitle.textContent();
+      expect(newTitle).not.toBe(initialTitle);
+    }
+  });
+
+  test("次の曲へボタンで同一動画内の曲に切り替わった場合、表示が更新される", async ({
+    page,
+  }) => {
+    // 曲タイトル要素
+    const songTitle = page
+      .locator(".line-clamp-1.text-sm.font-medium.text-white")
+      .first();
+    const initialTitle = await songTitle.textContent();
+
+    // 次の曲へボタンをクリック
+    const nextBtn = page.locator('button[aria-label="次の曲へ"]');
+    await expect(nextBtn).toBeVisible();
+
+    if (await nextBtn.isEnabled()) {
+      await nextBtn.click();
+      await page.waitForTimeout(500);
+
+      // 曲情報が切り替わることを確認
+      const newTitle = await songTitle.textContent();
+      expect(newTitle).toBeTruthy();
+      // 曲リストの設定によっては同じ曲に戻る可能性もあるため、タイトルが存在することのみ確認
+    }
+  });
+
+  test("曲選択時にURLパラメータが更新される", async ({ page }) => {
+    // 曲リストから曲をクリック
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songCount = await songItems.count();
+
+    if (songCount > 0) {
+      // 初期URLを取得
+      const initialUrl = page.url();
+
+      // 曲をクリック
+      await songItems.first().click();
+      await page.waitForTimeout(500);
+
+      // URLが更新されていることを確認（vパラメータが含まれる）
+      const newUrl = page.url();
+      expect(newUrl).toBeTruthy();
+    }
   });
 });
