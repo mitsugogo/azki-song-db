@@ -44,6 +44,7 @@ export default defineConfig({
     stderr: "pipe",
     env: {
       NEXT_PUBLIC_BASE_URL: baseURL,
+      NEXT_PLW: "true",
     },
   },
   projects: [
