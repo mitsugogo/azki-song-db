@@ -56,6 +56,7 @@ const usePlayerControls = (
   const youtubeVideoIdRef = useRef("");
   const lastManualChangeRef = useRef<number>(0);
   const isManualChangeInProgressRef = useRef<boolean>(false);
+  const lastEndClampRef = useRef<number>(0);
 
   // === ライブコール関連 ===
   const [timedLiveCallText, setTimedLiveCallText] = useState<string | null>(
@@ -270,7 +271,6 @@ const usePlayerControls = (
           isManualChangeInProgressRef.current = true;
           lastManualChangeRef.current = Date.now();
           setStartTime(targetStartTime);
-          setPlayerKey((prevKey) => prevKey + 1);
         }
         setCurrentSong(song);
         // skipSeekオプションがない場合はシークを行う
@@ -424,6 +424,29 @@ const usePlayerControls = (
             return;
           }
 
+          const videoSongs = songsByVideo.get(currentVideoId);
+          const lastEnd = videoSongs
+            ? videoSongs.reduce(
+                (max, song) => Math.max(max, Number(song.end || 0)),
+                0,
+              )
+            : 0;
+          if (lastEnd > 0 && currentTime > lastEnd + 0.5) {
+            const now = Date.now();
+            if (now - lastEndClampRef.current > 1000) {
+              lastEndClampRef.current = now;
+              try {
+                if (typeof player.seekTo === "function") {
+                  player.seekTo(lastEnd, true);
+                }
+                if (typeof player.pauseVideo === "function") {
+                  player.pauseVideo();
+                }
+              } catch (_) {}
+            }
+            return;
+          }
+
           // 現在時刻が指定秒数を超えて、かつ未表示のメッセージを探す
           const nextMessage = sortedTimedMessages.find(
             (msg) => currentTime + 1 >= msg.start && currentTime < msg.end,
@@ -449,6 +472,15 @@ const usePlayerControls = (
               s.start === foundSong?.start,
           );
 
+          try {
+            if (
+              document.documentElement.getAttribute("data-seek-dragging") ===
+              "1"
+            ) {
+              return;
+            }
+          } catch (_) {}
+
           // 自動切替: 同一動画内で再生位置が次の曲に移った場合、曲名を自動で更新する
           const currentPlayingVideoId = currentSongRef.current?.video_id;
           const isSameVideoPlaying =
@@ -463,9 +495,16 @@ const usePlayerControls = (
           ) {
             // 自動的な切り替えは ref 経由で最新の changeCurrentSong を呼ぶ
             // 自動遷移なのでシークはスキップ（表示のみ更新）
-            changeCurrentSongRef.current(foundSong, undefined, undefined, {
-              skipSeek: true,
-            });
+            isManualChangeInProgressRef.current = true;
+            lastManualChangeRef.current = Date.now();
+            changeCurrentSongRef.current(
+              foundSong,
+              foundSong.video_id,
+              Number(foundSong.start),
+              {
+                skipSeek: true,
+              },
+            );
             return;
           }
 

@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useState } from "react";
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FaPlay,
   FaPause,
@@ -11,7 +17,14 @@ import {
 import { LuVolume2, LuVolumeX } from "react-icons/lu";
 import { BiHide } from "react-icons/bi";
 import { Song } from "../types/song";
-import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
+import {
+  Menu,
+  MenuItem,
+  ScrollArea,
+  Slider,
+  Switch,
+  Tooltip,
+} from "@mantine/core";
 import { useClickOutside, useMediaQuery } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
@@ -31,11 +44,35 @@ type Hovered = {
 
 type CumulativeItem = {
   song: Song;
+  /**
+   * 自前シークバー上の曲の開始位置（動画開始からの累積時間）
+   */
   cumulativeStart: number;
+  /**
+   * 自前シークバー上の曲の終了位置（動画開始からの累積時間）。曲に終了位置がない場合は次の曲の開始位置、次の曲もない場合は動画の終了位置とする
+   */
   cumulativeEnd: number;
+
+  /**
+   * YouTubeの実際の動画内での曲の開始位置（動画開始からの時間）
+   */
   actualStart: number;
+  /**
+   * YouTubeの実際の動画内での曲の終了位置（動画開始からの時間）。曲に終了位置がない場合は次の曲の開始位置、次の曲もない場合は動画の終了位置とする
+   */
   actualEnd: number;
+  /**
+   * 曲の長さ
+   */
   duration: number;
+
+  /**
+   * スライダー表示上の開始/終了位置（display timeline 単位）
+   * - allSongsHaveEnd のとき: cumulative 単位（0..totalSongsDuration）
+   * - それ以外: video 時間を videoStartTime 基準にした値（0..displayDuration）
+   */
+  displayStart?: number;
+  displayEnd?: number;
 };
 
 type Props = {
@@ -48,8 +85,7 @@ type Props = {
   videoStartTime: number;
   displayDuration: number;
   tempSeekValue: number;
-  setTempSeekValue: (v: number) => void;
-  handleSeekChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleSeekChange: (value: number) => void;
   hoveredChapter: Hovered;
   setHoveredChapter: (h: Hovered) => void;
 
@@ -72,7 +108,7 @@ type Props = {
   showVolumeSlider: boolean;
   onVolumeChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSeekStart?: () => void;
-  onSeekEnd?: () => void;
+  onSeekEnd?: (value?: number) => void;
 
   // player settings
   currentSong: Song | null;
@@ -89,7 +125,6 @@ export default function PlayerControlsBar({
   videoStartTime,
   displayDuration,
   tempSeekValue,
-  setTempSeekValue,
   handleSeekChange,
   onSeekStart,
   onSeekEnd,
@@ -157,226 +192,413 @@ export default function PlayerControlsBar({
   // Volume slider hover state for PC
   const [isVolumeHovered, setIsVolumeHovered] = useState(false);
 
-  // seek start/end are handled by parent via optional handlers
+  const sliderMax = useMemo(() => {
+    return allSongsHaveEnd ? totalSongsDuration : displayDuration;
+  }, [allSongsHaveEnd, totalSongsDuration, displayDuration]);
+
+  const sliderRootRef = useRef<HTMLDivElement | null>(null);
+  const [trackInsets, setTrackInsets] = useState({ left: 0, right: 0 });
+
+  // チャプター計算
+  // `displayStart`/`displayEnd` は常に「スライダー上の表示単位」で統一する
+  // - allSongsHaveEnd のときは cumulative 単位 (0..totalSongsDuration)
+  // - それ以外は実時間を videoStartTime 基準にした値 (0..displayDuration)
+  const chapters: CumulativeItem[] = useMemo(() => {
+    if (allSongsHaveEnd) {
+      return songCumulativeMap.map((item) => ({
+        ...item,
+        displayStart: item.cumulativeStart,
+        displayEnd: item.cumulativeEnd,
+      }));
+    }
+    return songsInVideo.map((song, idx) => {
+      const start = Number(song.start);
+      const nextSong = songsInVideo[idx + 1];
+      const end =
+        song.end && Number(song.end) > 0
+          ? Number(song.end)
+          : nextSong
+            ? Number(nextSong.start)
+            : videoDuration;
+      return {
+        song,
+        cumulativeStart: start,
+        cumulativeEnd: end,
+        actualStart: start,
+        actualEnd: end,
+        duration: end - start,
+        displayStart: start - videoStartTime,
+        displayEnd: end - videoStartTime,
+      };
+    });
+  }, [allSongsHaveEnd, songCumulativeMap, songsInVideo]);
+
+  useEffect(() => {
+    const root = sliderRootRef.current;
+    if (!root) return;
+
+    const update = () => {
+      const track = root.querySelector(
+        ".youtube-progress-track",
+      ) as HTMLElement | null;
+      if (!track) return;
+      const rootRect = root.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
+
+      const left = Math.max(0, trackRect.left - rootRect.left);
+      const right = Math.max(0, rootRect.right - trackRect.right);
+      setTrackInsets((prev) =>
+        prev.left === left && prev.right === right ? prev : { left, right },
+      );
+
+      // Calculate visualTrackLeft (track left corrected by half thumb) and update
+      // Slider marks so they line up exactly with the visual red bar.
+      const thumbEl = root.querySelector(
+        ".youtube-progress-thumb",
+      ) as HTMLElement | null;
+      const halfThumb = thumbEl ? thumbEl.offsetWidth / 2 : 0;
+      const trackLeftRelToRoot = Math.max(0, trackRect.left - rootRect.left);
+      const visualTrackLeft = Math.max(0, trackLeftRelToRoot - halfThumb);
+      const trackWidthPx = trackRect.width;
+
+      // Position Mantine-generated marks (override their left to pixel-precise values)
+      try {
+        const markEls = Array.from(
+          root.querySelectorAll(".youtube-progress-mark"),
+        ) as HTMLElement[];
+        markEls.forEach((el, idx) => {
+          const ch = chapters[idx];
+          if (!ch) return;
+          const ds = ch.displayStart ?? 0;
+          const frac = sliderMax > 0 ? ds / sliderMax : 0;
+          const leftPx = visualTrackLeft + frac * trackWidthPx;
+          el.style.left = `${Math.round(leftPx)}px`;
+          // ensure no additional transform is applied (we set exact px left)
+          el.style.transform = "none";
+        });
+      } catch (_) {
+        // ignore
+      }
+
+      // Mirror Mantine's internal bar offset into the root so CSS can read it
+      try {
+        const bar = root.querySelector(
+          ".youtube-progress-bar-fill",
+        ) as HTMLElement | null;
+        let barOffsetPx = 0;
+
+        if (bar) {
+          const val = window
+            .getComputedStyle(bar)
+            .getPropertyValue("--slider-bar-offset")
+            .trim();
+          const m = val.match(/(-?\d+\.?\d*)px/);
+          if (m) barOffsetPx = Number(m[1]);
+        }
+
+        // fallback to thumb half width (positive) so CSS transform moves marks right
+        if (!barOffsetPx && halfThumb) barOffsetPx = halfThumb;
+
+        root.style.setProperty("--slider-bar-offset", `${barOffsetPx}px`);
+      } catch (_) {
+        // ignore
+      }
+    };
+
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [sliderMax]);
+
   return (
     <div
       id="player-controls-bar"
       className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
     >
       {/* Progress Bar */}
-      <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-4">
+      <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-2">
         <div className="relative flex-1">
           {/* Chapter markers */}
           {songsInVideo.length > 0 && (
             <div className="pointer-events-none absolute inset-0 flex mt-4 z-50">
-              {allSongsHaveEnd
-                ? // 空白を除いた連続表示
-                  songCumulativeMap.map((item, idx) => {
-                    const startPosition =
-                      totalSongsDuration > 0
-                        ? (item.cumulativeStart / totalSongsDuration) * 100
-                        : 0;
-                    const width =
-                      totalSongsDuration > 0
-                        ? (item.duration / totalSongsDuration) * 100
-                        : 0;
-                    const isHovered =
-                      hoveredChapter?.song?.title === item.song.title &&
-                      hoveredChapter?.song?.start === item.song.start;
+              {chapters.map((item, idx) => {
+                const ds = item.displayStart ?? 0;
+                const de = item.displayEnd ?? ds + item.duration;
+                const isHovered =
+                  hoveredChapter?.song?.title === item.song.title &&
+                  hoveredChapter?.song?.start === item.song.start;
 
-                    return (
-                      <div key={`chapter-${idx}`}>
-                        {isHovered && (
-                          <div
-                            className="absolute h-1.5 bg-white/30"
-                            style={{
-                              left: `${startPosition}%`,
-                              width: `${width}%`,
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                            }}
-                          />
-                        )}
-                        <div
-                          className="absolute h-1.5 w-0.5 bg-white/60"
-                          style={{
-                            left: `${startPosition}%`,
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                          }}
-                        />
-                      </div>
-                    );
-                  })
-                : // 絶対時間表示
-                  songsInVideo.map((song, idx) => {
-                    const songStart = Number(song.start);
-                    const nextSong = songsInVideo[idx + 1];
-                    const songEnd =
-                      song.end && Number(song.end) > 0
-                        ? Number(song.end)
-                        : nextSong
-                          ? Number(nextSong.start)
-                          : videoDuration;
-                    const seekBarRange = videoDuration - videoStartTime;
-                    const startPosition =
-                      seekBarRange > 0
-                        ? ((songStart - videoStartTime) / seekBarRange) * 100
-                        : 0;
-                    const endPosition =
-                      seekBarRange > 0
-                        ? ((songEnd - videoStartTime) / seekBarRange) * 100
-                        : 0;
-                    const width = endPosition - startPosition;
-                    const isHovered =
-                      hoveredChapter?.song?.title === song.title &&
-                      hoveredChapter?.song?.start === song.start;
+                // トラック DOM を基準に px 計算（tooltip と同じ座標系に揃える）
+                const trackEl = sliderRootRef.current?.querySelector(
+                  ".youtube-progress-track",
+                ) as HTMLElement | null;
+                const trackRect = trackEl?.getBoundingClientRect();
+                const parentRect =
+                  sliderRootRef.current?.parentElement?.getBoundingClientRect();
 
-                    return (
-                      <div key={`chapter-${idx}`}>
-                        {isHovered && (
-                          <div
-                            className="absolute h-1.5 bg-white/30"
-                            style={{
-                              left: `${startPosition}%`,
-                              width: `${width}%`,
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                            }}
-                          />
-                        )}
-                        <div
-                          className="absolute h-1.5 w-0.5 bg-white/60"
-                          style={{
-                            left: `${startPosition}%`,
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
+                const trackLeftRelToParent =
+                  trackRect && parentRect
+                    ? trackRect.left - parentRect.left
+                    : trackInsets.left;
+                const trackWidth =
+                  trackRect?.width ??
+                  Math.max(
+                    0,
+                    (sliderRootRef.current?.getBoundingClientRect().width ??
+                      0) -
+                      trackInsets.left -
+                      trackInsets.right,
+                  );
+
+                // まず Mantine が使っている CSS 変数 (--slider-bar-offset) を確認して
+                // bar の実際の開始オフセットが取得できればそれを使う。取得できなければ
+                // 既存の "thumb half" 補正をフォールバックで使用する。
+                const thumbEl = sliderRootRef.current?.querySelector(
+                  ".youtube-progress-thumb",
+                ) as HTMLElement | null;
+                const halfThumb = thumbEl ? thumbEl.offsetWidth / 2 : 0;
+
+                const barEl = sliderRootRef.current?.querySelector(
+                  ".youtube-progress-bar-fill",
+                ) as HTMLElement | null;
+                let barOffsetPx = 0;
+                try {
+                  const val = barEl
+                    ? window
+                        .getComputedStyle(barEl)
+                        .getPropertyValue("--slider-bar-offset")
+                    : "";
+                  const m = val.match(/(-?\d+\.?\d*)px/);
+                  if (m) barOffsetPx = Number(m[1]);
+                } catch (_) {
+                  barOffsetPx = 0;
+                }
+
+                const visualTrackLeft = Math.max(
+                  0,
+                  trackLeftRelToParent + (barOffsetPx || -halfThumb),
+                );
+
+                const startPx =
+                  sliderMax > 0 && trackWidth > 0
+                    ? visualTrackLeft + (ds / sliderMax) * trackWidth
+                    : undefined;
+                const widthPx =
+                  sliderMax > 0 && trackWidth > 0
+                    ? ((de - ds) / sliderMax) * trackWidth
+                    : undefined;
+
+                const startPct = sliderMax > 0 ? (ds / sliderMax) * 100 : 0;
+                const widthPct =
+                  sliderMax > 0 ? ((de - ds) / sliderMax) * 100 : 0;
+
+                return (
+                  <div key={`chapter-${idx}`}>
+                    {isHovered && (
+                      <div
+                        className="absolute h-1.5 bg-white/30"
+                        style={
+                          startPx != null && widthPx != null
+                            ? {
+                                left: `${startPx}px`,
+                                width: `${widthPx}px`,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                              }
+                            : {
+                                left: `${startPct}%`,
+                                width: `${widthPct}%`,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                              }
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          <input
-            type="range"
-            min={0}
-            max={allSongsHaveEnd ? totalSongsDuration : displayDuration}
-            value={tempSeekValue}
-            step="0.1"
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setTempSeekValue(Number(e.target.value))
-            }
-            onTouchStart={() => onSeekStart?.()}
-            onMouseDown={() => onSeekStart?.()}
-            onMouseUp={() => onSeekEnd?.()}
-            onTouchEnd={() => onSeekEnd?.()}
-            onChange={handleSeekChange}
-            onMouseMove={(e: React.MouseEvent<HTMLInputElement>) => {
-              if (songsInVideo.length === 0) return;
-
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const percentage = (x / rect.width) * 100;
-
-              let foundSongData: Hovered = null;
-
-              if (allSongsHaveEnd) {
-                const hoveredCumulativeTime =
-                  (totalSongsDuration * percentage) / 100;
-                const foundItem = songCumulativeMap.find((item) => {
-                  return (
-                    hoveredCumulativeTime >= item.cumulativeStart &&
-                    hoveredCumulativeTime <= item.cumulativeEnd
-                  );
-                });
-
-                if (foundItem) {
-                  const startPct =
-                    totalSongsDuration > 0
-                      ? foundItem.cumulativeStart / totalSongsDuration
-                      : 0;
-                  const widthPct =
-                    totalSongsDuration > 0
-                      ? foundItem.duration / totalSongsDuration
-                      : 0;
-                  const leftPx = startPct * rect.width;
-                  const widthPx = widthPct * rect.width;
-                  const centerPx = leftPx + widthPx / 2;
-
-                  foundSongData = {
-                    song: foundItem.song,
-                    x: centerPx,
-                    containerWidth: rect.width,
-                  };
+          <div
+            ref={sliderRootRef}
+            onPointerDownCapture={() => {
+              if (disabled) return;
+              try {
+                document.documentElement.setAttribute(
+                  "data-seek-dragging",
+                  "1",
+                );
+              } catch (_) {}
+              onSeekStart?.();
+            }}
+            onPointerUpCapture={() => {
+              if (disabled) return;
+              try {
+                document.documentElement.removeAttribute("data-seek-dragging");
+              } catch (_) {}
+              onSeekEnd?.(tempSeekValue);
+            }}
+            onPointerCancelCapture={() => {
+              if (disabled) return;
+              try {
+                document.documentElement.removeAttribute("data-seek-dragging");
+              } catch (_) {}
+              onSeekEnd?.(tempSeekValue);
+            }}
+          >
+            <Slider
+              min={0}
+              max={sliderMax}
+              value={tempSeekValue}
+              color="red"
+              step={0.1}
+              size="md"
+              label={(value: number) => {
+                // 00:00形式にフォーマット
+                const hours = Math.floor(value / 3600);
+                const minutes = Math.floor((value % 3600) / 60);
+                const seconds = Math.floor(value % 60);
+                if (hours > 0) {
+                  return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+                    .toString()
+                    .padStart(2, "0")}`;
                 }
-              } else {
-                const seekBarRange = videoDuration - videoStartTime;
-                const hoverTime =
-                  videoStartTime + (seekBarRange * percentage) / 100;
+                return `${minutes.toString().padStart(2, "0")}:${seconds
+                  .toString()
+                  .padStart(2, "0")}`;
+              }}
+              marks={chapters
+                .filter((it, idx) => idx !== 0)
+                .map((it: CumulativeItem) => ({
+                  value: it.displayStart ?? 0,
+                }))}
+              onChange={(value) => {
+                if (Array.isArray(value)) return;
+                handleSeekChange(value);
+              }}
+              onMouseMove={(e) => {
+                if (songsInVideo.length === 0) return;
 
-                const foundSong = songsInVideo
-                  .slice()
-                  .reverse()
-                  .find((s) => {
-                    const start = Number(s.start);
-                    const end = s.end ? Number(s.end) : Infinity;
-                    return hoverTime >= start && hoverTime < end;
+                // トラック要素を基準にマウス位置を算出（値→px のマッピングと一致させる）
+                const rootRect =
+                  sliderRootRef.current?.getBoundingClientRect() ??
+                  e.currentTarget.getBoundingClientRect();
+                const trackEl = sliderRootRef.current?.querySelector(
+                  ".youtube-progress-track",
+                ) as HTMLElement | null;
+                const trackRect = trackEl?.getBoundingClientRect() ?? rootRect;
+                const trackWidth = Math.max(
+                  0,
+                  trackRect.width - trackInsets.left - trackInsets.right,
+                );
+
+                const xRel = Math.min(
+                  trackWidth,
+                  Math.max(0, e.clientX - trackRect.left),
+                );
+                const percentage =
+                  trackWidth > 0 ? (xRel / trackWidth) * 100 : 0;
+
+                let foundSongData: Hovered = null;
+
+                // 表示単位（sliderMax）に基づく割合 -> 親幅(px) に変換して tooltip/x を統一
+                if (sliderMax > 0) {
+                  const displayValue = (sliderMax * percentage) / 100;
+                  const foundItem = chapters.find((item) => {
+                    const ds = item.displayStart ?? 0;
+                    const de = item.displayEnd ?? ds + item.duration;
+                    return displayValue >= ds && displayValue <= de;
                   });
 
-                if (foundSong) {
-                  const start = Number(foundSong.start);
-                  const nextSong = songsInVideo.find(
-                    (s) => Number(s.start) > start,
-                  );
-                  const songEnd =
-                    foundSong.end && Number(foundSong.end) > 0
-                      ? Number(foundSong.end)
-                      : nextSong
-                        ? Number(nextSong.start)
-                        : videoDuration;
+                  if (foundItem) {
+                    const ds = foundItem.displayStart ?? 0;
+                    const de = foundItem.displayEnd ?? ds + foundItem.duration;
 
-                  const seekBarRange = videoDuration - videoStartTime;
-                  const startPosPx =
-                    seekBarRange > 0
-                      ? ((start - videoStartTime) / seekBarRange) * rect.width
-                      : 0;
-                  const endPosPx =
-                    seekBarRange > 0
-                      ? ((songEnd - videoStartTime) / seekBarRange) * rect.width
-                      : 0;
-                  const centerPx = (startPosPx + endPosPx) / 2;
+                    // トラック要素を基準に center を px で計算して tooltip/x を合わせる
+                    const trackEl = sliderRootRef.current?.querySelector(
+                      ".youtube-progress-track",
+                    ) as HTMLElement | null;
+                    const trackRect = trackEl?.getBoundingClientRect();
+                    const parentRect =
+                      sliderRootRef.current?.parentElement?.getBoundingClientRect() ??
+                      e.currentTarget.getBoundingClientRect();
 
-                  foundSongData = {
-                    song: foundSong,
-                    x: centerPx,
-                    containerWidth: rect.width,
-                  };
+                    const trackLeftRelToParent =
+                      trackRect && parentRect
+                        ? trackRect.left - parentRect.left
+                        : trackInsets.left;
+                    const trackW =
+                      trackRect?.width ??
+                      Math.max(
+                        0,
+                        (sliderRootRef.current?.getBoundingClientRect().width ??
+                          0) -
+                          trackInsets.left -
+                          trackInsets.right,
+                      );
+
+                    const thumbEl = sliderRootRef.current?.querySelector(
+                      ".youtube-progress-thumb",
+                    ) as HTMLElement | null;
+                    const halfThumb = thumbEl ? thumbEl.offsetWidth / 2 : 0;
+
+                    const barEl = sliderRootRef.current?.querySelector(
+                      ".youtube-progress-bar-fill",
+                    ) as HTMLElement | null;
+                    let barOffsetPx = 0;
+                    try {
+                      const val = barEl
+                        ? window
+                            .getComputedStyle(barEl)
+                            .getPropertyValue("--slider-bar-offset")
+                        : "";
+                      const m = val.match(/(-?\d+\.?\d*)px/);
+                      if (m) barOffsetPx = Number(m[1]);
+                    } catch (_) {
+                      barOffsetPx = 0;
+                    }
+
+                    const visualTrackLeft = Math.max(
+                      0,
+                      trackLeftRelToParent + (barOffsetPx || -halfThumb),
+                    );
+
+                    const centerPxRelativeToParent =
+                      visualTrackLeft +
+                      ((ds + (de - ds) / 2) / sliderMax) * trackW;
+
+                    foundSongData = {
+                      song: foundItem.song,
+                      x: centerPxRelativeToParent,
+                      containerWidth: parentRect.width,
+                    };
+                  }
                 }
-              }
 
-              setHoveredChapter(foundSongData);
-            }}
-            onMouseLeave={() => setHoveredChapter(null)}
-            disabled={videoDuration <= 0 || disabled}
-            className="youtube-progress-bar relative z-20 w-full"
-            style={{
-              background: `linear-gradient(to right, #ff0000 0%, #ff0000 ${
-                displayDuration > 0
-                  ? (tempSeekValue / displayDuration) * 100
-                  : 0
-              }%, rgba(255,255,255,0.3) ${
-                displayDuration > 0
-                  ? (tempSeekValue / displayDuration) * 100
-                  : 0
-              }%, rgba(255,255,255,0.3) 100%)`,
-            }}
-          />
+                setHoveredChapter(foundSongData);
+              }}
+              onMouseLeave={() => setHoveredChapter(null)}
+              disabled={sliderMax <= 0 || disabled}
+              classNames={{
+                root: "youtube-progress-bar",
+                track: "youtube-progress-track",
+                bar: "youtube-progress-bar-fill",
+                thumb: "youtube-progress-thumb",
+                mark: "youtube-progress-mark",
+              }}
+              styles={{
+                track: { backgroundColor: "rgba(255,255,255,0.3)" },
+                bar: { backgroundColor: "#ff0000" },
+              }}
+              data-seek-slider
+            />
+          </div>
 
           {/* Chapter Tooltip */}
           {hoveredChapter && (
             <div
+              id="youtube-progress-bar-chapter-tooltip"
               className="pointer-events-none absolute z-50 max-w-xs rounded-lg bg-black/95 px-3 py-2 text-white shadow-2xl backdrop-blur-sm"
               style={{
                 left: `${hoveredChapter.x}px`,
@@ -389,7 +611,7 @@ export default function PlayerControlsBar({
                       : "translateX(-50%)",
               }}
             >
-              <div className="text-sm font-semibold">
+              <div className="text-sm font-semibold whitespace-nowrap">
                 {hoveredChapter.song.title}
               </div>
               <div className="text-xs text-white/70">

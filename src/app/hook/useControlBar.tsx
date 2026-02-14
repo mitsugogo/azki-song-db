@@ -28,6 +28,8 @@ type PlayerControls = {
   mute: () => void;
   unMute: () => void;
   currentTime: number;
+  /** If a seek is in-flight this is the requested target (seconds). */
+  seekInFlight?: number | null;
   volume: number;
   duration: number;
   isMuted?: boolean;
@@ -157,7 +159,11 @@ export default function useControlBar({
     (actualTime: number): number => {
       if (!allSongsHaveEnd) return actualTime - videoStartTime;
 
-      for (const item of songCumulativeMap) {
+      for (let i = 0; i < songCumulativeMap.length; i += 1) {
+        const item = songCumulativeMap[i];
+        if (actualTime < item.actualStart) {
+          return i > 0 ? songCumulativeMap[i - 1].cumulativeEnd : 0;
+        }
         if (actualTime >= item.actualStart && actualTime <= item.actualEnd) {
           const offset = actualTime - item.actualStart;
           return item.cumulativeStart + offset;
@@ -208,15 +214,42 @@ export default function useControlBar({
   const [tempSeekValue, setTempSeekValue] = useState(displayCurrentTime);
   const isSeekingRef = useRef(false);
   const lastSeekTimeRef = useRef<number>(0);
+  const suppressSyncUntilRef = useRef<number>(0);
 
   // tempシーク値をdisplayCurrentTimeの変化に応じて更新
   useEffect(() => {
+    // If a seek is in-flight on the player side, do not sync UI -> avoids
+    // overwriting the user's committed thumb while the player is still moving.
+    if (playerControls?.seekInFlight) return;
+    try {
+      if (document.documentElement.getAttribute("data-seek-dragging") === "1") {
+        return;
+      }
+    } catch (_) {}
     if (isSeekingRef.current) return;
+    if (suppressSyncUntilRef.current > Date.now()) return;
     setTempSeekValue(displayCurrentTime);
-  }, [displayCurrentTime]);
+  }, [displayCurrentTime, playerControls?.seekInFlight]);
+
+  // Clear UI locks/suppression immediately when the currentSong changes so
+  // the seek bar updates right away after the user selects a different song.
+  useEffect(() => {
+    try {
+      if (document.documentElement.getAttribute("data-seek-dragging") === "1") {
+        return;
+      }
+    } catch (_) {}
+    isSeekingRef.current = false;
+    // force immediate UI update to reflect the newly selected song
+    setTempSeekValue(displayCurrentTime);
+  }, [currentSong?.video_id, currentSong?.start, displayCurrentTime]);
 
   const seekToFromDisplayValue = useCallback(
     (displayValue: number, force = false) => {
+      // debug
+      // eslint-disable-next-line no-console
+      console.debug("seekToFromDisplayValue", { displayValue, force });
+
       if (!playerControls) return;
 
       if (isSeekingRef.current && !force) {
@@ -226,6 +259,8 @@ export default function useControlBar({
       const actualTime = allSongsHaveEnd
         ? cumulativeToActual(displayValue)
         : displayValue + videoStartTime;
+
+      // no-op
 
       const targetSong = songsInVideo
         .sort((a: Song, b: Song) => Number(b.start) - Number(a.start))
@@ -260,24 +295,36 @@ export default function useControlBar({
     ],
   );
 
-  const handleSeekChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const nextValue = Number(event.target.value);
-      setTempSeekValue(nextValue);
-      seekToFromDisplayValue(nextValue);
-    },
-    [seekToFromDisplayValue],
-  );
+  const handleSeekChange = useCallback((nextValue: number) => {
+    if (!Number.isFinite(nextValue)) return;
+    if (!isSeekingRef.current) {
+      isSeekingRef.current = true;
+    }
+    suppressSyncUntilRef.current = Date.now() + 10000;
+    setTempSeekValue(nextValue);
+  }, []);
 
   const handleSeekStart = useCallback(() => {
     isSeekingRef.current = true;
+    suppressSyncUntilRef.current = Date.now() + 10000;
   }, []);
 
-  const handleSeekEnd = useCallback(() => {
-    if (!isSeekingRef.current) return;
-    isSeekingRef.current = false;
-    seekToFromDisplayValue(tempSeekValue, true);
-  }, [tempSeekValue, seekToFromDisplayValue]);
+  const handleSeekEnd = useCallback(
+    (value?: number) => {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        setTempSeekValue(value);
+      }
+      if (!isSeekingRef.current && typeof value !== "number") return;
+      isSeekingRef.current = false;
+      suppressSyncUntilRef.current = 0;
+      const targetValue =
+        typeof value === "number" && Number.isFinite(value)
+          ? value
+          : tempSeekValue;
+      seekToFromDisplayValue(targetValue, true);
+    },
+    [tempSeekValue, seekToFromDisplayValue],
+  );
 
   // 空白時間の自動スキップ
   useEffect(() => {
@@ -468,7 +515,6 @@ export default function useControlBar({
 
     // シーク
     tempSeekValue,
-    setTempSeekValue,
     handleSeekChange,
     handleSeekStart,
     handleSeekEnd,

@@ -80,20 +80,22 @@ if (typeof window !== "undefined" && !window.matchMedia) {
 }
 
 describe("PlayerControlsBar", () => {
-  let onTogglePlay: ReturnType<typeof vi.fn>;
-  let onNext: ReturnType<typeof vi.fn>;
-  let onVolumeIconClick: ReturnType<typeof vi.fn>;
-  let onOpenShareModal: ReturnType<typeof vi.fn>;
-  let setHideFutureSongs: ReturnType<typeof vi.fn>;
-  let onVolumeChange: ReturnType<typeof vi.fn>;
+  let onTogglePlay: () => void;
+  let onNext: () => void;
+  let onVolumeIconClick: () => void;
+  let onOpenShareModal: () => void;
+  let setHideFutureSongs: (value: boolean) => void;
+  let onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   beforeEach(() => {
-    onTogglePlay = vi.fn();
-    onNext = vi.fn();
-    onVolumeIconClick = vi.fn();
-    onOpenShareModal = vi.fn();
-    setHideFutureSongs = vi.fn();
-    onVolumeChange = vi.fn();
+    onTogglePlay = vi.fn() as unknown as () => void;
+    onNext = vi.fn() as unknown as () => void;
+    onVolumeIconClick = vi.fn() as unknown as () => void;
+    onOpenShareModal = vi.fn() as unknown as () => void;
+    setHideFutureSongs = vi.fn() as unknown as (value: boolean) => void;
+    onVolumeChange = vi.fn() as unknown as (
+      e: React.ChangeEvent<HTMLInputElement>,
+    ) => void;
     vi.clearAllMocks();
   });
 
@@ -108,7 +110,6 @@ describe("PlayerControlsBar", () => {
         videoStartTime={0}
         displayDuration={100}
         tempSeekValue={0}
-        setTempSeekValue={() => {}}
         handleSeekChange={() => {}}
         hoveredChapter={null}
         setHoveredChapter={() => {}}
@@ -136,9 +137,7 @@ describe("PlayerControlsBar", () => {
       />,
       {
         wrapper: ({ children }) => (
-          <MantineProvider withGlobalStyles withNormalizeCSS>
-            {children}
-          </MantineProvider>
+          <MantineProvider>{children}</MantineProvider>
         ),
       },
     );
@@ -207,5 +206,177 @@ describe("PlayerControlsBar", () => {
     });
     fireEvent.click(switchInput);
     expect(setHideFutureSongs).toHaveBeenCalledWith(true);
+  });
+
+  it("progress bar が存在する", () => {
+    const { container } = renderComponent();
+    const slider = container.querySelector(
+      "[data-seek-slider] [role='slider']",
+    );
+    expect(slider).toBeTruthy();
+  });
+
+  it("pointerdown should call onSeekStart", () => {
+    const onSeekStart = vi.fn();
+    const { container } = renderComponent({
+      onSeekStart,
+    });
+    const sliderRoot = container.querySelector(
+      "[data-seek-slider]",
+    )! as HTMLElement;
+
+    fireEvent.pointerDown(sliderRoot);
+
+    expect(onSeekStart).toHaveBeenCalled();
+  });
+
+  it("hover tooltip and highlight align (absolute time mode)", () => {
+    const songsInVideo = [
+      { ...baseSong, start: "10", title: "Song A" },
+      { ...baseSong, start: "40", title: "Song B" },
+    ];
+
+    // mount a small wrapper to let setHoveredChapter update hoveredChapter prop
+    const Wrapper = () => {
+      const [hovered, setHovered] = React.useState<null | any>(null);
+      return (
+        <PlayerControlsBar
+          songsInVideo={songsInVideo}
+          allSongsHaveEnd={false}
+          songCumulativeMap={[]}
+          totalSongsDuration={0}
+          videoDuration={100}
+          videoStartTime={0}
+          displayDuration={100}
+          tempSeekValue={0}
+          handleSeekChange={() => {}}
+          onSeekStart={() => {}}
+          onSeekEnd={() => {}}
+          hoveredChapter={hovered}
+          setHoveredChapter={setHovered}
+          isPlaying={false}
+          onTogglePlay={() => {}}
+          disabled={false}
+          isMuted={false}
+          onNext={() => {}}
+          nextDisabled={false}
+          formattedCurrentTime="0:00"
+          formattedDuration="1:40"
+          displaySongTitle="Title"
+          displaySongArtist="Artist"
+          onOpenShareModal={() => {}}
+          volumeValue={50}
+          tempVolumeValue={50}
+          onVolumeIconClick={() => {}}
+          isTouchDevice={false}
+          showVolumeSlider={false}
+          onVolumeChange={() => {}}
+          currentSong={baseSong}
+          hideFutureSongs={false}
+          setHideFutureSongs={() => {}}
+        />
+      );
+    };
+
+    const { container } = render(<Wrapper />, {
+      wrapper: ({ children }) => <MantineProvider>{children}</MantineProvider>,
+    });
+
+    const sliderRoot = container.querySelector(
+      "[data-seek-slider]",
+    )! as HTMLElement;
+    const track = container.querySelector(
+      ".youtube-progress-track",
+    )! as HTMLElement;
+    const wrapper = sliderRoot.parentElement! as HTMLElement; // div ref={sliderRootRef}
+    const parent = wrapper.parentElement! as HTMLElement; // relative flex-1 container
+
+    // mock sliderRoot and track rects so px 計算が確定する
+    Object.defineProperty(sliderRoot, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        left: 0,
+        top: 0,
+        width: 200,
+        height: 20,
+        right: 200,
+        bottom: 20,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      }),
+    });
+    Object.defineProperty(track, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        left: 10,
+        top: 0,
+        width: 180,
+        height: 8,
+        right: 190,
+        bottom: 8,
+        x: 10,
+        y: 0,
+        toJSON: () => {},
+      }),
+    });
+
+    // mock thumb size (used to compute visual bar-start)
+    const thumb = container.querySelector(
+      ".youtube-progress-thumb",
+    ) as HTMLElement | null;
+    if (thumb) {
+      Object.defineProperty(thumb, "offsetWidth", {
+        configurable: true,
+        value: 8,
+      });
+    }
+
+    // mock parent (tooltip/overlay container) width so percentage -> px conversion is deterministic
+    Object.defineProperty(parent, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        left: 0,
+        top: 0,
+        width: 200,
+        height: 20,
+        right: 200,
+        bottom: 20,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      }),
+    });
+
+    // hover roughly at the center of the first song (start=10 end=40)
+    const centerPct = (10 + (40 - 10) / 2) / 100; // 0.25
+    const clientX = Math.round(centerPct * 200);
+
+    fireEvent.mouseMove(track, { clientX });
+
+    // tooltip should show Song A
+    const tooltip = container.querySelector(
+      "#youtube-progress-bar-chapter-tooltip",
+    );
+    expect(tooltip).toBeTruthy();
+    expect(tooltip!.textContent).toContain("Song A");
+
+    // the hovered translucent overlay should exist and match expected percent
+    const overlay = Array.from(container.querySelectorAll("div")).find((el) =>
+      el.className.includes("bg-white/30"),
+    );
+    expect(overlay).toBeTruthy();
+    // overlay left/width should match visual px values (visualTrackLeft + fraction*trackWidth)
+    expect(overlay!.getAttribute("style")).toContain("left: 24px");
+    expect(overlay!.getAttribute("style")).toContain("width: 54px");
+
+    // Slider の marks として統一されていることを確認
+    const marks = Array.from(
+      container.querySelectorAll(".youtube-progress-mark"),
+    ) as HTMLElement[];
+    expect(marks.length).toBeGreaterThanOrEqual(1);
+
+    // first mark should be positioned in px (visual alignment)
+    expect(marks[0].style.left).toContain("0px");
   });
 });
