@@ -93,10 +93,6 @@ const usePlayerControls = (
     nextSongRef.current = nextSong;
   }, [nextSong]);
 
-  // changeCurrentSong の ref 同期は後で定義
-
-  // === セトリネタバレ防止モードのlocalStorage同期 ===
-
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
@@ -218,6 +214,14 @@ const usePlayerControls = (
     ) => {
       const targetVideoId = explicitVideoId ?? song?.video_id;
       if (!targetVideoId) return;
+
+      // debug!!
+      console.trace("changeCurrentSong called with", {
+        song,
+        explicitVideoId,
+        explicitStartTime,
+        options,
+      });
 
       const targetStartTime =
         explicitStartTime ?? (song ? Number(song.start) : 0);

@@ -32,6 +32,8 @@ export default function useMainPlayerControls({
   globalPlayer,
 }: UseMainPlayerControlsOptions) {
   const playerRef = useRef<any>(null);
+  const playerRefVideoIdRef = useRef<string | null>(null);
+  const lastPlayerReadyAtRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
   // seek-in-flight tracking
   const seekInFlightRef = useRef<number | null>(null);
@@ -42,6 +44,7 @@ export default function useMainPlayerControls({
   const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
   const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
+  const previousVideoIdRef = useRef<string | null>(null);
 
   const {
     currentSong,
@@ -63,6 +66,12 @@ export default function useMainPlayerControls({
     handleStateChange: originalHandleStateChange,
     setPreviousAndNextSongs,
   } = usePlayerControls(songs, allSongs, globalPlayer);
+
+  // keep a mutable ref with the latest videoId so callbacks can read it
+  const latestVideoIdRef = useRef<string | null>(videoId ?? null);
+  latestVideoIdRef.current = videoId ?? null;
+  // track previous videoId across renders so effects can reason about transitions
+  previousVideoIdRef.current = previousVideoId;
 
   const [playerVolume, setPlayerVolume] = useLocalStorage<number>({
     key: "player-volume",
@@ -121,8 +130,19 @@ export default function useMainPlayerControls({
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandlePlayerOnReady(event);
       playerRef.current = event.target;
+
+      const videoIdFromPlayer =
+        typeof event.target.getVideoData === "function"
+          ? (event.target.getVideoData()?.video_id ?? null)
+          : null;
+      playerRefVideoIdRef.current =
+        videoIdFromPlayer ??
+        currentSong?.video_id ??
+        latestVideoIdRef.current ??
+        null;
       updatePlayerSnapshot(event.target);
       setIsPlayerReady(true);
+      lastPlayerReadyAtRef.current = Date.now();
       try {
         applyPersistedVolume(event.target);
       } catch (_) {}
@@ -431,6 +451,70 @@ export default function useMainPlayerControls({
 
     globalPlayer.setCurrentSong(currentSong);
   }, [currentSong, globalPlayer, previousVideoId]);
+
+  // videoId が変わったら古い player 参照をクリアして、
+  // iframe 差し替え中に stale な player を呼ばないようにする（YouTube 側の PlayerProxy エラー対策）
+  //
+  // NOTE:
+  // - テストやプレイヤーの onReady が同一フレーム内で発生した場合、
+  //   既に `playerRef` が新しい videoId を指していることがある。
+  // - そのため、既存の player が既に new `videoId` を表している場合は
+  //   参照をクリアしない（誤って ready 状態を消してしまうのを防ぐ）。
+  useEffect(() => {
+    let shouldClear = true;
+    try {
+      const now = Date.now();
+      const recentReady =
+        !!lastPlayerReadyAtRef.current &&
+        now - lastPlayerReadyAtRef.current < 200;
+      if (
+        recentReady &&
+        !previousVideoIdRef.current &&
+        !playerRefVideoIdRef.current
+      ) {
+        shouldClear = false;
+      } else if (playerRefVideoIdRef.current) {
+        shouldClear = playerRefVideoIdRef.current !== videoId;
+      } else if (!playerRef.current) {
+        shouldClear = true;
+      } else if (typeof playerRef.current.getVideoData === "function") {
+        const vid = playerRef.current.getVideoData()?.video_id ?? null;
+        shouldClear = vid !== videoId;
+      } else {
+        const initialLoadRace =
+          !previousVideoIdRef.current &&
+          !!lastPlayerReadyAtRef.current &&
+          Date.now() - lastPlayerReadyAtRef.current < 200;
+        shouldClear = !initialLoadRace;
+      }
+    } catch (_) {
+      shouldClear = true;
+    }
+
+    if (shouldClear) {
+      playerRef.current = null;
+      playerRefVideoIdRef.current = null;
+      setIsPlayerReady(false);
+      pendingSeekRef.current = null;
+    } else {
+      // もし getVideoDataが利用できないためにクリアを遅延していた場合、マイクロタスクをスケジュールして、何も設定されなければ playerRefVideoIdRef を再確認してクリアする
+      const recentlyReady =
+        !!lastPlayerReadyAtRef.current &&
+        Date.now() - lastPlayerReadyAtRef.current < 200;
+      if (playerRef.current && !playerRefVideoIdRef.current && !recentlyReady) {
+        setTimeout(() => {
+          try {
+            if (!playerRefVideoIdRef.current && playerRef.current) {
+              playerRef.current = null;
+              playerRefVideoIdRef.current = null;
+              setIsPlayerReady(false);
+              pendingSeekRef.current = null;
+            }
+          } catch (_) {}
+        }, 0);
+      }
+    }
+  }, [videoId]);
 
   useEffect(() => {
     if (!playerRef.current) return;

@@ -43,6 +43,34 @@ test.describe("Player Control Bar", () => {
     }
   });
 
+  test("連続で曲を切り替えてもYouTube側でPlayerProxyエラーが出ない", async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
+
+    const songItems = page
+      .locator("li")
+      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+
+    // 連続クリック（素早く別の曲を選択）
+    await songItems.first().click();
+    await songItems.nth(1).click();
+
+    const nextBtn = page.locator('button[aria-label="次の曲へ"]');
+    if (await nextBtn.isEnabled()) {
+      await nextBtn.click();
+    }
+
+    // 少し待って console を確認
+    await page.waitForTimeout(1500);
+    for (const e of errors) {
+      expect(e).not.toContain("PlayerProxy");
+    }
+  });
+
   test("ボリュームバーが操作できる", async ({ page }) => {
     const volumeBar = page.locator("input.youtube-volume-bar");
     await expect(volumeBar).toBeVisible();

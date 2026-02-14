@@ -267,7 +267,10 @@ export default function PlayerControlsBar({
           root.querySelectorAll(".youtube-progress-mark"),
         ) as HTMLElement[];
         markEls.forEach((el, idx) => {
-          const ch = chapters[idx];
+          // NOTE: Slider に渡している `marks` は `chapters.filter((_, idx) => idx !== 0)`
+          // で先頭要素を除外しているため、DOM 内の mark 要素のインデックスは
+          // `chapters` の (idx + 1) に対応します。
+          const ch = chapters[idx + 1];
           if (!ch) return;
           const ds = ch.displayStart ?? 0;
           const frac = sliderMax > 0 ? ds / sliderMax : 0;
@@ -344,39 +347,33 @@ export default function PlayerControlsBar({
                   trackRect?.width ??
                   Math.max(
                     0,
-                    (sliderRootRef.current?.getBoundingClientRect().width ??
-                      0) -
-                      trackInsets.left -
-                      trackInsets.right,
+                    sliderRootRef.current?.getBoundingClientRect().width ?? 0,
                   );
 
                 // まず Mantine が使っている CSS 変数 (--slider-bar-offset) を確認して
-                // bar の実際の開始オフセットが取得できればそれを使う。取得できなければ
-                // 既存の "thumb half" 補正をフォールバックで使用する。
+                // bar の実際の開始オフセットが root にセットされていればそれを反映する。
+                // これで .youtube-progress-mark の margin-left と同じ基準に揃える。
                 const thumbEl = sliderRootRef.current?.querySelector(
                   ".youtube-progress-thumb",
                 ) as HTMLElement | null;
                 const halfThumb = thumbEl ? thumbEl.offsetWidth / 2 : 0;
 
-                const barEl = sliderRootRef.current?.querySelector(
-                  ".youtube-progress-bar-fill",
-                ) as HTMLElement | null;
-                let barOffsetPx = 0;
+                let cssBarOffset = 0;
                 try {
-                  const val = barEl
-                    ? window
-                        .getComputedStyle(barEl)
-                        .getPropertyValue("--slider-bar-offset")
-                    : "";
+                  const val =
+                    sliderRootRef.current?.style.getPropertyValue(
+                      "--slider-bar-offset",
+                    ) ?? "";
                   const m = val.match(/(-?\d+\.?\d*)px/);
-                  if (m) barOffsetPx = Number(m[1]);
+                  if (m) cssBarOffset = Number(m[1]);
                 } catch (_) {
-                  barOffsetPx = 0;
+                  cssBarOffset = 0;
                 }
 
+                // mark と同じ基準で track の左端を算出する（halfThumb 補正 + CSS bar offset）
                 const visualTrackLeft = Math.max(
                   0,
-                  trackLeftRelToParent + (barOffsetPx || -halfThumb),
+                  trackLeftRelToParent - halfThumb + cssBarOffset,
                 );
 
                 const startPx =
@@ -488,10 +485,8 @@ export default function PlayerControlsBar({
                   ".youtube-progress-track",
                 ) as HTMLElement | null;
                 const trackRect = trackEl?.getBoundingClientRect() ?? rootRect;
-                const trackWidth = Math.max(
-                  0,
-                  trackRect.width - trackInsets.left - trackInsets.right,
-                );
+                // Use the actual track width (do NOT subtract trackInsets here)
+                const trackWidth = Math.max(0, trackRect.width);
 
                 const xRel = Math.min(
                   trackWidth,
@@ -532,10 +527,8 @@ export default function PlayerControlsBar({
                       trackRect?.width ??
                       Math.max(
                         0,
-                        (sliderRootRef.current?.getBoundingClientRect().width ??
-                          0) -
-                          trackInsets.left -
-                          trackInsets.right,
+                        sliderRootRef.current?.getBoundingClientRect().width ??
+                          0,
                       );
 
                     const thumbEl = sliderRootRef.current?.querySelector(
@@ -543,25 +536,22 @@ export default function PlayerControlsBar({
                     ) as HTMLElement | null;
                     const halfThumb = thumbEl ? thumbEl.offsetWidth / 2 : 0;
 
-                    const barEl = sliderRootRef.current?.querySelector(
-                      ".youtube-progress-bar-fill",
-                    ) as HTMLElement | null;
-                    let barOffsetPx = 0;
+                    let cssBarOffset = 0;
                     try {
-                      const val = barEl
-                        ? window
-                            .getComputedStyle(barEl)
-                            .getPropertyValue("--slider-bar-offset")
-                        : "";
+                      const val =
+                        sliderRootRef.current?.style.getPropertyValue(
+                          "--slider-bar-offset",
+                        ) ?? "";
                       const m = val.match(/(-?\d+\.?\d*)px/);
-                      if (m) barOffsetPx = Number(m[1]);
+                      if (m) cssBarOffset = Number(m[1]);
                     } catch (_) {
-                      barOffsetPx = 0;
+                      cssBarOffset = 0;
                     }
 
+                    // mark と同じ基準で track の左端を算出する（halfThumb 補正 + CSS bar offset）
                     const visualTrackLeft = Math.max(
                       0,
-                      trackLeftRelToParent + (barOffsetPx || -halfThumb),
+                      trackLeftRelToParent - halfThumb + cssBarOffset,
                     );
 
                     const centerPxRelativeToParent =

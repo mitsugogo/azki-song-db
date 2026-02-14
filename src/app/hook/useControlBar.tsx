@@ -273,13 +273,18 @@ export default function useControlBar({
       if (targetSong) {
         const currentId = `${currentSong?.video_id}-${currentSong?.start}`;
         const targetId = `${targetSong.video_id}-${targetSong.start}`;
+        const isDifferentVideo = currentSong?.video_id !== targetSong.video_id;
+
+        // 異なる動画への切替時は player が入れ替わるため seek を直接呼ばない
+        if (isDifferentVideo) {
+          changeCurrentSong(targetSong, targetSong.video_id, actualTime);
+          return;
+        }
 
         if (currentId !== targetId) {
           changeCurrentSong(targetSong, targetSong.video_id, actualTime);
-          playerControls.seekTo(actualTime);
-        } else {
-          playerControls.seekTo(actualTime);
         }
+        playerControls.seekTo(actualTime);
       } else {
         playerControls.seekTo(actualTime);
       }
@@ -483,14 +488,16 @@ export default function useControlBar({
 
   const handleNext = useCallback(() => {
     if (nextSong) {
-      // 同一動画内の場合も確実にシーク＆曲情報更新を行う
+      // 同一動画内の場合はシーク＆曲情報更新を行う。異なる動画の場合は
+      // changeCurrentSong のみ実行してプレイヤー差し替えを待つ（PlayerProxy エラー回避）。
       const targetStartTime = Number(nextSong.start);
+      const isDifferentVideo = currentSong?.video_id !== nextSong.video_id;
       changeCurrentSong(nextSong, nextSong.video_id, targetStartTime);
-      if (playerControls?.isReady) {
+      if (!isDifferentVideo && playerControls?.isReady) {
         playerControls.seekTo(targetStartTime);
       }
     }
-  }, [nextSong, changeCurrentSong, playerControls]);
+  }, [nextSong, changeCurrentSong, playerControls, currentSong]);
 
   const canUsePlayerControls = Boolean(playerControls?.isReady && currentSong);
 
