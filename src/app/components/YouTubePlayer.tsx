@@ -5,27 +5,20 @@ import { Options } from "youtube-player/dist/types";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 
 interface YouTubePlayerProps {
-  song: Song;
   video_id?: string;
   startTime?: number;
-  disableEnd?: boolean;
   showNativeControls?: boolean;
   onReady: (event: YouTubeEvent<any>) => void;
   onStateChange: (event: YouTubeEvent<any>) => void;
 }
 
 function YouTubePlayerComponent({
-  song,
   video_id,
   startTime,
-  disableEnd,
   showNativeControls,
   onReady,
   onStateChange,
 }: YouTubePlayerProps) {
-  const videoId = video_id || song.video_id;
-  const start = Number(startTime ?? song.start ?? 0);
-  const end = Number(song.end ?? 0);
   const showControls =
     typeof showNativeControls === "boolean" ? showNativeControls : true;
 
@@ -42,18 +35,17 @@ function YouTubePlayerComponent({
         autoplay: 1,
         playsinline: 1,
         controls: showControls ? 1 : 0,
-        start: start,
-        end: !disableEnd && end > 0 ? end : undefined,
+        start: startTime,
         rel: 0, // 再生終了後に同じチャンネルの動画を表示
         origin:
           typeof window !== "undefined" ? window.location.origin : undefined,
       },
     } as Options;
-  }, [videoId, start, end, disableEnd, showNativeControls]);
+  }, [video_id, startTime, showNativeControls]);
 
   return (
     <YouTube
-      videoId={videoId}
+      videoId={video_id}
       className="w-full h-full"
       opts={opts}
       onStateChange={onStateChange}
@@ -67,12 +59,8 @@ const YouTubePlayer = React.memo(
   YouTubePlayerComponent,
   (prevProps, nextProps) => {
     return (
-      prevProps.song.video_id === nextProps.song.video_id &&
-      prevProps.song.start === nextProps.song.start &&
-      prevProps.song.end === nextProps.song.end &&
       prevProps.video_id === nextProps.video_id &&
       prevProps.startTime === nextProps.startTime &&
-      prevProps.disableEnd === nextProps.disableEnd &&
       prevProps.showNativeControls === nextProps.showNativeControls
       // onStateChange は比較しない
     );

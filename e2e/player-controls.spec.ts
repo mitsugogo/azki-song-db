@@ -489,7 +489,7 @@ test.describe("同一動画内での曲切り替え", () => {
 
       // 同一動画内の次の曲をクリック（シークされるはず）
       await songItems.nth(idxB).click();
-      await page.waitForTimeout(700);
+      await page.waitForTimeout(3000);
 
       // iframe の videoId は変わっていない（シークのみ）
       const newFrameSrc = await page

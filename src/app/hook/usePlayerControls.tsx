@@ -215,14 +215,6 @@ const usePlayerControls = (
       const targetVideoId = explicitVideoId ?? song?.video_id;
       if (!targetVideoId) return;
 
-      // debug!!
-      console.trace("changeCurrentSong called with", {
-        song,
-        explicitVideoId,
-        explicitStartTime,
-        options,
-      });
-
       const targetStartTime =
         explicitStartTime ?? (song ? Number(song.start) : 0);
 

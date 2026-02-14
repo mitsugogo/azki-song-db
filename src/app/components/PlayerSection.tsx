@@ -163,10 +163,8 @@ export default function PlayerSection({
             {currentSong && (
               <YouTubePlayer
                 key={`youtube-player-${playerKey}-${currentSong?.video_id ?? "none"}`}
-                song={currentSong}
                 video_id={videoId}
                 startTime={startTime}
-                disableEnd={hasNextInVideo}
                 onReady={
                   handlePlayerOnReady as (event: YouTubeEvent<any>) => void
                 }
