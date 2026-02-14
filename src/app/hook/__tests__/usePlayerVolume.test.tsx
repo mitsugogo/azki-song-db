@@ -130,4 +130,29 @@ describe("usePlayerVolume", () => {
     expect(result.current.playerVolume).toBe(30);
     expect(localStorage.getItem("player-muted")).toBe("false");
   });
+
+  it("changeVolume(0)でミュートされる", () => {
+    const playerRef = {
+      current: {
+        setVolume: vi.fn(),
+        mute: vi.fn(),
+        unMute: vi.fn(),
+      },
+    };
+
+    const { result } = renderHook(() => usePlayerVolume(playerRef, true));
+
+    // initially not muted
+    expect(result.current.isMuted).toBe(false);
+
+    act(() => {
+      result.current.changeVolume(0);
+    });
+
+    expect(playerRef.current.setVolume).toHaveBeenCalledWith(0);
+    expect(playerRef.current.mute).toHaveBeenCalled();
+    expect(result.current.playerVolume).toBe(0);
+    expect(result.current.isMuted).toBe(true);
+    expect(localStorage.getItem("player-muted")).toBe("true");
+  });
 });

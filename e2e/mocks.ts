@@ -21,24 +21,29 @@ export const setupApiMocks = async (page: any) => {
     });
   });
 
-  // Mock YouTube video API
+  // Mock YouTube video API (return YouTube Data API - like shape)
   await page.route("**/api/yt/video/*", async (route: any) => {
     const videoData = {
       id: "dummy_video_id",
-      title: "Dummy Video",
-      author: "Dummy Author",
-      uploadDate: "2023-01-01T00:00:00Z",
-      viewCount: 1000,
-      isLiveContent: false,
-      thumbnails: [],
-      likeCount: 100,
-      tags: [],
-      description: "Dummy description",
-      duration: 300,
-      chapters: [],
-      music: null,
+      snippet: {
+        title: "Dummy Video",
+        description: `E2E description line 1\nE2E description line 2\nE2E description line 3\nE2E description line 4\nE2E description line 5`,
+        publishedAt: "2025-01-01T00:00:00Z",
+        channelTitle: "Dummy Channel",
+        tags: ["歌枠", "test"],
+        localized: {
+          title: "Dummy Video",
+          description: `E2E description line 1\nE2E description line 2\nE2E description line 3\nE2E description line 4\nE2E description line 5`,
+        },
+      },
+      statistics: {
+        viewCount: "12345",
+        likeCount: "100",
+      },
+      contentDetails: { duration: "PT5M" },
       lastFetchedAt: new Date().toISOString(),
     };
+
     await route.fulfill({
       status: 200,
       contentType: "application/json",

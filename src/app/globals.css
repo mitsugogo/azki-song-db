@@ -142,59 +142,41 @@ body {
   }
 }
 
-/* YouTube-style Progress Bar */
+/* YouTube-style Progress Bar (Mantine Slider) */
 .youtube-progress-bar {
-  -webkit-appearance: none;
-  appearance: none;
+  position: relative;
+  top: 4px;
+  cursor: pointer;
+}
+
+.youtube-progress-track {
   height: 4px;
   border-radius: 2px;
-  outline: none;
-  cursor: pointer;
   transition: height 0.1s ease;
-  position: relative;
-  top: 4px; /* nudge the whole track down so the red gradient overlays the semi-transparent white area */
+}
+.youtube-progress-track::before {
+  background: rgb(75, 75, 75);
 }
 
-.youtube-progress-bar::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #ff0000;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.1s ease;
-  /* center the larger thumb relative to the thin track; tuned to match track vertical center */
-  margin-top: -1.5px;
-}
-
-.youtube-progress-bar::-moz-range-thumb {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #ff0000;
-  cursor: pointer;
-  border: none;
-  opacity: 0;
-  transition: opacity 0.1s ease;
-  /* Firefox: nudge thumb vertically to center on 4px track */
-  transform: translateY(0px);
-}
-
-.youtube-progress-bar:hover {
+.youtube-progress-bar-fill {
   height: 4px;
+  border-radius: 2px;
 }
 
-.youtube-progress-bar:hover::-webkit-slider-thumb {
+.youtube-progress-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ff0000;
+  border: none;
+  transition: opacity 0.1s ease;
+}
+
+.youtube-progress-bar:hover .youtube-progress-thumb {
   opacity: 1;
 }
 
-.youtube-progress-bar:hover::-moz-range-thumb {
-  opacity: 1;
-}
-
-.youtube-progress-bar:disabled {
+.youtube-progress-bar[data-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -207,6 +189,7 @@ body {
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .youtube-volume-bar::-webkit-slider-thumb {
@@ -241,4 +224,12 @@ body {
 .youtube-volume-bar:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.youtube-progress-mark {
+  border-width: 0px;
+  border-color: rgba(255, 255, 255, 0.4);
+  margin-left: var(--slider-bar-offset, 0px);
+  width: 3px;
+  height: 4px;
 }

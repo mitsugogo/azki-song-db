@@ -63,4 +63,36 @@ test.describe("Mute persistence across video change", () => {
       .getAttribute("aria-label");
     expect(volBtnLabel).toMatch(/ミュート解除|音量調整/);
   });
+
+  test("volume slider -> 0 でミュートが永続化される", async ({ page }) => {
+    // play first song
+    await page.goto("/");
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/songs") && response.status() === 200,
+    );
+    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+
+    const first = page.getByRole("listitem").first();
+    await first.click();
+    await page.waitForSelector('button[aria-label="一時停止"]', {
+      timeout: 10000,
+    });
+
+    const volumeBar = page.locator("input.youtube-volume-bar");
+    await volumeBar.fill("0");
+    // debounce に合わせて少し待つ
+    await page.waitForTimeout(700);
+
+    const persistedMuted = await page.evaluate(() =>
+      localStorage.getItem("player-muted"),
+    );
+    expect(persistedMuted).toBe("true");
+
+    const volBtnLabel = await page
+      .getByRole("button", { name: /ミュート|ミュート解除|音量調整/ })
+      .first()
+      .getAttribute("aria-label");
+    expect(volBtnLabel).toMatch(/ミュート解除|音量調整/);
+  });
 });
