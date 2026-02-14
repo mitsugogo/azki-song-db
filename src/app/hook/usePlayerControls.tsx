@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
@@ -45,7 +46,10 @@ const usePlayerControls = (
   const [isPlaying, setIsPlaying] = useState(false);
 
   // === セトリネタバレ防止モード ===
-  const [hideFutureSongs, setHideFutureSongs] = useState(false);
+  const [hideFutureSongs, setHideFutureSongs] = useLocalStorage<boolean>({
+    key: "hideFutureSongs",
+    defaultValue: false,
+  });
 
   // === 内部参照 ===
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -91,20 +95,6 @@ const usePlayerControls = (
   // changeCurrentSong の ref 同期は後で定義
 
   // === セトリネタバレ防止モードのlocalStorage同期 ===
-  useEffect(() => {
-    const hideFutureSongs = localStorage.getItem("hideFutureSongs");
-    if (hideFutureSongs === "true") {
-      setHideFutureSongs(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (hideFutureSongs) {
-      localStorage.setItem("hideFutureSongs", "true");
-    } else {
-      localStorage.removeItem("hideFutureSongs");
-    }
-  }, [hideFutureSongs]);
 
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(

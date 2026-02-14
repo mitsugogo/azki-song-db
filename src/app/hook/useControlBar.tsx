@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Song } from "../types/song";
-import useDebounce from "./useDebounce";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 
 type CumulativeItem = {
   song: Song;
@@ -334,7 +334,7 @@ export default function useControlBar({
   const [isMuted, setIsMuted] = useState(false);
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const debouncedVolumeValue = useDebounce(tempVolumeValue, 100);
+  const [debouncedVolumeValue] = useDebouncedValue(tempVolumeValue, 100);
 
   // Sync local muted state from playerControls (or fallback to volume===0)
   useEffect(() => {
@@ -402,47 +402,12 @@ export default function useControlBar({
   }, [playerControls, isMuted]);
 
   // === タッチデバイス検出 ===
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-  useEffect(() => {
-    const checkTouch = () => {
-      const hasTouchPoints = navigator.maxTouchPoints > 0;
-      const supportsTouchEvent =
-        typeof window !== "undefined" && "ontouchstart" in window;
-      const coarsePointer =
-        typeof window !== "undefined" &&
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(pointer: coarse)").matches;
-
-      setIsTouchDevice(hasTouchPoints || supportsTouchEvent || coarsePointer);
-    };
-
-    checkTouch();
-
-    let mq: MediaQueryList | null = null;
-    if (
-      typeof window !== "undefined" &&
-      typeof window.matchMedia === "function"
-    ) {
-      mq = window.matchMedia("(pointer: coarse)");
-      const handler = () => checkTouch();
-      try {
-        mq.addEventListener?.("change", handler);
-      } catch (e) {
-        // @ts-ignore
-        mq.addListener?.(handler);
-      }
-
-      return () => {
-        try {
-          mq?.removeEventListener?.("change", checkTouch);
-        } catch (e) {
-          // @ts-ignore
-          mq?.removeListener?.(checkTouch);
-        }
-      };
-    }
-  }, []);
+  const isCoarsePointer = useMediaQuery("(pointer: coarse)");
+  const hasTouchPoints =
+    typeof window !== "undefined" && navigator.maxTouchPoints > 0;
+  const supportsTouchEvent =
+    typeof window !== "undefined" && "ontouchstart" in window;
+  const isTouchDevice = hasTouchPoints || supportsTouchEvent || isCoarsePointer;
 
   useEffect(() => {
     if (!isTouchDevice) {
