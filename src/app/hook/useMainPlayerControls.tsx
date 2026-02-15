@@ -82,6 +82,9 @@ export default function useMainPlayerControls({
     defaultValue: false,
   });
 
+  /**
+   * プレイヤーの状態のスナップショットを更新
+   */
   const updatePlayerSnapshot = useCallback((playerInstance: any) => {
     if (!playerInstance) return;
     if (typeof playerInstance.getDuration === "function") {
@@ -98,6 +101,9 @@ export default function useMainPlayerControls({
     }
   }, []);
 
+  /**
+   * 音量をプレイヤーに適用
+   */
   const applyPersistedVolume = useCallback(
     (playerInstance: any) => {
       if (!playerInstance || typeof playerInstance.setVolume !== "function") {
@@ -126,6 +132,9 @@ export default function useMainPlayerControls({
     [playerVolume, isMuted],
   );
 
+  /**
+   * プレイヤーが準備できたとき
+   */
   const handlePlayerOnReady = useCallback(
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandlePlayerOnReady(event);
@@ -190,6 +199,9 @@ export default function useMainPlayerControls({
     ],
   );
 
+  /**
+   * プレイヤーの状態が変化したとき
+   */
   const handlePlayerStateChange = useCallback(
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandleStateChange(event);
@@ -278,23 +290,18 @@ export default function useMainPlayerControls({
     }
   }, []);
 
-  // avoid issuing duplicate/concurrent seeks to the SAME absolute time
-  // - protects against UI + synthetic events causing duplicate player.seekTo calls
-  // - small time window tolerance (500ms) and value tolerance (0.25s)
+  // 重複/同時の同一絶対時間へのシークを避ける
+  // - UIや合成イベントが重複したplayer.seekTo呼び出しを引き起こすのを防ぐ
   const lastRequestedSeekRef = useRef<{ value: number; ts: number } | null>(
     null,
   );
 
+  /**
+   * プレイヤーを絶対時間（秒）にシークする。プレイヤーがまだ準備できていない場合は、準備完了後にシークをキューに入れる
+   * @param absoluteSeconds シーク先の絶対時間=YouTubeプレイヤー上の時間（秒）
+   */
   const seekToAbsolute = useCallback(
     (absoluteSeconds: number) => {
-      // debug
-      // eslint-disable-next-line no-console
-      console.debug("seekToAbsolute called", {
-        absoluteSeconds,
-        playerDuration,
-      });
-
-      // if player instance isn't ready yet, queue the seek for when it becomes ready
       if (
         !playerRef.current ||
         typeof playerRef.current.seekTo !== "function"
@@ -309,16 +316,15 @@ export default function useMainPlayerControls({
             ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
             : Math.max(absoluteSeconds, 0);
 
-        // DEDUP: if a seek to the same time is currently in-flight, ignore it
+        // DEDUP: もし現在同一の絶対時間へのシークが進行中であれば、重複して同じシークを送らない
         if (
           seekInFlightRef.current !== null &&
           Math.abs((seekInFlightRef.current || 0) - boundedAbsolute) < 0.25
         ) {
-          // already seeking to the same location — skip duplicate
           return;
         }
 
-        // DEDUP: ignore repeated identical requests within a short window
+        // DEDUP: 短時間内に同一のリクエストが繰り返されるのを無視
         const now = Date.now();
         const last = lastRequestedSeekRef.current;
         if (
@@ -330,25 +336,20 @@ export default function useMainPlayerControls({
         }
         lastRequestedSeekRef.current = { value: boundedAbsolute, ts: now };
 
-        // mark seek-in-flight (handshake)
+        // 進行中のシークを更新
         seekInFlightRef.current = boundedAbsolute;
         setSeekInFlight(boundedAbsolute);
 
-        // debug helper for E2E: expose last requested seek time to window
-        try {
-          (window as any).__lastSeekRequest = boundedAbsolute;
-        } catch (_) {}
-
+        // シーク実行
         playerRef.current.seekTo(boundedAbsolute, true);
 
-        // optimistic update so UI reflects the committed seek immediately and
-        // avoids tempSeekValue being overwritten by a stale poll value.
+        // 進行中のシークを更新
         try {
           setPlayerCurrentTime(boundedAbsolute);
         } catch (_) {}
         globalPlayer.setCurrentTime(boundedAbsolute);
 
-        // guard: clear stuck in-flight seek after 3s
+        // ガード処理: もし何らかの理由でシーク完了イベントが来ない場合、3秒後にシーク中状態をクリアする
         setTimeout(() => {
           if (seekInFlightRef.current === boundedAbsolute) {
             seekInFlightRef.current = null;
