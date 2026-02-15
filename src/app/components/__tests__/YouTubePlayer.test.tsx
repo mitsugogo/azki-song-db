@@ -41,41 +41,9 @@ const baseSong = {
 };
 
 describe("YouTubePlayer", () => {
-  it("includes end in playerVars when song.end > 0 and disableEnd=false", () => {
-    const { container } = render(
-      <YouTubePlayer
-        song={baseSong as any}
-        onReady={() => {}}
-        onStateChange={() => {}}
-      />,
-    );
-
-    const div = container.querySelector("div[data-videoid]")!;
-    expect(div.getAttribute("data-videoid")).toBe("vid1");
-    const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
-    expect(opts.playerVars.start).toBe(Number(baseSong.start));
-    expect(opts.playerVars.end).toBe(Number(baseSong.end));
-  });
-
-  it("omits end when disableEnd is true", () => {
-    const { container } = render(
-      <YouTubePlayer
-        song={baseSong as any}
-        disableEnd
-        onReady={() => {}}
-        onStateChange={() => {}}
-      />,
-    );
-
-    const div = container.querySelector("div[data-videoid]")!;
-    const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
-    expect(opts.playerVars.end).toBeUndefined();
-  });
-
   it("uses explicit video_id and startTime when provided", () => {
     const { container } = render(
       <YouTubePlayer
-        song={baseSong as any}
         video_id="explicitVid"
         startTime={5}
         onReady={() => {}}

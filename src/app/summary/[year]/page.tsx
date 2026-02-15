@@ -1,18 +1,10 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { metadata } from "../../layout";
-import { headers } from "next/headers";
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 type Props = {
   params: Promise<{ year: string }>;
 };
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
 
 // Pre-render all available year pages so `generateMetadata` receives a concrete
 // `params.year` during static generation.
@@ -85,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `${titleBase} | AZKi Song Database`,
+    title: `${titleBase} | ${siteConfig.siteName}`,
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
@@ -95,7 +87,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 import YearSummaryClient from "./YearSummaryClient";
-import React from "react";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { FaHome } from "react-icons/fa";
 

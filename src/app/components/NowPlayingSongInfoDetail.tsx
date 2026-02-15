@@ -570,7 +570,7 @@ const NowPlayingSongInfoDetail = ({
                             key={song.start}
                             className={`w-full flex rounded px-1 border  text-xs ${
                               isCurrentSong
-                                ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60 py-0.5"
+                                ? "bg-blue-50 dark:bg-blue-950/30 border-blue-300/30 dark:border-blue-900/300 py-0.5"
                                 : "border-transparent"
                             }`}
                           >
@@ -800,7 +800,7 @@ const NowPlayingSongInfoDetail = ({
                       <span
                         className={`text-xs inline-flex flex-wrap items-center gap-1 rounded px-1 py-0.5 border ${
                           isCurrentSangFrame
-                            ? "bg-blue-50/70 dark:bg-blue-900/40 border-blue-300/70 dark:border-blue-700/60"
+                            ? "bg-blue-50 dark:bg-blue-950/30 border-blue-300/30 dark:border-blue-900/300"
                             : "border-transparent"
                         }`}
                       >

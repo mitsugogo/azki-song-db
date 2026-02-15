@@ -4,13 +4,7 @@ import type { Metadata } from "next";
 import { metadata } from "../layout";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "統計情報";
@@ -26,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: "統計情報 | AZKi Song Database",
+    title: `統計情報 | ${siteConfig.siteName}`,
     description:
       "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
     openGraph: {

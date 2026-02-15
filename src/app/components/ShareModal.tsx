@@ -4,6 +4,7 @@ import { HiClipboardCopy } from "react-icons/hi";
 import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Label } from "flowbite-react";
 import { useState } from "react";
+import { siteConfig } from "../config/siteConfig";
 
 // Propsの型定義
 type ShareModalProps = {
@@ -105,7 +106,7 @@ export default function ShareModal({
         <div className="mt-4">
           <Label>
             <FaDatabase className="inline" />
-            &nbsp;AZKi Song Database
+            &nbsp;{siteConfig.siteName}
           </Label>
           <div className="relative">
             <TextInput

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReactNode } from "react";
 
 const DEFAULT_LINK_CLASS = "text-primary hover:underline dark:text-primary-300";
@@ -9,11 +10,11 @@ export type LinkifyTextOptions = {
   includeLineBreaks?: boolean;
   timestampToSeconds?: (timestamp: string) => number;
   timestampLinkClassName?: string;
-  hashtagPlatform?: "youtube" | "x";
+  hashtagPlatform?: "youtube" | "x" | "self";
 };
 
 const combinedRegex =
-  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(#[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g;
+  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(#[\w\d_.\-\u3000-\u300f\u3012-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g;
 
 export const renderLinkedText = (
   text: string,
@@ -88,16 +89,21 @@ export const renderLinkedText = (
         const url =
           hashtagPlatform === "youtube"
             ? `https://www.youtube.com/hashtag/${tag}`
-            : `https://x.com/hashtag/${tag}`;
+            : hashtagPlatform === "x"
+              ? `https://x.com/hashtag/${tag}`
+              : hashtagPlatform === "self"
+                ? `/?q=${encodeURIComponent("#" + tag)}`
+                : `#${tag}`;
         nodes.push(
-          <a
+          <Link
             key={`hashtag-${lineIndex}-${matchIndex}`}
             href={url}
-            target="_blank"
+            target={hashtagPlatform === "self" ? "_self" : "_blank"}
+            rel={hashtagPlatform === "self" ? undefined : "noopener noreferrer"}
             className={linkClassName}
           >
             {hashtag}
-          </a>,
+          </Link>,
         );
       }
 

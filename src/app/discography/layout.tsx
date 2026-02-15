@@ -4,10 +4,11 @@ import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { MantineProvider } from "@mantine/core";
 import { theme, flowbiteTheme } from "../theme";
+import { siteConfig } from "../config/siteConfig";
 
 // titleタグ
 export const metadata = {
-  title: "楽曲一覧 | AZKi Song Database",
+  title: `楽曲一覧 | ${siteConfig.siteName}`,
 };
 
 export default function StatsLayout({

@@ -1,10 +1,11 @@
 import { ThemeProvider } from "flowbite-react";
 import { MantineProvider } from "@mantine/core";
 import { theme, flowbiteTheme } from "../../theme";
+import { siteConfig } from "@/app/config/siteConfig";
 
 // titleタグ
 export const metadata = {
-  title: "プレイリスト | AZKi Song Database",
+  title: `プレイリスト | ${siteConfig.siteName}`,
 };
 
 export default function StatsLayout({

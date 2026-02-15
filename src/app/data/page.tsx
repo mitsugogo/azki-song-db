@@ -4,15 +4,10 @@ import Loading from "../loading";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+
 import type { Metadata, ResolvingMetadata } from "next";
 import { metadata } from "../layout";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -23,8 +18,6 @@ export async function generateMetadata(
   { params, searchParams }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const { q, v, t } = await searchParams;
-
   const title = "収録データ一覧";
   const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
 
@@ -37,7 +30,7 @@ export async function generateMetadata(
 
   return {
     ...metadata,
-    title: "収録データ一覧 | AZKi Song Database",
+    title: `収録データ一覧 | ${siteConfig.siteName}`,
     description:
       "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
     openGraph: {

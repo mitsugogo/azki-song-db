@@ -1,15 +1,9 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export const runtime = "edge";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,8 +37,8 @@ export async function GET(req: NextRequest) {
 
     const notoSansRegular = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
-        encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent(title || `${siteConfig.siteName}`) +
+        encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent(song.tags.join("")) +
         encodeURIComponent("...…,"),
     )
@@ -59,8 +53,8 @@ export async function GET(req: NextRequest) {
 
     const notoSansBold = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
-        encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent(title || `${siteConfig.siteName}`) +
+        encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent(song.tags.join("")) +
         encodeURIComponent("...…,"),
     )
@@ -149,7 +143,7 @@ export async function GET(req: NextRequest) {
               alignSelf: "flex-start",
             }}
           >
-            AZKi Song Database
+            {siteConfig.siteName}
           </div>
           {/* 曲名コンテナ（上段） */}
           <div

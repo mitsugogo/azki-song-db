@@ -11,7 +11,7 @@ import {
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { useMemo, useRef, useState } from "react";
-import useDebounce from "../hook/useDebounce";
+import { useDebouncedValue } from "@mantine/hooks";
 import { Badge, TextInput } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
@@ -49,7 +49,7 @@ export default function DataTable<
 }) {
   const [inputValue, setInputValue] = useState("");
   const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
-  const debouncedFilter = useDebounce(inputValue, 300);
+  const [debouncedFilter] = useDebouncedValue(inputValue, 300);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
