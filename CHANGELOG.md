@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.30.3](https://github.com/mitsugogo/azki-song-db/compare/v1.30.2...v1.30.3) (2026-02-15)
+
+
+### Bug Fixes
+
+* シーク不良バグ修正 ([b766cd7](https://github.com/mitsugogo/azki-song-db/commit/b766cd7fb34a3e3fb8c9c224abbc4ebbe0b6b60b))
+* 一部の動画で切り替えが出来ないバグを修正 ([5f80ce7](https://github.com/mitsugogo/azki-song-db/commit/5f80ce75677a3b372e33a5f1efcf852dddf83524))
+* 動画詳細で文字選択で展開が折りたたまれるのを修正 ([81b04b7](https://github.com/mitsugogo/azki-song-db/commit/81b04b72c73acc04756a056c313fd108a48177b7))
+* 音量0でミュート扱いにならないバグを修正 ([cc7fe17](https://github.com/mitsugogo/azki-song-db/commit/cc7fe1739b8431a5cd3a38240974398e4c93f337))
+
 ### [1.30.2](https://github.com/mitsugogo/azki-song-db/compare/v1.30.1...v1.30.2) (2026-02-12)
 
 
