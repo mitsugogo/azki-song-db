@@ -171,7 +171,7 @@ const DescriptionCollapsible = ({
           </div>
         )}
         <div
-          className={`${expanded ? "" : "line-clamp-3 select-none"} ${text.length > 200 ? "wrap-break-word" : "break-all"}`}
+          className={`dark:text-gray-50 ${expanded ? "" : "line-clamp-3 select-none"} ${text.length > 200 ? "wrap-break-word" : "break-all"}`}
         >
           {renderLinkedText(expanded || !isTruncatable ? text : collapsedText)}
         </div>
@@ -226,7 +226,9 @@ const MainChannelInfo = ({
                     src={
                       ch.thumbnails?.sort(
                         (a, b) => (b?.width ?? 0) - (a?.width ?? 0),
-                      )[0]?.url
+                      )[0]?.url ??
+                      ch.thumbnails?.[0]?.url ??
+                      null
                     }
                     alt={ch.name ?? "Channel Avatar"}
                     radius="xl"
@@ -579,8 +581,11 @@ const NowPlayingSongInfo = ({
                     />
                   </div>
                 )}
-                <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white m-0 line-clamp-2">
-                  {videoData?.title ?? videoTitle ?? currentSong.video_title}
+                <h2 className="text-lg lg:text-xl font-bold m-0 line-clamp-2 break-all">
+                  {renderLinkedText(
+                    videoData?.title ?? videoTitle ?? currentSong.video_title,
+                    { hashtagPlatform: "youtube" },
+                  )}
                 </h2>
               </div>
             </div>
@@ -641,6 +646,7 @@ const NowPlayingSongInfo = ({
                                             )
                                           : undefined
                                       }
+                                      size={36}
                                     />
                                   ))}
                                 </div>
