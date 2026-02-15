@@ -12,12 +12,7 @@ import { HiHome } from "react-icons/hi";
 import { Badge, Button } from "@mantine/core";
 import { renderLinkedText } from "@/app/lib/textLinkify";
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 async function fetchSongsFromApi(): Promise<Song[]> {
   const candidates = [
@@ -42,7 +37,7 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 
   // 最後の手段として production を試す
   try {
-    const res = await fetch("https://azki-song-db.vercel.app/api/songs");
+    const res = await fetch(new URL(`/api/songs`, siteConfig.siteUrl));
     if (res.ok) {
       return (await res.json()) as Song[];
     }
@@ -93,8 +88,8 @@ export async function generateMetadata({
   );
   if (!matched) return { title: slug };
   const title = matched.title
-    ? `${matched.title} | ${matched.artist} | Discography | AZKi Song Database`
-    : `${matched.album} | ${matched.artist} | Discography | AZKi Song Database`;
+    ? `${matched.title} | ${matched.artist} | Discography | ${siteConfig.siteName}`
+    : `${matched.album} | ${matched.artist} | Discography | ${siteConfig.siteName}`;
   const description =
     matched.extra ?? `${matched.title} - ${matched.artist}の楽曲情報`;
 
@@ -104,8 +99,8 @@ export async function generateMetadata({
     ? `${matched.title} / ${matched.artist}`
     : matched.album
       ? `${matched.album} / ${matched.artist}`
-      : "AZKi Song Database";
-  const ogSubtitle = matched.extra ?? "AZKi Song Database";
+      : siteConfig.siteName;
+  const ogSubtitle = matched.extra ?? siteConfig.siteName;
 
   ogImageUrl.searchParams.set("title", ogTitle);
   ogImageUrl.searchParams.set(

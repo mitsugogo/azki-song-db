@@ -171,6 +171,50 @@ export default function usePlayerLifecycle(options: {
     globalPlayer.setCurrentSong(currentSong);
   }, [currentSong, globalPlayer, previousVideoId]);
 
+  // キーボードイベント: 左右キーで動画を10秒前後させる（プレイヤー参照がある場所で処理）
+  useEffect(() => {
+    if (!isPlayerReady || !playerRef.current) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        try {
+          if (
+            playerRef.current &&
+            typeof playerRef.current.getCurrentTime === "function" &&
+            typeof playerRef.current.seekTo === "function"
+          ) {
+            const currentTime = playerRef.current.getCurrentTime();
+            const delta = event.key === "ArrowLeft" ? -10 : 10;
+            let newTime = Math.max(0, currentTime + delta);
+            if (typeof playerRef.current.getDuration === "function") {
+              const dur = playerRef.current.getDuration();
+              if (Number.isFinite(dur)) newTime = Math.min(newTime, dur);
+            } else if (playerDuration > 0) {
+              newTime = Math.min(newTime, playerDuration);
+            }
+            playerRef.current.seekTo(newTime, true);
+            try {
+              globalPlayer.setCurrentTime(newTime);
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPlayerReady, playerRef, playerDuration, globalPlayer]);
+
   return {
     playerRef,
     isPlayerReady,

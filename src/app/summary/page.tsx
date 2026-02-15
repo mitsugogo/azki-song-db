@@ -4,13 +4,7 @@ import { metadata } from "../layout";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { FaHome } from "react-icons/fa";
 import SummaryTopClient from "./client";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "年ごとの活動記録";
@@ -25,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `${title} | AZKi Song Database`,
+    title: `${title} | ${siteConfig.siteName}`,
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,

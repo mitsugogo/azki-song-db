@@ -461,7 +461,8 @@ export default function MiniPlayer() {
           {playingSong && (
             <YouTubePlayer
               key={`mini-player-${playerKey}`}
-              song={playingSong}
+              video_id={playingSong.video_id}
+              startTime={Number(playingSong.start)}
               onReady={handlePlayerOnReady}
               onStateChange={handleStateChange}
             />

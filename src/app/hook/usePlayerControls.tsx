@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 import { Song } from "../types/song";
-import YouTube, { YouTubeEvent } from "react-youtube";
+import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
+import { siteConfig } from "../config/siteConfig";
+
+// YouTubePlayer に getVideoData メソッドを追加した拡張型
+type YouTubePlayerWithVideoData = YouTubePlayer & {
+  getVideoData: () => YouTubeVideoData;
+};
 
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
@@ -40,13 +47,17 @@ const usePlayerControls = (
   const [isPlaying, setIsPlaying] = useState(false);
 
   // === セトリネタバレ防止モード ===
-  const [hideFutureSongs, setHideFutureSongs] = useState(false);
+  const [hideFutureSongs, setHideFutureSongs] = useLocalStorage<boolean>({
+    key: "hideFutureSongs",
+    defaultValue: false,
+  });
 
   // === 内部参照 ===
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
   const lastManualChangeRef = useRef<number>(0);
   const isManualChangeInProgressRef = useRef<boolean>(false);
+  const lastEndClampRef = useRef<number>(0);
 
   // === ライブコール関連 ===
   const [timedLiveCallText, setTimedLiveCallText] = useState<string | null>(
@@ -82,24 +93,6 @@ const usePlayerControls = (
   useEffect(() => {
     nextSongRef.current = nextSong;
   }, [nextSong]);
-
-  // changeCurrentSong の ref 同期は後で定義
-
-  // === セトリネタバレ防止モードのlocalStorage同期 ===
-  useEffect(() => {
-    const hideFutureSongs = localStorage.getItem("hideFutureSongs");
-    if (hideFutureSongs === "true") {
-      setHideFutureSongs(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (hideFutureSongs) {
-      localStorage.setItem("hideFutureSongs", "true");
-    } else {
-      localStorage.removeItem("hideFutureSongs");
-    }
-  }, [hideFutureSongs]);
 
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
@@ -143,8 +136,8 @@ const usePlayerControls = (
   useEffect(() => {
     const title =
       isPlaying && currentSong
-        ? `♪${currentSong.title} / ${currentSong.artist} - AZKi Song Database`
-        : "AZKi Song Database";
+        ? `♪${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
+        : siteConfig.siteName;
     document.title = title;
   }, [currentSong, isPlaying]);
 
@@ -262,11 +255,20 @@ const usePlayerControls = (
       setPreviousAndNextSongs(song, songs);
 
       // === 同一動画内での曲変更 ===
-      if (
-        youtubeVideoIdRef.current &&
-        targetVideoId &&
-        youtubeVideoIdRef.current === targetVideoId
-      ) {
+      const isSameVideo =
+        Boolean(youtubeVideoIdRef.current) &&
+        youtubeVideoIdRef.current === targetVideoId;
+      const isSameAsCurrentSong =
+        currentSong?.video_id && currentSong.video_id === targetVideoId;
+      const isSameAsVideoIdState = videoId && videoId === targetVideoId;
+
+      if (isSameVideo || isSameAsCurrentSong || isSameAsVideoIdState) {
+        youtubeVideoIdRef.current = targetVideoId;
+        if (!options?.skipSeek) {
+          isManualChangeInProgressRef.current = true;
+          lastManualChangeRef.current = Date.now();
+          setStartTime(targetStartTime);
+        }
         setCurrentSong(song);
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
@@ -361,7 +363,7 @@ const usePlayerControls = (
   );
 
   const handleStateChange = useCallback(
-    (event: YouTubeEvent<number>) => {
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       const player = event.target;
       const fetchedVideoData = player.getVideoData?.() ?? null;
       const videoId = fetchedVideoData?.video_id;
@@ -412,10 +414,33 @@ const usePlayerControls = (
 
         // 再生中の監視タイマー
         intervalRef.current = setInterval(() => {
-          const currentTime = player.getCurrentTime();
+          const currentTime = Number(player.getCurrentTime());
           const currentVideoId = player.getVideoData()?.video_id;
 
           if (!currentVideoId) {
+            return;
+          }
+
+          const videoSongs = songsByVideo.get(currentVideoId);
+          const lastEnd = videoSongs
+            ? videoSongs.reduce(
+                (max, song) => Math.max(max, Number(song.end || 0)),
+                0,
+              )
+            : 0;
+          if (lastEnd > 0 && currentTime > lastEnd + 0.5) {
+            const now = Date.now();
+            if (now - lastEndClampRef.current > 1000) {
+              lastEndClampRef.current = now;
+              try {
+                if (typeof player.seekTo === "function") {
+                  player.seekTo(lastEnd, true);
+                }
+                if (typeof player.pauseVideo === "function") {
+                  player.pauseVideo();
+                }
+              } catch (_) {}
+            }
             return;
           }
 
@@ -444,6 +469,15 @@ const usePlayerControls = (
               s.start === foundSong?.start,
           );
 
+          try {
+            if (
+              document.documentElement.getAttribute("data-seek-dragging") ===
+              "1"
+            ) {
+              return;
+            }
+          } catch (_) {}
+
           // 自動切替: 同一動画内で再生位置が次の曲に移った場合、曲名を自動で更新する
           const currentPlayingVideoId = currentSongRef.current?.video_id;
           const isSameVideoPlaying =
@@ -458,22 +492,27 @@ const usePlayerControls = (
           ) {
             // 自動的な切り替えは ref 経由で最新の changeCurrentSong を呼ぶ
             // 自動遷移なのでシークはスキップ（表示のみ更新）
-            changeCurrentSongRef.current(foundSong, undefined, undefined, {
-              skipSeek: true,
-            });
+            isManualChangeInProgressRef.current = true;
+            lastManualChangeRef.current = Date.now();
+            changeCurrentSongRef.current(
+              foundSong,
+              foundSong.video_id,
+              Number(foundSong.start),
+              {
+                skipSeek: true,
+              },
+            );
             return;
           }
 
           // 手動変更中フラグのチェック
+          const now = Date.now();
+          const elapsed = now - lastManualChangeRef.current;
           const shouldBlockAutoChange =
-            isManualChangeInProgressRef.current &&
-            Date.now() - lastManualChangeRef.current <= 3000;
+            isManualChangeInProgressRef.current && elapsed <= 3000;
 
-          // 一定時間経過したらフラグをクリア
-          if (
-            shouldBlockAutoChange &&
-            Date.now() - lastManualChangeRef.current > 300
-          ) {
+          // 手動変更の猶予時間が過ぎたらフラグをクリア
+          if (isManualChangeInProgressRef.current && elapsed > 3000) {
             isManualChangeInProgressRef.current = false;
           }
 
@@ -487,7 +526,7 @@ const usePlayerControls = (
             return;
           }
 
-          if (foundSong?.end && foundSong.end < currentTime) {
+          if (foundSong?.end && Number(foundSong.end ?? 0) < currentTime) {
             clearMonitorInterval();
             if (autoNextSong) {
               changeCurrentSongRef.current(autoNextSong);
@@ -539,42 +578,45 @@ const usePlayerControls = (
 
   const { videoInfo } = useYoutubeVideoInfo(videoId);
 
-  const handlePlayerOnReady = useCallback((event: YouTubeEvent<number>) => {
-    const player = event.target;
-    const fetchedVideoData = player.getVideoData?.() ?? null;
-    const title = fetchedVideoData?.title ?? null;
+  const handlePlayerOnReady = useCallback(
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+      const player = event.target;
+      const fetchedVideoData = player.getVideoData?.() ?? null;
+      const title = fetchedVideoData?.title ?? null;
 
-    const isVideoDataEqual = (
-      a: YouTubeVideoData | null,
-      b: YouTubeVideoData | null,
-    ) => {
-      if (a === b) return true;
-      if (!a || !b) return false;
-      return a.video_id === b.video_id && a.title === b.title;
-    };
+      const isVideoDataEqual = (
+        a: YouTubeVideoData | null,
+        b: YouTubeVideoData | null,
+      ) => {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        return a.video_id === b.video_id && a.title === b.title;
+      };
 
-    if (title && title !== videoTitleRef.current) {
-      setVideoTitle(title);
-      videoTitleRef.current = title;
-    }
+      if (title && title !== videoTitleRef.current) {
+        setVideoTitle(title);
+        videoTitleRef.current = title;
+      }
 
-    if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
-      setVideoData(fetchedVideoData);
-      videoDataRef.current = fetchedVideoData;
-    }
+      if (!isVideoDataEqual(fetchedVideoData, videoDataRef.current)) {
+        setVideoData(fetchedVideoData);
+        videoDataRef.current = fetchedVideoData;
+      }
 
-    player.playVideo();
-    setIsPlaying(true);
+      player.playVideo();
+      setIsPlaying(true);
 
-    // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("v") || url.searchParams.has("t")) {
-      url.searchParams.delete("v");
-      url.searchParams.delete("t");
-      window.history.replaceState(null, "", url.toString());
-      window.dispatchEvent(new Event("replacestate"));
-    }
-  }, []);
+      // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("v") || url.searchParams.has("t")) {
+        url.searchParams.delete("v");
+        url.searchParams.delete("t");
+        window.history.replaceState(null, "", url.toString());
+        window.dispatchEvent(new Event("replacestate"));
+      }
+    },
+    [],
+  );
 
   return {
     currentSong,
@@ -601,3 +643,4 @@ const usePlayerControls = (
 };
 
 export default usePlayerControls;
+export type { YouTubePlayerWithVideoData };

@@ -1,0 +1,608 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalStorage } from "@mantine/hooks";
+import usePlayerControls from "./usePlayerControls";
+import { GlobalPlayerContextType } from "./useGlobalPlayer";
+import type { Song } from "../types/song";
+import type { YouTubeEvent, YouTubePlayer } from "react-youtube";
+import type { YouTubeVideoData } from "../types/youtube";
+
+// YouTubePlayer に getVideoData メソッドを追加した拡張型
+type YouTubePlayerWithVideoData = YouTubePlayer & {
+  getVideoData: () => YouTubeVideoData;
+};
+
+type UseMainPlayerControlsOptions = {
+  songs: Song[];
+  allSongs: Song[];
+  globalPlayer: GlobalPlayerContextType;
+};
+
+/**
+ * メインプレイヤーの再生制御ロジックをまとめたカスタムフック
+ * - プレイヤーの準備状態管理
+ * - 再生位置の復元
+ * - 音量管理（ローカルストレージに保存）
+ * - グローバルプレイヤーとの連携
+ */
+export default function useMainPlayerControls({
+  songs,
+  allSongs,
+  globalPlayer,
+}: UseMainPlayerControlsOptions) {
+  const playerRef = useRef<any>(null);
+  const playerRefVideoIdRef = useRef<string | null>(null);
+  const lastPlayerReadyAtRef = useRef<number | null>(null);
+  const pendingSeekRef = useRef<number | null>(null);
+  // seek-in-flight tracking
+  const seekInFlightRef = useRef<number | null>(null);
+  const [seekInFlight, setSeekInFlight] = useState<number | null>(null);
+
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [playerDuration, setPlayerDuration] = useState(0);
+  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
+  const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
+  const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
+  const previousVideoIdRef = useRef<string | null>(null);
+
+  const {
+    currentSong,
+    previousSong,
+    nextSong,
+    isPlaying,
+    playerKey,
+    hideFutureSongs,
+    videoId,
+    videoTitle,
+    videoData,
+    videoInfo,
+    startTime,
+    timedLiveCallText,
+    setHideFutureSongs,
+    changeCurrentSong,
+    playRandomSong,
+    handlePlayerOnReady: originalHandlePlayerOnReady,
+    handleStateChange: originalHandleStateChange,
+    setPreviousAndNextSongs,
+  } = usePlayerControls(songs, allSongs, globalPlayer);
+
+  // keep a mutable ref with the latest videoId so callbacks can read it
+  const latestVideoIdRef = useRef<string | null>(videoId ?? null);
+  latestVideoIdRef.current = videoId ?? null;
+  // track previous videoId across renders so effects can reason about transitions
+  previousVideoIdRef.current = previousVideoId;
+
+  const [playerVolume, setPlayerVolume] = useLocalStorage<number>({
+    key: "player-volume",
+    defaultValue: 100,
+  });
+  const [isMuted, setIsMuted] = useLocalStorage<boolean>({
+    key: "player-muted",
+    defaultValue: false,
+  });
+
+  /**
+   * プレイヤーの状態のスナップショットを更新
+   */
+  const updatePlayerSnapshot = useCallback((playerInstance: any) => {
+    if (!playerInstance) return;
+    if (typeof playerInstance.getDuration === "function") {
+      const duration = playerInstance.getDuration();
+      if (Number.isFinite(duration)) {
+        setPlayerDuration(duration);
+      }
+    }
+    if (typeof playerInstance.getCurrentTime === "function") {
+      const currentTime = playerInstance.getCurrentTime();
+      if (Number.isFinite(currentTime)) {
+        setPlayerCurrentTime(currentTime);
+      }
+    }
+  }, []);
+
+  /**
+   * 音量をプレイヤーに適用
+   */
+  const applyPersistedVolume = useCallback(
+    (playerInstance: any) => {
+      if (!playerInstance || typeof playerInstance.setVolume !== "function") {
+        return;
+      }
+
+      try {
+        playerInstance.setVolume(playerVolume);
+        if (isMuted) {
+          try {
+            if (typeof playerInstance.mute === "function") {
+              playerInstance.mute();
+            }
+          } catch (_) {}
+        } else {
+          try {
+            if (typeof playerInstance.unMute === "function") {
+              playerInstance.unMute();
+            }
+          } catch (_) {}
+        }
+      } catch (_) {
+        // ignore
+      }
+    },
+    [playerVolume, isMuted],
+  );
+
+  /**
+   * プレイヤーが準備できたとき
+   */
+  const handlePlayerOnReady = useCallback(
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+      originalHandlePlayerOnReady(event);
+      playerRef.current = event.target;
+
+      const videoIdFromPlayer =
+        typeof event.target.getVideoData === "function"
+          ? (event.target.getVideoData()?.video_id ?? null)
+          : null;
+      playerRefVideoIdRef.current =
+        videoIdFromPlayer ??
+        currentSong?.video_id ??
+        latestVideoIdRef.current ??
+        null;
+      updatePlayerSnapshot(event.target);
+      setIsPlayerReady(true);
+      lastPlayerReadyAtRef.current = Date.now();
+      try {
+        applyPersistedVolume(event.target);
+      } catch (_) {}
+
+      const currentVideoId = currentSong?.video_id;
+      const shouldRestorePosition =
+        currentVideoId === previousVideoId &&
+        globalPlayer.currentTime > 0 &&
+        !hasRestoredPosition;
+
+      if (shouldRestorePosition) {
+        setTimeout(() => {
+          const player = event.target;
+          if (player && typeof player.seekTo === "function") {
+            player.seekTo(globalPlayer.currentTime, true);
+            setHasRestoredPosition(true);
+          }
+        }, 500);
+      } else if (currentVideoId !== previousVideoId) {
+        setHasRestoredPosition(false);
+      }
+
+      // if any seek was requested before the player was ready, perform it now
+      if (pendingSeekRef.current !== null) {
+        try {
+          const s = pendingSeekRef.current;
+          pendingSeekRef.current = null;
+          if (typeof event.target.seekTo === "function") {
+            event.target.seekTo(s, true);
+            globalPlayer.setCurrentTime(s);
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
+    },
+    [
+      originalHandlePlayerOnReady,
+      updatePlayerSnapshot,
+      applyPersistedVolume,
+      currentSong?.video_id,
+      previousVideoId,
+      globalPlayer.currentTime,
+      hasRestoredPosition,
+    ],
+  );
+
+  /**
+   * プレイヤーの状態が変化したとき
+   */
+  const handlePlayerStateChange = useCallback(
+    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+      originalHandleStateChange(event);
+      updatePlayerSnapshot(event.target);
+    },
+    [originalHandleStateChange, updatePlayerSnapshot],
+  );
+
+  const changeVolume = useCallback(
+    (volume: number) => {
+      if (!isPlayerReady || !playerRef.current) return;
+      try {
+        const clampedVolume = Math.min(Math.max(Math.round(volume), 0), 100);
+        if (typeof playerRef.current.setVolume === "function") {
+          playerRef.current.setVolume(clampedVolume);
+        }
+        setPlayerVolume(clampedVolume);
+        if (clampedVolume > 0 && isMuted) {
+          try {
+            if (typeof playerRef.current.unMute === "function") {
+              playerRef.current.unMute();
+            }
+          } catch (_) {}
+          setIsMuted(false);
+        } else if (clampedVolume === 0 && !isMuted) {
+          // 音量が0になったらミュート扱いにする
+          try {
+            if (typeof playerRef.current.mute === "function") {
+              playerRef.current.mute();
+            }
+          } catch (_) {}
+          setIsMuted(true);
+        }
+      } catch (_) {
+        // ignore
+      }
+    },
+    [isPlayerReady, isMuted, setPlayerVolume, setIsMuted],
+  );
+
+  const setMuted = useCallback(
+    (muted: boolean) => {
+      try {
+        if (playerRef.current) {
+          if (muted) {
+            if (typeof playerRef.current.mute === "function") {
+              playerRef.current.mute();
+            }
+          } else {
+            if (typeof playerRef.current.unMute === "function") {
+              playerRef.current.unMute();
+            }
+          }
+        }
+      } catch (_) {}
+      setIsMuted(muted);
+    },
+    [setIsMuted],
+  );
+
+  const playVideo = useCallback(() => {
+    if (
+      !playerRef.current ||
+      typeof playerRef.current.playVideo !== "function"
+    ) {
+      return;
+    }
+    try {
+      playerRef.current.playVideo();
+    } catch (error) {
+      console.error("Failed to play video:", error);
+    }
+  }, []);
+
+  const pauseVideo = useCallback(() => {
+    if (
+      !playerRef.current ||
+      typeof playerRef.current.pauseVideo !== "function"
+    ) {
+      return;
+    }
+    try {
+      playerRef.current.pauseVideo();
+    } catch (error) {
+      console.error("Failed to pause video:", error);
+    }
+  }, []);
+
+  // 重複/同時の同一絶対時間へのシークを避ける
+  // - UIや合成イベントが重複したplayer.seekTo呼び出しを引き起こすのを防ぐ
+  const lastRequestedSeekRef = useRef<{ value: number; ts: number } | null>(
+    null,
+  );
+
+  /**
+   * プレイヤーを絶対時間（秒）にシークする。プレイヤーがまだ準備できていない場合は、準備完了後にシークをキューに入れる
+   * @param absoluteSeconds シーク先の絶対時間=YouTubeプレイヤー上の時間（秒）
+   */
+  const seekToAbsolute = useCallback(
+    (absoluteSeconds: number) => {
+      if (
+        !playerRef.current ||
+        typeof playerRef.current.seekTo !== "function"
+      ) {
+        pendingSeekRef.current = absoluteSeconds;
+        return;
+      }
+
+      try {
+        const boundedAbsolute =
+          playerDuration > 0
+            ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
+            : Math.max(absoluteSeconds, 0);
+
+        // DEDUP: もし現在同一の絶対時間へのシークが進行中であれば、重複して同じシークを送らない
+        if (
+          seekInFlightRef.current !== null &&
+          Math.abs((seekInFlightRef.current || 0) - boundedAbsolute) < 0.25
+        ) {
+          return;
+        }
+
+        // DEDUP: 短時間内に同一のリクエストが繰り返されるのを無視
+        const now = Date.now();
+        const last = lastRequestedSeekRef.current;
+        if (
+          last &&
+          Math.abs(last.value - boundedAbsolute) < 0.25 &&
+          now - last.ts < 500
+        ) {
+          return;
+        }
+        lastRequestedSeekRef.current = { value: boundedAbsolute, ts: now };
+
+        // 進行中のシークを更新
+        seekInFlightRef.current = boundedAbsolute;
+        setSeekInFlight(boundedAbsolute);
+
+        // シーク実行
+        playerRef.current.seekTo(boundedAbsolute, true);
+
+        // 進行中のシークを更新
+        try {
+          setPlayerCurrentTime(boundedAbsolute);
+        } catch (_) {}
+        globalPlayer.setCurrentTime(boundedAbsolute);
+
+        // ガード処理: もし何らかの理由でシーク完了イベントが来ない場合、3秒後にシーク中状態をクリアする
+        setTimeout(() => {
+          if (seekInFlightRef.current === boundedAbsolute) {
+            seekInFlightRef.current = null;
+            setSeekInFlight(null);
+          }
+        }, 3000);
+      } catch (error) {
+        console.error("Failed to seek:", error);
+      }
+    },
+    [playerDuration, globalPlayer],
+  );
+
+  useEffect(() => {
+    globalPlayer.setSeekTo(seekToAbsolute);
+    return () => {
+      globalPlayer.setSeekTo(null);
+    };
+  }, [seekToAbsolute, globalPlayer]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !playerRef.current) return;
+    if (globalPlayer.isMinimized) return;
+    try {
+      applyPersistedVolume(playerRef.current);
+    } catch (_) {}
+  }, [isPlayerReady, globalPlayer.isMinimized, applyPersistedVolume]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !playerRef.current || !isPlaying) return;
+
+    let lastTime =
+      typeof playerRef.current.getCurrentTime === "function"
+        ? playerRef.current.getCurrentTime()
+        : 0;
+
+    const interval = setInterval(() => {
+      if (
+        playerRef.current &&
+        typeof playerRef.current.getCurrentTime === "function"
+      ) {
+        const currentTime = playerRef.current.getCurrentTime();
+        if (Number.isFinite(currentTime)) {
+          // detect seek-in-flight completion
+          const inFlight = seekInFlightRef.current;
+          if (inFlight !== null && Math.abs(currentTime - inFlight) <= 1.0) {
+            // consider seek completed
+            seekInFlightRef.current = null;
+            setSeekInFlight(null);
+            // ensure UI reflects the final settled time
+            setPlayerCurrentTime(currentTime);
+            try {
+              globalPlayer.setCurrentTime(currentTime);
+            } catch (_) {}
+          }
+
+          if (Math.abs(currentTime - lastTime) >= 0.25) {
+            lastTime = currentTime;
+            setPlayerCurrentTime(currentTime);
+          }
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [isPlayerReady, isPlaying]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      if (
+        playerRef.current &&
+        typeof playerRef.current.getCurrentTime === "function"
+      ) {
+        const time = playerRef.current.getCurrentTime();
+        globalPlayer.setCurrentTime(time);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, globalPlayer]);
+
+  useEffect(() => {
+    if (!currentSong) {
+      globalPlayer.setCurrentSong(null);
+      setPreviousVideoId(null);
+      return;
+    }
+
+    const currentVideoId = currentSong.video_id;
+
+    if (currentVideoId !== previousVideoId) {
+      if (previousVideoId !== null) {
+        globalPlayer.setCurrentTime(0);
+        setHasRestoredPosition(false);
+      }
+      setPreviousVideoId(currentVideoId);
+    }
+
+    globalPlayer.setCurrentSong(currentSong);
+  }, [currentSong, globalPlayer, previousVideoId]);
+
+  // videoId が変わったら古い player 参照をクリアして、
+  // iframe 差し替え中に stale な player を呼ばないようにする（YouTube 側の PlayerProxy エラー対策）
+  //
+  // NOTE:
+  // - テストやプレイヤーの onReady が同一フレーム内で発生した場合、
+  //   既に `playerRef` が新しい videoId を指していることがある。
+  // - そのため、既存の player が既に new `videoId` を表している場合は
+  //   参照をクリアしない（誤って ready 状態を消してしまうのを防ぐ）。
+  useEffect(() => {
+    let shouldClear = true;
+    try {
+      const now = Date.now();
+      const recentReady =
+        !!lastPlayerReadyAtRef.current &&
+        now - lastPlayerReadyAtRef.current < 200;
+      if (
+        recentReady &&
+        !previousVideoIdRef.current &&
+        !playerRefVideoIdRef.current
+      ) {
+        shouldClear = false;
+      } else if (playerRefVideoIdRef.current) {
+        shouldClear = playerRefVideoIdRef.current !== videoId;
+      } else if (!playerRef.current) {
+        shouldClear = true;
+      } else if (typeof playerRef.current.getVideoData === "function") {
+        const vid = playerRef.current.getVideoData()?.video_id ?? null;
+        shouldClear = vid !== videoId;
+      } else {
+        const initialLoadRace =
+          !previousVideoIdRef.current &&
+          !!lastPlayerReadyAtRef.current &&
+          Date.now() - lastPlayerReadyAtRef.current < 200;
+        shouldClear = !initialLoadRace;
+      }
+    } catch (_) {
+      shouldClear = true;
+    }
+
+    if (shouldClear) {
+      playerRef.current = null;
+      playerRefVideoIdRef.current = null;
+      setIsPlayerReady(false);
+      pendingSeekRef.current = null;
+    } else {
+      // もし getVideoDataが利用できないためにクリアを遅延していた場合、マイクロタスクをスケジュールして、何も設定されなければ playerRefVideoIdRef を再確認してクリアする
+      const recentlyReady =
+        !!lastPlayerReadyAtRef.current &&
+        Date.now() - lastPlayerReadyAtRef.current < 200;
+      if (playerRef.current && !playerRefVideoIdRef.current && !recentlyReady) {
+        setTimeout(() => {
+          try {
+            if (!playerRefVideoIdRef.current && playerRef.current) {
+              playerRef.current = null;
+              playerRefVideoIdRef.current = null;
+              setIsPlayerReady(false);
+              pendingSeekRef.current = null;
+            }
+          } catch (_) {}
+        }, 0);
+      }
+    }
+  }, [videoId]);
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        try {
+          if (
+            playerRef.current &&
+            typeof playerRef.current.getCurrentTime === "function" &&
+            typeof playerRef.current.seekTo === "function"
+          ) {
+            const currentTime = playerRef.current.getCurrentTime();
+            const delta = event.key === "ArrowLeft" ? -10 : 10;
+            let newTime = Math.max(0, currentTime + delta);
+            if (typeof playerRef.current.getDuration === "function") {
+              const dur = playerRef.current.getDuration();
+              if (Number.isFinite(dur)) newTime = Math.min(newTime, dur);
+            } else if (playerDuration > 0) {
+              newTime = Math.min(newTime, playerDuration);
+            }
+            playerRef.current.seekTo(newTime, true);
+            try {
+              globalPlayer.setCurrentTime(newTime);
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [playerDuration, globalPlayer]);
+
+  useEffect(() => {
+    globalPlayer.setIsPlaying(isPlaying);
+  }, [isPlaying, globalPlayer]);
+
+  const playerControls = {
+    isReady: isPlayerReady && Boolean(playerRef.current),
+    play: playVideo,
+    pause: pauseVideo,
+    seekTo: seekToAbsolute,
+    setVolume: changeVolume,
+    mute: () => setMuted(true),
+    unMute: () => setMuted(false),
+    currentTime: playerCurrentTime,
+    /** currently requested seek (seconds) or null */
+    seekInFlight: seekInFlight,
+    volume: playerVolume,
+    isMuted,
+    duration: playerDuration,
+  };
+
+  return {
+    currentSong,
+    previousSong,
+    nextSong,
+    isPlaying,
+    playerKey,
+    hideFutureSongs,
+    videoId,
+    videoTitle,
+    videoData,
+    videoInfo,
+    startTime,
+    timedLiveCallText,
+    setHideFutureSongs,
+    changeCurrentSong,
+    playRandomSong,
+    handlePlayerOnReady,
+    handlePlayerStateChange,
+    setPreviousAndNextSongs,
+    hasRestoredPosition,
+    setHasRestoredPosition,
+    previousVideoId,
+    setPreviousVideoId,
+    playerControls,
+  } as const;
+}

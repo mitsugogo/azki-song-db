@@ -3,13 +3,7 @@ import ClientTop from "./client";
 import { metadata } from "./layout";
 import { Song } from "./types/song";
 import { Playlist } from "./hook/usePlaylists";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -20,10 +14,10 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const { q, v, t, playlist } = await searchParams;
 
-  let title = "AZKi Song Database";
+  let title = `${siteConfig.siteName}`;
   let description = "AZKiさんの歌の素晴らしさを伝えるサイト";
 
-  let og_title = "AZKi Song Database";
+  let og_title = `${siteConfig.siteName}`;
   let og_subtitle = "AZKiさんの歌の素晴らしさを伝えるサイト";
 
   let ogImageUrl = new URL("/api/og", baseUrl);
@@ -47,7 +41,7 @@ export async function generateMetadata({
     };
 
     if (isOriginalSongsMode) {
-      title = "オリジナル曲モード | AZKi Song Database";
+      title = `オリジナル曲モード | ${siteConfig.siteName}`;
       og_title = "オリジナル曲モード";
       og_subtitle = "AZKiさんのオリジナル楽曲を集めたプレイリスト";
     } else {
@@ -56,18 +50,18 @@ export async function generateMetadata({
       for (const [prefix, { icon }] of Object.entries(prefixMap)) {
         if (qStr.startsWith(prefix)) {
           const displayTerm = qStr.replace(prefix, "");
-          title = `${displayTerm}の検索結果 | AZKi Song Database`;
+          title = `${displayTerm}の検索結果 | ${siteConfig.siteName}`;
           og_title = `${icon} ${displayTerm}の検索結果`;
-          og_subtitle = "AZKi Song Database";
+          og_subtitle = `${siteConfig.siteName}`;
           matched = true;
           break;
         }
       }
 
       if (!matched) {
-        title = `「${q}」の検索結果 | AZKi Song Database`;
+        title = `「${q}」の検索結果 | ${siteConfig.siteName}`;
         og_title = `「${q}」の検索結果`;
-        og_subtitle = "AZKi Song Database";
+        og_subtitle = `${siteConfig.siteName}`;
       }
     }
 
@@ -89,7 +83,7 @@ export async function generateMetadata({
         parseInt(s.start) == parseInt(t.toString().replace("s", "")),
     );
     if (song) {
-      title = `🎵 ${song.title} - ${song.artist} | AZKi Song Database`;
+      title = `🎵 ${song.title} - ${song.artist} | ${siteConfig.siteName}`;
       description = `${song.video_title} (配信日時:${new Date(
         song.broadcast_at,
       ).toLocaleDateString("ja-JP")})`;
@@ -121,7 +115,7 @@ export async function generateMetadata({
     };
 
     const decoded = decodePlaylistUrlParam(playlist as string);
-    title = `プレイリスト「${decoded.name}」 | AZKi Song Database`;
+    title = `プレイリスト「${decoded.name}」 | ${siteConfig.siteName}`;
     og_title = `📒 ${decoded.name}`;
     og_subtitle = `${decoded.songs.length}曲の楽曲をまとめたプレイリスト`;
     ogImageUrl.searchParams.set("title", og_title);

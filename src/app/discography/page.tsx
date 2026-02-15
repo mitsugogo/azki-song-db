@@ -1,13 +1,7 @@
 import DiscographyPage from "./client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { metadata } from "../layout";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Discography";
@@ -22,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: "Discography | AZKi Song Database",
+    title: `Discography | ${siteConfig.siteName}`,
     description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
     openGraph: {
       ...metadata.openGraph,

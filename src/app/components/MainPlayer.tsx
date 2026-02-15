@@ -1,22 +1,12 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback, useRef } from "react";
-import {
-  Spotlight,
-  SpotlightActionData,
-  createSpotlight,
-  spotlight,
-} from "@mantine/spotlight";
+import { useState, useEffect, useRef } from "react";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
-import usePlayerControls from "../hook/usePlayerControls";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
-import usePlayerLifecycle from "../hook/usePlayerLifecycle";
-import usePlayerVolume, {
-  applyPersistedVolumeToPlayer,
-} from "../hook/usePlayerVolume";
+import useMainPlayerControls from "../hook/useMainPlayerControls";
 import { usePathname } from "next/navigation";
 
 // Components
@@ -25,42 +15,23 @@ import SearchAndSongList from "./SearchAndSongList";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
-import { FaMusic, FaShare, FaStar, FaTag, FaUser } from "react-icons/fa6";
-import { FaSearch } from "react-icons/fa";
-import { BiHide } from "react-icons/bi";
-import { IoMusicalNotes } from "react-icons/io5";
 
 /**
  * メインプレイヤー
  */
 export default function MainPlayer() {
-  // Actions
-  const [actionsSpotlightStore, actionsSpotlight] = createSpotlight();
-  const [searchSpotlightStore, searchSpotlight] = createSpotlight();
-
   // グローバルプレイヤー
   const globalPlayer = useGlobalPlayer();
   const pathname = usePathname();
-  const sharedPlayerRef = useRef<any>(null);
 
   // --- Hooks ---
-  const {
-    allSongs,
-    isLoading: isSongDataLoading,
-    availableTags,
-    availableArtists,
-    availableSingers,
-    availableSongTitles,
-    availableMilestones,
-    availableTitleAndArtists,
-  } = useSongs();
+  const { allSongs, isLoading: isSongDataLoading } = useSongs();
 
   const { songs, setSongs, searchTerm, setSearchTerm, searchSongs } =
     useSearch(allSongs);
 
   const {
     currentSong,
-    currentSongRef,
     previousSong,
     nextSong,
     isPlaying,
@@ -75,99 +46,19 @@ export default function MainPlayer() {
     setHideFutureSongs,
     changeCurrentSong,
     playRandomSong,
-    handlePlayerOnReady: originalHandlePlayerOnReady,
-    handleStateChange: originalHandleStateChange,
-    setPreviousAndNextSongs,
-  } = usePlayerControls(songs, allSongs, globalPlayer);
-
-  const {
-    playerRef,
-    isPlayerReady,
-    playerDuration,
-    playerCurrentTime,
     handlePlayerOnReady,
     handlePlayerStateChange,
-    hasRestoredPosition,
+    setPreviousAndNextSongs,
     setHasRestoredPosition,
-    previousVideoId,
     setPreviousVideoId,
-  } = usePlayerLifecycle({
-    originalHandlePlayerOnReady,
-    originalHandleStateChange,
+    playerControls,
+  } = useMainPlayerControls({
+    songs,
+    allSongs,
     globalPlayer,
-    currentSong,
-    isPlaying,
-    playerRef: sharedPlayerRef,
   });
 
-  // プレイヤーボリューム（ローカル状態はフックで管理）
-  const {
-    playerVolume,
-    setPlayerVolume,
-    changeVolume: changePlayerVolume,
-    isMuted: persistedIsMuted,
-    setMuted: setPersistedMuted,
-  } = usePlayerVolume(sharedPlayerRef, isPlayerReady);
-
   const previousPathnameRef = useRef(pathname);
-
-  const seekTo = useCallback(
-    (seconds: number) => {
-      if (
-        playerRef.current &&
-        typeof playerRef.current.seekTo === "function" &&
-        typeof playerRef.current.getCurrentTime === "function"
-      ) {
-        const currentTime = playerRef.current.getCurrentTime();
-        const newTime = Math.max(0, currentTime + seconds);
-        playerRef.current.seekTo(newTime, true);
-      }
-    },
-    [playerRef],
-  );
-
-  // キーボードイベント: 左右キーで動画を10秒前後させる
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // 入力フィールドやテキストエリアにフォーカスがある場合は無視
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-
-      // 左右キーの処理
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        seekTo(-10);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        seekTo(10);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [seekTo]);
-
-  // isPlaying をグローバルプレイヤーに同期
-  useEffect(() => {
-    globalPlayer.setIsPlaying(isPlaying);
-  }, [isPlaying, globalPlayer]);
-
-  // ミニプレイヤーからメインに戻ったときに、保存された音量/ミュートをメインのプレイヤーに適用
-  useEffect(() => {
-    if (!isPlayerReady) return;
-    if (globalPlayer.isMinimized) return;
-    try {
-      if (playerRef.current) {
-        applyPersistedVolumeToPlayer(playerRef.current);
-      }
-    } catch (_) {}
-  }, [isPlayerReady, globalPlayer.isMinimized, playerRef]);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
   // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
@@ -209,7 +100,7 @@ export default function MainPlayer() {
     }
 
     previousPathnameRef.current = pathname;
-  }, [pathname, currentSong, globalPlayer, currentSong, changeCurrentSong]);
+  }, [pathname, currentSong, globalPlayer, changeCurrentSong]);
 
   useEffect(() => {
     if (!currentSong) return;
@@ -304,87 +195,6 @@ export default function MainPlayer() {
     setPreviousAndNextSongs(currentSong, songsInVideo);
   };
 
-  const playVideo = useCallback(() => {
-    if (
-      playerRef.current &&
-      typeof playerRef.current.playVideo === "function"
-    ) {
-      try {
-        playerRef.current.playVideo();
-      } catch (error) {
-        console.error("Failed to play video:", error);
-      }
-    }
-  }, []);
-
-  const pauseVideo = useCallback(() => {
-    if (
-      playerRef.current &&
-      typeof playerRef.current.pauseVideo === "function"
-    ) {
-      try {
-        playerRef.current.pauseVideo();
-      } catch (error) {
-        console.error("Failed to pause video:", error);
-      }
-    }
-  }, []);
-
-  const changeVolume = useCallback(
-    (volume: number) => {
-      changePlayerVolume(volume);
-    },
-    [changePlayerVolume],
-  );
-
-  const seekToAbsolute = useCallback(
-    (absoluteSeconds: number) => {
-      if (
-        !playerRef.current ||
-        typeof playerRef.current.seekTo !== "function"
-      ) {
-        return;
-      }
-      try {
-        const boundedAbsolute =
-          playerDuration > 0
-            ? Math.min(Math.max(absoluteSeconds, 0), playerDuration)
-            : Math.max(absoluteSeconds, 0);
-        playerRef.current.seekTo(boundedAbsolute, true);
-        globalPlayer.setCurrentTime(boundedAbsolute);
-      } catch (error) {
-        console.error("Failed to seek:", error);
-      }
-    },
-    [playerDuration, globalPlayer],
-  );
-
-  // seekToAbsolute を globalPlayer に登録
-  useEffect(() => {
-    globalPlayer.setSeekTo(seekToAbsolute);
-    return () => {
-      globalPlayer.setSeekTo(null);
-    };
-  }, [seekToAbsolute, globalPlayer]);
-
-  const desktopPlayerControls = {
-    isReady: isPlayerReady && Boolean(playerRef.current),
-    play: playVideo,
-    pause: pauseVideo,
-    seekTo: seekToAbsolute,
-    setVolume: changeVolume,
-    mute: () => {
-      setPersistedMuted?.(true);
-    },
-    unMute: () => {
-      setPersistedMuted?.(false);
-    },
-    currentTime: playerCurrentTime,
-    volume: playerVolume,
-    isMuted: persistedIsMuted,
-    duration: playerDuration,
-  };
-
   // --- Render ---
   if (isSongDataLoading) {
     return <Loading />;
@@ -420,7 +230,7 @@ export default function MainPlayer() {
         isPlaying={isPlaying}
         playerKey={playerKey}
         hideFutureSongs={hideFutureSongs}
-        playerControls={desktopPlayerControls}
+        playerControls={playerControls}
       />
 
       <SearchAndSongList

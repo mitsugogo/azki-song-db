@@ -4,6 +4,7 @@ import YouTube from "react-youtube";
 import usePlayerControls from "../usePlayerControls";
 import type { Song } from "../../types/song";
 import type { GlobalPlayerContextType } from "../useGlobalPlayer";
+import { siteConfig } from "@/app/config/siteConfig";
 
 // モック用のglobalPlayerを作成
 const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
@@ -270,7 +271,7 @@ describe("usePlayerControls", () => {
     });
 
     expect(result.current.hideFutureSongs).toBe(false);
-    expect(localStorage.getItem("hideFutureSongs")).toBeNull();
+    expect(localStorage.getItem("hideFutureSongs")).toBe("false");
   });
 
   it("localStorageからhideFutureSongsを復元できる", () => {
@@ -362,7 +363,7 @@ describe("usePlayerControls", () => {
     );
 
     // 初期状態
-    expect(document.title).toBe("AZKi Song Database");
+    expect(document.title).toBe(siteConfig.siteName);
 
     act(() => {
       result.current.changeCurrentSong(mockSongs[0]);
@@ -370,7 +371,7 @@ describe("usePlayerControls", () => {
 
     // currentSongInfoはあるがisPlayingがfalseの場合
     rerender();
-    expect(document.title).toBe("AZKi Song Database");
+    expect(document.title).toBe(siteConfig.siteName);
   });
 
   it("videoIdが変わるとvideoIdRefが更新される", () => {
@@ -674,6 +675,73 @@ describe("usePlayerControls", () => {
       expect(result.current.startTime).toBe(50);
       expect(result.current.currentSong?.title).toBe("Song D");
     });
+
+    it("start/endの指定がある楽曲が一つの動画で連続再生される場合、正しくシークされる", () => {
+      const videoSongs: Song[] = [
+        {
+          video_id: "vidSeq",
+          start: "30",
+          end: "90",
+          title: "Segment 1",
+          artist: "Artist S",
+          album: "",
+          album_list_uri: "",
+          album_release_at: "",
+          album_is_compilation: false,
+          sing: "",
+          video_title: "",
+          video_uri: "",
+          broadcast_at: "",
+          year: 0,
+          tags: [],
+          milestones: [],
+          lyricist: "",
+          composer: "",
+          arranger: "",
+        },
+        {
+          video_id: "vidSeq",
+          start: "100",
+          end: "150",
+          title: "Segment 2",
+          artist: "Artist S",
+          album: "",
+          album_list_uri: "",
+          album_release_at: "",
+          album_is_compilation: false,
+          sing: "",
+          video_title: "",
+          video_uri: "",
+          broadcast_at: "",
+          year: 0,
+          tags: [],
+          milestones: [],
+          lyricist: "",
+          composer: "",
+          arranger: "",
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        usePlayerControls(videoSongs, videoSongs, mockGlobalPlayer),
+      );
+
+      // 最初の曲を選択
+      act(() => {
+        result.current.changeCurrentSong(videoSongs[0]);
+      });
+
+      expect(result.current.currentSong?.title).toBe("Segment 1");
+
+      // 同一動画内で次の曲に切り替え
+      act(() => {
+        result.current.changeCurrentSong(videoSongs[1]);
+      });
+
+      // startに基づいて正しくシークされる
+      expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(100);
+      expect(result.current.currentSong?.title).toBe("Segment 2");
+    });
   });
 
   describe("handlePlayerOnReady", () => {
@@ -884,7 +952,7 @@ describe("usePlayerControls", () => {
           target: player,
           data: YouTube.PlayerState.PLAYING,
         } as any);
-        vi.advanceTimersByTime(500);
+        vi.advanceTimersByTime(3001); // 手動変更の猶予時間を過ぎる
         vi.advanceTimersByTime(500);
       });
 
@@ -921,7 +989,7 @@ describe("usePlayerControls", () => {
         vi.advanceTimersByTime(500);
       });
 
-      expect(result.current.currentSong?.start).toBe("200");
+      expect(result.current.currentSong?.start).toBe("100");
     });
   });
 });
