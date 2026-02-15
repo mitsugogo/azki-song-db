@@ -418,9 +418,7 @@ const NowPlayingSongInfo = ({
   searchTerm,
   isPlaying,
   hideFutureSongs,
-  setHideFutureSongs,
   setSearchTerm,
-  setOpenShereModal,
   changeCurrentSong,
   videoTitle,
   videoData,
@@ -581,10 +579,10 @@ const NowPlayingSongInfo = ({
                     />
                   </div>
                 )}
-                <h2 className="text-lg lg:text-xl font-bold m-0 line-clamp-2 break-all">
+                <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white m-0 line-clamp-2">
                   {renderLinkedText(
                     videoData?.title ?? videoTitle ?? currentSong.video_title,
-                    { hashtagPlatform: "youtube" },
+                    { hashtagPlatform: "self" },
                   )}
                 </h2>
               </div>
