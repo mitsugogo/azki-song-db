@@ -1,12 +1,6 @@
 import { Metadata } from "next";
 import SearchPageClient from "./client";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export async function generateMetadata({
   searchParams,
@@ -40,7 +34,7 @@ export async function generateMetadata({
       if (searchTerm.startsWith(prefix)) {
         displayTerm = searchTerm.replace(prefix, "");
         ogTitle = `${icon} ${displayTerm}の検索結果`;
-        ogSubtitle = "AZKi Song Database";
+        ogSubtitle = `${siteConfig.siteName}`;
         matched = true;
         break;
       }
@@ -48,29 +42,29 @@ export async function generateMetadata({
 
     if (!matched) {
       ogTitle = `「${displayTerm}」の検索結果`;
-      ogSubtitle = "AZKi Song Database";
+      ogSubtitle = `${siteConfig.siteName}`;
     }
   }
 
   return {
     title: searchTerm
-      ? `${displayTerm}の検索結果 | AZKi Song Database`
-      : "検索 | AZKi Song Database",
+      ? `${displayTerm}の検索結果 | ${siteConfig.siteName}`
+      : `検索 | ${siteConfig.siteName}`,
     description: "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
     openGraph: {
       title: ogTitle,
       description:
         "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
-      url: `https://azki-song-db.vercel.app/search${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ""}`,
+      url: `${baseUrl.endsWith("/") ? baseUrl : baseUrl + "/"}search${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ""}`,
       type: "website",
-      siteName: "AZKi Song Database",
+      siteName: `${siteConfig.siteName}`,
       locale: "ja_JP",
       images: [
         {
           url: `${baseUrl.endsWith("/") ? baseUrl : baseUrl + "/"}api/og?title=${encodeURIComponent(ogTitle)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`,
           width: 1200,
           height: 630,
-          alt: `AZKi Song Database - ${ogTitle}`,
+          alt: `${siteConfig.siteName} - ${ogTitle}`,
         },
       ],
     },

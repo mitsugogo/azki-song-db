@@ -5,6 +5,7 @@ import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
+import { siteConfig } from "../config/siteConfig";
 
 // YouTubePlayer に getVideoData メソッドを追加した拡張型
 type YouTubePlayerWithVideoData = YouTubePlayer & {
@@ -135,8 +136,8 @@ const usePlayerControls = (
   useEffect(() => {
     const title =
       isPlaying && currentSong
-        ? `♪${currentSong.title} / ${currentSong.artist} - AZKi Song Database`
-        : "AZKi Song Database";
+        ? `♪${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
+        : siteConfig.siteName;
     document.title = title;
   }, [currentSong, isPlaying]);
 

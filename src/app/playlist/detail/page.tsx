@@ -1,3 +1,4 @@
+import { siteConfig } from "@/app/config/siteConfig";
 import PlaylistDetailPage from "./client";
 import type { Metadata } from "next";
 
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ogImageUrl.searchParams.set("h", "630");
 
   return {
-    title: "プレイリスト | AZKi Song Database",
+    title: `プレイリスト | ${siteConfig.siteName}`,
     description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
     openGraph: {
       images: [ogImageUrl.toString()],

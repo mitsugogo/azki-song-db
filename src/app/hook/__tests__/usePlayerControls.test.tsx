@@ -4,6 +4,7 @@ import YouTube from "react-youtube";
 import usePlayerControls from "../usePlayerControls";
 import type { Song } from "../../types/song";
 import type { GlobalPlayerContextType } from "../useGlobalPlayer";
+import { siteConfig } from "@/app/config/siteConfig";
 
 // モック用のglobalPlayerを作成
 const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
@@ -362,7 +363,7 @@ describe("usePlayerControls", () => {
     );
 
     // 初期状態
-    expect(document.title).toBe("AZKi Song Database");
+    expect(document.title).toBe(siteConfig.siteName);
 
     act(() => {
       result.current.changeCurrentSong(mockSongs[0]);
@@ -370,7 +371,7 @@ describe("usePlayerControls", () => {
 
     // currentSongInfoはあるがisPlayingがfalseの場合
     rerender();
-    expect(document.title).toBe("AZKi Song Database");
+    expect(document.title).toBe(siteConfig.siteName);
   });
 
   it("videoIdが変わるとvideoIdRefが更新される", () => {

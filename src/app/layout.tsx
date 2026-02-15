@@ -5,6 +5,7 @@ import { VercelToolbar } from "@vercel/toolbar/next";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import ClientProviders from "./components/ClientProviders";
+import { siteConfig } from "./config/siteConfig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +35,16 @@ const notoSans = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "AZKi Song Database",
+  title: `${siteConfig.siteName}`,
   description:
     "ホロライブのAZKさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
   keywords: ["AZKi", "歌", "歌枠", "オリ曲", "ライブ", "ホロライブ"],
   openGraph: {
-    title: "AZKi Song Database",
+    title: `${siteConfig.siteName}`,
     description:
       "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
     url: "https://azki-song-db.vercel.app/",
-    siteName: "AZKi Song Database",
+    siteName: `${siteConfig.siteName}`,
     locale: "ja_JP",
     type: "website",
   },

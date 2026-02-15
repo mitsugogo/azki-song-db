@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export const runtime = "edge";
 
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
     const hasTitle = searchParams.has("title");
     const title = hasTitle
       ? searchParams.get("title")?.slice(0, 100)
-      : "AZKi Song Database";
+      : siteConfig.siteName;
 
     const titleColor = searchParams.get("titlecolor") || "ffffff";
 
@@ -26,8 +27,8 @@ export async function GET(req: NextRequest) {
 
     const notoSansRegular = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
-        encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent(title || siteConfig.siteName) +
+        encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent("...…"),
     )
       .then((res) => res.text())
@@ -41,8 +42,8 @@ export async function GET(req: NextRequest) {
 
     const notoSansBold = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
-        encodeURIComponent(title || "AZKi Song Database") +
-        encodeURIComponent(subTitle || "🎵 AZKi Song Database") +
+        encodeURIComponent(title || siteConfig.siteName) +
+        encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent("...…"),
     )
       .then((res) => res.text())
@@ -133,7 +134,7 @@ export async function GET(req: NextRequest) {
               alignSelf: "flex-start",
             }}
           >
-            AZKi Song Database
+            {siteConfig.siteName}
           </div>
           <div
             style={{
@@ -175,9 +176,11 @@ export async function GET(req: NextRequest) {
           }}
         >
           <div style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            AZKi Song Database
+            {siteConfig.siteName}
           </div>
-          <div style={{ fontSize: 20, color: "#fc3488" }}>azki-song-db</div>
+          <div style={{ fontSize: 20, color: "#fc3488" }}>
+            {siteConfig.siteSlug}
+          </div>
         </div>
       </div>,
       {

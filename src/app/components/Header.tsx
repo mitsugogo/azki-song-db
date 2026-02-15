@@ -18,6 +18,7 @@ import useSearch from "../hook/useSearch";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import SearchInput from "./SearchInput";
 import { useRouter } from "next/navigation";
+import { siteConfig } from "@/app/config/siteConfig";
 
 export function Header() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -119,7 +120,7 @@ export function Header() {
               <div className="flex shrink-0 items-center lg:ml-2">
                 <a href="/">
                   <h1 className="text-lg lg:text-lg font-bold">
-                    AZKi Song Database
+                    {siteConfig.siteName}
                   </h1>
                 </a>
               </div>
@@ -165,12 +166,12 @@ export function Header() {
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               <Link
-                href="https://www.youtube.com/@AZKi"
+                href={siteConfig.channelUrl}
                 target="_blank"
                 className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900/30 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
               >
                 <FaYoutube className="mr-1" />
-                AZKi Channel
+                {siteConfig.channelName}
               </Link>
               <FoldableToggle />
               <ThemeToggle />
@@ -185,7 +186,7 @@ export function Header() {
         title="Menu"
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
-        <div className="flex-grow space-y-1">
+        <div className="grow space-y-1">
           {navigation.map((category, categoryIndex) => (
             <div key={categoryIndex}>
               {category.category && (
