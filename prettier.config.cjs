@@ -2,8 +2,6 @@
  * @see https://prettier.io/docs/configuration
  * @type {import("prettier").Config}
  */
-const config = {
+module.exports = {
   tabWidth: 2,
 };
-
-export default config;

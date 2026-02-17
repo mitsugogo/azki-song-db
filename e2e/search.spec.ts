@@ -35,12 +35,6 @@ test.describe("Search page", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Wait for API to load songs
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
-
     // Wait for song list to load
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
@@ -87,12 +81,6 @@ test.describe("Search page", () => {
   test("search term persists after pressing Enter", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
-
-    // Wait for API to load songs
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
 
     // Wait for song list to load
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });

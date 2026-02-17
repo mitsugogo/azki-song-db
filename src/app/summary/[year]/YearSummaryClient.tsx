@@ -8,6 +8,7 @@ import useSearch from "../../hook/useSearch";
 import { HiSearch } from "react-icons/hi";
 import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
+import useSongs from "../../hook/useSongs";
 
 type Props = {
   initialSongs: Song[];
@@ -60,6 +61,8 @@ export default function YearSummaryClient({
   const [fetchedInitialSongs, setFetchedInitialSongs] = useState<Song[] | null>(
     null,
   );
+
+  const { allSongs } = useSongs();
 
   const allSongsForYear = useMemo(() => {
     return fetchedInitialSongs ?? initialSongs;
@@ -174,18 +177,11 @@ export default function YearSummaryClient({
       return;
     }
 
-    (async () => {
-      try {
-        const res = await fetch("/api/songs", { cache: "no-store" });
-        if (!res.ok) return;
-        const allSongs = (await res.json()) as Song[];
-        const songsForYear = allSongs.filter((s) => s.year === clientYear);
-        setFetchedInitialSongs(songsForYear);
-      } catch (e) {
-        // ignore
-      }
-    })();
-  }, [year, clientYear, fetchedInitialSongs, initialSongs]);
+    if (Array.isArray(allSongs) && allSongs.length > 0) {
+      const songsForYear = allSongs.filter((s) => s.year === clientYear);
+      setFetchedInitialSongs(songsForYear);
+    }
+  }, [year, clientYear, fetchedInitialSongs, initialSongs, allSongs]);
 
   const monthsWithSongs = useMemo(() => {
     const src = songsFiltered || [];

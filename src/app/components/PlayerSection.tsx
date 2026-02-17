@@ -220,7 +220,11 @@ export default function PlayerSection({
             onVolumeIconClick={controlBar.handleVolumeIconClick}
             isTouchDevice={controlBar.isTouchDevice}
             showVolumeSlider={controlBar.showVolumeSlider}
-            onVolumeChange={controlBar.handleVolumeChange}
+            onVolumeChange={(e) =>
+              controlBar.handleVolumeChange(
+                e as import("react").ChangeEvent<HTMLInputElement>,
+              )
+            }
             currentSong={currentSong}
             hideFutureSongs={hideFutureSongs}
             setHideFutureSongs={setHideFutureSongs}

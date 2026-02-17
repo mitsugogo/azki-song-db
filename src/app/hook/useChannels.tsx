@@ -1,28 +1,40 @@
 import { useEffect, useState } from "react";
 import type { ChannelEntry } from "../types/api/yt/channels";
+import { fetchJsonDedup } from "../lib/fetchDedup";
+
+let cachedChannelsForUseChannels: ChannelEntry[] | null = null;
 
 const useChannels = () => {
   const [channels, setChannels] = useState<ChannelEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let isActive = true;
-    fetch("/api/yt/channels")
-      .then((res) => res.json())
-      .then((data: ChannelEntry[]) => {
-        if (!isActive) return;
-        setChannels(Array.isArray(data) ? data : []);
-      })
-      .catch((error) => {
-        console.error("Error fetching channels:", error);
-      })
-      .finally(() => {
-        if (!isActive) return;
+    if (cachedChannelsForUseChannels) {
+      setChannels(cachedChannelsForUseChannels);
+      setIsLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    fetchJsonDedup<ChannelEntry[]>("/api/yt/channels")
+      .then((d) => {
+        if (!mounted) return;
+        if (!Array.isArray(d)) {
+          setIsLoading(false);
+          return;
+        }
+        cachedChannelsForUseChannels = d;
+        setChannels(d);
         setIsLoading(false);
+      })
+      .catch((e) => {
+        console.error("Failed to fetch channels:", e);
+        if (mounted) setIsLoading(false);
       });
 
     return () => {
-      isActive = false;
+      mounted = false;
     };
   }, []);
 

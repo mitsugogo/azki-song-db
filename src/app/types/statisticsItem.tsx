@@ -7,5 +7,4 @@ export interface StatisticsItem {
   song: Song;
   firstVideo: Song;
   lastVideo: Song;
-  videoInfo?: VideoInfo;
 }

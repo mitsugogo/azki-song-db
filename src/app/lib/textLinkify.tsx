@@ -14,7 +14,7 @@ export type LinkifyTextOptions = {
 };
 
 const combinedRegex =
-  /(https?:\/\/[\w\d./=?#-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(\d{1,2}:\d{2}:\d{2})|(@[\w\d_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|(#[\w\d_.\-\u3000-\u300f\u3012-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g;
+  /(https?:\/\/[a-zA-Z0-9_0-9\uFF10-\uFF19./=?#-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|([0-9\uFF10-\uFF19]{1,2}:[0-9\uFF10-\uFF19]{2}:[0-9\uFF10-\uFF19]{2})|(@[a-zA-Z0-9_0-9\uFF10-\uFF19_.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)|([#\uFF03][a-zA-Z0-9_0-9\uFF10-\uFF19_.\-\u3000-\u300f\u3012-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff]+)/g;
 
 export const renderLinkedText = (
   text: string,
@@ -30,6 +30,24 @@ export const renderLinkedText = (
 
   const lines = includeLineBreaks ? text.split(/\r\n|\n/) : [text];
   const nodes: ReactNode[] = [];
+
+  const xHashtagRegex = /^#[\p{L}\p{N}_\uFF10-\uFF19]+$/u;
+  const xAllDigitsRegex = /^#[\p{N}\uFF10-\uFF19]+$/u;
+  const youtubeHashtagRegex =
+    /^[#\uFF03][\p{L}\p{N}_\.\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff\uFF10-\uFF19]+$/u;
+
+  const isValidHashtagForPlatform = (
+    hashtag: string,
+    platform: LinkifyTextOptions["hashtagPlatform"],
+  ) => {
+    if (platform === "x") {
+      // X(Twitter)方式
+      return xHashtagRegex.test(hashtag) && !xAllDigitsRegex.test(hashtag);
+    }
+
+    // YouTube方式: 先頭は半角・全角どちらの#もOK、続く文字は英数字（半角全角両方）と一部記号のみ許可
+    return youtubeHashtagRegex.test(hashtag);
+  };
 
   lines.forEach((line, lineIndex) => {
     if (lineIndex > 0) {
@@ -85,26 +103,32 @@ export const renderLinkedText = (
         );
       } else if (match[4]) {
         const hashtag = match[4]; // includes leading #
-        const tag = hashtag.slice(1);
-        const url =
-          hashtagPlatform === "youtube"
-            ? `https://www.youtube.com/hashtag/${tag}`
-            : hashtagPlatform === "x"
-              ? `https://x.com/hashtag/${tag}`
+        if (!isValidHashtagForPlatform(hashtag, hashtagPlatform)) {
+          nodes.push(hashtag);
+        } else {
+          const tag = hashtag.slice(1);
+          const url =
+            hashtagPlatform === "youtube"
+              ? `https://www.youtube.com/hashtag/${tag}`
               : hashtagPlatform === "self"
-                ? `/?q=${encodeURIComponent("#" + tag)}`
-                : `#${tag}`;
-        nodes.push(
-          <Link
-            key={`hashtag-${lineIndex}-${matchIndex}`}
-            href={url}
-            target={hashtagPlatform === "self" ? "_self" : "_blank"}
-            rel={hashtagPlatform === "self" ? undefined : "noopener noreferrer"}
-            className={linkClassName}
-          >
-            {hashtag}
-          </Link>,
-        );
+                ? `/?q=${encodeURIComponent(`#${tag}`)}`
+                : hashtagPlatform === "x"
+                  ? `https://x.com/hashtag/${tag}`
+                  : `#${tag}`;
+          nodes.push(
+            <Link
+              key={`hashtag-${lineIndex}-${matchIndex}`}
+              href={url}
+              target={hashtagPlatform === "self" ? "_self" : "_blank"}
+              rel={
+                hashtagPlatform === "self" ? undefined : "noopener noreferrer"
+              }
+              className={linkClassName}
+            >
+              {hashtag}
+            </Link>,
+          );
+        }
       }
 
       lastIndex = matchIndex + match[0].length;

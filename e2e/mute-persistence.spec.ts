@@ -12,10 +12,6 @@ test.describe("Mute persistence across video change", () => {
     await page.goto("/");
 
     // wait for songs API and UI to load
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     // Click the first song to start playback
@@ -67,10 +63,6 @@ test.describe("Mute persistence across video change", () => {
   test("volume slider -> 0 でミュートが永続化される", async ({ page }) => {
     // play first song
     await page.goto("/");
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     const first = page.getByRole("listitem").first();

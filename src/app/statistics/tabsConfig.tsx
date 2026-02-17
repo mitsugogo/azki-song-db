@@ -311,7 +311,8 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         id: "viewCount",
-        accessorFn: (row) => row.videoInfo?.statistics?.viewCount,
+        accessorKey: "song.view_count",
+        accessorFn: (row) => row.song?.view_count ?? 0,
         header: "再生回数",
         cell: (info) => {
           return info.getValue<string>() ? (
@@ -324,7 +325,7 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         id: "viewCountLbl",
         accessorFn: (row) => {
-          return row.videoInfo?.statistics?.viewCount;
+          return row.song?.view_count ?? 0;
         },
         header: "再生回数ラベル",
         cell: (info) => renderViewCountCell(info.getValue<number>()),
@@ -388,8 +389,8 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         id: "viewCount",
-        accessorKey: "videoInfo.statistics.viewCount",
-        accessorFn: (row) => row.videoInfo?.statistics?.viewCount,
+        accessorKey: "song.view_count",
+        accessorFn: (row) => row.song?.view_count ?? 0,
         header: "再生回数",
         cell: (info) =>
           info.getValue<string>() ? (
@@ -400,7 +401,7 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         id: "viewCountLbl",
-        accessorFn: (row) => row.videoInfo?.statistics?.viewCount,
+        accessorFn: (row) => row.song?.view_count ?? 0,
         header: "再生回数ラベル",
         cell: (info) => renderViewCountCell(info.getValue<number>()),
         sortingFn: viewCountSortFn,

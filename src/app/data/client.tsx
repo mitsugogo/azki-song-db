@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
+import useSongs from "../hook/useSongs";
 import { Badge, TextInput } from "flowbite-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
@@ -25,8 +26,8 @@ import {
 } from "overlayscrollbars-react";
 
 export default function ClientTable() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [songs, setSongs] = useState<Song[]>([]);
+  const { allSongs, isLoading } = useSongs();
+  const songs = allSongs;
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -221,13 +222,8 @@ export default function ClientTable() {
   });
 
   useEffect(() => {
-    fetch("/api/songs")
-      .then((res) => res.json())
-      .then((data) => {
-        setSongs(data);
-        setIsLoading(false);
-      });
-  }, []);
+    // songs and isLoading are provided by useSongs
+  }, [allSongs, isLoading]);
 
   const rows = table.getRowModel().rows;
 

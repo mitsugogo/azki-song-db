@@ -5,15 +5,9 @@ import { createStatistics } from "../lib/statisticsHelpers"; // 元のファイ�
 
 type UseStatisticsProps = {
   songs: Song[];
-  coverSongInfo: VideoInfo[];
-  originalSongInfo: VideoInfo[];
 };
 
-export function useStatistics({
-  songs,
-  coverSongInfo,
-  originalSongInfo,
-}: UseStatisticsProps) {
+export function useStatistics({ songs }: UseStatisticsProps) {
   const songCounts = useMemo(
     () => createStatistics(songs, (s) => s.title),
     [songs],
@@ -62,9 +56,8 @@ export function useStatistics({
         (a, b) =>
           new Date(b.firstVideo.broadcast_at).getTime() -
           new Date(a.firstVideo.broadcast_at).getTime(),
-        originalSongInfo,
       ),
-    [songs, originalSongInfo],
+    [songs],
   );
   const coverSongCountsByReleaseDate = useMemo(
     () =>
@@ -74,9 +67,8 @@ export function useStatistics({
         (a, b) =>
           new Date(b.firstVideo.broadcast_at).getTime() -
           new Date(a.firstVideo.broadcast_at).getTime(),
-        coverSongInfo,
       ),
-    [songs, coverSongInfo],
+    [songs],
   );
 
   return {

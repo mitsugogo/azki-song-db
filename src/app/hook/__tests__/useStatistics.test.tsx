@@ -285,90 +285,6 @@ describe("useStatistics", () => {
     expect(originalCall).toBeTruthy();
   });
 
-  it("リリース日ソート用のデータが正しく渡される", () => {
-    const songs: Song[] = [
-      {
-        video_id: "ori-3",
-        start: "0",
-        title: "Original 3",
-        artist: "AZKi",
-        album: "",
-        sing: "AZKi",
-        tags: ["オリ曲"],
-        broadcast_at: "2024-01-03",
-        video_title: "Video O3",
-        milestones: ["m3"],
-        lyricist: "",
-        composer: "",
-        arranger: "",
-        album_list_uri: "",
-        album_release_at: "",
-        album_is_compilation: false,
-        video_uri: "",
-        end: "",
-        year: 0,
-      },
-      {
-        video_id: "cover-1",
-        start: "0",
-        title: "Cover 1",
-        artist: "Artist X",
-        album: "",
-        sing: "AZKi",
-        tags: ["カバー曲"],
-        broadcast_at: "2024-01-04",
-        video_title: "Video C1",
-        milestones: ["m4"],
-        lyricist: "",
-        composer: "",
-        arranger: "",
-        album_list_uri: "",
-        album_release_at: "",
-        album_is_compilation: false,
-        video_uri: "",
-        end: "",
-        year: 0,
-      },
-    ];
-
-    renderHook(() =>
-      useStatistics({
-        songs,
-        coverSongInfo: mockCoverSongInfo,
-        originalSongInfo: mockOriginalSongInfo,
-      }),
-    );
-
-    const originalByReleaseCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
-        calledSongs.length === 1 &&
-        calledSongs[0].title === "Original 3" &&
-        keyFn(calledSongs[0]) === "Original 3" &&
-        typeof sortFn === "function" &&
-        videoInfos === mockOriginalSongInfo,
-    );
-
-    expect(originalByReleaseCall).toBeTruthy();
-
-    const coverByReleaseCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
-        calledSongs.length === 1 &&
-        calledSongs[0].title === "Cover 1" &&
-        keyFn(calledSongs[0]) === "Cover 1 (Artist X) (AZKi)" &&
-        typeof sortFn === "function" &&
-        videoInfos === mockCoverSongInfo,
-    );
-
-    expect(coverByReleaseCall).toBeTruthy();
-
-    const sortFn = originalByReleaseCall?.[2] as (a: any, b: any) => number;
-    const compareResult = sortFn(
-      { firstVideo: { broadcast_at: "2024-02-01" } },
-      { firstVideo: { broadcast_at: "2024-01-01" } },
-    );
-    expect(compareResult).toBeLessThan(0);
-  });
-
   it("マイルストーンと動画IDの集計が正しく渡される", () => {
     const songs: Song[] = [
       {
@@ -397,28 +313,24 @@ describe("useStatistics", () => {
     renderHook(() =>
       useStatistics({
         songs,
-        coverSongInfo: mockCoverSongInfo,
-        originalSongInfo: mockOriginalSongInfo,
       }),
     );
 
     const milestoneCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+      ([calledSongs, keyFn, sortFn]) =>
         calledSongs.length === 1 &&
         Array.isArray(keyFn(calledSongs[0])) &&
         (keyFn(calledSongs[0]) as string[]).includes("first") &&
-        typeof sortFn === "function" &&
-        !videoInfos,
+        typeof sortFn === "function",
     );
 
     expect(milestoneCall).toBeTruthy();
 
     const videoIdCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+      ([calledSongs, keyFn, sortFn]) =>
         calledSongs.length === 1 &&
         keyFn(calledSongs[0]) === "milestone-1" &&
-        !sortFn &&
-        !videoInfos,
+        !sortFn,
     );
 
     expect(videoIdCall).toBeTruthy();
