@@ -7,9 +7,7 @@ type UseStatisticsProps = {
   songs: Song[];
 };
 
-export function useStatistics({
-  songs,
-}: UseStatisticsProps) {
+export function useStatistics({ songs }: UseStatisticsProps) {
   const songCounts = useMemo(
     () => createStatistics(songs, (s) => s.title),
     [songs],
@@ -58,7 +56,6 @@ export function useStatistics({
         (a, b) =>
           new Date(b.firstVideo.broadcast_at).getTime() -
           new Date(a.firstVideo.broadcast_at).getTime(),
-        
       ),
     [songs],
   );
