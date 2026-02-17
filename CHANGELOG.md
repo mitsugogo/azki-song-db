@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.30.4](https://github.com/mitsugogo/azki-song-db/compare/v1.30.3...v1.30.4) (2026-02-17)
+
+
+### Bug Fixes
+
+* /api/songsへのfetchが複数回走らないように ([f314c7c](https://github.com/mitsugogo/azki-song-db/commit/f314c7c9f7bb18f6b9678f5b7cd5d438742eb7fb))
+* /api/yt/channelsが複数回呼ばれないように ([ab689ce](https://github.com/mitsugogo/azki-song-db/commit/ab689ce59e10a79e18ad25acee5f80f5711f5fd1))
+* シートの見出し検出がうまくいってなかったので書き直し ([91efe7e](https://github.com/mitsugogo/azki-song-db/commit/91efe7ebc7b3cff9176354ee0592b46dfa790eb6))
+* ハッシュタグ判定修正 ([cbf5af3](https://github.com/mitsugogo/azki-song-db/commit/cbf5af31dc9643f642c9089790896c79d9eba7ca))
+
 ### [1.30.3](https://github.com/mitsugogo/azki-song-db/compare/v1.30.2...v1.30.3) (2026-02-15)
 
 
