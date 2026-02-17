@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Song } from "../../types/song";
 import { createStatistics } from "../createStatistics";
+import useSongs from "../../hook/useSongs";
 
 /**
  * Discographyページのデータフェッチと統計計算を管理するカスタムフック
@@ -9,18 +10,9 @@ export function useDiscographyData(
   groupByAlbum: boolean,
   onlyOriginalMV: boolean,
 ) {
-  const [loading, setLoading] = useState(true);
-  const [songs, setSongs] = useState<Song[]>([]);
-
-  // データフェッチ
-  useEffect(() => {
-    fetch("/api/songs")
-      .then((res) => res.json())
-      .then((data) => {
-        setSongs(data);
-        setLoading(false);
-      });
-  }, []);
+  const { allSongs, isLoading } = useSongs();
+  const [loading] = useState<boolean>(isLoading);
+  const songs = allSongs;
 
   // オリジナル楽曲の統計
   const originalSongCountsByReleaseDate = useMemo(() => {

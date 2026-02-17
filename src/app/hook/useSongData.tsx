@@ -1,19 +1,7 @@
-import { useState, useEffect } from "react";
-import { Song } from "../types/song";
+import useSongs from "./useSongs";
+
 export function useSongData() {
-  const [loading, setLoading] = useState(true);
-  const [songs, setSongs] = useState<Song[]>([]);
+  const { allSongs, isLoading } = useSongs();
 
-  // 曲リストの取得
-  useEffect(() => {
-    fetch("/api/songs")
-      .then((res) => res.json())
-      .then((data) => {
-        setSongs(data);
-        setLoading(false);
-      })
-      .catch(console.error);
-  }, []);
-
-  return { loading, songs };
+  return { loading: isLoading, songs: allSongs };
 }

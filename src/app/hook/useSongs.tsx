@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Song } from "../types/song";
 
+let cachedSongsForUseSongs: Song[] | null = null;
+let songsPromiseForUseSongs: Promise<Song[] | null> | null = null;
+
 /**
  * 曲データの取得と管理を行うカスタムフック
  */
@@ -21,119 +24,132 @@ const useSongs = () => {
   const [songsFetchedAt, setSongsFetchedAt] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/songs")
-      .then((res) => {
-        const headers = (res && (res as any).headers) || null;
+    if (cachedSongsForUseSongs) {
+      setAllSongs(cachedSongsForUseSongs);
+      setIsLoading(false);
+      return;
+    }
 
-        // try to read useful headers (prefer explicit x-data-updated)
-        const explicit = headers?.get?.("x-data-updated");
-        if (explicit) {
-          setSongsFetchedAt(explicit);
-        } else {
-          const lastModified = headers?.get?.("last-modified");
-          if (lastModified) {
-            setSongsFetchedAt(new Date(lastModified).toISOString());
-          } else {
-            const date = headers?.get?.("date");
-            if (date) setSongsFetchedAt(new Date(date).toISOString());
-            else {
-              const cache =
-                headers?.get?.("x-vercel-cache") ||
-                headers?.get?.("x-now-cache");
-              if (cache) {
-                const d = headers?.get?.("date");
-                const stamp = d ? new Date(d).toISOString() : null;
-                setSongsFetchedAt(stamp ? `${stamp} (${cache})` : `(${cache})`);
-              }
-            }
-          }
-        }
-        return res.json();
-      })
-      .then((data: Song[]) => {
-        data.sort((a, b) => {
-          return (
-            new Date(b.broadcast_at).getTime() -
-            new Date(a.broadcast_at).getTime()
-          );
-        });
-        setAllSongs(data);
+    let mounted = true;
 
-        // 検索用のサジェストワードを抽出
-        const tags = [...new Set(data.flatMap((song) => song.tags))].sort();
-        const songTitles = [...new Set(data.map((song) => song.title))].sort();
-        const singers = [
-          ...new Set(
-            data.flatMap((song) =>
-              (song.sing ?? "").split(/、/).map((s) => s.trim()),
-            ),
-          ),
-        ].sort();
-        const artists = [
-          ...new Set(
-            data.flatMap((song) =>
-              (song.artist ?? "").split(/、/).map((s) => s.trim()),
-            ),
-          ),
-        ].sort();
-        const lyricists = [
-          ...new Set(
-            data.flatMap((song) =>
-              (song.lyricist ?? "").split(/、/).map((s) => s.trim()),
-            ),
-          ),
-        ].sort();
-        const composers = [
-          ...new Set(
-            data.flatMap((song) =>
-              (song.composer ?? "").split(/、/).map((s) => s.trim()),
-            ),
-          ),
-        ].sort();
-        const arrangers = [
-          ...new Set(
-            data.flatMap((song) =>
-              (song.arranger ?? "").split(/、/).map((s) => s.trim()),
-            ),
-          ),
-        ].sort();
-        const milestones = [
-          ...new Set(data.flatMap((song) => song.milestones)),
-        ].sort();
+    const handleData = (data: Song[] | null) => {
+      if (!mounted || !Array.isArray(data)) return;
 
-        const uniquedTitleAndArtists = Array.from(
-          data.reduce((map, song) => {
-            // ユニークキーとして titleとartist を結合
-            const key = `${song.title}|${song.artist}`;
-
-            // keyが存在しなければ、その曲のオブジェクトをMapに追加
-            if (!map.has(key)) {
-              map.set(key, {
-                title: song.title,
-                artist: song.artist,
-                // 必要に応じて、元のオブジェクトの他のプロパティも保持できます
-                // 例: duration: song.duration,
-              });
-            }
-            return map;
-          }, new Map()),
+      const dataCopy = [...data];
+      dataCopy.sort((a, b) => {
+        return (
+          new Date(b.broadcast_at).getTime() -
+          new Date(a.broadcast_at).getTime()
         );
-
-        setAvailableTags(tags);
-        setAvailableSongTitles(songTitles);
-        setAvailableSingers(singers);
-        setAvailableArtists(artists);
-        setAvailableLyricists(lyricists);
-        setAvailableComposers(composers);
-        setAvailableArrangers(arrangers);
-        setAvailableMilestones(milestones);
-        setAvailableTitleAndArtists(
-          uniquedTitleAndArtists
-            .map((item) => item[1])
-            .sort((a, b) => a.title.localeCompare(b.title)),
-        );
-        setIsLoading(false);
       });
+
+      cachedSongsForUseSongs = dataCopy;
+
+      setAllSongs(dataCopy);
+      setSongsFetchedAt(null);
+
+      const tags = [...new Set(dataCopy.flatMap((song) => song.tags))].sort();
+      const songTitles = [
+        ...new Set(dataCopy.map((song) => song.title)),
+      ].sort();
+      const singers = [
+        ...new Set(
+          dataCopy.flatMap((song) =>
+            (song.sing ?? "").split(/、/).map((s) => s.trim()),
+          ),
+        ),
+      ].sort();
+      const artists = [
+        ...new Set(
+          dataCopy.flatMap((song) =>
+            (song.artist ?? "").split(/、/).map((s) => s.trim()),
+          ),
+        ),
+      ].sort();
+      const lyricists = [
+        ...new Set(
+          dataCopy.flatMap((song) =>
+            (song.lyricist ?? "").split(/、/).map((s) => s.trim()),
+          ),
+        ),
+      ].sort();
+      const composers = [
+        ...new Set(
+          dataCopy.flatMap((song) =>
+            (song.composer ?? "").split(/、/).map((s) => s.trim()),
+          ),
+        ),
+      ].sort();
+      const arrangers = [
+        ...new Set(
+          dataCopy.flatMap((song) =>
+            (song.arranger ?? "").split(/、/).map((s) => s.trim()),
+          ),
+        ),
+      ].sort();
+      const milestones = [
+        ...new Set(dataCopy.flatMap((song) => song.milestones)),
+      ].sort();
+
+      const uniquedTitleAndArtists = Array.from(
+        dataCopy.reduce((map, song) => {
+          const key = `${song.title}|${song.artist}`;
+          if (!map.has(key)) {
+            map.set(key, {
+              title: song.title,
+              artist: song.artist,
+            });
+          }
+          return map;
+        }, new Map()),
+      );
+
+      setAvailableTags(tags);
+      setAvailableSongTitles(songTitles);
+      setAvailableSingers(singers);
+      setAvailableArtists(artists);
+      setAvailableLyricists(lyricists);
+      setAvailableComposers(composers);
+      setAvailableArrangers(arrangers);
+      setAvailableMilestones(milestones);
+      setAvailableTitleAndArtists(
+        uniquedTitleAndArtists
+          .map((item) => item[1])
+          .sort((a, b) => a.title.localeCompare(b.title)),
+      );
+      setIsLoading(false);
+    };
+
+    if (songsPromiseForUseSongs) {
+      songsPromiseForUseSongs.then(handleData).catch((e) => {
+        console.error(e);
+        if (mounted) setIsLoading(false);
+      });
+    } else {
+      songsPromiseForUseSongs = fetch("/api/songs")
+        .then(async (res) => {
+          if (!res.ok) return null;
+          const data = (await res.json()) as Song[];
+          return data;
+        })
+        .finally(() => {
+          // keep promise reference until resolved; then clear
+        });
+
+      songsPromiseForUseSongs
+        .then((d) => handleData(d))
+        .catch((e) => {
+          console.error(e);
+          if (mounted) setIsLoading(false);
+        })
+        .finally(() => {
+          songsPromiseForUseSongs = null;
+        });
+    }
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return {

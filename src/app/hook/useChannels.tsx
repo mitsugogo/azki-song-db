@@ -1,32 +1,14 @@
-import { useEffect, useState } from "react";
+import { useFetch } from "@mantine/hooks";
 import type { ChannelEntry } from "../types/api/yt/channels";
 
 const useChannels = () => {
-  const [channels, setChannels] = useState<ChannelEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, error, loading } = useFetch<ChannelEntry[]>("/api/yt/channels");
 
-  useEffect(() => {
-    let isActive = true;
-    fetch("/api/yt/channels")
-      .then((res) => res.json())
-      .then((data: ChannelEntry[]) => {
-        if (!isActive) return;
-        setChannels(Array.isArray(data) ? data : []);
-      })
-      .catch((error) => {
-        console.error("Error fetching channels:", error);
-      })
-      .finally(() => {
-        if (!isActive) return;
-        setIsLoading(false);
-      });
+  if (error) {
+    console.error("Failed to fetch channels:", error);
+  }
 
-    return () => {
-      isActive = false;
-    };
-  }, []);
-
-  return { channels, isLoading };
+  return { channels: Array.isArray(data) ? data : [], isLoading: loading };
 };
 
 export default useChannels;

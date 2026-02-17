@@ -28,6 +28,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HiHome } from "react-icons/hi";
+import useSongs from "../../hook/useSongs";
 
 type PlaylistWithSongs = {
   id: string;
@@ -104,12 +105,10 @@ const SortableRow = ({
 
 export default function PlaylistDetailPage() {
   const [id, setId] = useState("");
-  const [allSongs, setAllSongs] = useState<Song[]>([]);
+  const { allSongs, isLoading } = useSongs();
   const [playlistSongs, setPlaylistSongs] = useState<
     PlaylistWithSongs["songs"]
   >([]);
-
-  const [isLoading, setIsLoading] = useState(true);
   const { playlists, updatePlaylist, encodePlaylistUrlParam, clearAllSongs } =
     usePlaylists();
   const {
@@ -143,12 +142,6 @@ export default function PlaylistDetailPage() {
     const id = url.searchParams.get("id");
     setId(id || "");
     setIsFavoritesMode(id === "system-favorites");
-    fetch("/api/songs")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllSongs(data);
-        setIsLoading(false);
-      });
   }, []);
 
   useEffect(() => {
