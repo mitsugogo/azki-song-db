@@ -11,7 +11,7 @@ export function useDiscographyData(
   onlyOriginalMV: boolean,
 ) {
   const { allSongs, isLoading } = useSongs();
-  const [loading] = useState<boolean>(isLoading);
+  const loading = isLoading;
   const songs = allSongs;
 
   // オリジナル楽曲の統計
