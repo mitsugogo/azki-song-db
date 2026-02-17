@@ -74,8 +74,6 @@ describe("useSongData", () => {
 
     expect(result.current.loading).toBe(true);
     expect(result.current.songs).toEqual([]);
-    expect(result.current.coverSongInfo).toEqual([]);
-    expect(result.current.originalSongInfo).toEqual([]);
   });
 
   it("曲データを取得できる", async () => {
@@ -99,120 +97,5 @@ describe("useSongData", () => {
     });
 
     expect(result.current.songs).toHaveLength(3);
-  });
-
-  it("カバー曲の動画情報を取得できる", async () => {
-    (global.fetch as any).mockImplementation((url: string) => {
-      if (url === "/api/songs") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockSongs,
-        });
-      }
-      if (url.includes("/api/yt/info") && url.includes("cover1")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => [mockVideoInfo[0]],
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => [],
-      });
-    });
-
-    const { result } = renderHook(() => useSongData());
-
-    await waitFor(() => {
-      expect(result.current.coverSongInfo.length).toBeGreaterThan(0);
-    });
-
-    expect(result.current.coverSongInfo).toHaveLength(1);
-    expect(result.current.coverSongInfo[0].id).toBe("cover1");
-  });
-
-  it("オリジナル曲の動画情報を取得できる", async () => {
-    (global.fetch as any).mockImplementation((url: string) => {
-      if (url === "/api/songs") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockSongs,
-        });
-      }
-      if (url.includes("/api/yt/info") && url.includes("original1")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => [mockVideoInfo[1]],
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => [],
-      });
-    });
-
-    const { result } = renderHook(() => useSongData());
-
-    await waitFor(() => {
-      expect(result.current.originalSongInfo.length).toBeGreaterThan(0);
-    });
-
-    expect(result.current.originalSongInfo).toHaveLength(1);
-    expect(result.current.originalSongInfo[0].id).toBe("original1");
-  });
-
-  it("API呼び出し失敗時にエラーを処理する", async () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    (global.fetch as any).mockImplementation((url: string) => {
-      if (url === "/api/songs") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockSongs,
-        });
-      }
-      return Promise.reject(new Error("Network error"));
-    });
-
-    const { result } = renderHook(() => useSongData());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    // エラーが発生しても空配列が設定される
-    await waitFor(() => {
-      expect(result.current.coverSongInfo).toEqual([]);
-      expect(result.current.originalSongInfo).toEqual([]);
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-
-  it("曲が0件の場合は動画情報を取得しない", async () => {
-    (global.fetch as any).mockImplementation((url: string) => {
-      if (url === "/api/songs") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => [],
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => [],
-      });
-    });
-
-    const { result } = renderHook(() => useSongData());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(result.current.songs).toHaveLength(0);
-    expect(result.current.coverSongInfo).toEqual([]);
-    expect(result.current.originalSongInfo).toEqual([]);
   });
 });
