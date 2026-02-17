@@ -9,10 +9,6 @@ test.describe("Navigation drawer", () => {
   test("opens and closes navigation drawer", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/songs") && response.status() === 200,
-    );
 
     // Wait for loading overlay to disappear
     await page.waitForSelector(".mantine-LoadingOverlay-root", {

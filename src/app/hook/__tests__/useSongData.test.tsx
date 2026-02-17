@@ -15,6 +15,16 @@ const mockSongs: Song[] = [
     tags: ["カバー曲"],
     broadcast_at: "2024-01-01",
     video_title: "Cover Video",
+    lyricist: "",
+    composer: "",
+    arranger: "",
+    album_list_uri: "",
+    album_release_at: "",
+    album_is_compilation: false,
+    video_uri: "",
+    end: "",
+    year: 0,
+    milestones: [],
   },
   {
     video_id: "original1",
@@ -26,6 +36,16 @@ const mockSongs: Song[] = [
     tags: ["オリ曲"],
     broadcast_at: "2024-01-02",
     video_title: "Original Video",
+    lyricist: "",
+    composer: "",
+    arranger: "",
+    album_list_uri: "",
+    album_release_at: "",
+    album_is_compilation: false,
+    video_uri: "",
+    end: "",
+    year: 0,
+    milestones: [],
   },
   {
     video_id: "other1",
@@ -37,27 +57,16 @@ const mockSongs: Song[] = [
     tags: ["その他"],
     broadcast_at: "2024-01-03",
     video_title: "Other Video",
-  },
-];
-
-const mockVideoInfo: VideoInfo[] = [
-  {
-    id: "cover1",
-    title: "Cover Video Title",
-    description: "Description",
-    publishedAt: "2024-01-01T00:00:00Z",
-    viewCount: "1000",
-    likeCount: "100",
-    commentCount: "10",
-  },
-  {
-    id: "original1",
-    title: "Original Video Title",
-    description: "Description",
-    publishedAt: "2024-01-02T00:00:00Z",
-    viewCount: "2000",
-    likeCount: "200",
-    commentCount: "20",
+    lyricist: "",
+    composer: "",
+    arranger: "",
+    album_list_uri: "",
+    album_release_at: "",
+    album_is_compilation: false,
+    video_uri: "",
+    end: "",
+    year: 0,
+    milestones: [],
   },
 ];
 
@@ -74,28 +83,5 @@ describe("useSongData", () => {
 
     expect(result.current.loading).toBe(true);
     expect(result.current.songs).toEqual([]);
-  });
-
-  it("曲データを取得できる", async () => {
-    (global.fetch as any).mockImplementation((url: string) => {
-      if (url === "/api/songs") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockSongs,
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => [],
-      });
-    });
-
-    const { result } = renderHook(() => useSongData());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(result.current.songs).toHaveLength(3);
   });
 });

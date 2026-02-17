@@ -313,28 +313,24 @@ describe("useStatistics", () => {
     renderHook(() =>
       useStatistics({
         songs,
-        coverSongInfo: mockCoverSongInfo,
-        originalSongInfo: mockOriginalSongInfo,
       }),
     );
 
     const milestoneCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+      ([calledSongs, keyFn, sortFn]) =>
         calledSongs.length === 1 &&
         Array.isArray(keyFn(calledSongs[0])) &&
         (keyFn(calledSongs[0]) as string[]).includes("first") &&
-        typeof sortFn === "function" &&
-        !videoInfos,
+        typeof sortFn === "function",
     );
 
     expect(milestoneCall).toBeTruthy();
 
     const videoIdCall = createStatisticsMock.mock.calls.find(
-      ([calledSongs, keyFn, sortFn, videoInfos]) =>
+      ([calledSongs, keyFn, sortFn]) =>
         calledSongs.length === 1 &&
         keyFn(calledSongs[0]) === "milestone-1" &&
-        !sortFn &&
-        !videoInfos,
+        !sortFn,
     );
 
     expect(videoIdCall).toBeTruthy();
