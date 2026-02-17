@@ -22,4 +22,5 @@ export interface Song {
   extra?: string;
   live_call?: string;
   live_note?: string;
+  view_count?: number;
 }

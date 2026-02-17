@@ -78,6 +78,7 @@ export async function GET() {
       { key: "arranger", aliases: ["編曲", "arranger"] },
       { key: "live_call", aliases: ["ライブコール", "live_call"] },
       { key: "live_note", aliases: ["ライブノート", "live_note"] },
+      { key: "view_count", aliases: ["再生数", "view_count"] },
     ] as const;
 
     const songs: any[] = [];
@@ -185,6 +186,7 @@ export async function GET() {
             .filter(Boolean),
           live_call: getStr("live_call"),
           live_note: getStr("live_note"),
+          view_count: getNum("view_count"),
         });
       });
     });
