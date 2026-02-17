@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Song } from "../types/song";
+import { fetchJsonDedup } from "../lib/fetchDedup";
 
 let cachedSongsForUseSongs: Song[] | null = null;
 let songsPromiseForUseSongs: Promise<Song[] | null> | null = null;
@@ -120,32 +121,13 @@ const useSongs = () => {
       setIsLoading(false);
     };
 
-    if (songsPromiseForUseSongs) {
-      songsPromiseForUseSongs.then(handleData).catch((e) => {
+    // use shared dedup fetch util
+    fetchJsonDedup<Song[]>("/api/songs")
+      .then((d) => handleData(d))
+      .catch((e) => {
         console.error(e);
         if (mounted) setIsLoading(false);
       });
-    } else {
-      songsPromiseForUseSongs = fetch("/api/songs")
-        .then(async (res) => {
-          if (!res.ok) return null;
-          const data = (await res.json()) as Song[];
-          return data;
-        })
-        .finally(() => {
-          // keep promise reference until resolved; then clear
-        });
-
-      songsPromiseForUseSongs
-        .then((d) => handleData(d))
-        .catch((e) => {
-          console.error(e);
-          if (mounted) setIsLoading(false);
-        })
-        .finally(() => {
-          songsPromiseForUseSongs = null;
-        });
-    }
 
     return () => {
       mounted = false;

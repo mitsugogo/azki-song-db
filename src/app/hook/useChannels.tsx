@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ChannelEntry } from "../types/api/yt/channels";
+import { fetchJsonDedup } from "../lib/fetchDedup";
 
 let cachedChannelsForUseChannels: ChannelEntry[] | null = null;
-let channelsPromiseForUseChannels: Promise<ChannelEntry[] | null> | null = null;
 
 const useChannels = () => {
   const [channels, setChannels] = useState<ChannelEntry[]>([]);
@@ -17,43 +17,21 @@ const useChannels = () => {
 
     let mounted = true;
 
-    const handleData = (data: ChannelEntry[] | null) => {
-      if (!mounted) return;
-      if (!Array.isArray(data)) {
+    fetchJsonDedup<ChannelEntry[]>("/api/yt/channels")
+      .then((d) => {
+        if (!mounted) return;
+        if (!Array.isArray(d)) {
+          setIsLoading(false);
+          return;
+        }
+        cachedChannelsForUseChannels = d;
+        setChannels(d);
         setIsLoading(false);
-        return;
-      }
-      cachedChannelsForUseChannels = data;
-      setChannels(data);
-      setIsLoading(false);
-    };
-
-    if (channelsPromiseForUseChannels) {
-      channelsPromiseForUseChannels.then(handleData).catch((e) => {
+      })
+      .catch((e) => {
         console.error("Failed to fetch channels:", e);
         if (mounted) setIsLoading(false);
       });
-    } else {
-      channelsPromiseForUseChannels = fetch("/api/yt/channels")
-        .then(async (res) => {
-          if (!res.ok) return null;
-          const d = await res.json();
-          return Array.isArray(d) ? (d as ChannelEntry[]) : null;
-        })
-        .finally(() => {
-          /* keep until resolved */
-        });
-
-      channelsPromiseForUseChannels
-        .then(handleData)
-        .catch((e) => {
-          console.error("Failed to fetch channels:", e);
-          if (mounted) setIsLoading(false);
-        })
-        .finally(() => {
-          channelsPromiseForUseChannels = null;
-        });
-    }
 
     return () => {
       mounted = false;
