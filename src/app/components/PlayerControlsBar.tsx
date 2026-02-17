@@ -1,5 +1,6 @@
 import React, {
   ChangeEvent,
+  SyntheticEvent,
   useEffect,
   useMemo,
   useRef,
@@ -106,7 +107,9 @@ type Props = {
   onVolumeIconClick: () => void;
   isTouchDevice: boolean;
   showVolumeSlider: boolean;
-  onVolumeChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onVolumeChange: (
+    e: ChangeEvent<HTMLInputElement> | SyntheticEvent<HTMLInputElement>,
+  ) => void;
   onSeekStart?: () => void;
   onSeekEnd?: (value?: number) => void;
 
