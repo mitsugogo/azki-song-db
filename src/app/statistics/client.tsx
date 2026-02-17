@@ -13,12 +13,10 @@ export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
-  const { songs, coverSongInfo, originalSongInfo, loading } = useSongData();
+  const { songs, loading } = useSongData();
 
   const statistics = useStatistics({
     songs,
-    coverSongInfo,
-    originalSongInfo,
   });
 
   const handleVideoClick = (videoId: string) => {

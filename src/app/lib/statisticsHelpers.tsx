@@ -2,13 +2,11 @@
 /* eslint @typescript-eslint/no-non-null-asserted-optional-chain: off */
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
-import { VideoInfo } from "../types/videoInfo";
 
 export function createStatistics(
   songs: Song[],
   keyFn: (song: Song) => string | string[],
   sortFn?: (a: any, b: any) => number,
-  videoInfos?: VideoInfo[],
 ) {
   const countsMap = songs.reduce((map: Map<string, any>, song: Song) => {
     const keys = Array.isArray(keyFn(song))
@@ -28,7 +26,6 @@ export function createStatistics(
           (map.get(key)?.lastVideo?.broadcast_at ?? 0) > song.broadcast_at
             ? map.get(key)?.lastVideo!
             : song,
-        videoInfo: videoInfos?.find((v) => v.videoId === song.video_id),
       } as any & StatisticsItem);
     });
     return map;
