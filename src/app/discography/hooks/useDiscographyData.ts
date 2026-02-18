@@ -37,11 +37,17 @@ export function useDiscographyData(
   // ユニット/ゲスト楽曲の統計
   const unitSongCountsByReleaseDate = useMemo(() => {
     const units = songs
-      .filter((s) => s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV"))
+      .filter(
+        (s) =>
+          s.tags.includes("オリ曲") ||
+          s.tags.includes("オリ曲MV") ||
+          (s.tags.includes("fes全体曲") && s.sing.includes("AZKi")),
+      )
       .filter(
         (s) =>
           s.tags.includes("ユニット曲") ||
           s.tags.includes("ゲスト参加") ||
+          (s.tags.includes("fes全体曲") && s.sing.includes("AZKi")) ||
           s.title.includes("feat. AZKi") ||
           s.title.includes("feat.AZKi"),
       );
