@@ -138,6 +138,14 @@ export default function MainPlayer() {
         changeCurrentSong(song);
         return;
       }
+      if (!song) {
+        // videoIdのみで曲を検索して再生する場合（startTimeは無視）
+        const songByVideoId = songs.find((s) => s.video_id === videoId);
+        if (songByVideoId) {
+          changeCurrentSong(songByVideoId);
+          return;
+        }
+      }
     }
 
     if (playlist) {

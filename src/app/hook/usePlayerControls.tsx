@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
@@ -111,6 +111,16 @@ const usePlayerControls = (
     },
     [],
   );
+
+  // 動画IDが変わったらURLのv=xxxを更新
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (videoId) {
+      url.searchParams.set("v", videoId);
+      window.history.replaceState(null, "", url.toString());
+      window.dispatchEvent(new Event("replacestate"));
+    }
+  }, [videoId]);
 
   // songsが変わったら前後の楽曲を再計算
   useEffect(() => {
@@ -269,6 +279,7 @@ const usePlayerControls = (
           lastManualChangeRef.current = Date.now();
           setStartTime(targetStartTime);
         }
+        setVideoId(targetVideoId);
         setCurrentSong(song);
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
@@ -285,7 +296,6 @@ const usePlayerControls = (
       // === 異なる動画への切り替え ===
       // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
       const url = new URL(window.location.href);
-      url.searchParams.delete("v");
       url.searchParams.delete("t");
       // Headerなどに通知
       window.dispatchEvent(new Event("replacestate"));
@@ -606,10 +616,9 @@ const usePlayerControls = (
       player.playVideo();
       setIsPlaying(true);
 
-      // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
+      // URLに「t」が存在する場合、再生開始後にパラメータを削除
       const url = new URL(window.location.href);
-      if (url.searchParams.has("v") || url.searchParams.has("t")) {
-        url.searchParams.delete("v");
+      if (url.searchParams.has("t")) {
         url.searchParams.delete("t");
         window.history.replaceState(null, "", url.toString());
         window.dispatchEvent(new Event("replacestate"));
