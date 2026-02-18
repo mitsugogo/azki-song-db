@@ -6,6 +6,7 @@ import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
 import { siteConfig } from "../config/siteConfig";
+import historyHelper from "../lib/history";
 
 // YouTubePlayer に getVideoData メソッドを追加した拡張型
 type YouTubePlayerWithVideoData = YouTubePlayer & {
@@ -55,6 +56,8 @@ const usePlayerControls = (
   // === 内部参照 ===
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
+  // 履歴更新フラグは集中管理する helper を使う
+  // (see src/app/lib/history.ts)
   const lastManualChangeRef = useRef<number>(0);
   const isManualChangeInProgressRef = useRef<boolean>(false);
   const lastEndClampRef = useRef<number>(0);
@@ -112,13 +115,14 @@ const usePlayerControls = (
     [],
   );
 
+  // URL操作ヘルパは外部ライブラリに移譲
+
   // 動画IDが変わったらURLのv=xxxを更新
   useEffect(() => {
     const url = new URL(window.location.href);
     if (videoId) {
       url.searchParams.set("v", videoId);
-      window.history.replaceState(null, "", url.toString());
-      window.dispatchEvent(new Event("replacestate"));
+      historyHelper.replaceUrlIfDifferent(url.toString());
     }
   }, [videoId]);
 
@@ -281,6 +285,18 @@ const usePlayerControls = (
         }
         setVideoId(targetVideoId);
         setCurrentSong(song);
+        // 再生中の場合は現在の再生位置を示す t パラメータを更新する
+        try {
+          if (isPlaying) {
+            const url = new URL(window.location.href);
+            if (Number(targetStartTime) > 0) {
+              url.searchParams.set("t", `${targetStartTime}s`);
+            } else {
+              url.searchParams.delete("t");
+            }
+            historyHelper.replaceUrlIfDifferent(url.toString());
+          }
+        } catch (_) {}
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
         if (!options?.skipSeek) {
@@ -296,9 +312,15 @@ const usePlayerControls = (
       // === 異なる動画への切り替え ===
       // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
       const url = new URL(window.location.href);
-      url.searchParams.delete("t");
-      // Headerなどに通知
-      window.dispatchEvent(new Event("replacestate"));
+      // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
+      // start が 0 の場合は t を省略して URL を簡潔に保つ。
+      if (Number(targetStartTime) > 0) {
+        url.searchParams.set("t", `${targetStartTime}s`);
+      } else {
+        url.searchParams.delete("t");
+      }
+      // Headerなどに通知（差分があれば履歴更新）
+      historyHelper.replaceUrlIfDifferent(url.toString());
 
       if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -454,7 +476,6 @@ const usePlayerControls = (
             return;
           }
 
-          // 現在時刻が指定秒数を超えて、かつ未表示のメッセージを探す
           const nextMessage = sortedTimedMessages.find(
             (msg) => currentTime + 1 >= msg.start && currentTime < msg.end,
           );
@@ -616,13 +637,7 @@ const usePlayerControls = (
       player.playVideo();
       setIsPlaying(true);
 
-      // URLに「t」が存在する場合、再生開始後にパラメータを削除
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("t")) {
-        url.searchParams.delete("t");
-        window.history.replaceState(null, "", url.toString());
-        window.dispatchEvent(new Event("replacestate"));
-      }
+      // 再生開始時は URL の既存パラメータを変更しない（外部から渡された v/t を保持）
     },
     [],
   );

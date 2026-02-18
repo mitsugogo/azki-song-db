@@ -4,6 +4,7 @@ import usePlaylists from "./usePlaylists";
 import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
 import { useSearchParams } from "next/navigation";
+import historyHelper from "../lib/history";
 
 /**
  * 検索ロジックを管理するカスタムフック
@@ -334,8 +335,7 @@ const useSearch = (allSongs: Song[]) => {
         url.searchParams.delete("q");
       }
 
-      history.replaceState(null, "", url.href);
-      window.dispatchEvent(new Event("replacestate"));
+      historyHelper.replaceUrlIfDifferent(url.href);
     }
   }, [searchTerm]);
 

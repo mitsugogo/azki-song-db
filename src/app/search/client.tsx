@@ -433,11 +433,25 @@ const SearchPageClient = () => {
               setSearchValue(values);
               const searchQuery = values.join("|");
               setSearchTerm(searchQuery);
-              // URLを更新
-              if (searchQuery) {
-                router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+              // URLを更新（既存の v/t を保持）
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.pathname = "/search";
+                if (searchQuery) {
+                  url.searchParams.set("q", searchQuery);
+                } else {
+                  url.searchParams.delete("q");
+                }
+                const target =
+                  url.pathname +
+                  (url.search ? `?${url.searchParams.toString()}` : "");
+                router.push(target);
               } else {
-                router.push("/search");
+                if (searchQuery) {
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                } else {
+                  router.push("/search");
+                }
               }
             }}
           />
@@ -624,11 +638,25 @@ const SearchPageClient = () => {
               setSearchValue(values);
               const searchQuery = values.join("|");
               setSearchTerm(searchQuery);
-              // URLを更新
-              if (searchQuery) {
-                router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+              // URLを更新（既存の v/t を保持）
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.pathname = "/search";
+                if (searchQuery) {
+                  url.searchParams.set("q", searchQuery);
+                } else {
+                  url.searchParams.delete("q");
+                }
+                const target =
+                  url.pathname +
+                  (url.search ? `?${url.searchParams.toString()}` : "");
+                router.push(target);
               } else {
-                router.push("/search");
+                if (searchQuery) {
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                } else {
+                  router.push("/search");
+                }
               }
             }}
           />
@@ -742,11 +770,25 @@ const SearchPageClient = () => {
             setSearchValue(values);
             const searchQuery = values.join("|");
             setSearchTerm(searchQuery);
-            // URLを更新
-            if (searchQuery) {
-              router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+            // URLを更新（既存の v/t を保持）
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              url.pathname = "/search";
+              if (searchQuery) {
+                url.searchParams.set("q", searchQuery);
+              } else {
+                url.searchParams.delete("q");
+              }
+              const target =
+                url.pathname +
+                (url.search ? `?${url.searchParams.toString()}` : "");
+              router.push(target);
             } else {
-              router.push("/search");
+              if (searchQuery) {
+                router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+              } else {
+                router.push("/search");
+              }
             }
           }}
           placeholder="曲名、アーティスト、タグなどで検索"

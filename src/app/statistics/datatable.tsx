@@ -19,6 +19,7 @@ import Link from "next/link";
 import { BsPlayCircle } from "react-icons/bs";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ScrollArea } from "@mantine/core";
+import historyHelper from "../lib/history";
 
 export default function DataTable<
   T extends
@@ -100,10 +101,8 @@ export default function DataTable<
         url.searchParams.set("sort", newSortingValue[0].id);
         url.searchParams.set("order", newSortingValue[0].desc ? "desc" : "asc");
       }
-      // 履歴を増やさないようにreplaceStateを使う
-      window.history.replaceState(null, "", url.href);
-      // Headerなどに変更を通知
-      window.dispatchEvent(new Event("replacestate"));
+      // 履歴を増やさないように replaceState 相当のユーティリティを使う
+      historyHelper.replaceUrlIfDifferent(url.href);
 
       setSorting(updater);
     },
@@ -324,7 +323,7 @@ export default function DataTable<
                                     >
                                       <div className="flex-shrink-0 w-20 px-3 py-1 text-center">
                                         <Link
-                                          href={`/?v=${s.video_id}&t=${s.start}s&q=video_id:${s.video_id}`}
+                                          href={`/?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}&q=video_id:${s.video_id}`}
                                           className=" hover:text-primary-600 dark:hover:text-white"
                                         >
                                           <BsPlayCircle

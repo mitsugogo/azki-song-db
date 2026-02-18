@@ -378,7 +378,15 @@ export default function MiniPlayer() {
 
   const handleMaximize = useCallback(() => {
     maximizePlayer();
-    router.push("/");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.pathname = "/";
+      const target =
+        url.pathname + (url.search ? `?${url.searchParams.toString()}` : "");
+      router.push(target);
+    } else {
+      router.push("/");
+    }
   }, [maximizePlayer, router]);
 
   // ホームページではミニプレイヤーを表示しない

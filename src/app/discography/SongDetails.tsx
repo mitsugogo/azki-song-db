@@ -138,7 +138,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   >
                     <TableCell className="px-2 py-1 dark:text-light-gray-500">
                       <Link
-                        href={`${s.tags.includes("カバー曲") ? `/?q=tag:カバー曲&v=${s.video_id}&t=${s.start ?? 0}s` : `/?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
+                        href={`${s.tags.includes("カバー曲") ? `/?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}s` : ""}` : `/?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
                         className=" hover:text-primary-600 dark:hover:text-white"
                       >
                         <BsPlayCircle size={24} />
@@ -148,7 +148,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       <Link
                         href={`${
                           s.tags.includes("カバー曲")
-                            ? `/?q=tag:カバー曲&v=${s.video_id}&t=${s.start ?? 0}s`
+                            ? `/?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}s` : ""}`
                             : `/discography/${
                                 s.slug ?? encodeURIComponent(s.title)
                               }`

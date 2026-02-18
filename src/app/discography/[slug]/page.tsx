@@ -266,8 +266,8 @@ export default async function SongPage({
               <Link
                 href={
                   first.album
-                    ? `/?q=album:${first.album}&v=${first.video_id}&t=${first.start}s`
-                    : `/?q=video_id:${first.video_id}&v=${first.video_id}&t=${first.start}s`
+                    ? `/?q=album:${first.album}&v=${first.video_id}${Number(first.start) > 0 ? `&t=${first.start}s` : ""}`
+                    : `/?q=video_id:${first.video_id}&v=${first.video_id}${Number(first.start) > 0 ? `&t=${first.start}s` : ""}`
                 }
                 className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
               >
@@ -361,7 +361,7 @@ export default async function SongPage({
                                 YouTube
                               </a>
                               <Link
-                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}&t=${s.start}s`}
+                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
                                 className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                               >
                                 <FaPlay className="inline mr-1 -mt-1" /> 再生
@@ -418,7 +418,7 @@ export default async function SongPage({
                                 YouTube
                               </a>
                               <Link
-                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}&t=${s.start}s`}
+                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
                                 className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                               >
                                 <FaPlay className="inline mr-1 -mt-1" /> 再生

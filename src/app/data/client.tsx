@@ -45,7 +45,7 @@ export default function ClientTable() {
         header: "再生",
         cell: (info) => (
           <Link
-            href={`/?v=${info.row.original.video_id}&t=${info.row.original.start}`}
+            href={`/?v=${info.row.original.video_id}${Number(info.row.original.start) > 0 ? `&t=${info.row.original.start}` : ""}`}
             className="text-gray-400 hover:text-primary-600 dark:hover:text-white"
           >
             <BsPlayCircle className="inline w-5 h-5" />
