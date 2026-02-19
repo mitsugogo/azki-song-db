@@ -74,7 +74,7 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("v", v?.toString());
     ogImageUrl.searchParams.set("t", t?.toString());
 
-    const songs = await fetch(new URL(`/api/songs/`, baseUrl)).then((res) =>
+    const songs = await fetch(new URL(`/api/songs`, baseUrl)).then((res) =>
       res.json(),
     );
     const song = songs.find(
