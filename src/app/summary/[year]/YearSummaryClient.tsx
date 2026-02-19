@@ -317,14 +317,15 @@ export default function YearSummaryClient({
             オリジナル楽曲
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:オリ曲`}>
+            <Link href={`/?q=year:${displayYear}|original-songs`}>
               {
                 new Set(
                   (fetchedInitialSongs ?? initialSongs)
                     .filter(
                       (s) =>
                         s.tags.includes("オリ曲") ||
-                        s.tags.includes("オリ曲MV"),
+                        s.tags.includes("オリ曲MV") ||
+                        s.tags.includes("fes全体曲"),
                     )
                     .map((s) => s.title),
                 ).size
@@ -577,7 +578,12 @@ export default function YearSummaryClient({
             {
               songsFiltered.filter((s) =>
                 (s.tags || []).some(
-                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                  (t) =>
+                    t === "オリ曲" ||
+                    t === "オリ曲MV" ||
+                    t === "カバー曲" ||
+                    t === "カバー曲MV" ||
+                    t === "fes全体曲",
                 ),
               ).length
             }
@@ -601,7 +607,12 @@ export default function YearSummaryClient({
             {(songsFiltered || [])
               .filter((s) =>
                 (s.tags || []).some(
-                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                  (t) =>
+                    t === "オリ曲" ||
+                    t === "オリ曲MV" ||
+                    t === "カバー曲" ||
+                    t === "カバー曲MV" ||
+                    t === "fes全体曲",
                 ),
               )
               .sort(
