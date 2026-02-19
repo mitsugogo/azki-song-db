@@ -9,6 +9,7 @@ import { HiSearch } from "react-icons/hi";
 import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
+import { siteConfig } from "@/app/config/siteConfig";
 
 type Props = {
   initialSongs: Song[];
@@ -232,7 +233,7 @@ export default function YearSummaryClient({
     return (
       Object.entries(counts)
         // AZKi本人は除外する
-        .filter(([singer]) => singer !== "AZKi")
+        .filter(([singer]) => singer !== siteConfig.talentName)
         .map(([singer, count]) => ({ singer, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
