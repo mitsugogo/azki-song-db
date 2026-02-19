@@ -240,35 +240,41 @@ export default function YearSummaryClient({
   }, [collaborativeSongs]);
 
   // マイルストーンと達成日(broadcast_at)を取得
-  const milestonesByYear = useMemo(
-    () =>
-      songsFiltered
-        .sort(
-          (a, b) =>
-            new Date(a.broadcast_at).getTime() -
-            new Date(b.broadcast_at).getTime(),
-        )
-        .reduce<
-          Record<number, { broadcast_at: string; milestones: string[] }[]>
-        >((acc, s) => {
-          const year = Number(s.year);
-          if (Number.isNaN(year)) return acc;
-          if (!acc[year]) acc[year] = [];
-          // 空のマイルストーンは除外
-          if (!s.milestones || s.milestones.length === 0) return acc;
-          // 重複するマイルストーンはスキップ
-          const existingMilestones =
-            acc[year]?.map((m) => m.milestones)?.flat() || [];
-          if (existingMilestones.includes(s.milestones[0])) return acc;
+  const milestonesByYear = useMemo(() => {
+    const milestones: Record<
+      number,
+      { broadcast_at: string; milestones: string[] }[]
+    > = {};
+    const seenMilestonesByYear: Record<number, Set<string>> = {};
 
-          acc[year].push({
-            broadcast_at: s.broadcast_at,
-            milestones: s.milestones,
+    [...songsFiltered]
+      .sort(
+        (a, b) =>
+          new Date(a.broadcast_at).getTime() -
+          new Date(b.broadcast_at).getTime(),
+      )
+      .forEach((s) => {
+        const year = Number(s.year);
+        if (Number.isNaN(year)) return;
+        if (!milestones[year]) milestones[year] = [];
+        if (!seenMilestonesByYear[year]) seenMilestonesByYear[year] = new Set();
+
+        (s.milestones || [])
+          .map((milestone) => milestone.trim())
+          .filter(Boolean)
+          .forEach((milestone) => {
+            if (seenMilestonesByYear[year].has(milestone)) return;
+
+            seenMilestonesByYear[year].add(milestone);
+            milestones[year].push({
+              broadcast_at: s.broadcast_at,
+              milestones: [milestone],
+            });
           });
-          return acc;
-        }, {}),
-    [songsFiltered],
-  );
+      });
+
+    return milestones;
+  }, [songsFiltered]);
 
   return (
     <div className="space-y-6">

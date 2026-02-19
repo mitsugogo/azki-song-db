@@ -111,9 +111,7 @@ export default async function Page({ params }: Props) {
 
   const songsOfYear = Number.isNaN(yearNum)
     ? []
-    : songs.filter(
-        (s) => Number(s.year) === yearNum && s.sing.includes("AZKi"),
-      );
+    : songs.filter((s) => Number(s.year) === yearNum);
 
   const displayYearServer = Number.isFinite(yearNum)
     ? yearNum
