@@ -287,15 +287,14 @@ const usePlayerControls = (
         setCurrentSong(song);
         // 再生中の場合は現在の再生位置を示す t パラメータを更新する
         try {
-          if (isPlaying) {
-            const url = new URL(window.location.href);
-            if (Number(targetStartTime) > 0) {
-              url.searchParams.set("t", `${targetStartTime}s`);
-            } else {
-              url.searchParams.delete("t");
-            }
-            historyHelper.replaceUrlIfDifferent(url.toString());
+          const url = new URL(window.location.href);
+          const songStart = Number(song?.start ?? targetStartTime);
+          if (songStart > 0) {
+            url.searchParams.set("t", `${songStart}s`);
+          } else {
+            url.searchParams.delete("t");
           }
+          historyHelper.replaceUrlIfDifferent(url.toString());
         } catch (_) {}
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
@@ -314,8 +313,9 @@ const usePlayerControls = (
       const url = new URL(window.location.href);
       // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
       // start が 0 の場合は t を省略して URL を簡潔に保つ。
-      if (Number(targetStartTime) > 0) {
-        url.searchParams.set("t", `${targetStartTime}s`);
+      const songStart = Number(song?.start ?? targetStartTime);
+      if (songStart > 0) {
+        url.searchParams.set("t", `${songStart}s`);
       } else {
         url.searchParams.delete("t");
       }
