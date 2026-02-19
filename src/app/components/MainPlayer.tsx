@@ -173,7 +173,9 @@ export default function MainPlayer() {
     const urlParams = new URLSearchParams(window.location.search);
     const videoId = urlParams.get("v");
     const startTime = Number(urlParams.get("t")?.replace("s", "")) || 0;
-    if (videoId && Number(currentSong.start) === startTime) {
+    // URL の `v` と `t` による外部リクエストは、現在選択中の動画と異なる動画を対象とする場合のみ処理
+    // `song.start` を示し続けさせる
+    if (videoId && (!currentSong || currentSong.video_id !== videoId)) {
       changeCurrentSong(null, videoId, startTime);
     }
   }, [currentSong]);

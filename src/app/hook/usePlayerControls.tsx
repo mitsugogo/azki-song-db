@@ -312,7 +312,7 @@ const usePlayerControls = (
       // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
       const url = new URL(window.location.href);
       // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
-      // start が 0 の場合は t を省略して URL を簡潔に保つ。
+      // 通常は曲の定義された start を優先して URL に反映する。
       const songStart = Number(song?.start ?? targetStartTime);
       if (songStart > 0) {
         url.searchParams.set("t", `${songStart}s`);
