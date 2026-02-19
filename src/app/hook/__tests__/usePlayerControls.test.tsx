@@ -930,6 +930,36 @@ describe("usePlayerControls", () => {
       expect(result.current.timedLiveCallText).toBeNull();
     });
 
+    it("検索フィルタ中のENDEDではフィルタ内の次曲に遷移する", () => {
+      const filteredSongs: Song[] = [
+        { ...mockSongs[0], video_id: "qVid", start: "100" },
+        { ...mockSongs[1], video_id: "qVid", start: "300" },
+      ];
+      const allSongs: Song[] = [
+        ...filteredSongs,
+        { ...mockSongs[2], video_id: "qVid", start: "200" },
+      ];
+      const player = createMockPlayer("qVid", 350);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(filteredSongs, allSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(filteredSongs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.ENDED,
+        } as any);
+      });
+
+      expect(result.current.currentSong?.start).toBe("300");
+      expect(result.current.currentSong?.start).not.toBe("200");
+    });
+
     it("自動遷移ではskipSeekが使われる", () => {
       const sameVideoSongs: Song[] = [
         { ...mockSongs[0], video_id: "autoVid", start: "0" },

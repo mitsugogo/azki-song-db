@@ -202,6 +202,24 @@ const usePlayerControls = (
     return `${song.title}::${song.artist}`;
   }, []);
 
+  const isSameSong = useCallback(
+    (a: Song | null | undefined, b: Song | null | undefined) => {
+      if (!a || !b) return false;
+      return a.video_id === b.video_id && a.start === b.start;
+    },
+    [],
+  );
+
+  const isSongInList = useCallback(
+    (song: Song | null | undefined, list: Song[]) => {
+      if (!song) return false;
+      return list.some(
+        (item) => item.video_id === song.video_id && item.start === song.start,
+      );
+    },
+    [],
+  );
+
   // 強制的にPlayerをリセットする
   const resetPlayer = useCallback(() => {
     setPlayerKey((prevKey) => prevKey + 1);
@@ -510,7 +528,39 @@ const usePlayerControls = (
           const currentSongForNext =
             currentSongRef.current ?? foundSong ?? null;
           const nextSongInVideo = getNextSongInVideo(currentSongForNext);
-          const autoNextSong = nextSongInVideo ?? nextSongRef.current ?? null;
+          // フィルタ済みの songs を優先して次曲を決定する（検索フィルタが有効な場合の同期問題対策）
+          let autoNextSong: Song | null = null;
+          // まず同一動画内での次曲を優先
+          if (
+            nextSongInVideo &&
+            !isSameSong(nextSongInVideo, currentSongRef.current) &&
+            isSongInList(nextSongInVideo, songsRef.current)
+          ) {
+            autoNextSong = nextSongInVideo;
+          } else {
+            // filtered songs（songsRef）上での現在位置に基づいて次曲を探す
+            const list = songsRef.current;
+            if (currentSongForNext) {
+              const idx = list.findIndex(
+                (s) =>
+                  s.video_id === currentSongForNext.video_id &&
+                  s.start === currentSongForNext.start,
+              );
+              if (idx >= 0 && idx < list.length - 1) {
+                const candidate = list[idx + 1];
+                if (!isSameSong(candidate, currentSongRef.current))
+                  autoNextSong = candidate;
+              }
+            }
+            // まだ見つからない場合は nextSongRef をフォールバック（ただし現在の曲と同一でないこと）
+            if (
+              !autoNextSong &&
+              nextSongRef.current &&
+              !isSameSong(nextSongRef.current, currentSongRef.current)
+            ) {
+              autoNextSong = nextSongRef.current;
+            }
+          }
           const isFoundSongInList = songsRef.current.some(
             (s) =>
               s.video_id === foundSong?.video_id &&
@@ -588,11 +638,36 @@ const usePlayerControls = (
       const handleEndedState = () => {
         clearMonitorInterval();
         const nextSongInVideo = getNextSongInVideo(currentSongRef.current);
-        const autoNextSong = nextSongInVideo ?? nextSongRef.current;
+        // ended 時はまず同一動画内の次曲を探し、なければ filtered songs の次、最後に全体の先頭を再生
+        let autoNextSong: Song | null = null;
+        if (
+          nextSongInVideo &&
+          !isSameSong(nextSongInVideo, currentSongRef.current) &&
+          isSongInList(nextSongInVideo, songsRef.current)
+        ) {
+          autoNextSong = nextSongInVideo;
+        } else if (currentSongRef.current) {
+          const list = songsRef.current;
+          const idx = list.findIndex(
+            (s) =>
+              s.video_id === currentSongRef.current?.video_id &&
+              s.start === currentSongRef.current?.start,
+          );
+          if (idx >= 0 && idx < list.length - 1) {
+            const candidate = list[idx + 1];
+            if (!isSameSong(candidate, currentSongRef.current)) {
+              autoNextSong = candidate;
+            }
+          }
+        }
         if (autoNextSong) {
           changeCurrentSongRef.current(autoNextSong);
         } else if (songsRef.current.length > 0) {
-          changeCurrentSongRef.current(songsRef.current[0]);
+          // songsRef の先頭が現在の曲でない場合のみ先頭へ移動
+          const first = songsRef.current[0];
+          if (first && !isSameSong(first, currentSongRef.current)) {
+            changeCurrentSongRef.current(first);
+          }
         }
         // 再生終了時にメッセージをリセット
         setTimedLiveCallText(null);
@@ -621,6 +696,8 @@ const usePlayerControls = (
       searchCurrentSongOnVideo,
       timedMessages,
       getNextSongInVideo,
+      isSameSong,
+      isSongInList,
     ],
   );
 
