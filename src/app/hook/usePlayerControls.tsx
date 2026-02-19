@@ -117,11 +117,34 @@ const usePlayerControls = (
 
   // URL操作ヘルパは外部ライブラリに移譲
 
+  // URL の検索パラメータを構築するヘルパ。
+  // 常に `v` を先頭、次に `t`、その後に既存のその他の検索パラメータを元の順序で追加する。
+  const buildSearchParamsWithVtFirst = (
+    url: URL,
+    vVal?: string | null,
+    tVal?: string | null,
+  ) => {
+    const existing = url.searchParams;
+    const newParams = new URLSearchParams();
+    if (vVal) {
+      newParams.append("v", vVal);
+    }
+    if (tVal) {
+      newParams.append("t", tVal);
+    }
+    for (const [key, value] of existing) {
+      if (key === "v" || key === "t") continue;
+      newParams.append(key, value);
+    }
+    url.search = newParams.toString();
+  };
+
   // 動画IDが変わったらURLのv=xxxを更新
   useEffect(() => {
     const url = new URL(window.location.href);
     if (videoId) {
-      url.searchParams.set("v", videoId);
+      const existingT = url.searchParams.get("t");
+      buildSearchParamsWithVtFirst(url, videoId, existingT);
       historyHelper.replaceUrlIfDifferent(url.toString());
     }
   }, [videoId]);
@@ -289,11 +312,8 @@ const usePlayerControls = (
         try {
           const url = new URL(window.location.href);
           const songStart = Number(song?.start ?? targetStartTime);
-          if (songStart > 0) {
-            url.searchParams.set("t", `${songStart}s`);
-          } else {
-            url.searchParams.delete("t");
-          }
+          const tVal = songStart > 0 ? `${songStart}s` : null;
+          buildSearchParamsWithVtFirst(url, targetVideoId, tVal);
           historyHelper.replaceUrlIfDifferent(url.toString());
         } catch (_) {}
         // skipSeekオプションがない場合はシークを行う
@@ -314,11 +334,8 @@ const usePlayerControls = (
       // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
       // 通常は曲の定義された start を優先して URL に反映する。
       const songStart = Number(song?.start ?? targetStartTime);
-      if (songStart > 0) {
-        url.searchParams.set("t", `${songStart}s`);
-      } else {
-        url.searchParams.delete("t");
-      }
+      const tVal = songStart > 0 ? `${songStart}s` : null;
+      buildSearchParamsWithVtFirst(url, targetVideoId, tVal);
       // Headerなどに通知（差分があれば履歴更新）
       historyHelper.replaceUrlIfDifferent(url.toString());
 
