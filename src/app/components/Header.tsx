@@ -320,7 +320,7 @@ export function Header() {
               arrowSize={4}
               label="ソロライブ！"
               withArrow
-              position="bottom"
+              position="top"
             >
               <Link
                 href="https://departure.hololivepro.com/"

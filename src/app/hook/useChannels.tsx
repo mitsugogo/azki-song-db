@@ -18,8 +18,9 @@ const useChannels = () => {
     let mounted = true;
 
     fetchJsonDedup<ChannelEntry[]>("/api/yt/channels")
-      .then((d) => {
+      .then((res) => {
         if (!mounted) return;
+        const d = res?.data ?? null;
         if (!Array.isArray(d)) {
           setIsLoading(false);
           return;

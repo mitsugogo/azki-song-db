@@ -3,7 +3,7 @@ import { Song } from "../types/song";
 import { fetchJsonDedup } from "../lib/fetchDedup";
 
 let cachedSongsForUseSongs: Song[] | null = null;
-let songsPromiseForUseSongs: Promise<Song[] | null> | null = null;
+let songsPromiseForUseSongs: Promise<any> | null = null;
 
 /**
  * 曲データの取得と管理を行うカスタムフック
@@ -120,14 +120,50 @@ const useSongs = () => {
       );
       setIsLoading(false);
     };
-
     // use shared dedup fetch util
-    fetchJsonDedup<Song[]>("/api/songs")
-      .then((d) => handleData(d))
-      .catch((e) => {
+    const startFetch = () => {
+      if (!songsPromiseForUseSongs) {
+        songsPromiseForUseSongs = fetchJsonDedup<Song[]>("/api/songs");
+      }
+
+      const p = songsPromiseForUseSongs;
+      p.then((res: any) => {
+        if (!mounted) return;
+        if (!res) {
+          setIsLoading(false);
+          return;
+        }
+
+        handleData(res.data);
+
+        // API のヘッダーから最終更新日時を復元してセットする
+        const hdrs = res.headers ?? {};
+        const maybeDate =
+          hdrs["x-data-updated"] ||
+          hdrs["last-modified"] ||
+          hdrs["x-updated-at"] ||
+          hdrs["x-last-updated"] ||
+          null;
+
+        if (maybeDate) {
+          const dt = new Date(maybeDate);
+          if (!isNaN(dt.getTime())) setSongsFetchedAt(dt.toISOString());
+          else setSongsFetchedAt(maybeDate);
+        } else {
+          setSongsFetchedAt(null);
+        }
+      }).catch((e) => {
         console.error(e);
         if (mounted) setIsLoading(false);
       });
+
+      // clear shared promise when done so future fetches can run
+      p.finally(() => {
+        if (songsPromiseForUseSongs === p) songsPromiseForUseSongs = null;
+      });
+    };
+
+    startFetch();
 
     return () => {
       mounted = false;
