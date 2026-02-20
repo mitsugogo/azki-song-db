@@ -363,7 +363,21 @@ export default function YearSummaryClient({
             {milestonesByYear[Number(displayYear)].map((milestone, index) => (
               <li key={index}>
                 <div className="font-medium">
-                  {milestone.milestones.join(", ")}
+                  {milestone.milestones.map(
+                    (milestoneValue, milestoneIndex) => (
+                      <span key={`${milestoneValue}-${milestoneIndex}`}>
+                        {milestoneIndex > 0 ? ", " : ""}
+                        <Link
+                          href={`/search?${new URLSearchParams({
+                            q: `milestone:${milestoneValue}`,
+                          }).toString()}`}
+                          className="hover:underline"
+                        >
+                          {milestoneValue}
+                        </Link>
+                      </span>
+                    ),
+                  )}
                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                     &nbsp;-&nbsp;
                     {new Date(milestone.broadcast_at).toLocaleDateString()}
