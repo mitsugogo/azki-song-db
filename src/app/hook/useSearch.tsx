@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import usePlaylists from "./usePlaylists";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -24,8 +24,7 @@ const useSearch = (allSongs: Song[]) => {
   const isSyncingFromUrl = useRef(false);
 
   // マイルストーンごとのvideo_id一覧を事前に集計
-  const milestoneVideoIdMap = useRef<Map<string, Set<string>>>(new Map());
-  useEffect(() => {
+  const milestoneVideoIdMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
     allSongs.forEach((song) => {
       if (song.milestones) {
@@ -38,7 +37,7 @@ const useSearch = (allSongs: Song[]) => {
         });
       }
     });
-    milestoneVideoIdMap.current = map;
+    return map;
   }, [allSongs]);
 
   // 検索ロジック
@@ -88,7 +87,7 @@ const useSearch = (allSongs: Song[]) => {
           if (v === "*") {
             return Boolean(s.milestones && s.milestones.length > 0);
           }
-          const videoIdSet = milestoneVideoIdMap.current.get(v.toLowerCase());
+          const videoIdSet = milestoneVideoIdMap.get(v.toLowerCase());
           if (!videoIdSet) return false;
           return videoIdSet.has(s.video_id);
         },
@@ -160,7 +159,7 @@ const useSearch = (allSongs: Song[]) => {
         (song.extra?.toLowerCase().includes(word) ?? false)
       );
     },
-    [],
+    [milestoneVideoIdMap],
   );
 
   // 曲を検索するcallback
