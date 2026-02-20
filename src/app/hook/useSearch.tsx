@@ -5,6 +5,7 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
 import { useSearchParams } from "next/navigation";
 import historyHelper from "../lib/history";
+import { filterOriginalSongs } from "../config/filters";
 
 /**
  * 検索ロジックを管理するカスタムフック
@@ -194,20 +195,7 @@ const useSearch = (allSongs: Song[]) => {
 
         // 予習曲のみ絞り込み
         songsToFilter = songsToFilter
-          .filter(
-            (s) =>
-              // AZKiさんオリ曲絞り込み
-              ((s.tags.includes("オリ曲") ||
-                s.tags.includes("オリ曲MV") ||
-                s.tags.includes("ライブ予習")) &&
-                s.artist.includes("AZKi") &&
-                !s.title.includes("Maaya") &&
-                !s.title.includes("Remix") &&
-                !s.tags.includes("リミックス") &&
-                !s.title.includes("あずいろ") &&
-                !s.title.includes("Kiss me")) ||
-              (s.tags.includes("fes全体曲") && s.sing.includes("AZKi")),
-          )
+          .filter((s) => filterOriginalSongs(s))
           .sort((a, b) => {
             // リリース順でソート
             return (

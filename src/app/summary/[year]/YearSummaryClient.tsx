@@ -10,6 +10,11 @@ import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { siteConfig } from "@/app/config/siteConfig";
+import {
+  isCoverSong,
+  isOriginalSong,
+  isPossibleOriginalSong,
+} from "@/app/config/filters";
 
 type Props = {
   initialSongs: Song[];
@@ -328,12 +333,7 @@ export default function YearSummaryClient({
               {
                 new Set(
                   (fetchedInitialSongs ?? initialSongs)
-                    .filter(
-                      (s) =>
-                        s.tags.includes("オリ曲") ||
-                        s.tags.includes("オリ曲MV") ||
-                        s.tags.includes("fes全体曲"),
-                    )
+                    .filter((s) => isPossibleOriginalSong(s))
                     .map((s) => s.title),
                 ).size
               }
@@ -348,7 +348,7 @@ export default function YearSummaryClient({
             <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("カバー曲"),
+                  isCoverSong(s),
                 ).length
               }
             </Link>
@@ -610,15 +610,15 @@ export default function YearSummaryClient({
             }
             )
             <Link
-              href={`/?q=year:${displayYear}|tag:オリ曲`}
-              className="ml-4 text-sm text-blue-600 hover:underline"
+              href={`/?q=year:${displayYear}|original-songs`}
+              className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
               オリ曲
             </Link>
             <Link
               href={`/?q=year:${displayYear}|tag:カバー曲`}
-              className="ml-4 text-sm text-blue-600 hover:underline"
+              className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
               カバー曲
