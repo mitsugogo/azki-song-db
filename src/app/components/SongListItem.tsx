@@ -48,7 +48,22 @@ const SongListItem = React.memo(
               : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
           onClick={() => {
-            changeCurrentSong(song);
+            try {
+              // ハンドラ内で重い処理があるとINP悪化の原因になるため
+              // 再描画の後に実行するよう次フレームへスケジューリングする。
+              // これによりブラウザがインタラクション応答を描画する余地を得る。
+              if (
+                typeof window !== "undefined" &&
+                typeof window.requestAnimationFrame === "function"
+              ) {
+                window.requestAnimationFrame(() => changeCurrentSong(song));
+              } else {
+                setTimeout(() => changeCurrentSong(song), 0);
+              }
+            } catch (_) {
+              // フォールバック
+              changeCurrentSong(song);
+            }
             if (isInOverlay) {
               onSelectSong?.();
             }
@@ -61,6 +76,13 @@ const SongListItem = React.memo(
           <Link
             href={`/?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`}
             className="flex lg:block lg:w-full"
+            onClick={(e) => {
+              // デフォルトのLinkナビゲーションを防ぎ、
+              // `changeCurrentSong` 側で履歴を管理する（不要な全体再レンダリングを防止）
+              try {
+                e.preventDefault();
+              } catch (_) {}
+            }}
           >
             <div className="flex lg:block lg:w-full mb-0 lg:mb-2 text-center ">
               <Indicator
