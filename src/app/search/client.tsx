@@ -53,7 +53,8 @@ type FilterMode =
   | "artist"
   | "tag"
   | "singer"
-  | "collab";
+  | "collab"
+  | "not-sung-for-a-year";
 
 const SearchPageClient = () => {
   const { allSongs, isLoading } = useSongs();
@@ -338,6 +339,42 @@ const SearchPageClient = () => {
         (a, b) => b.count - a.count,
       );
       return uniqueCollabs;
+    } else if (filterMode === "not-sung-for-a-year") {
+      // 1年以上歌ってない曲
+      // 曲名とアーティストの組み合わせでユニークにして最終配信日時をあわせる
+      const songLastSungMap = new Map<
+        string,
+        { title: string; artist: string; lastSung: string; count: number }
+      >();
+      allSongs.forEach((song) => {
+        const key = `${song.title} ${song.artist}`;
+        const existing = songLastSungMap.get(key);
+        if (existing) {
+          existing.lastSung = new Date(
+            Math.max(
+              new Date(existing.lastSung).getTime(),
+              new Date(song.broadcast_at).getTime(),
+            ),
+          ).toISOString();
+          existing.count++;
+        } else {
+          songLastSungMap.set(key, {
+            title: song.title,
+            artist: song.artist,
+            lastSung: song.broadcast_at,
+            count: 1,
+          });
+        }
+      });
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      const notSungForYear = Array.from(songLastSungMap.values())
+        .filter((item) => new Date(item.lastSung) < oneYearAgo)
+        .sort(
+          (a, b) =>
+            new Date(b.lastSung).getTime() - new Date(a.lastSung).getTime(),
+        );
+      return notSungForYear;
     }
     return [];
   }, [allSongs, filterMode]);
@@ -851,6 +888,14 @@ const SearchPageClient = () => {
           >
             コラボ・ユニット
           </Button>
+          <Button
+            variant={filterMode === "not-sung-for-a-year" ? "filled" : "light"}
+            color="pink"
+            size="sm"
+            onClick={() => setFilterMode("not-sung-for-a-year")}
+          >
+            1年以上歌ってない曲
+          </Button>
         </div>
       </div>
 
@@ -1129,6 +1174,42 @@ const SearchPageClient = () => {
                         )}
                         <div className="text-xs text-gray-500 dark:text-light-gray-300 mt-1">
                           {item.count}曲
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                });
+              })()}
+            {filterMode === "not-sung-for-a-year" &&
+              Array.isArray(filterModeData) &&
+              (() => {
+                return (
+                  filterModeData as unknown as {
+                    title: string;
+                    artist: string;
+                    lastSung: string;
+                    count: number;
+                  }[]
+                ).map((item, index) => {
+                  return (
+                    <Link
+                      key={index}
+                      href={`/search?q=${encodeURIComponent(`title:${item.title}|artist:${item.artist}`)}`}
+                      className="block relative overflow-hidden rounded border border-gray-200 dark:border-gray-700 hover:bg-primary-100 dark:hover:bg-gray-700 transition"
+                    >
+                      <div className="relative z-10 p-3">
+                        <div className="font-medium text-sm line-clamp-2">
+                          {item.title}{" "}
+                          <span className="text-gray-400">
+                            ({item.count}回)
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-light-gray-400 line-clamp-1 mt-1">
+                          {item.artist}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
+                          最終配信日:{" "}
+                          {new Date(item.lastSung).toLocaleDateString()}
                         </div>
                       </div>
                     </Link>
