@@ -4,6 +4,7 @@ import { fetchJsonDedup } from "../lib/fetchDedup";
 
 let cachedSongsForUseSongs: Song[] | null = null;
 let songsPromiseForUseSongs: Promise<any> | null = null;
+let cachedSongsFetchedAt: string | null = null;
 
 /**
  * 曲データの取得と管理を行うカスタムフック
@@ -27,6 +28,8 @@ const useSongs = () => {
   useEffect(() => {
     if (cachedSongsForUseSongs) {
       setAllSongs(cachedSongsForUseSongs);
+      // キャッシュから復元できる更新日時があれば反映する
+      if (cachedSongsFetchedAt) setSongsFetchedAt(cachedSongsFetchedAt);
       setIsLoading(false);
       return;
     }
@@ -47,7 +50,6 @@ const useSongs = () => {
       cachedSongsForUseSongs = dataCopy;
 
       setAllSongs(dataCopy);
-      setSongsFetchedAt(null);
 
       const tags = [...new Set(dataCopy.flatMap((song) => song.tags))].sort();
       const songTitles = [
@@ -147,10 +149,9 @@ const useSongs = () => {
 
         if (maybeDate) {
           const dt = new Date(maybeDate);
-          if (!isNaN(dt.getTime())) setSongsFetchedAt(dt.toISOString());
-          else setSongsFetchedAt(maybeDate);
-        } else {
-          setSongsFetchedAt(null);
+          const toSet = !isNaN(dt.getTime()) ? dt.toISOString() : maybeDate;
+          setSongsFetchedAt(toSet);
+          cachedSongsFetchedAt = toSet;
         }
       }).catch((e) => {
         console.error(e);
