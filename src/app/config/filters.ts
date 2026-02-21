@@ -19,7 +19,9 @@ export const isOriginalSong = (s: Song) => {
     (s.tags.includes("オリ曲") ||
       s.tags.includes("オリ曲MV") ||
       s.tags.includes("ライブ予習")) &&
-    s.artist.includes("AZKi") &&
+    (s.artist.includes("AZKi") ||
+      s.title.includes("feat. AZKi") ||
+      s.title.includes("feat.AZKi")) &&
     !s.title.includes("Maaya") &&
     !s.title.includes("Remix") &&
     !s.title.includes("あずいろ") &&
