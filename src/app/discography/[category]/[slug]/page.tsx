@@ -182,7 +182,6 @@ export default async function SongPage({
       (s.album && slugify(s.album) === slug),
   );
 
-  console.log("filteredSongs", matched);
   if (!matched || matched.length === 0) {
     notFound();
   }
@@ -245,10 +244,14 @@ export default async function SongPage({
   };
 
   // ルート判定
-  const matchedRoute = findRouteForRelease(song.album_release_at);
+  const matchedRoute = findRouteForRelease(
+    song.album_release_at || song.broadcast_at,
+  );
 
   // 衣装判定
-  const matchedVisual = findVisualForRelease(song.album_release_at);
+  const matchedVisual = findVisualForRelease(
+    song.album_release_at || song.broadcast_at,
+  );
 
   // 関連動画: 同一アルバムの別動画を優先し、なければ同タイトルの別動画を候補とする。
   // 重複（同一video_id）は排除して最大8件取得する。
@@ -357,11 +360,32 @@ export default async function SongPage({
               </Link>
             </p>
           )}
-
+          {song.sing && song.sing.length > 1 && (
+            <p className="text-sm">
+              歌唱:{" "}
+              {song.sing.split("、").map((s, idx) => (
+                <span key={idx}>
+                  <Link
+                    href={`/search?q=sing:${encodeURIComponent(s)}`}
+                    className="hover:underline text-primary dark:text-primary-300"
+                  >
+                    {s}
+                  </Link>
+                  {idx < song.sing.split("、").length - 1 && "、"}
+                </span>
+              ))}
+            </p>
+          )}
           {song.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
               発売日:{" "}
               {new Date(song.album_release_at).toLocaleDateString("ja-JP")}
+            </p>
+          )}
+
+          {!song.album_release_at && song.broadcast_at && (
+            <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
+              配信日: {new Date(song.broadcast_at).toLocaleDateString("ja-JP")}
             </p>
           )}
 
