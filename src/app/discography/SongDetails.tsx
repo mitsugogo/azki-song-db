@@ -238,7 +238,16 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     style={{ cursor: "pointer" }}
                     component="a"
                     href={`/search?q=${coverArtists
-                      .map((n) => `sing:${encodeURIComponent(n)}`)
+                      .map((n) => {
+                        const members = n
+                          .split("、")
+                          .map((m: string) => m.trim());
+
+                        // `sing:xxxx|sing:yyy` のように組み立てる
+                        return members
+                          .map((m: string) => `sing:${m}`)
+                          .join("|");
+                      })
                       .join("|")}`}
                   >
                     この組み合わせ
