@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Song } from "../../types/song";
+import { Song } from "../../../types/song";
 import { LuFolder } from "react-icons/lu";
-import slugify from "../../lib/slugify";
-import { ROUTE_RANGES, findRouteForRelease } from "../../config/timelineRoutes";
-import {
-  VISUAL_CHANGES,
-  findVisualForRelease,
-} from "../../config/timelineVisuals";
+import slugify from "../../../lib/slugify";
+import { findRouteForRelease } from "../../../config/timelineRoutes";
+import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
@@ -18,9 +15,9 @@ import { renderLinkedText } from "@/app/lib/textLinkify";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import {
   isCollaborationSong,
+  isCoverSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
-import useStatViewCount from "@/app/hook/useStatViewCount";
 import ViewStat from "./viewStat";
 
 async function fetchSongsFromApi(): Promise<Song[]> {
@@ -60,26 +57,39 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 export async function generateStaticParams() {
   const songs: Song[] = await fetchSongsFromApi();
 
-  // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
-  const originals = songs.filter(
-    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
-  );
+  // 各楽曲についてカテゴリを決定し、カテゴリ+スラグの組合せで静的パスを生成する
+  const paramSet = new Set<string>();
 
-  const slugs = new Set<string>();
+  const getCategory = (s: Song) =>
+    isPossibleOriginalSong(s)
+      ? "originals"
+      : isCollaborationSong(s)
+        ? "collaborations"
+        : "covers";
 
-  originals.forEach((s) => {
-    if (s.slug) slugs.add(s.slug);
-    else if (s.title) slugs.add(slugify(s.title));
-    if (s.album) slugs.add(slugify(s.album));
+  songs.forEach((s) => {
+    const category = getCategory(s);
+    const candidates: string[] = [];
+    if (s.slug) candidates.push(s.slug);
+    if (s.title) candidates.push(slugify(s.title));
+    if (s.album) candidates.push(slugify(s.album));
+
+    candidates.forEach((slug) => {
+      if (!slug) return;
+      paramSet.add(`${category}|||${slug}`);
+    });
   });
 
-  return Array.from(slugs).map((slug) => ({ slug }));
+  return Array.from(paramSet).map((entry) => {
+    const [category, slug] = entry.split("|||");
+    return { category, slug };
+  });
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
   const resolved = await params;
   const songs: Song[] = await fetchSongsFromApi();
@@ -87,7 +97,8 @@ export async function generateMetadata({
   // slugify は共通ユーティリティを使用
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
-    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
+    (s) =>
+      isPossibleOriginalSong(s) || isCollaborationSong(s) || isCoverSong(s),
   );
   const metadataCandidates = originals.filter(
     (s) =>
@@ -142,16 +153,27 @@ export async function generateMetadata({
 export default async function SongPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ category: string; slug: string }>;
 }) {
   const resolved = await params;
+  const category = decodeURIComponent(resolved.category);
   const slug = decodeURIComponent(resolved.slug);
   const songs: Song[] = await fetchSongsFromApi();
 
-  // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
-  const originals = songs.filter(
-    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
-  );
+  let originals = [];
+  switch (category) {
+    case "collabo":
+    case "collaborations":
+      originals = songs.filter((s) => isCollaborationSong(s));
+      break;
+    case "covers":
+      originals = songs.filter((s) => isCoverSong(s));
+      break;
+    case "originals":
+    default:
+      originals = songs.filter((s) => isPossibleOriginalSong(s));
+      break;
+  }
 
   const matched = originals.filter(
     (s) =>
@@ -256,6 +278,15 @@ export default async function SongPage({
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </BreadcrumbItem>
         <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
+        <BreadcrumbItem
+          href={`/discography/?category=${encodeURIComponent(category)}`}
+        >
+          {category === "originals"
+            ? "オリジナル"
+            : category === "covers"
+              ? "カバー"
+              : "コラボ"}{" "}
+        </BreadcrumbItem>
         {song.album && (
           <BreadcrumbItem
             href={`/discography/?album=${encodeURIComponent(song.album)}`}
@@ -396,7 +427,7 @@ export default async function SongPage({
                 title={song.video_title}
                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="w-full h-full max-w-2xl aspect-video shadow-lg"
+                className="w-full h-full max-w-3xl aspect-video"
               ></iframe>
             </div>
           </div>

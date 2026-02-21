@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
@@ -26,6 +26,8 @@ export default function DiscographyPage() {
   const { targetRef } = useScrollIntoView();
   const skipClearOnTabChange = useRef(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // カスタムフックでデータ取得と統計計算
   const {
@@ -103,6 +105,25 @@ export default function DiscographyPage() {
       setExpandedItem(null);
       setAnchorToScroll(null);
     }
+
+    try {
+      const tabToCategory = ["originals", "collab", "covers"];
+      const cat = tabToCategory[index];
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      if (cat) {
+        params.set("category", cat);
+      } else {
+        params.delete("category");
+      }
+      // 別のクエリ（album）の影響を避けるため削除
+      params.delete("album");
+
+      const q = params.toString();
+      const dest = q ? `${pathname}?${q}` : pathname;
+      router.replace(dest);
+    } catch (e) {
+      // ignore
+    }
   };
 
   return (
@@ -135,10 +156,6 @@ export default function DiscographyPage() {
         <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
           <Tab
             as="button"
-            onClick={() => {
-              setActiveTab(0);
-              setExpandedItem(null);
-            }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
@@ -160,10 +177,6 @@ export default function DiscographyPage() {
           </Tab>
           <Tab
             as="button"
-            onClick={() => {
-              setActiveTab(1);
-              setExpandedItem(null);
-            }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
@@ -177,10 +190,6 @@ export default function DiscographyPage() {
           </Tab>
           <Tab
             as="button"
-            onClick={() => {
-              setActiveTab(2);
-              setExpandedItem(null);
-            }}
             className={({ selected }) =>
               `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${

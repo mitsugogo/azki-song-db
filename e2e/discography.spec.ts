@@ -106,4 +106,17 @@ test.describe("Discography page", () => {
     await coverTab.click();
     await expect(coverTab).toHaveAttribute("aria-selected", "true");
   });
+
+  test("?category=covers opens Covers tab", async ({ page }) => {
+    await page.goto("/discography?category=covers");
+    await page.waitForLoadState("domcontentloaded");
+
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
+
+    const coverTab = page.getByRole("tab", { name: /カバー楽曲/ });
+    await expect(coverTab).toHaveAttribute("aria-selected", "true");
+  });
 });

@@ -13,13 +13,32 @@ import {
 import { BsPlayCircle } from "react-icons/bs";
 import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
-import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
+import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
-  const videos = song.videos || [];
+  const rawVideos = song.videos || [];
+  const videos = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const v of rawVideos) {
+      const key = `${(v.title || "").trim()}__${(v.artist || "").trim()}`;
+      if (!map.has(key)) {
+        map.set(key, v);
+      } else {
+        const existing = map.get(key);
+        const existingIsMV = (existing.tags || []).some((t: string) =>
+          t.includes("MV"),
+        );
+        const vIsMV = (v.tags || []).some((t: string) => t.includes("MV"));
+        if (vIsMV && !existingIsMV) {
+          map.set(key, v);
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [rawVideos]);
   const initialIndex = Math.max(
     0,
     videos.findIndex((v) => v.video_id === song.firstVideo.video_id),
@@ -33,8 +52,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [currVisible, setCurrVisible] = useState(true);
 
   const coverArtists = useMemo(() => {
-    return Array.from(new Set(song.videos.map((v) => v.sing)));
-  }, [song.song.tags]);
+    return Array.from(new Set(videos.map((v) => v.sing)));
+  }, [videos]);
 
   // スライドショー間隔（ミリ秒）
   const SLIDE_INTERVAL = 5000;
@@ -188,11 +207,17 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             </>
           )}
 
-          <p className="text-sm">
-            発売日:{" "}
-            {new Date(song.firstVideo.album_release_at).toLocaleDateString()}
-          </p>
-          <p className="text-sm">収録曲数: {song.count}曲</p>
+          {song.firstVideo.album_release_at && (
+            <p className="text-sm">
+              発売日:{" "}
+              {new Date(
+                song.firstVideo.album_release_at ??
+                  song.firstVideo.broadcast_at ??
+                  song.lastVideo.broadcast_at,
+              ).toLocaleDateString()}
+            </p>
+          )}
+          <p className="text-sm">収録曲数: {videos.length}曲</p>
 
           <div className="mt-4 overflow-y-auto max-h-62.5">
             <Table striped hoverable border={3}>
@@ -220,7 +245,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {song.videos.map((s, index) => (
+                {videos.map((s, index) => (
                   <TableRow
                     key={index}
                     onMouseEnter={() => setHoveredVideo(s.video_id)}
@@ -236,12 +261,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     </TableCell>
                     <TableCell className="px-2 py-1">
                       <Link
-                        href={`${
-                          s.tags.includes("カバー曲")
-                            ? `/?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}s` : ""}`
-                            : `/discography/${
-                                s.slug ?? encodeURIComponent(s.title)
-                              }`
+                        href={`/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
+                          s.slug ?? encodeURIComponent(s.video_id)
                         }`}
                         className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
                       >
