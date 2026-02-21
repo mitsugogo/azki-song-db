@@ -83,7 +83,7 @@ export async function generateMetadata({
         parseInt(s.start) == parseInt(t.toString().replace("s", "")),
     );
     if (song) {
-      title = `🎵 ${song.title} - ${song.artist} | ${siteConfig.siteName}`;
+      title = `${song.title} - ${song.artist} | ${siteConfig.siteName}`;
       description = `${song.video_title} (配信日時:${new Date(
         song.broadcast_at,
       ).toLocaleDateString("ja-JP")})`;

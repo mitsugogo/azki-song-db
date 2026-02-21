@@ -173,7 +173,7 @@ const usePlayerControls = (
   useEffect(() => {
     const title =
       isPlaying && currentSong
-        ? `♪${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
+        ? `${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
         : siteConfig.siteName;
     document.title = title;
   }, [currentSong, isPlaying]);
