@@ -432,8 +432,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <Link
               href={
                 song.isAlbum
-                  ? `/?q=album:${song.firstVideo.album}&v=${song.firstVideo.video_id}`
-                  : `/?v=${song.firstVideo.video_id}${`&t=${Number(song.firstVideo.start ?? 0)}s`}`
+                  ? `/?q=album:${encodeURIComponent(song.firstVideo.album)}&v=${song.firstVideo.video_id}`
+                  : `/?v=${song.firstVideo.video_id}${Number(song?.firstVideo?.start ?? 0) > 0 ? `&t=${song.firstVideo.start}s` : ""}`
               }
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
             >
