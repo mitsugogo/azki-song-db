@@ -235,7 +235,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <p className="text-sm">
               カバー:{" "}
               {coverArtists.map((n, i) => (
-                <>
+                <span>
                   <Link
                     key={i + "_cover"}
                     href={`/search?q=sing:${encodeURIComponent(n)}`}
@@ -244,10 +244,10 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     {n}
                   </Link>
                   {i < coverArtists.length - 1 ? "、" : ""}
-                </>
+                </span>
               ))}
               {unitName && (
-                <>
+                <span>
                   {" "}
                   -{" "}
                   <Badge
@@ -260,10 +260,10 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   >
                     {unitName}
                   </Badge>
-                </>
+                </span>
               )}
               {!unitName && (
-                <>
+                <span>
                   {" "}
                   -{" "}
                   <Badge
@@ -278,17 +278,17 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   >
                     この組み合わせ
                   </Badge>
-                </>
+                </span>
               )}
             </p>
           )}
           {!song.isAlbum && (
-            <>
+            <span>
               <p className="text-sm">
                 公開日:{" "}
                 {new Date(song.lastVideo.broadcast_at).toLocaleDateString()}
               </p>
-            </>
+            </span>
           )}
 
           {song.firstVideo.album_release_at && (
