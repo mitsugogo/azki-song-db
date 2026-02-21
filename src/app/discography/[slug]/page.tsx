@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Song } from "../../types/song";
 import { LuFolder } from "react-icons/lu";
 import slugify from "../../lib/slugify";
-import { ROUTE_RANGES } from "../../config/timelineRoutes";
-import { VISUAL_CHANGES } from "../../config/timelineVisuals";
+import { ROUTE_RANGES, findRouteForRelease } from "../../config/timelineRoutes";
+import {
+  VISUAL_CHANGES,
+  findVisualForRelease,
+} from "../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
@@ -177,8 +180,41 @@ export default async function SongPage({
   // 発売日からルートと衣装を特定する
   const toYMD = (d?: string | null) => {
     if (!d) return null;
+    const s = String(d);
+
+    // 時刻・タイムゾーン情報を含む場合は UTC としてパースし、JST(+9h) に変換して日付を決定する
+    const hasTime = /T|\d{2}:\d{2}:\d{2}|Z|[+-]\d{2}:?\d{2}/.test(s);
+    if (hasTime) {
+      try {
+        const dt = new Date(s);
+        if (isNaN(dt.getTime())) return null;
+        // JST に変換
+        const jst = new Date(dt.getTime() + 9 * 60 * 60 * 1000);
+        const y = jst.getFullYear();
+        const mo = String(jst.getMonth() + 1).padStart(2, "0");
+        const da = String(jst.getDate()).padStart(2, "0");
+        return `${y}-${mo}-${da}`;
+      } catch (e) {
+        // fallthrough to date-only parsing
+      }
+    }
+
+    // 日付部分を直接抽出（YYYY-MM-DD や YYYY/MM/DD）
+    const m = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+    if (m) {
+      const y = m[1];
+      const mo = String(Number(m[2])).padStart(2, "0");
+      const da = String(Number(m[3])).padStart(2, "0");
+      return `${y}-${mo}-${da}`;
+    }
+
     try {
-      return new Date(d).toISOString().slice(0, 10);
+      const dt = new Date(s);
+      if (isNaN(dt.getTime())) return null;
+      const y = dt.getFullYear();
+      const mo = String(dt.getMonth() + 1).padStart(2, "0");
+      const da = String(dt.getDate()).padStart(2, "0");
+      return `${y}-${mo}-${da}`;
     } catch (e) {
       return null;
     }
@@ -186,19 +222,11 @@ export default async function SongPage({
 
   const releaseYMD = toYMD(song.album_release_at);
 
-  const matchedRoute =
-    releaseYMD && ROUTE_RANGES
-      ? ROUTE_RANGES.find(
-          (r) => r.from <= releaseYMD && (r.to === null || releaseYMD <= r.to),
-        ) || null
-      : null;
+  // ルート判定は config 側に移譲（JST 補正を含む）
+  const matchedRoute = findRouteForRelease(song.album_release_at);
 
-  const matchedVisual =
-    releaseYMD && VISUAL_CHANGES
-      ? VISUAL_CHANGES.find(
-          (v) => v.from <= releaseYMD && (v.to === null || releaseYMD <= v.to),
-        ) || null
-      : null;
+  // 衣装判定も config 側へ移譲
+  const matchedVisual = findVisualForRelease(song.album_release_at);
 
   // 関連動画: 同一アルバムの別動画を優先し、なければ同タイトルの別動画を候補とする。
   // 重複（同一video_id）は排除して最大8件取得する。
