@@ -9,6 +9,12 @@ import { HiSearch } from "react-icons/hi";
 import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
+import { siteConfig } from "@/app/config/siteConfig";
+import {
+  isCoverSong,
+  isOriginalSong,
+  isPossibleOriginalSong,
+} from "@/app/config/filters";
 
 type Props = {
   initialSongs: Song[];
@@ -232,7 +238,7 @@ export default function YearSummaryClient({
     return (
       Object.entries(counts)
         // AZKi本人は除外する
-        .filter(([singer]) => singer !== "AZKi")
+        .filter(([singer]) => singer !== siteConfig.talentName)
         .map(([singer, count]) => ({ singer, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
@@ -240,35 +246,41 @@ export default function YearSummaryClient({
   }, [collaborativeSongs]);
 
   // マイルストーンと達成日(broadcast_at)を取得
-  const milestonesByYear = useMemo(
-    () =>
-      songsFiltered
-        .sort(
-          (a, b) =>
-            new Date(a.broadcast_at).getTime() -
-            new Date(b.broadcast_at).getTime(),
-        )
-        .reduce<
-          Record<number, { broadcast_at: string; milestones: string[] }[]>
-        >((acc, s) => {
-          const year = Number(s.year);
-          if (Number.isNaN(year)) return acc;
-          if (!acc[year]) acc[year] = [];
-          // 空のマイルストーンは除外
-          if (!s.milestones || s.milestones.length === 0) return acc;
-          // 重複するマイルストーンはスキップ
-          const existingMilestones =
-            acc[year]?.map((m) => m.milestones)?.flat() || [];
-          if (existingMilestones.includes(s.milestones[0])) return acc;
+  const milestonesByYear = useMemo(() => {
+    const milestones: Record<
+      number,
+      { broadcast_at: string; milestones: string[] }[]
+    > = {};
+    const seenMilestonesByYear: Record<number, Set<string>> = {};
 
-          acc[year].push({
-            broadcast_at: s.broadcast_at,
-            milestones: s.milestones,
+    [...songsFiltered]
+      .sort(
+        (a, b) =>
+          new Date(a.broadcast_at).getTime() -
+          new Date(b.broadcast_at).getTime(),
+      )
+      .forEach((s) => {
+        const year = Number(s.year);
+        if (Number.isNaN(year)) return;
+        if (!milestones[year]) milestones[year] = [];
+        if (!seenMilestonesByYear[year]) seenMilestonesByYear[year] = new Set();
+
+        (s.milestones || [])
+          .map((milestone) => milestone.trim())
+          .filter(Boolean)
+          .forEach((milestone) => {
+            if (seenMilestonesByYear[year].has(milestone)) return;
+
+            seenMilestonesByYear[year].add(milestone);
+            milestones[year].push({
+              broadcast_at: s.broadcast_at,
+              milestones: [milestone],
+            });
           });
-          return acc;
-        }, {}),
-    [songsFiltered],
-  );
+      });
+
+    return milestones;
+  }, [songsFiltered]);
 
   return (
     <div className="space-y-6">
@@ -317,15 +329,11 @@ export default function YearSummaryClient({
             オリジナル楽曲
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:オリ曲`}>
+            <Link href={`/?q=year:${displayYear}|original-songs`}>
               {
                 new Set(
                   (fetchedInitialSongs ?? initialSongs)
-                    .filter(
-                      (s) =>
-                        s.tags.includes("オリ曲") ||
-                        s.tags.includes("オリ曲MV"),
-                    )
+                    .filter((s) => isPossibleOriginalSong(s))
                     .map((s) => s.title),
                 ).size
               }
@@ -340,7 +348,7 @@ export default function YearSummaryClient({
             <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
               {
                 (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("カバー曲"),
+                  isCoverSong(s),
                 ).length
               }
             </Link>
@@ -355,7 +363,21 @@ export default function YearSummaryClient({
             {milestonesByYear[Number(displayYear)].map((milestone, index) => (
               <li key={index}>
                 <div className="font-medium">
-                  {milestone.milestones.join(", ")}
+                  {milestone.milestones.map(
+                    (milestoneValue, milestoneIndex) => (
+                      <span key={`${milestoneValue}-${milestoneIndex}`}>
+                        {milestoneIndex > 0 ? ", " : ""}
+                        <Link
+                          href={`/search?${new URLSearchParams({
+                            q: `milestone:${milestoneValue}`,
+                          }).toString()}`}
+                          className="hover:underline"
+                        >
+                          {milestoneValue}
+                        </Link>
+                      </span>
+                    ),
+                  )}
                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                     &nbsp;-&nbsp;
                     {new Date(milestone.broadcast_at).toLocaleDateString()}
@@ -577,21 +599,26 @@ export default function YearSummaryClient({
             {
               songsFiltered.filter((s) =>
                 (s.tags || []).some(
-                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                  (t) =>
+                    t === "オリ曲" ||
+                    t === "オリ曲MV" ||
+                    t === "カバー曲" ||
+                    t === "カバー曲MV" ||
+                    t === "fes全体曲",
                 ),
               ).length
             }
             )
             <Link
-              href={`/?q=year:${displayYear}|tag:オリ曲`}
-              className="ml-4 text-sm text-blue-600 hover:underline"
+              href={`/?q=year:${displayYear}|original-songs`}
+              className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
               オリ曲
             </Link>
             <Link
               href={`/?q=year:${displayYear}|tag:カバー曲`}
-              className="ml-4 text-sm text-blue-600 hover:underline"
+              className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
               カバー曲
@@ -601,7 +628,12 @@ export default function YearSummaryClient({
             {(songsFiltered || [])
               .filter((s) =>
                 (s.tags || []).some(
-                  (t) => t === "オリ曲" || t === "オリ曲MV" || t === "カバー曲",
+                  (t) =>
+                    t === "オリ曲" ||
+                    t === "オリ曲MV" ||
+                    t === "カバー曲" ||
+                    t === "カバー曲MV" ||
+                    t === "fes全体曲",
                 ),
               )
               .sort(

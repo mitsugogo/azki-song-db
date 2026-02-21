@@ -19,6 +19,11 @@ export function useTabSync(
   // ブラウザの履歴（戻る/進む）操作を監視
   useEffect(() => {
     const handlePopState = () => {
+      // プログラム発火による履歴更新は無視する
+      try {
+        const historyLib = require("../lib/history").default;
+        if (historyLib.isProgrammaticHistoryUpdate()) return;
+      } catch (_) {}
       const newUrl = new URL(window.location.href);
       const newTab = newUrl.searchParams.get("tab");
       if (newTab) {

@@ -89,6 +89,11 @@ export function Header() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleRouteChange = () => {
+        // プログラム発火による履歴更新は無視する（集中管理フラグを使用）
+        try {
+          const historyLib = require("../lib/history").default;
+          if (historyLib.isProgrammaticHistoryUpdate()) return;
+        } catch (_) {}
         setCurrentPath(window.location.pathname);
       };
       window.addEventListener("popstate", handleRouteChange);
@@ -145,16 +150,44 @@ export function Header() {
 
                       // TOPページと検索ページ以外では、検索ページに遷移
                       if (path !== "/" && path !== "/search") {
-                        const searchUrl = query
-                          ? `/search?q=${encodeURIComponent(query)}`
-                          : "/search";
-                        router.push(searchUrl);
+                        // 他のページから検索ページへ遷移する際は、既存の v/t を保持して遷移する
+                        if (typeof window !== "undefined") {
+                          const url = new URL(window.location.href);
+                          url.pathname = "/search";
+                          if (query) {
+                            url.searchParams.set("q", query);
+                          } else {
+                            url.searchParams.delete("q");
+                          }
+                          const target =
+                            url.pathname +
+                            (url.search
+                              ? `?${url.searchParams.toString()}`
+                              : "");
+                          router.push(target);
+                        } else {
+                          const searchUrl = query
+                            ? `/search?q=${encodeURIComponent(query)}`
+                            : "/search";
+                          router.push(searchUrl);
+                        }
                       } else {
                         // TOPページと検索ページでは、URLパラメータを更新
                         if (query) {
                           router.push(`${path}?q=${encodeURIComponent(query)}`);
                         } else {
-                          router.push(path);
+                          // 検索ワードをクリアする際は、既存の検索パラメータ(v/t 等)を保持しつつ q のみ削除する
+                          if (typeof window !== "undefined") {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete("q");
+                            const searchString = url.searchParams.toString();
+                            const target = searchString
+                              ? `${path}?${searchString}`
+                              : path;
+                            router.push(target);
+                          } else {
+                            router.push(path);
+                          }
                         }
                       }
                     }}
@@ -287,7 +320,7 @@ export function Header() {
               arrowSize={4}
               label="ソロライブ！"
               withArrow
-              position="bottom"
+              position="top"
             >
               <Link
                 href="https://departure.hololivepro.com/"

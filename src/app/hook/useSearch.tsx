@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Song } from "../types/song";
 import usePlaylists from "./usePlaylists";
 import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
 import { useSearchParams } from "next/navigation";
+import historyHelper from "../lib/history";
+import { filterOriginalSongs } from "../config/filters";
 
 /**
  * 検索ロジックを管理するカスタムフック
@@ -23,8 +25,7 @@ const useSearch = (allSongs: Song[]) => {
   const isSyncingFromUrl = useRef(false);
 
   // マイルストーンごとのvideo_id一覧を事前に集計
-  const milestoneVideoIdMap = useRef<Map<string, Set<string>>>(new Map());
-  useEffect(() => {
+  const milestoneVideoIdMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
     allSongs.forEach((song) => {
       if (song.milestones) {
@@ -37,7 +38,7 @@ const useSearch = (allSongs: Song[]) => {
         });
       }
     });
-    milestoneVideoIdMap.current = map;
+    return map;
   }, [allSongs]);
 
   // 検索ロジック
@@ -87,7 +88,7 @@ const useSearch = (allSongs: Song[]) => {
           if (v === "*") {
             return Boolean(s.milestones && s.milestones.length > 0);
           }
-          const videoIdSet = milestoneVideoIdMap.current.get(v.toLowerCase());
+          const videoIdSet = milestoneVideoIdMap.get(v.toLowerCase());
           if (!videoIdSet) return false;
           return videoIdSet.has(s.video_id);
         },
@@ -159,7 +160,7 @@ const useSearch = (allSongs: Song[]) => {
         (song.extra?.toLowerCase().includes(word) ?? false)
       );
     },
-    [],
+    [milestoneVideoIdMap],
   );
 
   // 曲を検索するcallback
@@ -194,19 +195,7 @@ const useSearch = (allSongs: Song[]) => {
 
         // 予習曲のみ絞り込み
         songsToFilter = songsToFilter
-          .filter(
-            (s) =>
-              // AZKiさんオリ曲絞り込み
-              (s.tags.includes("オリ曲") ||
-                s.tags.includes("オリ曲MV") ||
-                s.tags.includes("ライブ予習")) &&
-              s.artist.includes("AZKi") &&
-              !s.title.includes("Maaya") &&
-              !s.title.includes("Remix") &&
-              !s.tags.includes("リミックス") &&
-              !s.title.includes("あずいろ") &&
-              !s.title.includes("Kiss me"),
-          )
+          .filter((s) => filterOriginalSongs(s))
           .sort((a, b) => {
             // リリース順でソート
             return (
@@ -334,8 +323,7 @@ const useSearch = (allSongs: Song[]) => {
         url.searchParams.delete("q");
       }
 
-      history.replaceState(null, "", url.href);
-      window.dispatchEvent(new Event("replacestate"));
+      historyHelper.replaceUrlIfDifferent(url.href);
     }
   }, [searchTerm]);
 

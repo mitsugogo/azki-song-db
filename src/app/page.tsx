@@ -74,7 +74,7 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("v", v?.toString());
     ogImageUrl.searchParams.set("t", t?.toString());
 
-    const songs = await fetch(new URL(`/api/songs/`, baseUrl)).then((res) =>
+    const songs = await fetch(new URL(`/api/songs`, baseUrl)).then((res) =>
       res.json(),
     );
     const song = songs.find(
@@ -83,10 +83,27 @@ export async function generateMetadata({
         parseInt(s.start) == parseInt(t.toString().replace("s", "")),
     );
     if (song) {
-      title = `🎵 ${song.title} - ${song.artist} | ${siteConfig.siteName}`;
+      title = `${song.title} - ${song.artist} | ${siteConfig.siteName}`;
       description = `${song.video_title} (配信日時:${new Date(
         song.broadcast_at,
       ).toLocaleDateString("ja-JP")})`;
+
+      og_title = title;
+      og_subtitle = `${song.video_title} (配信日時:${new Date(
+        song.broadcast_at,
+      ).toLocaleDateString("ja-JP")})`;
+    }
+  } else if (v) {
+    // video_idのみのパターン
+    const songs = await fetch(new URL(`/api/songs/`, baseUrl)).then((res) =>
+      res.json(),
+    );
+    const song = songs.find((s: Song) => s.video_id === v);
+    if (song) {
+      title = `${song.video_title} | ${siteConfig.siteName}`;
+      og_title = title;
+      ogImageUrl.searchParams.set("title", og_title);
+      ogImageUrl.searchParams.set("subtitle", og_subtitle);
     }
   }
   if (playlist) {
@@ -132,6 +149,8 @@ export async function generateMetadata({
     description: description,
     openGraph: {
       ...metadata.openGraph,
+      title: og_title,
+      description: og_subtitle,
       images: [ogImageUrl.toString()],
     },
   };

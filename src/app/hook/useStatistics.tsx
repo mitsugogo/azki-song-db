@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { Song } from "../types/song";
-import { VideoInfo } from "../types/videoInfo";
-import { createStatistics } from "../lib/statisticsHelpers"; // 元のファイルからヘルパー関数を分離
+import { createStatistics } from "../lib/statisticsHelpers";
+import {
+  isCollaborationSong,
+  isCoverSong,
+  isPossibleOriginalSong,
+} from "../config/filters";
 
 type UseStatisticsProps = {
   songs: Song[];
@@ -17,9 +21,7 @@ export function useStatistics({ songs }: UseStatisticsProps) {
     [songs],
   );
   const originalSongCounts = useMemo(() => {
-    const originals = songs.filter((s) =>
-      s.artist.split("、").some((a) => a.includes("AZKi")),
-    );
+    const originals = songs.filter((s) => isPossibleOriginalSong(s));
     return createStatistics(originals, (s) => s.title);
   }, [songs]);
   const tagCounts = useMemo(
@@ -45,12 +47,7 @@ export function useStatistics({ songs }: UseStatisticsProps) {
     () =>
       createStatistics(
         songs.filter(
-          (s) =>
-            (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")) &&
-            s.sing.includes("AZKi") &&
-            ["AZKi", "瀬名航", "Star Flower", "SorAZ"].some((a) =>
-              s.artist.includes(a),
-            ),
+          (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
         ),
         (s) => s.title,
         (a, b) =>
@@ -62,7 +59,7 @@ export function useStatistics({ songs }: UseStatisticsProps) {
   const coverSongCountsByReleaseDate = useMemo(
     () =>
       createStatistics(
-        songs.filter((s) => s.tags.includes("カバー曲")),
+        songs.filter((s) => isCoverSong(s)),
         (s) => `${s.title} (${s.artist}) (${s.sing})`,
         (a, b) =>
           new Date(b.firstVideo.broadcast_at).getTime() -

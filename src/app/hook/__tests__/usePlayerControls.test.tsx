@@ -745,7 +745,7 @@ describe("usePlayerControls", () => {
   });
 
   describe("handlePlayerOnReady", () => {
-    it("再生開始とURLパラメータの削除が行われる", () => {
+    it("再生開始が行われ、既存の URL パラメータは保持される", () => {
       (window as any).location.href = "http://localhost/?v=vid1&t=120";
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
       const player = createMockPlayer();
@@ -761,14 +761,13 @@ describe("usePlayerControls", () => {
       expect(player.playVideo).toHaveBeenCalled();
       expect(result.current.isPlaying).toBe(true);
 
-      const replaceArgs = (window.history.replaceState as any).mock.calls[0];
-      expect(replaceArgs[2]).not.toContain("v=");
-      expect(replaceArgs[2]).not.toContain("t=");
+      // 既存パラメータは保持されるため、replaceState は呼ばれない
+      expect((window.history.replaceState as any).mock.calls.length).toBe(0);
 
       const calledEvent = dispatchSpy.mock.calls.find(
         (call) => (call[0] as Event).type === "replacestate",
       );
-      expect(calledEvent).toBeTruthy();
+      expect(calledEvent).toBeFalsy();
 
       dispatchSpy.mockRestore();
     });
@@ -929,6 +928,36 @@ describe("usePlayerControls", () => {
       expect(result.current.currentSong?.start).toBe("100");
       expect(result.current.isPlaying).toBe(false);
       expect(result.current.timedLiveCallText).toBeNull();
+    });
+
+    it("検索フィルタ中のENDEDではフィルタ内の次曲に遷移する", () => {
+      const filteredSongs: Song[] = [
+        { ...mockSongs[0], video_id: "qVid", start: "100" },
+        { ...mockSongs[1], video_id: "qVid", start: "300" },
+      ];
+      const allSongs: Song[] = [
+        ...filteredSongs,
+        { ...mockSongs[2], video_id: "qVid", start: "200" },
+      ];
+      const player = createMockPlayer("qVid", 350);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(filteredSongs, allSongs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(filteredSongs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.ENDED,
+        } as any);
+      });
+
+      expect(result.current.currentSong?.start).toBe("300");
+      expect(result.current.currentSong?.start).not.toBe("200");
     });
 
     it("自動遷移ではskipSeekが使われる", () => {

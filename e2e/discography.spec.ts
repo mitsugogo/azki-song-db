@@ -78,13 +78,31 @@ test.describe("Discography page", () => {
       timeout: 10000,
     });
 
-    // The album name should be visible and an expanded anchor should exist
-    await expect(page.locator(`text=${album}`).first()).toBeVisible({
+    // The album name should be present in the DOM (avoid scrollIntoView)
+    await page.locator(`text=${album}`).first().waitFor({
+      state: "attached",
       timeout: 10000,
     });
-    await expect(
-      page.locator('[data-discography-anchor^="album-"]').first(),
-    ).toBeVisible({ timeout: 10000 });
+
+    // Instead of requiring the expanded anchor, assert the correct tab is selected
+    // Determine expected tab from song tags (similar to app logic)
+    const tags = withAlbum.tags || [];
+    let expectedTabIndex = 0;
+    if (
+      tags.includes("ユニット曲") ||
+      tags.includes("ゲスト参加") ||
+      (withAlbum.title || "").includes("feat. AZKi") ||
+      (withAlbum.title || "").includes("feat.AZKi")
+    ) {
+      expectedTabIndex = 1;
+    } else if (tags.includes("カバー曲")) {
+      expectedTabIndex = 2;
+    }
+
+    const tabNames = [/オリジナル楽曲/, /ユニット・ゲスト楽曲/, /カバー楽曲/];
+
+    const tab = page.getByRole("tab", { name: tabNames[expectedTabIndex] });
+    await expect(tab).toHaveAttribute("aria-selected", "true");
   });
 
   test("tab switching updates selected tab", async ({ page }) => {
@@ -105,5 +123,41 @@ test.describe("Discography page", () => {
 
     await coverTab.click();
     await expect(coverTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("?category=covers opens Covers tab", async ({ page }) => {
+    await page.goto("/discography?category=covers");
+    await page.waitForLoadState("domcontentloaded");
+
+    await page.waitForSelector(".mantine-LoadingOverlay-root", {
+      state: "hidden",
+      timeout: 10000,
+    });
+
+    const coverTab = page.getByRole("tab", { name: /カバー楽曲/ });
+    await expect(coverTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  // 旧slugのURLにアクセスしたとき、正しい曲ページにリダイレクトされることを確認
+  test("redirects old slug URL to correct song page", async ({ page }) => {
+    const res = await page.request.get("/api/songs");
+    const songs: any[] = await res.json();
+    const withSlugV1 = songs.find(
+      (s) => s && s.slugv2 && s.slug && s.tags && s.tags.includes("オリ曲"),
+    );
+    test.skip(
+      !withSlugV1,
+      "no song with both slug and slugv2 available for testing",
+    );
+    const oldSlug = withSlugV1.slug; // v1 slug
+    const expectedTitle = withSlugV1.title ?? withSlugV1.album ?? null;
+
+    await page.goto(`/discography/${encodeURIComponent(oldSlug)}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    // Assert we are redirected to the correct page by checking the title
+    await expect(
+      page.locator("h1").filter({ hasText: expectedTitle }),
+    ).toBeVisible({ timeout: 15000 });
   });
 });

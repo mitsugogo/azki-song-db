@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Song } from "../types/song";
 import Link from "next/link";
 import {
@@ -9,21 +9,19 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   flexRender,
-  ColumnDef,
   SortingState,
 } from "@tanstack/react-table";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
 import useSongs from "../hook/useSongs";
-import { Badge, TextInput } from "flowbite-react";
+import { TextInput } from "flowbite-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
-import MilestoneBadge from "../components/MilestoneBadge";
-import { BsPlayCircle } from "react-icons/bs";
 import {
   OverlayScrollbarsComponent,
   OverlayScrollbarsComponentRef,
 } from "overlayscrollbars-react";
+import columns from "./columns";
 
 export default function ClientTable() {
   const { allSongs, isLoading } = useSongs();
@@ -32,178 +30,6 @@ export default function ClientTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
-
-  const columns = useMemo<ColumnDef<Song>[]>(
-    () => [
-      {
-        id: "index",
-        header: "#",
-        cell: (info) => info.row.index + 1,
-        size: 80,
-      },
-      {
-        header: "再生",
-        cell: (info) => (
-          <Link
-            href={`/?v=${info.row.original.video_id}&t=${info.row.original.start}`}
-            className="text-gray-400 hover:text-primary-600 dark:hover:text-white"
-          >
-            <BsPlayCircle className="inline w-5 h-5" />
-          </Link>
-        ),
-        size: 60,
-      },
-      {
-        accessorKey: "title",
-        header: "タイトル",
-        cell: (info) => (
-          <Link
-            href={`/?q=title:${info.getValue<string>()}`}
-            className="hover:underline font-semibold text-primary dark:text-primary-300"
-          >
-            {info.getValue<string>()}
-          </Link>
-        ),
-        size: 250,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "artist",
-        header: "アーティスト",
-        cell: (info) => (
-          <Link
-            href={`/?q=artist:${info.getValue<string>()}`}
-            className="hover:underline text-primary dark:text-primary-300"
-          >
-            {info.getValue<string>()}
-          </Link>
-        ),
-        size: 250,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "sing",
-        header: "歌った人",
-        size: 300,
-        cell: (info) => (
-          <div>
-            {info
-              .getValue<string>()
-              .split("、")
-              .map((title, index) => (
-                <Link
-                  key={index}
-                  href={`/?q=sing:${encodeURIComponent(title)}`}
-                  className="hover:underline text-primary dark:text-primary-300 mr-2"
-                >
-                  <Badge color="info" size="xs" className="inline-block">
-                    {title}
-                  </Badge>
-                </Link>
-              ))}
-          </div>
-        ),
-        enableResizing: true,
-      },
-      {
-        accessorKey: "album",
-        header: "アルバム",
-        size: 150,
-        cell: (info) => (
-          <Link
-            href={`/?q=album:${info.getValue<string>()}`}
-            className="hover:underline text-primary dark:text-primary-300"
-          >
-            {info.getValue<string>()}
-          </Link>
-        ),
-      },
-      {
-        accessorKey: "album_release_at",
-        header: "アルバム発売日",
-        cell: (info) =>
-          info.getValue()
-            ? new Date(info.getValue<string>()).toLocaleDateString("ja-JP")
-            : "",
-        size: 150,
-      },
-      {
-        accessorKey: "video_title",
-        header: "動画タイトル",
-        cell: (info) => (
-          <Link
-            href={`https://www.youtube.com/watch?v=${info.row.original.video_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline text-primary dark:text-primary-300"
-          >
-            {info.getValue<string>()}
-          </Link>
-        ),
-        size: 550,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "start",
-        header: "開始タイムスタンプ",
-        enableSorting: false,
-        cell: (info) => {
-          return new Date(parseInt(info.getValue<string>()) * 1000)
-            .toISOString()
-            .substring(11, 19);
-        },
-        size: 120,
-      },
-      {
-        accessorKey: "tags",
-        header: "タグ",
-        cell: (info) => (
-          <div>
-            {info.getValue<string[]>().map((tag, index) => (
-              <Link
-                key={index}
-                href={`/?q=tag:${encodeURIComponent(tag)}`}
-                className="hover:underline text-primary dark:text-primary-300 mr-2"
-              >
-                {tag}
-              </Link>
-            ))}
-          </div>
-        ),
-        size: 350,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "broadcast_at",
-        header: "公開日",
-        cell: (info) =>
-          info.getValue()
-            ? new Date(info.getValue<string>()).toLocaleDateString("ja-JP")
-            : "-",
-        size: 120,
-      },
-      {
-        accessorKey: "milestones",
-        header: "マイルストーン",
-        cell: (info) =>
-          info.getValue<string[]>()?.length > 0
-            ? info.getValue<string[]>()?.map((m, index) => (
-                <div className={`align-center mb-1`} key={index}>
-                  <Link
-                    href={`/?q=milestone:${encodeURIComponent(m)}`}
-                    className="hover:underline"
-                  >
-                    <MilestoneBadge song={info.row.original} inline />
-                  </Link>
-                </div>
-              ))
-            : "",
-        size: 200,
-        enableResizing: true,
-      },
-    ],
-    [],
-  );
 
   const table = useReactTable({
     data: songs,
@@ -237,6 +63,28 @@ export default function ClientTable() {
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
+  // 再描画されないケース（ブラウザバックなど）に備えて仮想化の再計測
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [rows.length]);
+
+  // ブラウザの戻る/進む（popstate）で来たときに再計測
+  useEffect(() => {
+    const handlePop = () => {
+      // OverlayScrollbars の再初期化が終わるまで少し待つ
+      setTimeout(() => {
+        try {
+          rowVirtualizer.measure();
+        } catch (e) {
+          // 念のためエラーは無視しておく
+        }
+      }, 50);
+    };
+
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center w-full justify-center h-screen relative">
@@ -247,7 +95,7 @@ export default function ClientTable() {
 
   return (
     <>
-      <div className="flex-grow lg:p-6 lg:pb-0">
+      <div className="grow p-0 lg:pb-0">
         <h1 className="font-extrabold text-2xl p-3">収録データ</h1>
         <p className="mb-4 px-3">本データベースの情報を表示しています。</p>
         <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
@@ -258,7 +106,7 @@ export default function ClientTable() {
           />
           <OverlayScrollbarsComponent
             ref={tableContainerRef}
-            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-290px)] lg:h-[calc(100dvh-375px)]"
+            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-290px)] lg:h-[calc(100dvh-353px)]"
           >
             <div className="relative">
               <div className="w-full text-sm text-left">

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+import { getCachedSongs } from "./test-utils";
 
 // コントロールバーのテスト
 // 再生・一時停止・次の曲・ボリューム・ミュートなど
@@ -506,4 +507,83 @@ test.describe("同一動画内での曲切り替え", () => {
       );
     });
   }
+});
+
+test.describe("検索フィルタ時の次曲遷移", () => {
+  test("q指定で中間曲を除外した場合、次の曲へで除外曲を飛ばして遷移する", async ({
+    page,
+  }) => {
+    const allSongs = getCachedSongs();
+    const groupedByVideo = new Map<string, any[]>();
+    for (const song of allSongs) {
+      if (!song?.video_id || song?.start == null) continue;
+      const list = groupedByVideo.get(song.video_id) ?? [];
+      list.push(song);
+      groupedByVideo.set(song.video_id, list);
+    }
+
+    let selected: {
+      videoId: string;
+      first: any;
+      middle: any;
+      third: any;
+    } | null = null;
+
+    for (const [videoId, list] of groupedByVideo.entries()) {
+      const sorted = list
+        .slice()
+        .sort((a, b) => Number(a.start) - Number(b.start));
+
+      for (let i = 0; i + 2 < sorted.length; i += 1) {
+        const first = sorted[i];
+        const middle = sorted[i + 1];
+        const third = sorted[i + 2];
+        if (
+          first?.title &&
+          middle?.title &&
+          third?.title &&
+          first.title !== middle.title &&
+          third.title !== middle.title
+        ) {
+          selected = { videoId, first, middle, third };
+          break;
+        }
+      }
+      if (selected) break;
+    }
+
+    if (!selected) {
+      test.skip(true, "同一動画で3曲連続のテストデータを作れないためスキップ");
+      return;
+    }
+
+    const { videoId, first, middle, third } = selected;
+    const q = `video_id:${videoId}|-title:${middle.title}`;
+
+    await setupApiMocks(page);
+    await page.goto(`/?q=${encodeURIComponent(q)}`);
+    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+
+    const firstSongInFilter = page.locator(
+      `#song-list li[data-video-id="${videoId}"][data-start-time="${first.start}"]`,
+    );
+    if (!(await firstSongInFilter.count())) {
+      test.skip(true, "フィルタ後に先頭候補が見つからないためスキップ");
+      return;
+    }
+
+    await firstSongInFilter.first().click();
+
+    const nextBtn = page.locator('button[aria-label="次の曲へ"]');
+    await expect(nextBtn).toBeVisible();
+    await expect(nextBtn).toBeEnabled();
+    await nextBtn.click();
+
+    await expect(page).toHaveURL(
+      new RegExp(`([?&])t=${Number(third.start)}s(?:&|$)`),
+    );
+    await expect(page).not.toHaveURL(
+      new RegExp(`([?&])t=${Number(middle.start)}s(?:&|$)`),
+    );
+  });
 });

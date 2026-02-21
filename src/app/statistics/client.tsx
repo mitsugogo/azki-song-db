@@ -8,6 +8,7 @@ import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
 import { TABS_CONFIG } from "./tabsConfig";
 import Loading from "../loading";
+import historyHelper from "../lib/history";
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -29,8 +30,7 @@ export default function StatisticsPage() {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tabIndex.toString());
     // タブ切替は履歴を増やさない（戻る操作で過去のタブが大量に残るのを防ぐ）
-    window.history.replaceState(null, "", url.href);
-    window.dispatchEvent(new Event("replacestate"));
+    historyHelper.replaceUrlIfDifferent(url.href);
   };
 
   // ページを開いた時にURLの"tab"を取得してタブを選択する
@@ -52,7 +52,7 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="grow lg:p-6 lg:pb-0">
+    <div className="grow">
       <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
