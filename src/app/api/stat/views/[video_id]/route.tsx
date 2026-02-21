@@ -1,7 +1,10 @@
-import { ViewStat } from "@/app/types/api/stat/views";
+import { Period, VALID_PERIODS, ViewStat } from "@/app/types/api/stat/views";
+import { NextRequest } from "next/server";
+
+export const runtime = "edge";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ video_id: string }> },
 ) {
   const { video_id } = await params;
@@ -11,9 +14,22 @@ export async function GET(
     });
   }
 
+  // クエリパラメータに期間の指定があれば処理
+  const { period } = Object.fromEntries(new URL(request.url).searchParams);
+  if (period) {
+    if (!VALID_PERIODS.includes(period as Period)) {
+      return new Response(JSON.stringify({ error: "Invalid period" }), {
+        status: 400,
+      });
+    }
+  }
+
   let statistics;
   try {
-    statistics = await getStatisticsByVideoId(video_id);
+    statistics = await getStatisticsByVideoId(
+      video_id,
+      period as Period | undefined,
+    );
   } catch (error) {
     console.error("Failed to fetch statistics:", error);
     return new Response(
@@ -39,16 +55,17 @@ export async function GET(
   });
 }
 
-export async function getStatisticsByVideoId(videoId: string) {
+export async function getStatisticsByVideoId(videoId: string, period?: Period) {
   const spreadsheetId = process.env.SPREADSHEET_ID;
   const apiKey = process.env.GOOGLE_API_KEY;
   const sheetName = "statistics";
 
   // G列がvideo_id
-  const query = encodeURIComponent(`SELECT * WHERE G = '${videoId}'`);
+  const query = `SELECT * WHERE G = '${videoId}' ${period ? `AND A >= date '${getGSDate(period)}'` : ""}`;
 
+  const encodedQuery = encodeURIComponent(query);
   // APIキーを末尾に付与
-  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&tq=${query}&sheet=${sheetName}&key=${apiKey}`;
+  const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&tq=${encodedQuery}&sheet=${sheetName}&key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
@@ -84,6 +101,44 @@ export async function getStatisticsByVideoId(videoId: string) {
     console.error("Fetch error:", error);
     return null;
   }
+}
+
+/**
+ * periodからスプシのクエリで使用する日付文字列を生成する
+ */
+function getGSDate(period: Period): string {
+  const now = new Date();
+  let pastDate: Date;
+  switch (period) {
+    case "1d":
+      pastDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+      break;
+    case "3d":
+      pastDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+      break;
+    case "7d":
+      pastDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case "30d":
+      pastDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    case "90d":
+      pastDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      break;
+    case "180d":
+      pastDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      break;
+    case "365d":
+    case "1y":
+      pastDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
+    case "all":
+    default:
+      pastDate = new Date(0);
+      break;
+  }
+  // "YYYY-MM-DD"形式で返す
+  return pastDate.toISOString().split("T")[0];
 }
 
 function parseGoogleDate(dateStr: string): Date | null {

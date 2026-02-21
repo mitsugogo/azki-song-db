@@ -2,17 +2,23 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Song } from "../../types/song";
-import { LuAlbum, LuFolder } from "react-icons/lu";
+import { LuFolder } from "react-icons/lu";
 import slugify from "../../lib/slugify";
 import { ROUTE_RANGES } from "../../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
-import { Badge, Button } from "@mantine/core";
+import { Badge } from "@mantine/core";
 import { renderLinkedText } from "@/app/lib/textLinkify";
 
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import {
+  isCollaborationSong,
+  isPossibleOriginalSong,
+} from "@/app/config/filters";
+import useStatViewCount from "@/app/hook/useStatViewCount";
+import ViewStat from "./viewStat";
 
 async function fetchSongsFromApi(): Promise<Song[]> {
   const candidates = [
@@ -53,7 +59,7 @@ export async function generateStaticParams() {
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
-    (s) => s.tags && (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")),
+    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
   );
 
   const slugs = new Set<string>();
@@ -78,29 +84,37 @@ export async function generateMetadata({
   // slugify は共通ユーティリティを使用
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
-    (s) => s.tags && (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")),
+    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
   );
-  const matched = originals.find(
+  const metadataCandidates = originals.filter(
     (s) =>
       s.slug === slug ||
       (s.title && slugify(s.title) === slug) ||
       (s.album && slugify(s.album) === slug),
   );
-  if (!matched) return { title: slug };
-  const title = matched.title
-    ? `${matched.title} | ${matched.artist} | Discography | ${siteConfig.siteName}`
-    : `${matched.album} | ${matched.artist} | Discography | ${siteConfig.siteName}`;
+  const matchedForMeta =
+    metadataCandidates.length > 1
+      ? (metadataCandidates.find((s) =>
+          // タグ配列内の要素に "MV" を含むものを優先（部分一致）
+          s.tags?.some((t) => t.includes("MV")),
+        ) ?? metadataCandidates[0])
+      : metadataCandidates[0];
+  if (!matchedForMeta) return { title: slug };
+  const title = matchedForMeta.title
+    ? `${matchedForMeta.title} | ${matchedForMeta.artist} | Discography | ${siteConfig.siteName}`
+    : `${matchedForMeta.album} | ${matchedForMeta.artist} | Discography | ${siteConfig.siteName}`;
   const description =
-    matched.extra ?? `${matched.title} - ${matched.artist}の楽曲情報`;
+    matchedForMeta.extra ??
+    `${matchedForMeta.title} - ${matchedForMeta.artist}の楽曲情報`;
 
   // OGP 画像生成を移植（app/page.tsx を参考）
   let ogImageUrl = new URL("/api/og", baseUrl);
-  const ogTitle = matched.title
-    ? `${matched.title} / ${matched.artist}`
-    : matched.album
-      ? `${matched.album} / ${matched.artist}`
+  const ogTitle = matchedForMeta.title
+    ? `${matchedForMeta.title} / ${matchedForMeta.artist}`
+    : matchedForMeta.album
+      ? `${matchedForMeta.album} / ${matchedForMeta.artist}`
       : siteConfig.siteName;
-  const ogSubtitle = matched.extra ?? siteConfig.siteName;
+  const ogSubtitle = matchedForMeta.extra ?? siteConfig.siteName;
 
   ogImageUrl.searchParams.set("title", ogTitle);
   ogImageUrl.searchParams.set(
@@ -133,9 +147,8 @@ export default async function SongPage({
 
   // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
   const originals = songs.filter(
-    (s) => s.tags && (s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV")),
+    (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
   );
-  // slugify は共通ユーティリティを使用
 
   const matched = originals.filter(
     (s) =>
@@ -146,8 +159,20 @@ export default async function SongPage({
   if (!matched || matched.length === 0) {
     notFound();
   }
+  const includeMVTagged = matched.some((s) =>
+    s.tags?.some((t) => t.includes("MV")),
+  );
+  const song =
+    matched.length > 1
+      ? includeMVTagged
+        ? matched.find((s) => s.tags?.some((t) => t.includes("MV")))
+        : matched[0]
+      : matched[0];
 
-  const first = matched[0];
+  console.log(matched.find((s) => s.tags?.some((t) => t.includes("MV"))));
+  if (!song) {
+    notFound();
+  }
 
   // 発売日からルートと衣装を特定する
   const toYMD = (d?: string | null) => {
@@ -159,7 +184,7 @@ export default async function SongPage({
     }
   };
 
-  const releaseYMD = toYMD(first.album_release_at);
+  const releaseYMD = toYMD(song.album_release_at);
 
   const matchedRoute =
     releaseYMD && ROUTE_RANGES
@@ -180,19 +205,19 @@ export default async function SongPage({
   const relatedAlbum = songs.filter(
     (s: Song) =>
       s.album &&
-      first.album &&
-      s.album === first.album &&
+      song.album &&
+      s.album === song.album &&
       s.video_id &&
-      s.video_id !== first.video_id,
+      s.video_id !== song.video_id,
   );
 
   const relatedSameTitle = songs.filter(
     (s: Song) =>
       s.title &&
-      first.title &&
-      s.title === first.title &&
+      song.title &&
+      s.title === song.title &&
       s.video_id &&
-      s.video_id !== first.video_id &&
+      s.video_id !== song.video_id &&
       s.tags.includes("歌枠"),
   );
 
@@ -203,235 +228,236 @@ export default async function SongPage({
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </BreadcrumbItem>
         <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
-        {first.album && (
+        {song.album && (
           <BreadcrumbItem
-            href={`/discography/?album=${encodeURIComponent(first.album)}`}
+            href={`/discography/?album=${encodeURIComponent(song.album)}`}
           >
-            {first.album}
+            {song.album}
           </BreadcrumbItem>
         )}
-        <BreadcrumbItem>
-          {first.title ? first.title : first.album}
-        </BreadcrumbItem>
+        <BreadcrumbItem>{song.title ? song.title : song.album}</BreadcrumbItem>
       </Breadcrumb>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div className="col-span-1">
           <div className="rounded-lg overflow-hidden shadow-lg">
             <img
-              src={`https://i.ytimg.com/vi/${first.video_id}/maxresdefault.jpg`}
-              alt={first.video_title}
+              src={`https://i.ytimg.com/vi/${song.video_id}/maxresdefault.jpg`}
+              alt={song.title}
               className="w-full h-auto object-cover"
             />
           </div>
         </div>
 
         <div className="col-span-2">
-          {first.album && (
+          {song.album && (
             <p className="text-sm text-gray-600 dark:text-gray-300">
               <LuFolder className="inline mr-1" />{" "}
               <Link
-                href={`/discography/?album=${encodeURIComponent(first.album)}`}
+                href={`/discography/?album=${encodeURIComponent(song.album)}`}
               >
-                {first.album}
+                {song.album}
               </Link>
             </p>
           )}
-          <h1 className="text-3xl font-extrabold mb-2">{first.title}</h1>
+          <h1 className="text-3xl font-extrabold mb-2">{song.title}</h1>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            {first.artist}
+            {song.artist}
           </p>
 
-          {first.lyricist && <p className="text-sm">作詞: {first.lyricist}</p>}
-          {first.composer && <p className="text-sm">作曲: {first.composer}</p>}
-          {first.arranger && <p className="text-sm">編曲: {first.arranger}</p>}
+          {song.lyricist && <p className="text-sm">作詞: {song.lyricist}</p>}
+          {song.composer && <p className="text-sm">作曲: {song.composer}</p>}
+          {song.arranger && <p className="text-sm">編曲: {song.arranger}</p>}
 
-          {first.album_release_at && (
+          {song.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
               発売日:{" "}
-              {new Date(first.album_release_at).toLocaleDateString("ja-JP")}
+              {new Date(song.album_release_at).toLocaleDateString("ja-JP")}
             </p>
           )}
 
-          <div className="mt-4 space-y-3">
-            <div>
-              <a
-                href={`https://www.youtube.com/watch?v=${first.video_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-red-600 text-white py-2 px-4 rounded-md"
-              >
-                <FaYoutube className="inline mr-1 -mt-1" /> YouTube
-              </a>
-              <Link
-                href={
-                  first.album
-                    ? `/?q=album:${first.album}&v=${first.video_id}${Number(first.start) > 0 ? `&t=${first.start}s` : ""}`
-                    : `/?q=video_id:${first.video_id}&v=${first.video_id}${Number(first.start) > 0 ? `&t=${first.start}s` : ""}`
-                }
-                className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
-              >
-                <FaPlay className="inline mr-1 -mt-1" /> 再生
-              </Link>
+          <div className="mt-4">
+            <a
+              href={`https://www.youtube.com/watch?v=${song.video_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-red-600 text-white py-2 px-4 rounded-md"
+            >
+              <FaYoutube className="inline mr-1 -mt-1" /> YouTube
+            </a>
+            <Link
+              href={
+                song.album
+                  ? `/?q=album:${song.album}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
+                  : `/?q=video_id:${song.video_id}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
+              }
+              className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
+            >
+              <FaPlay className="inline mr-1 -mt-1" /> 再生
+            </Link>
 
-              {/** シェアボタン */}
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  `${first.title} - ${first.artist} \nhttps://${process.env.PUBLIC_BASE_URL ? process.env.PUBLIC_BASE_URL : "azki-song-db.vercel.app"}/discography/${encodeURIComponent(
-                    first.slug
-                      ? first.slug
-                      : `${first.album}/${encodeURIComponent(first.title)}`,
-                  )}`,
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
-              >
-                <FaXTwitter className="inline mr-1 -mt-1" /> シェア
-              </a>
-            </div>
+            {/** シェアボタン */}
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                `${song.title} - ${song.artist} \nhttps://${process.env.PUBLIC_BASE_URL ? process.env.PUBLIC_BASE_URL : "azki-song-db.vercel.app"}/discography/${encodeURIComponent(
+                  song.slug
+                    ? song.slug
+                    : `${song.album}/${encodeURIComponent(song.title)}`,
+                )}`,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
+            >
+              <FaXTwitter className="inline mr-1 -mt-1" /> シェア
+            </a>
+          </div>
+        </div>
 
-            <div className="mt-6">
-              {/** 発売日からルートと衣装を特定 */}
-              {matchedRoute && <Badge color="gray">{matchedRoute.label}</Badge>}
-              {matchedVisual && (
-                <Badge className="ml-2" color="gray">
-                  {matchedVisual.label}
-                </Badge>
-              )}
-              {first.extra && (
-                <div className="mt-1 whitespace-pre-wrap">
-                  {renderLinkedText(first.extra)}
-                </div>
-              )}
-            </div>
-
-            <div>
-              {/** YouTubeの動画をiframeで配置 */}
-              <div className="aspect-w-16 aspect-h-9 mt-3">
-                <iframe
-                  src={`https://www.youtube.com/embed/${first.video_id}`}
-                  title={first.video_title}
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full max-w-2xl aspect-video shadow-lg"
-                ></iframe>
+        <div className="col-span-1 md:col-span-3 space-y-3">
+          <div className="mt-2">
+            {/** 発売日からルートと衣装を特定 */}
+            {matchedRoute && <Badge color="gray">{matchedRoute.label}</Badge>}
+            {matchedVisual && (
+              <Badge className="ml-2" color="gray">
+                {matchedVisual.label}
+              </Badge>
+            )}
+            {song.extra && (
+              <div className="mt-1 whitespace-pre-wrap">
+                {renderLinkedText(song.extra)}
               </div>
-            </div>
+            )}
+          </div>
 
-            <div>
-              {/* 関連動画 */}
-              {relatedAlbum && relatedAlbum.length > 0 && (
-                <>
-                  <h2 className="text-lg font-semibold mb-2">関連動画</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Array.from(
-                      new Map(
-                        relatedAlbum.map((s) => [s.video_id, s]),
-                      ).values(),
-                    ).map((s) => {
-                      const internalHref = s.slug
-                        ? `/discography/${encodeURIComponent(s.slug)}`
-                        : s.title
-                          ? `/discography/${encodeURIComponent(slugify(s.title))}`
-                          : "#";
-                      return (
-                        <div
-                          key={s.video_id}
-                          className="flex items-center gap-3 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
-                        >
-                          <img
-                            src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
-                            className="w-28 h-16 object-cover rounded"
-                            alt={s.video_title}
-                          />
-                          <div className="text-sm flex-1">
-                            <div className="font-medium">{s.video_title}</div>
-                            <div className="text-xs text-gray-600 dark:text-gray-300">
-                              {s.artist} - {s.sing}
-                            </div>
-                            <div className="mt-2 space-x-2">
-                              <a
-                                href={`https://www.youtube.com/watch?v=${s.video_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
-                              >
-                                <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                                YouTube
-                              </a>
-                              <Link
-                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
-                                className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
-                              >
-                                <FaPlay className="inline mr-1 -mt-1" /> 再生
-                              </Link>
-                            </div>
+          <div>
+            {/** YouTubeの動画をiframeで配置 */}
+            <div className="aspect-w-16 aspect-h-9 mt-3">
+              <iframe
+                src={`https://www.youtube.com/embed/${song.video_id}`}
+                title={song.video_title}
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full max-w-2xl aspect-video shadow-lg"
+              ></iframe>
+            </div>
+          </div>
+
+          <div>
+            {/* 関連動画 */}
+            {relatedAlbum && relatedAlbum.length > 0 && (
+              <>
+                <h2 className="text-lg font-semibold mb-2">関連動画</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Array.from(
+                    new Map(relatedAlbum.map((s) => [s.video_id, s])).values(),
+                  ).map((s) => {
+                    const internalHref = s.slug
+                      ? `/discography/${encodeURIComponent(s.slug)}`
+                      : s.title
+                        ? `/discography/${encodeURIComponent(slugify(s.title))}`
+                        : "#";
+                    return (
+                      <div
+                        key={s.video_id}
+                        className="flex items-center gap-3 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
+                      >
+                        <img
+                          src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
+                          className="w-28 h-16 object-cover rounded"
+                          alt={s.video_title}
+                        />
+                        <div className="text-sm flex-1">
+                          <div className="font-medium">{s.video_title}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">
+                            {s.artist} - {s.sing}
+                          </div>
+                          <div className="mt-2 space-x-2">
+                            <a
+                              href={`https://www.youtube.com/watch?v=${s.video_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
+                            >
+                              <FaYoutube className="inline mr-1 -mt-1" />{" "}
+                              YouTube
+                            </a>
+                            <Link
+                              href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
+                              className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
+                            >
+                              <FaPlay className="inline mr-1 -mt-1" /> 再生
+                            </Link>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
 
-              {/* この曲を歌った歌枠 */}
-              {relatedSameTitle && relatedSameTitle.length > 0 && (
-                <>
-                  <h2 className="text-lg font-semibold mb-2 mt-4">
-                    この曲を歌った歌枠
-                  </h2>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                    {Array.from(
-                      new Map(
-                        relatedSameTitle.map((s) => [s.video_id, s]),
-                      ).values(),
-                    ).map((s) => {
-                      const internalHref = s.slug
-                        ? `/discography/${encodeURIComponent(s.slug)}`
-                        : s.title
-                          ? `/discography/${encodeURIComponent(slugify(s.title))}`
-                          : "#";
-                      return (
-                        <div
-                          key={s.video_id}
-                          className="flex items-center gap-2 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
-                        >
-                          <img
-                            src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
-                            className="w-28 h-16 object-cover rounded"
-                            alt={s.video_title}
-                          />
-                          <div className="text-sm flex-1">
-                            <div className="font-medium">{s.video_title}</div>
-                            <div className="text-xs text-gray-600 dark:text-gray-300">
-                              {s.artist}
-                            </div>
-                            <div className="mt-2 space-x-2">
-                              <a
-                                href={`https://www.youtube.com/watch?v=${s.video_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
-                              >
-                                <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                                YouTube
-                              </a>
-                              <Link
-                                href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
-                                className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
-                              >
-                                <FaPlay className="inline mr-1 -mt-1" /> 再生
-                              </Link>
-                            </div>
+            {/* この曲を歌った歌枠 */}
+            {relatedSameTitle && relatedSameTitle.length > 0 && (
+              <>
+                <h2 className="text-lg font-semibold mb-2 mt-4">
+                  この曲を歌った歌枠
+                </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {Array.from(
+                    new Map(
+                      relatedSameTitle.map((s) => [s.video_id, s]),
+                    ).values(),
+                  ).map((s) => {
+                    const internalHref = s.slug
+                      ? `/discography/${encodeURIComponent(s.slug)}`
+                      : s.title
+                        ? `/discography/${encodeURIComponent(slugify(s.title))}`
+                        : "#";
+                    return (
+                      <div
+                        key={s.video_id}
+                        className="flex items-center gap-2 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
+                      >
+                        <img
+                          src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
+                          className="w-28 h-16 object-cover rounded"
+                          alt={s.video_title}
+                        />
+                        <div className="text-sm flex-1">
+                          <div className="font-medium">{s.video_title}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">
+                            {s.artist}
+                          </div>
+                          <div className="mt-2 space-x-2">
+                            <a
+                              href={`https://www.youtube.com/watch?v=${s.video_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
+                            >
+                              <FaYoutube className="inline mr-1 -mt-1" />{" "}
+                              YouTube
+                            </a>
+                            <Link
+                              href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
+                              className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
+                            >
+                              <FaPlay className="inline mr-1 -mt-1" /> 再生
+                            </Link>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* 動画の統計情報 */}
+          <div className="pt-6">
+            <ViewStat videoId={song.video_id} />
           </div>
         </div>
       </div>
