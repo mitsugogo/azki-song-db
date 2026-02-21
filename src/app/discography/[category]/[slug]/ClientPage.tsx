@@ -18,6 +18,7 @@ import {
 } from "../../../config/filters";
 import useSongs from "../../../hook/useSongs";
 import ViewStat from "./viewStat";
+import { getCollabUnitName } from "@/app/config/collabUnits";
 
 export default function ClientPage({
   category,
@@ -112,8 +113,10 @@ export default function ClientPage({
       s.video_id !== song.video_id,
   );
 
+  const unitName = getCollabUnitName(song.sing.split("、"));
+
   return (
-    <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+    <div className="p-6 w-full  mx-auto">
       <Breadcrumb aria-label="Breadcrumb" className="mb-3">
         <BreadcrumbItem href="/">
           <HiHome className="w-4 h-4 mr-1.5" /> Home
@@ -200,7 +203,7 @@ export default function ClientPage({
           )}
           {song.sing && song.sing.length > 1 && (
             <p className="text-sm">
-              歌唱:{" "}
+              歌:{" "}
               {song.sing.split("、").map((s, idx) => (
                 <span key={idx}>
                   <Link
@@ -212,6 +215,21 @@ export default function ClientPage({
                   {idx < song.sing.split("、").length - 1 && "、"}
                 </span>
               ))}
+              {unitName && (
+                <>
+                  {" "}
+                  -{" "}
+                  <Badge
+                    color="indigo"
+                    radius="sm"
+                    component="a"
+                    href={`/search?q=unit:${encodeURIComponent(unitName)}`}
+                    className="cursor-pointer"
+                  >
+                    {unitName}
+                  </Badge>
+                </>
+              )}
             </p>
           )}
           {song.album_release_at && (
