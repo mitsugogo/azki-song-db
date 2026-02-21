@@ -10,11 +10,13 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import { BsPlayCircle } from "react-icons/bs";
 import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { StatisticsItem } from "./createStatistics";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
+import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
@@ -110,6 +112,9 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
     }
   }, [hoveredVideo, currentIndex, videos, song.firstVideo.video_id]);
 
+  // この組み合わせにユニット名があるか
+  const unitName = getCollabUnitName(song.firstVideo.sing.split("、"));
+
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
@@ -196,7 +201,44 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             </>
           )}
           {song.song.tags.includes("カバー曲") && (
-            <p className="text-sm">カバー: {coverArtists.join("、")}</p>
+            <p className="text-sm">
+              カバー: {coverArtists.join("、")}
+              {unitName && (
+                <>
+                  {" "}
+                  -{" "}
+                  <Badge
+                    key={unitName}
+                    color={`indigo`}
+                    radius="sm"
+                    style={{ cursor: "pointer" }}
+                    component="a"
+                    href={`/search?q=unit:${encodeURIComponent(unitName)}`}
+                  >
+                    {unitName}
+                  </Badge>
+                </>
+              )}
+              {!unitName && (
+                <>
+                  {" "}
+                  -{" "}
+                  <Badge
+                    variant="gradient"
+                    gradient={{ from: "pink", to: "red", deg: 276 }}
+                    radius="sm"
+                    style={{ cursor: "pointer" }}
+                    component="a"
+                    href={`/search?q=${song.song.sing
+                      .split("、")
+                      .map((n) => `sing:${encodeURIComponent(n)}`)
+                      .join("|")}`}
+                  >
+                    この組み合わせ
+                  </Badge>
+                </>
+              )}
+            </p>
           )}
           {!song.isAlbum && (
             <>
