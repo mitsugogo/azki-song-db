@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -19,19 +19,109 @@ import { StatisticsItem } from "./createStatistics";
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
+  const videos = song.videos || [];
+  const initialIndex = Math.max(
+    0,
+    videos.findIndex((v) => v.video_id === song.firstVideo.video_id),
+  );
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const [displayedVideoId, setDisplayedVideoId] = useState<string>(
+    song.firstVideo.video_id,
+  );
+  const [prevVideoId, setPrevVideoId] = useState<string | null>(null);
+  const [prevVisible, setPrevVisible] = useState(false);
+  const [currVisible, setCurrVisible] = useState(true);
+
   const coverArtists = useMemo(() => {
     return Array.from(new Set(song.videos.map((v) => v.sing)));
   }, [song.song.tags]);
 
+  // スライドショー間隔（ミリ秒）
+  const SLIDE_INTERVAL = 5000;
+  const TRANSITION_DURATION = 500; // ms, Tailwind の duration-500 と合わせる
+
+  // 自動スライド（ホバー中は表示を変えない）
+  useEffect(() => {
+    if (!videos || videos.length <= 1) return;
+    const id = setInterval(() => {
+      if (hoveredVideo) return; // ホバー時は自動切替を行わない
+      setCurrentIndex((i) => {
+        const next = (i + 1) % videos.length;
+        const nextId = videos[next].video_id;
+        const oldId = displayedVideoId;
+
+        // 準備: prev をセットし、curr を非表示にしてから次のフレームで入れ替える
+        setPrevVideoId(oldId);
+        setPrevVisible(true);
+        setCurrVisible(false);
+        setDisplayedVideoId(nextId);
+
+        requestAnimationFrame(() => {
+          // フェード開始: prev をフェードアウト、curr をフェードイン
+          setPrevVisible(false);
+          setCurrVisible(true);
+        });
+
+        // TRANSITION_DURATION 後に prev を削除
+        setTimeout(() => {
+          setPrevVideoId(null);
+          setPrevVisible(false);
+        }, TRANSITION_DURATION + 50);
+
+        return next;
+      });
+    }, SLIDE_INTERVAL);
+    return () => clearInterval(id);
+  }, [videos, hoveredVideo, displayedVideoId]);
+
+  // hoveredVideo が変わったら即時表示（フェードなし）
+  useEffect(() => {
+    if (hoveredVideo) {
+      // ホバー中はホバービデオを即時表示。prev をクリアしてフェードなしで切替。
+      setPrevVideoId(null);
+      setPrevVisible(false);
+      setDisplayedVideoId(hoveredVideo);
+      setCurrVisible(true);
+    } else {
+      // ホバー解除時は currentIndex の位置に戻す
+      setDisplayedVideoId(
+        videos[currentIndex]?.video_id ?? song.firstVideo.video_id,
+      );
+      setCurrVisible(true);
+    }
+  }, [hoveredVideo, currentIndex, videos, song.firstVideo.video_id]);
+
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="w-full md:w-1/3 lg:w-1/2">
-          <YoutubeThumbnail
-            videoId={hoveredVideo ?? song.firstVideo.video_id}
-            alt={song.firstVideo.video_title}
-            fill={true}
-          />
+        <div className="w-full md:w-1/3 relative aspect-video">
+          {/* 前の画像（フェードアウト） */}
+          {prevVideoId && (
+            <div
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                prevVisible ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <YoutubeThumbnail
+                videoId={prevVideoId}
+                alt={song.firstVideo.video_title}
+                fill={true}
+              />
+            </div>
+          )}
+
+          {/* 現在表示中の画像（フェードイン） */}
+          <div
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              currVisible ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <YoutubeThumbnail
+              videoId={displayedVideoId}
+              alt={song.firstVideo.video_title}
+              fill={true}
+            />
+          </div>
         </div>
         <div className="flex-1 text-gray-900 dark:text-gray-200">
           <h2 className="text-2xl font-bold mb-1">
