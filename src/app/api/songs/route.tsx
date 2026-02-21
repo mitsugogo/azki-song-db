@@ -155,11 +155,13 @@ export async function GET() {
         const broadcastAt = convertToDate(getNum("broadcast_at"));
 
         // 組み合わせてユニークな文字列にする
+        const uniqKey =
+          videoId + "_" + parseTimeFromNumberValue(getNum("start"));
 
         songs.push({
           title: titleValue,
           slug: slugify(titleValue) || videoId,
-          slugv2: slugifyV2(titleValue + "_" + videoId) || videoId,
+          slugv2: slugifyV2(uniqKey),
           artist: getStr("artist"),
           sing: getStr("sing"),
           lyricist: getStr("lyricist"),
