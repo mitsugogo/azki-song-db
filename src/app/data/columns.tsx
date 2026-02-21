@@ -246,14 +246,6 @@ export const columns: ColumnDef<Song>[] = [
     cell: (info) => formatNumber(info.getValue<number>()),
     size: 120,
   },
-  {
-    accessorKey: "extra",
-    header: "extra",
-    cell: (info) => info.getValue<string>() || "",
-    size: 200,
-    enableResizing: true,
-  },
-  // live_call and live_note removed per request
 ];
 
 export default columns;
