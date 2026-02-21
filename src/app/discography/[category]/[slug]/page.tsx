@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Song } from "../../../types/song";
 import { LuFolder } from "react-icons/lu";
@@ -89,13 +89,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string; slug: string }>;
+  params: Promise<{ category: string; slug?: string }>;
 }): Promise<Metadata> {
   const resolved = await params;
   const songs: Song[] = await fetchSongsFromApi();
-  const slug = decodeURIComponent(resolved.slug);
-  // slugify は共通ユーティリティを使用
-  // オリジナル楽曲（`オリ曲` または `オリ曲MV`）のみを対象にする
+  const slug = decodeURIComponent(resolved.slug || "");
+
   const originals = songs.filter(
     (s) =>
       isPossibleOriginalSong(s) || isCollaborationSong(s) || isCoverSong(s),
@@ -103,6 +102,7 @@ export async function generateMetadata({
   const metadataCandidates = originals.filter(
     (s) =>
       s.slug === slug ||
+      s.slugv2 === slug ||
       (s.title && slugify(s.title) === slug) ||
       (s.album && slugify(s.album) === slug),
   );
@@ -160,27 +160,29 @@ export default async function SongPage({
   const slug = decodeURIComponent(resolved.slug);
   const songs: Song[] = await fetchSongsFromApi();
 
-  let originals = [];
+  let filteredSongs = [];
   switch (category) {
     case "collabo":
     case "collaborations":
-      originals = songs.filter((s) => isCollaborationSong(s));
+      filteredSongs = songs.filter((s) => isCollaborationSong(s));
       break;
     case "covers":
-      originals = songs.filter((s) => isCoverSong(s));
+      filteredSongs = songs.filter((s) => isCoverSong(s));
       break;
     case "originals":
     default:
-      originals = songs.filter((s) => isPossibleOriginalSong(s));
+      filteredSongs = songs.filter((s) => isPossibleOriginalSong(s));
       break;
   }
 
-  const matched = originals.filter(
+  const matched = filteredSongs.filter(
     (s) =>
       s.slug === slug ||
-      (s.title && slugify(s.title) === slug) ||
+      s.slugv2 === slug ||
       (s.album && slugify(s.album) === slug),
   );
+
+  console.log("filteredSongs", matched);
   if (!matched || matched.length === 0) {
     notFound();
   }
@@ -242,12 +244,10 @@ export default async function SongPage({
     }
   };
 
-  const releaseYMD = toYMD(song.album_release_at);
-
-  // ルート判定は config 側に移譲（JST 補正を含む）
+  // ルート判定
   const matchedRoute = findRouteForRelease(song.album_release_at);
 
-  // 衣装判定も config 側へ移譲
+  // 衣装判定
   const matchedVisual = findVisualForRelease(song.album_release_at);
 
   // 関連動画: 同一アルバムの別動画を優先し、なければ同タイトルの別動画を候補とする。

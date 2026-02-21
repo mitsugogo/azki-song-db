@@ -304,7 +304,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     <TableCell className="px-2 py-1">
                       <Link
                         href={`/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
-                          s.slug ?? encodeURIComponent(s.video_id)
+                          s.slugv2 ?? encodeURIComponent(s.video_id)
                         }`}
                         className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
                       >

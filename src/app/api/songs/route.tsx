@@ -157,6 +157,7 @@ export async function GET() {
         songs.push({
           title: titleValue,
           slug: slugify(titleValue) || videoId,
+          slugv2: slugify(titleValue) + "-" + slugify(videoId) || videoId,
           artist: getStr("artist"),
           sing: getStr("sing"),
           lyricist: getStr("lyricist"),
