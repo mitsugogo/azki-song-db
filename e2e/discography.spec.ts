@@ -137,4 +137,27 @@ test.describe("Discography page", () => {
     const coverTab = page.getByRole("tab", { name: /カバー楽曲/ });
     await expect(coverTab).toHaveAttribute("aria-selected", "true");
   });
+
+  // 旧slugのURLにアクセスしたとき、正しい曲ページにリダイレクトされることを確認
+  test("redirects old slug URL to correct song page", async ({ page }) => {
+    const res = await page.request.get("/api/songs");
+    const songs: any[] = await res.json();
+    const withSlugV1 = songs.find(
+      (s) => s && s.slugv2 && s.slug && s.tags && s.tags.includes("オリ曲"),
+    );
+    test.skip(
+      !withSlugV1,
+      "no song with both slug and slugv2 available for testing",
+    );
+    const oldSlug = withSlugV1.slug; // v1 slug
+    const expectedTitle = withSlugV1.title ?? withSlugV1.album ?? null;
+
+    await page.goto(`/discography/${encodeURIComponent(oldSlug)}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    // Assert we are redirected to the correct page by checking the title
+    await expect(
+      page.locator("h1").filter({ hasText: expectedTitle }),
+    ).toBeVisible({ timeout: 15000 });
+  });
 });
