@@ -304,7 +304,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               " px-2 py-1 rounded text-sm"
             }
           >
-            Y軸を0から始める: {startFromZero ? "ON" : "OFF"}
+            0から: {startFromZero ? "ON" : "OFF"}
           </button>
         </div>
       </div>

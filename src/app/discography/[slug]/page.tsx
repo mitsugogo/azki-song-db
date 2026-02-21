@@ -293,9 +293,39 @@ export default async function SongPage({
             {song.artist}
           </p>
 
-          {song.lyricist && <p className="text-sm">作詞: {song.lyricist}</p>}
-          {song.composer && <p className="text-sm">作曲: {song.composer}</p>}
-          {song.arranger && <p className="text-sm">編曲: {song.arranger}</p>}
+          {song.lyricist && (
+            <p className="text-sm">
+              作詞:{" "}
+              <Link
+                href={`/search?q=lyricist:${encodeURIComponent(song.lyricist)}`}
+                className="hover:underline text-primary dark:text-primary-300"
+              >
+                {song.lyricist}
+              </Link>
+            </p>
+          )}
+          {song.composer && (
+            <p className="text-sm">
+              作曲:{" "}
+              <Link
+                href={`/search?q=composer:${encodeURIComponent(song.composer)}`}
+                className="hover:underline text-primary dark:text-primary-300"
+              >
+                {song.composer}
+              </Link>
+            </p>
+          )}
+          {song.arranger && (
+            <p className="text-sm">
+              編曲:{" "}
+              <Link
+                href={`/search?q=arranger:${encodeURIComponent(song.arranger)}`}
+                className="hover:underline text-primary dark:text-primary-300"
+              >
+                {song.arranger}
+              </Link>
+            </p>
+          )}
 
           {song.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
@@ -455,11 +485,11 @@ export default async function SongPage({
                         <div className="text-sm flex-1">
                           <div className="font-medium">{s.video_title}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {s.artist}
+                            {new Date(s.broadcast_at).toLocaleDateString()} 配信
                           </div>
                           <div className="mt-2 space-x-2">
                             <a
-                              href={`https://www.youtube.com/watch?v=${s.video_id}`}
+                              href={`https://www.youtube.com/watch?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
