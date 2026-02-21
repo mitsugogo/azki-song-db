@@ -1,6 +1,6 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
-import slugify from "../../lib/slugify";
+import slugify, { slugifyV2 } from "../../lib/slugify";
 
 export async function GET() {
   try {
@@ -154,10 +154,12 @@ export async function GET() {
           )?.[1] || "";
         const broadcastAt = convertToDate(getNum("broadcast_at"));
 
+        // 組み合わせてユニークな文字列にする
+
         songs.push({
           title: titleValue,
           slug: slugify(titleValue) || videoId,
-          slugv2: slugify(titleValue) + "-" + slugify(videoId) || videoId,
+          slugv2: slugifyV2(titleValue + "_" + videoId) || videoId,
           artist: getStr("artist"),
           sing: getStr("sing"),
           lyricist: getStr("lyricist"),
