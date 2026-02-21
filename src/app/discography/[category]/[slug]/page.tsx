@@ -270,8 +270,7 @@ export default async function SongPage({
       song.title &&
       s.title === song.title &&
       s.video_id &&
-      s.video_id !== song.video_id &&
-      s.tags.includes("歌枠"),
+      s.video_id !== song.video_id,
   );
 
   return (
@@ -514,7 +513,7 @@ export default async function SongPage({
             {relatedSameTitle && relatedSameTitle.length > 0 && (
               <>
                 <h2 className="text-lg font-semibold mb-2 mt-4">
-                  この曲を歌った歌枠
+                  この曲を歌った歌枠 ({relatedSameTitle.length})
                 </h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {Array.from(

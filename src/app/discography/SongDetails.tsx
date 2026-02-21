@@ -229,8 +229,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     radius="sm"
                     style={{ cursor: "pointer" }}
                     component="a"
-                    href={`/search?q=${song.song.sing
-                      .split("、")
+                    href={`/search?q=${coverArtists
                       .map((n) => `sing:${encodeURIComponent(n)}`)
                       .join("|")}`}
                   >
@@ -321,45 +320,51 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     </TableCell>
                     <TableCell className="px-2 py-1">
                       {s.lyricist &&
-                        s.lyricist.split("、").map((n, i, arr) => (
-                          <span key={i}>
-                            <Link
-                              href={`/?q=lyricist:${n}`}
-                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                            >
-                              {n}
-                            </Link>
-                            {i < arr.length - 1 ? "、" : ""}
-                          </span>
-                        ))}
+                        s.lyricist
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=lyricist:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
                     </TableCell>
                     <TableCell className="px-2 py-1">
                       {s.composer &&
-                        s.composer.split("、").map((n, i, arr) => (
-                          <span key={i}>
-                            <Link
-                              href={`/?q=composer:${n}`}
-                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                            >
-                              {n}
-                            </Link>
-                            {i < arr.length - 1 ? "、" : ""}
-                          </span>
-                        ))}
+                        s.composer
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=composer:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
                     </TableCell>
                     <TableCell className="px-2 py-1">
                       {s.arranger &&
-                        s.arranger.split("、").map((n, i, arr) => (
-                          <span key={i}>
-                            <Link
-                              href={`/?q=arranger:${n}`}
-                              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                            >
-                              {n}
-                            </Link>
-                            {i < arr.length - 1 ? "、" : ""}
-                          </span>
-                        ))}
+                        s.arranger
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=arranger:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
                     </TableCell>
                     <TableCell className="px-2 py-1 dark:text-light-gray-500">
                       {new Date(s.broadcast_at).toLocaleDateString()}
