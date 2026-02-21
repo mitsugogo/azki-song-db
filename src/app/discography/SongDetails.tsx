@@ -62,7 +62,22 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [currVisible, setCurrVisible] = useState(true);
 
   const coverArtists = useMemo(() => {
-    return Array.from(new Set(videos.map((v) => v.sing)));
+    // videos の sing を "、" で分割して個別のアーティスト名を順序を保ってユニーク化
+    const names: string[] = [];
+    const seen = new Set<string>();
+    for (const v of videos) {
+      const parts = ((v.sing || "") as string)
+        .split("、")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const p of parts) {
+        if (!seen.has(p)) {
+          seen.add(p);
+          names.push(p);
+        }
+      }
+    }
+    return names;
   }, [videos]);
 
   // スライドショー間隔（ミリ秒）
@@ -161,7 +176,15 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               ? song.firstVideo.album
               : song.firstVideo.title}
           </h2>
-          <p className="text-sm">アーティスト: {song.firstVideo.artist}</p>
+          <p className="text-sm">
+            アーティスト:{" "}
+            <Link
+              href={`/search?q=artist:${encodeURIComponent(song.firstVideo.artist)}`}
+              className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+            >
+              {song.firstVideo.artist}
+            </Link>
+          </p>
           {!song.isAlbum && (
             <>
               {song.firstVideo.lyricist && (
@@ -210,7 +233,19 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           )}
           {song.song.tags.includes("カバー曲") && (
             <p className="text-sm">
-              カバー: {coverArtists.join("、")}
+              カバー:{" "}
+              {coverArtists.map((n, i) => (
+                <>
+                  <Link
+                    key={i}
+                    href={`/search?q=sing:${encodeURIComponent(n)}`}
+                    className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                  >
+                    {n}
+                  </Link>
+                  {i < coverArtists.length - 1 ? "、" : ""}
+                </>
+              ))}
               {unitName && (
                 <>
                   {" "}
@@ -238,16 +273,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     style={{ cursor: "pointer" }}
                     component="a"
                     href={`/search?q=${coverArtists
-                      .map((n) => {
-                        const members = n
-                          .split("、")
-                          .map((m: string) => m.trim());
-
-                        // `sing:xxxx|sing:yyy` のように組み立てる
-                        return members
-                          .map((m: string) => `sing:${m}`)
-                          .join("|");
-                      })
+                      .map((m) => `sing:${encodeURIComponent(m)}`)
                       .join("|")}`}
                   >
                     この組み合わせ

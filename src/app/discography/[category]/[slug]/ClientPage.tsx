@@ -133,7 +133,7 @@ export default function ClientPage({
         </BreadcrumbItem>
         {song.album && (
           <BreadcrumbItem
-            href={`/discography/?album=${encodeURIComponent(song.album)}`}
+            href={`/discography/?album=${encodeURIComponent(song.album)}&category=${encodeURIComponent(category)}`}
           >
             {song.album}
           </BreadcrumbItem>
