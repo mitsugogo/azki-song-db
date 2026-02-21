@@ -192,7 +192,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   作詞:{" "}
                   {song.firstVideo.lyricist.split("、").map((n, i) => (
                     <Link
-                      key={i}
+                      key={i + "_lyricist"}
                       href={`/?q=lyricist:${n}`}
                       className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
                     >
@@ -206,7 +206,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   作曲:{" "}
                   {song.firstVideo.composer.split("、").map((n, i) => (
                     <Link
-                      key={i}
+                      key={i + "_composer"}
                       href={`/?q=composer:${n}`}
                       className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
                     >
@@ -220,7 +220,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   編曲:{" "}
                   {song.firstVideo.arranger.split("、").map((n, i) => (
                     <Link
-                      key={i}
+                      key={i + "_arranger"}
                       href={`/?q=arranger:${n}`}
                       className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
                     >
@@ -237,7 +237,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               {coverArtists.map((n, i) => (
                 <>
                   <Link
-                    key={i}
+                    key={i + "_cover"}
                     href={`/search?q=sing:${encodeURIComponent(n)}`}
                     className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
                   >
