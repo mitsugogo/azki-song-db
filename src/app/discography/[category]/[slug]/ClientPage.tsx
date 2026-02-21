@@ -257,7 +257,7 @@ export default function ClientPage({
               href={
                 song.album
                   ? `/?q=album:${song.album}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
-                  : `/?q=video_id:${song.video_id}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
+                  : `/?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
               }
               className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
             >
