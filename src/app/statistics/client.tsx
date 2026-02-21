@@ -52,7 +52,7 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="grow lg:p-6 lg:pb-0">
+    <div className="grow">
       <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>

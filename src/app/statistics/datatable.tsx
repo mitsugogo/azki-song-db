@@ -153,7 +153,7 @@ export default function DataTable<
           />
         </div>
         <ScrollArea
-          className="h-[calc(100vh-260px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-365px)]"
+          className="h-[calc(100vh-260px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-423px)]"
           viewportRef={tableContainerRef}
         >
           <div className="relative">

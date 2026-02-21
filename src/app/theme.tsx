@@ -2,7 +2,13 @@ import { createTheme, Badge } from "@mantine/core";
 import { CustomFlowbiteTheme } from "flowbite-react/types";
 import { createTheme as createFlowbiteTheme } from "flowbite-react";
 
+/**
+ * Mantineのテーマ設定
+ * @see https://mantine.dev/theming/theme-object/
+ */
 export const theme = createTheme({
+  primaryColor: "pink",
+  cursorType: "pointer",
   components: {
     Badge: {
       defaultProps: {
