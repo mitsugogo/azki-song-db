@@ -235,9 +235,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <p className="text-sm">
               カバー:{" "}
               {coverArtists.map((n, i) => (
-                <span>
+                <span key={`${n}_${i}_coverArtist`}>
                   <Link
-                    key={i + "_cover"}
                     href={`/search?q=sing:${encodeURIComponent(n)}`}
                     className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
                   >
@@ -247,7 +246,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 </span>
               ))}
               {unitName && (
-                <span>
+                <span key={`${unitName}_unitName`}>
                   {" "}
                   -{" "}
                   <Badge
@@ -263,7 +262,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 </span>
               )}
               {!unitName && (
-                <span>
+                <span key={`coverArtists_${coverArtists.join("_")}`}>
                   {" "}
                   -{" "}
                   <Badge
