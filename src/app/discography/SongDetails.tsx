@@ -25,7 +25,15 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const videos = useMemo(() => {
     const map = new Map<string, any>();
     for (const v of rawVideos) {
-      const key = `${(v.title || "").trim()}__${(v.artist || "").trim()}`;
+      const title = (v.title || "").trim();
+      const artist = (v.artist || "").trim();
+      const singers = ((v.sing || "") as string)
+        .split("、")
+        .map((s: string) => s.trim())
+        .filter(Boolean)
+        .sort()
+        .join("、");
+      const key = `${title}__${artist}__${singers}`;
       if (!map.has(key)) {
         map.set(key, v);
       } else {

@@ -52,9 +52,21 @@ export function useDiscographyData(
   // カバー楽曲の統計
   const coverSongCountsByReleaseDate = useMemo(() => {
     const covers = songs.filter((s) => isCoverSong(s));
+    const normalizeSingers = (s: Song) =>
+      ((s.sing || "") as string)
+        .split("、")
+        .map((x) => x.trim())
+        .filter(Boolean)
+        .sort()
+        .join("、");
+
     return createStatistics(
       covers,
-      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      (s) => {
+        const singers = normalizeSingers(s);
+        if (groupByAlbum) return s.album || `${s.title}__${singers}` || s.title;
+        return singers ? `${s.title}__${singers}` : s.title;
+      },
       groupByAlbum,
     );
   }, [songs, groupByAlbum]);

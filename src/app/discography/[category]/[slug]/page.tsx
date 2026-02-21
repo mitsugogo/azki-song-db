@@ -284,7 +284,7 @@ export default async function SongPage({
           href={`/discography/?category=${encodeURIComponent(category)}`}
         >
           {category === "originals"
-            ? "オリジナル"
+            ? "オリジナル楽曲"
             : category === "covers"
               ? "カバー"
               : "コラボ"}{" "}
@@ -429,9 +429,13 @@ export default async function SongPage({
         <div className="col-span-1 md:col-span-3 space-y-3">
           <div className="mt-2">
             {/** 発売日からルートと衣装を特定 */}
-            {matchedRoute && <Badge color="gray">{matchedRoute.label}</Badge>}
+            {matchedRoute && (
+              <Badge color="gray" radius="sm">
+                {matchedRoute.label}
+              </Badge>
+            )}
             {matchedVisual && (
-              <Badge className="ml-2" color="gray">
+              <Badge className="ml-2" color="gray" radius="sm">
                 {matchedVisual.label}
               </Badge>
             )}
