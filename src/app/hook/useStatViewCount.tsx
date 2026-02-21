@@ -1,3 +1,5 @@
+"use client";
+
 import { useFetch } from "@mantine/hooks";
 import ViewStat from "../types/api/stat/views";
 
