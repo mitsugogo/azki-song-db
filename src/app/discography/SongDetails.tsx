@@ -261,7 +261,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                   </Badge>
                 </span>
               )}
-              {!unitName && (
+              {!unitName && coverArtists.length > 1 && (
                 <span key={`coverArtists_${coverArtists.join("_")}`}>
                   {" "}
                   -{" "}
