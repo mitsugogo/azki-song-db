@@ -4,40 +4,69 @@ import Link from "next/link";
 import { ROUTE_RANGES } from "../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../config/timelineVisuals";
 import { Song } from "../types/song";
+import useMilestones from "../hook/useMilestones";
+import { Badge, Text } from "@mantine/core";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 export default function Timeline({ songs }: { songs: Song[] }) {
   const activityStart = new Date(2018, 10, 15);
 
   const msPerDay = 1000 * 60 * 60 * 24;
 
-  const allMilestones = songs
+  const { items: externalMilestones } = useMilestones();
+
+  const songMilestones = songs
     .filter((s) => s.milestones && s.milestones.length > 0 && s.broadcast_at)
     .flatMap((s) =>
       (s.milestones || []).map((m: string) => ({
         date: new Date(s.broadcast_at),
         text: m,
       })),
-    )
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    );
 
-  const debutDateIso = new Date(2018, 10, 15).toISOString();
-  if (
-    !allMilestones.some(
-      (m) => m.date.toISOString() === debutDateIso && m.text === "デビュー",
-    )
-  ) {
-    allMilestones.push({ date: new Date(2018, 10, 15), text: "デビュー" });
-    allMilestones.sort((a, b) => a.date.getTime() - b.date.getTime());
-  }
+  const apiMilestones = (externalMilestones || [])
+    .map((m) => ({
+      date: m.date ? new Date(m.date) : null,
+      text: m.content,
+      note: m.note || "",
+      url: m.url || "",
+      is_external: true, // APIからのマイルストーンかどうか
+    }))
+    .filter((m) => m.date && m.text) as {
+    date: Date;
+    text: string;
+    note?: string;
+    url?: string;
+    is_external?: boolean;
+  }[];
+
+  const allMilestones = [...songMilestones, ...apiMilestones].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
 
   const uniqueMilestones = (() => {
-    const map = new Map<string, Date>();
+    const map = new Map<
+      string,
+      { date: Date; note?: string; url?: string; is_external?: boolean }
+    >();
     for (const m of allMilestones) {
       const prev = map.get(m.text);
-      if (!prev || m.date.getTime() < prev.getTime()) map.set(m.text, m.date);
+      if (!prev || m.date.getTime() < prev.date.getTime())
+        map.set(m.text, {
+          date: m.date,
+          note: (m as any).note,
+          url: (m as any).url,
+          is_external: (m as any).is_external,
+        });
     }
     return Array.from(map.entries())
-      .map(([text, date]) => ({ text, date }))
+      .map(([text, obj]) => ({
+        text,
+        date: obj.date,
+        note: obj.note,
+        url: obj.url,
+        is_external: obj.is_external || false,
+      }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   })();
 
@@ -65,11 +94,12 @@ export default function Timeline({ songs }: { songs: Song[] }) {
 
           // 総日数に比例して高さを追加し、セグメントの圧縮を避ける（1日あたり0.55px）
           const heightByDays = (totalRange / msPerDay) * 0.55;
-          const timelineHeight = Math.max(
-            800,
-            padding * 2 + (uniqueMilestones.length - 1) * minGap + 80,
-            heightByDays,
-          );
+
+          // マイルストーン数に応じて確実に十分な高さを確保する
+          // API 由来のマイルストーンが増えた場合でも縦方向の余裕を持たせる
+          const heightByItems = padding * 2 + uniqueMilestones.length * 40;
+
+          const timelineHeight = Math.max(800, heightByItems, heightByDays);
 
           const routeRanges = ROUTE_RANGES.map((r) => {
             const from = new Date(r.from).setHours(0, 0, 0, 0);
@@ -108,7 +138,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
           });
 
           return (
-            <div className="flex" style={{ height: timelineHeight }}>
+            <div className="flex" style={{ height: timelineHeight + 30 }}>
               <div className="w-12 relative mr-2 h-full">
                 {overlaps.map((o, i) => {
                   if (o.dur === 0) return null;
@@ -278,12 +308,40 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             {m.date.toLocaleDateString("ja-JP")}
                           </span>{" "}
                           —{" "}
-                          <Link
-                            href={`/?q=milestone:${m.text}`}
-                            className="text-primary"
-                          >
-                            {m.text}
-                          </Link>
+                          {m.is_external && (!m.url || m.url.trim() === "") && (
+                            <span>{m.text}</span>
+                          )}
+                          {(!m.is_external ||
+                            (m.is_external &&
+                              m.url &&
+                              m.url.trim() !== "")) && (
+                            <Link
+                              href={m.url ? m.url : `/?q=milestone:${m.text}`}
+                              className="text-primary"
+                              target={m.url ? "_blank" : undefined}
+                            >
+                              {m.text}
+                            </Link>
+                          )}
+                          {m.note ? (
+                            <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
+                              {m.note}
+                            </span>
+                          ) : null}
+                          {m.url ? (
+                            <Badge
+                              component="a"
+                              href={m.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              color="gray"
+                              radius="sm"
+                              className="ml-2"
+                            >
+                              <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
+                              URL
+                            </Badge>
+                          ) : null}
                         </div>
                         <div className="pr-2 text-right whitespace-nowrap">
                           活動日数:{" "}
