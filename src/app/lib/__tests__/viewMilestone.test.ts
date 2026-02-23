@@ -75,6 +75,20 @@ describe("buildViewMilestoneInfo", () => {
     expect(result?.estimatedAt).toBeNull();
   });
 
+  it("600万再生達成時は達成日を返す", () => {
+    const history: ViewStat[] = [
+      createStat("2026-02-22T00:00:00.000Z", 5999100),
+      createStat("2026-02-23T00:00:00.000Z", 6000905),
+      createStat("2026-02-24T00:00:00.000Z", 6003500),
+    ];
+
+    const result = buildViewMilestoneInfo(6000905, history);
+
+    expect(result?.status).toBe("achieved");
+    expect(result?.targetCount).toBe(6000000);
+    expect(result?.achievedAt).toBe("2026-02-23T00:00:00.000Z");
+  });
+
   it("対象外の再生回数ならnullを返す", () => {
     const result = buildViewMilestoneInfo(55555, []);
     expect(result).toBeNull();

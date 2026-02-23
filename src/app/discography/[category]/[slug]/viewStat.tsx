@@ -1,6 +1,7 @@
 "use client";
 
 import useStatViewCount from "@/app/hook/useStatViewCount";
+import { buildViewMilestoneInfo } from "@/app/lib/viewMilestone";
 import { LoadingOverlay } from "@mantine/core";
 import {
   ResponsiveContainer,
@@ -11,11 +12,42 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const isSameLocalDate = (left: string | Date, right: string | Date) => {
+  const leftDate = new Date(left);
+  const rightDate = new Date(right);
+  if (isNaN(leftDate.getTime()) || isNaN(rightDate.getTime())) {
+    return false;
+  }
+  return (
+    leftDate.getFullYear() === rightDate.getFullYear() &&
+    leftDate.getMonth() === rightDate.getMonth() &&
+    leftDate.getDate() === rightDate.getDate()
+  );
+};
 
 export default function ViewStat({ videoId }: { videoId: string }) {
   const { data: viewHistory, loading: viewHistoryLoading } =
     useStatViewCount(videoId);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncDarkMode = () => {
+      setIsDarkMode(root.classList.contains("dark"));
+    };
+
+    syncDarkMode();
+
+    const observer = new MutationObserver(syncDarkMode);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const stats = viewHistory?.statistics ?? [];
 
@@ -23,7 +55,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
   const fullChartData = stats
     .map((s) => ({
       date: s.datetime ? new Date(s.datetime).toLocaleDateString() : "",
-      isoDate: s.datetime ?? null,
+      isoDate: s.datetime ? new Date(s.datetime).toISOString() : null,
       viewCount: s.viewCount ?? 0,
       likeCount: s.likeCount ?? 0,
       commentCount: s.commentCount ?? 0,
@@ -82,6 +114,44 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     });
   }, [chartData, period]);
 
+  const milestoneDisplay = useMemo(() => {
+    if (chartData.length === 0) return null;
+
+    const latestViewCount = chartData[chartData.length - 1]?.viewCount ?? 0;
+    const milestone = buildViewMilestoneInfo(latestViewCount, stats);
+    if (
+      !milestone ||
+      milestone.status !== "achieved" ||
+      !milestone.achievedAt
+    ) {
+      return null;
+    }
+
+    const achievedPoint = chartData.find((item) => {
+      if (!item.isoDate) return false;
+      return isSameLocalDate(item.isoDate, milestone.achievedAt as string);
+    });
+
+    if (!achievedPoint?.isoDate) {
+      return null;
+    }
+    const achievedIsoDate = achievedPoint.isoDate;
+
+    const isInCurrentPeriod = displayedChartData.some((item) => {
+      if (!item.isoDate) return false;
+      return isSameLocalDate(item.isoDate, achievedIsoDate);
+    });
+
+    return {
+      targetLabel: `${Math.floor(milestone.targetCount / 10000)}万再生達成`,
+      achievedDateLabel: new Date(milestone.achievedAt).toLocaleDateString(),
+      isoDate: achievedIsoDate,
+      date: achievedPoint.date,
+      viewCount: achievedPoint.viewCount,
+      isInCurrentPeriod,
+    };
+  }, [chartData, displayedChartData, stats]);
+
   const formatNumber = (v: number | string | undefined | null) => {
     const n = Number(v ?? 0);
     return new Intl.NumberFormat().format(n);
@@ -96,6 +166,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     diffKey,
     pctKey,
     startFromZero: sfz = false,
+    milestone,
   }: {
     data: typeof chartData;
     dataKey: string;
@@ -105,6 +176,11 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     diffKey?: string;
     pctKey?: string;
     startFromZero?: boolean;
+    milestone?: {
+      isoDate: string;
+      label: string;
+      dateLabel: string;
+    };
   }) => (
     <div className={`w-full h-64 ${containerClassName ?? ""}`}>
       <div className="flex items-baseline justify-between mb-1">
@@ -262,7 +338,96 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               );
             }}
           />
-          <Line type="monotone" dataKey={dataKey} stroke={color} dot={false} />
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            dot={(props: any) => {
+              if (!milestone || !props?.payload?.isoDate) {
+                return false;
+              }
+
+              const isMilestonePoint = isSameLocalDate(
+                props.payload.isoDate,
+                milestone.isoDate,
+              );
+
+              if (!isMilestonePoint) {
+                return false;
+              }
+
+              const bubbleWidth = 130;
+              const bubbleHeight = 40;
+              const isNearRightEdge = props.index >= data.length - 2;
+              const isNearLeftEdge = props.index <= 1;
+              const isNearTopEdge = props.cy <= bubbleHeight + 18;
+
+              const bubbleX = isNearRightEdge
+                ? props.cx - bubbleWidth - 12
+                : isNearLeftEdge
+                  ? props.cx + 12
+                  : props.cx - bubbleWidth / 2;
+              const bubbleCenterX = bubbleX + bubbleWidth / 2;
+              const bubbleY = isNearTopEdge
+                ? props.cy + 14
+                : props.cy - bubbleHeight - 14;
+              const pointerPath = isNearTopEdge
+                ? `M ${props.cx - 6} ${bubbleY} L ${props.cx + 6} ${bubbleY} L ${props.cx} ${props.cy + 6} Z`
+                : `M ${props.cx - 6} ${bubbleY + bubbleHeight} L ${props.cx + 6} ${bubbleY + bubbleHeight} L ${props.cx} ${props.cy - 6} Z`;
+              const bubbleFill = isDarkMode ? "#1f2937" : "#ffffff";
+              const bubbleText = isDarkMode ? "#f3f4f6" : "#111827";
+              const bubbleSubText = isDarkMode ? "#d1d5db" : "#4b5563";
+              const dotStroke = isDarkMode ? "#111827" : "#ffffff";
+
+              return (
+                <g>
+                  <circle
+                    cx={props.cx}
+                    cy={props.cy}
+                    r={5}
+                    fill={color}
+                    stroke={dotStroke}
+                    strokeWidth={2}
+                  />
+                  <rect
+                    x={bubbleX}
+                    y={bubbleY}
+                    width={bubbleWidth}
+                    height={bubbleHeight}
+                    rx={8}
+                    ry={8}
+                    fill={bubbleFill}
+                    stroke={color}
+                    strokeWidth={1.5}
+                  />
+                  <path
+                    d={pointerPath}
+                    fill={bubbleFill}
+                    stroke={color}
+                    strokeWidth={1.5}
+                  />
+                  <text
+                    x={bubbleCenterX}
+                    y={bubbleY + 15}
+                    textAnchor="middle"
+                    fontSize={11}
+                    fill={bubbleText}
+                  >
+                    {milestone.label}
+                  </text>
+                  <text
+                    x={bubbleCenterX}
+                    y={bubbleY + 30}
+                    textAnchor="middle"
+                    fontSize={10}
+                    fill={bubbleSubText}
+                  >
+                    {milestone.dateLabel}
+                  </text>
+                </g>
+              );
+            }}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -274,6 +439,16 @@ export default function ViewStat({ videoId }: { videoId: string }) {
       <div className="text-sm text-gray-700 dark:text-gray-200 mb-4">
         毎日0:00～1:00(JST)ぐらいに更新
       </div>
+      {milestoneDisplay && (
+        <div className="mb-3 text-sm text-gray-700 dark:text-gray-200">
+          <ul className="list-disc list-inside">
+            <li>
+              {milestoneDisplay.targetLabel}（達成日:{" "}
+              {milestoneDisplay.achievedDateLabel}）
+            </li>
+          </ul>
+        </div>
+      )}
       {/** 期間切り替え */}
       <div className="mb-4 w-full">
         <div className="flex flex-wrap gap-2 justify-end">
@@ -325,6 +500,15 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               startFromZero={startFromZero}
               color="#8884d8"
               name="再生数"
+              milestone={
+                milestoneDisplay && milestoneDisplay.isInCurrentPeriod
+                  ? {
+                      isoDate: milestoneDisplay.isoDate,
+                      label: milestoneDisplay.targetLabel,
+                      dateLabel: milestoneDisplay.achievedDateLabel,
+                    }
+                  : undefined
+              }
             />
             <MetricChart
               data={displayedChartData}
