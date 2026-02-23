@@ -945,7 +945,7 @@ const SearchPageClient = () => {
                 {category.songs.length === 16 && (
                   <a
                     href={`/search?q=${encodeURIComponent(category.value)}`}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-pink-600 dark:text-pink-400 hover:underline"
                   >
                     » もっと見る
                   </a>
@@ -964,7 +964,7 @@ const SearchPageClient = () => {
                   {category.songs.map((song) => (
                     <article
                       key={`${song.video_id}-${song.start}-${song.title}`}
-                      className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
+                      className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-200 dark:hover:bg-gray-600 shadow-sm"
                     >
                       <Link
                         href={`/?v=${song.video_id}${
