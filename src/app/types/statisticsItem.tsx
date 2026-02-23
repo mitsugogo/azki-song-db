@@ -1,5 +1,5 @@
 import { Song } from "./song";
-import { VideoInfo } from "./videoInfo";
+import { ViewMilestoneInfo } from "./viewMilestone";
 
 export interface StatisticsItem {
   key: string;
@@ -7,4 +7,5 @@ export interface StatisticsItem {
   song: Song;
   firstVideo: Song;
   lastVideo: Song;
+  viewMilestone?: ViewMilestoneInfo | null;
 }

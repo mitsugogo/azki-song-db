@@ -2,6 +2,7 @@
 import { Badge } from "flowbite-react";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { Song } from "../types/song";
+import { ViewMilestoneInfo } from "../types/viewMilestone";
 
 export const renderLastVideoCell = (
   lastVideo: Song,
@@ -46,17 +47,48 @@ export const renderLastVideoCell = (
   );
 };
 
-export const renderViewCountCell = (viewCount: number) => {
+const formatMilestoneDate = (date: string | null | undefined) => {
+  if (!date) return null;
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) return null;
+  return parsedDate.toLocaleDateString();
+};
+
+export const renderViewCountCell = (
+  viewCount: number,
+  milestone?: ViewMilestoneInfo | null,
+) => {
   const remain = getRemainCount(viewCount);
-  if (remain) return `あと ${remain.toLocaleString()} 再生`;
+  if (remain) {
+    const estimatedAt = formatMilestoneDate(milestone?.estimatedAt);
+    return (
+      <div className="flex flex-col gap-1">
+        <span>{`あと ${remain.toLocaleString()} 再生`}</span>
+        {estimatedAt && (
+          <span className="text-xs text-muted-foreground">
+            達成見込み: {estimatedAt}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   const after = getAfterCount(viewCount);
-  if (after)
+  if (after) {
+    const achievedAt = formatMilestoneDate(milestone?.achievedAt);
     return (
-      <Badge color="success" className="inline whitespace-nowrap">
-        {Math.floor(after / 10000)}万再生達成
-      </Badge>
+      <div className="flex flex-col gap-1">
+        <Badge color="success" className="inline whitespace-nowrap w-fit">
+          {Math.floor(after / 10000)}万再生達成
+        </Badge>
+        {achievedAt && (
+          <span className="text-xs text-muted-foreground">
+            達成日: {achievedAt}
+          </span>
+        )}
+      </div>
     );
+  }
 
   return null;
 };
@@ -116,14 +148,21 @@ const getAfterCount = (viewCount: number) => {
 };
 
 export const viewCountSortFn = (rowA: any, rowB: any) => {
-  const viewCountA =
-    typeof rowA.original.videoInfo?.statistics?.viewCount === "string"
-      ? parseInt(rowA.original.videoInfo.statistics.viewCount, 10)
-      : 0;
-  const viewCountB =
-    typeof rowB.original.videoInfo?.statistics?.viewCount === "string"
-      ? parseInt(rowB.original.videoInfo.statistics.viewCount, 10)
-      : 0;
+  const extractViewCount = (row: any) => {
+    const fromSong = Number(row.original?.song?.view_count);
+    if (Number.isFinite(fromSong) && fromSong > 0) return fromSong;
+
+    const fromVideoInfo = row.original?.videoInfo?.statistics?.viewCount;
+    if (typeof fromVideoInfo === "string") {
+      const parsed = parseInt(fromVideoInfo, 10);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+
+    return 0;
+  };
+
+  const viewCountA = extractViewCount(rowA);
+  const viewCountB = extractViewCount(rowB);
 
   // viewCountAとBの残り再生数を計算
   const remainA = getRemainCount(viewCountA) || 0;
@@ -151,5 +190,9 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
     return 1;
   }
 
-  return afterA - afterB;
+  if (afterA && afterB) {
+    return afterA - afterB;
+  }
+
+  return viewCountB - viewCountA;
 };
