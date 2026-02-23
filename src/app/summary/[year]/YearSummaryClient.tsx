@@ -1,9 +1,9 @@
 ﻿"use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, FormEvent } from "react";
 import { Song } from "../../types/song";
 import Link from "next/link";
-import { Button } from "@mantine/core";
+import { Badge, Button, Input, InputClearButton } from "@mantine/core";
 import useSearch from "../../hook/useSearch";
 import { HiSearch } from "react-icons/hi";
 import { FaPlay } from "react-icons/fa6";
@@ -15,6 +15,7 @@ import {
   isOriginalSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
+import MilestoneBadge from "@/app/components/MilestoneBadge";
 
 type Props = {
   initialSongs: Song[];
@@ -29,6 +30,7 @@ export default function YearSummaryClient({
 }: Props) {
   const [mounted, setMounted] = useState(false);
   const [videoViewMode, setVideoViewMode] = useState<"grid" | "list">("list");
+  const [searchValue, setSearchValue] = useState("");
 
   const yearNumber = Number(year);
   const hasYear = Number.isFinite(yearNumber);
@@ -78,6 +80,15 @@ export default function YearSummaryClient({
     searchTerm,
     setSearchTerm,
   } = useSearch(allSongsForYear);
+
+  useEffect(() => {
+    setSearchValue(searchTerm ?? "");
+  }, [searchTerm]);
+
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSearchTerm(searchValue);
+  };
 
   const top10 = useMemo(() => {
     const counts: Record<string, { count: number; example?: Song }> = {};
@@ -720,7 +731,7 @@ export default function YearSummaryClient({
         </section>
       )}
 
-      <section className="mt-6">
+      <section className="my-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold">{displayYear}年の動画</h2>
           <div className="flex items-center gap-2">
@@ -749,26 +760,31 @@ export default function YearSummaryClient({
           </div>
         </div>
 
-        <div className="mb-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSearchTerm(e.currentTarget.search.value);
-            }}
-          >
-            <div className="flex items-center">
-              <input
-                type="search"
-                name="search"
-                placeholder="Search..."
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
-              />
-              <Button type="submit" className="ml-2">
-                <HiSearch className="h-5 w-5" />
-              </Button>
-            </div>
-          </form>
-        </div>
+        <form onSubmit={handleSearchSubmit} className="mb-4">
+          <div className="flex items-center">
+            <Input
+              type="search"
+              name="search"
+              placeholder="検索ワードを入力"
+              className="flex-1 border-gray-300 dark:border-gray-600 rounded-lg"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.currentTarget.value)}
+              // 削除ボタン
+              rightSection={
+                <InputClearButton
+                  onClick={() => {
+                    setSearchValue("");
+                    setSearchTerm("");
+                  }}
+                  aria-label="close"
+                />
+              }
+            />
+            <Button type="submit" className="ml-2">
+              <HiSearch className="h-5 w-5" />
+            </Button>
+          </div>
+        </form>
 
         {monthsWithSongs.length === 0 ? (
           <p className="text-sm text-gray-700 dark:text-light-gray-400">
@@ -813,6 +829,15 @@ export default function YearSummaryClient({
                             <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
                               {new Date(g.broadcast_at).toLocaleDateString()}
                             </div>
+
+                            {g.milestones &&
+                              g.milestones.map((milestone, idx) => (
+                                <div key={idx}>
+                                  <Badge color="pink" variant="sm">
+                                    {milestone}
+                                  </Badge>
+                                </div>
+                              ))}
                           </div>
                         </Link>
                       </article>
@@ -821,7 +846,17 @@ export default function YearSummaryClient({
                 ) : (
                   <div className="space-y-2">
                     {(() => {
-                      const byVideo: Record<string, any> = {};
+                      const byVideo: Record<
+                        string,
+                        {
+                          title: string;
+                          id: string;
+                          uri: string;
+                          broadcast_at: Date;
+                          songs: Song[];
+                          milestones?: string[];
+                        }
+                      > = {};
                       monthSongs.forEach((s) => {
                         const id = s.video_id || `noid-${s.broadcast_at}`;
                         if (!byVideo[id])
@@ -834,14 +869,38 @@ export default function YearSummaryClient({
                           };
                         byVideo[id].songs.push(s);
                       });
-                      return Object.values(byVideo).map((v: any) => (
-                        <div
-                          key={`v-${v.id}`}
-                          className="border rounded p-2 bg-white dark:bg-gray-800"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              {v.id && !v.id.startsWith("noid-") && (
+                      return Object.values(byVideo).map(
+                        (v: {
+                          title: string;
+                          id: string;
+                          uri: string;
+                          broadcast_at: Date;
+                          songs: Song[];
+                          milestones?: string[];
+                        }) => (
+                          <div
+                            key={`v-${v.id}`}
+                            className="border rounded p-2 bg-white dark:bg-gray-800"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                {v.id && !v.id.startsWith("noid-") && (
+                                  <Link
+                                    href={
+                                      v.uri ||
+                                      `https://www.youtube.com/watch?v=${v.id}`
+                                    }
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block shrink-0 w-32 h-18 bg-black relative"
+                                  >
+                                    <YoutubeThumbnail
+                                      videoId={v.id}
+                                      alt={v.title}
+                                      fill={true}
+                                    />
+                                  </Link>
+                                )}
                                 <Link
                                   href={
                                     v.uri ||
@@ -849,57 +908,53 @@ export default function YearSummaryClient({
                                   }
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="block shrink-0 w-32 h-18 bg-black relative"
+                                  className="font-medium hover:underline"
                                 >
-                                  <YoutubeThumbnail
-                                    videoId={v.id}
-                                    alt={v.title}
-                                    fill={true}
-                                  />
+                                  {v.title}
+                                  <span className="text-sm text-gray-700 dark:text-light-gray-400">
+                                    <br />
+                                    {v.broadcast_at.toLocaleDateString()}
+                                  </span>
                                 </Link>
-                              )}
-                              <Link
-                                href={
-                                  v.uri ||
-                                  `https://www.youtube.com/watch?v=${v.id}`
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                className="font-medium hover:underline"
-                              >
-                                {v.title}
-                                <span className="text-sm text-gray-700 dark:text-light-gray-400">
-                                  <br />
-                                  {v.broadcast_at.toLocaleDateString()}
-                                </span>
-                              </Link>
+                              </div>
+                              <div className="text-sm text-gray-700 dark:text-light-gray-400">
+                                {v.songs.length}曲
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                              {v.songs.length}曲
-                            </div>
+                            <ul className="mt-2 ml-3 pl-4 list-disc">
+                              {v.songs.map((s: Song, idx: number) => (
+                                <li key={`${v.id}-${idx}`} className="text-sm">
+                                  <Link
+                                    href={`/?v=${v.id}${
+                                      s.start ? `&t=${s.start}s` : ""
+                                    }&q=year:${displayYear}`}
+                                    className="hover:underline"
+                                  >
+                                    {s.title}
+                                    {s.artist && (
+                                      <span className="text-xs text-gray-500 dark:text-gray-300">
+                                        {" "}
+                                        - {s.artist}
+                                      </span>
+                                    )}
+                                    {s.milestones &&
+                                      s.milestones.map((milestone, mIdx) => (
+                                        <Badge
+                                          key={mIdx}
+                                          color="pink"
+                                          variant="sm"
+                                          className="ml-2"
+                                        >
+                                          {milestone}
+                                        </Badge>
+                                      ))}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <ul className="mt-2 ml-3 pl-4 list-disc">
-                            {v.songs.map((s: Song, idx: number) => (
-                              <li key={`${v.id}-${idx}`} className="text-sm">
-                                <Link
-                                  href={`/?v=${v.id}${
-                                    s.start ? `&t=${s.start}s` : ""
-                                  }&q=year:${displayYear}`}
-                                  className="hover:underline"
-                                >
-                                  {s.title}
-                                  {s.artist && (
-                                    <span className="text-xs text-gray-500 dark:text-gray-300">
-                                      {" "}
-                                      - {s.artist}
-                                    </span>
-                                  )}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ));
+                        ),
+                      );
                     })()}
                   </div>
                 )}
@@ -908,12 +963,6 @@ export default function YearSummaryClient({
           </div>
         )}
       </section>
-
-      <div className="mt-6">
-        <Link href="/summary" className="text-sm underline">
-          ← 年ごとのまとめに戻る
-        </Link>
-      </div>
     </div>
   );
 }
