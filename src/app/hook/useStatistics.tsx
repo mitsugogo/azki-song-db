@@ -11,6 +11,27 @@ type UseStatisticsProps = {
   songs: Song[];
 };
 
+const isOfficialOriginalRelease = (song: Song) => {
+  return (
+    Boolean(song.album) ||
+    song.tags.some((tag) => tag.includes("MV")) ||
+    song.tags.includes("アートトラック")
+  );
+};
+
+const getOriginalReleaseKey = (song: Song) => {
+  const baseKey = `${song.title}__${song.artist}`;
+
+  if (song.tags.some((tag) => tag.includes("MV"))) {
+    return `${baseKey}__mv`;
+  }
+  if (song.tags.includes("アートトラック")) {
+    return `${baseKey}__art-track`;
+  }
+
+  return `${baseKey}__other`;
+};
+
 export function useStatistics({ songs }: UseStatisticsProps) {
   const songCounts = useMemo(
     () => createStatistics(songs, (s) => s.title),
@@ -47,9 +68,11 @@ export function useStatistics({ songs }: UseStatisticsProps) {
     () =>
       createStatistics(
         songs.filter(
-          (s) => isPossibleOriginalSong(s) || isCollaborationSong(s),
+          (s) =>
+            (isPossibleOriginalSong(s) || isCollaborationSong(s)) &&
+            isOfficialOriginalRelease(s),
         ),
-        (s) => s.title,
+        getOriginalReleaseKey,
         (a, b) =>
           new Date(b.firstVideo.broadcast_at).getTime() -
           new Date(a.firstVideo.broadcast_at).getTime(),
