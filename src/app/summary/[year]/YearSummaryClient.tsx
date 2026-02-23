@@ -441,7 +441,7 @@ export default function YearSummaryClient({
                               </span>
                             </div>
                           </Link>
-                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
+                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
                             {t.count}回
                           </div>
                         </div>
@@ -490,7 +490,7 @@ export default function YearSummaryClient({
                               {a.artist}
                             </Link>
                           </div>
-                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
+                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
                             {a.count}回
                           </div>
                         </div>
@@ -543,7 +543,7 @@ export default function YearSummaryClient({
                               {a.singer}
                             </Link>
                           </div>
-                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
+                          <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
                             {a.count}曲
                           </div>
                         </div>
@@ -590,7 +590,7 @@ export default function YearSummaryClient({
                     />
                     <div className="relative z-10 flex items-center justify-between px-2 py-1">
                       <div className="font-medium">{month}月</div>
-                      <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400">
+                      <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
                         {songs.length}曲
                       </div>
                     </div>
