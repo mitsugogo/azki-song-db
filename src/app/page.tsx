@@ -142,16 +142,48 @@ export async function generateMetadata({
 
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  // build canonical URL including relevant search params
+  const canonical = new URL(baseUrl);
+  if (typeof q === "string") canonical.searchParams.set("q", q);
+  if (typeof v === "string") canonical.searchParams.set("v", v);
+  if (typeof t === "string") canonical.searchParams.set("t", t);
+  if (typeof playlist === "string")
+    canonical.searchParams.set("playlist", playlist);
 
   return {
     ...metadata,
     title: title,
     description: description,
+    keywords: [
+      "AZKi",
+      "歌",
+      "まとめ",
+      "楽曲",
+      "Discography",
+      "オリジナル曲",
+      "コラボ曲",
+      "カバー曲",
+      "オリ曲",
+      "歌枠",
+      "ライブ",
+      "セトリ",
+      "ホロライブ",
+    ],
     openGraph: {
       ...metadata.openGraph,
       title: og_title,
       description: og_subtitle,
-      images: [ogImageUrl.toString()],
+      images: [
+        {
+          url: ogImageUrl.toString(),
+          width: 1200,
+          height: 630,
+          alt: og_title,
+        },
+      ],
+    },
+    alternates: {
+      canonical: canonical.toString(),
     },
   };
 }
