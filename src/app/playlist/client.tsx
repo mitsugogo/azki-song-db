@@ -10,7 +10,8 @@ import {
   Notification,
   Table,
 } from "@mantine/core";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
 import Link from "next/link";
@@ -64,12 +65,17 @@ export default function PlaylistPage() {
 
   return (
     <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/playlist">プレイリスト</BreadcrumbItem>
-      </Breadcrumb>
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/playlist" className={breadcrumbClasses.link}>
+            プレイリスト
+          </Link>
+        </div>
+      </nav>
 
       <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
 

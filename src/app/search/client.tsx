@@ -10,8 +10,8 @@ import usePlayerControls from "../hook/usePlayerControls";
 import useSearch from "../hook/useSearch";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import Link from "next/link";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { LoadingOverlay, Button } from "@mantine/core";
 import { FaMusic, FaUser, FaTag, FaUsers } from "react-icons/fa6";
@@ -382,12 +382,17 @@ const SearchPageClient = () => {
   if (isLoading) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto relative">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <HiHome className="w-4 h-4 mr-1.5" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/search" className={breadcrumbClasses.link}>
+              検索
+            </Link>
+          </div>
+        </nav>
         <LoadingOverlay
           visible={true}
           zIndex={1000}
@@ -402,13 +407,21 @@ const SearchPageClient = () => {
   if (currentSearchTerm && filteredSongs.length > 0) {
     return (
       <div ref={parentRef} className="grow lg:p-6 lg:pb-0 overflow-auto">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
-          <BreadcrumbItem>「{currentSearchTerm}」の検索結果</BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <HiHome className="w-4 h-4 mr-1.5" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/search" className={breadcrumbClasses.link}>
+              検索
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <span className={breadcrumbClasses.link}>
+              「{currentSearchTerm}」の検索結果
+            </span>
+          </div>
+        </nav>
         {/* タイトルと説明 */}
         <div className="mb-4">
           <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
@@ -608,12 +621,17 @@ const SearchPageClient = () => {
   if (currentSearchTerm && filteredSongs.length === 0) {
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <HiHome className="w-4 h-4 mr-1.5" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/search" className={breadcrumbClasses.link}>
+              検索
+            </Link>
+          </div>
+        </nav>
         {/* タイトルと説明 */}
         <div className="mb-4">
           <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
@@ -709,15 +727,24 @@ const SearchPageClient = () => {
     );
     return (
       <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/search">検索</BreadcrumbItem>
-          <BreadcrumbItem href={`/search?tag=${encodeURIComponent(tagParam)}`}>
-            {selectedCategory?.label}
-          </BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <HiHome className="w-4 h-4 mr-1.5" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/search" className={breadcrumbClasses.link}>
+              検索
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link
+              href={`/search?tag=${encodeURIComponent(tagParam)}`}
+              className={breadcrumbClasses.link}
+            >
+              {selectedCategory?.label}
+            </Link>
+          </div>
+        </nav>
         {/* タイトルと説明 */}
         <div className="mb-4">
           <Link
@@ -780,12 +807,17 @@ const SearchPageClient = () => {
   // カテゴリー表示（検索がない場合）
   return (
     <div className="flex-grow lg:p-6 lg:pb-0 overflow-auto">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/search">検索</BreadcrumbItem>
-      </Breadcrumb>
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/search" className={breadcrumbClasses.link}>
+            検索
+          </Link>
+        </div>
+      </nav>
       {/* タイトルと説明 */}
       <div>
         <h1 className="font-extrabold text-2xl p-3">検索</h1>

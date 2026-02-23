@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import { Breadcrumbs } from "@mantine/core";
+import Link from "next/link";
+import { breadcrumbClasses } from "../../theme";
+import { HiHome, HiChevronRight } from "react-icons/hi";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
@@ -150,11 +152,17 @@ export default function DiscographyPage({
       options={{ scrollbars: { autoHide: "leave" } }}
       defer
     >
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
           <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
+        </Link>
+        <Link href="/discography" className={breadcrumbClasses.link}>
+          楽曲一覧
+        </Link>
 
         {/** カテゴリに応じたパスを追加 */}
         {(() => {
@@ -173,7 +181,14 @@ export default function DiscographyPage({
               else if (cat.includes("cover")) label = "カバー楽曲";
 
               if (label) {
-                return <BreadcrumbItem href={pathname}>{label}</BreadcrumbItem>;
+                return (
+                  <Link
+                    href={pathname}
+                    className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-200"
+                  >
+                    {label}
+                  </Link>
+                );
               }
             }
           } catch (e) {
@@ -181,7 +196,7 @@ export default function DiscographyPage({
           }
           return null;
         })()}
-      </Breadcrumb>
+      </Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
 

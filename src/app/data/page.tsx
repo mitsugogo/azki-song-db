@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import ClientTable from "./client";
 import Loading from "../loading";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import Link from "next/link";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
@@ -43,12 +44,17 @@ export async function generateMetadata(
 export default async function DataPage() {
   return (
     <div className="grow lg:p-6 lg:pb-0">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/data">収録データ</BreadcrumbItem>
-      </Breadcrumb>
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/data" className={breadcrumbClasses.link}>
+            収録データ
+          </Link>
+        </div>
+      </nav>
 
       <Suspense fallback={<Loading />}>
         <ClientTable />

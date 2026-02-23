@@ -7,8 +7,8 @@ import slugify from "../../../lib/slugify";
 import { findRouteForRelease } from "../../../config/timelineRoutes";
 import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../../../theme";
 import { Badge, LoadingOverlay } from "@mantine/core";
 import { renderLinkedText } from "../../../lib/textLinkify";
 import {
@@ -101,29 +101,45 @@ export default function ClientPage({
 
   return (
     <div className="p-6 w-full  mx-auto">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
-        <BreadcrumbItem href={`/discography/${encodeURIComponent(category)}`}>
-          {category === "originals"
-            ? "オリジナル楽曲"
-            : category === "covers"
-              ? "カバー"
-              : "コラボ"}{" "}
-        </BreadcrumbItem>
-        {song.album && (
-          <BreadcrumbItem
-            href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(
-              song.album,
-            )}`}
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/discography" className={breadcrumbClasses.link}>
+            楽曲一覧
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link
+            href={`/discography/${encodeURIComponent(category)}`}
+            className={breadcrumbClasses.link}
           >
-            {song.album}
-          </BreadcrumbItem>
-        )}
-        <BreadcrumbItem>{song.title ? song.title : song.album}</BreadcrumbItem>
-      </Breadcrumb>
+            {category === "originals"
+              ? "オリジナル楽曲"
+              : category === "covers"
+                ? "カバー"
+                : "コラボ"}
+          </Link>
+          {song.album && (
+            <>
+              <HiChevronRight className={breadcrumbClasses.separator} />
+              <Link
+                href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(
+                  song.album,
+                )}`}
+                className={breadcrumbClasses.link}
+              >
+                {song.album}
+              </Link>
+            </>
+          )}
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <span className={breadcrumbClasses.link}>
+            {song.title ? song.title : song.album}
+          </span>
+        </div>
+      </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div className="col-span-1">

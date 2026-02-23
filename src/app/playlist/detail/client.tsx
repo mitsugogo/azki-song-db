@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Button, Checkbox, ScrollArea, Table } from "@mantine/core";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import useFavorites from "../../hook/useFavorites";
@@ -27,7 +26,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../../theme";
 import useSongs from "../../hook/useSongs";
 
 type PlaylistWithSongs = {
@@ -297,15 +297,21 @@ export default function PlaylistDetailPage() {
 
   return (
     <div className="grow pt-3 p-1 lg:p-6 lg:pb-0">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/playlist">プレイリスト</BreadcrumbItem>
-        <BreadcrumbItem>
-          {`#${playlist?.id} (${playlist?.name})`}
-        </BreadcrumbItem>
-      </Breadcrumb>
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/playlist" className={breadcrumbClasses.link}>
+            プレイリスト
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <span
+            className={breadcrumbClasses.link}
+          >{`#${playlist?.id} (${playlist?.name})`}</span>
+        </div>
+      </nav>
 
       <h1 className="font-extrabold text-2xl p-3 pl-0">プレイリストの管理</h1>
 

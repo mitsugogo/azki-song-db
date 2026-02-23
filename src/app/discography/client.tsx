@@ -11,8 +11,9 @@ import {
 import useSongs from "../hook/useSongs";
 import { Song } from "../types/song";
 import Loading from "../loading";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import { Breadcrumbs } from "@mantine/core";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 
 const SongPreview = ({ song }: { song: Song }) => {
   const videoId = song.video_id || null;
@@ -70,12 +71,18 @@ export default function DiscographyClient() {
 
   return (
     <div className="p-3">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
           <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
-      </Breadcrumb>
+        </Link>
+        <Link href="/discography" className={breadcrumbClasses.link}>
+          楽曲一覧
+        </Link>
+      </Breadcrumbs>
       <h1 className="font-extrabold text-2xl mb-4">Discography</h1>
 
       <section className="mb-6">
