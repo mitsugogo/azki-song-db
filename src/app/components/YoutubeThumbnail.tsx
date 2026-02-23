@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface YoutubeThumbnailProps {
   videoId: string;
@@ -18,7 +18,7 @@ interface YoutubeThumbnailProps {
 const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   videoId,
   alt,
-  fill,
+  fill = true,
   width,
   height,
   className,
@@ -27,6 +27,11 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
 }) => {
   const { imageUrl, handleError } = useYoutubeThumbnailFallback(videoId);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // videoId が変わったら読み込み状態をリセットする
+    setLoading(true);
+  }, [videoId]);
 
   const handleOnLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     // 画像の幅を確認して、0または120(YouTubeがサムネがないときに返す幅)になった場合は、フォールバックを試す

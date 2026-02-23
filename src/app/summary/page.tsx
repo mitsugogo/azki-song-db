@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { FaHome } from "react-icons/fa";
+import { HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 import SummaryTopClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
@@ -68,12 +69,17 @@ export default async function Page() {
   return (
     <div className="grow lg:p-6 lg:pb-0">
       <div className="mb-4">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <FaHome className="inline mr-1" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/summary">活動記録</BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <FaHome className="inline mr-1" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/summary" className={breadcrumbClasses.link}>
+              活動記録
+            </Link>
+          </div>
+        </nav>
       </div>
       <h1 className="font-extrabold text-2xl p-3">活動記録</h1>
 

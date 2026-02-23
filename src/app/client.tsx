@@ -6,17 +6,20 @@ import { Header } from "./components/Header";
 import Footer from "./components/Footer";
 import { theme, flowbiteTheme } from "./theme";
 import { ThemeProvider } from "flowbite-react";
+import { MantineProvider } from "@mantine/core";
 export default function ClientTop() {
   return (
-    <ThemeProvider theme={flowbiteTheme}>
-      <div className="h-dvh flex flex-col">
-        <Header />
-        <main className="flex flex-col md:flex-row md:foldable:flex-row grow md:overflow-hidden p-0 lg:p-4 lg:pb-0 mb:pb-0 dark:bg-gray-900">
-          <MainPlayer />
-        </main>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </ThemeProvider>
+    <MantineProvider theme={theme}>
+      <ThemeProvider theme={flowbiteTheme}>
+        <div className="h-dvh flex flex-col">
+          <Header />
+          <main className="flex flex-col md:flex-row md:foldable:flex-row grow md:overflow-hidden p-0 lg:p-4 lg:pb-0 mb:pb-0 dark:bg-gray-900">
+            <MainPlayer />
+          </main>
+          <Footer />
+        </div>
+        <AnalyticsWrapper />
+      </ThemeProvider>
+    </MantineProvider>
   );
 }

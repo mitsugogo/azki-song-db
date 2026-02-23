@@ -87,8 +87,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 import YearSummaryClient from "./YearSummaryClient";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
+import Link from "next/link";
 import { FaHome } from "react-icons/fa";
+import { HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../../theme";
 
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
@@ -111,9 +113,7 @@ export default async function Page({ params }: Props) {
 
   const songsOfYear = Number.isNaN(yearNum)
     ? []
-    : songs.filter(
-        (s) => Number(s.year) === yearNum && s.sing.includes("AZKi"),
-      );
+    : songs.filter((s) => Number(s.year) === yearNum);
 
   const displayYearServer = Number.isFinite(yearNum)
     ? yearNum
@@ -124,15 +124,24 @@ export default async function Page({ params }: Props) {
   return (
     <div className="flex-grow p-2 lg:p-6 lg:pb-0 overflow-auto">
       <div className="mb-4">
-        <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-          <BreadcrumbItem href="/">
-            <FaHome className="inline mr-1" /> Home
-          </BreadcrumbItem>
-          <BreadcrumbItem href="/summary">活動記録</BreadcrumbItem>
-          <BreadcrumbItem href={`/summary/${rawYearParam}`}>
-            {displayYearServer ? `${displayYearServer}年` : `詳細`}
-          </BreadcrumbItem>
-        </Breadcrumb>
+        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+          <div className="flex items-center">
+            <Link href="/" className={breadcrumbClasses.link}>
+              <FaHome className="inline mr-1" /> Home
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link href="/summary" className={breadcrumbClasses.link}>
+              活動記録
+            </Link>
+            <HiChevronRight className={breadcrumbClasses.separator} />
+            <Link
+              href={`/summary/${rawYearParam}`}
+              className={breadcrumbClasses.link}
+            >
+              {displayYearServer ? `${displayYearServer}年` : `詳細`}
+            </Link>
+          </div>
+        </nav>
       </div>
 
       <div className="flex items-center justify-between mb-3">

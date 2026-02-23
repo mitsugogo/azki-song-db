@@ -5,7 +5,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   distDir: process.env.NEXT_PLW ? ".next-playwright" : ".next",
   images: {
-    remotePatterns: [new URL("https://img.youtube.com/**")],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+        pathname: "/**",
+      },
+    ],
     unoptimized: true,
   },
   experimental: {

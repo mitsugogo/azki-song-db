@@ -16,3 +16,11 @@ export function getCachedChannels() {
   }
   return [];
 }
+
+export function getCachedMilestones() {
+  const cachePath = path.join(__dirname, ".cache", "milestones.json");
+  if (fs.existsSync(cachePath)) {
+    return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+  }
+  return [];
+}

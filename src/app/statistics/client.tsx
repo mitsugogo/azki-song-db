@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import DataTable from "./datatable";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
+import useStatViewCounts from "../hook/useStatViewCounts";
 import { TABS_CONFIG } from "./tabsConfig";
 import Loading from "../loading";
+import historyHelper from "../lib/history";
+import { buildViewMilestoneInfo } from "../lib/viewMilestone";
 
 export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -19,6 +22,47 @@ export default function StatisticsPage() {
     songs,
   });
 
+  const viewLabelVideoIds = useMemo(
+    () =>
+      [
+        ...statistics.originalSongCountsByReleaseDate,
+        ...statistics.coverSongCountsByReleaseDate,
+      ]
+        .map((item) => item.song?.video_id)
+        .filter(Boolean),
+    [
+      statistics.originalSongCountsByReleaseDate,
+      statistics.coverSongCountsByReleaseDate,
+    ],
+  );
+
+  const { data: viewStatisticsByVideoId } =
+    useStatViewCounts(viewLabelVideoIds);
+
+  const statisticsWithMilestones = useMemo(() => {
+    const attachMilestone = (
+      items: typeof statistics.originalSongCountsByReleaseDate,
+    ) =>
+      items.map((item) => {
+        const viewCount = Number(item.song?.view_count ?? 0);
+        const history = viewStatisticsByVideoId[item.song?.video_id || ""];
+        return {
+          ...item,
+          viewMilestone: buildViewMilestoneInfo(viewCount, history),
+        };
+      });
+
+    return {
+      ...statistics,
+      originalSongCountsByReleaseDate: attachMilestone(
+        statistics.originalSongCountsByReleaseDate,
+      ),
+      coverSongCountsByReleaseDate: attachMilestone(
+        statistics.coverSongCountsByReleaseDate,
+      ),
+    };
+  }, [statistics, viewStatisticsByVideoId]);
+
   const handleVideoClick = (videoId: string) => {
     setSelectedVideoId((prev) => (prev === videoId ? null : videoId));
   };
@@ -29,8 +73,7 @@ export default function StatisticsPage() {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tabIndex.toString());
     // タブ切替は履歴を増やさない（戻る操作で過去のタブが大量に残るのを防ぐ）
-    window.history.replaceState(null, "", url.href);
-    window.dispatchEvent(new Event("replacestate"));
+    historyHelper.replaceUrlIfDifferent(url.href);
   };
 
   // ページを開いた時にURLの"tab"を取得してタブを選択する
@@ -52,7 +95,7 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="grow lg:p-6 lg:pb-0">
+    <div className="grow">
       <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
       <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
@@ -85,7 +128,7 @@ export default function StatisticsPage() {
           {TABS_CONFIG.map((tab, index) => (
             <TabPanel key={`${tab.title}-${index}-panel`}>
               <DataTable
-                data={statistics[tab.dataKey]}
+                data={statisticsWithMilestones[tab.dataKey]}
                 caption={tab.caption}
                 description={tab.description}
                 columns={tab.columns}

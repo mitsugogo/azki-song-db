@@ -25,9 +25,11 @@ async function globalSetup() {
 
     const songsPath = "/api/songs";
     const channelsPath = "/api/yt/channels";
+    const milestonesPath = "/api/milestones";
 
     const songsUrl = new URL(songsPath, baseApi).toString();
     const channelsUrl = new URL(channelsPath, baseApi).toString();
+    const milestonesUrl = new URL(milestonesPath, baseApi).toString();
 
     // 実際のAPIからデータを取得してキャッシュ
     const songsResponse = await fetch(songsUrl);
@@ -35,6 +37,9 @@ async function globalSetup() {
 
     const channelsResponse = await fetch(channelsUrl);
     const channelsData = await channelsResponse.json();
+
+    const milestonesResponse = await fetch(milestonesUrl);
+    const milestonesData = await milestonesResponse.json();
 
     // キャッシュディレクトリを作成
     const cacheDir = path.join(__dirname, ".cache");
@@ -50,6 +55,10 @@ async function globalSetup() {
     fs.writeFileSync(
       path.join(cacheDir, "channels.json"),
       JSON.stringify(channelsData),
+    );
+    fs.writeFileSync(
+      path.join(cacheDir, "milestones.json"),
+      JSON.stringify(milestonesData),
     );
   } catch (err) {
     console.error("globalSetup failed", {

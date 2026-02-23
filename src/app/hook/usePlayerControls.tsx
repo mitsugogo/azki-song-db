@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import { Song } from "../types/song";
 import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
@@ -6,6 +6,7 @@ import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
 import { siteConfig } from "../config/siteConfig";
+import historyHelper from "../lib/history";
 
 // YouTubePlayer に getVideoData メソッドを追加した拡張型
 type YouTubePlayerWithVideoData = YouTubePlayer & {
@@ -55,6 +56,8 @@ const usePlayerControls = (
   // === 内部参照 ===
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const youtubeVideoIdRef = useRef("");
+  // 履歴更新フラグは集中管理する helper を使う
+  // (see src/app/lib/history.ts)
   const lastManualChangeRef = useRef<number>(0);
   const isManualChangeInProgressRef = useRef<boolean>(false);
   const lastEndClampRef = useRef<number>(0);
@@ -67,6 +70,7 @@ const usePlayerControls = (
     { start: number; end: number; text: string }[]
   >([]);
   const timedMessagesRef = useRef(timedMessages);
+  const defaultDocumentTitleRef = useRef(siteConfig.siteName);
 
   // songs配列とnextSongの最新値をrefで保持
   const songsRef = useRef(songs);
@@ -94,6 +98,11 @@ const usePlayerControls = (
     nextSongRef.current = nextSong;
   }, [nextSong]);
 
+  useEffect(() => {
+    const initialTitle = document.title?.trim();
+    defaultDocumentTitleRef.current = initialTitle || siteConfig.siteName;
+  }, []);
+
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
@@ -111,6 +120,40 @@ const usePlayerControls = (
     },
     [],
   );
+
+  // URL操作ヘルパは外部ライブラリに移譲
+
+  // URL の検索パラメータを構築するヘルパ。
+  // 常に `v` を先頭、次に `t`、その後に既存のその他の検索パラメータを元の順序で追加する。
+  const buildSearchParamsWithVtFirst = (
+    url: URL,
+    vVal?: string | null,
+    tVal?: string | null,
+  ) => {
+    const existing = url.searchParams;
+    const newParams = new URLSearchParams();
+    if (vVal) {
+      newParams.append("v", vVal);
+    }
+    if (tVal) {
+      newParams.append("t", tVal);
+    }
+    for (const [key, value] of existing) {
+      if (key === "v" || key === "t") continue;
+      newParams.append(key, value);
+    }
+    url.search = newParams.toString();
+  };
+
+  // 動画IDが変わったらURLのv=xxxを更新
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (videoId) {
+      const existingT = url.searchParams.get("t");
+      buildSearchParamsWithVtFirst(url, videoId, existingT);
+      historyHelper.replaceUrlIfDifferent(url.toString());
+    }
+  }, [videoId]);
 
   // songsが変わったら前後の楽曲を再計算
   useEffect(() => {
@@ -136,8 +179,8 @@ const usePlayerControls = (
   useEffect(() => {
     const title =
       isPlaying && currentSong
-        ? `♪${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
-        : siteConfig.siteName;
+        ? `${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
+        : defaultDocumentTitleRef.current;
     document.title = title;
   }, [currentSong, isPlaying]);
 
@@ -164,6 +207,24 @@ const usePlayerControls = (
     if (song.slug) return song.slug;
     return `${song.title}::${song.artist}`;
   }, []);
+
+  const isSameSong = useCallback(
+    (a: Song | null | undefined, b: Song | null | undefined) => {
+      if (!a || !b) return false;
+      return a.video_id === b.video_id && a.start === b.start;
+    },
+    [],
+  );
+
+  const isSongInList = useCallback(
+    (song: Song | null | undefined, list: Song[]) => {
+      if (!song) return false;
+      return list.some(
+        (item) => item.video_id === song.video_id && item.start === song.start,
+      );
+    },
+    [],
+  );
 
   // 強制的にPlayerをリセットする
   const resetPlayer = useCallback(() => {
@@ -269,7 +330,16 @@ const usePlayerControls = (
           lastManualChangeRef.current = Date.now();
           setStartTime(targetStartTime);
         }
+        setVideoId(targetVideoId);
         setCurrentSong(song);
+        // 再生中の場合は現在の再生位置を示す t パラメータを更新する
+        try {
+          const url = new URL(window.location.href);
+          const songStart = Number(song?.start ?? targetStartTime);
+          const tVal = songStart > 0 ? `${songStart}s` : null;
+          buildSearchParamsWithVtFirst(url, targetVideoId, tVal);
+          historyHelper.replaceUrlIfDifferent(url.toString());
+        } catch (_) {}
         // skipSeekオプションがない場合はシークを行う
         // 自動遷移時のみskipSeek: trueで呼び出される
         if (!options?.skipSeek) {
@@ -285,10 +355,13 @@ const usePlayerControls = (
       // === 異なる動画への切り替え ===
       // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
       const url = new URL(window.location.href);
-      url.searchParams.delete("v");
-      url.searchParams.delete("t");
-      // Headerなどに通知
-      window.dispatchEvent(new Event("replacestate"));
+      // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
+      // 通常は曲の定義された start を優先して URL に反映する。
+      const songStart = Number(song?.start ?? targetStartTime);
+      const tVal = songStart > 0 ? `${songStart}s` : null;
+      buildSearchParamsWithVtFirst(url, targetVideoId, tVal);
+      // Headerなどに通知（差分があれば履歴更新）
+      historyHelper.replaceUrlIfDifferent(url.toString());
 
       if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -444,7 +517,6 @@ const usePlayerControls = (
             return;
           }
 
-          // 現在時刻が指定秒数を超えて、かつ未表示のメッセージを探す
           const nextMessage = sortedTimedMessages.find(
             (msg) => currentTime + 1 >= msg.start && currentTime < msg.end,
           );
@@ -462,7 +534,39 @@ const usePlayerControls = (
           const currentSongForNext =
             currentSongRef.current ?? foundSong ?? null;
           const nextSongInVideo = getNextSongInVideo(currentSongForNext);
-          const autoNextSong = nextSongInVideo ?? nextSongRef.current ?? null;
+          // フィルタ済みの songs を優先して次曲を決定する（検索フィルタが有効な場合の同期問題対策）
+          let autoNextSong: Song | null = null;
+          // まず同一動画内での次曲を優先
+          if (
+            nextSongInVideo &&
+            !isSameSong(nextSongInVideo, currentSongRef.current) &&
+            isSongInList(nextSongInVideo, songsRef.current)
+          ) {
+            autoNextSong = nextSongInVideo;
+          } else {
+            // filtered songs（songsRef）上での現在位置に基づいて次曲を探す
+            const list = songsRef.current;
+            if (currentSongForNext) {
+              const idx = list.findIndex(
+                (s) =>
+                  s.video_id === currentSongForNext.video_id &&
+                  s.start === currentSongForNext.start,
+              );
+              if (idx >= 0 && idx < list.length - 1) {
+                const candidate = list[idx + 1];
+                if (!isSameSong(candidate, currentSongRef.current))
+                  autoNextSong = candidate;
+              }
+            }
+            // まだ見つからない場合は nextSongRef をフォールバック（ただし現在の曲と同一でないこと）
+            if (
+              !autoNextSong &&
+              nextSongRef.current &&
+              !isSameSong(nextSongRef.current, currentSongRef.current)
+            ) {
+              autoNextSong = nextSongRef.current;
+            }
+          }
           const isFoundSongInList = songsRef.current.some(
             (s) =>
               s.video_id === foundSong?.video_id &&
@@ -540,11 +644,36 @@ const usePlayerControls = (
       const handleEndedState = () => {
         clearMonitorInterval();
         const nextSongInVideo = getNextSongInVideo(currentSongRef.current);
-        const autoNextSong = nextSongInVideo ?? nextSongRef.current;
+        // ended 時はまず同一動画内の次曲を探し、なければ filtered songs の次、最後に全体の先頭を再生
+        let autoNextSong: Song | null = null;
+        if (
+          nextSongInVideo &&
+          !isSameSong(nextSongInVideo, currentSongRef.current) &&
+          isSongInList(nextSongInVideo, songsRef.current)
+        ) {
+          autoNextSong = nextSongInVideo;
+        } else if (currentSongRef.current) {
+          const list = songsRef.current;
+          const idx = list.findIndex(
+            (s) =>
+              s.video_id === currentSongRef.current?.video_id &&
+              s.start === currentSongRef.current?.start,
+          );
+          if (idx >= 0 && idx < list.length - 1) {
+            const candidate = list[idx + 1];
+            if (!isSameSong(candidate, currentSongRef.current)) {
+              autoNextSong = candidate;
+            }
+          }
+        }
         if (autoNextSong) {
           changeCurrentSongRef.current(autoNextSong);
         } else if (songsRef.current.length > 0) {
-          changeCurrentSongRef.current(songsRef.current[0]);
+          // songsRef の先頭が現在の曲でない場合のみ先頭へ移動
+          const first = songsRef.current[0];
+          if (first && !isSameSong(first, currentSongRef.current)) {
+            changeCurrentSongRef.current(first);
+          }
         }
         // 再生終了時にメッセージをリセット
         setTimedLiveCallText(null);
@@ -573,6 +702,8 @@ const usePlayerControls = (
       searchCurrentSongOnVideo,
       timedMessages,
       getNextSongInVideo,
+      isSameSong,
+      isSongInList,
     ],
   );
 
@@ -606,14 +737,7 @@ const usePlayerControls = (
       player.playVideo();
       setIsPlaying(true);
 
-      // URLに「v」と「t」が存在する場合、再生開始後にパラメータを削除
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("v") || url.searchParams.has("t")) {
-        url.searchParams.delete("v");
-        url.searchParams.delete("t");
-        window.history.replaceState(null, "", url.toString());
-        window.dispatchEvent(new Event("replacestate"));
-      }
+      // 再生開始時は URL の既存パラメータを変更しない（外部から渡された v/t を保持）
     },
     [],
   );

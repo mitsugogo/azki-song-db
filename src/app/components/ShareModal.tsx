@@ -23,12 +23,20 @@ export default function ShareModal({
   const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
 
-  const youtubeUrl = `https://www.youtube.com/watch?v=${currentSong?.video_id}&t=${currentSong?.start}s`;
-  const databaseUrl = `${baseUrl}/?v=${currentSong?.video_id}&t=${currentSong?.start}s`;
+  const youtubeUrl = `https://www.youtube.com/watch?v=${currentSong?.video_id}${
+    currentSong && Number(currentSong.start) > 0
+      ? `&t=${currentSong.start}s`
+      : ""
+  }`;
+  const databaseUrl = `${baseUrl}/?v=${currentSong?.video_id}${
+    currentSong && Number(currentSong.start) > 0
+      ? `&t=${currentSong.start}s`
+      : ""
+  }`;
 
   const handleShareToX = (isDatabaseUrl: boolean) => {
     const text = isDatabaseUrl
-      ? `♪${currentSong?.title} / ${currentSong?.artist} \n${currentSong?.video_title} \n${databaseUrl}`
+      ? `${currentSong?.title} / ${currentSong?.artist} \n${currentSong?.video_title} \n${databaseUrl}`
       : `${currentSong?.video_title} \n${youtubeUrl}`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };

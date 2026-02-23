@@ -6,6 +6,11 @@ import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
 import { ColumnDef } from "@tanstack/react-table";
 
 import {
+  isCollaborationSong,
+  isCoverSong,
+  isPossibleOriginalSong,
+} from "../config/filters";
+import {
   renderLastVideoCell,
   renderViewCountCell,
   viewCountSortFn,
@@ -25,6 +30,21 @@ type TabConfig = {
   initialSort: { id: string; direction: "asc" | "desc" };
   minWidth?: number | string;
   columns: ColumnDef<StatisticsItem, any>[];
+};
+
+const getDiscographyLink = (song: Song) => {
+  if (!song?.slugv2) return null;
+
+  if (isPossibleOriginalSong(song)) {
+    return `/discography/originals/${encodeURIComponent(song.slugv2)}`;
+  }
+  if (isCollaborationSong(song)) {
+    return `/discography/collaborations/${encodeURIComponent(song.slugv2)}`;
+  }
+  if (isCoverSong(song)) {
+    return `/discography/covers/${encodeURIComponent(song.slugv2)}`;
+  }
+  return null;
 };
 
 export const TABS_CONFIG: TabConfig[] = [
@@ -279,10 +299,30 @@ export const TABS_CONFIG: TabConfig[] = [
     icon: FaCompactDisc,
     dataKey: "originalSongCountsByReleaseDate",
     caption: "オリ曲",
-    description: "オリジナル楽曲のリリース日 または 動画初公開日 です",
+    description:
+      "オリジナル楽曲のリリース日 または 動画初公開日 です。MVとアートトラックを収録しているため、同一曲でも重複があります。",
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1700,
     columns: [
+      {
+        id: "discographyLink",
+        header: "詳細",
+        enableSorting: false,
+        cell: (info) => {
+          const href = getDiscographyLink(info.row.original.song);
+          if (!href) return null;
+
+          return (
+            <Link
+              href={href}
+              className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
+            >
+              詳細
+            </Link>
+          );
+        },
+        size: 90,
+      },
       {
         accessorKey: "song.title",
         header: "曲名",
@@ -328,8 +368,13 @@ export const TABS_CONFIG: TabConfig[] = [
           return row.song?.view_count ?? 0;
         },
         header: "再生回数ラベル",
-        cell: (info) => renderViewCountCell(info.getValue<number>()),
+        cell: (info) =>
+          renderViewCountCell(
+            info.getValue<number>(),
+            info.row.original.viewMilestone,
+          ),
         sortingFn: viewCountSortFn,
+        size: 180,
       },
       {
         id: "broadcast_at",
@@ -356,6 +401,25 @@ export const TABS_CONFIG: TabConfig[] = [
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1700,
     columns: [
+      {
+        id: "discographyLink",
+        header: "詳細",
+        enableSorting: false,
+        cell: (info) => {
+          const href = getDiscographyLink(info.row.original.song);
+          if (!href) return null;
+
+          return (
+            <Link
+              href={href}
+              className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
+            >
+              詳細
+            </Link>
+          );
+        },
+        size: 90,
+      },
       {
         accessorKey: "song.title",
         header: "曲名",
@@ -403,8 +467,13 @@ export const TABS_CONFIG: TabConfig[] = [
         id: "viewCountLbl",
         accessorFn: (row) => row.song?.view_count ?? 0,
         header: "再生回数ラベル",
-        cell: (info) => renderViewCountCell(info.getValue<number>()),
+        cell: (info) =>
+          renderViewCountCell(
+            info.getValue<number>(),
+            info.row.original.viewMilestone,
+          ),
         sortingFn: viewCountSortFn,
+        size: 180,
       },
       {
         id: "broadcast_at",

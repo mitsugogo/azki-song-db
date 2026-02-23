@@ -43,13 +43,26 @@ export const metadata: Metadata = {
     title: `${siteConfig.siteName}`,
     description:
       "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
-    url: "https://azki-song-db.vercel.app/",
+    url: siteConfig.siteUrl,
     siteName: `${siteConfig.siteName}`,
     locale: "ja_JP",
     type: "website",
+    images: [
+      `${siteConfig.siteUrl}api/og?title=${encodeURIComponent(
+        siteConfig.siteName,
+      )}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
+    ],
   },
   twitter: {
     card: "summary_large_image",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+    other: [{ rel: "mask-icon", url: "/favicon.ico", color: "#b81e8a" }],
+  },
+  alternates: {
+    canonical: siteConfig.siteUrl,
   },
 };
 
@@ -73,6 +86,14 @@ export default function RootLayout({
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#b81e8a" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <link rel="preconnect" href="https://www.youtube.com" />
         <link rel="preconnect" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
