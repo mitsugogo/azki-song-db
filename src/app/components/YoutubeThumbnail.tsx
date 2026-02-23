@@ -18,7 +18,7 @@ interface YoutubeThumbnailProps {
 const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   videoId,
   alt,
-  fill,
+  fill = true,
   width,
   height,
   className,

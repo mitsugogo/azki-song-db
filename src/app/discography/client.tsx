@@ -1,249 +1,157 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useScrollIntoView } from "@mantine/hooks";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
+import {
+  isCollaborationSong,
+  isCoverSong,
+  isPossibleOriginalSong,
+} from "@/app/config/filters";
+import useSongs from "../hook/useSongs";
+import { Song } from "../types/song";
+import Loading from "../loading";
 import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
-import { useDiscographyData } from "./hooks/useDiscographyData";
-import { useItemVisibility } from "./hooks/useItemVisibility";
-import { useAlbumNavigation } from "./hooks/useAlbumNavigation";
-import DiscographyControls from "./components/DiscographyControls";
-import ContentRenderer from "./components/ContentRenderer";
-import { scrollToAnchor } from "./utils/scrollHelpers";
+const SongPreview = ({ song }: { song: Song }) => {
+  const videoId = song.video_id || null;
 
-export default function DiscographyPage() {
-  const [activeTab, setActiveTab] = useState(0);
-  const [groupByAlbum, setGroupByAlbum] = useState(true);
-  const [groupByYear, setGroupByYear] = useState(false);
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
-  const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
-  const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
-
-  const { targetRef } = useScrollIntoView();
-  const skipClearOnTabChange = useRef(false);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  // カスタムフックでデータ取得と統計計算
-  const {
-    loading,
-    songs,
-    originalSongCountsByReleaseDate,
-    unitSongCountsByReleaseDate,
-    coverSongCountsByReleaseDate,
-  } = useDiscographyData(groupByAlbum, onlyOriginalMV);
-
-  // アイテムの表示アニメーション管理
-  const visibleItems = useItemVisibility(
-    activeTab,
-    originalSongCountsByReleaseDate,
-    unitSongCountsByReleaseDate,
-    coverSongCountsByReleaseDate,
-  );
-
-  // URLパラメータに基づくアルバムナビゲーション
-  useAlbumNavigation({
-    loading,
-    songs,
-    searchParams,
-    setGroupByAlbum,
-    setActiveTab,
-    setExpandedItem,
-    setAnchorToScroll,
-    skipClearOnTabChange,
-  });
-
-  useEffect(() => {
-    if (!anchorToScroll) return;
-    scrollToAnchor(anchorToScroll).finally(() => {
-      setAnchorToScroll(null);
-    });
-  }, [anchorToScroll]);
-
-  // アイテムクリックハンドラー
-  const handleItemClick = (key: string) => {
-    if (key === expandedItem) {
-      setExpandedItem(null);
-      setAnchorToScroll(null);
-      return;
-    }
-
-    setExpandedItem(key);
-    setAnchorToScroll(key);
-  };
-
-  // コントロール変更ハンドラー
-  const handleGroupByAlbumChange = () => {
-    setGroupByAlbum(!groupByAlbum);
-    setExpandedItem(null);
-    setAnchorToScroll(null);
-  };
-
-  const handleGroupByYearChange = () => {
-    setGroupByYear(!groupByYear);
-    setExpandedItem(null);
-    setAnchorToScroll(null);
-  };
-
-  const handleOnlyOriginalMVChange = () => {
-    setOnlyOriginalMV(!onlyOriginalMV);
-    setExpandedItem(null);
-    setAnchorToScroll(null);
-  };
-
-  // タブ変更ハンドラー
-  const handleTabChange = (index: number) => {
-    setActiveTab(index);
-    if (skipClearOnTabChange.current) {
-      skipClearOnTabChange.current = false;
-    } else {
-      setExpandedItem(null);
-      setAnchorToScroll(null);
-    }
-
-    try {
-      const tabToCategory = ["originals", "collab", "covers"];
-      const cat = tabToCategory[index];
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      if (cat) {
-        params.set("category", cat);
-      } else {
-        params.delete("category");
-      }
-      // 別のクエリ（album）の影響を避けるため削除
-      params.delete("album");
-
-      const q = params.toString();
-      const dest = q ? `${pathname}?${q}` : pathname;
-      router.replace(dest);
-    } catch (e) {
-      // ignore
-    }
-  };
+  const release = song.album_release_at || song.broadcast_at || null;
+  const releaseLabel = release ? new Date(release).toLocaleDateString() : null;
 
   return (
-    <OverlayScrollbarsComponent
-      element="div"
-      className="lg:p-6 flex flex-col w-full h-full"
-      options={{ scrollbars: { autoHide: "leave" } }}
-      defer
-    >
+    <div className="group">
+      <div className="w-full aspect-video rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
+        {videoId ? (
+          <YoutubeThumbnail videoId={videoId} alt={song.title || ""} fill />
+        ) : (
+          <div className="w-full h-full bg-gray-200 dark:bg-gray-700" />
+        )}
+      </div>
+      <div className="mt-2">
+        <div className="font-extrabold text-sm line-clamp-2">{song.title}</div>
+        <div className="text-xs text-muted-foreground">{song.artist}</div>
+        {releaseLabel ? (
+          <div className="text-xs text-muted-foreground mt-1">
+            {releaseLabel}
+          </div>
+        ) : null}
+        {song.view_count ? (
+          <div className="text-xs text-muted-foreground mt-1">
+            {Number(song.view_count).toLocaleString()} 回再生
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+export default function DiscographyClient() {
+  const { allSongs: songs, isLoading } = useSongs();
+
+  const searchParams = useSearchParams();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  const originals = songs.filter((s: any) => isPossibleOriginalSong(s));
+  const collabs = songs.filter((s: any) => isCollaborationSong(s));
+  const covers = songs.filter((s: any) => isCoverSong(s));
+
+  const sortByRelease = (a: any, b: any) =>
+    new Date(b.album_release_at || b.broadcast_at).getTime() -
+    new Date(a.album_release_at || a.broadcast_at).getTime();
+
+  const recentOriginals = originals.sort(sortByRelease).slice(0, 10);
+  const recentCollabs = collabs.sort(sortByRelease).slice(0, 10);
+  const recentCovers = covers.sort(sortByRelease).slice(0, 10);
+
+  return (
+    <div className="p-3">
       <Breadcrumb aria-label="Breadcrumb" className="mb-3">
         <BreadcrumbItem href="/">
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </BreadcrumbItem>
-        <BreadcrumbItem>楽曲一覧</BreadcrumbItem>
+        <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
       </Breadcrumb>
+      <h1 className="font-extrabold text-2xl mb-4">Discography</h1>
 
-      <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
+      <section className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold">オリジナル楽曲</h2>
+          <Link href="/discography/originals" className="text-primary text-sm">
+            » もっと見る
+          </Link>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {recentOriginals.map((s: Song, i: number) => (
+            <li
+              key={
+                s.video_id
+                  ? `${s.slug ?? "noslug"}-${s.video_id}`
+                  : `${s.slug ?? "noslug"}-${i}`
+              }
+            >
+              <Link
+                href={`/discography/originals/${s.slugv2}`}
+                className="block"
+              >
+                <SongPreview song={s} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <DiscographyControls
-        groupByAlbum={groupByAlbum}
-        groupByYear={groupByYear}
-        onlyOriginalMV={onlyOriginalMV}
-        activeTab={activeTab}
-        onGroupByAlbumChange={handleGroupByAlbumChange}
-        onGroupByYearChange={handleGroupByYearChange}
-        onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
-      />
+      <section className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold">ユニット・ゲスト楽曲</h2>
+          <Link href="/discography/collab" className="text-primary text-sm">
+            » もっと見る
+          </Link>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {recentCollabs.map((s: any, i: number) => (
+            <li
+              key={
+                s.video_id
+                  ? `${s.slug ?? "noslug"}-${s.video_id}`
+                  : `${s.slug ?? "noslug"}-${i}`
+              }
+            >
+              <Link href={`/discography/collab/${s.slugv2}`} className="block">
+                <SongPreview song={s} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-        <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-            }
-          >
-            オリジナル楽曲 (
-            {
-              Array.from(
-                new Set(
-                  originalSongCountsByReleaseDate.map((s) => s.song.title),
-                ),
-              ).length
-            }
-            )
-          </Tab>
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-            }
-          >
-            ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
-          </Tab>
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-            }
-          >
-            カバー楽曲 ({coverSongCountsByReleaseDate.length})
-          </Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <ContentRenderer
-              data={originalSongCountsByReleaseDate}
-              tabIndex={0}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[0] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-          <TabPanel>
-            <ContentRenderer
-              data={unitSongCountsByReleaseDate}
-              tabIndex={1}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[1] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-          <TabPanel>
-            <ContentRenderer
-              data={coverSongCountsByReleaseDate}
-              tabIndex={2}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[2] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
-    </OverlayScrollbarsComponent>
+      <section className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold">カバー楽曲</h2>
+          <Link href="/discography/covers" className="text-primary text-sm">
+            » もっと見る
+          </Link>
+        </div>
+        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {recentCovers.map((s: any, i: number) => (
+            <li
+              key={
+                s.video_id
+                  ? `${s.slug ?? "noslug"}-${s.video_id}`
+                  : `${s.slug ?? "noslug"}-${i}`
+              }
+            >
+              <Link href={`/discography/covers/${s.slugv2}`} className="block">
+                <SongPreview song={s} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }

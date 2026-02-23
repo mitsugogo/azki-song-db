@@ -38,23 +38,7 @@ export default function ClientPage({
   }
 
   const songs: Song[] = allSongs ?? [];
-
-  let filteredSongs: Song[] = [];
-  switch (category) {
-    case "collabo":
-    case "collaborations":
-      filteredSongs = songs.filter((s) => isCollaborationSong(s));
-      break;
-    case "covers":
-      filteredSongs = songs.filter((s) => isCoverSong(s));
-      break;
-    case "originals":
-    default:
-      filteredSongs = songs.filter((s) => isPossibleOriginalSong(s));
-      break;
-  }
-
-  const matched = filteredSongs.filter(
+  const matched = songs.filter(
     (s) =>
       s.slug === slug ||
       s.slugv2 === slug ||
@@ -122,9 +106,7 @@ export default function ClientPage({
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </BreadcrumbItem>
         <BreadcrumbItem href="/discography">楽曲一覧</BreadcrumbItem>
-        <BreadcrumbItem
-          href={`/discography/?category=${encodeURIComponent(category)}`}
-        >
+        <BreadcrumbItem href={`/discography/${encodeURIComponent(category)}`}>
           {category === "originals"
             ? "オリジナル楽曲"
             : category === "covers"
@@ -133,7 +115,9 @@ export default function ClientPage({
         </BreadcrumbItem>
         {song.album && (
           <BreadcrumbItem
-            href={`/discography/?album=${encodeURIComponent(song.album)}&category=${encodeURIComponent(category)}`}
+            href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(
+              song.album,
+            )}`}
           >
             {song.album}
           </BreadcrumbItem>
@@ -157,7 +141,7 @@ export default function ClientPage({
             <p className="text-sm text-gray-600 dark:text-gray-300">
               <LuFolder className="inline mr-1" />{" "}
               <Link
-                href={`/discography/?album=${encodeURIComponent(song.album)}`}
+                href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(song.album)}`}
               >
                 {song.album}
               </Link>

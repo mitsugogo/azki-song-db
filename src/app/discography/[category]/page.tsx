@@ -7,6 +7,7 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
+import CategoryClient from "./client";
 
 async function fetchSongsFromApi(): Promise<Song[]> {
   const candidates = [
@@ -46,6 +47,28 @@ export default async function CategoryOrLegacyRedirect({
 }) {
   const resolved = await params;
   const possibleSlug = decodeURIComponent(resolved.category || "");
+  const lower = possibleSlug.toLowerCase();
+
+  // path ベースのカテゴリ要求であれば Discography のクライアントをレンダリング
+  const originals = new Set(["originals", "original", "ori"]);
+  const collabs = new Set(["collab", "collabo", "collaboration", "unit"]);
+  const covers = new Set(["covers", "cover"]);
+
+  if (originals.has(lower) || lower.includes("original")) {
+    return <CategoryClient category="originals" />;
+  }
+
+  if (
+    collabs.has(lower) ||
+    lower.includes("collab") ||
+    lower.includes("unit")
+  ) {
+    return <CategoryClient category="collab" />;
+  }
+
+  if (covers.has(lower) || lower.includes("cover")) {
+    return <CategoryClient category="covers" />;
+  }
   const songs: Song[] = await fetchSongsFromApi();
 
   let filteredSongs = songs.filter(

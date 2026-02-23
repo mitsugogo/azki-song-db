@@ -7,6 +7,7 @@ interface UseAlbumNavigationParams {
   loading: boolean;
   songs: Song[];
   searchParams: ReadonlyURLSearchParams | null;
+  pathname?: string | null;
   setGroupByAlbum: Dispatch<SetStateAction<boolean>>;
   setActiveTab: Dispatch<SetStateAction<number>>;
   setExpandedItem: Dispatch<SetStateAction<string | null>>;
@@ -21,6 +22,7 @@ export function useAlbumNavigation({
   loading,
   songs,
   searchParams,
+  pathname,
   setGroupByAlbum,
   setActiveTab,
   setExpandedItem,
@@ -32,7 +34,16 @@ export function useAlbumNavigation({
 
     try {
       const albumParam = searchParams?.get("album");
-      const categoryParam = searchParams?.get("category");
+      // category はクエリまたは pathname から取得する
+      let categoryParam = searchParams?.get("category");
+      if (!categoryParam && pathname) {
+        // pathname 例: /discography/originals
+        const parts = pathname.split("/").filter(Boolean);
+        // parts[0] === 'discography', parts[1] === category
+        if (parts.length >= 2 && parts[0] === "discography") {
+          categoryParam = parts[1];
+        }
+      }
       if (!albumParam && !categoryParam) return;
 
       // album があればそちらを優先して開く
@@ -183,6 +194,7 @@ export function useAlbumNavigation({
     loading,
     songs,
     searchParams,
+    pathname,
     setGroupByAlbum,
     setActiveTab,
     setExpandedItem,
