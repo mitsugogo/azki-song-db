@@ -31,6 +31,15 @@ test.describe("Search page", () => {
     }
   });
 
+  test("drops deprecated tag query parameter", async ({ page }) => {
+    await page.goto("/search?tag=tag%3A%E3%82%AA%E3%83%AA%E6%9B%B2");
+
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(300);
+
+    expect(page.url()).not.toContain("tag=");
+  });
+
   test("filters songs by search term", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");

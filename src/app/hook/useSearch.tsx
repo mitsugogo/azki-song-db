@@ -7,16 +7,29 @@ import { useSearchParams } from "next/navigation";
 import historyHelper from "../lib/history";
 import { filterOriginalSongs } from "../config/filters";
 
+interface UseSearchOptions {
+  syncUrl?: boolean;
+}
+
 /**
  * 検索ロジックを管理するカスタムフック
  * @param allSongs - 全ての曲のリスト
  */
-const useSearch = (allSongs: Song[]) => {
+const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   const [songs, setSongs] = useState<Song[]>([]);
+  const syncUrl = options?.syncUrl ?? true;
 
   // 通常検索
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 300);
+  const searchTokens = useMemo(
+    () =>
+      searchTerm
+        .split("|")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    [searchTerm],
+  );
 
   // プレイリスト
   const { decodePlaylistUrlParam } = usePlaylists();
@@ -308,6 +321,8 @@ const useSearch = (allSongs: Song[]) => {
 
   // URL更新（即座に）
   useEffect(() => {
+    if (!syncUrl) return;
+
     if (isSyncingFromUrl.current) {
       isSyncingFromUrl.current = false;
       return;
@@ -325,7 +340,7 @@ const useSearch = (allSongs: Song[]) => {
 
       historyHelper.replaceUrlIfDifferent(url.href);
     }
-  }, [searchTerm]);
+  }, [searchTerm, syncUrl]);
 
   // リアルタイム検索（debounce適用）
   useEffect(() => {
@@ -350,6 +365,7 @@ const useSearch = (allSongs: Song[]) => {
     songs,
     setSongs,
     searchTerm,
+    searchTokens,
     setSearchTerm,
     searchSongs,
   };
