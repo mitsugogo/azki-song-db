@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.31.0](https://github.com/mitsugogo/azki-song-db/compare/v1.30.5...v1.31.0) (2026-02-23)
+
+
+### Features
+
+* 動画のstats表示 ([6497dfa](https://github.com/mitsugogo/azki-song-db/commit/6497dfa0772826bc08bcadf9e579a59c69ba3920))
+
+
+### Bug Fixes
+
+* 「この組み合わせ」は1人のときに出さない ([8bc9189](https://github.com/mitsugogo/azki-song-db/commit/8bc918978550e3b671e25e92e89d1a41a7954f63))
+* extraは削除 ([57ecdd2](https://github.com/mitsugogo/azki-song-db/commit/57ecdd298ffae350848073597bf3e77da402fc3e))
+* fetchJsonDedupがheaderを返せてなかったのを修正 ([d4f773c](https://github.com/mitsugogo/azki-song-db/commit/d4f773c27aadce166c4ddab61b0e67575aeedd12))
+* key修正 ([0069587](https://github.com/mitsugogo/azki-song-db/commit/00695878c2ce5a30207237e616975a854de601ef))
+* key修正 ([4548f6f](https://github.com/mitsugogo/azki-song-db/commit/4548f6f579d4735a62125250ad5741a6d2416e0e))
+* key被り修正 ([523cae9](https://github.com/mitsugogo/azki-song-db/commit/523cae9e461d91065b9033c6842242179a4e8427))
+* slugv2の生成キー修正 ([e5dfc97](https://github.com/mitsugogo/azki-song-db/commit/e5dfc97daedfb4f4680b85da064fa16b6e3d5cd2))
+* title上書き処理を修正 ([22e2bb6](https://github.com/mitsugogo/azki-song-db/commit/22e2bb6501407565eb24f319b08e6fb241512596))
+* オリ曲判定にfes全体曲歌唱を含める ([d6662d9](https://github.com/mitsugogo/azki-song-db/commit/d6662d9d307318259befe4b86292c5b231992336))
+* この組わせ機能が正しくsplit出来ていなかったのを修正 ([4a43f7f](https://github.com/mitsugogo/azki-song-db/commit/4a43f7f0d9d8324723b41ba7474171871591805a))
+* シーク処理修正 ([c176922](https://github.com/mitsugogo/azki-song-db/commit/c17692208279762e401f0d49d12b60c8d8e72ed8))
+* ページ遷移でMiniPlayerの再レンダが走らないように修正 ([c00a806](https://github.com/mitsugogo/azki-song-db/commit/c00a8068de52600b60bfaea4b9b745f198d69f76))
+* リンク修正 ([dafdc62](https://github.com/mitsugogo/azki-song-db/commit/dafdc62f1a430494927803c3d0f10f49d39343ce))
+* リンク修正 ([191ef98](https://github.com/mitsugogo/azki-song-db/commit/191ef988a6663f7080bd29e605f8024d71f97126))
+* ルート、ビジュアル判定がUTC/JSTでズレているのを修正 ([4a1d992](https://github.com/mitsugogo/azki-song-db/commit/4a1d992c98c1c8a37b132e1f288e422c42607356))
+* 不要なredirectが走っているのを修正 ([55ddb01](https://github.com/mitsugogo/azki-song-db/commit/55ddb015e2e573dbc4cfdf39ca0cbbea78983f4c))
+* 再生中のURLパラメータになるように ([b9f23d0](https://github.com/mitsugogo/azki-song-db/commit/b9f23d0654d1d15a56eeb105fa93aa21baebd955))
+* 同曲・別組み合わせのカバーがグルーピングされてしまうのを修正 ([64572e5](https://github.com/mitsugogo/azki-song-db/commit/64572e5e0952a856df5d9aad534d13b72b735a29))
+* 更新日時が出ないのを修正 ([6bd5fce](https://github.com/mitsugogo/azki-song-db/commit/6bd5fceba4317d465c77f2c9ab7dea6e049d02bf))
+* 検索状態で次の曲に遷移しないバグを修正 ([940978c](https://github.com/mitsugogo/azki-song-db/commit/940978cf0de13956c2379b915cfea9a06f163cad))
+* 検索結果画面にmilestone検索の直リンクが効かないのを修正 (fix [#272](https://github.com/mitsugogo/azki-song-db/issues/272)) ([29bc419](https://github.com/mitsugogo/azki-song-db/commit/29bc4193f0317616895a5bc99c9311516a0a261d))
+* 活動記録の表示条件の調整 ([90d1e6b](https://github.com/mitsugogo/azki-song-db/commit/90d1e6b1782247df6dcd7dc53be8c5cdcc7b4d85))
+
 ### [1.30.5](https://github.com/mitsugogo/azki-song-db/compare/v1.30.4...v1.30.5) (2026-02-19)
 
 ### [1.30.4](https://github.com/mitsugogo/azki-song-db/compare/v1.30.3...v1.30.4) (2026-02-17)
