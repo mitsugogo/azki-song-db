@@ -22,7 +22,7 @@ const SongPreview = ({ song }: { song: Song }) => {
   const releaseLabel = release ? new Date(release).toLocaleDateString() : null;
 
   return (
-    <div className="group">
+    <div className="group hover:text-primary dark:hover:text-white">
       <div className="w-full aspect-video rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
         {videoId ? (
           <YoutubeThumbnail videoId={videoId} alt={song.title || ""} fill />
@@ -70,7 +70,7 @@ export default function DiscographyClient() {
   const recentCovers = covers.sort(sortByRelease).slice(0, 10);
 
   return (
-    <div className="p-3">
+    <div className="p-6">
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}

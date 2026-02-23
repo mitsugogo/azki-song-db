@@ -111,7 +111,7 @@ export async function generateMetadata({
     matchedForMeta.extra ??
     `${matchedForMeta.title} - ${matchedForMeta.artist}の楽曲情報`;
 
-  // OGP 画像生成を移植（app/page.tsx を参考）
+  // OGP 画像生成
   let ogImageUrl = new URL("/api/og", baseUrl);
   const ogTitle = matchedForMeta.title
     ? `${matchedForMeta.title} / ${matchedForMeta.artist}`
@@ -149,6 +149,5 @@ export default async function SongPage({
   const category = decodeURIComponent(resolved.category);
   const slug = decodeURIComponent(resolved.slug);
 
-  // Render client-side page component; UI will fetch data on client.
   return <ClientPage category={category} slug={slug} />;
 }
