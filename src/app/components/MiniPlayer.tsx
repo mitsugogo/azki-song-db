@@ -292,18 +292,18 @@ export default function MiniPlayer() {
   }, [isDragging, dragOffset, snapToCorner]);
 
   useEffect(() => {
-    // ページ遷移または動画IDが変わったときにプレイヤーをリセット
+    // 動画IDが変わったときのみプレイヤーをリセットする
     if (!isHomePage && currentSong) {
       const videoIdChanged = currentSong.video_id !== lastVideoIdRef.current;
-      const pathnameChanged = pathname !== lastPathnameRef.current;
 
-      if (videoIdChanged || pathnameChanged) {
+      if (videoIdChanged) {
         setPlayerKey((prev) => prev + 1);
         setHasRestoredTime(false);
         setPlayingSong(currentSong);
         lastVideoIdRef.current = currentSong.video_id;
-        lastPathnameRef.current = pathname;
       }
+
+      lastPathnameRef.current = pathname;
     }
   }, [pathname, isHomePage, currentSong?.video_id]);
 
