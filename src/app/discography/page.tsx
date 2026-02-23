@@ -1,7 +1,7 @@
-import DiscographyPage from "./client";
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import { metadata } from "../layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import DiscographyClient from "./client";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Discography";
@@ -24,7 +24,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
-
 export default function Page() {
-  return <DiscographyPage />;
+  return <DiscographyClient />;
 }

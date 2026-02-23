@@ -1,6 +1,6 @@
 "use client";
 
-import { FaCompactDisc, FaMusic } from "react-icons/fa6";
+import { FaCompactDisc, FaMusic, FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
@@ -68,6 +68,13 @@ const SongItem = ({
                 ? `${new Date(song.firstVideo.album_release_at).toLocaleDateString()}`
                 : `${new Date(song.firstVideo.broadcast_at).toLocaleDateString()}`}
               {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
+
+              {song.videos.length == 1 && song.videos[0].view_count && (
+                <div className="mt-2 text-xs">
+                  <FaPlay className="inline mr-2 -mt-1" />
+                  {song.videos[0].view_count.toLocaleString()}回再生
+                </div>
+              )}
             </div>
           </div>
         </div>

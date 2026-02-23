@@ -389,7 +389,7 @@ const NowPlayingSongInfoDetail = ({
               </dt>
               <dd>
                 <a
-                  href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
+                  href={`${currentSong.video_uri}${Number(currentSong.start) > 0 ? `&t=${currentSong.start}s` : ""}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300 text-sm"
@@ -404,7 +404,7 @@ const NowPlayingSongInfoDetail = ({
                   style={{ cursor: "pointer" }}
                   target="_blank"
                   component={Link}
-                  href={`${currentSong.video_uri}&t=${currentSong.start || 0}s`}
+                  href={`${currentSong.video_uri}${Number(currentSong.start) > 0 ? `&t=${currentSong.start}s` : ""}`}
                   leftSection={<FaYoutube />}
                 >
                   YouTube

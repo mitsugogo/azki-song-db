@@ -108,6 +108,10 @@ export const collabUnits: CollabUnit[] = [
     unitName: "フブミオ",
   },
   {
+    members: ["AZKi", "ロボ子さん", "水宮枢", "響咲リオナ"],
+    unitName: "RoARiS",
+  },
+  {
     members: ["AZKi", "アキ・ローゼンタール", "大神ミオ"],
     unitName: "RosaMia",
   },

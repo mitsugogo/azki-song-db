@@ -95,13 +95,17 @@ describe("useSearch", () => {
   });
 
   it("初期状態では全ての曲を返す", () => {
-    const { result } = renderHook(() => useSearch(mockSongs));
+    const { result } = renderHook(() =>
+      useSearch(mockSongs, { syncUrl: true, urlUpdateMode: "push" }),
+    );
 
     expect(result.current.songs).toEqual(mockSongs);
   });
 
   it("タイトル検索が動作する", async () => {
-    const { result } = renderHook(() => useSearch(mockSongs));
+    const { result } = renderHook(() =>
+      useSearch(mockSongs, { syncUrl: true, urlUpdateMode: "push" }),
+    );
 
     result.current.setSearchTerm("title:winter");
 
@@ -134,7 +138,9 @@ describe("useSearch", () => {
   );
 
   it("アーティスト検索が動作する", async () => {
-    const { result } = renderHook(() => useSearch(mockSongs));
+    const { result } = renderHook(() =>
+      useSearch(mockSongs, { syncUrl: true, urlUpdateMode: "push" }),
+    );
 
     result.current.setSearchTerm("artist:artist a");
 
@@ -617,24 +623,28 @@ describe("useSearch", () => {
   });
 
   it("検索語変更でURLが更新される", async () => {
-    const replaceStateSpy = vi
-      .spyOn(window.history, "replaceState")
+    const pushStateSpy = vi
+      .spyOn(window.history, "pushState")
       .mockImplementation(() => undefined as any);
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
-    const { result } = renderHook(() => useSearch(mockSongs));
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const { result } = renderHook(() =>
+      useSearch(mockSongs, { syncUrl: true, urlUpdateMode: "push" }),
+    );
 
     result.current.setSearchTerm("artist:artist a");
 
     await waitFor(
       () => {
-        expect(replaceStateSpy).toHaveBeenCalled();
+        expect(pushStateSpy).toHaveBeenCalled();
         expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event));
       },
       { timeout: 1000 },
     );
 
-    replaceStateSpy.mockRestore();
+    pushStateSpy.mockRestore();
     dispatchSpy.mockRestore();
   });
 });

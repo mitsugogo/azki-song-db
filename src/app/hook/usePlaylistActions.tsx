@@ -1,5 +1,6 @@
 // usePlaylistActions.tsx
 import { useCallback } from "react";
+import historyHelper from "../lib/history";
 import usePlaylists, { Playlist } from "./usePlaylists";
 import { Song } from "../types/song";
 
@@ -54,10 +55,8 @@ export const usePlaylistActions = ({
       const url = new URL(window.location.href);
       url.searchParams.set("playlist", encoded);
       url.searchParams.delete("q");
-      // 履歴を増やさないようにreplaceStateを使う
-      window.history.replaceState({}, "", url);
-      // Headerなどに通知
-      window.dispatchEvent(new Event("replacestate"));
+      // 履歴を増やさないように replaceState 相当のユーティリティを使う
+      historyHelper.replaceUrlIfDifferent(url.toString());
     },
     [
       allSongs,
@@ -72,10 +71,8 @@ export const usePlaylistActions = ({
   const disablePlaylistMode = useCallback(() => {
     const url = new URL(window.location.href);
     url.searchParams.delete("playlist");
-    // 履歴を増やさないようにreplaceStateを使う
-    window.history.replaceState({}, "", url);
-    // Headerなどに通知
-    window.dispatchEvent(new Event("replacestate"));
+    // 履歴を増やさないように replaceState 相当のユーティリティを使う
+    historyHelper.replaceUrlIfDifferent(url.toString());
     setSongs(allSongs);
   }, [allSongs, setSongs]);
 

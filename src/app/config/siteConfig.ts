@@ -4,6 +4,7 @@ export const siteConfig = {
   siteSlug: "azki-song-db",
 
   // 推しのチャンネル名、URL
+  talentName: "AZKi",
   channelName: "AZKi Channel",
   channelUrl: "https://www.youtube.com/@AZKi",
   // 本番のURL

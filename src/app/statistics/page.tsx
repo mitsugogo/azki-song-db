@@ -2,8 +2,9 @@ import StatisticsPage from "./client";
 
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import { Breadcrumb, BreadcrumbItem } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import Link from "next/link";
+import { HiHome, HiChevronRight } from "react-icons/hi";
+import { breadcrumbClasses } from "../theme";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,12 +34,17 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Page() {
   return (
     <div className="grow lg:p-6 lg:pb-0">
-      <Breadcrumb aria-label="Breadcrumb" className="mb-3">
-        <BreadcrumbItem href="/">
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </BreadcrumbItem>
-        <BreadcrumbItem href="/statistics">統計情報</BreadcrumbItem>
-      </Breadcrumb>
+      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
+        <div className="flex items-center">
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <HiChevronRight className={breadcrumbClasses.separator} />
+          <Link href="/statistics" className={breadcrumbClasses.link}>
+            統計情報
+          </Link>
+        </div>
+      </nav>
       <StatisticsPage />
     </div>
   );

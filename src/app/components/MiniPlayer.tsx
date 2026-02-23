@@ -292,18 +292,18 @@ export default function MiniPlayer() {
   }, [isDragging, dragOffset, snapToCorner]);
 
   useEffect(() => {
-    // ページ遷移または動画IDが変わったときにプレイヤーをリセット
+    // 動画IDが変わったときのみプレイヤーをリセットする
     if (!isHomePage && currentSong) {
       const videoIdChanged = currentSong.video_id !== lastVideoIdRef.current;
-      const pathnameChanged = pathname !== lastPathnameRef.current;
 
-      if (videoIdChanged || pathnameChanged) {
+      if (videoIdChanged) {
         setPlayerKey((prev) => prev + 1);
         setHasRestoredTime(false);
         setPlayingSong(currentSong);
         lastVideoIdRef.current = currentSong.video_id;
-        lastPathnameRef.current = pathname;
       }
+
+      lastPathnameRef.current = pathname;
     }
   }, [pathname, isHomePage, currentSong?.video_id]);
 
@@ -378,7 +378,15 @@ export default function MiniPlayer() {
 
   const handleMaximize = useCallback(() => {
     maximizePlayer();
-    router.push("/");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.pathname = "/";
+      const target =
+        url.pathname + (url.search ? `?${url.searchParams.toString()}` : "");
+      router.push(target);
+    } else {
+      router.push("/");
+    }
   }, [maximizePlayer, router]);
 
   // ホームページではミニプレイヤーを表示しない

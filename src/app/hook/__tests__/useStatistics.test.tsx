@@ -342,4 +342,94 @@ describe("useStatistics", () => {
     );
     expect(compareResult).toBeLessThan(0);
   });
+
+  it("オリ曲リリース日集計でMVとアートトラックを分離し歌枠を除外する", () => {
+    const songs: Song[] = [
+      {
+        video_id: "mv-1",
+        start: "0",
+        title: "同名曲",
+        artist: "AZKi",
+        album: "Album A",
+        sing: "AZKi",
+        tags: ["オリ曲MV"],
+        broadcast_at: "2024-01-01",
+        video_title: "MV",
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+      {
+        video_id: "art-1",
+        start: "0",
+        title: "同名曲",
+        artist: "AZKi",
+        album: "Album A",
+        sing: "AZKi",
+        tags: ["オリ曲", "アートトラック"],
+        broadcast_at: "2024-01-02",
+        video_title: "Art Track",
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+      {
+        video_id: "live-1",
+        start: "120",
+        title: "同名曲",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["歌枠", "2025歌枠"],
+        broadcast_at: "2025-01-02",
+        video_title: "Live",
+        milestones: [],
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        end: "",
+        year: 0,
+      },
+    ];
+
+    renderHook(() =>
+      useStatistics({
+        songs,
+      }),
+    );
+
+    const originalReleaseCall = createStatisticsMock.mock.calls.find(
+      ([calledSongs, keyFn]) =>
+        calledSongs.length === 2 &&
+        calledSongs.every((song) => song.title === "同名曲") &&
+        typeof keyFn(calledSongs[0]) === "string" &&
+        (keyFn(calledSongs[0]) as string).includes("__"),
+    );
+
+    expect(originalReleaseCall).toBeTruthy();
+
+    const [calledSongs, keyFn] = originalReleaseCall!;
+    const keys = calledSongs.map((song) => keyFn(song));
+
+    expect(keys).toContain("同名曲__AZKi__mv");
+    expect(keys).toContain("同名曲__AZKi__art-track");
+  });
 });
