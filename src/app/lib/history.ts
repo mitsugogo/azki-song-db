@@ -1,6 +1,6 @@
 // Small helper for programmatic history updates.
-// Provides a centralized way to perform replaceState with a short-lived
-// programmatic flag and (optionally) dispatch a replacestate event.
+// Provides a centralized way to perform replaceState/pushState with a short-lived
+// programmatic flag and dispatch a matching event when needed.
 export const __PROGRAMMATIC_FLAG_KEY = "__isProgrammaticHistoryUpdate";
 
 export function isProgrammaticHistoryUpdate(): boolean {
@@ -36,7 +36,26 @@ export function replaceUrlIfDifferent(
   }
 }
 
+export function pushUrlIfDifferent(
+  newUrl: string,
+  opts?: { dispatchEvent?: boolean },
+) {
+  try {
+    if (typeof window === "undefined") return;
+    if (window.location.href === newUrl) return;
+    setProgrammaticFlag(true);
+    window.history.pushState(null, "", newUrl);
+    if (opts?.dispatchEvent ?? true) {
+      window.dispatchEvent(new Event("pushstate"));
+    }
+  } finally {
+    // clear next tick
+    setTimeout(() => setProgrammaticFlag(false), 0);
+  }
+}
+
 export default {
   isProgrammaticHistoryUpdate,
   replaceUrlIfDifferent,
+  pushUrlIfDifferent,
 };

@@ -9,6 +9,7 @@ import { filterOriginalSongs } from "../config/filters";
 
 interface UseSearchOptions {
   syncUrl?: boolean;
+  urlUpdateMode?: "replace" | "push";
 }
 
 /**
@@ -18,6 +19,7 @@ interface UseSearchOptions {
 const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   const [songs, setSongs] = useState<Song[]>([]);
   const syncUrl = options?.syncUrl ?? true;
+  const urlUpdateMode = options?.urlUpdateMode ?? "replace";
 
   // 通常検索
   const [searchTerm, setSearchTerm] = useState("");
@@ -338,9 +340,13 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         url.searchParams.delete("q");
       }
 
-      historyHelper.replaceUrlIfDifferent(url.href);
+      if (urlUpdateMode === "push") {
+        historyHelper.pushUrlIfDifferent(url.href);
+      } else {
+        historyHelper.replaceUrlIfDifferent(url.href);
+      }
     }
-  }, [searchTerm, syncUrl]);
+  }, [searchTerm, syncUrl, urlUpdateMode]);
 
   // リアルタイム検索（debounce適用）
   useEffect(() => {

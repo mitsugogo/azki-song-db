@@ -43,6 +43,7 @@ const SearchPageClient = () => {
     allSongs,
     {
       syncUrl: true,
+      urlUpdateMode: "push",
     },
   );
 
