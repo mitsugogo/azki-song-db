@@ -16,7 +16,6 @@ import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
 import Link from "next/link";
 import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
-import { HiHome } from "react-icons/hi";
 
 export default function PlaylistPage() {
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);

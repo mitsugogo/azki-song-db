@@ -1,4 +1,8 @@
-import { getCachedSongs, getCachedChannels } from "./test-utils";
+import {
+  getCachedSongs,
+  getCachedChannels,
+  getCachedMilestones,
+} from "./test-utils";
 
 export const setupApiMocks = async (page: any) => {
   // Mock the songs API with cached data
@@ -8,6 +12,15 @@ export const setupApiMocks = async (page: any) => {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify(songs),
+    });
+  });
+
+  await page.route("**/api/milestones", async (route: any) => {
+    const milestones = getCachedMilestones();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(milestones),
     });
   });
 
