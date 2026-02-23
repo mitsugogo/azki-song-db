@@ -70,6 +70,7 @@ const usePlayerControls = (
     { start: number; end: number; text: string }[]
   >([]);
   const timedMessagesRef = useRef(timedMessages);
+  const defaultDocumentTitleRef = useRef(siteConfig.siteName);
 
   // songs配列とnextSongの最新値をrefで保持
   const songsRef = useRef(songs);
@@ -96,6 +97,11 @@ const usePlayerControls = (
   useEffect(() => {
     nextSongRef.current = nextSong;
   }, [nextSong]);
+
+  useEffect(() => {
+    const initialTitle = document.title?.trim();
+    defaultDocumentTitleRef.current = initialTitle || siteConfig.siteName;
+  }, []);
 
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
@@ -174,7 +180,7 @@ const usePlayerControls = (
     const title =
       isPlaying && currentSong
         ? `${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
-        : siteConfig.siteName;
+        : defaultDocumentTitleRef.current;
     document.title = title;
   }, [currentSong, isPlaying]);
 
