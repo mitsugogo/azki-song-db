@@ -299,7 +299,8 @@ export const TABS_CONFIG: TabConfig[] = [
     icon: FaCompactDisc,
     dataKey: "originalSongCountsByReleaseDate",
     caption: "オリ曲",
-    description: "オリジナル楽曲のリリース日 または 動画初公開日 です",
+    description:
+      "オリジナル楽曲のリリース日 または 動画初公開日 です。MVとアートトラックを収録しているため、同一曲でも重複があります。",
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1700,
     columns: [
@@ -373,6 +374,7 @@ export const TABS_CONFIG: TabConfig[] = [
             info.row.original.viewMilestone,
           ),
         sortingFn: viewCountSortFn,
+        size: 180,
       },
       {
         id: "broadcast_at",
@@ -471,6 +473,7 @@ export const TABS_CONFIG: TabConfig[] = [
             info.row.original.viewMilestone,
           ),
         sortingFn: viewCountSortFn,
+        size: 180,
       },
       {
         id: "broadcast_at",
