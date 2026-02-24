@@ -7,8 +7,6 @@ import slugify from "../../../lib/slugify";
 import { findRouteForRelease } from "../../../config/timelineRoutes";
 import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../../../theme";
 import { Badge, LoadingOverlay } from "@mantine/core";
 import { renderLinkedText } from "../../../lib/textLinkify";
 import {
@@ -19,6 +17,7 @@ import {
 import useSongs from "../../../hook/useSongs";
 import ViewStat from "./viewStat";
 import { getCollabUnitName } from "@/app/config/collabUnits";
+import DiscographyBreadcrumbs from "../../components/DiscographyBreadcrumbs";
 
 export default function ClientPage({
   category,
@@ -101,45 +100,32 @@ export default function ClientPage({
 
   return (
     <div className="p-6 w-full  mx-auto">
-      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-        <div className="flex items-center">
-          <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link href="/discography" className={breadcrumbClasses.link}>
-            楽曲一覧
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link
-            href={`/discography/${encodeURIComponent(category)}`}
-            className={breadcrumbClasses.link}
-          >
-            {category === "originals"
-              ? "オリジナル楽曲"
-              : category === "covers"
-                ? "カバー"
-                : "コラボ"}
-          </Link>
-          {song.album && (
-            <>
-              <HiChevronRight className={breadcrumbClasses.separator} />
-              <Link
-                href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(
-                  song.album,
-                )}`}
-                className={breadcrumbClasses.link}
-              >
-                <LuFolder className="inline mr-1" /> {song.album}
-              </Link>
-            </>
-          )}
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <span className={breadcrumbClasses.link}>
-            {song.title ? song.title : song.album}
-          </span>
-        </div>
-      </nav>
+      <DiscographyBreadcrumbs
+        items={[
+          {
+            label:
+              category === "originals"
+                ? "オリジナル楽曲"
+                : category === "covers"
+                  ? "カバー楽曲"
+                  : "ユニット・ゲスト楽曲",
+            href: `/discography/${encodeURIComponent(category)}`,
+          },
+          ...(song.album
+            ? [
+                {
+                  label: (
+                    <>
+                      <LuFolder className="inline mr-1" /> {song.album}
+                    </>
+                  ),
+                  href: `/discography/album/${encodeURIComponent(slugify(song.album))}`,
+                },
+              ]
+            : []),
+          { label: song.title ? song.title : song.album },
+        ]}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div className="col-span-1">
@@ -157,7 +143,7 @@ export default function ClientPage({
             <p className="text-sm text-gray-600 dark:text-gray-300">
               <LuFolder className="inline mr-1" />{" "}
               <Link
-                href={`/discography/${encodeURIComponent(category)}?album=${encodeURIComponent(song.album)}`}
+                href={`/discography/album/${encodeURIComponent(slugify(song.album))}`}
               >
                 {song.album}
               </Link>

@@ -17,6 +17,7 @@ import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { StatisticsItem } from "./createStatistics";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
 import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
+import slugify from "../lib/slugify";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
@@ -137,44 +138,64 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
 
   // この組み合わせにユニット名があるか
   const unitName = getCollabUnitName(song.firstVideo.sing.split("、"));
+  const albumPath = song.firstVideo.album
+    ? `/discography/album/${encodeURIComponent(slugify(song.firstVideo.album))}`
+    : null;
 
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="w-full md:w-1/3 relative aspect-video">
-          {/* 前の画像（フェードアウト） */}
-          {prevVideoId && (
-            <div
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                prevVisible ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <YoutubeThumbnail
-                videoId={prevVideoId}
-                alt={song.firstVideo.video_title}
-                fill={true}
-              />
-            </div>
-          )}
-
-          {/* 現在表示中の画像（フェードイン） */}
-          <div
-            className={`absolute inset-0 transition-opacity duration-500 ${
-              currVisible ? "opacity-100" : "opacity-0"
-            }`}
-          >
+          {song.isAlbum ? (
             <YoutubeThumbnail
-              videoId={displayedVideoId}
+              videoId={song.firstVideo.video_id}
               alt={song.firstVideo.video_title}
               fill={true}
             />
-          </div>
+          ) : (
+            <>
+              {/* 前の画像（フェードアウト） */}
+              {prevVideoId && (
+                <div
+                  className={`absolute inset-0 transition-opacity duration-500 ${
+                    prevVisible ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <YoutubeThumbnail
+                    videoId={prevVideoId}
+                    alt={song.firstVideo.video_title}
+                    fill={true}
+                  />
+                </div>
+              )}
+
+              {/* 現在表示中の画像（フェードイン） */}
+              <div
+                className={`absolute inset-0 transition-opacity duration-500 ${
+                  currVisible ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <YoutubeThumbnail
+                  videoId={displayedVideoId}
+                  alt={song.firstVideo.video_title}
+                  fill={true}
+                />
+              </div>
+            </>
+          )}
         </div>
         <div className="flex-1 text-gray-900 dark:text-gray-200">
           <h2 className="text-2xl font-bold mb-1">
-            {song.isAlbum && song.firstVideo.album
-              ? song.firstVideo.album
-              : song.firstVideo.title}
+            {song.isAlbum && song.firstVideo.album && albumPath ? (
+              <Link
+                href={albumPath}
+                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+              >
+                {song.firstVideo.album}
+              </Link>
+            ) : (
+              song.firstVideo.title
+            )}
           </h2>
           <p className="text-sm">
             アーティスト:{" "}
@@ -331,8 +352,16 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 {videos.map((s, index) => (
                   <TableRow
                     key={index}
-                    onMouseEnter={() => setHoveredVideo(s.video_id)}
-                    onMouseLeave={() => setHoveredVideo(null)}
+                    onMouseEnter={() => {
+                      if (!song.isAlbum) {
+                        setHoveredVideo(s.video_id);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!song.isAlbum) {
+                        setHoveredVideo(null);
+                      }
+                    }}
                   >
                     <TableCell className="px-2 py-1 dark:text-light-gray-500">
                       <Link

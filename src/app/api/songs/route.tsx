@@ -82,6 +82,7 @@ export async function GET() {
     ] as const;
 
     const songs: any[] = [];
+    let sourceOrder = 0;
 
     response.data.sheets?.forEach((sheet) => {
       const sheetRows = sheet.data?.[0]?.rowData || [];
@@ -159,6 +160,7 @@ export async function GET() {
           videoId + "_" + parseTimeFromNumberValue(getNum("start"));
 
         songs.push({
+          source_order: sourceOrder++,
           title: titleValue,
           slug: slugify(titleValue) || videoId,
           slugv2: slugifyV2(uniqKey),
