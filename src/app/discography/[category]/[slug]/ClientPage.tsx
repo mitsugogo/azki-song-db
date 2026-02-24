@@ -130,7 +130,7 @@ export default function ClientPage({
                 )}`}
                 className={breadcrumbClasses.link}
               >
-                {song.album}
+                <LuFolder className="inline mr-1" /> {song.album}
               </Link>
             </>
           )}
