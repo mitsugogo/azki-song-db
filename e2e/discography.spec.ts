@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+import { getCachedSongs } from "./test-utils";
 
 test.describe("Discography page", () => {
   test.describe.configure({ mode: "serial" });
@@ -34,8 +35,7 @@ test.describe("Discography page", () => {
   });
 
   test("discography slug page shows details", async ({ page }) => {
-    const res = await page.request.get("/api/songs");
-    const songs: any[] = await res.json();
+    const songs: any[] = getCachedSongs();
     const withSlug = songs.find(
       (s) => s && s.slug && s.tags && s.tags.includes("オリ曲"),
     );
@@ -62,8 +62,7 @@ test.describe("Discography page", () => {
   test("discography?album=xxxx opens and expands the album", async ({
     page,
   }) => {
-    const res = await page.request.get("/api/songs");
-    const songs: any[] = await res.json();
+    const songs: any[] = getCachedSongs();
     const withAlbum = songs.find((s) => s && s.album);
     test.skip(!withAlbum, "no song with album available for testing");
     const album = withAlbum.album;
@@ -152,8 +151,7 @@ test.describe("Discography page", () => {
 
   // 旧slugのURLにアクセスしたとき、正しい曲ページにリダイレクトされることを確認
   test("redirects old slug URL to correct song page", async ({ page }) => {
-    const res = await page.request.get("/api/songs");
-    const songs: any[] = await res.json();
+    const songs: any[] = getCachedSongs();
     const withSlugV1 = songs.find(
       (s) => s && s.slugv2 && s.slug && s.tags && s.tags.includes("オリ曲"),
     );
