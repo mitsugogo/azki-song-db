@@ -120,6 +120,8 @@ Major data APIs in this project return the `Vercel-Cache-Tag` response header.
 - `/api/songs`: `dataset:core,songs,songs:list`
 - `/api/milestones`: `dataset:core,milestones,milestones:list`
 - `/api/yt/channels`: `dataset:core,channels,channels:list`
+- `/api/yt/info`: `yt:info,yt:video`
+- `/api/yt/video/[video_id]`: `yt:video,yt:video:{video_id}`
 - `/api/stat/views`: `stat:views,stat:views:list`
 - `/api/stat/views/[video_id]`: `stat:views,stat:views:single`
 

@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 import { YouTubeApiVideoResult } from "@/app/types/api/yt/video";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 type FetchVideoOutcome = {
   result: YouTubeApiVideoResult | null;
@@ -76,7 +77,11 @@ export async function GET(
     return NextResponse.json(result.result, {
       headers: {
         "Cache-Control":
-          "max-age=3600, s-maxage=86400, stale-while-revalidate=300",
+          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.ytVideo,
+          `yt:video:${video_id}`,
+        ]),
       },
     });
   }
