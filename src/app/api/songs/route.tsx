@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 export async function GET() {
   try {
@@ -214,6 +215,11 @@ export async function GET() {
       headers: {
         "Cache-Control":
           "max-age=300, s-maxage=86400, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.coreDataset,
+          cacheTags.songs,
+          cacheTags.songsList,
+        ]),
         "x-data-updated": now.toISOString(),
         "Last-Modified": now.toUTCString(),
       },

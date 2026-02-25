@@ -83,6 +83,31 @@ npm run test:e2e:headed
 
 Vercelにデプロイする場合は、該当の環境変数をコンソールから設定してください。
 
+## Vercel CDNキャッシュ運用（タグ指定削除）
+
+このプロジェクトの主要データAPIは `Vercel-Cache-Tag` ヘッダを返します。
+
+- `/api/songs`: `dataset:core,songs,songs:list`
+- `/api/milestones`: `dataset:core,milestones,milestones:list`
+- `/api/yt/channels`: `dataset:core,channels,channels:list`
+- `/api/stat/views`: `stat:views,stat:views:list`
+- `/api/stat/views/[video_id]`: `stat:views,stat:views:single`
+
+### 手動でタグ指定削除する手順
+
+1. Vercel Project の `Settings` を開く
+2. `Caches` を開く
+3. `CDN Cache` セクションの `Purge CDN Cache` をクリック
+4. `Cache Tag` を選択
+5. 削除対象タグ（例: `songs`）を入力して実行
+
+### 推奨戦略
+
+- 通常運用は `Invalidate` を使用（推奨）
+- `Delete` は緊急時のみ使用（初回リクエスト遅延やスタンピードを避けるため）
+- 既定は `Cache-Control` のTTL + `stale-while-revalidate` を活かし、更新時だけタグ `Invalidate` で即時反映する
+- `dataset:core` は複数APIを横断で更新したいときに使用する
+
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で公開されています。詳細は `LICENSE` を参照してください。

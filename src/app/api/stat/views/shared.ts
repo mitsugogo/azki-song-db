@@ -1,4 +1,5 @@
 import { Period, VALID_PERIODS, ViewStat } from "@/app/types/api/stat/views";
+import { cacheTags } from "@/app/lib/cacheTags";
 
 const SHEET_NAME = "statistics";
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -92,7 +93,10 @@ export async function getStatisticsByVideoIds(
 
   try {
     const response = await fetch(url, {
-      next: { revalidate: 60 },
+      next: {
+        revalidate: 60,
+        tags: [cacheTags.statViews, cacheTags.statViewsList],
+      },
     });
     const text = await response.text();
     const data = parseGvizPayload(text);
