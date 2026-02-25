@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchJsonDedup } from "../lib/fetchDedup";
-import { ViewStat } from "../types/api/stat/views";
+import { Period, ViewStat } from "../types/api/stat/views";
 
 const CHUNK_SIZE = 40;
 
@@ -18,7 +18,7 @@ type StatisticsResponse = {
   statistics: Record<string, ViewStat[]>;
 };
 
-const useStatViewCounts = (videoIds: string[]) => {
+const useStatViewCounts = (videoIds: string[], period: Period = "7d") => {
   const [data, setData] = useState<Record<string, ViewStat[]>>({});
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +41,7 @@ const useStatViewCounts = (videoIds: string[]) => {
 
     Promise.all(
       chunks.map(async (chunk) => {
-        const url = `/api/stat/views?videoIds=${encodeURIComponent(chunk.join(","))}`;
+        const url = `/api/stat/views?videoIds=${encodeURIComponent(chunk.join(","))}&period=${period}`;
         const result = await fetchJsonDedup<StatisticsResponse>(url);
         return result.data?.statistics || {};
       }),

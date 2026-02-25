@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       status: 400,
     });
   }
-  const period = parsePeriod(periodParam) ?? undefined;
+  const period = parsePeriod(periodParam) ?? "7d";
 
   let statisticsByVideoId;
   try {
