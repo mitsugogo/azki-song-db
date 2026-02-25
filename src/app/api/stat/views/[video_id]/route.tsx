@@ -21,7 +21,7 @@ export async function GET(
       status: 400,
     });
   }
-  const period = parsePeriod(periodParam) ?? undefined;
+  const period = parsePeriod(periodParam) ?? "7d";
 
   let statistics;
   try {

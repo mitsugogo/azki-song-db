@@ -28,8 +28,11 @@ const isSameLocalDate = (left: string | Date, right: string | Date) => {
 };
 
 export default function ViewStat({ videoId }: { videoId: string }) {
-  const { data: viewHistory, loading: viewHistoryLoading } =
-    useStatViewCount(videoId);
+  const [period, setPeriod] = useState<"7d" | "30d" | "365d" | "all">("30d");
+  const { data: viewHistory, loading: viewHistoryLoading } = useStatViewCount(
+    videoId,
+    period,
+  );
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -89,9 +92,6 @@ export default function ViewStat({ videoId }: { videoId: string }) {
           : null,
     };
   });
-
-  // 期間絞り込み state
-  const [period, setPeriod] = useState<"7d" | "30d" | "365d" | "all">("30d");
 
   // Y軸を0始まりにするかどうか（UIで切替）
   const [startFromZero, setStartFromZero] = useState<boolean>(true);
