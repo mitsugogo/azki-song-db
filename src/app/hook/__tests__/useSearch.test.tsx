@@ -255,6 +255,70 @@ describe("useSearch", () => {
     );
   });
 
+  it("album単独検索はsource_order順で並ぶ", async () => {
+    const songs: Song[] = [
+      {
+        video_id: "album2",
+        title: "Album Track 2",
+        artist: "AZKi",
+        album: "Album Ordered",
+        sing: "AZKi",
+        tags: [],
+        video_title: "Video 2",
+        broadcast_at: "2025-01-02",
+        start: "0",
+        end: "100",
+        year: 2025,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+        source_order: 2,
+      },
+      {
+        video_id: "album1",
+        title: "Album Track 1",
+        artist: "AZKi",
+        album: "Album Ordered",
+        sing: "AZKi",
+        tags: [],
+        video_title: "Video 1",
+        broadcast_at: "2024-12-31",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+        source_order: 1,
+      },
+    ];
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("album:Album Ordered");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(2);
+        expect(result.current.songs[0].video_id).toBe("album1");
+        expect(result.current.songs[1].video_id).toBe("album2");
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("作曲者検索が動作する", async () => {
     const { result } = renderHook(() => useSearch(mockSongs));
 
