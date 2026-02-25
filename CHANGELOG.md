@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.32.0](https://github.com/mitsugogo/azki-song-db/compare/v1.31.0...v1.32.0) (2026-02-25)
+
+
+### Features
+
+* discographyの大幅なレイアウト変更 ([6a44ee1](https://github.com/mitsugogo/azki-song-db/commit/6a44ee13a755bdde842792cb5be82a2f92e724b0))
+
+
+### Bug Fixes
+
+* タイムゾーン計算ミス修正 ([93e94ce](https://github.com/mitsugogo/azki-song-db/commit/93e94ce3e428a29c7a4cf2a776e9962d4127071f))
+
 ## [1.31.0](https://github.com/mitsugogo/azki-song-db/compare/v1.30.5...v1.31.0) (2026-02-23)
 
 
