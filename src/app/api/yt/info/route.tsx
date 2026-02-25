@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { MethodOptions } from "googleapis/build/src/apis/abusiveexperiencereport";
 import { NextRequest, NextResponse } from "next/server";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 // 50件ずつに分割するヘルパー関数
 const chunkArray = (arr: Array<string>, size: number) => {
@@ -59,7 +60,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(allVideoInfos, {
       headers: {
-        "Cache-Control": "s-maxage=600, stale-while-revalidate=300",
+        "Cache-Control":
+          "public, max-age=0, must-revalidate, s-maxage=600, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.ytInfo,
+          cacheTags.ytVideo,
+        ]),
       },
     });
   } catch (error) {

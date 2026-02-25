@@ -2,7 +2,7 @@
 
 import useStatViewCount from "@/app/hook/useStatViewCount";
 import { buildViewMilestoneInfo } from "@/app/lib/viewMilestone";
-import { LoadingOverlay } from "@mantine/core";
+import { Skeleton } from "@mantine/core";
 import {
   ResponsiveContainer,
   LineChart,
@@ -156,6 +156,16 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     const n = Number(v ?? 0);
     return new Intl.NumberFormat().format(n);
   };
+
+  const ChartSkeleton = () => (
+    <div className="w-full h-64 rounded-md border border-gray-200 dark:border-gray-700 p-3">
+      <div className="flex items-baseline justify-between mb-3">
+        <Skeleton height={14} width={80} radius="sm" />
+        <Skeleton height={14} width={90} radius="sm" />
+      </div>
+      <Skeleton height={220} width="100%" radius="sm" />
+    </div>
+  );
 
   const MetricChart = ({
     data,
@@ -484,8 +494,12 @@ export default function ViewStat({ videoId }: { videoId: string }) {
         </div>
       </div>
       {viewHistoryLoading ? (
-        <div>
-          <LoadingOverlay visible={viewHistoryLoading} />
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <ChartSkeleton />
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </div>
         </div>
       ) : chartData.length === 0 ? (
         <></>

@@ -113,6 +113,33 @@ The following environment variables are used in the project:
 
 Please set these environment variables in your `.env.local` file or in your production environment.
 
+## Vercel CDN Cache operation (tag-based purge)
+
+Major data APIs in this project return the `Vercel-Cache-Tag` response header.
+
+- `/api/songs`: `dataset:core,songs,songs:list`
+- `/api/milestones`: `dataset:core,milestones,milestones:list`
+- `/api/yt/channels`: `dataset:core,channels,channels:list`
+- `/api/yt/info`: `yt:info,yt:video`
+- `/api/yt/video/[video_id]`: `yt:video,yt:video:{video_id}`
+- `/api/stat/views`: `stat:views,stat:views:list`
+- `/api/stat/views/[video_id]`: `stat:views,stat:views:single`
+
+### Manual tag purge steps
+
+1. Open your Vercel project `Settings`
+2. Open `Caches`
+3. Click `Purge CDN Cache` in the `CDN Cache` section
+4. Select `Cache Tag`
+5. Enter a tag (for example: `songs`) and purge
+
+### Recommended strategy
+
+- Use `Invalidate` for normal operation (recommended)
+- Use `Delete` only for urgent recovery scenarios (to avoid slower first-hit and cache stampede risk)
+- Keep TTL + `stale-while-revalidate` as default behavior, and use tag `Invalidate` only when immediate freshness is needed
+- Use `dataset:core` when you need to refresh multiple core APIs at once
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

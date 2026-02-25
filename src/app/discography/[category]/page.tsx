@@ -9,6 +9,34 @@ import {
 } from "@/app/config/filters";
 import CategoryClient from "./client";
 
+type AlbumEntry = {
+  album: string;
+  slug: string;
+};
+
+function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
+  const albumNames = Array.from(
+    new Set(
+      songs
+        .map((song) => song.album?.trim())
+        .filter((album): album is string => Boolean(album)),
+    ),
+  ).sort((a, b) => a.localeCompare(b, "ja"));
+
+  const slugCounts = new Map<string, number>();
+
+  return albumNames.map((album) => {
+    const baseSlug = slugify(album) || "album";
+    const count = slugCounts.get(baseSlug) ?? 0;
+    slugCounts.set(baseSlug, count + 1);
+
+    return {
+      album,
+      slug: count === 0 ? baseSlug : `${baseSlug}-${count + 1}`,
+    };
+  });
+}
+
 async function fetchSongsFromApi(): Promise<Song[]> {
   const candidates = [
     process.env.NEXT_PUBLIC_BASE_URL,
@@ -75,6 +103,14 @@ export default async function CategoryOrLegacyRedirect({
     (s) =>
       isCollaborationSong(s) || isCoverSong(s) || isPossibleOriginalSong(s),
   );
+
+  const matchedAlbum = buildAlbumEntries(filteredSongs).find(
+    (entry) => entry.slug === possibleSlug,
+  );
+
+  if (matchedAlbum) {
+    redirect(`/discography/album/${encodeURIComponent(matchedAlbum.slug)}`);
+  }
 
   // 旧URL の場合、category に slug(v1) が入っていることがあるため判定してリダイレクト
   const possibleSong = filteredSongs.find(

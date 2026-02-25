@@ -1,6 +1,7 @@
 export interface Song {
   slug?: string;
   slugv2?: string;
+  source_order?: number;
   title: string;
   artist: string;
   album: string;

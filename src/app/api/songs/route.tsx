@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 export async function GET() {
   try {
@@ -82,6 +83,7 @@ export async function GET() {
     ] as const;
 
     const songs: any[] = [];
+    let sourceOrder = 0;
 
     response.data.sheets?.forEach((sheet) => {
       const sheetRows = sheet.data?.[0]?.rowData || [];
@@ -159,6 +161,7 @@ export async function GET() {
           videoId + "_" + parseTimeFromNumberValue(getNum("start"));
 
         songs.push({
+          source_order: sourceOrder++,
           title: titleValue,
           slug: slugify(titleValue) || videoId,
           slugv2: slugifyV2(uniqKey),
@@ -211,7 +214,12 @@ export async function GET() {
     return NextResponse.json(songs, {
       headers: {
         "Cache-Control":
-          "max-age=300, s-maxage=86400, stale-while-revalidate=300",
+          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.coreDataset,
+          cacheTags.songs,
+          cacheTags.songsList,
+        ]),
         "x-data-updated": now.toISOString(),
         "Last-Modified": now.toUTCString(),
       },

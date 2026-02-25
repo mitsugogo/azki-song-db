@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getStatisticsByVideoIds, isValidPeriod, parsePeriod } from "./shared";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 export const runtime = "edge";
 
@@ -60,7 +61,11 @@ export async function GET(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control":
-          "max-age=3600, s-maxage=86400, stale-while-revalidate=300",
+          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.statViews,
+          cacheTags.statViewsList,
+        ]),
       },
     },
   );

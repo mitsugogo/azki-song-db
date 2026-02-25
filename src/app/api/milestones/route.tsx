@@ -1,5 +1,6 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
+import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
 export async function GET() {
   try {
@@ -96,7 +97,12 @@ export async function GET() {
     return NextResponse.json(items, {
       headers: {
         "Cache-Control":
-          "max-age=300, s-maxage=86400, stale-while-revalidate=300",
+          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+          cacheTags.coreDataset,
+          cacheTags.milestones,
+          cacheTags.milestonesList,
+        ]),
         "x-data-updated": now.toISOString(),
         "Last-Modified": now.toUTCString(),
       },
