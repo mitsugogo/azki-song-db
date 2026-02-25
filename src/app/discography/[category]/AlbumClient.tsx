@@ -1,17 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment } from "react";
 import { Song } from "../../types/song";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-} from "flowbite-react";
-import { FaDatabase, FaYoutube } from "react-icons/fa6";
+import { FaDatabase, FaPlay, FaYoutube } from "react-icons/fa6";
 import { LoadingOverlay } from "@mantine/core";
 import {
   isCollaborationSong,
@@ -78,12 +69,19 @@ export default function AlbumClient({
   });
   const leadSong =
     albumSongs.find((song) => song.video_id === coverVideoId) ?? albumSongs[0];
-  const isCoverAlbum = albumSongs.some((song) => {
-    const artist = song.artist?.trim();
-    const singer = song.sing?.trim();
-    if (!artist || !singer) return false;
-    return artist !== singer;
-  });
+  const albumArtists = albumSongs
+    .map((song) => song.artist?.trim())
+    .filter((artist): artist is string => Boolean(artist));
+  const hasSingleAlbumArtist =
+    albumArtists.length > 0 && new Set(albumArtists).size === 1;
+  const isCoverAlbum = hasSingleAlbumArtist
+    ? false
+    : albumSongs.some((song) => {
+        const artist = song.artist?.trim();
+        const singer = song.sing?.trim();
+        if (!artist || !singer) return false;
+        return artist !== singer;
+      });
 
   if (isLoading) {
     return (
@@ -142,7 +140,7 @@ export default function AlbumClient({
             />
           </div>
 
-          <h1 className="text-4xl font-extrabold mt-4 mb-2">{albumName}</h1>
+          <h1 className="text-2xl font-extrabold mt-4 mb-2">{albumName}</h1>
           {!isCoverAlbum && (
             <p className="text-sm text-gray-600 dark:text-gray-300">
               アーティスト: {leadSong.artist}
@@ -181,96 +179,66 @@ export default function AlbumClient({
           </div>
         </aside>
 
-        <section className="rounded-xl bg-gray-50/20 dark:bg-gray-800 overflow-hidden p-2 md:p-3">
-          <div className="w-full overflow-x-auto rounded-lg">
-            <Table
-              border={3}
-              className="w-full min-w-full table-auto md:table-fixed"
-            >
-              <TableHead className="sticky top-0">
-                <TableRow>
-                  <TableHeadCell className="w-12 px-2 py-2 whitespace-nowrap dark:text-light-gray-500">
-                    #
-                  </TableHeadCell>
-                  <TableHeadCell className="px-3 py-2 whitespace-nowrap dark:text-light-gray-500">
-                    曲名
-                  </TableHeadCell>
-                  <TableHeadCell className="px-3 py-2 whitespace-nowrap dark:text-light-gray-500">
-                    アーティスト
-                  </TableHeadCell>
-                  <TableHeadCell className="px-3 py-2 whitespace-nowrap dark:text-light-gray-500">
-                    歌った人
-                  </TableHeadCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {albumSongs.map((song, index) => {
-                  const stripeRowClass =
-                    index % 2 === 0
-                      ? "bg-white dark:bg-gray-800"
-                      : "bg-light-gray-100 dark:bg-gray-700";
+        <section className="rounded-sm bg-gray-50/20 dark:bg-gray-800 p-2 md:p-0">
+          <div className="space-y-3">
+            {albumSongs.map((song, index) => (
+              <article
+                key={`${song.video_id}-${index}`}
+                className="rounded-xl bg-light-gray-100 dark:bg-gray-700 p-3 md:p-4"
+              >
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="shrink-0 text-sm font-semibold text-gray-600 dark:text-light-gray-500 w-10">
+                    #{index + 1}
+                  </span>
 
-                  return (
-                    <Fragment key={`${song.video_id}-${index}`}>
-                      <TableRow
-                        key={`${song.video_id}-${index}-main`}
-                        className={stripeRowClass}
+                  <div className="w-32 shrink-0 overflow-hidden rounded aspect-video">
+                    <YoutubeThumbnail
+                      videoId={song.video_id}
+                      alt={song.title}
+                      fill={true}
+                      imageClassName="object-cover"
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={buildSongDetailPath(song)}
+                      className="block text-base font-semibold text-gray-900 dark:text-white hover:text-primary-500 dark:hover:text-primary-400 wrap-break-word leading-snug"
+                    >
+                      {song.title}
+                    </Link>
+                    <p className="text-sm text-gray-700 dark:text-light-gray-500 wrap-break-word leading-snug">
+                      {song.artist}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`https://www.youtube.com/watch?v=${song.video_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1.5 leading-none"
                       >
-                        <TableCell className="w-12 px-2 py-2 whitespace-nowrap align-top">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="px-3 py-2 align-top min-w-52">
-                          <div className="flex items-start gap-2 md:gap-3 min-w-0">
-                            <div className="w-20 h-12 md:w-28 md:h-16 shrink-0 overflow-hidden rounded">
-                              <YoutubeThumbnail
-                                videoId={song.video_id}
-                                alt={song.title}
-                                fill={true}
-                                imageClassName="object-cover"
-                              />
-                            </div>
-                            <Link
-                              href={buildSongDetailPath(song)}
-                              className="min-w-0 text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 whitespace-normal wrap-break-word leading-snug"
-                            >
-                              {song.title}
-                            </Link>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 py-2 dark:text-light-gray-500 align-top">
-                          <div className="max-w-44 whitespace-normal wrap-break-word leading-snug">
-                            {song.artist}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 py-2 dark:text-light-gray-500 align-top">
-                          <div className="max-w-52 whitespace-normal wrap-break-word leading-snug">
-                            {song.sing || "-"}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow
-                        key={`${song.video_id}-${index}-meta`}
-                        className={stripeRowClass}
+                        <FaYoutube className="text-xs" /> YouTube
+                      </Link>
+                      <Link
+                        href={`/?v=${song.video_id}&q=album:${encodeURIComponent(song.album ?? "")}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold px-2.5 py-1.5 leading-none"
                       >
-                        <TableCell
-                          colSpan={4}
-                          className="px-3 py-2 text-xs dark:text-light-gray-500"
-                        >
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                            <span>作詞: {song.lyricist || "-"}</span>
-                            <span>作曲: {song.composer || "-"}</span>
-                            <span>編曲: {song.arranger || "-"}</span>
-                            <span>
-                              動画公開日: {formatDate(song.broadcast_at)}
-                            </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    </Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                        <FaPlay className="text-xs" /> 再生
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-1 text-xs text-gray-600 dark:text-light-gray-500 flex flex-wrap items-center gap-x-4 gap-y-1 pl-13 md:pl-14">
+                  <span>歌: {song.sing || "-"}</span>
+                  <span>作詞: {song.lyricist || "-"}</span>
+                  <span>作曲: {song.composer || "-"}</span>
+                  <span>編曲: {song.arranger || "-"}</span>
+                  <span>動画公開日: {formatDate(song.broadcast_at)}</span>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       </div>

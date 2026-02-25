@@ -98,6 +98,8 @@ export default function ClientPage({
 
   const unitName = getCollabUnitName(song.sing.split("、"));
 
+  const isCover = isCoverSong(song);
+
   return (
     <div className="p-6 w-full  mx-auto">
       <DiscographyBreadcrumbs
@@ -123,7 +125,13 @@ export default function ClientPage({
                 },
               ]
             : []),
-          { label: song.title ? song.title : song.album },
+          {
+            label: song.title
+              ? isCover
+                ? `${song.title} - ${song.artist}`
+                : song.title
+              : song.album,
+          },
         ]}
       />
 
@@ -300,10 +308,10 @@ export default function ClientPage({
                   {Array.from(
                     new Map(relatedAlbum.map((s) => [s.video_id, s])).values(),
                   ).map((s) => {
-                    const internalHref = s.slug
-                      ? `/discography/${encodeURIComponent(s.slug)}`
+                    const internalHref = s.slugv2
+                      ? `/discography/${category}/${encodeURIComponent(s.slugv2)}`
                       : s.title
-                        ? `/discography/${encodeURIComponent(slugify(s.title))}`
+                        ? `/discography/${category}/${encodeURIComponent(slugify(s.title))}`
                         : "#";
                     return (
                       <div
@@ -316,7 +324,9 @@ export default function ClientPage({
                           alt={s.video_title}
                         />
                         <div className="text-sm flex-1">
-                          <div className="font-medium">{s.video_title}</div>
+                          <div className="font-medium">
+                            <Link href={internalHref}>{s.title}</Link>
+                          </div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">
                             {s.artist} - {s.sing}
                           </div>
