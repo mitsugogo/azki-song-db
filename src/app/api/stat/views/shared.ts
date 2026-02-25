@@ -1,6 +1,7 @@
 import { Period, VALID_PERIODS, ViewStat } from "@/app/types/api/stat/views";
 
 const SHEET_NAME = "statistics";
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 function escapeQueryValue(value: string) {
   return value.replace(/'/g, "''");
@@ -116,37 +117,40 @@ export async function getStatisticsByVideoId(videoId: string, period?: Period) {
 }
 
 function getGSDate(period: Period): string {
-  const now = new Date();
-  let pastDate: Date;
+  if (period === "all") {
+    return "1970-01-01";
+  }
+
+  const nowAsJst = new Date(Date.now() + JST_OFFSET_MS);
+  let pastDateAsJst: Date;
   switch (period) {
     case "1d":
-      pastDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 1 * 24 * 60 * 60 * 1000);
       break;
     case "3d":
-      pastDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 3 * 24 * 60 * 60 * 1000);
       break;
     case "7d":
-      pastDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 7 * 24 * 60 * 60 * 1000);
       break;
     case "30d":
-      pastDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 30 * 24 * 60 * 60 * 1000);
       break;
     case "90d":
-      pastDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 90 * 24 * 60 * 60 * 1000);
       break;
     case "180d":
-      pastDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 180 * 24 * 60 * 60 * 1000);
       break;
     case "365d":
     case "1y":
-      pastDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      pastDateAsJst = new Date(nowAsJst.getTime() - 365 * 24 * 60 * 60 * 1000);
       break;
-    case "all":
     default:
-      pastDate = new Date(0);
+      pastDateAsJst = new Date(0);
       break;
   }
-  return pastDate.toISOString().split("T")[0];
+  return pastDateAsJst.toISOString().split("T")[0];
 }
 
 function parseGoogleDate(dateStr: string): Date | null {
@@ -154,7 +158,7 @@ function parseGoogleDate(dateStr: string): Date | null {
   if (!match) return null;
 
   const parts = match[1].split(",").map(Number);
-  return new Date(
+  const jstMs = Date.UTC(
     parts[0],
     parts[1],
     parts[2],
@@ -162,4 +166,5 @@ function parseGoogleDate(dateStr: string): Date | null {
     parts[4] || 0,
     parts[5] || 0,
   );
+  return new Date(jstMs - JST_OFFSET_MS);
 }
