@@ -275,6 +275,11 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         });
       };
 
+      const isAlbumOnlySearch =
+        normalWords.length > 0 &&
+        excludeWords.length === 0 &&
+        normalWords.every((word) => word.startsWith("album:"));
+
       // 楽曲紹介shortsの場合は逆順に並べる
       if (normalWords.some((word) => word === "tag:楽曲紹介shorts")) {
         return songsToFilter
@@ -292,12 +297,22 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
           });
       }
 
-      return songsToFilter.filter((song) => {
+      const filteredSongs = songsToFilter.filter((song) => {
         return (
           matchesNormalWords(song, normalWords) &&
           !isExcluded(song, excludeWords)
         );
       });
+
+      if (isAlbumOnlySearch) {
+        return [...filteredSongs].sort((a, b) => {
+          const leftOrder = a.source_order ?? Number.MAX_SAFE_INTEGER;
+          const rightOrder = b.source_order ?? Number.MAX_SAFE_INTEGER;
+          return leftOrder - rightOrder;
+        });
+      }
+
+      return filteredSongs;
     },
     [allSongs],
   );

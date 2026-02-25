@@ -65,9 +65,9 @@ export default function DiscographyClient() {
     new Date(b.album_release_at || b.broadcast_at).getTime() -
     new Date(a.album_release_at || a.broadcast_at).getTime();
 
-  const recentOriginals = originals.sort(sortByRelease).slice(0, 10);
-  const recentCollabs = collabs.sort(sortByRelease).slice(0, 10);
-  const recentCovers = covers.sort(sortByRelease).slice(0, 10);
+  const recentOriginals = originals.sort(sortByRelease).slice(0, 5);
+  const recentCollabs = collabs.sort(sortByRelease).slice(0, 5);
+  const recentCovers = covers.sort(sortByRelease).slice(0, 5);
 
   return (
     <div className="p-6">
@@ -84,10 +84,21 @@ export default function DiscographyClient() {
         </Link>
       </Breadcrumbs>
       <h1 className="font-extrabold text-2xl mb-4">Discography</h1>
+      <p className="mb-6 text-sm text-muted-foreground">
+        これまでに配信された楽曲の一覧です。オリ曲、コラボ楽曲、カバー楽曲などをまとめています。
+      </p>
 
       <section className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-bold">オリジナル楽曲</h2>
+          <h2 className="font-bold text-lg">
+            <Link
+              href="/discography/originals"
+              className="hover:text-primary dark:hover:text-white"
+            >
+              オリジナル楽曲
+            </Link>{" "}
+            ({originals.length})
+          </h2>
           <Link href="/discography/originals" className="text-primary text-sm">
             » もっと見る
           </Link>
@@ -114,7 +125,15 @@ export default function DiscographyClient() {
 
       <section className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-bold">ユニット・ゲスト楽曲</h2>
+          <h2 className="font-bold text-lg">
+            <Link
+              href="/discography/collab"
+              className="hover:text-primary dark:hover:text-white"
+            >
+              ユニット・ゲスト楽曲
+            </Link>{" "}
+            ({collabs.length})
+          </h2>
           <Link href="/discography/collab" className="text-primary text-sm">
             » もっと見る
           </Link>
@@ -138,7 +157,15 @@ export default function DiscographyClient() {
 
       <section className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-bold">カバー楽曲</h2>
+          <h2 className="font-bold text-lg">
+            <Link
+              href="/discography/covers"
+              className="hover:text-primary dark:hover:text-white"
+            >
+              カバー楽曲
+            </Link>{" "}
+            ({covers.length})
+          </h2>
           <Link href="/discography/covers" className="text-primary text-sm">
             » もっと見る
           </Link>

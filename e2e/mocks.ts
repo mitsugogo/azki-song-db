@@ -87,22 +87,20 @@ export const setupApiMocks = async (page: any) => {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        statistics: {
-          dummy_video_id: [
-            {
-              datetime: new Date("2026-01-01T00:00:00.000Z").toISOString(),
-              viewCount: 900,
-              likeCount: 10,
-              commentCount: 1,
-            },
-            {
-              datetime: new Date("2026-01-10T00:00:00.000Z").toISOString(),
-              viewCount: 1000,
-              likeCount: 12,
-              commentCount: 1,
-            },
-          ],
-        },
+        statistics: [
+          {
+            datetime: new Date("2026-01-01T00:00:00.000Z").toISOString(),
+            viewCount: 900,
+            likeCount: 10,
+            commentCount: 1,
+          },
+          {
+            datetime: new Date("2026-01-10T00:00:00.000Z").toISOString(),
+            viewCount: 1000,
+            likeCount: 12,
+            commentCount: 1,
+          },
+        ],
       }),
     });
   });

@@ -199,6 +199,14 @@ export default function DiscographyPage({
       </Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
+      <p className="mb-6 text-sm text-muted-foreground">
+        {/* タブによって表示を切り替え */}
+        {activeTab === 0
+          ? "オリジナル楽曲の一覧です。"
+          : activeTab === 1
+            ? "ユニット・ゲスト楽曲の一覧です。"
+            : "カバー楽曲の一覧です。"}
+      </p>
 
       <DiscographyControls
         groupByAlbum={groupByAlbum}

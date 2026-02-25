@@ -1,9 +1,16 @@
 "use client";
 
 import { FaCompactDisc, FaMusic, FaPlay } from "react-icons/fa6";
+import { useRouter } from "next/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
+import slugify from "../lib/slugify";
+import {
+  isCollaborationSong,
+  isCoverSong,
+  isPossibleOriginalSong,
+} from "../config/filters";
 
 const SongItem = ({
   song,
@@ -16,6 +23,43 @@ const SongItem = ({
   groupByAlbum?: boolean;
   onClick: (key: string) => void;
 }) => {
+  const router = useRouter();
+  const albumSlug = song.firstVideo.album ? slugify(song.firstVideo.album) : "";
+
+  const getSongPath = () => {
+    const target = song.firstVideo;
+    const slug = target.slugv2 || target.slug || slugify(target.title);
+    if (!slug) return null;
+
+    const category = isPossibleOriginalSong(target)
+      ? "originals"
+      : isCollaborationSong(target)
+        ? "collab"
+        : isCoverSong(target)
+          ? "covers"
+          : null;
+
+    if (!category) return null;
+    return `/discography/${category}/${encodeURIComponent(slug)}`;
+  };
+
+  const handleClick = () => {
+    if (song.isAlbum && groupByAlbum && albumSlug) {
+      router.push(`/discography/album/${encodeURIComponent(albumSlug)}`);
+      return;
+    }
+
+    if (!song.isAlbum) {
+      const songPath = getSongPath();
+      if (songPath) {
+        router.push(songPath);
+        return;
+      }
+    }
+
+    onClick(song.key);
+  };
+
   return (
     <div
       className={`group relative cursor-pointer shadow-lg transition-all duration-500 overflow-hidden ${
@@ -32,7 +76,7 @@ const SongItem = ({
               song.firstVideo.broadcast_at,
             ).toLocaleDateString()})`
       }
-      onClick={() => onClick(song.key)}
+      onClick={handleClick}
       style={{
         userSelect: "none",
       }}
