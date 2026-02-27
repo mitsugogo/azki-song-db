@@ -37,7 +37,7 @@ const notoSans = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: `${siteConfig.siteName}`,
   description:
-    "ホロライブのAZKさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
   keywords: ["AZKi", "歌", "歌枠", "オリ曲", "ライブ", "ホロライブ"],
   openGraph: {
     title: `${siteConfig.siteName}`,

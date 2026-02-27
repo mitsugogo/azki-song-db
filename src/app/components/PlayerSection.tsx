@@ -17,6 +17,29 @@ import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 
+const getSongModeLabel = (term: string) => {
+  const tokens = term
+    .split("|")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (tokens.includes("tag:歌枠")) {
+    return "歌枠";
+  }
+
+  if (tokens.includes("collaboration-songs")) {
+    return "コラボ曲";
+  }
+  if (tokens.includes("cover-songs")) {
+    return "カバー曲";
+  }
+  if (tokens.includes("original-songs") || tokens.includes("sololive2025")) {
+    return "オリ曲";
+  }
+
+  return "全曲";
+};
+
 type DesktopPlayerControls = {
   isReady: boolean;
   play: () => void;
@@ -118,6 +141,7 @@ export default function PlayerSection({
     if (song.slug) return song.slug;
     return `${song.title}::${song.artist}`;
   }, []);
+  const currentSongModeLabel = getSongModeLabel(searchTerm);
 
   const hasNextInVideo = useMemo(() => {
     if (!currentSong) return false;
@@ -234,7 +258,8 @@ export default function PlayerSection({
         <div className="block md:hidden mx-2 mt-2">
           <MobileActionButtons
             onSurprise={() => playRandomSong?.(songs)}
-            onOriginal={() => setSearchTerm?.("original-songs")}
+            onSelectSongMode={(mode) => setSearchTerm?.(mode)}
+            currentSongModeLabel={currentSongModeLabel}
             onPlaylist={() => setShowPlaylistSelector?.(true)}
           />
         </div>
