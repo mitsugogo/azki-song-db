@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function Page() {
   return (
-    <div className="grow lg:p-6 lg:pb-0">
+    <div className="grow lg:p-6 lg:pb-10">
       <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
         <div className="flex items-center">
           <Link href="/" className={breadcrumbClasses.link}>
