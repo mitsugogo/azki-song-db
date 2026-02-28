@@ -1,19 +1,10 @@
 // SearchAndSongList.tsx
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
 import type { IconType } from "react-icons";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
-import {
-  LuChevronDown,
-  LuCrown,
-  LuDatabase,
-  LuLibrary,
-  LuMicVocal,
-  LuMusic,
-  LuUsers,
-  LuX,
-} from "react-icons/lu";
+import { LuChevronDown, LuX } from "react-icons/lu";
 import { LuSparkles } from "react-icons/lu";
 import {
   Button as MantineButton,
@@ -40,64 +31,14 @@ import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
 import MobileActionButtons from "./MobileActionButtons";
-
-type SongMode =
-  | ""
-  | "original-songs"
-  | "cover-songs"
-  | "collaboration-songs"
-  | "tag:歌枠"
-  | "tag:楽曲紹介shorts";
-
-const getSongModeLabel = (term: string) => {
-  const tokens = term
-    .split("|")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (tokens.includes("tag:歌枠")) {
-    return "歌枠";
-  }
-  if (tokens.includes("tag:楽曲紹介shorts")) {
-    return "楽曲紹介shorts";
-  }
-  if (tokens.includes("collaboration-songs")) {
-    return "コラボ曲";
-  }
-  if (tokens.includes("cover-songs")) {
-    return "カバー曲";
-  }
-  if (tokens.includes("original-songs") || tokens.includes("sololive2025")) {
-    return "オリ曲";
-  }
-
-  return "全曲";
-};
-
-const getSongModeIcon = (term: string): IconType => {
-  const tokens = term
-    .split("|")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (tokens.includes("tag:歌枠")) {
-    return LuMicVocal;
-  }
-  if (tokens.includes("tag:楽曲紹介shorts")) {
-    return LuLibrary;
-  }
-  if (tokens.includes("collaboration-songs")) {
-    return LuUsers;
-  }
-  if (tokens.includes("cover-songs")) {
-    return LuMusic;
-  }
-  if (tokens.includes("original-songs") || tokens.includes("sololive2025")) {
-    return LuCrown;
-  }
-
-  return LuDatabase;
-};
+import {
+  getSongModeIcon,
+  getSongModeLabel,
+  getSongModeTriggerButtonClassName,
+  SONG_MODE_GROUP_LABELS,
+  SONG_MODE_MENU_ITEMS,
+  type SongModeGroup,
+} from "./songModeMenu";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -142,16 +83,17 @@ export default function SearchAndSongList({
   const overlayOpen = Boolean(isOverlayOpen);
   const currentSongModeLabel = getSongModeLabel(searchTerm);
   const CurrentSongModeIcon = getSongModeIcon(searchTerm);
+  const currentSongModeButtonClassName =
+    getSongModeTriggerButtonClassName(searchTerm);
 
-  const songModeMenuItems: { mode: SongMode; label: string; icon: IconType }[] =
-    [
-      { mode: "", label: "全曲", icon: LuDatabase },
-      { mode: "original-songs", label: "オリ曲", icon: LuCrown },
-      { mode: "cover-songs", label: "カバー曲", icon: LuMusic },
-      { mode: "collaboration-songs", label: "コラボ曲", icon: LuUsers },
-      { mode: "tag:歌枠", label: "歌枠", icon: LuMicVocal },
-      { mode: "tag:楽曲紹介shorts", label: "楽曲紹介shorts", icon: LuLibrary },
-    ];
+  const songModeMenuItems = SONG_MODE_MENU_ITEMS;
+  const songModeUngroupedItems = songModeMenuItems.filter(
+    (item) => !item.group,
+  );
+  const songModeGroupedItems = {
+    mode: songModeMenuItems.filter((item) => item.group === "mode"),
+    theme: songModeMenuItems.filter((item) => item.group === "theme"),
+  } as const;
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
@@ -240,7 +182,7 @@ export default function SearchAndSongList({
             <Grid.Col span={4} className="foldable:hidden">
               <Menu width={180} position="bottom-start" withArrow>
                 <Menu.Target>
-                  <Button className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600">
+                  <Button className={currentSongModeButtonClassName}>
                     <span className="text-sm w-full grid grid-cols-[1rem_1fr_1rem] items-center">
                       <CurrentSongModeIcon className="w-4 h-4 justify-self-center" />
                       <span className="text-center">
@@ -252,7 +194,7 @@ export default function SearchAndSongList({
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                  {songModeMenuItems.map((item) => {
+                  {songModeUngroupedItems.map((item) => {
                     const ModeIcon = item.icon;
                     return (
                       <Menu.Item
@@ -264,6 +206,36 @@ export default function SearchAndSongList({
                       </Menu.Item>
                     );
                   })}
+
+                  {(Object.keys(songModeGroupedItems) as SongModeGroup[]).map(
+                    (group) => {
+                      const items = songModeGroupedItems[group];
+                      if (items.length === 0) {
+                        return null;
+                      }
+
+                      return (
+                        <Fragment key={group}>
+                          <Menu.Divider />
+                          <Menu.Label>
+                            {SONG_MODE_GROUP_LABELS[group]}
+                          </Menu.Label>
+                          {items.map((item) => {
+                            const ModeIcon = item.icon;
+                            return (
+                              <Menu.Item
+                                key={item.mode}
+                                leftSection={<ModeIcon className="w-4 h-4" />}
+                                onClick={() => setSearchTerm(item.mode)}
+                              >
+                                {item.label}
+                              </Menu.Item>
+                            );
+                          })}
+                        </Fragment>
+                      );
+                    },
+                  )}
                 </Menu.Dropdown>
               </Menu>
             </Grid.Col>
@@ -289,6 +261,9 @@ export default function SearchAndSongList({
             onSurprise={() => playRandomSong(songs)}
             onSelectSongMode={(mode) => setSearchTerm(mode)}
             currentSongModeLabel={currentSongModeLabel}
+            currentSongModeIcon={CurrentSongModeIcon}
+            currentSongModeButtonClassName={currentSongModeButtonClassName}
+            songModeMenuItems={songModeMenuItems}
             onPlaylist={() => setShowPlaylistSelector(true)}
           />
         </div>
