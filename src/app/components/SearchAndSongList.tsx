@@ -166,11 +166,12 @@ export default function SearchAndSongList({
           >
             <span className="text-sm">
               <LuSparkles className="mr-1 inline" />
-              ランダムで他の曲にする
+              <span className="foldable:hidden">ランダムで他の曲にする</span>
+              <span className="foldable:inline">Surprise Me</span>
             </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
-            <Grid.Col span={4} className="foldable:hidden">
+            <Grid.Col span={4}>
               <Menu width={180} position="bottom-start" withArrow>
                 <Menu.Target>
                   <Button className={currentSongModeButtonClassName}>

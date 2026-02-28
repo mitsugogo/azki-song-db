@@ -59,6 +59,8 @@ export default function MobileActionButtons({
             </span>
           </Button>
         </Grid.Col>
+      </Grid>
+      <Grid grow gutter={{ base: 5 }} className="mt-0.5">
         <Grid.Col span={4}>
           <Menu width={170} position="bottom-start" withArrow>
             <Menu.Target>
