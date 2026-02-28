@@ -167,12 +167,8 @@ export default function DataTable<
 
   return (
     <div>
-      <div className="flex-grow">
-        <div className="hidden md:block p-1 md:p-3 text-lg font-semibold text-left">
-          {caption} ({data.length})
-          <p className="mt-1 text-sm font-normal">{description}</p>
-        </div>
-        <div className="px-3 py-2 lg:mb-3 lg:py-0 text-sm font-normal">
+      <div className="grow mt-3">
+        <div className="py-2 lg:mb-3 lg:py-0 text-sm font-normal">
           <TextInput
             placeholder="検索..."
             value={inputValue}

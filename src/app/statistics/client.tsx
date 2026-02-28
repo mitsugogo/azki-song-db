@@ -55,7 +55,7 @@ function SongCountOverview({
   if (items.length === 0) return null;
 
   return (
-    <section className="px-3 pt-3 lg:px-4 lg:pt-4">
+    <section className="pt-3 lg:pt-4">
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
           <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
@@ -395,14 +395,7 @@ export default function StatisticsPage() {
                 items={
                   statisticsWithMilestones[tab.dataKey] as StatisticsItem[]
                 }
-                {...(tab.dataKey === "videoCounts"
-                  ? {
-                      primaryLabel: "動画数",
-                      totalCountLabel: "総収録曲数",
-                      topLabel: "最多収録動画",
-                      countUnit: "曲",
-                    }
-                  : getOverviewLabels(tab.dataKey))}
+                {...getOverviewLabels(tab.dataKey)}
                 showTopTile={!hideTopTileTabs.has(tab.dataKey)}
               />
               <DataTable
