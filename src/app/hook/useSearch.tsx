@@ -210,16 +210,15 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
       );
 
       // 特殊モード判定
-      const urlParams = new URLSearchParams(window.location.search);
-      const playlist = urlParams.get("playlist");
+      const playlist = searchParams?.get("playlist");
 
       // 曲モード（オリ曲/カバー曲/コラボ曲）
       if (selectedSongMode) {
         // 検索ワードからマジックワードを除く
         normalWords = normalWords.filter((word) => !songModePredicates[word]);
 
-        songsToFilter = songsToFilter.filter(
-          songModePredicates[selectedSongMode],
+        songsToFilter = songsToFilter.filter((song) =>
+          songModePredicates[selectedSongMode](song),
         );
 
         if (
@@ -328,7 +327,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
       return filteredSongs;
     },
-    [allSongs],
+    [allSongs, decodePlaylistUrlParam, filterCallback, searchParams],
   );
 
   // 検索パラメータ（?q=...）変更時に検索条件を同期
