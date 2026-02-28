@@ -65,6 +65,7 @@ vi.mock("../YearPager", () => ({
     <div
       data-testid="year-pager"
       data-current-count={props.currentSongIds?.length ?? 0}
+      data-current-ids={(props.currentSongIds ?? []).join("|")}
     >
       YearPager
     </div>
@@ -235,5 +236,62 @@ describe("SongsList", () => {
     expect(items[1]).toHaveAttribute("data-is-hide", "false");
     expect(items[2]).toHaveAttribute("data-is-hide", "true");
     expect(items[3]).toHaveAttribute("data-is-hide", "false");
+  });
+
+  it("updates visible song ids even when length and first id are unchanged", async () => {
+    const songs = Array.from({ length: 16 }, (_, index) =>
+      createSong({
+        title: `Song ${index}`,
+        video_id: `video-${index}`,
+        start: `00:${index.toString().padStart(2, "0")}`,
+      }),
+    );
+
+    window.innerWidth = 800;
+    virtualItems = createVirtualItems(2);
+    mockVirtualizer.getVirtualItems.mockImplementation(() =>
+      virtualItems.map((item) => ({ ...item })),
+    );
+
+    render(
+      <SongsList
+        songs={songs}
+        hideFutureSongs={false}
+        currentSong={null}
+        changeCurrentSong={vi.fn()}
+      />,
+    );
+
+    const firstVisibleIds = [
+      `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`,
+      `${songs[1].video_id}-${songs[1].start}-${songs[1].title}`,
+    ].join("|");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("year-pager")).toHaveAttribute(
+        "data-current-ids",
+        firstVisibleIds,
+      );
+    });
+
+    virtualItems = [
+      { index: 0, start: 0, end: 100, key: "row-0" },
+      { index: 2, start: 200, end: 300, key: "row-2" },
+    ];
+
+    window.innerWidth = 801;
+    window.dispatchEvent(new Event("resize"));
+
+    const secondVisibleIds = [
+      `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`,
+      `${songs[2].video_id}-${songs[2].start}-${songs[2].title}`,
+    ].join("|");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("year-pager")).toHaveAttribute(
+        "data-current-ids",
+        secondVisibleIds,
+      );
+    });
   });
 });

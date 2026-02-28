@@ -22,6 +22,25 @@ interface YearPagerProps {
 // ドットの最大表示数
 const MAX_DOTS = 8;
 
+const getSongId = (song: Song): string =>
+  `${song.video_id}-${song.start}-${song.title}`;
+
+const getDotIndexFromSongIndex = (
+  songIndex: number,
+  totalSongsInYear: number,
+  totalDots: number,
+): number => {
+  if (songIndex < 0 || totalSongsInYear <= 0 || totalDots <= 0) {
+    return -1;
+  }
+
+  if (songIndex >= totalSongsInYear - 1) {
+    return totalDots - 1;
+  }
+
+  return Math.floor((songIndex / totalSongsInYear) * totalDots);
+};
+
 /**
  * 曲リストからページャー用のデータを生成するヘルパー関数 (相対ドット数計算を含む)
  */
@@ -87,9 +106,7 @@ const YearPager: React.FC<YearPagerProps> = ({
 
   // 必要なデータの計算
   const visibleSongs = currentSongIds
-    .map((id) =>
-      songs.find((s) => `${s.video_id}-${s.start}-${s.title}` === id),
-    )
+    .map((id) => songs.find((s) => getSongId(s) === id))
     .filter((s): s is Song => s !== undefined);
 
   // マウスホイールで楽曲一覧をスクロール
@@ -181,7 +198,7 @@ const YearPager: React.FC<YearPagerProps> = ({
         );
 
         const targetSongId = item.songs[targetSongIndexInYear]
-          ? `${item.songs[targetSongIndexInYear].video_id}-${item.songs[targetSongIndexInYear].start}-${item.songs[targetSongIndexInYear].title}`
+          ? getSongId(item.songs[targetSongIndexInYear])
           : item.firstSongId;
 
         const isCurrentDot = isCurrentYear && dotIndex === currentSongDotIndex;
@@ -195,7 +212,7 @@ const YearPager: React.FC<YearPagerProps> = ({
 
               if (isHighlightedDot && currentSong) {
                 // ハイライトされているドットをクリックした場合は、現在再生中の曲にスクロールする
-                songIdToScroll = `${currentSong.video_id}-${currentSong.start}-${currentSong.title}`;
+                songIdToScroll = getSongId(currentSong);
               }
 
               onPagerItemClick(songIdToScroll);
@@ -220,7 +237,7 @@ const YearPager: React.FC<YearPagerProps> = ({
                   let songIdToScroll = targetSongId;
 
                   if (isHighlightedDot && currentSong) {
-                    songIdToScroll = `${currentSong.video_id}-${currentSong.start}-${currentSong.title}`;
+                    songIdToScroll = getSongId(currentSong);
                   }
                   onPagerItemClick(songIdToScroll);
                   triggerHaptic();
@@ -249,7 +266,10 @@ const YearPager: React.FC<YearPagerProps> = ({
           // その年の曲の中に、画面に可視な曲が1つでも含まれているかを確認
           const isYearActuallyVisible = item.songs.some((song) =>
             visibleSongs.some(
-              (vs) => vs.video_id === song.video_id && vs.start === song.start,
+              (vs) =>
+                vs.video_id === song.video_id &&
+                vs.start === song.start &&
+                vs.title === song.title,
             ),
           );
 
@@ -283,50 +303,24 @@ const YearPager: React.FC<YearPagerProps> = ({
             );
 
             if (visibleSongsInYear.length > 0) {
-              const minVisibleTimeInYear = Math.min(
-                ...visibleSongsInYear.map((s) =>
-                  new Date(s.broadcast_at).getTime(),
-                ),
-              );
-              const maxVisibleTimeInYear = Math.max(
-                ...visibleSongsInYear.map((s) =>
-                  new Date(s.broadcast_at).getTime(),
-                ),
-              );
+              const visibleIndexesInYear = visibleSongsInYear
+                .map((song) => findIndexInYear(song))
+                .filter((index) => index !== -1);
 
-              const minYearSongInView = visibleSongsInYear.find(
-                (s) =>
-                  new Date(s.broadcast_at).getTime() === minVisibleTimeInYear,
-              );
-              const maxYearSongInView = visibleSongsInYear.find(
-                (s) =>
-                  new Date(s.broadcast_at).getTime() === maxVisibleTimeInYear,
-              );
+              if (visibleIndexesInYear.length > 0) {
+                const minVisibleIndex = Math.min(...visibleIndexesInYear);
+                const maxVisibleIndex = Math.max(...visibleIndexesInYear);
 
-              if (minYearSongInView && maxYearSongInView) {
-                const indexMin = findIndexInYear(minYearSongInView);
-                const indexMax = findIndexInYear(maxYearSongInView);
-
-                if (indexMin !== -1) {
-                  minDotIndex = Math.floor(
-                    (indexMin / totalSongsInYear) * totalDots,
-                  );
-                }
-
-                if (indexMax !== -1) {
-                  maxDotIndex = Math.floor(
-                    (indexMax / totalSongsInYear) * totalDots,
-                  );
-                  // 最後の曲の場合は、最後のドットになるように調整
-                  if (indexMax === totalSongsInYear - 1 && totalDots > 0) {
-                    maxDotIndex = totalDots - 1;
-                  }
-                }
-
-                // 範囲の保証
-                if (minDotIndex > maxDotIndex) {
-                  minDotIndex = maxDotIndex;
-                }
+                minDotIndex = getDotIndexFromSongIndex(
+                  minVisibleIndex,
+                  totalSongsInYear,
+                  totalDots,
+                );
+                maxDotIndex = getDotIndexFromSongIndex(
+                  maxVisibleIndex,
+                  totalSongsInYear,
+                  totalDots,
+                );
               }
             }
           }
@@ -343,15 +337,11 @@ const YearPager: React.FC<YearPagerProps> = ({
             if (currentSongIndexInYear !== -1) {
               const totalSongsInYear = songsInYear.length;
               const totalDots = item.dotCount;
-              currentSongDotIndex = Math.floor(
-                (currentSongIndexInYear / totalSongsInYear) * totalDots,
+              currentSongDotIndex = getDotIndexFromSongIndex(
+                currentSongIndexInYear,
+                totalSongsInYear,
+                totalDots,
               );
-              if (
-                currentSongIndexInYear === totalSongsInYear - 1 &&
-                totalDots > 0
-              ) {
-                currentSongDotIndex = totalDots - 1;
-              }
             }
           }
 
