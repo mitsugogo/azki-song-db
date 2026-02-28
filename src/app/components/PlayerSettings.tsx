@@ -180,6 +180,7 @@ export default function PlayerSettings({
                   color="pink"
                   label="セトリネタバレ防止モード"
                   className="text-light-gray-700 dark:text-light-gray-300 cursor-pointer"
+                  withThumbIndicator={false}
                 />
               </div>
             </li>

@@ -828,6 +828,7 @@ export default function PlayerControlsBar({
                               color="pink"
                               label="セトリネタバレ防止モード"
                               className="cursor-pointer w-full"
+                              withThumbIndicator={false}
                             />
                           </div>
                         </li>
@@ -960,6 +961,7 @@ export default function PlayerControlsBar({
                           color="pink"
                           label="セトリネタバレ防止モード"
                           className="cursor-pointer w-full"
+                          withThumbIndicator={false}
                         />
                       </div>
                     </li>
