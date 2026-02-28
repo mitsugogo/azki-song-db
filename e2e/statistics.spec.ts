@@ -56,4 +56,12 @@ test.describe("Statistics page", () => {
       await page.waitForTimeout(500);
     }
   });
+
+  test("updates tab query with data key", async ({ page }) => {
+    await page.goto("/statistics");
+    await page.waitForLoadState("domcontentloaded");
+
+    await page.getByRole("tab", { name: "アーティスト名別" }).click();
+    await expect(page).toHaveURL(/tab=artistCounts/);
+  });
 });

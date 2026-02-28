@@ -10,15 +10,14 @@ import {
 } from "@tanstack/react-table";
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 import { Badge, TextInput } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import Link from "next/link";
 import { BsPlayCircle } from "react-icons/bs";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { ScrollArea } from "@mantine/core";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
 
 export default function DataTable<
@@ -36,6 +35,7 @@ export default function DataTable<
   onRowClick,
   selectedVideoId,
   songs,
+  visualMode = "default",
 }: {
   data: T[];
   caption: string;
@@ -47,12 +47,13 @@ export default function DataTable<
   onRowClick?: (id: string) => void;
   selectedVideoId?: string | null;
   songs?: Song[];
+  visualMode?: "default" | "ranked" | "viewCountBar";
 }) {
   const [inputValue, setInputValue] = useState("");
   const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
   const [debouncedFilter] = useDebouncedValue(inputValue, 300);
-
-  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tableBodyRef = useRef<HTMLDivElement>(null);
+  const [tableBodyOffsetTop, setTableBodyOffsetTop] = useState(0);
 
   type ColumnSort = { id: string; desc: boolean };
 
@@ -127,12 +128,39 @@ export default function DataTable<
   });
 
   const rows = table.getRowModel().rows;
+  const maxCount = useMemo(() => {
+    return data.reduce((max, item) => {
+      const count = (item as { count?: number }).count;
+      if (typeof count !== "number") return max;
+      return Math.max(max, count);
+    }, 0);
+  }, [data]);
 
-  const rowVirtualizer = useVirtualizer({
+  const maxViewCount = useMemo(() => {
+    return data.reduce((max, item) => {
+      const viewCount = Number((item as StatisticsItem)?.song?.view_count ?? 0);
+      if (!Number.isFinite(viewCount)) return max;
+      return Math.max(max, viewCount);
+    }, 0);
+  }, [data]);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      if (!tableBodyRef.current) return;
+      const rect = tableBodyRef.current.getBoundingClientRect();
+      setTableBodyOffsetTop(rect.top + window.scrollY);
+    };
+
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [rows.length, debouncedFilter]);
+
+  const rowVirtualizer = useWindowVirtualizer({
     count: rows.length,
-    getScrollElement: () => tableContainerRef.current as Element,
     estimateSize: () => 86,
     overscan: 10,
+    scrollMargin: tableBodyOffsetTop,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -152,67 +180,71 @@ export default function DataTable<
             className="max-w-sm"
           />
         </div>
-        <ScrollArea
-          className="h-[calc(100vh-260px)] md:h-[calc(100vh-330px)] lg:h-[calc(100vh-423px)]"
-          viewportRef={tableContainerRef}
-        >
-          <div className="relative">
-            <div className="w-full text-sm text-left">
-              {/* Header */}
-              <div className="flex text-xs sticky top-0 z-10">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <div
-                    key={headerGroup.id}
-                    className="flex flex-1 bg-light-gray-200 dark:bg-gray-700"
-                  >
-                    {headerGroup.headers.map((header) => (
+        <div className="relative">
+          <div className="w-full text-sm text-left">
+            {/* Header */}
+            <div className="flex text-xs sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <div
+                  key={headerGroup.id}
+                  className="flex flex-1 bg-light-gray-200 dark:bg-gray-700"
+                >
+                  {headerGroup.headers.map((header) => (
+                    <div
+                      key={header.id}
+                      className="relative px-6 py-3 min-w-0 flex-shrink-0"
+                      style={{
+                        width:
+                          header.getSize() === Number.MAX_SAFE_INTEGER
+                            ? "auto"
+                            : header.getSize(),
+                      }}
+                    >
                       <div
-                        key={header.id}
-                        className="relative px-6 py-3 min-w-0 flex-shrink-0"
-                        style={{
-                          width:
-                            header.getSize() === Number.MAX_SAFE_INTEGER
-                              ? "auto"
-                              : header.getSize(),
-                        }}
+                        onClick={header.column.getToggleSortingHandler()}
+                        className="flex items-center cursor-pointer select-none whitespace-nowrap"
                       >
-                        <div
-                          onClick={header.column.getToggleSortingHandler()}
-                          className="flex items-center cursor-pointer select-none whitespace-nowrap"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {header.column.getCanSort() && (
-                            <span className="ml-1 inline-block">
-                              {{
-                                asc: <HiChevronUp className="inline w-4 h-4" />,
-                                desc: (
-                                  <HiChevronDown className="inline w-4 h-4" />
-                                ),
-                              }[header.column.getIsSorted() as string] ?? (
-                                <HiArrowsUpDown className="inline w-4 h-4 opacity-50" />
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        {header.column.getCanResize() && (
-                          <div
-                            onMouseDown={header.getResizeHandler()}
-                            onTouchStart={header.getResizeHandler()}
-                            className={`resizer absolute top-0 right-0 h-full w-2 cursor-col-resize ${
-                              header.column.getIsResizing() ? "bg-blue-500" : ""
-                            }`}
-                          ></div>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getCanSort() && (
+                          <span className="ml-1 inline-block">
+                            {{
+                              asc: <HiChevronUp className="inline w-4 h-4" />,
+                              desc: (
+                                <HiChevronDown className="inline w-4 h-4" />
+                              ),
+                            }[header.column.getIsSorted() as string] ?? (
+                              <HiArrowsUpDown className="inline w-4 h-4 opacity-50" />
+                            )}
+                          </span>
                         )}
                       </div>
-                    ))}
-                  </div>
-                ))}
+                      {header.column.getCanResize() && (
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={`resizer absolute top-0 right-0 h-full w-2 cursor-col-resize ${
+                            header.column.getIsResizing() ? "bg-blue-500" : ""
+                          }`}
+                        ></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            {/* Body */}
+            {rows.length === 0 ? (
+              <div className="px-6 py-10 text-center text-sm text-light-gray-700 dark:text-light-gray-400">
+                {inputValue.trim().length > 0
+                  ? `「${inputValue.trim()}」に一致する結果は見つかりませんでした。`
+                  : "表示できるデータがありません。"}
               </div>
-              {/* Body */}
+            ) : (
               <div
+                ref={tableBodyRef}
                 className="relative"
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,
@@ -237,13 +269,17 @@ export default function DataTable<
                           left: 0,
                           minWidth: `${minWidth + "px" || "auto"}`,
                           width: "100%",
-                          transform: `translateY(${virtualRow.start}px)`,
+                          transform: `translateY(${virtualRow.start - tableBodyOffsetTop}px)`,
                         }}
                         className={`flex ${
                           onRowClick ? "cursor-pointer select-none" : ""
                         } ${
                           parseInt(row.id) % 2 === 0
                             ? "bg-light-gray-100 dark:bg-gray-800/70"
+                            : ""
+                        } ${
+                          visualMode === "ranked"
+                            ? "hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"
                             : ""
                         }`}
                       >
@@ -263,9 +299,72 @@ export default function DataTable<
                                   : cell.column.getSize(),
                             }}
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
+                            {visualMode === "ranked" && idx === 0 && (
+                              <span className="mr-2 inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary-700 dark:text-primary-400">
+                                #{virtualRow.index + 1}
+                              </span>
+                            )}
+                            {visualMode === "ranked" &&
+                            cell.column.id === "count" &&
+                            typeof cell.getValue() === "number" ? (
+                              <div className="w-full min-w-30">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold">
+                                    {Number(cell.getValue()).toLocaleString()}
+                                  </span>
+                                  <span className="text-light-gray-700 dark:text-light-gray-400">
+                                    回
+                                  </span>
+                                </div>
+                                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
+                                  <div
+                                    className="h-full rounded-full bg-linear-to-r from-primary-400 to-primary-600 dark:from-primary-500 dark:to-primary-700"
+                                    style={{
+                                      width: `${Math.max(
+                                        5,
+                                        maxCount > 0
+                                          ? (Number(cell.getValue()) /
+                                              maxCount) *
+                                              100
+                                          : 0,
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ) : visualMode === "viewCountBar" &&
+                              cell.column.id === "viewCount" &&
+                              Number(cell.getValue()) > 0 ? (
+                              <div className="w-full min-w-30">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold">
+                                    {Number(cell.getValue()).toLocaleString()}
+                                  </span>
+                                  <span className="text-light-gray-700 dark:text-light-gray-400">
+                                    回
+                                  </span>
+                                </div>
+                                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
+                                  <div
+                                    className="h-full rounded-full bg-linear-to-r from-primary-400 to-primary-600 dark:from-primary-500 dark:to-primary-700"
+                                    style={{
+                                      width: `${Math.max(
+                                        5,
+                                        maxViewCount > 0
+                                          ? (Number(cell.getValue()) /
+                                              maxViewCount) *
+                                              100
+                                          : 0,
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )
                             )}
                           </div>
                         ))}
@@ -277,7 +376,7 @@ export default function DataTable<
                           <div
                             className="p-4 bg-gray-100 dark:bg-gray-800 relative z-50 shadow-inner shadow-gray-500/50 dark:shadow-gray-900"
                             style={{
-                              transform: `translateY(${virtualRow.end}px)`,
+                              transform: `translateY(${virtualRow.end - tableBodyOffsetTop}px)`,
                             }}
                           >
                             <h3 className="text-lg font-semibold mb-2">
@@ -375,9 +474,9 @@ export default function DataTable<
                   );
                 })}
               </div>
-            </div>
+            )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
