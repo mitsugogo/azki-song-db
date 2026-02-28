@@ -732,6 +732,38 @@ export default function PlayerControlsBar({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {currentSong && (
+            <Tooltip
+              label={
+                isTheaterMode
+                  ? "シアターモードを終了"
+                  : "シアターモードに切り替え"
+              }
+            >
+              <button
+                type="button"
+                onClick={onToggleTheaterMode}
+                className={`hidden foldable:flex lg:flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all text-white ${
+                  isTheaterMode
+                    ? "bg-white/20 ring-1 ring-white/40"
+                    : "hover:bg-white/20"
+                }`}
+                aria-label={
+                  isTheaterMode
+                    ? "シアターモードを終了"
+                    : "シアターモードに切り替え"
+                }
+                aria-pressed={isTheaterMode}
+              >
+                {isTheaterMode ? (
+                  <LuShrink className="text-base text-white" />
+                ) : (
+                  <LuExpand className="text-base text-white" />
+                )}
+              </button>
+            </Tooltip>
+          )}
+
           {/* PC */}
           {isPcScreen && currentSong && (
             <>
@@ -770,37 +802,6 @@ export default function PlayerControlsBar({
                   aria-label="現在の楽曲をシェア"
                 >
                   <FaShare className="text-base" />
-                </button>
-              </Tooltip>
-
-              {/* PC 設定ボタン */}
-              <Tooltip
-                label={
-                  isTheaterMode
-                    ? "シアターモードを終了"
-                    : "シアターモードに切り替え"
-                }
-              >
-                <button
-                  type="button"
-                  onClick={onToggleTheaterMode}
-                  className={`hidden md:flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all text-white ${
-                    isTheaterMode
-                      ? "bg-white/20 ring-1 ring-white/40"
-                      : "hover:bg-white/20"
-                  }`}
-                  aria-label={
-                    isTheaterMode
-                      ? "シアターモードを終了"
-                      : "シアターモードに切り替え"
-                  }
-                  aria-pressed={isTheaterMode}
-                >
-                  {isTheaterMode ? (
-                    <LuShrink className="text-base text-white" />
-                  ) : (
-                    <LuExpand className="text-base text-white" />
-                  )}
                 </button>
               </Tooltip>
 

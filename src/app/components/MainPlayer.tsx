@@ -196,6 +196,12 @@ export default function MainPlayer() {
     defaultValue: false,
   });
   const isDesktopControlsVisible = useMediaQuery("(min-width: 1024px)");
+  const [foldableMode] = useLocalStorage<"default" | "foldable">({
+    key: "foldable-mode",
+    defaultValue: "default",
+  });
+  const canUseTheaterMode =
+    isDesktopControlsVisible || foldableMode === "foldable";
 
   // --- Effects ---
   useEffect(() => {
@@ -204,10 +210,10 @@ export default function MainPlayer() {
   }, [allSongs]);
 
   useEffect(() => {
-    if (isDesktopControlsVisible) return;
+    if (canUseTheaterMode) return;
     if (!isTheaterMode) return;
     setIsTheaterMode(false);
-  }, [isDesktopControlsVisible, isTheaterMode, setIsTheaterMode]);
+  }, [canUseTheaterMode, isTheaterMode, setIsTheaterMode]);
 
   const setSongsToCurrentVideo = () => {
     if (!currentSong) return;
