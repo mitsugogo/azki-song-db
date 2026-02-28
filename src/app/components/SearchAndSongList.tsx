@@ -1,6 +1,4 @@
-// SearchAndSongList.tsx
 import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
-import type { IconType } from "react-icons";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
@@ -72,14 +70,12 @@ export default function SearchAndSongList({
   playRandomSong,
   setSearchTerm,
   setSongs,
-  searchSongs,
   showPlaylistSelector,
   setShowPlaylistSelector,
   isOverlayOpen,
   setIsOverlayOpen,
   isTheaterMode,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
-  const [isLoading, setIsLoading] = useState(true);
   const overlayOpen = Boolean(isOverlayOpen);
   const currentSongModeLabel = getSongModeLabel(searchTerm);
   const CurrentSongModeIcon = getSongModeIcon(searchTerm);
@@ -97,23 +93,18 @@ export default function SearchAndSongList({
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
-  const { playlists, addToPlaylist, removeFromPlaylist, isNowPlayingPlaylist } =
-    usePlaylists();
+  const { playlists, isNowPlayingPlaylist } = usePlaylists();
   const { favorites } = useFavorites();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
 
-  const {
-    playPlaylist,
-    disablePlaylistMode,
-    decodePlaylistFromUrl,
-    isInPlaylist,
-  } = usePlaylistActions({
-    allSongs,
-    setSongs,
-    changeCurrentSong,
-    setSearchTerm,
-  });
+  const { playPlaylist, disablePlaylistMode, decodePlaylistFromUrl } =
+    usePlaylistActions({
+      allSongs,
+      setSongs,
+      changeCurrentSong,
+      setSearchTerm,
+    });
 
   const { encodePlaylistUrlParam } = usePlaylists();
 
