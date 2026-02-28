@@ -366,7 +366,12 @@ export default function StatisticsPage() {
             <Center className="h-70">
               <div className="flex flex-col items-center gap-2">
                 <Loader color="pink" type="dots" />
-                <Text size="sm" c="dimmed" aria-live="polite" className="select-none">
+                <Text
+                  size="sm"
+                  c="dimmed"
+                  aria-live="polite"
+                  className="select-none"
+                >
                   {"Loading...".split("").map((char, index) => (
                     <span
                       key={`loading-char-${index}`}
