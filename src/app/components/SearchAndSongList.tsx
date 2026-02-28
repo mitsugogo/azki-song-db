@@ -118,6 +118,7 @@ type SearchAndSongListProps = {
 type SearchAndSongListPropsExt = {
   isOverlayOpen?: boolean;
   setIsOverlayOpen?: (open: boolean) => void;
+  isTheaterMode?: boolean;
 };
 
 export default function SearchAndSongList({
@@ -135,6 +136,7 @@ export default function SearchAndSongList({
   setShowPlaylistSelector,
   isOverlayOpen,
   setIsOverlayOpen,
+  isTheaterMode,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
   const [isLoading, setIsLoading] = useState(true);
   const overlayOpen = Boolean(isOverlayOpen);
@@ -212,8 +214,18 @@ export default function SearchAndSongList({
   }, []); // 初回マウント時のみ実行
 
   return (
-    <section className="flex md:w-1/3 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0  md:h-full foldable:h-full lg:h-full sm:mx-0">
-      <div className="flex flex-col h-full min-h-0 bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0">
+    <section
+      className={`flex sm:w-full flex-col min-h-0 sm:mx-0 transition-[width] duration-300 ease-in-out ${
+        isTheaterMode
+          ? "md:w-full lg:w-full xl:w-full md:h-auto lg:h-auto foldable:w-full foldable:h-auto"
+          : "foldable:w-1/2 md:w-1/3 lg:w-1/3 xl:w-5/12 md:h-full foldable:h-full lg:h-full"
+      }`}
+    >
+      <div
+        className={`flex flex-col bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0 ${
+          isTheaterMode ? "h-auto min-h-fit" : "h-full min-h-0"
+        }`}
+      >
         <div className="mb-2 hidden lg:block foldable:hidden md:foldable:block">
           <Button
             onClick={() => playRandomSong(songs)}
@@ -281,7 +293,11 @@ export default function SearchAndSongList({
           />
         </div>
 
-        <div className="hidden md:flex md:flex-col md:min-h-0 md:flex-1">
+        <div
+          className={`hidden md:flex md:flex-col ${
+            isTheaterMode ? "md:min-h-fit" : "md:min-h-0 md:flex-1"
+          }`}
+        >
           <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
             {/* Search Bar */}
             <SearchInput
@@ -300,7 +316,7 @@ export default function SearchAndSongList({
             </p>
           </div>
 
-          <div className="flex-1 min-h-0">
+          <div className={isTheaterMode ? "h-[60vh]" : "flex-1 min-h-0"}>
             <Suspense fallback={<Loading />}>
               <SongsList
                 songs={songs}

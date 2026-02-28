@@ -91,6 +91,9 @@ type PlayerSectionProps = {
   setOpenSongListOverlay?: (open: boolean) => void;
   setShowPlaylistSelector?: (open: boolean) => void;
   playerControls?: DesktopPlayerControls;
+  isTheaterMode: boolean;
+  onToggleTheaterMode: () => void;
+  showNowPlayingInfo?: boolean;
 };
 
 export default function PlayerSection({
@@ -122,6 +125,9 @@ export default function PlayerSection({
   playerControls,
   setOpenSongListOverlay,
   setShowPlaylistSelector,
+  isTheaterMode,
+  onToggleTheaterMode,
+  showNowPlayingInfo = true,
 }: PlayerSectionProps) {
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
@@ -174,7 +180,13 @@ export default function PlayerSection({
   }, [timedLiveCallText]);
 
   return (
-    <aside className="flex md:w-2/3 xl:w-9/12 w-full foldable:w-full md:foldable:w-1/2 pr-0">
+    <aside
+      className={`flex w-full pr-0 transition-[width] duration-300 ease-in-out ${
+        isTheaterMode
+          ? "md:w-full xl:w-full md:shrink-0 foldable:w-full"
+          : "foldable:w-full md:foldable:w-1/2 md:w-2/3 xl:w-9/12"
+      }`}
+    >
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
@@ -252,6 +264,8 @@ export default function PlayerSection({
             currentSong={currentSong}
             hideFutureSongs={hideFutureSongs}
             setHideFutureSongs={setHideFutureSongs}
+            isTheaterMode={isTheaterMode}
+            onToggleTheaterMode={onToggleTheaterMode}
           />
         )}
 
@@ -321,21 +335,22 @@ export default function PlayerSection({
           </div>
         )}
 
-        {/* Now Playing Song Info */}
-        <NowPlayingSongInfo
-          currentSong={currentSong}
-          allSongs={allSongs}
-          searchTerm={searchTerm}
-          isPlaying={isPlaying}
-          hideFutureSongs={hideFutureSongs}
-          setSearchTerm={setSearchTerm}
-          setOpenShereModal={setOpenShareModal}
-          changeCurrentSong={changeCurrentSong}
-          videoTitle={videoTitle}
-          videoData={videoData}
-          videoInfo={videoInfo}
-          setHideFutureSongs={setHideFutureSongs}
-        />
+        {showNowPlayingInfo && (
+          <NowPlayingSongInfo
+            currentSong={currentSong}
+            allSongs={allSongs}
+            searchTerm={searchTerm}
+            isPlaying={isPlaying}
+            hideFutureSongs={hideFutureSongs}
+            setSearchTerm={setSearchTerm}
+            setOpenShereModal={setOpenShareModal}
+            changeCurrentSong={changeCurrentSong}
+            videoTitle={videoTitle}
+            videoData={videoData}
+            videoInfo={videoInfo}
+            setHideFutureSongs={setHideFutureSongs}
+          />
+        )}
       </OverlayScrollbarsComponent>
     </aside>
   );

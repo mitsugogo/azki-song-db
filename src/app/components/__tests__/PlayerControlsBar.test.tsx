@@ -84,6 +84,7 @@ describe("PlayerControlsBar", () => {
   let onNext: () => void;
   let onVolumeIconClick: () => void;
   let onOpenShareModal: () => void;
+  let onToggleTheaterMode: () => void;
   let setHideFutureSongs: (value: boolean) => void;
   let onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
@@ -92,6 +93,7 @@ describe("PlayerControlsBar", () => {
     onNext = vi.fn() as unknown as () => void;
     onVolumeIconClick = vi.fn() as unknown as () => void;
     onOpenShareModal = vi.fn() as unknown as () => void;
+    onToggleTheaterMode = vi.fn() as unknown as () => void;
     setHideFutureSongs = vi.fn() as unknown as (value: boolean) => void;
     onVolumeChange = vi.fn() as unknown as (
       e: React.ChangeEvent<HTMLInputElement>,
@@ -133,6 +135,8 @@ describe("PlayerControlsBar", () => {
         currentSong={baseSong}
         hideFutureSongs={false}
         setHideFutureSongs={setHideFutureSongs}
+        isTheaterMode={false}
+        onToggleTheaterMode={onToggleTheaterMode}
         {...overrides}
       />,
       {
@@ -195,6 +199,13 @@ describe("PlayerControlsBar", () => {
     const shareBtn = getByLabelText("現在の楽曲をシェア");
     fireEvent.click(shareBtn);
     expect(onOpenShareModal).toHaveBeenCalled();
+  });
+
+  it("シアターモードボタンをクリックすると onToggleTheaterMode が呼ばれる", () => {
+    const { getByLabelText } = renderComponent();
+    const theaterBtn = getByLabelText("シアターモードに切り替え");
+    fireEvent.click(theaterBtn);
+    expect(onToggleTheaterMode).toHaveBeenCalled();
   });
 
   it("セトリネタバレ防止スイッチを操作すると setHideFutureSongs が呼ばれる", () => {
@@ -274,6 +285,8 @@ describe("PlayerControlsBar", () => {
           currentSong={baseSong}
           hideFutureSongs={false}
           setHideFutureSongs={() => {}}
+          isTheaterMode={false}
+          onToggleTheaterMode={() => {}}
         />
       );
     };

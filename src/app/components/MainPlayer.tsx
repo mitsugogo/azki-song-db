@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useLocalStorage, useMediaQuery } from "@mantine/hooks";
+import { motion } from "motion/react";
 
 // Custom Hooks
 import useSongs from "../hook/useSongs";
@@ -12,6 +14,7 @@ import { usePathname } from "next/navigation";
 // Components
 import PlayerSection from "./PlayerSection";
 import SearchAndSongList from "./SearchAndSongList";
+import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import ShareModal from "./ShareModal";
 import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
@@ -188,12 +191,23 @@ export default function MainPlayer() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [openShareModal, setOpenShareModal] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useLocalStorage<boolean>({
+    key: "player-theater-mode",
+    defaultValue: false,
+  });
+  const isDesktopControlsVisible = useMediaQuery("(min-width: 1024px)");
 
   // --- Effects ---
   useEffect(() => {
     if (allSongs.length === 0) return;
     setBaseUrl(window.location.origin);
   }, [allSongs]);
+
+  useEffect(() => {
+    if (isDesktopControlsVisible) return;
+    if (!isTheaterMode) return;
+    setIsTheaterMode(false);
+  }, [isDesktopControlsVisible, isTheaterMode, setIsTheaterMode]);
 
   const setSongsToCurrentVideo = () => {
     if (!currentSong) return;
@@ -212,53 +226,115 @@ export default function MainPlayer() {
 
   return (
     <>
-      <PlayerSection
-        currentSong={currentSong}
-        previousSong={previousSong}
-        nextSong={nextSong}
-        allSongs={allSongs}
-        songs={songs}
-        searchTerm={searchTerm}
-        videoId={videoId}
-        startTime={startTime}
-        videoTitle={videoTitle}
-        videoData={videoData}
-        videoInfo={videoInfo}
-        timedLiveCallText={timedLiveCallText ?? ""}
-        setSongs={setSongs}
-        searchSongs={searchSongs}
-        handlePlayerOnReady={handlePlayerOnReady}
-        handleStateChange={handlePlayerStateChange}
-        changeCurrentSong={changeCurrentSong}
-        playRandomSong={playRandomSong}
-        setSongsToCurrentVideo={setSongsToCurrentVideo}
-        setOpenShareModal={setOpenShareModal}
-        setSearchTerm={setSearchTerm}
-        setHideFutureSongs={setHideFutureSongs}
-        setOpenSongListOverlay={setIsSongListOverlayOpen}
-        setShowPlaylistSelector={setShowPlaylistSelector}
-        isPlaying={isPlaying}
-        playerKey={playerKey}
-        hideFutureSongs={hideFutureSongs}
-        playerControls={playerControls}
-      />
+      <div
+        className={`flex min-h-0 w-full flex-col md:h-full ${
+          isTheaterMode
+            ? "md:flex-col md:overflow-y-auto md:[scrollbar-width:none] md:[-ms-overflow-style:none] md:[&::-webkit-scrollbar]:hidden"
+            : "md:flex-row"
+        }`}
+      >
+        <PlayerSection
+          currentSong={currentSong}
+          previousSong={previousSong}
+          nextSong={nextSong}
+          allSongs={allSongs}
+          songs={songs}
+          searchTerm={searchTerm}
+          videoId={videoId}
+          startTime={startTime}
+          videoTitle={videoTitle}
+          videoData={videoData}
+          videoInfo={videoInfo}
+          timedLiveCallText={timedLiveCallText ?? ""}
+          setSongs={setSongs}
+          searchSongs={searchSongs}
+          handlePlayerOnReady={handlePlayerOnReady}
+          handleStateChange={handlePlayerStateChange}
+          changeCurrentSong={changeCurrentSong}
+          playRandomSong={playRandomSong}
+          setSongsToCurrentVideo={setSongsToCurrentVideo}
+          setOpenShareModal={setOpenShareModal}
+          setSearchTerm={setSearchTerm}
+          setHideFutureSongs={setHideFutureSongs}
+          setOpenSongListOverlay={setIsSongListOverlayOpen}
+          setShowPlaylistSelector={setShowPlaylistSelector}
+          isPlaying={isPlaying}
+          playerKey={playerKey}
+          hideFutureSongs={hideFutureSongs}
+          playerControls={playerControls}
+          isTheaterMode={isTheaterMode}
+          onToggleTheaterMode={() => setIsTheaterMode((prev) => !prev)}
+          showNowPlayingInfo={!isTheaterMode}
+        />
 
-      <SearchAndSongList
-        songs={songs}
-        allSongs={allSongs}
-        currentSong={currentSong}
-        searchTerm={searchTerm}
-        hideFutureSongs={hideFutureSongs}
-        changeCurrentSong={changeCurrentSong}
-        playRandomSong={playRandomSong}
-        setSearchTerm={setSearchTerm}
-        setSongs={setSongs}
-        searchSongs={searchSongs}
-        showPlaylistSelector={showPlaylistSelector}
-        setShowPlaylistSelector={setShowPlaylistSelector}
-        isOverlayOpen={isSongListOverlayOpen}
-        setIsOverlayOpen={setIsSongListOverlayOpen}
-      />
+        {/* 通常モード: 右カラムに楽曲一覧 */}
+        {!isTheaterMode && (
+          <SearchAndSongList
+            songs={songs}
+            allSongs={allSongs}
+            currentSong={currentSong}
+            searchTerm={searchTerm}
+            hideFutureSongs={hideFutureSongs}
+            changeCurrentSong={changeCurrentSong}
+            playRandomSong={playRandomSong}
+            setSearchTerm={setSearchTerm}
+            setSongs={setSongs}
+            searchSongs={searchSongs}
+            showPlaylistSelector={showPlaylistSelector}
+            setShowPlaylistSelector={setShowPlaylistSelector}
+            isOverlayOpen={isSongListOverlayOpen}
+            setIsOverlayOpen={setIsSongListOverlayOpen}
+            isTheaterMode={false}
+          />
+        )}
+
+        {/* シアターモード: プレイヤー下段に楽曲詳細(左)＋楽曲一覧(右) */}
+        {isTheaterMode && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="flex w-full flex-col mt-2 md:flex-row md:items-start md:gap-2 lg:gap-4 foldable:flex-col"
+          >
+            <div className="hidden md:block md:w-2/3 xl:w-9/12 pr-0 lg:pr-3 foldable:w-full">
+              <NowPlayingSongInfo
+                currentSong={currentSong}
+                allSongs={allSongs}
+                searchTerm={searchTerm}
+                isPlaying={isPlaying}
+                hideFutureSongs={hideFutureSongs}
+                setSearchTerm={setSearchTerm}
+                setOpenShereModal={setOpenShareModal}
+                changeCurrentSong={changeCurrentSong}
+                videoTitle={videoTitle}
+                videoData={videoData}
+                videoInfo={videoInfo}
+                setHideFutureSongs={setHideFutureSongs}
+              />
+            </div>
+
+            <div className="w-full md:w-1/3 xl:w-5/12 foldable:w-full">
+              <SearchAndSongList
+                songs={songs}
+                allSongs={allSongs}
+                currentSong={currentSong}
+                searchTerm={searchTerm}
+                hideFutureSongs={hideFutureSongs}
+                changeCurrentSong={changeCurrentSong}
+                playRandomSong={playRandomSong}
+                setSearchTerm={setSearchTerm}
+                setSongs={setSongs}
+                searchSongs={searchSongs}
+                showPlaylistSelector={showPlaylistSelector}
+                setShowPlaylistSelector={setShowPlaylistSelector}
+                isOverlayOpen={isSongListOverlayOpen}
+                setIsOverlayOpen={setIsSongListOverlayOpen}
+                isTheaterMode={true}
+              />
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {showToast && (
         <ToastNotification

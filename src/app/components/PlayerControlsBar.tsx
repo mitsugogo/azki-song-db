@@ -15,7 +15,7 @@ import {
   FaRegStar,
   FaShare,
 } from "react-icons/fa";
-import { LuVolume2, LuVolumeX } from "react-icons/lu";
+import { LuExpand, LuShrink, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { BiHide } from "react-icons/bi";
 import { Song } from "../types/song";
 import {
@@ -117,6 +117,8 @@ type Props = {
   currentSong: Song | null;
   hideFutureSongs: boolean;
   setHideFutureSongs: (value: boolean) => void;
+  isTheaterMode: boolean;
+  onToggleTheaterMode: () => void;
 };
 
 export default function PlayerControlsBar({
@@ -153,6 +155,8 @@ export default function PlayerControlsBar({
   currentSong,
   hideFutureSongs,
   setHideFutureSongs,
+  isTheaterMode,
+  onToggleTheaterMode,
 }: Props) {
   // Mobile menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -770,6 +774,36 @@ export default function PlayerControlsBar({
               </Tooltip>
 
               {/* PC 設定ボタン */}
+              <Tooltip
+                label={
+                  isTheaterMode
+                    ? "シアターモードを終了"
+                    : "シアターモードに切り替え"
+                }
+              >
+                <button
+                  type="button"
+                  onClick={onToggleTheaterMode}
+                  className={`hidden md:flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all text-white ${
+                    isTheaterMode
+                      ? "bg-white/20 ring-1 ring-white/40"
+                      : "hover:bg-white/20"
+                  }`}
+                  aria-label={
+                    isTheaterMode
+                      ? "シアターモードを終了"
+                      : "シアターモードに切り替え"
+                  }
+                  aria-pressed={isTheaterMode}
+                >
+                  {isTheaterMode ? (
+                    <LuShrink className="text-base text-white" />
+                  ) : (
+                    <LuExpand className="text-base text-white" />
+                  )}
+                </button>
+              </Tooltip>
+
               <Tooltip label="設定">
                 <div className="relative" ref={pcMenuRef}>
                   <button
