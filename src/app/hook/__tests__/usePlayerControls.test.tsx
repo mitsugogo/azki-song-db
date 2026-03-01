@@ -411,7 +411,7 @@ describe("usePlayerControls", () => {
     expect(result.current.currentSong?.video_id).toBe("directVid");
   });
 
-  it("songsが変わって現在の曲がリストにない場合は先頭曲を再生", () => {
+  it("songsが変わって現在の曲がリストにない場合でも現在曲を維持する", () => {
     const { result, rerender } = renderHook(
       ({ songs, allSongs }) =>
         usePlayerControls(songs, allSongs, mockGlobalPlayer),
@@ -431,8 +431,11 @@ describe("usePlayerControls", () => {
       rerender({ songs: newSongs, allSongs: mockSongs });
     });
 
-    // 先頭の曲に自動切り替え
-    expect(result.current.currentSong?.video_id).toBe("vid1");
+    // 現在曲は維持される
+    expect(result.current.currentSong?.video_id).toBe("vid2");
+    // リスト外のため前後曲は未設定
+    expect(result.current.previousSong).toBeNull();
+    expect(result.current.nextSong).toBeNull();
   });
 
   // ===== 同一動画内での曲切り替えテスト =====

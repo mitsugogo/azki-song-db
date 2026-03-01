@@ -26,7 +26,19 @@ describe("useYoutubeThumbnailFallback", () => {
       result.current.handleError();
     });
 
+    expect(result.current.imageUrl).toContain("maxresdefault.jpg?retry=1");
+
+    act(() => {
+      result.current.handleError();
+    });
+
     expect(result.current.imageUrl).toContain("sddefault.jpg");
+
+    act(() => {
+      result.current.handleError();
+    });
+
+    expect(result.current.imageUrl).toContain("sddefault.jpg?retry=1");
 
     act(() => {
       result.current.handleError();
@@ -46,13 +58,25 @@ describe("useYoutubeThumbnailFallback", () => {
 
     // 全ての解像度を順番に試す
     act(() => {
+      result.current.handleError(); // maxresdefault retry
+    });
+    act(() => {
       result.current.handleError(); // sddefault
+    });
+    act(() => {
+      result.current.handleError(); // sddefault retry
     });
     act(() => {
       result.current.handleError(); // hqdefault
     });
     act(() => {
+      result.current.handleError(); // hqdefault retry
+    });
+    act(() => {
       result.current.handleError(); // mqdefault
+    });
+    act(() => {
+      result.current.handleError(); // mqdefault retry
     });
     act(() => {
       result.current.handleError(); // default
@@ -61,6 +85,9 @@ describe("useYoutubeThumbnailFallback", () => {
     expect(result.current.imageUrl).toContain("default.jpg");
 
     // さらにエラーを呼んでも変わらない
+    act(() => {
+      result.current.handleError();
+    });
     act(() => {
       result.current.handleError();
     });
@@ -80,6 +107,9 @@ describe("useYoutubeThumbnailFallback", () => {
     );
 
     // 最初のvideoIdで解像度を下げる
+    act(() => {
+      result.current.handleError();
+    });
     act(() => {
       result.current.handleError();
     });
@@ -107,5 +137,19 @@ describe("useYoutubeThumbnailFallback", () => {
     });
 
     expect(result.current.imageUrl).not.toBe(initialUrl);
+  });
+
+  it("最初のエラーでは同じ解像度を再試行する", () => {
+    const { result } = renderHook(() =>
+      useYoutubeThumbnailFallback(testVideoId),
+    );
+
+    act(() => {
+      result.current.handleError();
+    });
+
+    expect(result.current.imageUrl).toBe(
+      `https://img.youtube.com/vi/${testVideoId}/maxresdefault.jpg?retry=1`,
+    );
   });
 });
