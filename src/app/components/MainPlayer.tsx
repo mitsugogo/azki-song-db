@@ -62,6 +62,7 @@ export default function MainPlayer() {
   });
 
   const previousPathnameRef = useRef(pathname);
+  const previousCurrentSongKeyRef = useRef<string | null>(null);
 
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
   // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
@@ -109,6 +110,33 @@ export default function MainPlayer() {
     if (!currentSong) return;
     setPreviousAndNextSongs(currentSong, songs);
   }, [currentSong]);
+
+  useEffect(() => {
+    const currentSongKey = currentSong
+      ? `${currentSong.video_id}-${currentSong.start}`
+      : null;
+    const hasSongChanged = previousCurrentSongKeyRef.current !== currentSongKey;
+
+    previousCurrentSongKeyRef.current = currentSongKey;
+
+    if (!hasSongChanged) return;
+    if (!currentSong) return;
+    if (!searchTerm.trim()) return;
+
+    const isCurrentSongInFilteredResults = songs.some(
+      (song) =>
+        song.video_id === currentSong.video_id &&
+        song.start === currentSong.start,
+    );
+
+    if (isCurrentSongInFilteredResults) {
+      return;
+    }
+
+    // フィルタ結果に存在しない曲へ遷移した場合は全曲モードに戻す
+    setSearchTerm("");
+    setSongs(allSongs);
+  }, [currentSong, searchTerm, songs, setSearchTerm, setSongs, allSongs]);
 
   // 曲を再生
   useEffect(() => {
