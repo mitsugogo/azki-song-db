@@ -188,7 +188,7 @@ export default function DataTable<
                   {headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
-                      className="relative px-6 py-3 min-w-0 flex-shrink-0"
+                      className="relative px-6 py-3 min-w-0 shrink-0"
                       style={{
                         width:
                           header.getSize() === Number.MAX_SAFE_INTEGER
@@ -284,8 +284,8 @@ export default function DataTable<
                             key={cell.id}
                             className={`px-6 py-2 min-w-0 ${
                               idx === row.getVisibleCells().length - 1
-                                ? "flex-grow-1"
-                                : "flex-shrink-0"
+                                ? "grow"
+                                : "shrink-0"
                             }`}
                             style={{
                               width:
@@ -387,10 +387,10 @@ export default function DataTable<
                             <div className="w-full">
                               {/* Inner Header */}
                               <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700">
-                                <div className="flex-shrink-0 w-20 px-3 py-1">
+                                <div className="shrink-0 w-20 px-3 py-1">
                                   再生
                                 </div>
-                                <div className="flex-shrink-0 w-32 px-3 py-1">
+                                <div className="shrink-0 w-32 px-3 py-1">
                                   タイムスタンプ
                                 </div>
                                 <div className="flex-1 min-w-0 px-3 py-1">
@@ -416,7 +416,7 @@ export default function DataTable<
                                       key={`${s.video_id}-${s.start}`}
                                       className="flex items-center w-full border-b border-gray-200 dark:border-gray-700"
                                     >
-                                      <div className="flex-shrink-0 w-20 px-3 py-1 text-center">
+                                      <div className="shrink-0 w-20 px-3 py-1 text-center">
                                         <Link
                                           href={`/?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}&q=video_id:${s.video_id}`}
                                           className=" hover:text-primary-600 dark:hover:text-white"
@@ -427,7 +427,7 @@ export default function DataTable<
                                           />
                                         </Link>
                                       </div>
-                                      <div className="flex-shrink-0 w-32 px-3 py-1 text-sm">
+                                      <div className="shrink-0 w-32 px-3 py-1 text-sm">
                                         {new Date(parseInt(s.start) * 1000)
                                           .toISOString()
                                           .substring(11, 19)}
