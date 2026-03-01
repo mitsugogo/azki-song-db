@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.33.0](https://github.com/mitsugogo/azki-song-db/compare/v1.32.1...v1.33.0) (2026-03-01)
+
+
+### Features
+
+* シアターモード ([585e5f1](https://github.com/mitsugogo/azki-song-db/commit/585e5f1a2b278f16c075f3af950f2e1e6559e478))
+
+
+### Bug Fixes
+
+* devスクリプトにメモリ制限を追加 ([f70caa9](https://github.com/mitsugogo/azki-song-db/commit/f70caa94446b4e1c3203e681ffe4267d14515f7c))
+* YearPagerのドットが抜ける場合があったのを修正 ([0a37f43](https://github.com/mitsugogo/azki-song-db/commit/0a37f4351893d59c01f3ba249cde01bb40ce5ebc))
+* タブ切替時のローディング改善 ([d2258a5](https://github.com/mitsugogo/azki-song-db/commit/d2258a5ded28eae5498319ba0cfea2de773cf63d))
+* 判定調整 ([8492cbb](https://github.com/mitsugogo/azki-song-db/commit/8492cbbbfa51b6b12093bb2c206da04b4ef822be))
+
 ### [1.32.1](https://github.com/mitsugogo/azki-song-db/compare/v1.32.0...v1.32.1) (2026-02-25)
 
 ## [1.32.0](https://github.com/mitsugogo/azki-song-db/compare/v1.31.0...v1.32.0) (2026-02-25)
