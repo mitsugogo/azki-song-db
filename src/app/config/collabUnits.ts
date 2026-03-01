@@ -115,6 +115,10 @@ export const collabUnits: CollabUnit[] = [
     members: ["AZKi", "アキ・ローゼンタール", "大神ミオ"],
     unitName: "RosaMia",
   },
+  {
+    members: ["AZKi", "響咲リオナ"],
+    unitName: "RiONAZKi",
+  },
 ];
 
 // メンバー配列を正規化（ソート）

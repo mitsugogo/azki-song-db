@@ -625,6 +625,189 @@ describe("useSearch", () => {
     );
   });
 
+  it("カバー曲モードが動作する", async () => {
+    const songs: Song[] = [
+      {
+        video_id: "orig1",
+        title: "Original 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        video_title: "",
+        broadcast_at: "2024-01-01",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+      {
+        video_id: "cover1",
+        title: "Cover 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["カバー曲"],
+        video_title: "",
+        broadcast_at: "2024-01-02",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+    ];
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("cover-songs");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("cover1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("コラボ曲モードが動作する", async () => {
+    const songs: Song[] = [
+      {
+        video_id: "solo1",
+        title: "Solo 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        video_title: "",
+        broadcast_at: "2024-01-01",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+      {
+        video_id: "collab1",
+        title: "Collab 1 feat. AZKi",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi、Someone",
+        tags: ["オリ曲", "ユニット曲"],
+        video_title: "",
+        broadcast_at: "2024-01-02",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+    ];
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("collaboration-songs");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("collab1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("歌枠モードが動作する", async () => {
+    const songs: Song[] = [
+      {
+        video_id: "karaoke1",
+        title: "Karaoke 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["歌枠"],
+        video_title: "",
+        broadcast_at: "2024-01-01",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+      {
+        video_id: "normal1",
+        title: "Normal 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["ライブ"],
+        video_title: "",
+        broadcast_at: "2024-01-02",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+    ];
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("tag:歌枠");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("karaoke1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("楽曲紹介shortsは日付昇順で並ぶ", async () => {
     const songs: Song[] = [
       {

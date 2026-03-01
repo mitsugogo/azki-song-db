@@ -109,7 +109,12 @@ test.describe("プレイリスト機能", () => {
     await page.waitForTimeout(1000);
 
     // プレイリスト再生モードで3曲がセットされていることを確認
-    await expect(page.getByText(/楽曲一覧 \(3曲/)).toBeVisible({
+    await expect(
+      page
+        .getByRole("paragraph")
+        .filter({ hasText: /楽曲一覧 \(3曲/ })
+        .first(),
+    ).toBeVisible({
       timeout: 5000,
     });
   });

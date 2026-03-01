@@ -53,6 +53,11 @@ const SongsList = ({
   isInOverlay = false,
   onSelectSong,
 }: SongListProps) => {
+  const getSongId = useCallback(
+    (song: Song) => `${song.video_id}-${song.start}-${song.title}`,
+    [],
+  );
+
   const parentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null); // キー長押しを管理するタイマー
 
@@ -194,10 +199,24 @@ const SongsList = ({
 
   useEffect(() => {
     if (virtualRows.length > 0) {
+      const viewport = parentRef.current;
+      const scrollTop = viewport?.scrollTop ?? 0;
+      const viewportHeight = viewport?.clientHeight ?? 0;
+      const viewportBottom = scrollTop + viewportHeight;
+
+      const rowsInViewport =
+        viewportHeight > 0
+          ? virtualRows.filter(
+              (item) => item.end > scrollTop && item.start < viewportBottom,
+            )
+          : virtualRows;
+
+      const targetRows =
+        rowsInViewport.length > 0 ? rowsInViewport : virtualRows;
       const newVisibleIds: string[] = [];
 
       // 画面に見えている全ての仮想アイテムを処理
-      virtualRows.forEach((item) => {
+      targetRows.forEach((item) => {
         const startItemIndex = item.index * colCount;
 
         // 1行内の全ての曲をチェック
@@ -206,7 +225,7 @@ const SongsList = ({
           const song = songs[globalIndex];
 
           if (song) {
-            const visibleId = `${song.video_id}-${song.start}-${song.title}`;
+            const visibleId = getSongId(song);
             newVisibleIds.push(visibleId);
           }
         }
@@ -214,18 +233,18 @@ const SongsList = ({
 
       // スクロール位置が変わったときのみstateを更新
       setVisibleSongIds((prev) => {
-        // 配列の比較は面倒なので、IDの数で大まかに判定
         if (
-          newVisibleIds.length !== prev.length ||
-          newVisibleIds[0] !== prev[0]
+          newVisibleIds.length === prev.length &&
+          newVisibleIds.every((id, index) => prev[index] === id)
         ) {
-          return newVisibleIds;
+          return prev;
         }
-        return prev;
+
+        return newVisibleIds;
       });
     } else if (songs.length > 0) {
       // リストが空でない場合の初期値設定
-      const initialId = `${songs[0].video_id}-${songs[0].start}-${songs[0].title}`;
+      const initialId = getSongId(songs[0]);
       setVisibleSongIds((prev) => {
         if (prev.length === 0) {
           return [initialId];
@@ -233,7 +252,7 @@ const SongsList = ({
         return prev;
       });
     }
-  }, [virtualRows, songs, colCount]); // virtualRowsが変更されるたびに実行
+  }, [virtualRows, songs, colCount, getSongId]); // virtualRowsが変更されるたびに実行
 
   /**
    * ページャーまたはリストからのクリック時に特定の曲にスクロールする関数

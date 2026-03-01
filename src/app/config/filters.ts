@@ -3,20 +3,21 @@ import { Song } from "../types/song";
 /**
  * オリジナル楽曲と定義する曲にフィルタリングする関数
  */
-export function filterOriginalSongs(song: Song) {
-  return isOriginalSong(song) || isFesOverallSong(song);
+export function filterOriginalSongs(song: Song, excludeTag = false) {
+  return isOriginalSong(song, excludeTag) || isFesOverallSong(song);
 }
 
-export const isPossibleOriginalSong = (s: Song) => {
-  return isOriginalSong(s) || isFesOverallSong(s);
+export const isPossibleOriginalSong = (s: Song, excludeTag = false) => {
+  return isOriginalSong(s, excludeTag) || isFesOverallSong(s);
 };
 
 /**
  * (純粋な)オリジナル楽曲かどうか
  */
-export const isOriginalSong = (s: Song) => {
+export const isOriginalSong = (s: Song, excludeTag = false) => {
   return (
-    (s.tags.includes("オリ曲") ||
+    (excludeTag ||
+      s.tags.includes("オリ曲") ||
       s.tags.includes("オリ曲MV") ||
       s.tags.includes("ライブ予習")) &&
     (s.artist.includes("AZKi") ||
