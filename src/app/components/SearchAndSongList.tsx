@@ -1,8 +1,20 @@
-import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
-import { LuChevronDown, LuX } from "react-icons/lu";
+import {
+  LuArrowDownWideNarrow,
+  LuArrowUpWideNarrow,
+  LuChevronDown,
+  LuX,
+} from "react-icons/lu";
 import { LuSparkles } from "react-icons/lu";
 import {
   Button as MantineButton,
@@ -92,6 +104,25 @@ export default function SearchAndSongList({
   } as const;
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const sortedSongs = useMemo(() => {
+    const order = sortOrder === "asc" ? 1 : -1;
+
+    return [...songs].sort((leftSong, rightSong) => {
+      const leftDate = new Date(leftSong.broadcast_at || "").getTime();
+      const rightDate = new Date(rightSong.broadcast_at || "").getTime();
+
+      const normalizedLeftDate = Number.isNaN(leftDate) ? 0 : leftDate;
+      const normalizedRightDate = Number.isNaN(rightDate) ? 0 : rightDate;
+
+      if (normalizedLeftDate !== normalizedRightDate) {
+        return (normalizedLeftDate - normalizedRightDate) * order;
+      }
+
+      return leftSong.title.localeCompare(rightSong.title) * order;
+    });
+  }, [songs, sortOrder]);
 
   const { playlists, isNowPlayingPlaylist } = usePlaylists();
   const { favorites } = useFavorites();
@@ -277,16 +308,34 @@ export default function SearchAndSongList({
               placeholder="検索"
             />
           </div>
-          <div className="block">
-            <p className="text-xs text-muted-foreground dark:text-white mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground dark:text-white">
               楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
             </p>
+            <button
+              type="button"
+              onClick={() =>
+                setSortOrder((previousOrder) =>
+                  previousOrder === "asc" ? "desc" : "asc",
+                )
+              }
+              aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+              className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
+                songs.length > 15 ? "mr-11" : ""
+              }`}
+            >
+              {sortOrder === "asc" ? (
+                <LuArrowUpWideNarrow className="h-4 w-4" />
+              ) : (
+                <LuArrowDownWideNarrow className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
           <div className={isTheaterMode ? "h-[60vh]" : "flex-1 min-h-0"}>
             <Suspense fallback={<Loading />}>
               <SongsList
-                songs={songs}
+                songs={sortedSongs}
                 currentSong={currentSong}
                 changeCurrentSong={changeCurrentSong as any}
                 hideFutureSongs={hideFutureSongs}
@@ -339,11 +388,33 @@ export default function SearchAndSongList({
               </div>
             </div>
 
+            <div className="px-3 py-0 flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground dark:text-white">
+                楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setSortOrder((previousOrder) =>
+                    previousOrder === "asc" ? "desc" : "asc",
+                  )
+                }
+                aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+                className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
+              >
+                {sortOrder === "asc" ? (
+                  <LuArrowUpWideNarrow className="h-4 w-4" />
+                ) : (
+                  <LuArrowDownWideNarrow className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
             <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 mt-2 ml-3 mr-1">
               <div className="h-full">
                 <Suspense fallback={<Loading />}>
                   <SongsList
-                    songs={songs}
+                    songs={sortedSongs}
                     currentSong={currentSong}
                     changeCurrentSong={changeCurrentSong as any}
                     hideFutureSongs={hideFutureSongs}
