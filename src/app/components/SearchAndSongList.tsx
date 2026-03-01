@@ -167,7 +167,7 @@ export default function SearchAndSongList({
             <span className="text-sm">
               <LuSparkles className="mr-1 inline" />
               <span className="foldable:hidden">ランダムで他の曲にする</span>
-              <span className="foldable:inline">Surprise Me</span>
+              <span className="hidden foldable:inline">Surprise Me</span>
             </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
