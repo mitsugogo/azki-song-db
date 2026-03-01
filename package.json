@@ -1,6 +1,6 @@
 {
   "name": "azki-song-app",
-  "version": "1.32.1",
+  "version": "1.33.0",
   "private": true,
   "scripts": {
     "dev": "node --max-old-space-size=4092 ./node_modules/next/dist/bin/next dev --turbopack",
