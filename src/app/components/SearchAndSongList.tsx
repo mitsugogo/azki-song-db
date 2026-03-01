@@ -120,6 +120,13 @@ export default function SearchAndSongList({
         return (normalizedLeftDate - normalizedRightDate) * order;
       }
 
+      const leftOrder = leftSong.source_order ?? Number.MAX_SAFE_INTEGER;
+      const rightOrder = rightSong.source_order ?? Number.MAX_SAFE_INTEGER;
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
       return leftSong.title.localeCompare(rightSong.title) * order;
     });
   }, [songs, sortOrder]);
