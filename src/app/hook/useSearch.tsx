@@ -42,6 +42,24 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
   const searchParams = useSearchParams();
   const isSyncingFromUrl = useRef(false);
+  const previousUrlSyncState = useRef<{ q: string; playlist: string } | null>(
+    null,
+  );
+
+  const isSameSongOrder = useCallback(
+    (leftSongs: Song[], rightSongs: Song[]) => {
+      return (
+        leftSongs.length === rightSongs.length &&
+        rightSongs.every(
+          (song, index) =>
+            song.video_id === leftSongs[index]?.video_id &&
+            song.start === leftSongs[index]?.start &&
+            song.title === leftSongs[index]?.title,
+        )
+      );
+    },
+    [],
+  );
 
   // マイルストーンごとのvideo_id一覧を事前に集計
   const milestoneVideoIdMap = useMemo(() => {
@@ -210,7 +228,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
       );
 
       // 特殊モード判定
-      const playlist = searchParams?.get("playlist");
+      const playlist = searchParams?.get("playlist") ?? "";
 
       // 曲モード（オリ曲/カバー曲/コラボ曲）
       if (selectedSongMode) {
@@ -335,6 +353,19 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
     if (!searchParams) return;
     const queryFromUrl = searchParams.get("q") ?? "";
     const playlistFromUrl = searchParams.get("playlist") ?? "";
+    const previousSyncState = previousUrlSyncState.current;
+    const hasUrlFilterStateChanged =
+      previousSyncState?.q !== queryFromUrl ||
+      previousSyncState?.playlist !== playlistFromUrl;
+
+    if (!hasUrlFilterStateChanged) {
+      return;
+    }
+
+    previousUrlSyncState.current = {
+      q: queryFromUrl,
+      playlist: playlistFromUrl,
+    };
 
     if (queryFromUrl !== searchTerm) {
       isSyncingFromUrl.current = true;
@@ -345,9 +376,13 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
     // ここで重複して処理しない
     if (!playlistFromUrl) {
       const filteredSongs = searchSongs(allSongs, queryFromUrl);
-      setSongs(filteredSongs);
+      setSongs((previousSongs) =>
+        isSameSongOrder(previousSongs, filteredSongs)
+          ? previousSongs
+          : filteredSongs,
+      );
     }
-  }, [searchParams, allSongs, searchSongs]);
+  }, [searchParams, allSongs, searchSongs, searchTerm, isSameSongOrder]);
 
   // URL更新（即座に）
   useEffect(() => {
@@ -381,19 +416,10 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
     // 楽曲のフィルタリングを実行
     const newSongs = searchSongs(allSongs, debouncedSearchTerm);
 
-    // 配列の長さが異なるか、曲IDの並びが変わった場合のみセットする
-    const isSameOrder =
-      newSongs.length === songs.length &&
-      newSongs.every(
-        (song, index) =>
-          song.video_id === songs[index]?.video_id &&
-          song.start === songs[index]?.start,
-      );
-
-    if (!isSameOrder) {
-      setSongs(newSongs);
-    }
-  }, [debouncedSearchTerm, allSongs, searchSongs]);
+    setSongs((previousSongs) =>
+      isSameSongOrder(previousSongs, newSongs) ? previousSongs : newSongs,
+    );
+  }, [debouncedSearchTerm, allSongs, searchSongs, isSameSongOrder]);
 
   return {
     songs,

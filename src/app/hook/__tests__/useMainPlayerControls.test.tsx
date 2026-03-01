@@ -390,14 +390,12 @@ describe("useMainPlayerControls", () => {
   });
 
   it("video_idが変更された場合、再生位置がリセットされる", () => {
-    const { result, rerender } = renderHook(
-      ({ songs }) =>
-        useMainPlayerControls({
-          songs,
-          allSongs: songs,
-          globalPlayer: mockGlobalPlayer,
-        }),
-      { initialProps: { songs: mockSongs } },
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
     );
 
     // 最初の曲を設定
@@ -405,8 +403,10 @@ describe("useMainPlayerControls", () => {
       result.current.changeCurrentSong(mockSongs[0]);
     });
 
-    // ビデオIDを変更
-    rerender({ songs: [mockSongs[1]] });
+    // 明示的に別動画の曲へ切り替え
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
 
     expect(mockGlobalPlayer.setCurrentTime).toHaveBeenCalledWith(0);
   });

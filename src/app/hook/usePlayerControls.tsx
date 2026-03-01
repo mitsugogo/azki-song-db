@@ -159,14 +159,16 @@ const usePlayerControls = (
   useEffect(() => {
     if (!currentSong) return;
 
-    // もし現在の楽曲がリストにない場合は先頭を再生しはじめる
+    // 現在の楽曲がリストにない場合は、再生曲は維持して前後曲のみ未設定にする
+    // （フィルタ解除などの上位ロジックで再同期させる）
     const isExists = songs.some(
       (song) =>
         song.video_id === currentSong?.video_id &&
         song.start === currentSong?.start,
     );
-    if (!isExists && songs.length > 0) {
-      changeCurrentSong(songs[0]);
+    if (!isExists) {
+      setPreviousSong(null);
+      setNextSong(null);
       return;
     }
 
