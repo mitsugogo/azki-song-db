@@ -15,11 +15,11 @@ test.describe("Mobile action buttons", () => {
 
     // Mobile action buttons should be visible
     const surpriseButton = page.getByRole("button", { name: /Surprise/i });
-    const originalButton = page.getByRole("button", { name: /オリ曲/ });
+    const modeButton = page.getByRole("button", { name: /全曲/ });
     const playlistButton = page.getByRole("button", { name: /プレイリスト/ });
 
     await expect(surpriseButton).toBeVisible();
-    await expect(originalButton).toBeVisible();
+    await expect(modeButton).toBeVisible();
     await expect(playlistButton).toBeVisible();
   });
 
@@ -87,9 +87,10 @@ test.describe("Mobile action buttons", () => {
     const initialMatch = initialCountText?.match(/(\d+)曲\/(\d+)曲/);
     const initialTotal = initialMatch ? parseInt(initialMatch[2]) : 0;
 
-    // Click original songs button
-    const originalButton = page.getByRole("button", { name: /オリ曲/ });
-    await originalButton.click();
+    // Click song mode button and choose original songs
+    const modeButton = page.getByRole("button", { name: /全曲/ });
+    await modeButton.click();
+    await page.getByRole("menuitem", { name: "オリ曲" }).click();
 
     // Wait for filtering
     await page.waitForTimeout(1000);

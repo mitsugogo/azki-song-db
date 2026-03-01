@@ -16,6 +16,11 @@ import MobileActionButtons from "./MobileActionButtons";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
+import {
+  getSongModeIcon,
+  getSongModeLabel,
+  getSongModeTriggerButtonClassName,
+} from "./songModeMenu";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -68,6 +73,9 @@ type PlayerSectionProps = {
   setOpenSongListOverlay?: (open: boolean) => void;
   setShowPlaylistSelector?: (open: boolean) => void;
   playerControls?: DesktopPlayerControls;
+  isTheaterMode: boolean;
+  onToggleTheaterMode: () => void;
+  showNowPlayingInfo?: boolean;
 };
 
 export default function PlayerSection({
@@ -99,6 +107,9 @@ export default function PlayerSection({
   playerControls,
   setOpenSongListOverlay,
   setShowPlaylistSelector,
+  isTheaterMode,
+  onToggleTheaterMode,
+  showNowPlayingInfo = true,
 }: PlayerSectionProps) {
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
@@ -118,6 +129,10 @@ export default function PlayerSection({
     if (song.slug) return song.slug;
     return `${song.title}::${song.artist}`;
   }, []);
+  const currentSongModeLabel = getSongModeLabel(searchTerm);
+  const currentSongModeIcon = getSongModeIcon(searchTerm);
+  const currentSongModeButtonClassName =
+    getSongModeTriggerButtonClassName(searchTerm);
 
   const hasNextInVideo = useMemo(() => {
     if (!currentSong) return false;
@@ -150,7 +165,13 @@ export default function PlayerSection({
   }, [timedLiveCallText]);
 
   return (
-    <aside className="flex md:w-2/3 xl:w-9/12 w-full foldable:w-full md:foldable:w-1/2 pr-0">
+    <aside
+      className={`flex w-full pr-0 transition-[width] duration-300 ease-in-out ${
+        isTheaterMode
+          ? "md:w-full xl:w-full md:shrink-0 foldable:w-full"
+          : "foldable:w-full md:foldable:w-1/2 md:w-2/3 xl:w-9/12"
+      }`}
+    >
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
@@ -228,13 +249,18 @@ export default function PlayerSection({
             currentSong={currentSong}
             hideFutureSongs={hideFutureSongs}
             setHideFutureSongs={setHideFutureSongs}
+            isTheaterMode={isTheaterMode}
+            onToggleTheaterMode={onToggleTheaterMode}
           />
         )}
 
         <div className="block md:hidden mx-2 mt-2">
           <MobileActionButtons
             onSurprise={() => playRandomSong?.(songs)}
-            onOriginal={() => setSearchTerm?.("original-songs")}
+            onSelectSongMode={(mode) => setSearchTerm?.(mode)}
+            currentSongModeLabel={currentSongModeLabel}
+            currentSongModeIcon={currentSongModeIcon}
+            currentSongModeButtonClassName={currentSongModeButtonClassName}
             onPlaylist={() => setShowPlaylistSelector?.(true)}
           />
         </div>
@@ -296,21 +322,22 @@ export default function PlayerSection({
           </div>
         )}
 
-        {/* Now Playing Song Info */}
-        <NowPlayingSongInfo
-          currentSong={currentSong}
-          allSongs={allSongs}
-          searchTerm={searchTerm}
-          isPlaying={isPlaying}
-          hideFutureSongs={hideFutureSongs}
-          setSearchTerm={setSearchTerm}
-          setOpenShereModal={setOpenShareModal}
-          changeCurrentSong={changeCurrentSong}
-          videoTitle={videoTitle}
-          videoData={videoData}
-          videoInfo={videoInfo}
-          setHideFutureSongs={setHideFutureSongs}
-        />
+        {showNowPlayingInfo && (
+          <NowPlayingSongInfo
+            currentSong={currentSong}
+            allSongs={allSongs}
+            searchTerm={searchTerm}
+            isPlaying={isPlaying}
+            hideFutureSongs={hideFutureSongs}
+            setSearchTerm={setSearchTerm}
+            setOpenShereModal={setOpenShareModal}
+            changeCurrentSong={changeCurrentSong}
+            videoTitle={videoTitle}
+            videoData={videoData}
+            videoInfo={videoInfo}
+            setHideFutureSongs={setHideFutureSongs}
+          />
+        )}
       </OverlayScrollbarsComponent>
     </aside>
   );

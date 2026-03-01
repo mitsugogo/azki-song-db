@@ -42,7 +42,12 @@ export function useStatistics({ songs }: UseStatisticsProps) {
     [songs],
   );
   const originalSongCounts = useMemo(() => {
-    const originals = songs.filter((s) => isPossibleOriginalSong(s));
+    const originals = songs.filter((s) => {
+      return (
+        isPossibleOriginalSong(s, true) ||
+        (s.artist.includes("AZKi") && s.sing.includes("AZKi"))
+      );
+    });
     return createStatistics(originals, (s) => s.title);
   }, [songs]);
   const tagCounts = useMemo(

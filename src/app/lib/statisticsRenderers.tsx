@@ -3,6 +3,9 @@ import { Badge } from "flowbite-react";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { Song } from "../types/song";
 import { ViewMilestoneInfo } from "../types/viewMilestone";
+import Link from "next/link";
+import { FaYoutube } from "react-icons/fa6";
+import { BsPlayCircleFill } from "react-icons/bs";
 
 export const renderLastVideoCell = (
   lastVideo: Song,
@@ -12,38 +15,70 @@ export const renderLastVideoCell = (
   if (!lastVideo) return <span className="text-sm">なし</span>;
 
   const videoUrl = `${lastVideo.video_uri}`;
+  const appPlayUrl = `/?v=${lastVideo.video_id}&q=video_id:${lastVideo.video_id}`;
 
-  const content = (
-    <div className="flex items-center gap-2 flex-row">
-      <div className="flex w-24 max-w-[120px]">
-        <YoutubeThumbnail
-          key={lastVideo.video_id}
-          videoId={lastVideo.video_id}
-          alt={lastVideo.video_title}
-          fill={true}
-        />
-      </div>
-      <div className="flex flex-grow flex-col w-full gap-0">
-        <span className={`text-xs ${hiddenTitle ? "hidden" : ""} inline`}>
-          <span>{lastVideo.video_title}</span>
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {new Date(lastVideo.broadcast_at).toLocaleDateString()}
-        </span>
+  return (
+    <div className="p-2">
+      <div className="flex items-start gap-3">
+        <div className="w-32 shrink-0 overflow-hidden rounded-sm">
+          {link ? (
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <YoutubeThumbnail
+                key={lastVideo.video_id}
+                videoId={lastVideo.video_id}
+                alt={lastVideo.video_title}
+                fill={true}
+              />
+            </a>
+          ) : (
+            <YoutubeThumbnail
+              key={lastVideo.video_id}
+              videoId={lastVideo.video_id}
+              alt={lastVideo.video_title}
+              fill={true}
+            />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className={`${hiddenTitle ? "hidden" : ""}`}>
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="line-clamp-1 text-sm font-semibold text-light-gray-900 hover:text-primary-700 dark:text-light-gray-100 dark:hover:text-primary-500"
+            >
+              {lastVideo.video_title}
+            </a>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {new Date(lastVideo.broadcast_at).toLocaleDateString()}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <a
+              href={videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-md bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700"
+            >
+              <FaYoutube size={12} />
+              YouTube
+            </a>
+            <Link
+              href={appPlayUrl}
+              className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-primary-700"
+            >
+              <BsPlayCircleFill size={12} />
+              再生
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
-  );
-  return link ? (
-    <a
-      href={videoUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-    >
-      {content}
-    </a>
-  ) : (
-    content
   );
 };
 

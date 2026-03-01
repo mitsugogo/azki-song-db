@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { Select, Tabs } from "@mantine/core";
+import { HiArrowUp } from "react-icons/hi";
 
 import DataTable from "./datatable";
+import SongCountOverview from "./SongCountOverview";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
 import useStatViewCounts from "../hook/useStatViewCounts";
@@ -11,10 +13,15 @@ import { TABS_CONFIG } from "./tabsConfig";
 import Loading from "../loading";
 import historyHelper from "../lib/history";
 import { buildViewMilestoneInfo } from "../lib/viewMilestone";
+import { StatisticsItem } from "../types/statisticsItem";
 
 export default function StatisticsPage() {
-  const [activeTab, setActiveTab] = useState(0);
+  const tabKeys = useMemo(() => TABS_CONFIG.map((tab) => tab.dataKey), []);
+  const defaultTab = tabKeys[0] ?? "songCounts";
+
+  const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const { songs, loading } = useSongData();
 
@@ -67,11 +74,124 @@ export default function StatisticsPage() {
     setSelectedVideoId((prev) => (prev === videoId ? null : videoId));
   };
 
-  const handleTabChange = (tabIndex: number) => {
-    setActiveTab(tabIndex);
+  const rankedDesignTabs = new Set([
+    "songCounts",
+    "artistCounts",
+    "originalSongCounts",
+    "tagCounts",
+    "videoCounts",
+  ]);
+
+  const hideTopTileTabs = new Set([
+    "milestoneCounts",
+    "videoCounts",
+    "originalSongCountsByReleaseDate",
+    "coverSongCountsByReleaseDate",
+  ]);
+
+  const viewCountBarTabs = new Set([
+    "originalSongCountsByReleaseDate",
+    "coverSongCountsByReleaseDate",
+  ]);
+
+  const milestoneOverviewTabs = new Set([
+    "originalSongCountsByReleaseDate",
+    "coverSongCountsByReleaseDate",
+  ]);
+
+  const getOverviewLabels = (
+    dataKey: keyof typeof statisticsWithMilestones,
+  ) => {
+    switch (dataKey) {
+      case "songCounts":
+        return {
+          primaryLabel: "曲の種類",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "最多曲",
+          countUnit: "回",
+        };
+      case "artistCounts":
+        return {
+          primaryLabel: "アーティスト数",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "最多アーティスト",
+          countUnit: "回",
+        };
+      case "originalSongCounts":
+        return {
+          primaryLabel: "オリ曲数",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "最多オリ曲",
+          countUnit: "回",
+        };
+      case "tagCounts":
+        return {
+          primaryLabel: "タグ数",
+          totalCountLabel: "総収録回数",
+          topLabel: "最多タグ",
+          countUnit: "件",
+        };
+      case "milestoneCounts":
+        return {
+          primaryLabel: "マイルストーン数",
+          totalCountLabel: "総登場回数",
+          topLabel: "最新マイルストーン",
+          countUnit: "回",
+        };
+      case "videoCounts":
+        return {
+          primaryLabel: "動画数",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "最多動画",
+          countUnit: "回",
+        };
+      case "originalSongCountsByReleaseDate":
+        return {
+          primaryLabel: "収録楽曲数",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "",
+          countUnit: "回",
+        };
+      case "coverSongCountsByReleaseDate":
+        return {
+          primaryLabel: "収録楽曲数",
+          totalCountLabel: "総歌唱回数",
+          topLabel: "",
+          countUnit: "回",
+        };
+      default:
+        return {
+          primaryLabel: "項目数",
+          totalCountLabel: "総回数",
+          topLabel: "最多項目",
+          countUnit: "回",
+        };
+    }
+  };
+
+  const resolveTabFromSearchParam = (tabParam: string | null) => {
+    if (!tabParam) return defaultTab;
+
+    const matchedByKey = tabKeys.find((key) => key === tabParam);
+    if (matchedByKey) return matchedByKey;
+
+    if (/^\d+$/.test(tabParam)) {
+      const tabIndex = Number(tabParam);
+      if (tabIndex >= 0 && tabIndex < tabKeys.length) {
+        return tabKeys[tabIndex];
+      }
+    }
+
+    return defaultTab;
+  };
+
+  const handleTabChange = (nextTab: string | null) => {
+    if (!nextTab || nextTab === activeTab) return;
+
+    setActiveTab(nextTab);
 
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", tabIndex.toString());
+    url.searchParams.set("tab", nextTab);
     // タブ切替は履歴を増やさない（戻る操作で過去のタブが大量に残るのを防ぐ）
     historyHelper.replaceUrlIfDifferent(url.href);
   };
@@ -79,12 +199,35 @@ export default function StatisticsPage() {
   // ページを開いた時にURLの"tab"を取得してタブを選択する
   useEffect(() => {
     const url = new URL(window.location.href);
-    const tab = url.searchParams.get("tab");
-    if (tab) {
-      const tabIndex = parseInt(tab, 10);
-      setActiveTab(tabIndex);
-    }
+    setActiveTab(resolveTabFromSearchParam(url.searchParams.get("tab")));
+
+    const handlePopState = () => {
+      const nextUrl = new URL(window.location.href);
+      setActiveTab(resolveTabFromSearchParam(nextUrl.searchParams.get("tab")));
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [defaultTab, tabKeys]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const activeTabConfig = useMemo(
+    () => TABS_CONFIG.find((tab) => tab.dataKey === activeTab),
+    [activeTab],
+  );
 
   if (loading) {
     return (
@@ -98,53 +241,94 @@ export default function StatisticsPage() {
     <div className="grow">
       <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
 
-      <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <TabList className="flex whitespace-nowrap overflow-x-auto overflow-y-hidden">
+      <Tabs value={activeTab} onChange={handleTabChange} variant="default">
+        <div className="md:hidden px-3 pb-2">
+          <Select
+            aria-label="統計タブ選択"
+            value={activeTab}
+            onChange={handleTabChange}
+            data={TABS_CONFIG.map((tab) => ({
+              value: tab.dataKey,
+              label: tab.title,
+            }))}
+            searchable={false}
+            allowDeselect={false}
+            checkIconPosition="right"
+            comboboxProps={{ withinPortal: false }}
+          />
+        </div>
+
+        <div className="border-b border-gray-200 dark:border-gray-700 hidden md:block">
+          <Tabs.List className="flex whitespace-nowrap overflow-x-auto overflow-y-hidden">
             {TABS_CONFIG.map((tab) => (
-              <Tab
+              <Tabs.Tab
                 id={`tab-${TABS_CONFIG.indexOf(tab)}`}
                 key={`${tab.title}-${tab.dataKey}-header`}
-                className={({ selected }) =>
-                  `flex items-center justify-center p-4 font-medium text-sm border-b-2 focus:outline-none transition-colors duration-200 cursor-pointer
-                   ${
-                     selected
-                       ? "border-primary-600 text-primary-600 dark:border-primary-500 dark:text-primary-500"
-                       : "border-transparent text-light-gray-800 dark:text-light-gray-300 hover:border-gray-300 hover:text-gray-400 dark:hover:text-gray-100"
-                   }`
+                value={tab.dataKey}
+                leftSection={
+                  tab.icon ? <tab.icon className="h-4 w-4" /> : undefined
                 }
+                className="px-4"
               >
-                {tab.icon && (
-                  <span className="mr-2">
-                    <tab.icon />
-                  </span>
-                )}
                 {tab.title}
-              </Tab>
+              </Tabs.Tab>
             ))}
-          </TabList>
+          </Tabs.List>
         </div>
-        <TabPanels>
-          {TABS_CONFIG.map((tab, index) => (
-            <TabPanel key={`${tab.title}-${index}-panel`}>
-              <DataTable
-                data={statisticsWithMilestones[tab.dataKey]}
-                caption={tab.caption}
-                description={tab.description}
-                columns={tab.columns}
-                minWidth={tab.minWidth}
-                initialSortColumnId={tab.initialSort.id}
-                initialSortDirection={tab.initialSort.direction}
-                {...(tab.dataKey === "videoCounts" && {
-                  onRowClick: handleVideoClick,
-                  selectedVideoId: selectedVideoId,
-                  songs: songs,
-                })}
-              />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </TabGroup>
+
+        {activeTabConfig && (
+          <Tabs.Panel
+            key={activeTabConfig.dataKey}
+            value={activeTabConfig.dataKey}
+          >
+            <SongCountOverview
+              items={
+                statisticsWithMilestones[
+                  activeTabConfig.dataKey
+                ] as StatisticsItem[]
+              }
+              {...getOverviewLabels(activeTabConfig.dataKey)}
+              showMilestoneHighlights={milestoneOverviewTabs.has(
+                activeTabConfig.dataKey,
+              )}
+              showTopTile={!hideTopTileTabs.has(activeTabConfig.dataKey)}
+            />
+            <DataTable
+              key={activeTabConfig.dataKey}
+              data={statisticsWithMilestones[activeTabConfig.dataKey]}
+              caption={activeTabConfig.caption}
+              description={activeTabConfig.description}
+              columns={activeTabConfig.columns}
+              minWidth={activeTabConfig.minWidth}
+              initialSortColumnId={activeTabConfig.initialSort.id}
+              initialSortDirection={activeTabConfig.initialSort.direction}
+              visualMode={
+                rankedDesignTabs.has(activeTabConfig.dataKey)
+                  ? "ranked"
+                  : viewCountBarTabs.has(activeTabConfig.dataKey)
+                    ? "viewCountBar"
+                    : "default"
+              }
+              {...(activeTabConfig.dataKey === "videoCounts" && {
+                onRowClick: handleVideoClick,
+                selectedVideoId: selectedVideoId,
+                songs: songs,
+              })}
+            />
+          </Tabs.Panel>
+        )}
+      </Tabs>
+
+      {showBackToTop && (
+        <button
+          type="button"
+          onClick={handleBackToTop}
+          aria-label="ページ上部へ戻る"
+          className="fixed bottom-4 right-4 z-40 inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-lg transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+        >
+          <HiArrowUp className="h-5 w-5" />
+        </button>
+      )}
     </div>
   );
 }

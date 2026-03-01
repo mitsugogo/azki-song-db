@@ -3,7 +3,7 @@
   "version": "1.32.1",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "node --max-old-space-size=4092 ./node_modules/next/dist/bin/next dev --turbopack",
     "build": "node scripts/pre-build.js && next build",
     "start": "next start",
     "test": "vitest",

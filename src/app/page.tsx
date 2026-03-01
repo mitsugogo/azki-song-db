@@ -26,6 +26,8 @@ export async function generateMetadata({
 
   if (q) {
     const isOriginalSongsMode = q === "sololive2025" || q === "original-songs";
+    const isCoverSongsMode = q === "cover-songs";
+    const isCollaborationSongsMode = q === "collaboration-songs";
     const qStr = typeof q === "string" ? q : "";
 
     // プレフィックスとアイコンのマッピング
@@ -44,6 +46,14 @@ export async function generateMetadata({
       title = `オリジナル曲モード | ${siteConfig.siteName}`;
       og_title = "オリジナル曲モード";
       og_subtitle = "AZKiさんのオリジナル楽曲を集めたプレイリスト";
+    } else if (isCoverSongsMode) {
+      title = `カバー曲モード | ${siteConfig.siteName}`;
+      og_title = "カバー曲モード";
+      og_subtitle = "AZKiさんのカバー楽曲を集めたプレイリスト";
+    } else if (isCollaborationSongsMode) {
+      title = `コラボ曲モード | ${siteConfig.siteName}`;
+      og_title = "コラボ曲モード";
+      og_subtitle = "AZKiさんのコラボ楽曲を集めたプレイリスト";
     } else {
       // プレフィックスを検出
       let matched = false;

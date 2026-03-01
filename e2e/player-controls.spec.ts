@@ -217,6 +217,86 @@ test.describe("Player Control Bar", () => {
     const afterLeftTime = await timeElement.textContent();
     expect(afterLeftTime).not.toBe(afterRightTime);
   });
+
+  test("シアターモードでプレイヤーが上段全幅になり、リロード後も状態を保持する", async ({
+    page,
+  }) => {
+    const theaterToggle = page.locator(
+      'button[aria-label="シアターモードに切り替え"], button[aria-label="シアターモードを終了"]',
+    );
+    await expect(theaterToggle).toBeVisible();
+
+    const initialLabel = await theaterToggle.getAttribute("aria-label");
+    if (initialLabel === "シアターモードに切り替え") {
+      await theaterToggle.click();
+    }
+
+    await expect(theaterToggle).toHaveAttribute(
+      "aria-label",
+      "シアターモードを終了",
+    );
+
+    // 左側: 楽曲詳細（NowPlayingSongInfo）
+    await expect(page.getByText("タイトル:").first()).toBeVisible();
+    // 右側: 楽曲一覧
+    await expect(
+      page.getByText(/楽曲一覧 \(\d+曲\/\d+曲\)/).first(),
+    ).toBeVisible();
+
+    // 右カラムが3列タイル表示であることを確認
+    const tilePositions = await page.evaluate(() => {
+      const tiles = Array.from(
+        document.querySelectorAll("#song-list li"),
+      ).slice(0, 3);
+      const xs = tiles.map((tile) =>
+        Math.round(tile.getBoundingClientRect().x),
+      );
+      return {
+        tileCount: tiles.length,
+        distinctCols: new Set(xs).size,
+      };
+    });
+
+    expect(tilePositions.tileCount).toBeGreaterThanOrEqual(3);
+    expect(tilePositions.distinctCols).toBe(3);
+
+    await page.reload();
+
+    const theaterToggleAfterReload = page.locator(
+      'button[aria-label="シアターモードに切り替え"], button[aria-label="シアターモードを終了"]',
+    );
+    await expect(theaterToggleAfterReload).toHaveAttribute(
+      "aria-label",
+      "シアターモードを終了",
+    );
+  });
+
+  test("シアターボタンが表示されない幅ではシアターモードを強制解除する", async ({
+    page,
+  }) => {
+    const theaterToggle = page.locator(
+      'button[aria-label="シアターモードに切り替え"], button[aria-label="シアターモードを終了"]',
+    );
+    await expect(theaterToggle).toBeVisible();
+
+    const initialLabel = await theaterToggle.getAttribute("aria-label");
+    if (initialLabel === "シアターモードに切り替え") {
+      await theaterToggle.click();
+    }
+
+    await expect(theaterToggle).toHaveAttribute(
+      "aria-label",
+      "シアターモードを終了",
+    );
+
+    await page.setViewportSize({ width: 900, height: 900 });
+
+    await expect
+      .poll(async () =>
+        page.evaluate(() => localStorage.getItem("player-theater-mode")),
+      )
+      .toBe("false");
+  });
 });
 
 test.describe("同一動画内での曲切り替え", () => {

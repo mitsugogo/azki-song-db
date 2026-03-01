@@ -5,7 +5,11 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
 import { useSearchParams } from "next/navigation";
 import historyHelper from "../lib/history";
-import { filterOriginalSongs } from "../config/filters";
+import {
+  filterOriginalSongs,
+  isCollaborationSong,
+  isCoverSong,
+} from "../config/filters";
 
 interface UseSearchOptions {
   syncUrl?: boolean;
@@ -194,30 +198,41 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         (word) => word.startsWith("-") && word.length > 1,
       );
 
-      // 特殊モード判定
-      const isOriginalSongsMode = searchWords.some(
-        (word) => word === "sololive2025" || word === "original-songs",
-      );
-      const urlParams = new URLSearchParams(window.location.search);
-      const playlist = urlParams.get("playlist");
+      const songModePredicates: Record<string, (song: Song) => boolean> = {
+        sololive2025: filterOriginalSongs,
+        "original-songs": filterOriginalSongs,
+        "cover-songs": isCoverSong,
+        "collaboration-songs": isCollaborationSong,
+      };
 
-      // オリ曲モード(オリ曲のみ絞り込み)
-      if (isOriginalSongsMode) {
+      const selectedSongMode = searchWords.find(
+        (word) => songModePredicates[word],
+      );
+
+      // 特殊モード判定
+      const playlist = searchParams?.get("playlist");
+
+      // 曲モード（オリ曲/カバー曲/コラボ曲）
+      if (selectedSongMode) {
         // 検索ワードからマジックワードを除く
-        normalWords = normalWords.filter(
-          (word) => word !== "sololive2025" && word !== "original-songs",
+        normalWords = normalWords.filter((word) => !songModePredicates[word]);
+
+        songsToFilter = songsToFilter.filter((song) =>
+          songModePredicates[selectedSongMode](song),
         );
 
-        // 予習曲のみ絞り込み
-        songsToFilter = songsToFilter
-          .filter((s) => filterOriginalSongs(s))
-          .sort((a, b) => {
+        if (
+          selectedSongMode === "sololive2025" ||
+          selectedSongMode === "original-songs"
+        ) {
+          songsToFilter = songsToFilter.sort((a, b) => {
             // リリース順でソート
             return (
               new Date(a.broadcast_at || "").getTime() -
               new Date(b.broadcast_at || "").getTime()
             );
           });
+        }
       } else if (playlist) {
         // プレイリストモード
         const playlistSongs = decodePlaylistUrlParam(playlist);
@@ -250,9 +265,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
           // オリ曲モード解除
           setSearchTerm("");
-          normalWords = normalWords.filter(
-            (word) => word !== "sololive2025" && word !== "original-songs",
-          );
+          normalWords = normalWords.filter((word) => !songModePredicates[word]);
         }
       }
       // プレイリストモードの場合は、playPlaylist関数で処理済みなので
@@ -314,7 +327,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
       return filteredSongs;
     },
-    [allSongs],
+    [allSongs, decodePlaylistUrlParam, filterCallback, searchParams],
   );
 
   // 検索パラメータ（?q=...）変更時に検索条件を同期

@@ -76,7 +76,7 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         minSize: 800,
       },
     ],
@@ -115,10 +115,10 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 3. オリ曲 (回数)
   {
-    title: "オリ曲",
+    title: "オリ曲（回数）",
     icon: HiPlay,
     dataKey: "originalSongCounts",
-    caption: "オリ曲",
+    caption: "オリ曲（回数）",
     description: "オリジナル楽曲の歌った回数です",
     initialSort: { id: "count", direction: "desc" },
     minWidth: 1024,
@@ -141,7 +141,7 @@ export const TABS_CONFIG: TabConfig[] = [
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
     ],
@@ -179,7 +179,7 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
     ],
@@ -220,7 +220,7 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
     ],
@@ -247,35 +247,6 @@ export const TABS_CONFIG: TabConfig[] = [
         cell: (info) =>
           renderLastVideoCell(info.getValue<Song>(), false, false),
         size: 800,
-      },
-      {
-        accessorKey: "lastVideo",
-        header: "再生",
-        enableSorting: false,
-        cell: (info) => (
-          <div className="flex items-center justify-center">
-            <span className="inline-flex gap-x-2">
-              <Link
-                href={`https://www.youtube.com/watch?v=${
-                  info.getValue<Song>().video_id
-                }`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-              >
-                <FaYoutube size={18} />
-              </Link>
-              <Link
-                href={`/?v=${info.getValue<Song>().video_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
-              >
-                <FaDatabase size={18} />
-              </Link>
-            </span>
-          </div>
-        ),
       },
       {
         accessorKey: "count",
@@ -386,7 +357,7 @@ export const TABS_CONFIG: TabConfig[] = [
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 600,
       },
     ],
@@ -485,7 +456,7 @@ export const TABS_CONFIG: TabConfig[] = [
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
         header: "最新",
-        cell: (info) => renderLastVideoCell(info.getValue<Song>(), true),
+        cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 500,
       },
     ],

@@ -1,13 +1,24 @@
-// SearchAndSongList.tsx
-import { Suspense, useCallback, useEffect, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Song } from "../types/song";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
-import { LuCrown, LuMusic, LuX } from "react-icons/lu";
-import { MdAdd } from "react-icons/md";
+import {
+  LuArrowDownWideNarrow,
+  LuArrowUpWideNarrow,
+  LuChevronDown,
+  LuX,
+} from "react-icons/lu";
 import { LuSparkles } from "react-icons/lu";
 import {
   Button as MantineButton,
+  Menu,
   Grid,
   Modal,
   ScrollArea,
@@ -30,6 +41,14 @@ import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
 import MobileActionButtons from "./MobileActionButtons";
+import {
+  getSongModeIcon,
+  getSongModeLabel,
+  getSongModeTriggerButtonClassName,
+  SONG_MODE_GROUP_LABELS,
+  SONG_MODE_MENU_ITEMS,
+  type SongModeGroup,
+} from "./songModeMenu";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -50,6 +69,7 @@ type SearchAndSongListProps = {
 type SearchAndSongListPropsExt = {
   isOverlayOpen?: boolean;
   setIsOverlayOpen?: (open: boolean) => void;
+  isTheaterMode?: boolean;
 };
 
 export default function SearchAndSongList({
@@ -62,34 +82,60 @@ export default function SearchAndSongList({
   playRandomSong,
   setSearchTerm,
   setSongs,
-  searchSongs,
   showPlaylistSelector,
   setShowPlaylistSelector,
   isOverlayOpen,
   setIsOverlayOpen,
+  isTheaterMode,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
-  const [isLoading, setIsLoading] = useState(true);
   const overlayOpen = Boolean(isOverlayOpen);
+  const currentSongModeLabel = getSongModeLabel(searchTerm);
+  const CurrentSongModeIcon = getSongModeIcon(searchTerm);
+  const currentSongModeButtonClassName =
+    getSongModeTriggerButtonClassName(searchTerm);
+
+  const songModeMenuItems = SONG_MODE_MENU_ITEMS;
+  const songModeUngroupedItems = songModeMenuItems.filter(
+    (item) => !item.group,
+  );
+  const songModeGroupedItems = {
+    mode: songModeMenuItems.filter((item) => item.group === "mode"),
+    theme: songModeMenuItems.filter((item) => item.group === "theme"),
+  } as const;
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const { playlists, addToPlaylist, removeFromPlaylist, isNowPlayingPlaylist } =
-    usePlaylists();
+  const sortedSongs = useMemo(() => {
+    const order = sortOrder === "asc" ? 1 : -1;
+
+    return [...songs].sort((leftSong, rightSong) => {
+      const leftDate = new Date(leftSong.broadcast_at || "").getTime();
+      const rightDate = new Date(rightSong.broadcast_at || "").getTime();
+
+      const normalizedLeftDate = Number.isNaN(leftDate) ? 0 : leftDate;
+      const normalizedRightDate = Number.isNaN(rightDate) ? 0 : rightDate;
+
+      if (normalizedLeftDate !== normalizedRightDate) {
+        return (normalizedLeftDate - normalizedRightDate) * order;
+      }
+
+      return leftSong.title.localeCompare(rightSong.title) * order;
+    });
+  }, [songs, sortOrder]);
+
+  const { playlists, isNowPlayingPlaylist } = usePlaylists();
   const { favorites } = useFavorites();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
 
-  const {
-    playPlaylist,
-    disablePlaylistMode,
-    decodePlaylistFromUrl,
-    isInPlaylist,
-  } = usePlaylistActions({
-    allSongs,
-    setSongs,
-    changeCurrentSong,
-    setSearchTerm,
-  });
+  const { playPlaylist, disablePlaylistMode, decodePlaylistFromUrl } =
+    usePlaylistActions({
+      allSongs,
+      setSongs,
+      changeCurrentSong,
+      setSearchTerm,
+    });
 
   const { encodePlaylistUrlParam } = usePlaylists();
 
@@ -132,8 +178,18 @@ export default function SearchAndSongList({
   }, []); // 初回マウント時のみ実行
 
   return (
-    <section className="flex md:w-1/3 lg:w-1/3 xl:w-5/12 sm:w-full foldable:w-1/2 flex-col min-h-0  md:h-full foldable:h-full lg:h-full sm:mx-0">
-      <div className="flex flex-col h-full min-h-0 bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0">
+    <section
+      className={`flex sm:w-full flex-col min-h-0 sm:mx-0 transition-[width] duration-300 ease-in-out ${
+        isTheaterMode
+          ? "md:w-full lg:w-full xl:w-full md:h-auto lg:h-auto foldable:w-full foldable:h-auto"
+          : "foldable:w-1/2 md:w-1/3 lg:w-1/3 xl:w-5/12 md:h-full foldable:h-full lg:h-full"
+      }`}
+    >
+      <div
+        className={`flex flex-col bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0 ${
+          isTheaterMode ? "h-auto min-h-fit" : "h-full min-h-0"
+        }`}
+      >
         <div className="mb-2 hidden lg:block foldable:hidden md:foldable:block">
           <Button
             onClick={() => playRandomSong(songs)}
@@ -141,37 +197,70 @@ export default function SearchAndSongList({
           >
             <span className="text-sm">
               <LuSparkles className="mr-1 inline" />
-              ランダムで他の曲にする
+              <span className="foldable:hidden">ランダムで他の曲にする</span>
+              <span className="hidden foldable:inline">Surprise Me</span>
             </span>
           </Button>
           <Grid grow gutter={{ base: 5 }} className="mt-2">
-            <Grid.Col span={4} className="foldable:hidden">
-              <Button
-                onClick={() => {
-                  // オリ曲モードをセット
-                  setSearchTerm("original-songs");
-                }}
-                className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
-              >
-                <LuCrown className="mr-1" />
-                <span className="text-sm">
-                  オリ曲<span className="hidden 2xl:inline">モード</span>
-                </span>
-              </Button>
-            </Grid.Col>
             <Grid.Col span={4}>
-              <Button
-                onClick={() => {
-                  // 楽曲紹介shortsモード
-                  setSearchTerm("tag:楽曲紹介shorts");
-                }}
-                className="px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0 bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
-              >
-                <LuMusic className="mr-1" />
-                <span className="text-sm">
-                  楽曲紹介<span className="hidden 2xl:inline">shorts</span>
-                </span>
-              </Button>
+              <Menu width={180} position="bottom-start" withArrow>
+                <Menu.Target>
+                  <Button className={currentSongModeButtonClassName}>
+                    <span className="text-sm w-full grid grid-cols-[1rem_1fr_1rem] items-center">
+                      <CurrentSongModeIcon className="w-4 h-4 justify-self-center" />
+                      <span className="text-center">
+                        {currentSongModeLabel}
+                      </span>
+                      <LuChevronDown className="w-4 h-4 justify-self-center" />
+                    </span>
+                  </Button>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  {songModeUngroupedItems.map((item) => {
+                    const ModeIcon = item.icon;
+                    return (
+                      <Menu.Item
+                        key={item.mode}
+                        leftSection={<ModeIcon className="w-4 h-4" />}
+                        onClick={() => setSearchTerm(item.mode)}
+                      >
+                        {item.label}
+                      </Menu.Item>
+                    );
+                  })}
+
+                  {(Object.keys(songModeGroupedItems) as SongModeGroup[]).map(
+                    (group) => {
+                      const items = songModeGroupedItems[group];
+                      if (items.length === 0) {
+                        return null;
+                      }
+
+                      return (
+                        <Fragment key={group}>
+                          <Menu.Divider />
+                          <Menu.Label>
+                            {SONG_MODE_GROUP_LABELS[group]}
+                          </Menu.Label>
+                          {items.map((item) => {
+                            const ModeIcon = item.icon;
+                            return (
+                              <Menu.Item
+                                key={item.mode}
+                                leftSection={<ModeIcon className="w-4 h-4" />}
+                                onClick={() => setSearchTerm(item.mode)}
+                              >
+                                {item.label}
+                              </Menu.Item>
+                            );
+                          })}
+                        </Fragment>
+                      );
+                    },
+                  )}
+                </Menu.Dropdown>
+              </Menu>
             </Grid.Col>
             <Grid.Col span={4}>
               <Button
@@ -193,12 +282,20 @@ export default function SearchAndSongList({
         <div className="hidden md:block lg:hidden foldable:hidden mt-2">
           <MobileActionButtons
             onSurprise={() => playRandomSong(songs)}
-            onOriginal={() => setSearchTerm("original-songs")}
+            onSelectSongMode={(mode) => setSearchTerm(mode)}
+            currentSongModeLabel={currentSongModeLabel}
+            currentSongModeIcon={CurrentSongModeIcon}
+            currentSongModeButtonClassName={currentSongModeButtonClassName}
+            songModeMenuItems={songModeMenuItems}
             onPlaylist={() => setShowPlaylistSelector(true)}
           />
         </div>
 
-        <div className="hidden md:flex md:flex-col md:min-h-0 md:flex-1">
+        <div
+          className={`hidden md:flex md:flex-col ${
+            isTheaterMode ? "md:min-h-fit" : "md:min-h-0 md:flex-1"
+          }`}
+        >
           <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
             {/* Search Bar */}
             <SearchInput
@@ -211,16 +308,34 @@ export default function SearchAndSongList({
               placeholder="検索"
             />
           </div>
-          <div className="block">
-            <p className="text-xs text-muted-foreground dark:text-white mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground dark:text-white">
               楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
             </p>
+            <button
+              type="button"
+              onClick={() =>
+                setSortOrder((previousOrder) =>
+                  previousOrder === "asc" ? "desc" : "asc",
+                )
+              }
+              aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+              className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
+                songs.length > 15 ? "mr-11" : ""
+              }`}
+            >
+              {sortOrder === "asc" ? (
+                <LuArrowUpWideNarrow className="h-4 w-4" />
+              ) : (
+                <LuArrowDownWideNarrow className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
-          <div className="flex-1 min-h-0">
+          <div className={isTheaterMode ? "h-[60vh]" : "flex-1 min-h-0"}>
             <Suspense fallback={<Loading />}>
               <SongsList
-                songs={songs}
+                songs={sortedSongs}
                 currentSong={currentSong}
                 changeCurrentSong={changeCurrentSong as any}
                 hideFutureSongs={hideFutureSongs}
@@ -273,11 +388,33 @@ export default function SearchAndSongList({
               </div>
             </div>
 
+            <div className="px-3 py-0 flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground dark:text-white">
+                楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setSortOrder((previousOrder) =>
+                    previousOrder === "asc" ? "desc" : "asc",
+                  )
+                }
+                aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+                className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
+              >
+                {sortOrder === "asc" ? (
+                  <LuArrowUpWideNarrow className="h-4 w-4" />
+                ) : (
+                  <LuArrowDownWideNarrow className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
             <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 mt-2 ml-3 mr-1">
               <div className="h-full">
                 <Suspense fallback={<Loading />}>
                   <SongsList
-                    songs={songs}
+                    songs={sortedSongs}
                     currentSong={currentSong}
                     changeCurrentSong={changeCurrentSong as any}
                     hideFutureSongs={hideFutureSongs}

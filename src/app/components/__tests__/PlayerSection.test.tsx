@@ -158,6 +158,8 @@ describe("PlayerSection", () => {
         setOpenShareModal={() => {}}
         setSearchTerm={() => {}}
         setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
       />,
     );
 
@@ -186,6 +188,8 @@ describe("PlayerSection", () => {
         setOpenShareModal={() => {}}
         setSearchTerm={() => {}}
         setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
       />,
     );
 
@@ -218,6 +222,8 @@ describe("PlayerSection", () => {
         setOpenShareModal={() => {}}
         setSearchTerm={() => {}}
         setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
       />,
     );
 
@@ -255,6 +261,8 @@ describe("PlayerSection", () => {
           setOpenShareModal={() => {}}
           setSearchTerm={() => {}}
           setHideFutureSongs={() => {}}
+          isTheaterMode={false}
+          onToggleTheaterMode={() => {}}
         />
       </MantineProvider>,
     );
