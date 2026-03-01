@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 const RESOLUTIONS = [
   "maxresdefault",
@@ -28,29 +28,44 @@ const useYoutubeThumbnailFallback = (
   videoId: string,
 ): YoutubeThumbnailFallbackResult => {
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
-  const [imageUrl, setImageUrl] = useState<string>(
-    getImageUrl(videoId, RESOLUTIONS[0]),
-  );
+  const [retryCount, setRetryCount] = useState(0);
+
+  const imageUrl = useMemo(() => {
+    const baseUrl = getImageUrl(videoId, RESOLUTIONS[currentUrlIndex]);
+    if (retryCount === 0) {
+      return baseUrl;
+    }
+    return `${baseUrl}?retry=${retryCount}`;
+  }, [videoId, currentUrlIndex, retryCount]);
 
   useEffect(() => {
     // videoIdが変更されたら、ステートをリセット
     setCurrentUrlIndex(0);
-    setImageUrl(getImageUrl(videoId, RESOLUTIONS[0]));
+    setRetryCount(0);
   }, [videoId]);
 
   const handleError = useCallback(() => {
-    if (currentUrlIndex < RESOLUTIONS.length - 1) {
-      // 次の解像度のURLに切り替え
-      const nextIndex = currentUrlIndex + 1;
-      setCurrentUrlIndex(nextIndex);
-      setImageUrl(getImageUrl(videoId, RESOLUTIONS[nextIndex]));
-    } else {
+    setCurrentUrlIndex((prevIndex) => {
+      if (retryCount === 0) {
+        // 一時的なネットワーク失敗を考慮して、現在解像度を1回だけ再試行
+        setRetryCount(1);
+        return prevIndex;
+      }
+
+      setRetryCount(0);
+
+      if (prevIndex < RESOLUTIONS.length - 1) {
+        // 次の解像度のURLに切り替え
+        return prevIndex + 1;
+      }
+
       // 全てのフォールバックを試しても見つからなかった場合
       console.error(
         `Failed to load YouTube thumbnail for video ID: ${videoId}`,
       );
-    }
-  }, [currentUrlIndex, videoId]);
+      return prevIndex;
+    });
+  }, [retryCount, videoId]);
 
   return { imageUrl, handleError };
 };
