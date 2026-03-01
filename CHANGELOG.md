@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.33.1](https://github.com/mitsugogo/azki-song-db/compare/v1.33.0...v1.33.1) (2026-03-01)
+
+
+### Bug Fixes
+
+* ソート順はsource_orderを加味する ([f902454](https://github.com/mitsugogo/azki-song-db/commit/f9024541cba94a4989d12009560fe19e137617de))
+* なるべく高解像度のサムネイルを利用 ([8efe601](https://github.com/mitsugogo/azki-song-db/commit/8efe60138bd62ab05b26650ab57848501c7d8b45))
+* モードチェンジで無限ループするバグを修正 ([92826f3](https://github.com/mitsugogo/azki-song-db/commit/92826f36fc7bd0963a275d1ac86a590ad50b327c))
+
 ## [1.33.0](https://github.com/mitsugogo/azki-song-db/compare/v1.32.1...v1.33.0) (2026-03-01)
 
 
