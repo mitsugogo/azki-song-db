@@ -49,35 +49,48 @@ export default function DataTable<
   songs?: Song[];
   visualMode?: "default" | "ranked" | "viewCountBar";
 }) {
+  type ColumnSort = { id: string; desc: boolean };
+
+  const initialSorting = useMemo(() => {
+    const hasColumn = (columnId: string) =>
+      columns.some((column) => column.id === columnId);
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      const sort = url.searchParams.get("sort");
+      const order = url.searchParams.get("order");
+      if (sort && order && hasColumn(sort)) {
+        return [{ id: sort, desc: order === "desc" }] as ColumnSort[];
+      }
+    }
+
+    if (initialSortColumnId && hasColumn(initialSortColumnId)) {
+      return [
+        {
+          id: initialSortColumnId,
+          desc: initialSortDirection === "desc",
+        },
+      ] as ColumnSort[];
+    }
+
+    return [] as ColumnSort[];
+  }, [columns, initialSortColumnId, initialSortDirection]);
+
   const [inputValue, setInputValue] = useState("");
-  const [sorting, setSorting] = useState<{ id: string; desc: boolean }[]>([]);
+  const [sorting, setSorting] = useState<ColumnSort[]>(initialSorting);
   const [debouncedFilter] = useDebouncedValue(inputValue, 300);
   const tableBodyRef = useRef<HTMLDivElement>(null);
   const [tableBodyOffsetTop, setTableBodyOffsetTop] = useState(0);
 
-  type ColumnSort = { id: string; desc: boolean };
-
-  const initialSorting = useMemo(() => {
-    if (typeof window === "undefined") return [] as ColumnSort[];
-
-    const url = new URL(window.location.href);
-    const sort = url.searchParams.get("sort");
-    const order = url.searchParams.get("order");
-    if (sort && order && columns.some((column) => column.id === sort)) {
-      setSorting([{ id: sort, desc: order === "desc" }]);
-      return [{ id: sort, desc: order === "desc" }];
-    }
-
-    setSorting([
-      {
-        id: initialSortColumnId as string,
-        desc: initialSortDirection === "desc",
-      },
-    ]);
-    return [
-      { id: initialSortColumnId, desc: initialSortDirection === "desc" },
-    ] as ColumnSort[];
-  }, [columns, initialSortColumnId, initialSortDirection]);
+  useEffect(() => {
+    setSorting((prev) => {
+      const currentSort = prev[0]?.id;
+      if (currentSort && columns.some((column) => column.id === currentSort)) {
+        return prev;
+      }
+      return initialSorting;
+    });
+  }, [columns, initialSorting]);
 
   const table = useReactTable({
     data,

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition } from "react";
-import { Center, Loader, Select, Tabs, Text } from "@mantine/core";
+import { useState, useEffect, useMemo } from "react";
+import { Select, Tabs } from "@mantine/core";
 import { HiArrowUp } from "react-icons/hi";
 
 import DataTable from "./datatable";
@@ -22,8 +22,6 @@ export default function StatisticsPage() {
   const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [isTabSwitching, setIsTabSwitching] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const { songs, loading } = useSongData();
 
@@ -190,10 +188,7 @@ export default function StatisticsPage() {
   const handleTabChange = (nextTab: string | null) => {
     if (!nextTab || nextTab === activeTab) return;
 
-    setIsTabSwitching(true);
-    startTransition(() => {
-      setActiveTab(nextTab);
-    });
+    setActiveTab(nextTab);
 
     const url = new URL(window.location.href);
     url.searchParams.set("tab", nextTab);
@@ -225,18 +220,14 @@ export default function StatisticsPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!isPending && isTabSwitching) {
-      const frameId = window.requestAnimationFrame(() => {
-        setIsTabSwitching(false);
-      });
-      return () => window.cancelAnimationFrame(frameId);
-    }
-  }, [activeTab, isPending, isTabSwitching]);
-
   const handleBackToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const activeTabConfig = useMemo(
+    () => TABS_CONFIG.find((tab) => tab.dataKey === activeTab),
+    [activeTab],
+  );
 
   if (loading) {
     return (
@@ -245,8 +236,6 @@ export default function StatisticsPage() {
       </div>
     );
   }
-
-  const showTabLoading = isTabSwitching || isPending;
 
   return (
     <div className="grow">
@@ -287,67 +276,46 @@ export default function StatisticsPage() {
           </Tabs.List>
         </div>
 
-        {showTabLoading ? (
-          <div className="relative min-h-70">
-            <Center className="h-70">
-              <div className="flex flex-col items-center gap-2">
-                <Loader color="pink" type="dots" />
-                <Text
-                  size="sm"
-                  c="dimmed"
-                  aria-live="polite"
-                  className="select-none"
-                >
-                  {"Loading...".split("").map((char, index) => (
-                    <span
-                      key={`loading-char-${index}`}
-                      className="inline-block animate-bounce"
-                      style={{
-                        animationDelay: `${index * 80}ms`,
-                        animationDuration: "900ms",
-                      }}
-                    >
-                      {char === " " ? "\u00A0" : char}
-                    </span>
-                  ))}
-                </Text>
-              </div>
-            </Center>
-          </div>
-        ) : (
-          TABS_CONFIG.map((tab, index) => (
-            <Tabs.Panel key={`${tab.title}-${index}-panel`} value={tab.dataKey}>
-              <SongCountOverview
-                items={
-                  statisticsWithMilestones[tab.dataKey] as StatisticsItem[]
-                }
-                {...getOverviewLabels(tab.dataKey)}
-                showMilestoneHighlights={milestoneOverviewTabs.has(tab.dataKey)}
-                showTopTile={!hideTopTileTabs.has(tab.dataKey)}
-              />
-              <DataTable
-                data={statisticsWithMilestones[tab.dataKey]}
-                caption={tab.caption}
-                description={tab.description}
-                columns={tab.columns}
-                minWidth={tab.minWidth}
-                initialSortColumnId={tab.initialSort.id}
-                initialSortDirection={tab.initialSort.direction}
-                visualMode={
-                  rankedDesignTabs.has(tab.dataKey)
-                    ? "ranked"
-                    : viewCountBarTabs.has(tab.dataKey)
-                      ? "viewCountBar"
-                      : "default"
-                }
-                {...(tab.dataKey === "videoCounts" && {
-                  onRowClick: handleVideoClick,
-                  selectedVideoId: selectedVideoId,
-                  songs: songs,
-                })}
-              />
-            </Tabs.Panel>
-          ))
+        {activeTabConfig && (
+          <Tabs.Panel
+            key={activeTabConfig.dataKey}
+            value={activeTabConfig.dataKey}
+          >
+            <SongCountOverview
+              items={
+                statisticsWithMilestones[
+                  activeTabConfig.dataKey
+                ] as StatisticsItem[]
+              }
+              {...getOverviewLabels(activeTabConfig.dataKey)}
+              showMilestoneHighlights={milestoneOverviewTabs.has(
+                activeTabConfig.dataKey,
+              )}
+              showTopTile={!hideTopTileTabs.has(activeTabConfig.dataKey)}
+            />
+            <DataTable
+              key={activeTabConfig.dataKey}
+              data={statisticsWithMilestones[activeTabConfig.dataKey]}
+              caption={activeTabConfig.caption}
+              description={activeTabConfig.description}
+              columns={activeTabConfig.columns}
+              minWidth={activeTabConfig.minWidth}
+              initialSortColumnId={activeTabConfig.initialSort.id}
+              initialSortDirection={activeTabConfig.initialSort.direction}
+              visualMode={
+                rankedDesignTabs.has(activeTabConfig.dataKey)
+                  ? "ranked"
+                  : viewCountBarTabs.has(activeTabConfig.dataKey)
+                    ? "viewCountBar"
+                    : "default"
+              }
+              {...(activeTabConfig.dataKey === "videoCounts" && {
+                onRowClick: handleVideoClick,
+                selectedVideoId: selectedVideoId,
+                songs: songs,
+              })}
+            />
+          </Tabs.Panel>
         )}
       </Tabs>
 
