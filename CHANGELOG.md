@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.33.2](https://github.com/mitsugogo/azki-song-db/compare/v1.33.1...v1.33.2) (2026-03-05)
+
+
+### Bug Fixes
+
+* 100万再生が出ないバグを修正 ([a12f555](https://github.com/mitsugogo/azki-song-db/commit/a12f555dc047db2fb99b7d2a46b0e5bf20e69cd7))
+* mantineのCSSロードを修正 ([be6cd1e](https://github.com/mitsugogo/azki-song-db/commit/be6cd1e611ba3ff23e40e52da3925530396434e9))
+* パンくずデザイン崩れ修正 ([7706a37](https://github.com/mitsugogo/azki-song-db/commit/7706a3742137c4fed3f4e2371c633eb54b306423))
+
 ### [1.33.1](https://github.com/mitsugogo/azki-song-db/compare/v1.33.0...v1.33.1) (2026-03-01)
 
 
