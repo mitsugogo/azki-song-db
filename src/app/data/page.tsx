@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Breadcrumbs } from "@mantine/core";
 import ClientTable from "./client";
 import Loading from "../loading";
 import Link from "next/link";
@@ -44,17 +45,18 @@ export async function generateMetadata(
 export default async function DataPage() {
   return (
     <div className="grow lg:p-6 lg:pb-0">
-      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-        <div className="flex items-center">
-          <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link href="/data" className={breadcrumbClasses.link}>
-            収録データ
-          </Link>
-        </div>
-      </nav>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </Link>
+        <Link href="/data" className={breadcrumbClasses.link}>
+          収録データ
+        </Link>
+      </Breadcrumbs>
 
       <Suspense fallback={<Loading />}>
         <ClientTable />

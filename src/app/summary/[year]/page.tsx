@@ -88,6 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 import YearSummaryClient from "./YearSummaryClient";
 import Link from "next/link";
+import { Breadcrumbs } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses } from "../../theme";
@@ -124,24 +125,24 @@ export default async function Page({ params }: Props) {
   return (
     <div className="flex-grow p-2 lg:p-6 lg:pb-0 overflow-auto">
       <div className="mb-4">
-        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-          <div className="flex items-center">
-            <Link href="/" className={breadcrumbClasses.link}>
-              <FaHome className="inline mr-1" /> Home
-            </Link>
-            <HiChevronRight className={breadcrumbClasses.separator} />
-            <Link href="/summary" className={breadcrumbClasses.link}>
-              活動記録
-            </Link>
-            <HiChevronRight className={breadcrumbClasses.separator} />
-            <Link
-              href={`/summary/${rawYearParam}`}
-              className={breadcrumbClasses.link}
-            >
-              {displayYearServer ? `${displayYearServer}年` : `詳細`}
-            </Link>
-          </div>
-        </nav>
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          className={breadcrumbClasses.root}
+          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+        >
+          <Link href="/" className={breadcrumbClasses.link}>
+            <FaHome className="inline mr-1" /> Home
+          </Link>
+          <Link href="/summary" className={breadcrumbClasses.link}>
+            活動記録
+          </Link>
+          <Link
+            href={`/summary/${rawYearParam}`}
+            className={breadcrumbClasses.link}
+          >
+            {displayYearServer ? `${displayYearServer}年` : `詳細`}
+          </Link>
+        </Breadcrumbs>
       </div>
 
       <div className="flex items-center justify-between mb-3">

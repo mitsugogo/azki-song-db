@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import CreatePlaylistModal from "../components/CreatePlaylistModal";
 import { MdPlaylistAdd } from "react-icons/md";
 import {
+  Breadcrumbs,
   Button,
   Checkbox,
   CopyButton,
@@ -60,21 +61,22 @@ export default function PlaylistPage() {
   const allPlaylists =
     favorites.length > 0 ? [favoritesPlaylist, ...playlists] : playlists;
 
-  // Flowbite breadcrumb will be rendered below
+  // Mantine Breadcrumbs を利用
 
   return (
     <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
-      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-        <div className="flex items-center">
-          <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link href="/playlist" className={breadcrumbClasses.link}>
-            プレイリスト
-          </Link>
-        </div>
-      </nav>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </Link>
+        <Link href="/playlist" className={breadcrumbClasses.link}>
+          プレイリスト
+        </Link>
+      </Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
 

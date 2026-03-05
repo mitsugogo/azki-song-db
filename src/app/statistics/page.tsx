@@ -1,4 +1,5 @@
 import StatisticsPage from "./client";
+import { Breadcrumbs } from "@mantine/core";
 
 import type { Metadata } from "next";
 import { metadata } from "../layout";
@@ -34,17 +35,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Page() {
   return (
     <div className="grow p-2 lg:p-6 lg:pb-10">
-      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-        <div className="flex items-center">
-          <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link href="/statistics" className={breadcrumbClasses.link}>
-            統計情報
-          </Link>
-        </div>
-      </nav>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </Link>
+        <Link href="/statistics" className={breadcrumbClasses.link}>
+          統計情報
+        </Link>
+      </Breadcrumbs>
       <StatisticsPage />
     </div>
   );

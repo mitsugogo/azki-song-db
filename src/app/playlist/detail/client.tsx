@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Button, Checkbox, ScrollArea, Table } from "@mantine/core";
+import {
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  ScrollArea,
+  Table,
+} from "@mantine/core";
 import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import useFavorites from "../../hook/useFavorites";
@@ -297,21 +303,21 @@ export default function PlaylistDetailPage() {
 
   return (
     <div className="grow pt-3 p-1 lg:p-6 lg:pb-0">
-      <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-        <div className="flex items-center">
-          <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <Link href="/playlist" className={breadcrumbClasses.link}>
-            プレイリスト
-          </Link>
-          <HiChevronRight className={breadcrumbClasses.separator} />
-          <span
-            className={breadcrumbClasses.link}
-          >{`#${playlist?.id} (${playlist?.name})`}</span>
-        </div>
-      </nav>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <HiHome className="w-4 h-4 mr-1.5" /> Home
+        </Link>
+        <Link href="/playlist" className={breadcrumbClasses.link}>
+          プレイリスト
+        </Link>
+        <span
+          className={breadcrumbClasses.link}
+        >{`#${playlist?.id} (${playlist?.name})`}</span>
+      </Breadcrumbs>
 
       <h1 className="font-extrabold text-2xl p-3 pl-0">プレイリストの管理</h1>
 

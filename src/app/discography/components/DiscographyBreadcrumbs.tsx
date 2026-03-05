@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Breadcrumbs } from "@mantine/core";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { breadcrumbClasses } from "../../theme";
+import { Breadcrumbs } from "@mantine/core";
 import { ReactNode } from "react";
 
 type DiscographyBreadcrumbItem = {

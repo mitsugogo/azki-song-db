@@ -182,10 +182,7 @@ export default function DiscographyPage({
 
               if (label) {
                 return (
-                  <Link
-                    href={pathname}
-                    className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-200"
-                  >
+                  <Link href={pathname} className={breadcrumbClasses.link}>
                     {label}
                   </Link>
                 );
