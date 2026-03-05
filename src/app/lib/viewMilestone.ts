@@ -158,3 +158,31 @@ export function buildViewMilestoneInfo(
     estimatedAt: estimateReachedAt(safeHistory, target.targetCount),
   };
 }
+
+function getLatestAchievedTarget(viewCount: number) {
+  if (viewCount >= 1000000) {
+    return Math.floor(viewCount / 1000000) * 1000000;
+  }
+  if (viewCount >= 100000) {
+    return Math.floor(viewCount / 100000) * 100000;
+  }
+  if (viewCount >= 10000) {
+    return Math.floor(viewCount / 10000) * 10000;
+  }
+  return null;
+}
+
+export function buildLatestAchievedViewMilestoneInfo(
+  viewCount: number,
+  history: ViewStat[] | undefined,
+): ViewMilestoneInfo | null {
+  const targetCount = getLatestAchievedTarget(viewCount);
+  if (!targetCount) return null;
+
+  const safeHistory = history || [];
+  return {
+    status: "achieved",
+    targetCount,
+    achievedAt: findAchievedAt(safeHistory, targetCount),
+  };
+}

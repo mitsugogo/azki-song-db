@@ -1,7 +1,7 @@
 "use client";
 
 import useStatViewCount from "@/app/hook/useStatViewCount";
-import { buildViewMilestoneInfo } from "@/app/lib/viewMilestone";
+import { buildLatestAchievedViewMilestoneInfo } from "@/app/lib/viewMilestone";
 import { Skeleton } from "@mantine/core";
 import {
   ResponsiveContainer,
@@ -118,7 +118,10 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     if (chartData.length === 0) return null;
 
     const latestViewCount = chartData[chartData.length - 1]?.viewCount ?? 0;
-    const milestone = buildViewMilestoneInfo(latestViewCount, stats);
+    const milestone = buildLatestAchievedViewMilestoneInfo(
+      latestViewCount,
+      stats,
+    );
     if (
       !milestone ||
       milestone.status !== "achieved" ||
