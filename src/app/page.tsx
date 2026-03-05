@@ -108,12 +108,22 @@ export async function generateMetadata({
     const songs = await fetch(new URL(`/api/songs/`, baseUrl)).then((res) =>
       res.json(),
     );
-    const song = songs.find((s: Song) => s.video_id === v);
-    if (song) {
-      title = `${song.video_title} | ${siteConfig.siteName}`;
-      og_title = title;
-      ogImageUrl.searchParams.set("title", og_title);
-      ogImageUrl.searchParams.set("subtitle", og_subtitle);
+    const filteredSongs = songs.filter((s: Song) => s.video_id === v);
+    if (filteredSongs) {
+      const song = filteredSongs[0];
+      if (filteredSongs.length === 1) {
+        // video_idが一意に特定できる場合は動画タイトルをOGPタイトルにする
+        title = `${song.video_title} | ${siteConfig.siteName}`;
+        ogImageUrl = new URL("/api/og/thumb", baseUrl);
+        ogImageUrl.searchParams.set("v", v?.toString());
+        ogImageUrl.searchParams.set("t", song.start.toString());
+        og_title = title;
+      } else {
+        title = `${song.video_title} | ${siteConfig.siteName}`;
+        og_title = title;
+        ogImageUrl.searchParams.set("title", og_title);
+        ogImageUrl.searchParams.set("subtitle", og_subtitle);
+      }
     }
   }
   if (playlist) {

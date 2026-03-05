@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildViewMilestoneInfo } from "../viewMilestone";
+import {
+  buildLatestAchievedViewMilestoneInfo,
+  buildViewMilestoneInfo,
+} from "../viewMilestone";
 import { ViewStat } from "../../types/api/stat/views";
 
 const createStat = (date: string, viewCount: number): ViewStat => ({
@@ -91,6 +94,27 @@ describe("buildViewMilestoneInfo", () => {
 
   it("対象外の再生回数ならnullを返す", () => {
     const result = buildViewMilestoneInfo(55555, []);
+    expect(result).toBeNull();
+  });
+});
+
+describe("buildLatestAchievedViewMilestoneInfo", () => {
+  it("100万を達成済みなら達成情報を返す", () => {
+    const history: ViewStat[] = [
+      createStat("2026-02-20T00:00:00.000Z", 998500),
+      createStat("2026-02-21T00:00:00.000Z", 1000500),
+      createStat("2026-02-22T00:00:00.000Z", 1018000),
+    ];
+
+    const result = buildLatestAchievedViewMilestoneInfo(1018000, history);
+
+    expect(result?.status).toBe("achieved");
+    expect(result?.targetCount).toBe(1000000);
+    expect(result?.achievedAt).toBe("2026-02-21T00:00:00.000Z");
+  });
+
+  it("閾値未満ならnullを返す", () => {
+    const result = buildLatestAchievedViewMilestoneInfo(9999, []);
     expect(result).toBeNull();
   });
 });

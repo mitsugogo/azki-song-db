@@ -26,7 +26,7 @@ export const theme = createTheme({
 
 // 共通で使うパンくず向けの Tailwind クラスをエクスポート
 export const breadcrumbClasses = {
-  root: "bg-light-gray-100 px-5 py-3 dark:bg-gray-800 rounded-md hidden lg:block mb-3 gap-x-0",
+  root: "bg-light-gray-100 px-5 py-3 dark:bg-gray-800 rounded-md hidden lg:flex mb-3 gap-x-0",
   link: "flex items-center text-sm font-medium text-gray-500 dark:text-gray-200",
   separator: "mx-1 h-4 w-4 text-gray-400",
 };

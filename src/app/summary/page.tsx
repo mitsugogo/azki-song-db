@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Breadcrumbs } from "@mantine/core";
 import type { Metadata } from "next";
 import { metadata } from "../layout";
 import { FaHome } from "react-icons/fa";
@@ -69,17 +70,18 @@ export default async function Page() {
   return (
     <div className="grow lg:p-6 lg:pb-0">
       <div className="mb-4">
-        <nav aria-label="Breadcrumb" className={breadcrumbClasses.root}>
-          <div className="flex items-center">
-            <Link href="/" className={breadcrumbClasses.link}>
-              <FaHome className="inline mr-1" /> Home
-            </Link>
-            <HiChevronRight className={breadcrumbClasses.separator} />
-            <Link href="/summary" className={breadcrumbClasses.link}>
-              活動記録
-            </Link>
-          </div>
-        </nav>
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          className={breadcrumbClasses.root}
+          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+        >
+          <Link href="/" className={breadcrumbClasses.link}>
+            <FaHome className="inline mr-1" /> Home
+          </Link>
+          <Link href="/summary" className={breadcrumbClasses.link}>
+            活動記録
+          </Link>
+        </Breadcrumbs>
       </div>
       <h1 className="font-extrabold text-2xl p-3">活動記録</h1>
 
