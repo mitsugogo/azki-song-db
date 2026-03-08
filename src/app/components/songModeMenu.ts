@@ -14,6 +14,7 @@ export type SongMode =
   | "cover-songs"
   | "collaboration-songs"
   | "tag:歌枠"
+  | "tag:コラボ|tag:歌枠"
   | "tag:楽曲紹介shorts";
 
 export type SongModeGroup = "mode" | "theme";
@@ -70,6 +71,14 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
     group: "theme",
   },
   {
+    mode: "tag:コラボ|tag:歌枠",
+    label: "コラボ歌枠",
+    icon: LuUsers,
+    buttonClassName:
+      "bg-pink-400 hover:bg-pink-500 dark:bg-pink-700 dark:hover:bg-pink-600",
+    group: "theme",
+  },
+  {
     mode: "tag:楽曲紹介shorts",
     label: "楽曲紹介shorts",
     icon: LuLibrary,
@@ -95,6 +104,9 @@ export const getSongMode = (term: string): SongMode => {
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
 
+  if (tokens.includes("tag:コラボ") && tokens.includes("tag:歌枠")) {
+    return "tag:コラボ|tag:歌枠";
+  }
   if (tokens.includes("tag:歌枠")) {
     return "tag:歌枠";
   }
