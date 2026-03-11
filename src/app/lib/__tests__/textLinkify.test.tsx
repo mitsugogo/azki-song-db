@@ -63,6 +63,13 @@ const cases: Case[] = [
     href: "https://www.youtube.com/hashtag/hash-tag",
     display: "#hash-tag",
   },
+  {
+    input: "#talk&live",
+    platform: "youtube",
+    shouldLink: true,
+    href: "https://www.youtube.com/hashtag/talk&live",
+    display: "#talk&live",
+  },
 ];
 
 describe("textLinkify - ハッシュタグ検出", () => {
