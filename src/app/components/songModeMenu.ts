@@ -56,7 +56,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "collaboration-songs",
-    label: "コラボ曲",
+    label: "ユニット・ゲスト参加曲",
     icon: LuUsers,
     buttonClassName:
       "bg-green-400 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-500",
