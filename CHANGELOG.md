@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.34.0](https://github.com/mitsugogo/azki-song-db/compare/v1.33.3...v1.34.0) (2026-03-11)
+
+
+### Features
+
+* 私の究極の9曲機能 ([23a4dca](https://github.com/mitsugogo/azki-song-db/commit/23a4dca71ff2f526d40a9f0cc587b1cd525d77a2))
+
+
+### Bug Fixes
+
+* 取得URL修正 ([2d6a68b](https://github.com/mitsugogo/azki-song-db/commit/2d6a68bc4b68050974665302759e20097bb73782))
+
 ### [1.33.3](https://github.com/mitsugogo/azki-song-db/compare/v1.33.2...v1.33.3) (2026-03-08)
 
 ### [1.33.2](https://github.com/mitsugogo/azki-song-db/compare/v1.33.1...v1.33.2) (2026-03-05)
