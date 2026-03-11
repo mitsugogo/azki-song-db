@@ -24,4 +24,8 @@ export const pageList: PageCategory[] = [
       { name: "全データ", href: "/data" },
     ],
   },
+  {
+    category: "シェア",
+    items: [{ name: "好きな楽曲9選", href: "/share/my-best-9-songs" }],
+  },
 ];

@@ -572,7 +572,12 @@ const NowPlayingSongInfo = ({
   // YouTube準拠: タイトルにハッシュタグがある場合はそれを優先し、
   // タイトルに無い場合のみ説明文先頭から最大3件を表示する
   const displayTags = useMemo(
-    () => getYoutubeVisibleHashtagBodies(resolvedVideoTitle, resolvedDescription, 3),
+    () =>
+      getYoutubeVisibleHashtagBodies(
+        resolvedVideoTitle,
+        resolvedDescription,
+        3,
+      ),
     [resolvedVideoTitle, resolvedDescription],
   );
 
@@ -594,10 +599,9 @@ const NowPlayingSongInfo = ({
                   </div>
                 )}
                 <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-white m-0 line-clamp-2">
-                  {renderLinkedText(
-                    resolvedVideoTitle,
-                    { hashtagPlatform: "self" },
-                  )}
+                  {renderLinkedText(resolvedVideoTitle, {
+                    hashtagPlatform: "self",
+                  })}
                 </h2>
               </div>
             </div>
