@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.34.1](https://github.com/mitsugogo/azki-song-db/compare/v1.34.0...v1.34.1) (2026-03-11)
+
+
+### Bug Fixes
+
+* お題を変更できない場合があるのを修正 ([d499d01](https://github.com/mitsugogo/azki-song-db/commit/d499d01c3e29b6f405d3a7e986c7c198964a149c))
+
 ## [1.34.0](https://github.com/mitsugogo/azki-song-db/compare/v1.33.3...v1.34.0) (2026-03-11)
 
 
