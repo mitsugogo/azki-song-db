@@ -39,7 +39,7 @@ export default function Page({ params }: Props) {
         setError(null);
 
         // 曲データ取得
-        const songsRes = await fetch(`${baseUrl}/api/songs`);
+        const songsRes = await fetch(`/api/songs`);
         if (!songsRes.ok) {
           throw new Error("曲データの取得に失敗しました");
         }
