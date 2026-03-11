@@ -45,6 +45,11 @@ export default function MyBestNineSongsPage() {
     return normalized.slice(0, 50);
   }, [searchParams]);
 
+  // 初回ロード時のqueryTitleをrefに保持し、以降の再レンダリングで上書きされないようにする
+  const initialQueryTitleRef = useRef(queryTitle);
+  // ドラフト復元を1回のみ実行するフラグ
+  const hasRestoredDraftRef = useRef(false);
+
   const [activeFilter, setActiveFilter] =
     useState<SongCategoryFilter>("original");
   const [title, setTitle] = useState(() => queryTitle || DEFAULT_TITLE);
@@ -52,6 +57,7 @@ export default function MyBestNineSongsPage() {
   const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedThemeUrl, setCopiedThemeUrl] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerateLocked, setIsGenerateLocked] = useState(false);
   const lockedSelectionKeyRef = useRef<string | null>(null);
@@ -105,17 +111,12 @@ export default function MyBestNineSongsPage() {
     }
   }, [isGenerateLocked, currentSelectionKey]);
 
-  // URLクエリでお題タイトルが指定されている場合は初期値に反映
+  // ドラフトを復元（初回のみ実行。URLのtitleパラメータは初回ロード時の値のみ使用する）
   useEffect(() => {
-    if (queryTitle) {
-      setTitle(queryTitle);
-    }
-  }, [queryTitle]);
-
-  // ドラフトを復元
-  useEffect(() => {
+    if (hasRestoredDraftRef.current) return;
     if (draft && allSongs.length > 0) {
-      setTitle(queryTitle || draft.title || DEFAULT_TITLE);
+      hasRestoredDraftRef.current = true;
+      setTitle(initialQueryTitleRef.current || draft.title || DEFAULT_TITLE);
       setAuthor(draft.author || "");
 
       // ドラフトの曲を復元
@@ -128,7 +129,7 @@ export default function MyBestNineSongsPage() {
 
       setSelectedSongs(draftSongs);
     }
-  }, [draft, allSongs, queryTitle]);
+  }, [draft, allSongs]);
 
   // 曲を選択に追加
   const addSong = (song: Song) => {
@@ -283,6 +284,31 @@ export default function MyBestNineSongsPage() {
                   <Text size="xs" c="dimmed" mt={4}>
                     {title.length}/50
                   </Text>
+                  <Tooltip
+                    label={
+                      copiedThemeUrl
+                        ? "コピーしました！"
+                        : "このタイトルで回答を募集するURLをコピー"
+                    }
+                  >
+                    <MantineButton
+                      size="xs"
+                      variant="subtle"
+                      color="blue"
+                      leftSection={<MdContentCopy size={14} />}
+                      onClick={() => {
+                        const themeUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/share/my-best-9-songs?title=${encodeURIComponent(title.trim())}`;
+                        navigator.clipboard.writeText(themeUrl);
+                        setCopiedThemeUrl(true);
+                        setTimeout(() => setCopiedThemeUrl(false), 2000);
+                      }}
+                      disabled={!title.trim()}
+                    >
+                      {copiedThemeUrl
+                        ? "コピーしました！"
+                        : "このお題を募集するURLをコピー"}
+                    </MantineButton>
+                  </Tooltip>
                 </div>
 
                 {/* 作成者名入力 */}
@@ -383,7 +409,7 @@ export default function MyBestNineSongsPage() {
                 {/* ドラフト削除 */}
                 <MantineButton
                   onClick={() => {
-                    setTitle(queryTitle || DEFAULT_TITLE);
+                    setTitle(DEFAULT_TITLE);
                     setAuthor("");
                     setSelectedSongs([]);
                     clearDraft();
