@@ -111,11 +111,18 @@ export async function GET(req: NextRequest) {
       ? `by ${selection.author.trim()}`
       : "";
 
-    const ogSongCards: OgSongCard[] = selectedSongs.map((song) => ({
-      url: `https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`,
-      title: song.title,
-      artist: song.artist,
-    }));
+    const ogSongCards: OgSongCard[] = selectedSongs.map((song) => {
+      let url = `https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`;
+      if (song.video_id === "fiddR-oZta4") {
+        // afterglow(id:fiddR-oZta4)だけmaxresdefault.jpgが存在しないため、hqdefault.jpgを使用
+        url = `https://img.youtube.com/vi/${song.video_id}/hqdefault.jpg`;
+      }
+      return {
+        url: url,
+        title: song.title,
+        artist: song.artist,
+      };
+    });
 
     // 9枚未満の場合は空カードでパディング
     while (ogSongCards.length < 9) {
