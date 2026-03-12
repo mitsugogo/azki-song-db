@@ -112,4 +112,18 @@ describe("textLinkify - ハッシュタグ検出", () => {
       "https://www.youtube.com/hashtag/テスト2",
     );
   });
+
+  it("末尾記号を含むハッシュタグは記号を残してリンク化する", () => {
+    const input = "【#尾丸ポルカ生誕祭2026】Glitter of Love";
+    const nodes = renderLinkedText(input, { hashtagPlatform: "youtube" });
+    const { container } = render(<>{nodes}</>);
+
+    const hashtag = screen.queryByText("#尾丸ポルカ生誕祭2026");
+    expect(hashtag).toBeTruthy();
+    const link = hashtag?.closest("a") as HTMLAnchorElement | null;
+    expect(link?.getAttribute("href")).toBe(
+      "https://www.youtube.com/hashtag/尾丸ポルカ生誕祭2026",
+    );
+    expect(container.textContent).toContain("】Glitter of Love");
+  });
 });
