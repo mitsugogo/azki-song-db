@@ -1,11 +1,11 @@
 export type HashtagPlatform = "youtube" | "x" | "self";
 
-export const HASHTAG_CANDIDATE_PATTERN = String.raw`[#\uFF03][^\s#\uFF03]+`;
+export const HASHTAG_CANDIDATE_PATTERN = String.raw`[#\uFF03][\p{L}\p{N}_\.\-&\uFF06\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff\uFF10-\uFF19]+`;
 
 const xHashtagRegex = /^#[\p{L}\p{N}_\uFF10-\uFF19]+$/u;
 const xAllDigitsRegex = /^#[\p{N}\uFF10-\uFF19]+$/u;
 const youtubeHashtagRegex =
-  /^[#\uFF03][\p{L}\p{N}_\.\-&\uFF06\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff\uFF10-\uFF19]+$/u;
+  /^[#\uFF03][\p{L}\p{N}_\.\-&\uFF06\u3040-\u309f\u30a0-\u30ff\u3130-\u318f\u3300-\u33ff\u3400-\u4dbf\u4e00-\u9fff\uF900-\uFAff\uFE00-\uFEff\uFF10-\uFF19]+$/u;
 
 export function sanitizeHashtagToken(hashtag: string) {
   return hashtag.trim().replace(/[.,!?:;\]\)】）]+$/gu, "");

@@ -21,7 +21,7 @@ export type LinkifyTextOptions = {
 
 const combinedRegex = new RegExp(
   `(https?:\\/\\/[a-zA-Z0-9_0-9\\uFF10-\\uFF19./=?#-\\u3000-\\u303f\\u3040-\\u309f\\u30a0-\\u30ff\\u3130-\\u318f\\u3300-\\u33ff\\u3400-\\u4dbf\\u4e00-\\u9fff\\uF900-\\uFAff\\uFE00-\\uFEff]+)|([0-9\\uFF10-\\uFF19]{1,2}:[0-9\\uFF10-\\uFF19]{2}:[0-9\\uFF10-\\uFF19]{2})|(@[a-zA-Z0-9_0-9\\uFF10-\\uFF19_.\\-\\u3000-\\u303f\\u3040-\\u309f\\u30a0-\\u30ff\\u3130-\\u318f\\u3300-\\u33ff\\u3400-\\u4dbf\\u4e00-\\u9fff\\uF900-\\uFAff\\uFE00-\\uFEff]+)|(${HASHTAG_CANDIDATE_PATTERN})`,
-  "g",
+  "gu",
 );
 
 export const renderLinkedText = (
@@ -94,6 +94,7 @@ export const renderLinkedText = (
       } else if (match[4]) {
         const rawHashtag = match[4];
         const hashtag = sanitizeHashtagToken(rawHashtag);
+        const trailingText = rawHashtag.slice(hashtag.length);
         if (!hashtag) {
           nodes.push(rawHashtag);
           lastIndex = matchIndex + match[0].length;
@@ -124,6 +125,9 @@ export const renderLinkedText = (
               {hashtag}
             </Link>,
           );
+          if (trailingText) {
+            nodes.push(trailingText);
+          }
         }
       }
 
