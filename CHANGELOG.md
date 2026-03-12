@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.34.2](https://github.com/mitsugogo/azki-song-db/compare/v1.34.1...v1.34.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* afterglowだけサムネイルが出ない対策 ([4d89a92](https://github.com/mitsugogo/azki-song-db/commit/4d89a92ceaeadda8aba8263a2d8285ec32663af4))
+* ハッシュタグ範囲を修正 ([1756e9a](https://github.com/mitsugogo/azki-song-db/commit/1756e9a730487b29e67c73f1679eff66d18f228c))
+
 ### [1.34.1](https://github.com/mitsugogo/azki-song-db/compare/v1.34.0...v1.34.1) (2026-03-11)
 
 
