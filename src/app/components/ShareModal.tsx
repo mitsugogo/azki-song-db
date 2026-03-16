@@ -36,8 +36,8 @@ export default function ShareModal({
 
   const handleShareToX = (isDatabaseUrl: boolean) => {
     const text = isDatabaseUrl
-      ? `${currentSong?.title} / ${currentSong?.artist} \n${currentSong?.video_title} \n${databaseUrl}`
-      : `${currentSong?.video_title} \n${youtubeUrl}`;
+      ? `${currentSong?.title} / ${currentSong?.artist} \n${currentSong?.video_title} #AZSongDB \n${databaseUrl}`
+      : `${currentSong?.video_title} \n${youtubeUrl} #AZSongDB`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 
