@@ -32,7 +32,13 @@ import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
 import { breadcrumbClasses } from "@/app/theme";
 import Link from "next/link";
 
-type SongCategoryFilter = "original" | "cover" | "unit-guest" | "live-singing";
+type SongCategoryFilter =
+  | "all"
+  | "original"
+  | "cover"
+  | "unit-guest"
+  | "live-singing"
+  | "collaboration";
 const DEFAULT_TITLE = "私が選んだAZKi究極の9曲";
 
 const normalizeStart = (value: unknown): string | null => {
@@ -47,6 +53,14 @@ const normalizeStart = (value: unknown): string | null => {
     return String(numeric);
   }
   return withoutSuffix;
+};
+
+const formatBroadcastDate = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "配信日不明";
+  }
+  return date.toLocaleDateString("ja-JP");
 };
 
 /**
@@ -68,8 +82,7 @@ export default function MyBestNineSongsPage() {
   // ドラフト復元を1回のみ実行するフラグ
   const hasRestoredDraftRef = useRef(false);
 
-  const [activeFilter, setActiveFilter] =
-    useState<SongCategoryFilter>("original");
+  const [activeFilter, setActiveFilter] = useState<SongCategoryFilter>("all");
   const [title, setTitle] = useState(() => queryTitle || DEFAULT_TITLE);
   const [author, setAuthor] = useState("");
   const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
@@ -91,21 +104,24 @@ export default function MyBestNineSongsPage() {
     return song.tags.includes("歌枠");
   };
 
-  // 選択対象の全候補（オリ曲/カバー曲/ユニット・ゲスト曲/歌枠）
-  const selectableSongs = useMemo(
-    () =>
-      allSongs.filter(
-        (song) =>
-          isPossibleOriginalSong(song) ||
-          isCoverSong(song) ||
-          isUnitOrGuestSong(song) ||
-          isLiveSingSong(song),
-      ),
-    [allSongs],
-  );
+  const hasTag = (song: Song, value: string) => {
+    const normalizedValue = value.toLowerCase();
+    return song.tags
+      .join(",")
+      .toLowerCase()
+      .split(",")
+      .some((tag) => tag.includes(normalizedValue));
+  };
+
+  // 選択対象の全候補
+  const selectableSongs = allSongs;
 
   // カテゴリーフィルター済みの曲（activeFilterに応じて絞り込み）
   const categoryFilteredSongs = useMemo(() => {
+    if (activeFilter === "all") {
+      return selectableSongs;
+    }
+
     if (activeFilter === "original") {
       return selectableSongs.filter((song) => isPossibleOriginalSong(song));
     }
@@ -118,20 +134,37 @@ export default function MyBestNineSongsPage() {
       return selectableSongs.filter((song) => song.tags.includes("歌枠"));
     }
 
+    if (activeFilter === "collaboration") {
+      return selectableSongs.filter((song) => hasTag(song, "コラボ"));
+    }
+
     return selectableSongs.filter((song) => isUnitOrGuestSong(song));
   }, [activeFilter, selectableSongs]);
+
+  // 同一動画・同一開始秒の重複行を除外（React key重複と二重表示を防ぐ）
+  const uniqueCategorySongs = useMemo(() => {
+    const seen = new Set<string>();
+    return categoryFilteredSongs.filter((song) => {
+      const dedupeKey = `${song.video_id}-${String(song.start)}`;
+      if (seen.has(dedupeKey)) {
+        return false;
+      }
+      seen.add(dedupeKey);
+      return true;
+    });
+  }, [categoryFilteredSongs]);
 
   // カテゴリーフィルター済みの曲に対して検索を適用（URL同期なし）
   const {
     songs: searchedSongs,
     searchTerm: songSearchQuery,
     setSearchTerm: setSongSearchQuery,
-  } = useSearch(categoryFilteredSongs, { syncUrl: false });
+  } = useSearch(uniqueCategorySongs, { syncUrl: false });
 
   // 検索クエリがない場合はカテゴリー結果をそのまま使う（初期表示の遅延を防ぐ）
   const displayedSongs = songSearchQuery.trim()
     ? searchedSongs
-    : categoryFilteredSongs;
+    : uniqueCategorySongs;
 
   const currentSelectionKey = useMemo(() => {
     const songsKey = selectedSongs
@@ -554,6 +587,9 @@ export default function MyBestNineSongsPage() {
                               {song.artist}
                             </Text>
                             <Text size="xs" c="dimmed" mt={2}>
+                              {formatBroadcastDate(song.broadcast_at)}
+                            </Text>
+                            <Text size="xs" c="dimmed" mt={2}>
                               クリックで削除
                             </Text>
                           </div>
@@ -566,6 +602,14 @@ export default function MyBestNineSongsPage() {
                 {/* 利用可能な曲のリスト */}
                 <div>
                   <Group gap="xs" mb={8}>
+                    <MantineButton
+                      size="xs"
+                      color="pink"
+                      variant={activeFilter === "all" ? "filled" : "light"}
+                      onClick={() => setActiveFilter("all")}
+                    >
+                      全て
+                    </MantineButton>
                     <MantineButton
                       size="xs"
                       color="pink"
@@ -602,6 +646,16 @@ export default function MyBestNineSongsPage() {
                     >
                       歌枠
                     </MantineButton>
+                    <MantineButton
+                      size="xs"
+                      color="pink"
+                      variant={
+                        activeFilter === "collaboration" ? "filled" : "light"
+                      }
+                      onClick={() => setActiveFilter("collaboration")}
+                    >
+                      コラボ
+                    </MantineButton>
                   </Group>
                   <TextInput
                     placeholder="曲名、アーティストなどで検索"
@@ -613,7 +667,7 @@ export default function MyBestNineSongsPage() {
                   <Text size="sm" c="dimmed" mb={8}>
                     表示中: {displayedSongs.length}曲
                     {songSearchQuery.trim() &&
-                      ` / ${categoryFilteredSongs.length}曲中`}
+                      ` / ${uniqueCategorySongs.length}曲中`}
                   </Text>
                   <div className="h-95 lg:h-[calc(100dvh-280px)] min-h-95">
                     {isLoading ? (
@@ -678,6 +732,9 @@ export default function MyBestNineSongsPage() {
                                   </Text>
                                   <Text size="xs" c="dimmed" truncate>
                                     {song.artist}
+                                  </Text>
+                                  <Text size="xs" c="dimmed" mt={2}>
+                                    {formatBroadcastDate(song.broadcast_at)}
                                   </Text>
                                   {isSelected && (
                                     <Badge size="xs" color="pink" mt={4}>
