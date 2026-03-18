@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   TextInput,
   Button as MantineButton,
@@ -92,6 +93,8 @@ export default function MyBestNineSongsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerateLocked, setIsGenerateLocked] = useState(false);
   const lockedSelectionKeyRef = useRef<string | null>(null);
+  const songListViewportRef = useRef<HTMLDivElement>(null);
+  const [windowWidth, setWindowWidth] = useState(0);
 
   const { draft, saveDraft, clearDraft } = useMyBestNineSongsDraft();
   const { allSongs, isLoading } = useSongs();
@@ -166,6 +169,34 @@ export default function MyBestNineSongsPage() {
     ? searchedSongs
     : uniqueCategorySongs;
 
+  // タイル一覧の表示幅から列数を計算（base:2, lg:3, xl:4）
+  const tileColumnCount = useMemo(() => {
+    if (windowWidth >= 1280) return 4;
+    if (windowWidth >= 1024) return 3;
+    return 2;
+  }, [windowWidth]);
+
+  const tileRowCount = useMemo(() => {
+    if (tileColumnCount <= 0) return 0;
+    return Math.ceil(displayedSongs.length / tileColumnCount);
+  }, [displayedSongs.length, tileColumnCount]);
+
+  const tileVirtualizer = useVirtualizer({
+    count: tileRowCount,
+    getScrollElement: () => songListViewportRef.current,
+    estimateSize: () => 220,
+    overscan: 4,
+  });
+
+  const virtualTileRows = tileVirtualizer.getVirtualItems();
+  const tileStartOffset =
+    virtualTileRows.length > 0 ? virtualTileRows[0].start : 0;
+  const tileEndOffset =
+    virtualTileRows.length > 0
+      ? tileVirtualizer.getTotalSize() -
+        virtualTileRows[virtualTileRows.length - 1].end
+      : 0;
+
   const currentSelectionKey = useMemo(() => {
     const songsKey = selectedSongs
       .map((song) => `${song.video_id}:${String(song.start)}`)
@@ -183,6 +214,17 @@ export default function MyBestNineSongsPage() {
       lockedSelectionKeyRef.current = null;
     }
   }, [isGenerateLocked, currentSelectionKey]);
+
+  useEffect(() => {
+    const updateWidth = () => setWindowWidth(window.innerWidth);
+    updateWidth();
+
+    window.addEventListener("resize", updateWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
 
   // ドラフトを復元（初回のみ実行。URLのtitleパラメータは初回ロード時の値のみ使用する）
   useEffect(() => {
@@ -686,66 +728,89 @@ export default function MyBestNineSongsPage() {
                         ))}
                       </div>
                     ) : (
-                      <ScrollArea h="100%">
-                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pr-2">
-                          {displayedSongs.map((song) => {
-                            const isSelected = selectedSongs.find(
-                              (s) =>
-                                s.video_id === song.video_id &&
-                                s.start === song.start,
-                            );
-                            const isDisabled =
-                              selectedSongs.length >= 9 && !isSelected;
+                      <ScrollArea h="100%" viewportRef={songListViewportRef}>
+                        <div style={{ height: `${tileStartOffset}px` }} />
 
-                            return (
-                              <article
-                                key={`${song.video_id}-${song.start}-${activeFilter}`}
-                                onClick={() => {
-                                  if (!isSelected && !isDisabled) {
-                                    addSong(song);
-                                  } else if (isSelected) {
-                                    removeSong(song.video_id, song.start);
-                                  }
-                                }}
-                                className={`cursor-pointer rounded overflow-hidden border shadow-sm transition ${
-                                  isSelected
-                                    ? "border-pink-500 bg-pink-100 dark:bg-pink-900/40"
-                                    : isDisabled
-                                      ? "cursor-not-allowed border-gray-300 bg-gray-100 opacity-50 dark:border-gray-600 dark:bg-gray-800"
-                                      : "border-gray-200 bg-white hover:bg-primary-100/50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-primary-900/20"
-                                }`}
-                              >
-                                <div className="w-full aspect-video bg-black">
-                                  <YoutubeThumbnail
-                                    videoId={song.video_id}
-                                    alt={song.title}
-                                    fill={true}
-                                  />
-                                </div>
-                                <div className="p-2">
-                                  <Text
-                                    size="sm"
-                                    truncate
-                                    className="font-medium"
-                                  >
-                                    {song.title}
-                                  </Text>
-                                  <Text size="xs" c="dimmed" truncate>
-                                    {song.artist}
-                                  </Text>
-                                  <Text size="xs" c="dimmed" mt={2}>
-                                    {formatBroadcastDate(song.broadcast_at)}
-                                  </Text>
-                                  {isSelected && (
-                                    <Badge size="xs" color="pink" mt={4}>
-                                      選択中
-                                    </Badge>
-                                  )}
-                                </div>
-                              </article>
+                        <div
+                          className="grid gap-2 pr-2"
+                          style={{
+                            gridTemplateColumns: `repeat(${tileColumnCount}, minmax(0, 1fr))`,
+                          }}
+                        >
+                          {virtualTileRows.flatMap((virtualRow) => {
+                            const startItemIndex =
+                              virtualRow.index * tileColumnCount;
+                            const rowItems = displayedSongs.slice(
+                              startItemIndex,
+                              startItemIndex + tileColumnCount,
                             );
+
+                            return rowItems.map((song, itemIndexInRow) => {
+                              const isSelected = selectedSongs.find(
+                                (s) =>
+                                  s.video_id === song.video_id &&
+                                  s.start === song.start,
+                              );
+                              const isDisabled =
+                                selectedSongs.length >= 9 && !isSelected;
+
+                              return (
+                                <article
+                                  key={`${virtualRow.key}-${song.video_id}-${song.start}-${itemIndexInRow}`}
+                                  ref={
+                                    itemIndexInRow === 0
+                                      ? tileVirtualizer.measureElement
+                                      : undefined
+                                  }
+                                  onClick={() => {
+                                    if (!isSelected && !isDisabled) {
+                                      addSong(song);
+                                    } else if (isSelected) {
+                                      removeSong(song.video_id, song.start);
+                                    }
+                                  }}
+                                  className={`cursor-pointer rounded overflow-hidden border shadow-sm transition ${
+                                    isSelected
+                                      ? "border-pink-500 bg-pink-100 dark:bg-pink-900/40"
+                                      : isDisabled
+                                        ? "cursor-not-allowed border-gray-300 bg-gray-100 opacity-50 dark:border-gray-600 dark:bg-gray-800"
+                                        : "border-gray-200 bg-white hover:bg-primary-100/50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-primary-900/20"
+                                  }`}
+                                >
+                                  <div className="w-full aspect-video bg-black">
+                                    <YoutubeThumbnail
+                                      videoId={song.video_id}
+                                      alt={song.title}
+                                      fill={true}
+                                    />
+                                  </div>
+                                  <div className="p-2">
+                                    <Text
+                                      size="sm"
+                                      truncate
+                                      className="font-medium"
+                                    >
+                                      {song.title}
+                                    </Text>
+                                    <Text size="xs" c="dimmed" truncate>
+                                      {song.artist}
+                                    </Text>
+                                    <Text size="xs" c="dimmed" mt={2}>
+                                      {formatBroadcastDate(song.broadcast_at)}
+                                    </Text>
+                                    {isSelected && (
+                                      <Badge size="xs" color="pink" mt={4}>
+                                        選択中
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </article>
+                              );
+                            });
                           })}
                         </div>
+
+                        <div style={{ height: `${tileEndOffset}px` }} />
                       </ScrollArea>
                     )}
                   </div>
