@@ -20,6 +20,7 @@ import { MdContentCopy } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
 import { Song } from "../../types/song";
 import useMyBestNineSongsDraft from "../../hook/useMyBestNineSongsDraft";
+import useSearch from "../../hook/useSearch";
 import {
   isPossibleOriginalSong,
   isCoverSong,
@@ -27,12 +28,26 @@ import {
 } from "../../config/filters";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
-import { HiChevronRight, HiHome } from "react-icons/hi";
+import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
 import { breadcrumbClasses } from "@/app/theme";
 import Link from "next/link";
 
-type SongCategoryFilter = "original" | "cover" | "unit-guest";
+type SongCategoryFilter = "original" | "cover" | "unit-guest" | "live-singing";
 const DEFAULT_TITLE = "私が選んだAZKi究極の9曲";
+
+const normalizeStart = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+
+  const withoutSuffix = trimmed.replace(/s$/i, "");
+  const numeric = Number(withoutSuffix);
+  if (Number.isFinite(numeric)) {
+    return String(numeric);
+  }
+  return withoutSuffix;
+};
 
 /**
  * 好きな楽曲9選作成ページ
@@ -72,19 +87,25 @@ export default function MyBestNineSongsPage() {
     return isCollaborationSong(song);
   };
 
-  // 選択対象の全候補（オリ曲/カバー曲/ユニット・ゲスト曲）
+  const isLiveSingSong = (song: Song) => {
+    return song.tags.includes("歌枠");
+  };
+
+  // 選択対象の全候補（オリ曲/カバー曲/ユニット・ゲスト曲/歌枠）
   const selectableSongs = useMemo(
     () =>
       allSongs.filter(
         (song) =>
           isPossibleOriginalSong(song) ||
           isCoverSong(song) ||
-          isUnitOrGuestSong(song),
+          isUnitOrGuestSong(song) ||
+          isLiveSingSong(song),
       ),
     [allSongs],
   );
 
-  const filteredSongs = useMemo(() => {
+  // カテゴリーフィルター済みの曲（activeFilterに応じて絞り込み）
+  const categoryFilteredSongs = useMemo(() => {
     if (activeFilter === "original") {
       return selectableSongs.filter((song) => isPossibleOriginalSong(song));
     }
@@ -93,8 +114,24 @@ export default function MyBestNineSongsPage() {
       return selectableSongs.filter((song) => isCoverSong(song));
     }
 
+    if (activeFilter === "live-singing") {
+      return selectableSongs.filter((song) => song.tags.includes("歌枠"));
+    }
+
     return selectableSongs.filter((song) => isUnitOrGuestSong(song));
   }, [activeFilter, selectableSongs]);
+
+  // カテゴリーフィルター済みの曲に対して検索を適用（URL同期なし）
+  const {
+    songs: searchedSongs,
+    searchTerm: songSearchQuery,
+    setSearchTerm: setSongSearchQuery,
+  } = useSearch(categoryFilteredSongs, { syncUrl: false });
+
+  // 検索クエリがない場合はカテゴリー結果をそのまま使う（初期表示の遅延を防ぐ）
+  const displayedSongs = songSearchQuery.trim()
+    ? searchedSongs
+    : categoryFilteredSongs;
 
   const currentSelectionKey = useMemo(() => {
     const songsKey = selectedSongs
@@ -125,8 +162,25 @@ export default function MyBestNineSongsPage() {
       // ドラフトの曲を復元
       const draftSongs = draft.songs
         .map((entry) => {
-          const song = allSongs.find((s) => s.video_id === entry.v);
-          return song;
+          const normalizedEntryStart = normalizeStart(entry.s);
+          if (!normalizedEntryStart) return undefined;
+
+          const exact = allSongs.find((s) => {
+            const normalizedSongStart = normalizeStart(s.start);
+            return (
+              s.video_id === entry.v &&
+              normalizedSongStart !== null &&
+              normalizedSongStart === normalizedEntryStart
+            );
+          });
+          if (exact) return exact;
+
+          const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
+          if (sameVideoSongs.length === 1) {
+            return sameVideoSongs[0];
+          }
+
+          return undefined;
         })
         .filter((s): s is Song => s !== undefined);
 
@@ -138,7 +192,9 @@ export default function MyBestNineSongsPage() {
   const addSong = (song: Song) => {
     if (
       selectedSongs.length < 9 &&
-      !selectedSongs.find((s) => s.video_id === song.video_id)
+      !selectedSongs.find(
+        (s) => s.video_id === song.video_id && s.start === song.start,
+      )
     ) {
       const newSelected = [...selectedSongs, song];
       setSelectedSongs(newSelected);
@@ -151,8 +207,10 @@ export default function MyBestNineSongsPage() {
   };
 
   // 曲を選択から削除
-  const removeSong = (videoId: string) => {
-    const newSelected = selectedSongs.filter((s) => s.video_id !== videoId);
+  const removeSong = (videoId: string, start: string) => {
+    const newSelected = selectedSongs.filter(
+      (s) => !(s.video_id === videoId && s.start === start),
+    );
     setSelectedSongs(newSelected);
     const songEntries = newSelected.map((s) => ({
       v: s.video_id,
@@ -264,9 +322,10 @@ export default function MyBestNineSongsPage() {
         <Link href="/" className={breadcrumbClasses.link}>
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </Link>
-        <Link href="/share/my-best-9-songs" className={breadcrumbClasses.link}>
-          究極の9曲
+        <Link href="/share" className={breadcrumbClasses.link}>
+          共有
         </Link>
+        <span className={breadcrumbClasses.link}>究極の9曲ジェネレーター</span>
       </Breadcrumbs>
 
       <div>
@@ -476,9 +535,9 @@ export default function MyBestNineSongsPage() {
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                       {selectedSongs.map((song) => (
                         <div
-                          key={song.video_id}
-                          className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800"
-                          onClick={() => removeSong(song.video_id)}
+                          key={`${song.video_id}-${song.start}`}
+                          className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800 dark:hover:bg-pink-900/20"
+                          onClick={() => removeSong(song.video_id, song.start)}
                         >
                           <div className="w-full aspect-video bg-black">
                             <YoutubeThumbnail
@@ -533,16 +592,35 @@ export default function MyBestNineSongsPage() {
                     >
                       ユニット・ゲスト曲
                     </MantineButton>
+                    <MantineButton
+                      size="xs"
+                      color="pink"
+                      variant={
+                        activeFilter === "live-singing" ? "filled" : "light"
+                      }
+                      onClick={() => setActiveFilter("live-singing")}
+                    >
+                      歌枠
+                    </MantineButton>
                   </Group>
+                  <TextInput
+                    placeholder="曲名、アーティストなどで検索"
+                    value={songSearchQuery}
+                    onChange={(e) => setSongSearchQuery(e.currentTarget.value)}
+                    leftSection={<HiSearch />}
+                    mb={8}
+                  />
                   <Text size="sm" c="dimmed" mb={8}>
-                    表示中: {filteredSongs.length}曲
+                    表示中: {displayedSongs.length}曲
+                    {songSearchQuery.trim() &&
+                      ` / ${categoryFilteredSongs.length}曲中`}
                   </Text>
                   <div className="h-95 lg:h-[calc(100dvh-280px)] min-h-95">
                     {isLoading ? (
                       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pr-2">
                         {Array.from({ length: 12 }).map((_, index) => (
                           <article
-                            key={`song-skeleton-${index}`}
+                            key={`song-skeleton-${index}-${activeFilter}`}
                             className="rounded overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                           >
                             <Skeleton height={80} radius={0} />
@@ -556,21 +634,23 @@ export default function MyBestNineSongsPage() {
                     ) : (
                       <ScrollArea h="100%">
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pr-2">
-                          {filteredSongs.map((song) => {
+                          {displayedSongs.map((song) => {
                             const isSelected = selectedSongs.find(
-                              (s) => s.video_id === song.video_id,
+                              (s) =>
+                                s.video_id === song.video_id &&
+                                s.start === song.start,
                             );
                             const isDisabled =
                               selectedSongs.length >= 9 && !isSelected;
 
                             return (
                               <article
-                                key={song.video_id}
+                                key={`${song.video_id}-${song.start}-${activeFilter}`}
                                 onClick={() => {
                                   if (!isSelected && !isDisabled) {
                                     addSong(song);
                                   } else if (isSelected) {
-                                    removeSong(song.video_id);
+                                    removeSong(song.video_id, song.start);
                                   }
                                 }}
                                 className={`cursor-pointer rounded overflow-hidden border shadow-sm transition ${

@@ -1,33 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import useMyBestNineSongs, {
   MyBestNineSongs,
 } from "@/app/hook/useMyBestNineSongs";
+import useSongs from "@/app/hook/useSongs";
 import { Song } from "@/app/types/song";
-import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 
-type Props = {
-  params: Promise<{ encoded: string }>;
-};
+export default function Page() {
+  const params = useParams<{ encoded: string }>();
+  const encodedParam = params?.encoded;
+  const encoded = Array.isArray(encodedParam)
+    ? encodedParam[0] || ""
+    : encodedParam || "";
 
-export default function Page({ params }: Props) {
-  const [encoded, setEncoded] = useState<string>("");
   const [selection, setSelection] = useState<MyBestNineSongs | null>(null);
-  const [allSongs, setAllSongs] = useState<Song[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSelectionLoading, setIsSelectionLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { allSongs, isLoading: isSongsLoading } = useSongs();
   const { decodeFromUrlParam } = useMyBestNineSongs();
 
-  // params を解決
-  useEffect(() => {
-    params.then((p) => {
-      setEncoded(p.encoded);
-    });
-  }, [params]);
+  const normalizeStart = (value: unknown): string | null => {
+    if (value === null || value === undefined) return null;
+
+    const trimmed = String(value).trim();
+    if (!trimmed) return null;
+
+    const withoutSuffix = trimmed.replace(/s$/i, "");
+    const numeric = Number(withoutSuffix);
+    if (Number.isFinite(numeric)) {
+      return String(numeric);
+    }
+    return withoutSuffix;
+  };
 
   // 曲データを取得して、9選をデコード
   useEffect(() => {
@@ -35,16 +44,8 @@ export default function Page({ params }: Props) {
 
     const initialize = async () => {
       try {
-        setIsLoading(true);
+        setIsSelectionLoading(true);
         setError(null);
-
-        // 曲データ取得
-        const songsRes = await fetch(`/api/songs`);
-        if (!songsRes.ok) {
-          throw new Error("曲データの取得に失敗しました");
-        }
-        const songs = (await songsRes.json()) as Song[];
-        setAllSongs(songs);
 
         // 新形式(ID)を優先して復元
         const savedResponse = await fetch(
@@ -73,12 +74,44 @@ export default function Page({ params }: Props) {
         console.error("Failed to load selection:", e);
         setError(e instanceof Error ? e.message : "読み込みに失敗しました");
       } finally {
-        setIsLoading(false);
+        setIsSelectionLoading(false);
       }
     };
 
     initialize();
   }, [encoded, decodeFromUrlParam]);
+
+  const isLoading = isSelectionLoading || isSongsLoading;
+
+  // フック順序を固定するため、selection が null の場合も常に評価する
+  const selectedSongs = useMemo(() => {
+    if (!selection) return [] as Song[];
+
+    return selection.songs
+      .map((entry) => {
+        const normalizedEntryStart = normalizeStart(entry.s);
+        if (!normalizedEntryStart) return undefined;
+
+        const exact = allSongs.find((s) => {
+          const normalizedSongStart = normalizeStart(s.start);
+          return (
+            s.video_id === entry.v &&
+            normalizedSongStart !== null &&
+            normalizedSongStart === normalizedEntryStart
+          );
+        });
+        if (exact) return exact;
+
+        // 旧データ向け: 同じ video_id が1件しかない場合のみ安全にフォールバック
+        const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
+        if (sameVideoSongs.length === 1) {
+          return sameVideoSongs[0];
+        }
+
+        return undefined;
+      })
+      .filter((s) => s !== undefined) as Song[];
+  }, [selection, allSongs]);
 
   if (isLoading) {
     return (
@@ -109,17 +142,6 @@ export default function Page({ params }: Props) {
       </div>
     );
   }
-
-  // 曲データをマップして対応させる
-  const selectedSongs = selection.songs
-    .map((entry) => {
-      // 旧URL互換: start が一致しない場合は video_id のみでフォールバック
-      return (
-        allSongs.find((s) => s.video_id === entry.v && s.start === entry.s) ||
-        allSongs.find((s) => s.video_id === entry.v)
-      );
-    })
-    .filter((s) => s !== undefined) as Song[];
 
   // 見つからなかった曲の情報を保持
   const missingCount = selection.songs.length - selectedSongs.length;
