@@ -165,16 +165,14 @@ export default function MyBestNineSongsPage() {
           const normalizedEntryStart = normalizeStart(entry.s);
           if (!normalizedEntryStart) return undefined;
 
-          const exact = allSongs.find(
-            (s) => {
-              const normalizedSongStart = normalizeStart(s.start);
-              return (
-                s.video_id === entry.v &&
-                normalizedSongStart !== null &&
-                normalizedSongStart === normalizedEntryStart
-              );
-            },
-          );
+          const exact = allSongs.find((s) => {
+            const normalizedSongStart = normalizeStart(s.start);
+            return (
+              s.video_id === entry.v &&
+              normalizedSongStart !== null &&
+              normalizedSongStart === normalizedEntryStart
+            );
+          });
           if (exact) return exact;
 
           const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
