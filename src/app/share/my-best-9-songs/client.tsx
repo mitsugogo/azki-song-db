@@ -536,7 +536,7 @@ export default function MyBestNineSongsPage() {
                       {selectedSongs.map((song) => (
                         <div
                           key={`${song.video_id}-${song.start}`}
-                          className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800"
+                          className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800 dark:hover:bg-pink-900/20"
                           onClick={() => removeSong(song.video_id, song.start)}
                         >
                           <div className="w-full aspect-video bg-black">
