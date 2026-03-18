@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.34.4](https://github.com/mitsugogo/azki-song-db/compare/v1.34.3...v1.34.4) (2026-03-18)
+
+
+### Bug Fixes
+
+* hover時の背景色修正 ([a1a5008](https://github.com/mitsugogo/azki-song-db/commit/a1a50085edf042f1a2ed0afe7e49cc508981f482))
+* サムネイル表示調整 ([c4a2ab8](https://github.com/mitsugogo/azki-song-db/commit/c4a2ab8d275c45a55117efea77545c546a430797))
+* 動画シェア時のサムネ修正 ([5fd6913](https://github.com/mitsugogo/azki-song-db/commit/5fd691351058d60bafc16dc119bb56ce9babae9f))
+
 ### [1.34.3](https://github.com/mitsugogo/azki-song-db/compare/v1.34.2...v1.34.3) (2026-03-16)
 
 ### [1.34.2](https://github.com/mitsugogo/azki-song-db/compare/v1.34.1...v1.34.2) (2026-03-12)
