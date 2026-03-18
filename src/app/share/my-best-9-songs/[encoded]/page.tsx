@@ -24,6 +24,20 @@ export default function Page() {
   const { allSongs, isLoading: isSongsLoading } = useSongs();
   const { decodeFromUrlParam } = useMyBestNineSongs();
 
+  const normalizeStart = (value: unknown): string | null => {
+    if (value === null || value === undefined) return null;
+
+    const trimmed = String(value).trim();
+    if (!trimmed) return null;
+
+    const withoutSuffix = trimmed.replace(/s$/i, "");
+    const numeric = Number(withoutSuffix);
+    if (Number.isFinite(numeric)) {
+      return String(numeric);
+    }
+    return withoutSuffix;
+  };
+
   // 曲データを取得して、9選をデコード
   useEffect(() => {
     if (!encoded) return;
@@ -75,11 +89,26 @@ export default function Page() {
 
     return selection.songs
       .map((entry) => {
-        // start が一致しない場合は video_id のみでフォールバック
-        return (
-          allSongs.find((s) => s.video_id === entry.v && s.start === entry.s) ||
-          allSongs.find((s) => s.video_id === entry.v)
-        );
+        const normalizedEntryStart = normalizeStart(entry.s);
+        if (!normalizedEntryStart) return undefined;
+
+        const exact = allSongs.find((s) => {
+          const normalizedSongStart = normalizeStart(s.start);
+          return (
+            s.video_id === entry.v &&
+            normalizedSongStart !== null &&
+            normalizedSongStart === normalizedEntryStart
+          );
+        });
+        if (exact) return exact;
+
+        // 旧データ向け: 同じ video_id が1件しかない場合のみ安全にフォールバック
+        const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
+        if (sameVideoSongs.length === 1) {
+          return sameVideoSongs[0];
+        }
+
+        return undefined;
       })
       .filter((s) => s !== undefined) as Song[];
   }, [selection, allSongs]);

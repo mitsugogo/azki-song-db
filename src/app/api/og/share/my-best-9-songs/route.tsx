@@ -11,6 +11,21 @@ type OgSongCard = {
   artist: string;
 };
 
+const normalizeStart = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+
+  const withoutSuffix = trimmed.replace(/s$/i, "");
+  const numeric = Number(withoutSuffix);
+  if (Number.isFinite(numeric)) {
+    return String(numeric);
+  }
+
+  return withoutSuffix;
+};
+
 const fallbackOgImage = () =>
   new ImageResponse(
     <div
@@ -97,11 +112,28 @@ export async function GET(req: NextRequest) {
     // 厳選した曲を取得
     const selectedSongs = selection.songs
       .map((entry: { v: string; s: string }) => {
-        return (
-          songs.find(
-            (s: Song) => s.video_id === entry.v && s.start === entry.s,
-          ) || songs.find((s: Song) => s.video_id === entry.v)
+        const normalizedEntryStart = normalizeStart(entry.s);
+        if (!normalizedEntryStart) return undefined;
+
+        const exact = songs.find((s: Song) => {
+          const normalizedSongStart = normalizeStart(s.start);
+          return (
+            s.video_id === entry.v &&
+            normalizedSongStart !== null &&
+            normalizedSongStart === normalizedEntryStart
+          );
+        });
+        if (exact) return exact;
+
+        // 旧データ向け: 同じ動画IDが1件だけなら安全にフォールバック
+        const sameVideoSongs = songs.filter(
+          (s: Song) => s.video_id === entry.v,
         );
+        if (sameVideoSongs.length === 1) {
+          return sameVideoSongs[0];
+        }
+
+        return undefined;
       })
       .filter((s: Song | undefined) => s !== undefined)
       .slice(0, 9) as Song[];

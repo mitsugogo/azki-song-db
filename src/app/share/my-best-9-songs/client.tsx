@@ -35,6 +35,20 @@ import Link from "next/link";
 type SongCategoryFilter = "original" | "cover" | "unit-guest" | "live-singing";
 const DEFAULT_TITLE = "私が選んだAZKi究極の9曲";
 
+const normalizeStart = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+
+  const withoutSuffix = trimmed.replace(/s$/i, "");
+  const numeric = Number(withoutSuffix);
+  if (Number.isFinite(numeric)) {
+    return String(numeric);
+  }
+  return withoutSuffix;
+};
+
 /**
  * 好きな楽曲9選作成ページ
  * オリジナル曲とカバー曲から最大9曲を選んで、共有URLを生成
@@ -148,8 +162,27 @@ export default function MyBestNineSongsPage() {
       // ドラフトの曲を復元
       const draftSongs = draft.songs
         .map((entry) => {
-          const song = allSongs.find((s) => s.video_id === entry.v);
-          return song;
+          const normalizedEntryStart = normalizeStart(entry.s);
+          if (!normalizedEntryStart) return undefined;
+
+          const exact = allSongs.find(
+            (s) => {
+              const normalizedSongStart = normalizeStart(s.start);
+              return (
+                s.video_id === entry.v &&
+                normalizedSongStart !== null &&
+                normalizedSongStart === normalizedEntryStart
+              );
+            },
+          );
+          if (exact) return exact;
+
+          const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
+          if (sameVideoSongs.length === 1) {
+            return sameVideoSongs[0];
+          }
+
+          return undefined;
         })
         .filter((s): s is Song => s !== undefined);
 
@@ -161,7 +194,9 @@ export default function MyBestNineSongsPage() {
   const addSong = (song: Song) => {
     if (
       selectedSongs.length < 9 &&
-      !selectedSongs.find((s) => s.video_id === song.video_id)
+      !selectedSongs.find(
+        (s) => s.video_id === song.video_id && s.start === song.start,
+      )
     ) {
       const newSelected = [...selectedSongs, song];
       setSelectedSongs(newSelected);
@@ -174,8 +209,10 @@ export default function MyBestNineSongsPage() {
   };
 
   // 曲を選択から削除
-  const removeSong = (videoId: string) => {
-    const newSelected = selectedSongs.filter((s) => s.video_id !== videoId);
+  const removeSong = (videoId: string, start: string) => {
+    const newSelected = selectedSongs.filter(
+      (s) => !(s.video_id === videoId && s.start === start),
+    );
     setSelectedSongs(newSelected);
     const songEntries = newSelected.map((s) => ({
       v: s.video_id,
@@ -500,9 +537,9 @@ export default function MyBestNineSongsPage() {
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                       {selectedSongs.map((song) => (
                         <div
-                          key={song.video_id}
+                          key={`${song.video_id}-${song.start}`}
                           className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800"
-                          onClick={() => removeSong(song.video_id)}
+                          onClick={() => removeSong(song.video_id, song.start)}
                         >
                           <div className="w-full aspect-video bg-black">
                             <YoutubeThumbnail
@@ -601,7 +638,9 @@ export default function MyBestNineSongsPage() {
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pr-2">
                           {displayedSongs.map((song) => {
                             const isSelected = selectedSongs.find(
-                              (s) => s.video_id === song.video_id,
+                              (s) =>
+                                s.video_id === song.video_id &&
+                                s.start === song.start,
                             );
                             const isDisabled =
                               selectedSongs.length >= 9 && !isSelected;
@@ -613,7 +652,7 @@ export default function MyBestNineSongsPage() {
                                   if (!isSelected && !isDisabled) {
                                     addSong(song);
                                   } else if (isSelected) {
-                                    removeSong(song.video_id);
+                                    removeSong(song.video_id, song.start);
                                   }
                                 }}
                                 className={`cursor-pointer rounded overflow-hidden border shadow-sm transition ${
