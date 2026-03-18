@@ -121,8 +121,8 @@ export async function generateMetadata({
       } else {
         title = `${song.video_title} | ${siteConfig.siteName}`;
         og_title = title;
-        ogImageUrl.searchParams.set("title", og_title);
-        ogImageUrl.searchParams.set("subtitle", og_subtitle);
+        ogImageUrl = new URL("/api/og/videothumb", baseUrl);
+        ogImageUrl.searchParams.set("v", v?.toString());
       }
     }
   }

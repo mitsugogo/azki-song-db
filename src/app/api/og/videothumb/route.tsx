@@ -26,10 +26,10 @@ export async function GET(req: NextRequest) {
       return new Response("Song not found", { status: 404 });
     }
 
-    const title =
+    const title = `${song.video_title}`;
+    const subTitle =
       `${song.title} - ${song.artist}` +
       (songsByVideoId.length > 1 ? ` 他${songsByVideoId.length - 1}曲` : "");
-    const subTitle = `${song.video_title}`;
     const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;
 
     const notoSansRegular = await fetch(
