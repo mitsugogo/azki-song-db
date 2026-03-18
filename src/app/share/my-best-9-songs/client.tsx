@@ -287,9 +287,10 @@ export default function MyBestNineSongsPage() {
         <Link href="/" className={breadcrumbClasses.link}>
           <HiHome className="w-4 h-4 mr-1.5" /> Home
         </Link>
-        <Link href="/share/my-best-9-songs" className={breadcrumbClasses.link}>
-          究極の9曲
+        <Link href="/share" className={breadcrumbClasses.link}>
+          共有
         </Link>
+        <span className={breadcrumbClasses.link}>究極の9曲ジェネレーター</span>
       </Breadcrumbs>
 
       <div>
