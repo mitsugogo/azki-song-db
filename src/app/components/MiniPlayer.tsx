@@ -12,6 +12,7 @@ import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import YoutubeThumbnail from "./YoutubeThumbnail";
+import { WATCH_PATH, isWatchPagePath } from "../lib/watchUrl";
 
 type Position = {
   x: number;
@@ -62,8 +63,8 @@ export default function MiniPlayer() {
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const miniPlayerRef = useRef<HTMLDivElement>(null);
 
-  // ホームページ（メインプレイヤーがある場所）ではミニプレイヤーを非表示
-  const isHomePage = pathname === "/";
+  // watch ページ（メインプレイヤーがある場所）ではミニプレイヤーを非表示
+  const isWatchPage = isWatchPagePath(pathname);
 
   const sortedSongs = useMemo(() => {
     return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
@@ -293,7 +294,7 @@ export default function MiniPlayer() {
 
   useEffect(() => {
     // 動画IDが変わったときのみプレイヤーをリセットする
-    if (!isHomePage && currentSong) {
+    if (!isWatchPage && currentSong) {
       const videoIdChanged = currentSong.video_id !== lastVideoIdRef.current;
 
       if (videoIdChanged) {
@@ -305,7 +306,7 @@ export default function MiniPlayer() {
 
       lastPathnameRef.current = pathname;
     }
-  }, [pathname, isHomePage, currentSong?.video_id]);
+  }, [pathname, isWatchPage, currentSong?.video_id]);
 
   // 同じ動画内で曲の開始位置だけが変わった場合も、即座にプレビュー位置へ移動する
   useEffect(() => {
@@ -400,17 +401,17 @@ export default function MiniPlayer() {
     maximizePlayer();
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.pathname = "/";
+      url.pathname = WATCH_PATH;
       const target =
         url.pathname + (url.search ? `?${url.searchParams.toString()}` : "");
       router.push(target);
     } else {
-      router.push("/");
+      router.push(WATCH_PATH);
     }
   }, [maximizePlayer, router]);
 
-  // ホームページではミニプレイヤーを表示しない
-  if (isHomePage || !isMinimized || !currentSong) {
+  // watch ページではミニプレイヤーを表示しない
+  if (isWatchPage || !isMinimized || !currentSong) {
     return null;
   }
 

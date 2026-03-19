@@ -431,7 +431,7 @@ export default function DataTable<
                                     >
                                       <div className="shrink-0 w-20 px-3 py-1 text-center">
                                         <Link
-                                          href={`/?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}&q=video_id:${s.video_id}`}
+                                          href={`/watch?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}&q=video_id:${s.video_id}`}
                                           className=" hover:text-primary-600 dark:hover:text-white"
                                         >
                                           <BsPlayCircle

@@ -98,7 +98,7 @@ const SortableRow = ({
       </Table.Td>
       <Table.Td>
         <Link
-          href={`/?v=${s.videoId}${Number(s.start) > 0 ? `&t=${s.start}` : ""}&playlist=${encodePlaylistUrlParam(playlist)}`}
+          href={`/watch?v=${s.videoId}${Number(s.start) > 0 ? `&t=${s.start}` : ""}&playlist=${encodePlaylistUrlParam(playlist)}`}
         >
           <Button color="gray">再生</Button>
         </Link>

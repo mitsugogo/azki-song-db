@@ -176,7 +176,7 @@ export default function Page() {
             {selectedSongs.map((song, idx) => (
               <Link
                 key={`${song.video_id}-${song.start}-${idx}`}
-                href={`/?v=${song.video_id}&t=${song.start}s`}
+                href={`/watch?v=${song.video_id}&t=${song.start}`}
                 className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
               >
                 <div className="aspect-video bg-black relative overflow-hidden">

@@ -74,7 +74,7 @@ const SongListItem = React.memo(
           data-index={`${song.video_id}-${song.start}-${song.title}`}
         >
           <Link
-            href={`/?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`}
+            href={`/watch?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`}
             className="flex lg:block lg:w-full"
             onClick={(e) => {
               // デフォルトのLinkナビゲーションを防ぎ、

@@ -250,8 +250,8 @@ export default function ClientPage({
             <Link
               href={
                 song.album
-                  ? `/?q=album:${song.album}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
-                  : `/?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`
+                  ? `/watch?q=album:${song.album}&v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`
+                  : `/watch?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`
               }
               className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
             >
@@ -341,7 +341,7 @@ export default function ClientPage({
                               YouTube
                             </a>
                             <Link
-                              href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
+                              href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
                               className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                             >
                               <FaPlay className="inline mr-1 -mt-1" /> 再生
@@ -397,7 +397,7 @@ export default function ClientPage({
                               YouTube
                             </a>
                             <Link
-                              href={`/?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
+                              href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
                               className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                             >
                               <FaPlay className="inline mr-1 -mt-1" /> 再生

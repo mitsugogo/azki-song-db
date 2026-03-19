@@ -658,8 +658,8 @@ export default function YearSummaryClient({
                   className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
                 >
                   <Link
-                    href={`/?v=${g.video_id || ""}${
-                      g.start ? `&t=${g.start}s` : ""
+                    href={`/watch?v=${g.video_id || ""}${
+                      g.start ? `&t=${g.start}` : ""
                     }&q=year:${displayYear}`}
                     className="block"
                   >
@@ -701,8 +701,8 @@ export default function YearSummaryClient({
                 className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
               >
                 <Link
-                  href={`/?v=${s.video_id || ""}${
-                    s.start ? `&t=${s.start}s` : ""
+                  href={`/watch?v=${s.video_id || ""}${
+                    s.start ? `&t=${s.start}` : ""
                   }&q=year:${displayYear}`}
                 >
                   <div className="w-full aspect-video bg-black">
@@ -805,8 +805,8 @@ export default function YearSummaryClient({
                         className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
                       >
                         <Link
-                          href={`/?v=${g.video_id || ""}${
-                            g.start ? `&t=${g.start}s` : ""
+                          href={`/watch?v=${g.video_id || ""}${
+                            g.start ? `&t=${g.start}` : ""
                           }&q=year:${displayYear}`}
                           className="block"
                         >
@@ -841,7 +841,7 @@ export default function YearSummaryClient({
                           </div>
                         </Link>
                       </article>
-                    ))}
+                                      s.start ? `&t=${s.start}` : ""
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -925,8 +925,8 @@ export default function YearSummaryClient({
                               {v.songs.map((s: Song, idx: number) => (
                                 <li key={`${v.id}-${idx}`} className="text-sm">
                                   <Link
-                                    href={`/?v=${v.id}${
-                                      s.start ? `&t=${s.start}s` : ""
+                                    href={`/watch?v=${v.id}${
+                                      s.start ? `&t=${s.start}` : ""
                                     }&q=year:${displayYear}`}
                                     className="hover:underline"
                                   >

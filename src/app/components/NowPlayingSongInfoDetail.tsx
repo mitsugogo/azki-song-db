@@ -815,7 +815,7 @@ const NowPlayingSongInfoDetail = ({
                         -{" "}
                         <Link
                           key={index}
-                          href={`/?v=${song.video_id}&t=${song.start}s`}
+                          href={`/watch?v=${song.video_id}&t=${song.start}`}
                           rel="noopener noreferrer"
                           className="text-primary hover:underline justify-self-start font-semibold dark:text-primary-300"
                           onClick={(e) => {

@@ -160,7 +160,7 @@ const SearchBrowseView = ({
                       className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-200 dark:hover:bg-gray-600 shadow-sm"
                     >
                       <Link
-                        href={`/?v=${song.video_id}${song.start ? `&t=${song.start}s` : ""}`}
+                        href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}`}
                         className="block"
                       >
                         <div className="w-full aspect-video bg-black">
