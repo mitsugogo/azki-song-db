@@ -307,6 +307,26 @@ export default function MiniPlayer() {
     }
   }, [pathname, isHomePage, currentSong?.video_id]);
 
+  // 同じ動画内で曲の開始位置だけが変わった場合も、即座にプレビュー位置へ移動する
+  useEffect(() => {
+    if (!currentSong || !playingSong) return;
+    if (currentSong.video_id !== playingSong.video_id) return;
+    if (currentSong.start === playingSong.start) return;
+
+    const targetSeconds = Number(currentSong.start);
+    if (Number.isNaN(targetSeconds)) return;
+
+    setPlayingSong(currentSong);
+    setCurrentTime(targetSeconds);
+
+    if (playerRef.current && typeof playerRef.current.seekTo === "function") {
+      playerRef.current.seekTo(targetSeconds, true);
+      if (isPlaying && typeof playerRef.current.playVideo === "function") {
+        playerRef.current.playVideo();
+      }
+    }
+  }, [currentSong, playingSong, isPlaying, setCurrentTime]);
+
   const handlePlayerOnReady = (event: YouTubeEvent<number>) => {
     playerRef.current = event.target;
     try {

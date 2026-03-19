@@ -32,6 +32,8 @@ import useSongs from "../../hook/useSongs";
 import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
 import { breadcrumbClasses } from "@/app/theme";
 import Link from "next/link";
+import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
+import { FaPlay } from "react-icons/fa6";
 
 type SongCategoryFilter =
   | "all"
@@ -98,6 +100,15 @@ export default function MyBestNineSongsPage() {
 
   const { draft, saveDraft, clearDraft } = useMyBestNineSongsDraft();
   const { allSongs, isLoading } = useSongs();
+  const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
+    useGlobalPlayer();
+
+  const handlePreviewSong = (song: Song) => {
+    setCurrentSong(song);
+    setCurrentTime(Number(song.start));
+    setIsMinimized(true);
+    setIsPlaying(true);
+  };
 
   const isUnitOrGuestSong = (song: Song) => {
     return isCollaborationSong(song);
@@ -387,6 +398,64 @@ export default function MyBestNineSongsPage() {
     return `https://twitter.com/intent/tweet?${params.toString()}`;
   }, [generatedUrl, title, author]);
 
+  const renderSelectedSongsSection = (gridClassName: string) => {
+    if (selectedSongs.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mb-4">
+        <Text size="sm" fw={500} mb={8}>
+          選択済みの曲
+        </Text>
+        <div className={gridClassName}>
+          {selectedSongs.map((song) => (
+            <div
+              key={`${song.video_id}-${song.start}`}
+              className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800 dark:hover:bg-pink-900/20"
+              onClick={() => removeSong(song.video_id, song.start)}
+            >
+              <div className="w-full aspect-video bg-black">
+                <YoutubeThumbnail
+                  videoId={song.video_id}
+                  alt={song.title}
+                  fill={true}
+                />
+              </div>
+              <div className="p-3 pt-2">
+                <Text size="xs" truncate className="font-bold">
+                  {song.title}
+                </Text>
+                <Text size="xs" c="dimmed" truncate>
+                  {song.artist}
+                </Text>
+                <Text size="xs" c="dimmed" mt={2}>
+                  {formatBroadcastDate(song.broadcast_at)}
+                </Text>
+                <MantineButton
+                  size="compact-xs"
+                  color="pink"
+                  variant="light"
+                  className="inline-flex mt-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePreviewSong(song);
+                  }}
+                >
+                  <FaPlay className="mr-1" />
+                  再生
+                </MantineButton>
+                <Text size="xs" c="dimmed" mt={2}>
+                  クリックで削除
+                </Text>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="grow lg:p-6 lg:pb-0 overflow-auto">
       <Breadcrumbs
@@ -589,6 +658,13 @@ export default function MyBestNineSongsPage() {
                 </Paper>
               </Stack>
             </Paper>
+
+            {/* PC表示では選択済み曲を左下に表示 */}
+            <div className="hidden lg:block mt-4">
+              {renderSelectedSongsSection(
+                "grid grid-cols-2 xl:grid-cols-3 gap-2",
+              )}
+            </div>
           </Grid.Col>
 
           {/* 右側：曲選択 */}
@@ -601,45 +677,10 @@ export default function MyBestNineSongsPage() {
                   </h2>
                 </div>
 
-                {/* 選择済み曲の表示 */}
-                {selectedSongs.length > 0 && (
-                  <div className="mb-4">
-                    <Text size="sm" fw={500} mb={8}>
-                      選択済みの曲
-                    </Text>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                      {selectedSongs.map((song) => (
-                        <div
-                          key={`${song.video_id}-${song.start}`}
-                          className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800 dark:hover:bg-pink-900/20"
-                          onClick={() => removeSong(song.video_id, song.start)}
-                        >
-                          <div className="w-full aspect-video bg-black">
-                            <YoutubeThumbnail
-                              videoId={song.video_id}
-                              alt={song.title}
-                              fill={true}
-                            />
-                          </div>
-                          <div className="p-3 pt-2">
-                            <Text size="xs" truncate className="font-bold">
-                              {song.title}
-                            </Text>
-                            <Text size="xs" c="dimmed" truncate>
-                              {song.artist}
-                            </Text>
-                            <Text size="xs" c="dimmed" mt={2}>
-                              {formatBroadcastDate(song.broadcast_at)}
-                            </Text>
-                            <Text size="xs" c="dimmed" mt={2}>
-                              クリックで削除
-                            </Text>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* スマホ表示では現在の位置を維持 */}
+                <div className="lg:hidden">
+                  {renderSelectedSongsSection("grid grid-cols-2 gap-2")}
+                </div>
 
                 {/* 利用可能な曲のリスト */}
                 <div>
@@ -798,6 +839,19 @@ export default function MyBestNineSongsPage() {
                                     <Text size="xs" c="dimmed" mt={2}>
                                       {formatBroadcastDate(song.broadcast_at)}
                                     </Text>
+                                    <MantineButton
+                                      size="compact-xs"
+                                      color="pink"
+                                      variant="light"
+                                      className="inline-flex mt-2"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handlePreviewSong(song);
+                                      }}
+                                    >
+                                      <FaPlay className="mr-1" />
+                                      再生
+                                    </MantineButton>
                                     {isSelected && (
                                       <Badge size="xs" color="pink" mt={4}>
                                         選択中
