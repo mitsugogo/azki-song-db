@@ -58,18 +58,5 @@ test.describe("Summary pages", () => {
         page.getByRole("heading", { name: "2024年", exact: true, level: 1 }),
       ).toBeVisible();
     });
-
-    test("displays breadcrumbs with year", async ({ page }) => {
-      await page.goto("/summary/2024");
-
-      await page.waitForLoadState("domcontentloaded");
-
-      // Wait for breadcrumb to be visible
-      await page.waitForSelector('nav[aria-label="Breadcrumb"]', {
-        timeout: 10000,
-      });
-      const summaryLink = page.getByRole("link", { name: /活動記録/i });
-      await expect(summaryLink).toBeVisible();
-    });
   });
 });

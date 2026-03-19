@@ -15,11 +15,13 @@ test.describe("Home page", () => {
     await page.goto("/");
 
     await expect(
-      page.getByRole("link", { name: "AZKi Song Database" }),
+      page.getByRole("link", {
+        name: /AZKi.*(Song|SONG).*Database|AZKi.*SONG.*DATABASE/i,
+      }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: /音楽で辿る、\s*Virtual DiVAの記録。|AZKiの歌を探して、\s*そのまま聴く。/,
+        name: /音楽で辿る、\s*(Virtual DiVAの記録|Virtual DiVA AZKiの軌跡)。|AZKiの歌を探して、\s*そのまま聴く。/,
       }),
     ).toBeVisible();
     await expect(
