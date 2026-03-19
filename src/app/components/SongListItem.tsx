@@ -110,7 +110,7 @@ const SongListItem = React.memo(
                 </div>
               )}
             </div>
-            <div className="w-full space-y-0.5 px-3 pb-3 lg:pb-2 lg:space-y-1">
+            <div className="w-full space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
               <div
                 className={`line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white`}
               >
