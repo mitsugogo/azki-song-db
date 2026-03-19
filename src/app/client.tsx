@@ -163,7 +163,7 @@ export default function ClientTop() {
               <div className="flex shrink-0 items-center justify-end sm:gap-2">
                 <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
                   <Link href="/search" className="hover:text-primary">
-                    Search
+                    <LuSearch />
                   </Link>
                   <Link href="/discography" className="hover:text-primary">
                     Discography
