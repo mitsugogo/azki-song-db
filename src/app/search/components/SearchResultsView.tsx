@@ -69,7 +69,7 @@ const SearchResultsView = ({
         setSearchTerm={setSearchTerm}
       />
 
-      <div className="p-3 lg:ml-6">
+      <div className="p-3">
         <div style={{ height: `${firstStart}px` }} />
 
         <ul
@@ -78,7 +78,7 @@ const SearchResultsView = ({
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${cols}, ${estimatedItemWidth}px)`,
-            justifyContent: "center",
+            justifyContent: "start",
             gap: "1rem",
             boxSizing: "border-box",
             width:
@@ -86,7 +86,7 @@ const SearchResultsView = ({
                 ? `${wrapperWidth}px`
                 : wrapperWidth,
             maxWidth: "100%",
-            margin: "0 auto",
+            margin: "0",
           }}
         >
           {virtualRows.flatMap((virtualRow) => {
@@ -127,7 +127,7 @@ const SearchResultsView = ({
                     boxSizing: "border-box",
                   }}
                 >
-                  <article className="card-glassmorphism hover-lift-animation overflow-hidden h-full">
+                  <article className="card-glassmorphism hover-lift-shadow overflow-hidden h-full">
                     <Link
                       href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
                       className="block"

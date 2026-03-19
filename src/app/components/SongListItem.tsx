@@ -110,7 +110,7 @@ const SongListItem = React.memo(
                 </div>
               )}
             </div>
-            <div className="w-full space-y-1 px-3 pb-3">
+            <div className="w-full space-y-0.5 px-3 pb-3 lg:pb-2 lg:space-y-1">
               <div
                 className={`line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white`}
               >
@@ -127,7 +127,7 @@ const SongListItem = React.memo(
                 </span>
               </div>
               <div
-                className={`line-clamp-1 text-xs text-gray-600 dark:text-gray-300`}
+                className={`line-clamp-1 text-xs text-gray-600 dark:text-gray-100`}
               >
                 <span
                   className={`${
@@ -141,7 +141,7 @@ const SongListItem = React.memo(
                   </span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500 pt-1">
+              <div className="flex items-center justify-between text-[0.7rem] uppercase  text-gray-400 dark:text-gray-300">
                 <span>
                   {song.broadcast_at &&
                     new Date(song.broadcast_at).toLocaleDateString()}

@@ -25,7 +25,20 @@ export async function generateMetadata(): Promise<Metadata> {
     ...metadata,
     title: siteConfig.siteName,
     description:
-      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    openGraph: {
+      ...metadata.openGraph,
+      title: siteConfig.siteName,
+      description:
+        "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      url: siteConfig.siteUrl,
+      siteName: siteConfig.siteName,
+      images: [
+        `${siteConfig.siteUrl}api/og?title=${encodeURIComponent(
+          siteConfig.siteName,
+        )}&subtitle=${encodeURIComponent("AZKiさんの歌の素晴らしさを伝えるサイト")}&w=1200&h=630`,
+      ],
+    },
     alternates: {
       canonical: new URL("/", baseUrl).toString(),
     },

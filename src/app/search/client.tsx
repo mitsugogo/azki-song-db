@@ -172,12 +172,23 @@ const SearchPageClient = () => {
 
   useEffect(() => {
     const compute = () => {
-      const containerWidth =
-        parentRef.current?.clientWidth || windowWidth || 1024;
+      const parentElement = parentRef.current;
+      const fallbackWidth = windowWidth || 1024;
+      let containerWidth = fallbackWidth;
+
+      if (parentElement) {
+        const style = window.getComputedStyle(parentElement);
+        const horizontalPadding =
+          parseFloat(style.paddingLeft || "0") +
+          parseFloat(style.paddingRight || "0");
+        const availableWidth = parentElement.clientWidth - horizontalPadding;
+        // SearchResultsView 側の p-3（左右 12px ずつ）分を差し引く
+        containerWidth = Math.max(availableWidth - 24, 0);
+      }
+
       const gap = 16;
       const totalGap = Math.max(cols - 1, 0) * gap;
-      const padding = 24;
-      const rawItemWidth = (containerWidth - totalGap - padding) / cols;
+      const rawItemWidth = (containerWidth - totalGap) / cols;
       const itemWidth = Math.max(Math.floor(rawItemWidth), 120);
       const thumbHeight = itemWidth * (9 / 16);
       const infoHeight = 76;
@@ -185,7 +196,7 @@ const SearchPageClient = () => {
       setEstimatedRowHeight(rowHeight);
       setEstimatedItemWidth(itemWidth);
 
-      const computedWrapper = itemWidth * cols + totalGap + padding;
+      const computedWrapper = itemWidth * cols + totalGap;
       setWrapperWidth(Math.min(computedWrapper, containerWidth));
     };
 

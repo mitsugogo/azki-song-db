@@ -110,7 +110,7 @@ export function Header() {
 
   return (
     <>
-      <header className="relative bg-primary dark:bg-gray-800 text-white shadow-md">
+      <header className="relative bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
         <div className="w-full px-2">
           <div className="relative flex h-10 lg:h-16 items-center">
             <div className="absolute inset-y-0 left-0 flex items-center z-10">
@@ -124,8 +124,8 @@ export function Header() {
             <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
                 <a href="/">
-                  <h1 className="text-lg lg:text-lg font-bold">
-                    {siteConfig.siteName}
+                  <h1 className="text-lg lg:text-lg font-semibold tracking-[0.06em]">
+                    {siteConfig.siteNameUpper}
                   </h1>
                 </a>
               </div>
