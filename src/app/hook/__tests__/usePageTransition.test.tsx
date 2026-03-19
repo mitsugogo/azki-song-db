@@ -37,36 +37,32 @@ describe("usePageTransition", () => {
     expect(mockMinimizePlayer).not.toHaveBeenCalled();
   });
 
-  it("ホームページから別のページに遷移するとミニプレイヤー化される", () => {
+  it("watchから別のページに遷移するとミニプレイヤー化される", () => {
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: mockCurrentSong,
       minimizePlayer: mockMinimizePlayer,
     });
 
-    // 初期レンダリング: ホームページ
-    (usePathname as Mock).mockReturnValue("/");
+    (usePathname as Mock).mockReturnValue("/watch");
     const { rerender } = renderHook(() => usePageTransition());
 
-    // pathnameの変更をシミュレート: ホームページから検索ページへ
     (usePathname as Mock).mockReturnValue("/search");
     rerender();
 
     expect(mockMinimizePlayer).toHaveBeenCalledTimes(1);
   });
 
-  it("ホームページ以外からの遷移ではミニプレイヤー化されない", () => {
+  it("watch以外からの遷移ではミニプレイヤー化されない", () => {
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: mockCurrentSong,
       minimizePlayer: mockMinimizePlayer,
     });
 
-    // 初期状態: 検索ページ
     (usePathname as Mock).mockReturnValue("/search");
-    renderHook(() => usePageTransition());
+    const { rerender } = renderHook(() => usePageTransition());
 
-    // 遷移: 検索ページからプレイリストページへ
     (usePathname as Mock).mockReturnValue("/playlist");
-    renderHook(() => usePageTransition());
+    rerender();
 
     expect(mockMinimizePlayer).not.toHaveBeenCalled();
   });
@@ -77,13 +73,11 @@ describe("usePageTransition", () => {
       minimizePlayer: mockMinimizePlayer,
     });
 
-    // 初期状態: ホームページ
     (usePathname as Mock).mockReturnValue("/");
-    renderHook(() => usePageTransition());
+    const { rerender } = renderHook(() => usePageTransition());
 
-    // 遷移: ホームページから検索ページへ
     (usePathname as Mock).mockReturnValue("/search");
-    renderHook(() => usePageTransition());
+    rerender();
 
     expect(mockMinimizePlayer).not.toHaveBeenCalled();
   });

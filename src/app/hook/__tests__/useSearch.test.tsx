@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import useSearch from "../useSearch";
 import { Song } from "../../types/song";
@@ -881,7 +881,9 @@ describe("useSearch", () => {
       useSearch(mockSongs, { syncUrl: true, urlUpdateMode: "push" }),
     );
 
-    result.current.setSearchTerm("artist:artist a");
+    await act(async () => {
+      result.current.setSearchTerm("artist:artist a");
+    });
 
     await waitFor(
       () => {
