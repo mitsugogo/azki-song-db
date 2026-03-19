@@ -157,7 +157,7 @@ const SearchBrowseView = ({
                   {category.songs.map((song) => (
                     <article
                       key={`${song.video_id}-${song.start}-${song.title}`}
-                      className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-200 dark:hover:bg-gray-600 shadow-sm"
+                      className="card-glassmorphism hover-lift-shadow overflow-hidden"
                     >
                       <Link
                         href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}`}

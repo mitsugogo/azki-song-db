@@ -41,7 +41,7 @@ const SearchTermChips = ({ terms }: SearchTermChipsProps) => {
         return (
           <span
             key={`${term}-${index}`}
-            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200"
+            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100/70 dark:bg-primary-800/60 text-primary-700 dark:text-primary-200 border border-primary-200/50 dark:border-primary-700/50 backdrop-blur-sm"
           >
             {icon}
             {label}

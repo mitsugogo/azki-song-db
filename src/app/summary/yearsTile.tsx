@@ -45,11 +45,11 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
     return (
       <li
         key={year}
-        className="border rounded hover:shadow-md transition-shadow duration-150"
+        className="rounded-2xl border border-white/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
       >
         <Link
           href={`/summary/${year}`}
-          className="block p-3 h-full dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-gray-600"
+          className="block p-3 h-full bg-transparent hover:bg-white/10 dark:hover:bg-white/5 transition duration-200"
           onClick={() => setLoading(true)}
         >
           <div className="flex items-center justify-between">

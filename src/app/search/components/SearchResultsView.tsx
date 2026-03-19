@@ -127,7 +127,7 @@ const SearchResultsView = ({
                     boxSizing: "border-box",
                   }}
                 >
-                  <article className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-100/50 dark:hover:bg-primary-900/20 shadow-sm h-full">
+                  <article className="card-glassmorphism hover-lift-animation overflow-hidden h-full">
                     <Link
                       href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
                       className="block"

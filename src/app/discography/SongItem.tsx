@@ -62,7 +62,7 @@ const SongItem = ({
 
   return (
     <div
-      className={`group relative cursor-pointer shadow-lg transition-all duration-500 overflow-hidden ${
+      className={`group relative cursor-pointer rounded-2xl border border-white/60 bg-white/85 dark:border-white/10 dark:bg-gray-900/50 shadow-lg transition-all duration-500 overflow-hidden hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:hover:border-pink-300/30 dark:hover:shadow-[0_18px_52px_rgba(0,0,0,0.35)] ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
       }`}
       title={

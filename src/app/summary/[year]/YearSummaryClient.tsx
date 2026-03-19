@@ -841,7 +841,7 @@ export default function YearSummaryClient({
                           </div>
                         </Link>
                       </article>
-                                      s.start ? `&t=${s.start}` : ""
+                    ))}
                   </div>
                 ) : (
                   <div className="space-y-2">

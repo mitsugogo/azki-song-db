@@ -280,17 +280,13 @@ export default function DataTable<
                           width: "100%",
                           transform: `translateY(${virtualRow.start - tableBodyOffsetTop}px)`,
                         }}
-                        className={`flex ${
+                        className={`flex border-b border-white/20 dark:border-white/10 ${
                           onRowClick ? "cursor-pointer select-none" : ""
                         } ${
                           parseInt(row.id) % 2 === 0
-                            ? "bg-light-gray-100 dark:bg-gray-800/70"
+                            ? "bg-white/15 dark:bg-gray-900/15"
                             : ""
-                        } ${
-                          visualMode === "ranked"
-                            ? "hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"
-                            : ""
-                        }`}
+                        } hover:bg-white/30 dark:hover:bg-gray-800/30 transition duration-150`}
                       >
                         {row.getVisibleCells().map((cell, idx) => (
                           <div
