@@ -257,11 +257,23 @@ body {
 
   /* ホバー浮上アニメーション */
   .hover-lift-animation {
-    @apply transition hover:-translate-y-1;
+    @apply transition;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift-animation:hover {
+      @apply -translate-y-1;
+    }
   }
 
   /* ホバーボーダーカラー変更　+　シャドウ拡大 */
   .hover-lift-shadow {
-    @apply transition hover:-translate-y-1 hover:border-primary/30 hover:bg-white/95 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:hover:border-pink-300/30 dark:hover:bg-gray-900/85;
+    @apply transition;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift-shadow:hover {
+      @apply -translate-y-1 border-primary/30 bg-white/95 shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-pink-300/30 dark:bg-gray-900/85;
+    }
   }
 }
