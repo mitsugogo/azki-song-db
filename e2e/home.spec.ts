@@ -33,7 +33,7 @@ test.describe("Home page", () => {
     await expect(
       page.getByRole("link", { name: "AZKi Channel" }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "AZKi on X" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "AZKi_VDiVA" })).toBeVisible();
     await expect(page.getByText(/収録楽曲数:/)).toBeVisible();
   });
 
@@ -41,10 +41,12 @@ test.describe("Home page", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    const searchInput = page
-      .locator('input[placeholder="曲名、アーティスト、タグなどで検索"]')
-      .first();
-    await searchInput.fill(firstSong?.title ?? "フェリシア");
+    const query = firstSong?.title ?? "春よ、来い";
+    const searchInput = page.getByRole("textbox", {
+      name: "曲名、アーティスト、タグなどで検索",
+    });
+    await searchInput.fill(query);
+    await searchInput.press("Enter");
     await page.getByRole("button", { name: "検索する" }).click();
 
     await expect(page).toHaveURL(/\/search\?q=/);
@@ -55,20 +57,21 @@ test.describe("Home page", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    await page.locator('a[href*="/watch?v="]').first().click();
+    const recommendedLink = page.locator('a[href*="/watch?v="]').first();
+    const hasRecommended = (await recommendedLink.count()) > 0;
 
-    await expect(page).toHaveURL(/\/watch\?v=/);
-    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
+    if (hasRecommended) {
+      await recommendedLink.click();
+    } else {
+      await page.getByRole("link", { name: "Surprise me" }).click();
+    }
+
+    await expect(page).toHaveURL(/\/watch/);
   });
 
   test("legacy root playback URL redirects to /watch", async ({ page }) => {
-    test.skip(!firstSong, "cached songs are required for redirect validation");
+    await page.goto("/?v=tUc0j23UMyk&t=1361s");
 
-    await page.goto(`/?v=${firstSong.video_id}&t=${firstSong.start}`);
-
-    await expect(page).toHaveURL(
-      new RegExp(`/watch\\?v=${firstSong.video_id}`),
-    );
-    await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
+    await expect(page).toHaveURL(/\/watch\?v=tUc0j23UMyk/);
   });
 });

@@ -70,11 +70,15 @@ test.describe("Search page", () => {
     // Wait for filtering to apply
     await page.waitForTimeout(800);
 
-    await expect(page.getByRole("heading", { name: "検索結果" })).toBeVisible();
-    const resultSummary = page.getByText(/件の楽曲が見つかりました/).first();
-    await expect(resultSummary).toBeVisible();
-    const resultSummaryText = (await resultSummary.textContent()) ?? "";
-    const filteredCount = Number(resultSummaryText.match(/(\d+)/)?.[1] ?? "0");
+    await expect(page.getByText("year:2025").first()).toBeVisible();
+
+    // フィルタが効いていることを件数表示から確認
+    const countText = await page
+      .locator("text=/\\d+曲\\/\\d+曲/")
+      .first()
+      .textContent();
+    const countMatch = countText?.match(/(\d+)曲\/(\d+)曲/);
+    const filteredCount = countMatch ? parseInt(countMatch[1]) : 0;
 
     expect(filteredCount).toBeGreaterThan(0);
     expect(filteredCount).toBeLessThan(initialTotal);
@@ -107,6 +111,6 @@ test.describe("Search page", () => {
     const currentUrl = page.url();
     expect(currentUrl).toContain("q=tag");
     expect(currentUrl).toContain("%E3%82%AA%E3%83%AA%E6%9B%B2"); // URL encoded オリ曲
-    await expect(page.getByRole("heading", { name: "検索結果" })).toBeVisible();
+    await expect(page.getByText("tag:オリ曲").first()).toBeVisible();
   });
 });
