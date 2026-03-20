@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Burger, Skeleton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
@@ -91,10 +91,24 @@ function groupRecentUpdates(items: Song[], limit: number = 3) {
 export default function ClientTop() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isScrolled, setIsScrolled] = useState(false);
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
   const [searchValue, setSearchValue] = useState<string[]>([]);
+
+  useEffect(() => {
+    const updateHeaderState = () => {
+      setIsScrolled(window.scrollY > 12);
+    };
+
+    updateHeaderState();
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", updateHeaderState);
+    };
+  }, []);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
@@ -128,9 +142,15 @@ export default function ClientTop() {
 
   return (
     <ThemeProvider theme={flowbiteTheme}>
-      <div className="min-h-dvh overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_42%,#ffffff_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_40%,#111827_100%)] dark:text-white">
+      <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_42%,#ffffff_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_40%,#111827_100%)] dark:text-white">
         <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
-          <header className="py-4">
+          <header
+            className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+              isScrolled
+                ? "border-b border-white/60 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:border-white/10 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/55"
+                : "border-b border-transparent bg-transparent"
+            }`}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 <Burger
