@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Canonical URL
   const canonical = new URL(`/share/my-best-9-songs/${id}`, baseUrl);
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title: pageTitle,
@@ -51,9 +52,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: ogTitle,
       description: ogDescription,
+      url: canonical.toString(),
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
       images: [
         {
-          url: ogImageUrl.toString(),
+          url: ogImagePath,
           width: 1200,
           height: 630,
           alt: ogTitle,
@@ -65,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
-      images: [ogImageUrl.toString()],
+      images: [ogImagePath],
     },
     alternates: {
       canonical: canonical.toString(),

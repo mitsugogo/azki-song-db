@@ -18,6 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
   ogImageUrl.searchParams.set("subtitle", subtitle);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const canonical = new URL("/summary", baseUrl).toString();
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     ...metadata,
@@ -25,7 +27,22 @@ export async function generateMetadata(): Promise<Metadata> {
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
-      images: [ogImageUrl.toString()],
+      title,
+      description: subtitle,
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: subtitle,
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }

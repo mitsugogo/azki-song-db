@@ -21,6 +21,9 @@ const getParamValue = (value: string | string[] | undefined) => {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
+  const ogImagePath = `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌の素晴らしさを伝えるサイト")}&w=1200&h=630`;
+  const canonical = new URL("/", baseUrl).toString();
+
   return {
     ...metadata,
     title: siteConfig.siteName,
@@ -31,16 +34,28 @@ export async function generateMetadata(): Promise<Metadata> {
       title: siteConfig.siteName,
       description:
         "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
-      url: siteConfig.siteUrl,
+      url: canonical,
       siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
       images: [
-        `${siteConfig.siteUrl}api/og?title=${encodeURIComponent(
-          siteConfig.siteName,
-        )}&subtitle=${encodeURIComponent("AZKiさんの歌の素晴らしさを伝えるサイト")}&w=1200&h=630`,
+        {
+          url: ogImagePath,
+          width: 1200,
+          height: 630,
+          alt: `${siteConfig.siteName} - AZKiさんの歌の素晴らしさを伝えるサイト`,
+        },
       ],
     },
+    twitter: {
+      card: "summary_large_image",
+      title: siteConfig.siteName,
+      description:
+        "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      images: [ogImagePath],
+    },
     alternates: {
-      canonical: new URL("/", baseUrl).toString(),
+      canonical,
     },
   };
 }

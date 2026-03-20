@@ -202,14 +202,24 @@ export async function generateMetadata({
       ...metadata.openGraph,
       title: ogTitle,
       description: ogSubtitle,
+      url: canonical.toString(),
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
       images: [
         {
-          url: ogImageUrl.toString(),
+          url: `${ogImageUrl.pathname}${ogImageUrl.search}`,
           width: 1200,
           height: 630,
           alt: ogTitle,
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogSubtitle,
+      images: [`${ogImageUrl.pathname}${ogImageUrl.search}`],
     },
     alternates: {
       canonical: canonical.toString(),
