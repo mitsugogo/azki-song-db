@@ -32,6 +32,11 @@ type DrawerMenuProps = {
   onClose: () => void;
 };
 
+type BuildInfo = {
+  buildDate?: string;
+  version?: string;
+};
+
 function buildBugReportUrl(currentSong: Song | null) {
   const base =
     "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
@@ -45,6 +50,7 @@ function buildBugReportUrl(currentSong: Song | null) {
 export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
   const pathname = usePathname();
   const [buildDate, setBuildDate] = useState("N/A");
+  const [appVersion, setAppVersion] = useState("N/A");
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const isMobile = useMediaQuery("(max-width: 50em)");
   const { height } = useViewportSize();
@@ -77,13 +83,15 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
           }
         });
       })
-      .then((data) => {
-        setBuildDate(data.buildDate);
+      .then((data: BuildInfo) => {
+        setBuildDate(data.buildDate ?? "N/A");
+        setAppVersion(data.version ?? "N/A");
       })
       .catch((error) => {
         console.warn("Failed to fetch build info:", error);
         if (process.env.NODE_ENV === "development") {
           setBuildDate(new Date().toISOString());
+          setAppVersion("dev");
         }
       });
   }, []);
@@ -174,7 +182,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
 
           <div
-            className={`block relative ${
+            className={`block w-[calc(100%-1.5rem)] relative ${
               isShortViewport
                 ? "md:static"
                 : "md:absolute md:bottom-6 md:left-3"
@@ -216,21 +224,34 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3 mb-1">
               {buildDate && songsFetchedAt && (
                 <>
-                  Last Update: {new Date(buildDate).toLocaleDateString()}
+                  Version:{" "}
+                  <Link
+                    href={
+                      appVersion === "dev"
+                        ? "https://github.com/mitsugogo/azki-song-db"
+                        : `https://github.com/mitsugogo/azki-song-db/releases/tag/v${appVersion}`
+                    }
+                    target="_blank"
+                  >
+                    <FaGithub className="inline -mt-1" />
+                    {appVersion === "dev" ? "dev" : `v${appVersion}`}
+                  </Link>
                   <span className="ml-3"></span>
-                  Songs - {new Date(songsFetchedAt).toLocaleDateString()}
+                  Last Build: {new Date(buildDate).toLocaleDateString()}
+                  <span className="ml-3"></span>
+                  Songs: {new Date(songsFetchedAt).toLocaleDateString()}
                 </>
               )}
             </div>
 
             <div className="text-[12px] text-gray-400 dark:text-light-gray-500 pl-3">
               <Link
-                href="https://github.com/mitsugogo/azki-song-db"
+                href="https://github.com/mitsugogo/azki-song-db/blob/main/CHANGELOG.md"
                 target="_blank"
                 className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
                 onClick={onClose}
               >
-                <FaGithub className="inline -mt-1 mr-1" /> GitHub
+                <FaGithub className="inline -mt-1 mr-1" /> CHANGELOG
               </Link>
               <span className="ml-3"></span>
               <a
@@ -251,8 +272,8 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
                 onClick={onClose}
               >
-                Managed by <FaXTwitter className="inline mr-0.5" />
-                mitsugogo
+                <FaXTwitter className="inline -mt-1 mr-1" />
+                @mitsugogo
               </Link>
             </div>
           </div>

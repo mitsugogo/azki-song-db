@@ -60,3 +60,4 @@ next-env.d.ts
 .github/copilot-instructions.md
 .github/for_copilot/*
 
+public/build-info.json
