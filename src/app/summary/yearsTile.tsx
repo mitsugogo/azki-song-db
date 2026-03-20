@@ -45,7 +45,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
     return (
       <li
         key={year}
-        className="rounded-2xl border border-white/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
+        className="rounded-2xl border border-gray-50/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
       >
         <Link
           href={`/summary/${year}`}

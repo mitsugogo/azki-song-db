@@ -148,20 +148,20 @@ export default function ClientTop() {
 
               <div className="flex shrink-0 items-center justify-end sm:gap-2">
                 <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
-                  <Link href="/search" className="hover:text-primary">
+                  <Link href="/search" className="hover:text-primary-500">
                     <LuSearch />
                   </Link>
-                  <Link href="/discography" className="hover:text-primary">
+                  <Link href="/discography" className="hover:text-primary-500">
                     Discography
                   </Link>
-                  <Link href="/summary" className="hover:text-primary">
+                  <Link href="/summary" className="hover:text-primary-500">
                     Activities
                   </Link>
-                  <Link href="/statistics" className="hover:text-primary">
+                  <Link href="/statistics" className="hover:text-primary-500">
                     Stats
                   </Link>
                 </nav>
-                <ThemeToggle />
+                <ThemeToggle className="hover:text-primary-500 dark:hover:text-white dark:hover:bg-primary-800" />
               </div>
             </div>
           </header>
@@ -256,7 +256,7 @@ export default function ClientTop() {
                           videoId: song.video_id,
                           start: song.start,
                         })}
-                        className="group overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                        className="group overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] hover-lift-animation hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                       >
                         <div className="relative aspect-video overflow-hidden bg-black">
                           <YoutubeThumbnail
@@ -310,7 +310,7 @@ export default function ClientTop() {
                         <Link
                           key={update.videoId}
                           href={buildWatchHref({ videoId: update.videoId })}
-                          className="block rounded-lg border border-pink-200 bg-white p-4 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                          className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                         >
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
                             {formattedDate}{" "}
@@ -347,7 +347,7 @@ export default function ClientTop() {
                   href={siteConfig.channelUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
+                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-red-600 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
                 >
                   <FaYoutube className="mr-2" />
                   {siteConfig.channelName}
@@ -356,7 +356,7 @@ export default function ClientTop() {
                   href={siteConfig.xUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-gray-900 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                 >
                   <FaXTwitter className="mr-2" />
                   {siteConfig.xName}

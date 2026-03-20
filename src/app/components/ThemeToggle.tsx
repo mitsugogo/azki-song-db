@@ -3,7 +3,7 @@ import { FaCircleHalfStroke, FaMoon, FaSun } from "react-icons/fa6";
 import { useMantineColorScheme } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ className }: { className?: string }) => {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const isSystemDark = useMediaQuery("(prefers-color-scheme: dark)");
   const [mounted, setMounted] = useState(false);
@@ -54,7 +54,7 @@ const ThemeToggle = () => {
     <button
       type="button"
       aria-label="Toggle theme"
-      className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-800 p-2 rounded-md"
+      className={`outline-none cursor-pointer ml-2 p-2 rounded-md ${className ?? "hover:bg-primary-600 dark:hover:bg-primary-800"}`}
       onClick={handleClick}
     >
       {getThemeIcon()}

@@ -247,12 +247,12 @@ body {
 
   /* グラスモーフィズムカード */
   .card-glassmorphism {
-    @apply rounded-3xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)];
+    @apply rounded-2xl border border-gray-50/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)];
   }
 
   /* グラスモーフィズムカード（大きめシャドウ版） */
   .card-glassmorphism-lg {
-    @apply rounded-4xl border border-white/70 bg-white/90 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)];
+    @apply rounded-4xl border border-gray-50/70 bg-white/90 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)];
   }
 
   /* ホバー浮上アニメーション */
@@ -262,6 +262,6 @@ body {
 
   /* ホバーボーダーカラー変更　+　シャドウ拡大 */
   .hover-lift-shadow {
-    @apply transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:hover:border-pink-300/30;
+    @apply transition hover:-translate-y-1 hover:border-primary/30 hover:bg-white/95 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:hover:border-pink-300/30 dark:hover:bg-gray-900/85;
   }
 }
