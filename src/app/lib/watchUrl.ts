@@ -24,7 +24,7 @@ export function normalizeWatchTimeParam(
     return null;
   }
 
-  return `${Math.floor(seconds)}`;
+  return `${Math.floor(seconds)}s`;
 }
 
 export function buildWatchHref({
