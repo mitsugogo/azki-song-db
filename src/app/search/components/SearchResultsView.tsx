@@ -1,5 +1,6 @@
 import Link from "next/link";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
+import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
@@ -162,6 +163,7 @@ const SearchResultsView = ({
 
         <div style={{ height: `${totalSize - lastEnd}px` }} />
       </div>
+      <ScrollToTopButton />
     </div>
   );
 };

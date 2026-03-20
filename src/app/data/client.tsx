@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Song } from "../types/song";
 import Link from "next/link";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import {
   useReactTable,
   getCoreRowModel,
@@ -28,6 +29,9 @@ export default function ClientTable() {
   const songs = allSongs;
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [scrollViewport, setScrollViewport] = useState<HTMLElement | null>(
+    null,
+  );
 
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
@@ -50,6 +54,16 @@ export default function ClientTable() {
   useEffect(() => {
     // songs and isLoading are provided by useSongs
   }, [allSongs, isLoading]);
+
+  // OverlayScrollbars の viewport 要素を取得して ScrollToTopButton に渡す
+  useEffect(() => {
+    const viewport = tableContainerRef.current
+      ?.osInstance()
+      ?.elements().viewport;
+    if (viewport instanceof HTMLElement) {
+      setScrollViewport(viewport);
+    }
+  }, [isLoading]);
 
   const rows = table.getRowModel().rows;
 
@@ -214,6 +228,7 @@ export default function ClientTable() {
           </OverlayScrollbarsComponent>
         </div>
       </div>
+      <ScrollToTopButton scrollElement={scrollViewport} />
     </>
   );
 }

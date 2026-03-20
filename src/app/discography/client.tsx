@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
 import Link from "next/link";
 import { breadcrumbClasses } from "../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { useDiscographyData } from "./hooks/useDiscographyData";
 import DiscographyControls from "./components/DiscographyControls";
@@ -141,73 +141,71 @@ export default function DiscographyClient({
   ];
 
   return (
-    <OverlayScrollbarsComponent
-      element="div"
-      className="lg:p-6 flex flex-col w-full h-full"
-      options={{ scrollbars: { autoHide: "leave" } }}
-      defer
-    >
-      <Breadcrumbs
-        aria-label="Breadcrumb"
-        className={breadcrumbClasses.root}
-        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-      >
-        <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </Link>
-        <Link href="/discography" className={breadcrumbClasses.link}>
-          楽曲一覧
-        </Link>
-      </Breadcrumbs>
+    <>
+      <div className="grow lg:p-6 overflow-auto">
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          className={breadcrumbClasses.root}
+          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+        >
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <Link href="/discography" className={breadcrumbClasses.link}>
+            楽曲一覧
+          </Link>
+        </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        これまでに配信された楽曲の一覧です。オリ曲、コラボ楽曲、カバー楽曲などをまとめています。
-      </p>
+        <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
+        <p className="mb-6 text-sm text-muted-foreground">
+          これまでに配信された楽曲の一覧です。オリ曲、コラボ楽曲、カバー楽曲などをまとめています。
+        </p>
 
-      <DiscographyControls
-        groupByAlbum={groupByAlbum}
-        groupByYear={groupByYear}
-        onlyOriginalMV={onlyOriginalMV}
-        activeTab={controlsActiveTab}
-        onGroupByAlbumChange={handleGroupByAlbumChange}
-        onGroupByYearChange={handleGroupByYearChange}
-        onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
-      />
+        <DiscographyControls
+          groupByAlbum={groupByAlbum}
+          groupByYear={groupByYear}
+          onlyOriginalMV={onlyOriginalMV}
+          activeTab={controlsActiveTab}
+          onGroupByAlbumChange={handleGroupByAlbumChange}
+          onGroupByYearChange={handleGroupByYearChange}
+          onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
+        />
 
-      <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-        <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
-          <Tab as="button" className={tabClass}>
-            すべて ({allSongCountsByReleaseDate.length})
-          </Tab>
-          <Tab as="button" className={tabClass}>
-            オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
-          </Tab>
-          <Tab as="button" className={tabClass}>
-            ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
-          </Tab>
-          <Tab as="button" className={tabClass}>
-            カバー楽曲 ({coverSongCountsByReleaseDate.length})
-          </Tab>
-        </TabList>
-        <TabPanels>
-          {tabDataList.map((data, tabIndex) => (
-            <TabPanel key={tabIndex}>
-              <ContentRenderer
-                data={data}
-                tabIndex={tabIndex}
-                groupByAlbum={groupByAlbum}
-                groupByYear={groupByYear}
-                expandedItem={expandedItem}
-                visibleItems={activeTab === tabIndex ? visibleItems : []}
-                anchorToScroll={anchorToScroll}
-                targetRef={targetRef}
-                onItemClick={handleItemClick}
-              />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </TabGroup>
-    </OverlayScrollbarsComponent>
+        <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
+          <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
+            <Tab as="button" className={tabClass}>
+              すべて ({allSongCountsByReleaseDate.length})
+            </Tab>
+            <Tab as="button" className={tabClass}>
+              オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
+            </Tab>
+            <Tab as="button" className={tabClass}>
+              ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
+            </Tab>
+            <Tab as="button" className={tabClass}>
+              カバー楽曲 ({coverSongCountsByReleaseDate.length})
+            </Tab>
+          </TabList>
+          <TabPanels>
+            {tabDataList.map((data, tabIndex) => (
+              <TabPanel key={tabIndex}>
+                <ContentRenderer
+                  data={data}
+                  tabIndex={tabIndex}
+                  groupByAlbum={groupByAlbum}
+                  groupByYear={groupByYear}
+                  expandedItem={expandedItem}
+                  visibleItems={activeTab === tabIndex ? visibleItems : []}
+                  anchorToScroll={anchorToScroll}
+                  targetRef={targetRef}
+                  onItemClick={handleItemClick}
+                />
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </TabGroup>
+        <ScrollToTopButton />
+      </div>
+    </>
   );
 }

@@ -258,16 +258,18 @@ const SearchPageClient = () => {
   }
 
   return (
-    <SearchBrowseView
-      allSongs={allSongs}
-      searchValue={searchValue}
-      setSearchValue={setSearchValue}
-      setSearchTerm={setSearchTerm}
-      filterMode={filterMode}
-      setFilterMode={setFilterMode}
-      categorySongs={categorySongs}
-      filterModeData={filterModeData}
-    />
+    <>
+      <SearchBrowseView
+        allSongs={allSongs}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        setSearchTerm={setSearchTerm}
+        filterMode={filterMode}
+        setFilterMode={setFilterMode}
+        categorySongs={categorySongs}
+        filterModeData={filterModeData}
+      />
+    </>
   );
 };
 

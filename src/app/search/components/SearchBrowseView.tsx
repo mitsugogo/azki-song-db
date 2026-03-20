@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@mantine/core";
 import { FaMusic, FaTag, FaUser, FaUsers } from "react-icons/fa6";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
+import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
@@ -194,6 +195,7 @@ const SearchBrowseView = ({
       ) : (
         <FilterModeGrid filterModeResult={filterModeData} />
       )}
+      <ScrollToTopButton />
     </div>
   );
 };
