@@ -476,7 +476,7 @@ export default function MyBestNineSongsPage() {
         <h1 className="font-extrabold text-2xl p-3">究極の9曲ジェネレーター</h1>
         <div className="p-3">
           <p className="text-sm text-gray-600 dark:text-light-gray-400">
-            オリジナル曲とカバー曲から、最大9曲を選んでSNSで共有できます
+            オリジナル曲や歌枠から、最大9曲を選んでSNSで共有できます
           </p>
         </div>
       </div>
