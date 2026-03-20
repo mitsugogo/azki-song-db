@@ -156,11 +156,11 @@ export default function Page() {
             {selection.title}
           </h1>
           {selection.author && (
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-lg text-gray-600 dark:text-gray-200 mb-4">
               by {selection.author}
             </p>
           )}
-          <p className="text-sm text-gray-500 dark:text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-200">
             {selectedSongs.length}曲
             {missingCount > 0 && (
               <span className="ml-2 text-yellow-600 dark:text-yellow-400">
@@ -202,7 +202,7 @@ export default function Page() {
                   <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
                     {song.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
                     {song.artist}
                   </p>
                 </div>
