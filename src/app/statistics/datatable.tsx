@@ -36,6 +36,7 @@ export default function DataTable<
   selectedVideoId,
   songs,
   visualMode = "default",
+  countUnit = "回",
 }: {
   data: T[];
   caption: string;
@@ -48,6 +49,7 @@ export default function DataTable<
   selectedVideoId?: string | null;
   songs?: Song[];
   visualMode?: "default" | "ranked" | "viewCountBar";
+  countUnit?: string;
 }) {
   type ColumnSort = { id: string; desc: boolean };
 
@@ -318,7 +320,7 @@ export default function DataTable<
                                     {Number(cell.getValue()).toLocaleString()}
                                   </span>
                                   <span className="text-light-gray-700 dark:text-light-gray-400">
-                                    回
+                                    {countUnit}
                                   </span>
                                 </div>
                                 <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
