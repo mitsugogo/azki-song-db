@@ -2,27 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { Burger, Drawer, Modal, Skeleton, Tooltip } from "@mantine/core";
-import { useDisclosure, useMediaQuery, useViewportSize } from "@mantine/hooks";
+import { useMemo, useState, useTransition } from "react";
+import { Burger, Skeleton } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
-import Acknowledgment from "./components/Acknowledgment";
+import DrawerMenu from "./components/DrawerMenu";
 import SearchInput from "./components/SearchInput";
 import Footer from "./components/Footer";
 import ThemeToggle from "./components/ThemeToggle";
 import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { siteConfig } from "./config/siteConfig";
-import usePWAInstall from "./hook/usePWAInstall";
 import useSongs from "./hook/useSongs";
-import { useGlobalPlayer } from "./hook/useGlobalPlayer";
 import { buildWatchHref } from "./lib/watchUrl";
 import { flowbiteTheme } from "./theme";
 import { ThemeProvider } from "flowbite-react";
 import { LuSearch, LuSparkles } from "react-icons/lu";
-import { FaGithub, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { MdInstallMobile } from "react-icons/md";
-import { LiaExternalLinkAltSolid } from "react-icons/lia";
-import { pageList } from "./pagelists";
+import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Song } from "./types/song";
 
 const RECOMMENDED_SONG_COUNT = 20;
@@ -45,24 +40,69 @@ function pickRecommendedSongs<T>(items: Song[], count: number) {
   return pool.slice(0, count);
 }
 
+// video_id基準で楽曲をグループ化し、直近3件を取得
+function groupRecentUpdates(items: Song[], limit: number = 3) {
+  // broadcast_at と video_id が存在する楽曲のみを対象
+  const validItems = items.filter((item) => item.broadcast_at && item.video_id);
+
+  // video_id でグループ化
+  const grouped = new Map<string, Song[]>();
+  validItems.forEach((song) => {
+    if (!grouped.has(song.video_id)) {
+      grouped.set(song.video_id, []);
+    }
+    grouped.get(song.video_id)!.push(song);
+  });
+
+  // 各グループの最新配信日でソート（新しい順）して、直近 limit 件を取得
+  const sorted = Array.from(grouped.entries())
+    .map(([videoId, songs]) => {
+      // グループ内で最新の配信日を取得
+      const latestDate = new Date(
+        Math.max(...songs.map((s) => new Date(s.broadcast_at).getTime())),
+      );
+      // グループ内の最初の曲のタイトルを使用
+      const videoTitle = songs[0].video_title;
+      return {
+        videoId,
+        videoTitle,
+        songs,
+        count: songs.length,
+        latestDate,
+      };
+    })
+    .sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime())
+    .slice(0, limit)
+    .map(({ videoId, videoTitle, songs, count, latestDate }) => ({
+      date: latestDate.toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+      videoId,
+      videoTitle,
+      songs,
+      count,
+    }));
+
+  return sorted;
+}
+
 export default function ClientTop() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
-  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
-  const [currentPath, setCurrentPath] = useState("");
-  const [buildDate, setBuildDate] = useState("N/A");
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
-  const { currentSong } = useGlobalPlayer();
-  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
-  const isMobile = useMediaQuery("(max-width: 50em)");
-  const { height } = useViewportSize();
-  const isShortViewport = (height || 0) < 840;
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
+    [allSongs],
+  );
+
+  const recentUpdates = useMemo(
+    () => groupRecentUpdates(allSongs, 3),
     [allSongs],
   );
 
@@ -78,60 +118,6 @@ export default function ClientTop() {
 
     return date.toLocaleDateString("ja-JP");
   }, [songsFetchedAt]);
-
-  const navigation = useMemo(() => {
-    return pageList.map((category) => ({
-      ...category,
-      items: category.items.map((item) => ({
-        ...item,
-        current: item.href !== "#" && item.href === currentPath,
-      })),
-    }));
-  }, [currentPath]);
-
-  useEffect(() => {
-    fetch("/build-info.json")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch build info: ${res.status}`);
-        }
-        return res.text().then((text) => {
-          try {
-            return JSON.parse(text);
-          } catch {
-            return {};
-          }
-        });
-      })
-      .then((data) => {
-        setBuildDate(data.buildDate);
-      })
-      .catch((error) => {
-        console.warn("Failed to fetch build info:", error);
-        if (process.env.NODE_ENV === "development") {
-          setBuildDate(new Date().toISOString());
-        }
-      });
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const syncPath = () => setCurrentPath(window.location.pathname);
-    syncPath();
-
-    window.addEventListener("popstate", syncPath);
-    window.addEventListener("pushstate", syncPath);
-    window.addEventListener("replacestate", syncPath);
-
-    return () => {
-      window.removeEventListener("popstate", syncPath);
-      window.removeEventListener("pushstate", syncPath);
-      window.removeEventListener("replacestate", syncPath);
-    };
-  }, []);
 
   const handleSearch = () => {
     const query = searchValue.join("|").trim();
@@ -298,6 +284,64 @@ export default function ClientTop() {
                     ))}
               </div>
 
+              {/* 更新情報セクション */}
+              <div className="mt-16 space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                    Recent Updates
+                  </p>
+                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    更新情報
+                  </h3>
+                </div>
+
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={`update-skeleton-${i}`} height={60} />
+                    ))}
+                  </div>
+                ) : recentUpdates.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentUpdates.map((update) => {
+                      // YYYY/MM/DD 形式を YYYY.MM.DD に変換
+                      const formattedDate = update.date.replace(/\//g, ".");
+                      return (
+                        <Link
+                          key={update.videoId}
+                          href={buildWatchHref({ videoId: update.videoId })}
+                          className="block rounded-lg border border-pink-200 bg-white p-4 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                        >
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {formattedDate}{" "}
+                            <span className="pl-3 text-gray-100">
+                              {update.count}曲追加
+                            </span>
+                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-black">
+                              <YoutubeThumbnail
+                                videoId={update.videoId}
+                                alt={update.videoTitle}
+                                fill={true}
+                                imageClassName="object-cover"
+                              />
+                            </div>
+                            <p className="min-w-0 text-xs opacity-70 line-clamp-2">
+                              {update.videoTitle}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    更新情報はありません
+                  </p>
+                )}
+              </div>
+
               <div className="mt-24 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   href={siteConfig.channelUrl}
@@ -329,189 +373,7 @@ export default function ClientTop() {
 
           <Footer />
         </div>
-        <Drawer
-          opened={drawerOpened}
-          onClose={closeDrawer}
-          title="Menu"
-          overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
-        >
-          <div className="grow space-y-1">
-            {navigation.map((category, categoryIndex) => (
-              <div key={categoryIndex}>
-                {category.category && (
-                  <div className="ml-3 mt-4 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-                    {category.category}
-                  </div>
-                )}
-                {category.items.map((item) => {
-                  const isCurrent = item.current;
-                  const baseClasses =
-                    "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
-                  const activeClasses =
-                    "bg-primary-600 dark:bg-primary-800 text-white";
-                  const inactiveClasses =
-                    "hover:bg-white/5 hover:text-primary dark:hover:text-white";
-
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      aria-current={isCurrent ? "page" : undefined}
-                      className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses}`}
-                      onClick={() => closeDrawer()}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-            <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
-
-            <div className="ml-3 text-xs text-light-gray-400 dark:text-gray-300">
-              管理機能
-            </div>
-            <Link
-              href="/playlist"
-              key="playlist"
-              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-              onClick={() => closeDrawer()}
-            >
-              プレイリスト
-            </Link>
-
-            <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
-
-            {isInstallable && !isInstalled && (
-              <>
-                <div
-                  key="install-pwa"
-                  className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                  onClick={() => {
-                    promptInstall();
-                    closeDrawer();
-                  }}
-                >
-                  <MdInstallMobile className="mr-2 inline text-xl" />
-                  アプリをインストール
-                </div>
-                <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
-              </>
-            )}
-
-            <Link
-              href="#"
-              key="about"
-              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-              onClick={() => {
-                setShowAcknowledgment(true);
-                closeDrawer();
-              }}
-            >
-              このサイトについて
-            </Link>
-            <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
-
-            <div
-              className={`block relative ${
-                isShortViewport
-                  ? "md:static"
-                  : "md:absolute md:bottom-6 md:left-3"
-              }`}
-            >
-              <Link
-                href="https://www.youtube.com/@AZKi"
-                target="_blank"
-                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                onClick={() => closeDrawer()}
-              >
-                AZKi Channel
-                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-              </Link>
-
-              <Tooltip
-                arrowOffset={10}
-                arrowSize={4}
-                label="ソロライブ！"
-                withArrow
-                position="top"
-              >
-                <Link
-                  href="https://departure.hololivepro.com/"
-                  target="_blank"
-                  className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                  onClick={() => closeDrawer()}
-                >
-                  <div className="text-xs text-gray-400 dark:text-light-gray-500">
-                    2025.11.19 (Wed.) - PIA ARENA MM
-                  </div>{" "}
-                  AZKi SOLO LiVE 2025 &quot;Departure&quot;
-                  <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
-                </Link>
-              </Tooltip>
-
-              <hr className="my-2 border border-light-gray-200 dark:border-gray-600 w-full" />
-
-              <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3">
-                {buildDate && songsFetchedAt && (
-                  <>
-                    Last Update: {new Date(buildDate).toLocaleDateString()}
-                    <span className="ml-3"></span>
-                    Songs - {new Date(songsFetchedAt).toLocaleDateString()}
-                  </>
-                )}
-              </div>
-
-              <div className="text-[12px] text-gray-400 dark:text-light-gray-500 pl-3">
-                <Link
-                  href="https://github.com/mitsugogo/azki-song-db"
-                  target="_blank"
-                  className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                  onClick={() => closeDrawer()}
-                >
-                  <FaGithub className="inline -mt-1 mr-1" /> GitHub
-                </Link>
-                <span className="ml-3"></span>
-                <a
-                  href={(() => {
-                    const base =
-                      "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
-                    const debug = currentSong
-                      ? `title:${currentSong.title}&artist:${currentSong.artist}&video_id:${currentSong.video_id}&start:${currentSong.start}`
-                      : "";
-                    return base + encodeURIComponent(debug);
-                  })()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                  onClick={() => closeDrawer()}
-                >
-                  不具合報告
-                </a>
-              </div>
-            </div>
-          </div>
-        </Drawer>
-
-        <Modal
-          opened={showAcknowledgment}
-          onClose={() => setShowAcknowledgment(false)}
-          size="auto"
-          title="このサイトについて"
-          overlayProps={{ backgroundOpacity: 0.5, blur: 5 }}
-          fullScreen={isMobile}
-        >
-          <Acknowledgment />
-          <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer rounded-md px-4 py-2"
-              onClick={() => setShowAcknowledgment(false)}
-            >
-              閉じる
-            </button>
-          </div>
-        </Modal>
+        <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
         <AnalyticsWrapper />
       </div>
     </ThemeProvider>
