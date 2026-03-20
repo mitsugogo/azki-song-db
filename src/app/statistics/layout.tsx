@@ -2,8 +2,7 @@ import { ThemeProvider } from "flowbite-react";
 import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
-import { MantineProvider } from "@mantine/core";
-import { theme, flowbiteTheme } from "../theme";
+import { flowbiteTheme } from "../theme";
 import { siteConfig } from "../config/siteConfig";
 
 // titleタグ
@@ -18,16 +17,14 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <MantineProvider theme={theme}>
-        <ThemeProvider theme={flowbiteTheme}>
-          <div className="flex flex-col h-dvh">
-            <Header />
-            <div>{children}</div>
-            <Footer />
-          </div>
-          <AnalyticsWrapper />
-        </ThemeProvider>
-      </MantineProvider>
+      <ThemeProvider theme={flowbiteTheme}>
+        <div className="flex flex-col h-dvh">
+          <Header />
+          <div>{children}</div>
+          <Footer />
+        </div>
+        <AnalyticsWrapper />
+      </ThemeProvider>
     </>
   );
 }
