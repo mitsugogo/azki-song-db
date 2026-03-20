@@ -7,7 +7,8 @@ import slugify from "../../../lib/slugify";
 import { findRouteForRelease } from "../../../config/timelineRoutes";
 import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { Badge, LoadingOverlay } from "@mantine/core";
+import { Badge, LoadingOverlay, Modal } from "@mantine/core";
+import { useState } from "react";
 import { renderLinkedText } from "../../../lib/textLinkify";
 import {
   isCollaborationSong,
@@ -18,6 +19,7 @@ import useSongs from "../../../hook/useSongs";
 import ViewStat from "./viewStat";
 import { getCollabUnitName } from "@/app/config/collabUnits";
 import DiscographyBreadcrumbs from "../../components/DiscographyBreadcrumbs";
+import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 
 export default function ClientPage({
   category,
@@ -27,6 +29,7 @@ export default function ClientPage({
   slug: string;
 }) {
   const { allSongs, isLoading } = useSongs();
+  const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -101,7 +104,7 @@ export default function ClientPage({
   const isCover = isCoverSong(song);
 
   return (
-    <div className="p-6 w-full  mx-auto">
+    <div className="p-6 w-full mx-auto h-full overflow-y-auto">
       <DiscographyBreadcrumbs
         items={[
           {
@@ -137,13 +140,30 @@ export default function ClientPage({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div className="col-span-1">
-          <div className="rounded-lg overflow-hidden shadow-lg">
-            <img
-              src={`https://i.ytimg.com/vi/${song.video_id}/maxresdefault.jpg`}
-              alt={song.title}
+          <div
+            className="overflow-hidden shadow-lg cursor-zoom-in"
+            onClick={() => setThumbnailModalOpen(true)}
+            title="クリックして拡大"
+          >
+            <YoutubeThumbnail
+              videoId={song.video_id}
               className="w-full h-auto object-cover"
+              alt={song.video_title}
             />
           </div>
+          <Modal
+            opened={thumbnailModalOpen}
+            onClose={() => setThumbnailModalOpen(false)}
+            title={song.video_title}
+            fullScreen
+            centered
+          >
+            <YoutubeThumbnail
+              videoId={song.video_id}
+              className="w-full h-auto"
+              alt={song.video_title}
+            />
+          </Modal>
         </div>
 
         <div className="col-span-2">
