@@ -50,7 +50,11 @@ const SearchResultsView = ({
     virtualRows.length > 0 ? virtualRows[virtualRows.length - 1].end : 0;
 
   return (
-    <div ref={parentRef} className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div
+      ref={parentRef}
+      className="grow lg:p-6 lg:pb-0 overflow-y-auto overflow-x-hidden"
+      style={{ scrollbarGutter: "stable" }}
+    >
       <SearchBreadcrumb currentLabel={`「${searchTerm}」の検索結果`} />
 
       <div className="mb-4">
