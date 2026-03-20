@@ -342,6 +342,7 @@ export default function ClientTop() {
                 )}
               </div>
 
+              {/* リンク集 */}
               <div className="mt-24 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   href={siteConfig.channelUrl}
@@ -361,9 +362,17 @@ export default function ClientTop() {
                   <FaXTwitter className="mr-2" />
                   {siteConfig.xName}
                 </Link>
+                <Link
+                  href="https://hololive.hololivepro.com/talents/azki/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
+                >
+                  ホロライブ公式
+                </Link>
               </div>
 
-              <p className="mt-4 text-center text-xs text-gray-500/80 dark:text-gray-400/80">
+              <p className="mt-4 text-center text-xs text-gray-500/80 dark:text-gray-100/80">
                 {isLoading
                   ? "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中"
                   : `収録楽曲数: ${allSongs.length.toLocaleString()}曲${songsUpdatedLabel ? ` / 最終更新日: ${songsUpdatedLabel}` : ""}`}
