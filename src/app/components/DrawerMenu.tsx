@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "flowbite-react";
-import { Drawer, Modal, Tooltip } from "@mantine/core";
+import { Badge, Drawer, Modal, Tooltip } from "@mantine/core";
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
@@ -224,7 +224,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3 mb-1">
               {buildDate && songsFetchedAt && (
                 <>
-                  Version:{" "}
+                  Version{" "}
                   <Link
                     href={
                       appVersion === "dev"
@@ -232,14 +232,13 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                         : `https://github.com/mitsugogo/azki-song-db/releases/tag/v${appVersion}`
                     }
                     target="_blank"
+                    className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
                   >
-                    <FaGithub className="inline -mt-1" />
                     {appVersion === "dev" ? "dev" : `v${appVersion}`}
                   </Link>
-                  <span className="ml-3"></span>
-                  Last Build: {new Date(buildDate).toLocaleDateString()}
-                  <span className="ml-3"></span>
-                  Songs: {new Date(songsFetchedAt).toLocaleDateString()}
+                  <span className="mx-1"></span>
+                  (Build: {new Date(buildDate).toLocaleDateString()}, Songs:{" "}
+                  {new Date(songsFetchedAt).toLocaleDateString()})
                 </>
               )}
             </div>
@@ -266,15 +265,18 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             </div>
 
             <div className="text-[12px] text-gray-400 dark:text-light-gray-500 pl-3">
-              <Link
-                href="https://x.com/mitsugogo"
+              Copylight © 2026 mitsugogo{" "}
+              <Badge
+                color="gray"
+                variant="transparent"
+                className="cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                size="xs"
+                component={Link}
                 target="_blank"
-                className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                onClick={onClose}
+                href="https://github.com/mitsugogo/azki-song-db"
               >
-                <FaXTwitter className="inline -mt-1 mr-1" />
-                @mitsugogo
-              </Link>
+                <FaXTwitter className="" />
+              </Badge>
             </div>
           </div>
         </div>
