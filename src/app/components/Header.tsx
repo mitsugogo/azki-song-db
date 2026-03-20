@@ -61,8 +61,8 @@ export function Header() {
                           ? window.location.pathname
                           : pathname;
 
-                      // TOPページと検索ページ以外では、検索ページに遷移
-                      if (path !== "/" && path !== "/search") {
+                      // 再生ページと検索ページ以外では、検索ページに遷移
+                      if (path !== "/watch" && path !== "/search") {
                         // 他のページから検索ページへ遷移する際は、既存の v/t を保持して遷移する
                         if (typeof window !== "undefined") {
                           const url = new URL(window.location.href);
@@ -85,7 +85,7 @@ export function Header() {
                           router.push(searchUrl);
                         }
                       } else {
-                        // TOPページと検索ページでは、URLパラメータを更新
+                        // 再生ページと検索ページでは、URLパラメータを更新
                         if (query) {
                           router.push(`${path}?q=${encodeURIComponent(query)}`);
                         } else {
