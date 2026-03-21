@@ -10,12 +10,7 @@ import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { siteConfig } from "@/app/config/siteConfig";
-import {
-  isCoverSong,
-  isOriginalSong,
-  isPossibleOriginalSong,
-} from "@/app/config/filters";
-import MilestoneBadge from "@/app/components/MilestoneBadge";
+import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 
 type Props = {
   initialSongs: Song[];
@@ -90,9 +85,26 @@ export default function YearSummaryClient({
     setSearchTerm(searchValue);
   };
 
+  /**
+   * 歌枠かつAZKiさんが歌っているか
+   */
+  const isSingingStreamAndSingTargetTalent = (song: Song) => {
+    return (
+      song.sing
+        .split("、")
+        .map((x) => x.trim())
+        .includes(siteConfig.talentName) && song.tags.includes("歌枠")
+    );
+  };
+
   const top10 = useMemo(() => {
     const counts: Record<string, { count: number; example?: Song }> = {};
     songsFiltered.forEach((s) => {
+      // AZKiさん歌唱の曲のみを対象とする
+      if (!isSingingStreamAndSingTargetTalent(s)) {
+        return;
+      }
+
       const key = s.title;
       if (!counts[key]) counts[key] = { count: 0, example: s };
       counts[key].count += 1;
@@ -127,6 +139,10 @@ export default function YearSummaryClient({
   const topArtists = useMemo(() => {
     const counts: Record<string, { count: number; example?: Song }> = {};
     songsFiltered.forEach((s) => {
+      // AZKiさん歌唱の曲のみを対象とする
+      if (!isSingingStreamAndSingTargetTalent(s)) {
+        return;
+      }
       const artists = (s.artist || "")
         .split("、")
         .map((a) => a.trim())
