@@ -142,7 +142,7 @@ export default function ClientTop() {
 
   return (
     <ThemeProvider theme={flowbiteTheme}>
-      <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_42%,#ffffff_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_40%,#111827_100%)] dark:text-white">
+      <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
         <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
           <header
             className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${

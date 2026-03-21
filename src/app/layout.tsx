@@ -112,7 +112,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
       </head>
       <body
-        className={`antialiased bg-white dark:bg-azki-gradient transition-colors duration-700`}
+        className={`antialiased bg-white dark:bg-azki-gradient bg-fixed transition-colors duration-700`}
       >
         <MantineProvider theme={theme}>
           <ClientProviders>

@@ -236,13 +236,14 @@ body {
 @layer utilities {
   /* 背景グラデーション */
   .bg-azki-gradient {
-    @apply bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_42%,#ffffff_100%)];
+    @apply bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)];
   }
 
   .dark\:bg-azki-gradient:where(.dark, .dark *) {
+    background-attachment: fixed;
     background-image:
       radial-gradient(circle at top, rgba(190, 24, 93, 0.2), transparent 34%),
-      linear-gradient(180deg, #111827 0%, #0f172a 40%, #111827 100%);
+      linear-gradient(180deg, #111827 0%, #0f172a 100%);
   }
 
   /* グラスモーフィズムカード */

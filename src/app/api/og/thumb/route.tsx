@@ -9,9 +9,9 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const v = searchParams.get("v");
-    const t = searchParams.get("t");
+    const t = searchParams.get("t") || "0";
 
-    if (!v || !t) {
+    if (!v) {
       return new Response("Missing required parameters", { status: 404 });
     }
 
