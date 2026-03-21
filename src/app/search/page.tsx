@@ -46,6 +46,12 @@ export async function generateMetadata({
     }
   }
 
+  const canonical = new URL("/search", baseUrl);
+  if (searchTerm) {
+    canonical.searchParams.set("q", searchTerm);
+  }
+  const ogImagePath = `/api/og?title=${encodeURIComponent(ogTitle)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`;
+
   return {
     title: searchTerm
       ? `${displayTerm}の検索結果 | ${siteConfig.siteName}`
@@ -55,13 +61,13 @@ export async function generateMetadata({
       title: ogTitle,
       description:
         "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
-      url: `${baseUrl.endsWith("/") ? baseUrl : baseUrl + "/"}search${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ""}`,
+      url: canonical.toString(),
       type: "website",
       siteName: `${siteConfig.siteName}`,
       locale: "ja_JP",
       images: [
         {
-          url: `${baseUrl.endsWith("/") ? baseUrl : baseUrl + "/"}api/og?title=${encodeURIComponent(ogTitle)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`,
+          url: ogImagePath,
           width: 1200,
           height: 630,
           alt: `${siteConfig.siteName} - ${ogTitle}`,
@@ -70,6 +76,13 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
+      title: ogTitle,
+      description:
+        "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical: canonical.toString(),
     },
   };
 }

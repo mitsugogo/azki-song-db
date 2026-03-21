@@ -1,6 +1,24 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 
+async function setTheme(
+  page: import("@playwright/test").Page,
+  target: "light" | "dark",
+) {
+  const root = page.locator("html");
+  const toggle = page.getByRole("button", { name: "Toggle theme" });
+
+  for (let i = 0; i < 4; i += 1) {
+    const current = await root.getAttribute("data-mantine-color-scheme");
+    if (current === target) {
+      return;
+    }
+    await toggle.click();
+  }
+
+  await expect(root).toHaveAttribute("data-mantine-color-scheme", target);
+}
+
 test.describe("Summary pages", () => {
   test.describe.configure({ mode: "serial" });
   test.beforeEach(async ({ page }) => {
@@ -59,17 +77,38 @@ test.describe("Summary pages", () => {
       ).toBeVisible();
     });
 
-    test("displays breadcrumbs with year", async ({ page }) => {
-      await page.goto("/summary/2024");
+    test("summary から watch へ遷移してもライトモードを維持する", async ({
+      page,
+    }) => {
+      await page.goto("/watch", { waitUntil: "domcontentloaded" });
+      await expect
+        .poll(() => page.url(), { timeout: 10000 })
+        .toMatch(/\/watch\?v=/);
+      await setTheme(page, "dark");
 
-      await page.waitForLoadState("domcontentloaded");
+      await page.goto("/summary/2026", { waitUntil: "domcontentloaded" });
+      await page.waitForSelector('a[href*="/watch?v="]', { timeout: 15000 });
 
-      // Wait for breadcrumb to be visible
-      await page.waitForSelector('nav[aria-label="Breadcrumb"]', {
-        timeout: 10000,
-      });
-      const summaryLink = page.getByRole("link", { name: /活動記録/i });
-      await expect(summaryLink).toBeVisible();
+      await setTheme(page, "light");
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-mantine-color-scheme",
+        "light",
+      );
+
+      await page.locator('a[href*="/watch?v="]').first().click();
+      await expect(page).toHaveURL(/\/watch\?v=/);
+
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-mantine-color-scheme",
+        "light",
+      );
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            document.documentElement.classList.contains("dark"),
+          ),
+        )
+        .toBe(false);
     });
   });
 });

@@ -28,7 +28,7 @@ export type SongModeMenuItem = {
 };
 
 const SONG_MODE_TRIGGER_BUTTON_BASE_CLASS_NAME =
-  "px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-primary-400/20 dark:shadow-none ring-0 focus:ring-0";
+  "px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0";
 
 export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   {

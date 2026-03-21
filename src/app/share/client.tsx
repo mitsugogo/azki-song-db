@@ -1,10 +1,10 @@
 "use client";
 
-import { Breadcrumbs, MantineProvider } from "@mantine/core";
+import { Breadcrumbs } from "@mantine/core";
 import { ThemeProvider } from "flowbite-react";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import Link from "next/link";
-import { breadcrumbClasses, theme, flowbiteTheme } from "@/app/theme";
+import { breadcrumbClasses, flowbiteTheme } from "@/app/theme";
 import { Header } from "@/app/components/Header";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
@@ -23,18 +23,16 @@ const shareFeatures = [
 /** 共有ページ */
 export default function ShareIndexClient() {
   return (
-    <MantineProvider theme={theme}>
-      <ThemeProvider theme={flowbiteTheme}>
-        <div className="flex flex-col h-dvh">
-          <Header />
-          <div className="flex flex-col grow md:flex-row overflow-y-hidden w-full">
-            <ShareIndexContent />
-          </div>
-          <Footer />
+    <ThemeProvider theme={flowbiteTheme}>
+      <div className="flex flex-col h-dvh">
+        <Header />
+        <div className="flex flex-col grow md:flex-row overflow-y-hidden w-full">
+          <ShareIndexContent />
         </div>
-        <AnalyticsWrapper />
-      </ThemeProvider>
-    </MantineProvider>
+        <Footer />
+      </div>
+      <AnalyticsWrapper />
+    </ThemeProvider>
   );
 }
 

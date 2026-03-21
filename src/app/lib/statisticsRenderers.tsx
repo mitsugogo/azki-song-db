@@ -15,7 +15,7 @@ export const renderLastVideoCell = (
   if (!lastVideo) return <span className="text-sm">なし</span>;
 
   const videoUrl = `${lastVideo.video_uri}`;
-  const appPlayUrl = `/?v=${lastVideo.video_id}&q=video_id:${lastVideo.video_id}`;
+  const appPlayUrl = `/watch?v=${lastVideo.video_id}&q=video_id:${lastVideo.video_id}`;
 
   return (
     <div className="p-2">

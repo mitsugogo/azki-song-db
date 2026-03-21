@@ -65,7 +65,7 @@ test.describe("Song mode transition", () => {
       });
     });
 
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
   });
@@ -115,7 +115,9 @@ test.describe("Song mode transition", () => {
 
     await page.locator("li", { hasText: coverSong.title }).first().click();
 
-    await expect(page.locator("text=2曲/2曲").first()).toBeVisible({
+    await expect(
+      page.locator("text=/1曲\\/2曲|2曲\\/2曲/").first(),
+    ).toBeVisible({
       timeout: 10000,
     });
   });

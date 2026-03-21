@@ -10,6 +10,7 @@ import useSearch from "../hook/useSearch";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import useMainPlayerControls from "../hook/useMainPlayerControls";
 import { usePathname } from "next/navigation";
+import { isWatchPagePath } from "../lib/watchUrl";
 
 // Components
 import PlayerSection from "./PlayerSection";
@@ -67,12 +68,12 @@ export default function MainPlayer() {
   // ホームページに戻ったらミニプレイヤーを非表示し、グローバルの曲を復元
   // ホームページから他ページへ遷移した瞬間だけ自動でミニプレイヤー化する
   useEffect(() => {
-    const isHomePage = pathname === "/";
+    const isWatchPage = isWatchPagePath(pathname);
     const previousPathname = previousPathnameRef.current;
 
-    if (!isHomePage && previousPathname === "/" && currentSong) {
+    if (!isWatchPage && isWatchPagePath(previousPathname) && currentSong) {
       globalPlayer.setIsMinimized(true);
-    } else if (isHomePage) {
+    } else if (isWatchPage) {
       globalPlayer.maximizePlayer();
       const urlParams = new URLSearchParams(window.location.search);
 

@@ -10,12 +10,7 @@ import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { siteConfig } from "@/app/config/siteConfig";
-import {
-  isCoverSong,
-  isOriginalSong,
-  isPossibleOriginalSong,
-} from "@/app/config/filters";
-import MilestoneBadge from "@/app/components/MilestoneBadge";
+import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 
 type Props = {
   initialSongs: Song[];
@@ -90,9 +85,26 @@ export default function YearSummaryClient({
     setSearchTerm(searchValue);
   };
 
+  /**
+   * 歌枠かつAZKiさんが歌っているか
+   */
+  const isSingingStreamAndSingTargetTalent = (song: Song) => {
+    return (
+      song.sing
+        .split("、")
+        .map((x) => x.trim())
+        .includes(siteConfig.talentName) && song.tags.includes("歌枠")
+    );
+  };
+
   const top10 = useMemo(() => {
     const counts: Record<string, { count: number; example?: Song }> = {};
     songsFiltered.forEach((s) => {
+      // AZKiさん歌唱の曲のみを対象とする
+      if (!isSingingStreamAndSingTargetTalent(s)) {
+        return;
+      }
+
       const key = s.title;
       if (!counts[key]) counts[key] = { count: 0, example: s };
       counts[key].count += 1;
@@ -127,6 +139,10 @@ export default function YearSummaryClient({
   const topArtists = useMemo(() => {
     const counts: Record<string, { count: number; example?: Song }> = {};
     songsFiltered.forEach((s) => {
+      // AZKiさん歌唱の曲のみを対象とする
+      if (!isSingingStreamAndSingTargetTalent(s)) {
+        return;
+      }
       const artists = (s.artist || "")
         .split("、")
         .map((a) => a.trim())
@@ -296,7 +312,7 @@ export default function YearSummaryClient({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-3 gap-4">
-        <div className="border rounded p-4">
+        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             収録楽曲
           </div>
@@ -306,7 +322,7 @@ export default function YearSummaryClient({
             </Link>
           </div>
         </div>
-        <div className="border rounded p-4">
+        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             歌枠で歌った曲数
           </div>
@@ -320,7 +336,7 @@ export default function YearSummaryClient({
             </Link>
           </div>
         </div>
-        <div className="border rounded p-4">
+        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             ゲストで歌った曲数
           </div>
@@ -335,7 +351,7 @@ export default function YearSummaryClient({
           </div>
         </div>
 
-        <div className="border rounded p-4">
+        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             オリジナル楽曲
           </div>
@@ -351,7 +367,7 @@ export default function YearSummaryClient({
             </Link>
           </div>
         </div>
-        <div className="border rounded p-4">
+        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             カバー楽曲
           </div>
@@ -655,11 +671,11 @@ export default function YearSummaryClient({
               .map((g, i) => (
                 <article
                   key={`${g.video_id || i}-special-${i}`}
-                  className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
+                  className="card-glassmorphism hover-lift-shadow overflow-hidden"
                 >
                   <Link
-                    href={`/?v=${g.video_id || ""}${
-                      g.start ? `&t=${g.start}s` : ""
+                    href={`/watch?v=${g.video_id || ""}${
+                      g.start ? `&t=${g.start}` : ""
                     }&q=year:${displayYear}`}
                     className="block"
                   >
@@ -698,11 +714,11 @@ export default function YearSummaryClient({
             {(collaborativeSongs || []).map((s) => (
               <article
                 key={`${s.video_id || ""}-collab-${s.start || ""}`}
-                className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
+                className="card-glassmorphism hover-lift-shadow overflow-hidden"
               >
                 <Link
-                  href={`/?v=${s.video_id || ""}${
-                    s.start ? `&t=${s.start}s` : ""
+                  href={`/watch?v=${s.video_id || ""}${
+                    s.start ? `&t=${s.start}` : ""
                   }&q=year:${displayYear}`}
                 >
                   <div className="w-full aspect-video bg-black">
@@ -802,11 +818,11 @@ export default function YearSummaryClient({
                     {monthSongs.map((g, i) => (
                       <article
                         key={`${g.video_id || i}-${i}`}
-                        className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm"
+                        className="card-glassmorphism hover-lift-shadow overflow-hidden"
                       >
                         <Link
-                          href={`/?v=${g.video_id || ""}${
-                            g.start ? `&t=${g.start}s` : ""
+                          href={`/watch?v=${g.video_id || ""}${
+                            g.start ? `&t=${g.start}` : ""
                           }&q=year:${displayYear}`}
                           className="block"
                         >
@@ -880,7 +896,7 @@ export default function YearSummaryClient({
                         }) => (
                           <div
                             key={`v-${v.id}`}
-                            className="border rounded p-2 bg-white dark:bg-gray-800"
+                            className="border rounded p-2 bg-white dark:bg-gray-800 card-glassmorphism hover-lift-shadow"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -925,8 +941,8 @@ export default function YearSummaryClient({
                               {v.songs.map((s: Song, idx: number) => (
                                 <li key={`${v.id}-${idx}`} className="text-sm">
                                   <Link
-                                    href={`/?v=${v.id}${
-                                      s.start ? `&t=${s.start}s` : ""
+                                    href={`/watch?v=${v.id}${
+                                      s.start ? `&t=${s.start}` : ""
                                     }&q=year:${displayYear}`}
                                     className="hover:underline"
                                   >

@@ -11,16 +11,16 @@ export interface PageCategory {
 export const pageList: PageCategory[] = [
   {
     items: [
-      { name: "TOP", href: "/" },
+      { name: "HOME", href: "/" },
       { name: "検索", href: "/search" },
     ],
   },
   {
-    category: "データ",
+    category: "活動の記録",
     items: [
       { name: "Discography", href: "/discography" },
-      { name: "統計情報", href: "/statistics" },
       { name: "活動記録", href: "/summary" },
+      { name: "統計情報", href: "/statistics" },
       { name: "全データ", href: "/data" },
     ],
   },

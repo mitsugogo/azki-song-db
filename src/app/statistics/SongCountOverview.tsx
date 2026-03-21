@@ -139,7 +139,7 @@ export default function SongCountOverview({
     <section className="pt-3 lg:pt-4">
       {!showMilestoneHighlights && (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
               {primaryLabel}
             </p>
@@ -147,7 +147,7 @@ export default function SongCountOverview({
               {overview.totalSongKinds.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
               {totalCountLabel}
             </p>
@@ -156,7 +156,7 @@ export default function SongCountOverview({
             </p>
           </div>
           {showTopTile && (
-            <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+            <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
               <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
                 {topLabel}
               </p>
@@ -168,7 +168,7 @@ export default function SongCountOverview({
               </p>
             </div>
           )}
-          <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
               最新更新
             </p>
@@ -182,7 +182,7 @@ export default function SongCountOverview({
       )}
       {showMilestoneHighlights && (
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
               直近7日で達成
             </p>
@@ -260,7 +260,7 @@ export default function SongCountOverview({
               </ul>
             )}
           </div>
-          <div className="rounded-lg border border-light-gray-300 bg-light-gray-100/80 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+          <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
               達成見込み
             </p>

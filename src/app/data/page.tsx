@@ -8,18 +8,10 @@ import { breadcrumbClasses } from "../theme";
 
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 import { metadata } from "../layout";
 
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata,
-): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   const title = "収録データ一覧";
   const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
 
@@ -29,6 +21,8 @@ export async function generateMetadata(
 
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const canonical = new URL("/data", baseUrl).toString();
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     ...metadata,
@@ -37,7 +31,24 @@ export async function generateMetadata(
       "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
     openGraph: {
       ...metadata.openGraph,
-      images: [ogImageUrl.toString()],
+      title,
+      description:
+        "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description:
+        "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }

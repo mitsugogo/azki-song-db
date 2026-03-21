@@ -104,6 +104,20 @@ export async function generateMetadata({
     return {
       title: `アルバムが見つかりません | ${siteConfig.siteName}`,
       description: "指定されたアルバムは存在しません。",
+      openGraph: {
+        title: `アルバムが見つかりません | ${siteConfig.siteName}`,
+        description: "指定されたアルバムは存在しません。",
+        url: new URL(`/discography/album/${albumSlug}`, baseUrl).toString(),
+        siteName: siteConfig.siteName,
+        locale: "ja_JP",
+        type: "website",
+      },
+      alternates: {
+        canonical: new URL(
+          `/discography/album/${albumSlug}`,
+          baseUrl,
+        ).toString(),
+      },
     };
   }
 
@@ -119,6 +133,11 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const canonical = new URL(
+    `/discography/album/${albumSlug}`,
+    baseUrl,
+  ).toString();
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title,
@@ -126,7 +145,20 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImageUrl.toString()],
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }

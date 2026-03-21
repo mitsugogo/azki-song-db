@@ -10,7 +10,7 @@ test.describe("Search overlay (mobile)", () => {
   });
 
   test("opens and closes the song list overlay", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Wait for the button to be present in DOM

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
+import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
@@ -49,7 +50,11 @@ const SearchResultsView = ({
     virtualRows.length > 0 ? virtualRows[virtualRows.length - 1].end : 0;
 
   return (
-    <div ref={parentRef} className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div
+      ref={parentRef}
+      className="grow lg:p-6 lg:pb-0 overflow-y-auto overflow-x-hidden"
+      style={{ scrollbarGutter: "stable" }}
+    >
       <SearchBreadcrumb currentLabel={`「${searchTerm}」の検索結果`} />
 
       <div className="mb-4">
@@ -69,7 +74,7 @@ const SearchResultsView = ({
         setSearchTerm={setSearchTerm}
       />
 
-      <div className="p-3 lg:ml-6">
+      <div className="p-3">
         <div style={{ height: `${firstStart}px` }} />
 
         <ul
@@ -78,7 +83,7 @@ const SearchResultsView = ({
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${cols}, ${estimatedItemWidth}px)`,
-            justifyContent: "center",
+            justifyContent: "start",
             gap: "1rem",
             boxSizing: "border-box",
             width:
@@ -86,7 +91,7 @@ const SearchResultsView = ({
                 ? `${wrapperWidth}px`
                 : wrapperWidth,
             maxWidth: "100%",
-            margin: "0 auto",
+            margin: "0",
           }}
         >
           {virtualRows.flatMap((virtualRow) => {
@@ -127,9 +132,9 @@ const SearchResultsView = ({
                     boxSizing: "border-box",
                   }}
                 >
-                  <article className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-100/50 dark:hover:bg-primary-900/20 shadow-sm h-full">
+                  <article className="card-glassmorphism hover-lift-shadow overflow-hidden h-full">
                     <Link
-                      href={`/?v=${song.video_id}${song.start ? `&t=${song.start}s` : ""}&q=${encodeURIComponent(searchTerm)}`}
+                      href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
                       className="block"
                     >
                       <div className="w-full aspect-video bg-black">
@@ -162,6 +167,7 @@ const SearchResultsView = ({
 
         <div style={{ height: `${totalSize - lastEnd}px` }} />
       </div>
+      <ScrollToTopButton />
     </div>
   );
 };

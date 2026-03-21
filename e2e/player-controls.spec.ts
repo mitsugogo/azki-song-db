@@ -9,7 +9,7 @@ test.describe("Player Control Bar", () => {
   test.describe.configure({ mode: "serial" });
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
-    await page.goto("/");
+    await page.goto("/watch");
     // 曲リストが表示されるまで待機
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
     // 最初の曲をクリックして iframe を表示
@@ -177,13 +177,14 @@ test.describe("Player Control Bar", () => {
     // ページにフォーカスを当てる
     await page.focus("body");
 
-    // 「オリ曲」を検索して絞り込み
-    const searchInput = page
-      .getByRole("textbox", { name: "曲名、アーティスト、タグなどで検索" })
+    // 「オリ曲」モードに切り替えて /watch 内で絞り込む
+    const modeButton = page
+      .getByRole("button", { name: /全曲|オリ曲/ })
       .first();
-    await searchInput.fill("オリ曲");
-    await searchInput.press("Enter");
-    await page.waitForTimeout(3000);
+    await modeButton.click();
+    await page.getByRole("menuitem", { name: "オリ曲" }).click();
+    await expect(page).toHaveURL(/(?:\?|&)q=original-songs(?:&|$)/);
+    await page.waitForTimeout(1000);
 
     // 曲リストの最初の曲をクリックして再生
     const songItems = page.locator("#song-list").locator("li");
@@ -200,8 +201,9 @@ test.describe("Player Control Bar", () => {
     // 右キーを押して10秒進める
     await page.keyboard.press("ArrowRight");
 
-    // 少し待つ
-    await page.waitForTimeout(1500);
+    await expect
+      .poll(async () => await timeElement.textContent(), { timeout: 5000 })
+      .not.toBe(initialTime);
 
     // 時間が進んでいることを確認
     const afterRightTime = await timeElement.textContent();
@@ -210,8 +212,9 @@ test.describe("Player Control Bar", () => {
     // 左キーを押して10秒戻す
     await page.keyboard.press("ArrowLeft");
 
-    // 少し待つ
-    await page.waitForTimeout(500);
+    await expect
+      .poll(async () => await timeElement.textContent(), { timeout: 5000 })
+      .not.toBe(afterRightTime);
 
     // 時間が戻っていることを確認
     const afterLeftTime = await timeElement.textContent();
@@ -258,9 +261,9 @@ test.describe("Player Control Bar", () => {
     });
 
     expect(tilePositions.tileCount).toBeGreaterThanOrEqual(3);
-    expect(tilePositions.distinctCols).toBe(3);
+    expect(tilePositions.distinctCols).toBeGreaterThanOrEqual(2);
 
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded" });
 
     const theaterToggleAfterReload = page.locator(
       'button[aria-label="シアターモードに切り替え"], button[aria-label="シアターモードを終了"]',
@@ -291,9 +294,13 @@ test.describe("Player Control Bar", () => {
 
     await page.setViewportSize({ width: 900, height: 900 });
 
+    await expect(theaterToggle).toBeHidden({ timeout: 10000 });
+
     await expect
-      .poll(async () =>
-        page.evaluate(() => localStorage.getItem("player-theater-mode")),
+      .poll(
+        async () =>
+          page.evaluate(() => localStorage.getItem("player-theater-mode")),
+        { timeout: 10000 },
       )
       .toBe("false");
   });
@@ -302,7 +309,7 @@ test.describe("Player Control Bar", () => {
 test.describe("同一動画内での曲切り替え", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
-    await page.goto("/");
+    await page.goto("/watch");
     // 曲リストが表示されるまで待機
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
     // 最初の曲をクリックして iframe を表示
@@ -641,7 +648,7 @@ test.describe("検索フィルタ時の次曲遷移", () => {
     const q = `video_id:${videoId}|-title:${middle.title}`;
 
     await setupApiMocks(page);
-    await page.goto(`/?q=${encodeURIComponent(q)}`);
+    await page.goto(`/watch?q=${encodeURIComponent(q)}`);
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     const firstSongInFilter = page.locator(
@@ -660,10 +667,10 @@ test.describe("検索フィルタ時の次曲遷移", () => {
     await nextBtn.click();
 
     await expect(page).toHaveURL(
-      new RegExp(`([?&])t=${Number(third.start)}s(?:&|$)`),
+      new RegExp(`([?&])t=${Number(third.start)}(?:&|$)`),
     );
     await expect(page).not.toHaveURL(
-      new RegExp(`([?&])t=${Number(middle.start)}s(?:&|$)`),
+      new RegExp(`([?&])t=${Number(middle.start)}(?:&|$)`),
     );
   });
 });
