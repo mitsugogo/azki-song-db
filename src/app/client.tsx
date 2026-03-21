@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Burger, Skeleton } from "@mantine/core";
+import { Burger, Skeleton, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
@@ -147,8 +147,8 @@ export default function ClientTop() {
           <header
             className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
               isScrolled
-                ? "border-b border-white/60 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:border-white/10 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/55"
-                : "border-b border-transparent bg-transparent"
+                ? "bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/70"
+                : "border-transparent bg-transparent"
             }`}
           >
             <div className="flex items-center justify-between gap-3">
@@ -224,14 +224,27 @@ export default function ClientTop() {
                       </>
                     )}
                   </button>
-                  <Link
-                    href="/watch"
-                    className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
-                    title="ランダム"
+                  <Tooltip
+                    withArrow
+                    arrowSize={8}
+                    position="bottom"
+                    transitionProps={{ transition: "fade", duration: 300 }}
+                    label={
+                      <>
+                        <LuSparkles className="mr-1 inline" />
+                        ランダムに楽曲を再生開始します
+                      </>
+                    }
                   >
-                    <LuSparkles className="mr-1 inline" />
-                    Surprise me
-                  </Link>
+                    <Link
+                      href="/watch"
+                      className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
+                      aria-label="ランダム再生"
+                    >
+                      <LuSparkles className="mr-1 inline" />
+                      Surprise me
+                    </Link>
+                  </Tooltip>
                 </div>
               </div>
             </section>
@@ -386,7 +399,7 @@ export default function ClientTop() {
                   href="https://hololive.hololivepro.com/talents/azki/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
+                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
                 >
                   ホロライブ公式
                 </Link>
