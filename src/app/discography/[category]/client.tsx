@@ -1,7 +1,14 @@
 "use client";
 
-import DiscographyPage from "../components/DiscographyPage";
+import DiscographyClient from "../client";
+
+const CATEGORY_TO_TAB: Record<string, number> = {
+  originals: 1,
+  collab: 2,
+  covers: 3,
+};
 
 export default function CategoryClient({ category }: { category: string }) {
-  return <DiscographyPage initialCategory={category} />;
+  const initialTab = CATEGORY_TO_TAB[category] ?? 0;
+  return <DiscographyClient initialTab={initialTab} />;
 }

@@ -1,13 +1,6 @@
-import { siteConfig } from "@/app/config/siteConfig";
+import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import PlaylistDetailPage from "./client";
 import type { Metadata } from "next";
-
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  process.env.PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? `http://localhost:${process.env.PORT ?? 3000}`
-    : "https://azki-song-db.vercel.app/");
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "プレイリスト";
@@ -18,12 +11,29 @@ export async function generateMetadata(): Promise<Metadata> {
 
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const canonical = new URL("/playlist/detail", baseUrl).toString();
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title: `プレイリスト | ${siteConfig.siteName}`,
     description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
     openGraph: {
-      images: [ogImageUrl.toString()],
+      title,
+      description: subtitle,
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: subtitle,
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }

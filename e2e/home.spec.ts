@@ -1,109 +1,77 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+import { getCachedSongs } from "./test-utils";
 
 test.describe("Home page", () => {
   test.describe.configure({ mode: "serial" });
+  const songs = getCachedSongs();
+  const firstSong = songs[0];
 
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
   });
 
-  test("renders header controls and navigation drawer", async ({ page }) => {
+  test("renders landing search UI and recommended songs", async ({ page }) => {
     await page.goto("/");
 
     await expect(
-      page.getByRole("heading", { name: "AZKi Song Database" }),
+      page.getByRole("link", {
+        name: /AZKi.*(Song|SONG).*Database|AZKi.*SONG.*DATABASE/i,
+      }),
     ).toBeVisible();
-
-    const navToggle = page.getByRole("button", { name: /toggle navigation/i });
-    await expect(navToggle).toBeVisible();
-
-    const youtubeLink = page
-      .getByRole("link", { name: /AZKi Channel/i })
-      .first();
-    await expect(youtubeLink).toHaveAttribute(
-      "href",
-      "https://www.youtube.com/@AZKi",
-    );
-
-    await navToggle.click();
     await expect(
-      page.getByRole("link", { name: "プレイリスト" }),
+      page.getByRole("heading", {
+        name: /音楽で辿る、\s*(Virtual DiVAの記録|Virtual DiVA AZKiの軌跡)。|AZKiの歌を探して、\s*そのまま聴く。/,
+      }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Toggle theme" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "検索する" })).toBeVisible();
+    await expect(page.getByText("おすすめ楽曲")).toBeVisible();
+    await expect(page.locator('a[href*="/watch?v="]').first()).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "AZKi Channel" }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "AZKi_VDiVA" })).toBeVisible();
+    await expect(page.getByText(/収録楽曲数:/)).toBeVisible();
   });
 
-  test("can select a song and video changes", async ({ page }) => {
+  test("submits search from top page to /search", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Wait for song list to load
-    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+    const query = firstSong?.title ?? "春よ、来い";
+    const searchInput = page.getByRole("textbox", {
+      name: "曲名、アーティスト、タグなどで検索",
+    });
+    await searchInput.fill(query);
+    await searchInput.press("Enter");
+    await page.getByRole("button", { name: "検索する" }).click();
 
-    // Get initial video URL from the iframe
-    const initialFrame = page
-      .frameLocator('iframe[src*="youtube.com"]')
-      .first();
-    const initialFrameUrl = await page
-      .locator('iframe[src*="youtube.com"]')
-      .first()
-      .getAttribute("src");
-    const initialVideoId = initialFrameUrl?.match(/\/embed\/([^?]+)/)?.[1];
-
-    // Find and click on a song in the list (click on the second visible song to ensure it's different)
-    const songItems = page
-      .locator('div[role="button"]')
-      .filter({ hasText: /\d{4}\/\d{2}\/\d{2}/ });
-    const songCount = await songItems.count();
-
-    if (songCount > 1) {
-      // Click on the second song
-      await songItems.nth(1).click();
-
-      // Wait a bit for the video to change
-      await page.waitForTimeout(1000);
-
-      // Get the new video URL
-      const newFrameUrl = await page
-        .locator('iframe[src*="youtube.com"]')
-        .first()
-        .getAttribute("src");
-      const newVideoId = newFrameUrl?.match(/\/embed\/([^?]+)/)?.[1];
-
-      // Verify the video has changed
-      expect(newVideoId).toBeDefined();
-      expect(newVideoId).not.toBe(initialVideoId);
-    }
+    await expect(page).toHaveURL(/\/search\?q=/);
+    await expect(page.getByRole("heading", { name: "検索結果" })).toBeVisible();
   });
 
-  test("song selection updates URL parameters", async ({ page }) => {
+  test("recommended tile opens the watch page", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Wait for song list to load
-    await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
+    const recommendedLink = page.locator('a[href*="/watch?v="]').first();
+    const hasRecommended = (await recommendedLink.count()) > 0;
 
-    // Get initial URL
-    const initialUrl = page.url();
-
-    // Click on a song in the list
-    const songItems = page
-      .locator('div[role="button"]')
-      .filter({ hasText: /\d{4}\/\d{2}\/\d{2}/ });
-    const songCount = await songItems.count();
-
-    if (songCount > 0) {
-      await songItems.first().click();
-
-      // Wait for URL to potentially update
-      await page.waitForTimeout(500);
-
-      // URL should contain video ID parameter
-      const newUrl = page.url();
-
-      // The URL might contain 'v=' parameter for the selected video
-      // or might update other parameters - we just verify something changed
-      // or the iframe source changed which is already tested above
-      expect(newUrl).toBeTruthy();
+    if (hasRecommended) {
+      await recommendedLink.click();
+    } else {
+      await page.getByRole("link", { name: "Surprise me" }).click();
     }
+
+    await expect(page).toHaveURL(/\/watch/);
+  });
+
+  test("legacy root playback URL redirects to /watch", async ({ page }) => {
+    await page.goto("/?v=tUc0j23UMyk&t=1361s");
+
+    await expect(page).toHaveURL(/\/watch\?v=tUc0j23UMyk/);
   });
 });

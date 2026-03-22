@@ -28,9 +28,9 @@ export default function ShareModal({
       ? `&t=${currentSong.start}s`
       : ""
   }`;
-  const databaseUrl = `${baseUrl}/?v=${currentSong?.video_id}${
+  const databaseUrl = `${baseUrl}/watch?v=${currentSong?.video_id}${
     currentSong && Number(currentSong.start) > 0
-      ? `&t=${currentSong.start}s`
+      ? `&t=${currentSong.start}`
       : ""
   }`;
 

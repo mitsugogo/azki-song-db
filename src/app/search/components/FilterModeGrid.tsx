@@ -23,7 +23,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                 <Link
                   key={index}
                   href={`/search?q=${encodeURIComponent(`title:${item.title}|artist:${item.artist}`)}`}
-                  className="block relative overflow-hidden rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  className="card-glassmorphism hover-lift-shadow block relative overflow-hidden"
                 >
                   <div
                     className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"
@@ -54,7 +54,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                 <Link
                   key={index}
                   href={`/search?q=${encodeURIComponent(`artist:${item.artist}`)}`}
-                  className="block relative overflow-hidden rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  className="card-glassmorphism hover-lift-shadow block relative overflow-hidden"
                 >
                   <div
                     className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"
@@ -82,7 +82,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                 <Link
                   key={index}
                   href={`/search?q=${encodeURIComponent(`tag:${item.tag}`)}`}
-                  className="block relative overflow-hidden rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  className="card-glassmorphism hover-lift-shadow block relative overflow-hidden"
                 >
                   <div
                     className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"

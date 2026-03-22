@@ -5,7 +5,7 @@ import { ROUTE_RANGES } from "../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../config/timelineVisuals";
 import { Song } from "../types/song";
 import useMilestones from "../hook/useMilestones";
-import { Badge, Text } from "@mantine/core";
+import { Badge } from "@mantine/core";
 import { FaExternalLinkAlt } from "react-icons/fa";
 
 export default function Timeline({ songs }: { songs: Song[] }) {
@@ -72,7 +72,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
 
   return (
     <>
-      <div key="timeline" className="col-span-full mt-6 p-3 border-t">
+      <div key="timeline" className="col-span-full mt-6 p-3 border-t pb-6">
         <h2 className="font-bold text-xl mb-2">活動年表</h2>
         {(() => {
           const start = activityStart;
@@ -89,7 +89,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
           const totalRange = Math.max(1, end.getTime() - start.getTime());
 
           // レイアウト定数（px）
-          const padding = 12;
+          const topPadding = 12;
+          const bottomPadding = 56;
           const minGap = 26;
 
           // 総日数に比例して高さを追加し、セグメントの圧縮を避ける（1日あたり0.55px）
@@ -97,9 +98,14 @@ export default function Timeline({ songs }: { songs: Song[] }) {
 
           // マイルストーン数に応じて確実に十分な高さを確保する
           // API 由来のマイルストーンが増えた場合でも縦方向の余裕を持たせる
-          const heightByItems = padding * 2 + uniqueMilestones.length * 40;
+          const heightByItems =
+            topPadding + bottomPadding + uniqueMilestones.length * 40;
 
-          const timelineHeight = Math.max(800, heightByItems, heightByDays);
+          const timelineHeight = Math.max(
+            800,
+            heightByItems,
+            heightByDays + topPadding + bottomPadding,
+          );
 
           const routeRanges = ROUTE_RANGES.map((r) => {
             const from = new Date(r.from).setHours(0, 0, 0, 0);
@@ -138,7 +144,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
           });
 
           return (
-            <div className="flex" style={{ height: timelineHeight + 30 }}>
+            <div className="flex" style={{ height: timelineHeight }}>
               <div className="w-12 relative mr-2 h-full">
                 {overlaps.map((o, i) => {
                   if (o.dur === 0) return null;
@@ -235,14 +241,16 @@ export default function Timeline({ songs }: { songs: Song[] }) {
               </div>
               <div className="flex-1 relative h-full">
                 {(() => {
-                  const padding = 12;
                   const minGap = 26; // px
-                  const avail = Math.max(100, timelineHeight - padding * 2);
+                  const avail = Math.max(
+                    100,
+                    timelineHeight - topPadding - bottomPadding,
+                  );
 
                   // 生の位置（px、上からの距離）
                   const raw = uniqueMilestones.map((m) => {
                     const t = (m.date.getTime() - start.getTime()) / totalRange;
-                    return padding + Math.max(0, Math.min(1, t)) * avail;
+                    return topPadding + Math.max(0, Math.min(1, t)) * avail;
                   });
 
                   // 前方/後方パスで最小間隔を維持
@@ -272,8 +280,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                   }
 
                   // 利用可能範囲にクランプし、はみ出す場合はシフト
-                  const topLimit = padding;
-                  const bottomLimit = padding + avail;
+                  const topLimit = topPadding;
+                  const bottomLimit = topPadding + avail;
                   // 下側のオーバーフローを計算
                   const overflow = Math.max(0, adj[n - 1] - bottomLimit);
                   if (overflow > 0) {
@@ -290,7 +298,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                       Math.floor(
                         (m.date.getTime() - activityStart.getTime()) / msPerDay,
                       ) + 1;
-                    const topPx = Math.round(adj[idx] ?? padding);
+                    const topPx = Math.round(adj[idx] ?? topPadding);
                     return (
                       <div
                         key={idx}

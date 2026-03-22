@@ -7,6 +7,7 @@ import useMyBestNineSongs, {
   MyBestNineSongs,
 } from "@/app/hook/useMyBestNineSongs";
 import useSongs from "@/app/hook/useSongs";
+import { useGlobalPlayer } from "@/app/hook/useGlobalPlayer";
 import { Song } from "@/app/types/song";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 
@@ -23,6 +24,15 @@ export default function Page() {
 
   const { allSongs, isLoading: isSongsLoading } = useSongs();
   const { decodeFromUrlParam } = useMyBestNineSongs();
+  const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
+    useGlobalPlayer();
+
+  const handlePreviewSong = (song: Song) => {
+    setCurrentSong(song);
+    setCurrentTime(Number(song.start));
+    setIsMinimized(true);
+    setIsPlaying(true);
+  };
 
   const normalizeStart = (value: unknown): string | null => {
     if (value === null || value === undefined) return null;
@@ -156,11 +166,11 @@ export default function Page() {
             {selection.title}
           </h1>
           {selection.author && (
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-lg text-gray-600 dark:text-gray-200 mb-4">
               by {selection.author}
             </p>
           )}
-          <p className="text-sm text-gray-500 dark:text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-200">
             {selectedSongs.length}曲
             {missingCount > 0 && (
               <span className="ml-2 text-yellow-600 dark:text-yellow-400">
@@ -174,39 +184,50 @@ export default function Page() {
         {selectedSongs.length > 0 ? (
           <div className="grid grid-cols-3 gap-4 lg:gap-6 mb-8">
             {selectedSongs.map((song, idx) => (
-              <Link
+              <div
                 key={`${song.video_id}-${song.start}-${idx}`}
-                href={`/?v=${song.video_id}&t=${song.start}s`}
                 className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
               >
-                <div className="aspect-video bg-black relative overflow-hidden">
-                  <YoutubeThumbnail
-                    videoId={song.video_id}
-                    alt={song.title}
-                    fill={true}
-                  />
-                  {/* オーバーレイ */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <svg
-                      className="w-12 h-12 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                    </svg>
+                <button
+                  type="button"
+                  onClick={() => handlePreviewSong(song)}
+                  aria-label={`${song.title} をミニプレイヤで再生`}
+                  className="block w-full text-left cursor-pointer"
+                >
+                  <div className="aspect-video bg-black relative overflow-hidden">
+                    <YoutubeThumbnail
+                      videoId={song.video_id}
+                      alt={song.title}
+                      fill={true}
+                    />
+                    {/* オーバーレイ */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <svg
+                        className="w-12 h-12 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
+                </button>
 
                 {/* 曲情報 */}
                 <div className="p-3 lg:p-4">
-                  <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
-                    {song.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                  <Link
+                    href={`/watch?v=${song.video_id}&t=${song.start}`}
+                    className="block"
+                  >
+                    <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
+                      {song.title}
+                    </h3>
+                  </Link>
+                  <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
                     {song.artist}
                   </p>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

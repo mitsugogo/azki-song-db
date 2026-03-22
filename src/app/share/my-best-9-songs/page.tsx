@@ -36,6 +36,7 @@ export async function generateMetadata({
   if (normalizedTitle) {
     pageUrl.searchParams.set("title", normalizedTitle);
   }
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title: pageTitle,
@@ -49,7 +50,7 @@ export async function generateMetadata({
       locale: "ja_JP",
       images: [
         {
-          url: ogImageUrl.toString(),
+          url: ogImagePath,
           width: 1200,
           height: 630,
           alt: `${siteConfig.siteName} - ${ogTitle}`,
@@ -60,7 +61,10 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
-      images: [ogImageUrl.toString()],
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical: pageUrl.toString(),
     },
   };
 }

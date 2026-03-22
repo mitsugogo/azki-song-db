@@ -1,5 +1,6 @@
 export const siteConfig = {
   siteName: "AZKi Song Database",
+  siteNameUpper: "AZKi SONG DATABASE",
   shortName: "AZ Song DB",
   siteSlug: "azki-song-db",
 
@@ -7,6 +8,8 @@ export const siteConfig = {
   talentName: "AZKi",
   channelName: "AZKi Channel",
   channelUrl: "https://www.youtube.com/@AZKi",
+  xName: "AZKi_VDiVA",
+  xUrl: "https://x.com/AZKi_VDiVA",
   // 本番のURL
   siteUrl: "https://azki-song-db.vercel.app/",
 };

@@ -22,14 +22,14 @@ test.describe("Filtered TOP iframe updates", () => {
       "no milestone data available for testing",
     );
 
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Use the first available milestone
     const milestone = milestones[0];
 
     // Navigate to the milestone filtered page
-    await page.goto(`/?q=milestone:${encodeURIComponent(milestone)}`);
+    await page.goto(`/watch?q=milestone:${encodeURIComponent(milestone)}`);
     await page.waitForLoadState("domcontentloaded");
 
     // Wait for loading overlay to disappear

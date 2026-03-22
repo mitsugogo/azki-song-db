@@ -2,6 +2,16 @@
 export interface CollabUnit {
   members: string[]; // メンバー名配列（ソート順は問わない）
   unitName: string; // 通称
+
+  // 結成に関する情報
+  formationDate?: string; // 結成日（ユニット名の初出）
+  formationExtraInfo?: string; // 結成に関する追加情報（例: 配信内容の説明）
+  formationExtraURL?: string; // 結成に関するURL（例: Xの投稿や配信URL）
+
+  // 活動開始日（ユニット名結成前からの活動）
+  activityStartDate?: string; // 活動開始日（ユニット名の初出より前に曲を出したりした場合）
+  activityStartExtraInfo?: string; // 活動開始に関する追加情報
+  activityStartExtraURL?: string; // 活動開始に関するURL
 }
 
 // あいうえお順ソート関数
@@ -14,10 +24,17 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "星街すいせい"],
     unitName: "AS_tar",
+    formationDate: "2024-06-02",
+    formationExtraInfo:
+      "PlateUp!配信にてアンケートをしてユニット名が正式に決定。",
+    formationExtraURL: "https://youtu.be/fVS8qkHfBOg?t=8254",
   },
   {
     members: ["AZKi", "風真いろは"],
     unitName: "あずいろ",
+    formationDate: "2022-09-07",
+    formationExtraInfo: "アンドロイドガールのカバーがあずいろの初出。",
+    formationExtraURL: "https://www.youtube.com/watch?v=_NC_pqMt5rY",
   },
   {
     members: ["AZKi", "ときのそら", "ロボ子さん", "さくらみこ", "星街すいせい"],
@@ -26,6 +43,10 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["ときのそら", "AZKi"],
     unitName: "SorAZ",
+    formationDate: "2019-07-27",
+    formationExtraInfo:
+      "「【SPライブゲスト：ときのそら】AZKi生放送 #8　Talk&Live」の配信内で、SorAZのユニット名が決定。「そらちゃん」と呼び始めたのもここから。",
+    formationExtraURL: "https://www.youtube.com/watch?v=flbnSvDohAA",
   },
   {
     members: ["天音かなた", "沙花叉クロヱ", "AZKi"],
@@ -46,6 +67,10 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "雪花ラミィ", "博衣こより"],
     unitName: "KoZMy",
+    formationDate: "2025-08-03",
+    formationExtraInfo:
+      "2025/08/03、3人によるマシュマロ雑談配信の告知でKoZMyが初めて使用された。",
+    formationExtraURL: "https://x.com/hakuikoyori/status/1951661145338896855",
   },
   {
     members: ["AZKi", "音乃瀬奏"],
@@ -114,6 +139,10 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "アキ・ローゼンタール", "大神ミオ"],
     unitName: "RosaMia",
+    formationDate: "2026-02-19",
+    formationExtraInfo:
+      "オフコラボで行われたカラオケ配信にてユニット名が決定。",
+    formationExtraURL: "https://www.youtube.com/watch?v=jRX_EeOZc-I&t=2588s",
   },
   {
     members: ["AZKi", "響咲リオナ"],

@@ -171,7 +171,7 @@ export default function AlbumClient({
               <FaYoutube className="mr-2" /> YouTubeで見る
             </Link>
             <Link
-              href={`/?q=album:${encodeURIComponent(albumName)}&v=${leadSong.video_id}`}
+              href={`/watch?q=album:${encodeURIComponent(albumName)}&v=${leadSong.video_id}`}
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center"
             >
               <FaDatabase className="mr-2" /> データベースで見る
@@ -221,7 +221,7 @@ export default function AlbumClient({
                         <FaYoutube className="text-xs" /> YouTube
                       </Link>
                       <Link
-                        href={`/?v=${song.video_id}&q=album:${encodeURIComponent(song.album ?? "")}`}
+                        href={`/watch?v=${song.video_id}&q=album:${encodeURIComponent(song.album ?? "")}`}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold px-2.5 py-1.5 leading-none"
                       >
                         <FaPlay className="text-xs" /> 再生

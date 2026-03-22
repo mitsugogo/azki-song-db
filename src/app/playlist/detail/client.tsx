@@ -35,6 +35,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses } from "../../theme";
 import useSongs from "../../hook/useSongs";
+import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
+import { LuPlay } from "react-icons/lu";
+import YoutubeThumbnail from "../../components/YoutubeThumbnail";
+import { FaYoutube } from "react-icons/fa6";
 
 type PlaylistWithSongs = {
   id: string;
@@ -49,17 +53,15 @@ type PlaylistWithSongs = {
 const SortableRow = ({
   s,
   index,
-  playlist,
-  encodePlaylistUrlParam,
   isSelected,
   onCheckboxChange,
+  onPreview,
 }: {
   s: PlaylistWithSongs["songs"][0];
   index: number;
-  playlist: Playlist;
-  encodePlaylistUrlParam: (playlist: Playlist) => string;
   isSelected: boolean;
   onCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onPreview: () => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: `${s.videoId}-${s.start}` });
@@ -68,6 +70,14 @@ const SortableRow = ({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const youtubeUrl = `https://www.youtube.com/watch?v=${s.videoId}${
+    Number(s.start) > 0 ? `&t=${s.start}s` : ""
+  }`;
+
+  const formattedBroadcastDate = s.songinfo.broadcast_at
+    ? new Date(s.songinfo.broadcast_at).toLocaleDateString()
+    : null;
 
   return (
     <Table.Tr
@@ -97,11 +107,43 @@ const SortableRow = ({
         </div>
       </Table.Td>
       <Table.Td>
-        <Link
-          href={`/?v=${s.videoId}${Number(s.start) > 0 ? `&t=${s.start}` : ""}&playlist=${encodePlaylistUrlParam(playlist)}`}
-        >
-          <Button color="gray">再生</Button>
-        </Link>
+        <div className="flex items-start gap-3 p-2.5" style={{ minWidth: 260 }}>
+          <div className="relative h-20 w-34 shrink-0 overflow-hidden rounded-lg bg-black">
+            <YoutubeThumbnail
+              videoId={s.videoId}
+              alt={s.songinfo.video_title}
+              fill={true}
+              imageClassName="object-cover"
+            />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="line-clamp-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white">
+              {s.songinfo.video_title}
+            </div>
+            {formattedBroadcastDate && (
+              <div className="mt-1 text-xs text-gray-500 dark:text-gray-200">
+                {formattedBroadcastDate} 配信
+              </div>
+            )}
+
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700"
+              >
+                <FaYoutube className="mr-1" />
+                YouTube
+              </a>
+              <Button color="pink" size="compact-sm" onClick={onPreview}>
+                <LuPlay className="mr-1" />
+                プレビュー
+              </Button>
+            </div>
+          </div>
+        </div>
       </Table.Td>
     </Table.Tr>
   );
@@ -113,14 +155,15 @@ export default function PlaylistDetailPage() {
   const [playlistSongs, setPlaylistSongs] = useState<
     PlaylistWithSongs["songs"]
   >([]);
-  const { playlists, updatePlaylist, encodePlaylistUrlParam, clearAllSongs } =
-    usePlaylists();
+  const { playlists, updatePlaylist, clearAllSongs } = usePlaylists();
   const {
     favorites,
     reorderFavorites,
     clearAllFavorites,
     removeMultipleFavorites,
   } = useFavorites();
+  const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
+    useGlobalPlayer();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [isFavoritesMode, setIsFavoritesMode] = useState(false);
 
@@ -281,6 +324,13 @@ export default function PlaylistDetailPage() {
     }
   };
 
+  const handlePreviewSong = (song: Song) => {
+    setCurrentSong(song);
+    setCurrentTime(Number(song.start));
+    setIsMinimized(true);
+    setIsPlaying(true);
+  };
+
   if (isLoading) {
     return (
       <div className="grow lg:p-6 lg:pb-0">
@@ -327,7 +377,7 @@ export default function PlaylistDetailPage() {
           <Button
             color="red"
             onClick={handleDeleteSelected}
-            className="sm:hidden"
+            disabled={selection.length === 0}
           >
             選択した曲を削除
           </Button>
@@ -337,7 +387,6 @@ export default function PlaylistDetailPage() {
               isFavoritesMode ? clearAllFavorites() : clearAllSongs(playlist)
             }
             disabled={playlist.songs.length === 0}
-            className="sm:hidden"
           >
             <FaRegTrashCan className="mr-2" />{" "}
             <span className="hidden lg:inline">プレイリスト内の曲を</span>
@@ -394,17 +443,15 @@ export default function PlaylistDetailPage() {
                       key={rowKey}
                       s={s}
                       index={index}
-                      playlist={playlist}
-                      encodePlaylistUrlParam={encodePlaylistUrlParam}
                       isSelected={isSelected}
                       onCheckboxChange={(event) => {
-                        console.log(rowKey);
                         if (event.currentTarget.checked) {
                           handlers.select(rowKey);
                         } else {
                           handlers.deselect(rowKey);
                         }
                       }}
+                      onPreview={() => handlePreviewSong(s.songinfo)}
                     />
                   );
                 })}

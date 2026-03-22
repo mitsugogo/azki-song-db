@@ -7,7 +7,7 @@ import { VercelToolbar } from "@vercel/toolbar/next";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import ClientProviders from "./components/ClientProviders";
-import { siteConfig } from "./config/siteConfig";
+import { siteConfig, baseUrl } from "./config/siteConfig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +37,7 @@ const notoSans = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: `${siteConfig.siteName}`,
   description:
     "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
@@ -50,13 +51,22 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     type: "website",
     images: [
-      `${siteConfig.siteUrl}api/og?title=${encodeURIComponent(
-        siteConfig.siteName,
-      )}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
+      {
+        url: `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.siteName} - AZKiさんの歌のデータベース`,
+      },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    title: `${siteConfig.siteName}`,
+    description:
+      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    images: [
+      `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
+    ],
   },
   icons: {
     icon: "/favicon.ico",
@@ -102,7 +112,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
       </head>
       <body
-        className={`antialiased dark:bg-gray-900 transition-colors duration-700`}
+        className={`antialiased bg-white dark:bg-azki-gradient bg-fixed transition-colors duration-700`}
       >
         <MantineProvider theme={theme}>
           <ClientProviders>

@@ -49,7 +49,7 @@ test.describe("プレイリスト機能", () => {
 
   test("追加・再生", async ({ page }) => {
     // トップページへ
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // 設定ボタンをクリック

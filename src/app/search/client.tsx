@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Song } from "../types/song";
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
@@ -162,42 +168,73 @@ const SearchPageClient = () => {
   );
 
   const filterModeData = useSearchFilterModeData(allSongs, filterMode);
+  const isShowingSearchResults =
+    !isLoading && hasSearchTerm && filteredSongs.length > 0;
 
   const parentRef = useRef<HTMLDivElement | null>(null);
-  const cols = Math.max(colCount, 1);
+  const desiredCols = Math.max(colCount, 1);
+  const [resolvedCols, setResolvedCols] = useState<number>(desiredCols);
+  const cols = Math.max(resolvedCols, 1);
   const rowCount = Math.ceil(filteredSongs.length / cols);
   const [estimatedRowHeight, setEstimatedRowHeight] = useState<number>(320);
   const [estimatedItemWidth, setEstimatedItemWidth] = useState<number>(240);
   const [wrapperWidth, setWrapperWidth] = useState<number | "100%">("100%");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!isShowingSearchResults) {
+      return;
+    }
+
     const compute = () => {
-      const containerWidth =
-        parentRef.current?.clientWidth || windowWidth || 1024;
+      const parentElement = parentRef.current;
+      const fallbackWidth = windowWidth || 1024;
+      let containerWidth = fallbackWidth;
+
+      if (parentElement) {
+        const style = window.getComputedStyle(parentElement);
+        const horizontalPadding =
+          parseFloat(style.paddingLeft || "0") +
+          parseFloat(style.paddingRight || "0");
+        const availableWidth = parentElement.clientWidth - horizontalPadding;
+        // SearchResultsView 側の p-3（左右 12px ずつ）分を差し引く
+        containerWidth = Math.max(availableWidth - 24, 0);
+      }
+
       const gap = 16;
-      const totalGap = Math.max(cols - 1, 0) * gap;
-      const padding = 24;
-      const rawItemWidth = (containerWidth - totalGap - padding) / cols;
-      const itemWidth = Math.max(Math.floor(rawItemWidth), 120);
+      const minItemWidth = 120;
+      const maxColsByWidth = Math.max(
+        1,
+        Math.floor((containerWidth + gap) / (minItemWidth + gap)),
+      );
+      const nextCols = Math.min(desiredCols, maxColsByWidth);
+      const totalGap = Math.max(nextCols - 1, 0) * gap;
+      const rawItemWidth = (containerWidth - totalGap) / nextCols;
+      const itemWidth = Math.max(Math.floor(rawItemWidth), minItemWidth);
       const thumbHeight = itemWidth * (9 / 16);
       const infoHeight = 76;
       const rowHeight = Math.round(thumbHeight + infoHeight + 8);
+      setResolvedCols(nextCols);
       setEstimatedRowHeight(rowHeight);
       setEstimatedItemWidth(itemWidth);
 
-      const computedWrapper = itemWidth * cols + totalGap + padding;
+      const computedWrapper = itemWidth * nextCols + totalGap;
       setWrapperWidth(Math.min(computedWrapper, containerWidth));
     };
 
-    compute();
+    const rafId = window.requestAnimationFrame(compute);
+    const timeoutId1 = window.setTimeout(compute, 120);
+    const timeoutId2 = window.setTimeout(compute, 480);
     const ro = new ResizeObserver(() => compute());
     if (parentRef.current) ro.observe(parentRef.current);
     window.addEventListener("resize", compute);
     return () => {
+      window.cancelAnimationFrame(rafId);
+      window.clearTimeout(timeoutId1);
+      window.clearTimeout(timeoutId2);
       ro.disconnect();
       window.removeEventListener("resize", compute);
     };
-  }, [windowWidth, cols]);
+  }, [windowWidth, desiredCols, isShowingSearchResults]);
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -247,16 +284,18 @@ const SearchPageClient = () => {
   }
 
   return (
-    <SearchBrowseView
-      allSongs={allSongs}
-      searchValue={searchValue}
-      setSearchValue={setSearchValue}
-      setSearchTerm={setSearchTerm}
-      filterMode={filterMode}
-      setFilterMode={setFilterMode}
-      categorySongs={categorySongs}
-      filterModeData={filterModeData}
-    />
+    <>
+      <SearchBrowseView
+        allSongs={allSongs}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        setSearchTerm={setSearchTerm}
+        filterMode={filterMode}
+        setFilterMode={setFilterMode}
+        categorySongs={categorySongs}
+        filterModeData={filterModeData}
+      />
+    </>
   );
 };
 

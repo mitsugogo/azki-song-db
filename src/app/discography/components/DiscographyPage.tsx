@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
+import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
 import Link from "next/link";
 import { breadcrumbClasses } from "../../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import { useDiscographyData } from "../hooks/useDiscographyData";
@@ -146,167 +146,165 @@ export default function DiscographyPage({
   };
 
   return (
-    <OverlayScrollbarsComponent
-      element="div"
-      className="lg:p-6 flex flex-col w-full h-full"
-      options={{ scrollbars: { autoHide: "leave" } }}
-      defer
-    >
-      <Breadcrumbs
-        aria-label="Breadcrumb"
-        className={breadcrumbClasses.root}
-        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-      >
-        <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </Link>
-        <Link href="/discography" className={breadcrumbClasses.link}>
-          楽曲一覧
-        </Link>
+    <>
+      <div className="grow lg:p-6 overflow-auto">
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          className={breadcrumbClasses.root}
+          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+        >
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="w-4 h-4 mr-1.5" /> Home
+          </Link>
+          <Link href="/discography" className={breadcrumbClasses.link}>
+            楽曲一覧
+          </Link>
 
-        {/** カテゴリに応じたパスを追加 */}
-        {(() => {
-          try {
-            const pathParts = pathname.split("/").filter(Boolean);
-            if (pathParts.length >= 2 && pathParts[0] === "discography") {
-              const cat = pathParts[1];
-              let label = "";
-              if (cat.includes("original")) label = "オリジナル楽曲";
-              else if (
-                cat.includes("collab") ||
-                cat.includes("collabo") ||
-                cat.includes("unit")
-              )
-                label = "ユニット・ゲスト楽曲";
-              else if (cat.includes("cover")) label = "カバー楽曲";
+          {/** カテゴリに応じたパスを追加 */}
+          {(() => {
+            try {
+              const pathParts = pathname.split("/").filter(Boolean);
+              if (pathParts.length >= 2 && pathParts[0] === "discography") {
+                const cat = pathParts[1];
+                let label = "";
+                if (cat.includes("original")) label = "オリジナル楽曲";
+                else if (
+                  cat.includes("collab") ||
+                  cat.includes("collabo") ||
+                  cat.includes("unit")
+                )
+                  label = "ユニット・ゲスト楽曲";
+                else if (cat.includes("cover")) label = "カバー楽曲";
 
-              if (label) {
-                return (
-                  <Link href={pathname} className={breadcrumbClasses.link}>
-                    {label}
-                  </Link>
-                );
+                if (label) {
+                  return (
+                    <Link href={pathname} className={breadcrumbClasses.link}>
+                      {label}
+                    </Link>
+                  );
+                }
               }
+            } catch (e) {
+              // ignore
             }
-          } catch (e) {
-            // ignore
-          }
-          return null;
-        })()}
-      </Breadcrumbs>
+            return null;
+          })()}
+        </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        {/* タブによって表示を切り替え */}
-        {activeTab === 0
-          ? "オリジナル楽曲の一覧です。"
-          : activeTab === 1
-            ? "ユニット・ゲスト楽曲の一覧です。"
-            : "カバー楽曲の一覧です。"}
-      </p>
+        <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
+        <p className="mb-6 text-sm text-muted-foreground">
+          {/* タブによって表示を切り替え */}
+          {activeTab === 0
+            ? "オリジナル楽曲の一覧です。"
+            : activeTab === 1
+              ? "ユニット・ゲスト楽曲の一覧です。"
+              : "カバー楽曲の一覧です。"}
+        </p>
 
-      <DiscographyControls
-        groupByAlbum={groupByAlbum}
-        groupByYear={groupByYear}
-        onlyOriginalMV={onlyOriginalMV}
-        activeTab={activeTab}
-        onGroupByAlbumChange={handleGroupByAlbumChange}
-        onGroupByYearChange={handleGroupByYearChange}
-        onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
-      />
+        <DiscographyControls
+          groupByAlbum={groupByAlbum}
+          groupByYear={groupByYear}
+          onlyOriginalMV={onlyOriginalMV}
+          activeTab={activeTab}
+          onGroupByAlbumChange={handleGroupByAlbumChange}
+          onGroupByYearChange={handleGroupByYearChange}
+          onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
+        />
 
-      <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-        <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+        <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
+          <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
+            <Tab
+              as="button"
+              className={({ selected }) =>
+                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
                   : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
-            }
-          >
-            オリジナル楽曲 (
-            {
-              Array.from(
-                new Set(
-                  originalSongCountsByReleaseDate.map((s) => s.song.title),
-                ),
-              ).length
-            }
-            )
-          </Tab>
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              }
+            >
+              オリジナル楽曲 (
+              {
+                Array.from(
+                  new Set(
+                    originalSongCountsByReleaseDate.map((s) => s.song.title),
+                  ),
+                ).length
+              }
+              )
+            </Tab>
+            <Tab
+              as="button"
+              className={({ selected }) =>
+                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
                   : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
-            }
-          >
-            ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
-          </Tab>
-          <Tab
-            as="button"
-            className={({ selected }) =>
-              `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
+              }
+            >
+              ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
+            </Tab>
+            <Tab
+              as="button"
+              className={({ selected }) =>
+                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
               ${
                 selected
                   ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
                   : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
               }`
-            }
-          >
-            カバー楽曲 ({coverSongCountsByReleaseDate.length})
-          </Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <ContentRenderer
-              data={originalSongCountsByReleaseDate}
-              tabIndex={0}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[0] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-          <TabPanel>
-            <ContentRenderer
-              data={unitSongCountsByReleaseDate}
-              tabIndex={1}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[1] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-          <TabPanel>
-            <ContentRenderer
-              data={coverSongCountsByReleaseDate}
-              tabIndex={2}
-              groupByAlbum={groupByAlbum}
-              groupByYear={groupByYear}
-              expandedItem={expandedItem}
-              visibleItems={visibleItems[2] || []}
-              anchorToScroll={anchorToScroll}
-              targetRef={targetRef}
-              onItemClick={handleItemClick}
-            />
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
-    </OverlayScrollbarsComponent>
+              }
+            >
+              カバー楽曲 ({coverSongCountsByReleaseDate.length})
+            </Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <ContentRenderer
+                data={originalSongCountsByReleaseDate}
+                tabIndex={0}
+                groupByAlbum={groupByAlbum}
+                groupByYear={groupByYear}
+                expandedItem={expandedItem}
+                visibleItems={visibleItems[0] || []}
+                anchorToScroll={anchorToScroll}
+                targetRef={targetRef}
+                onItemClick={handleItemClick}
+              />
+            </TabPanel>
+            <TabPanel>
+              <ContentRenderer
+                data={unitSongCountsByReleaseDate}
+                tabIndex={1}
+                groupByAlbum={groupByAlbum}
+                groupByYear={groupByYear}
+                expandedItem={expandedItem}
+                visibleItems={visibleItems[1] || []}
+                anchorToScroll={anchorToScroll}
+                targetRef={targetRef}
+                onItemClick={handleItemClick}
+              />
+            </TabPanel>
+            <TabPanel>
+              <ContentRenderer
+                data={coverSongCountsByReleaseDate}
+                tabIndex={2}
+                groupByAlbum={groupByAlbum}
+                groupByYear={groupByYear}
+                expandedItem={expandedItem}
+                visibleItems={visibleItems[2] || []}
+                anchorToScroll={anchorToScroll}
+                targetRef={targetRef}
+                onItemClick={handleItemClick}
+              />
+            </TabPanel>
+          </TabPanels>
+        </TabGroup>
+        <ScrollToTopButton />
+      </div>
+    </>
   );
 }

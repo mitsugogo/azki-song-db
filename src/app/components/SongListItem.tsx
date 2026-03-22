@@ -42,10 +42,10 @@ const SongListItem = React.memo(
       return (
         <li
           ref={ref}
-          className={`rounded relative cursor-pointer transition shadow-md flex lg:block dark:text-gray-50 ${
+          className={`relative cursor-pointer transition flex lg:block dark:text-gray-50 rounded-xl ${
             isSelected
-              ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200"
-              : "bg-gray-50/50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200 shadow-md"
+              : "card-glassmorphism hover-lift-shadow"
           }`}
           onClick={() => {
             try {
@@ -74,7 +74,7 @@ const SongListItem = React.memo(
           data-index={`${song.video_id}-${song.start}-${song.title}`}
         >
           <Link
-            href={`/?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}s` : ""}`}
+            href={`/watch?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`}
             className="flex lg:block lg:w-full"
             onClick={(e) => {
               // デフォルトのLinkナビゲーションを防ぎ、
@@ -84,7 +84,7 @@ const SongListItem = React.memo(
               } catch (_) {}
             }}
           >
-            <div className="flex lg:block lg:w-full mb-0 lg:mb-2 text-center ">
+            <div className="flex lg:block lg:w-full mb-0 lg:mb-2 text-center relative">
               <Indicator
                 color="cyan"
                 size={8}
@@ -102,15 +102,22 @@ const SongListItem = React.memo(
                   />
                 </div>
               </Indicator>
+              {song.milestones && song.milestones.length > 0 && (
+                <div className="absolute top-0 left-0 z-20 text-xs truncate">
+                  <div>
+                    <MilestoneBadge song={song} outClassName="mb-1.5" />
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="w-full p-0 pl-2 pt-1 lg:pl-3 lg:p-3 lg:pt-0">
+            <div className="w-full space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
               <div
-                className={`w-full text-sm font-semibold line-clamp-1 lg:line-clamp-3`}
+                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white`}
               >
                 <span
                   className={`${
                     isHide
-                      ? `h-3.5 bg-light-gray-300 rounded-sm dark:bg-gray-700 mb-1`
+                      ? `h-3.5 bg-light-gray-300 rounded-sm dark:bg-gray-700 block`
                       : ""
                   }`}
                 >
@@ -120,48 +127,33 @@ const SongListItem = React.memo(
                 </span>
               </div>
               <div
-                className={`w-full text-xs text-gray-600 dark:text-gray-200 line-clamp-1 lg:line-clamp-3`}
+                className={`line-clamp-1 lg:line-clamp-2 text-xs text-gray-600 dark:text-gray-100`}
               >
                 <span
                   className={`${
                     isHide
-                      ? `h-1.5 bg-light-gray-300 rounded-sm dark:bg-gray-700 mb-1`
+                      ? `h-1.5 bg-light-gray-300 rounded-sm dark:bg-gray-700 block`
                       : ""
                   }`}
                 >
                   <span className={`${isHide ? "opacity-0" : ""}`}>
-                    {song.artist} - {song.sing}
+                    {song.artist}
                   </span>
                 </span>
               </div>
-              <div className="flex gap-x-2 text-xs text-gray-600 dark:text-gray-200">
-                {song.broadcast_at && (
-                  <>{new Date(song.broadcast_at).toLocaleDateString()}</>
-                )}
+              <div className="flex items-center justify-between text-[0.7rem] uppercase  text-gray-400 dark:text-gray-300">
+                <span>
+                  {song.broadcast_at &&
+                    new Date(song.broadcast_at).toLocaleDateString()}
+                </span>
                 {song.live_call && (
-                  <span className="text-xs lg:hidden">
+                  <span className="text-xs">
                     <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
                       コール
                     </Badge>
                   </span>
                 )}
               </div>
-              {song.live_call && isOriginalSongsMode && (
-                <div className="hidden lg:flex gap-x-2 text-xs text-gray-600 dark:text-gray-200 mt-2">
-                  <span className="text-xs">
-                    <Badge className="inline text-xs bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
-                      コーレス
-                    </Badge>
-                  </span>
-                </div>
-              )}
-              {song.milestones && song.milestones.length > 0 && (
-                <div className="absolute bottom-0 right-2 lg:top-0 lg:left-0 text-xs truncate">
-                  <div>
-                    <MilestoneBadge song={song} outClassName="mb-1.5" />
-                  </div>
-                </div>
-              )}
             </div>
           </Link>
         </li>

@@ -231,3 +231,50 @@ body {
   width: 3px;
   height: 4px;
 }
+
+/* ユーティリティ */
+@layer utilities {
+  /* 背景グラデーション */
+  .bg-azki-gradient {
+    @apply bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)];
+  }
+
+  .dark\:bg-azki-gradient:where(.dark, .dark *) {
+    background-attachment: fixed;
+    background-image:
+      radial-gradient(circle at top, rgba(190, 24, 93, 0.2), transparent 34%),
+      linear-gradient(180deg, #111827 0%, #0f172a 100%);
+  }
+
+  /* グラスモーフィズムカード */
+  .card-glassmorphism {
+    @apply rounded-2xl border border-gray-50/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)];
+  }
+
+  /* グラスモーフィズムカード（大きめシャドウ版） */
+  .card-glassmorphism-lg {
+    @apply rounded-4xl border border-gray-50/70 bg-white/90 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)];
+  }
+
+  /* ホバー浮上アニメーション */
+  .hover-lift-animation {
+    @apply transition;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift-animation:hover {
+      @apply -translate-y-1;
+    }
+  }
+
+  /* ホバーボーダーカラー変更　+　シャドウ拡大 */
+  .hover-lift-shadow {
+    @apply transition;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift-shadow:hover {
+      @apply -translate-y-1 border-primary/30 bg-white/95 shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-pink-300/30 dark:bg-gray-900/85;
+    }
+  }
+}
