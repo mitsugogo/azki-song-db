@@ -74,6 +74,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ogImageUrl.searchParams.set("subtitle", subtitle);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const canonical = hasValidYear
+    ? new URL(`/summary/${yearNum}`, baseUrl).toString()
+    : new URL("/summary", baseUrl).toString();
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     ...metadata,
@@ -81,7 +85,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
-      images: [ogImageUrl.toString()],
+      title: titleBase,
+      description: subtitle,
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: titleBase }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleBase,
+      description: subtitle,
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }
@@ -123,7 +142,7 @@ export default async function Page({ params }: Props) {
       : null;
 
   return (
-    <div className="flex-grow p-2 lg:p-6 lg:pb-0 overflow-auto">
+    <div className="grow p-2 lg:p-6 lg:pb-0 overflow-auto">
       <div className="mb-4">
         <Breadcrumbs
           aria-label="Breadcrumb"

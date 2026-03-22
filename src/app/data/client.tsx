@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Song } from "../types/song";
 import Link from "next/link";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import {
   useReactTable,
   getCoreRowModel,
@@ -28,6 +29,9 @@ export default function ClientTable() {
   const songs = allSongs;
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [scrollViewport, setScrollViewport] = useState<HTMLElement | null>(
+    null,
+  );
 
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
@@ -50,6 +54,16 @@ export default function ClientTable() {
   useEffect(() => {
     // songs and isLoading are provided by useSongs
   }, [allSongs, isLoading]);
+
+  // OverlayScrollbars の viewport 要素を取得して ScrollToTopButton に渡す
+  useEffect(() => {
+    const viewport = tableContainerRef.current
+      ?.osInstance()
+      ?.elements().viewport;
+    if (viewport instanceof HTMLElement) {
+      setScrollViewport(viewport);
+    }
+  }, [isLoading]);
 
   const rows = table.getRowModel().rows;
 
@@ -115,7 +129,7 @@ export default function ClientTable() {
                   {table.getHeaderGroups().map((headerGroup) => (
                     <div
                       key={headerGroup.id}
-                      className="flex flex-1 bg-light-gray-200 dark:bg-gray-700 dark:text-white"
+                      className="flex flex-1 bg-white/30 dark:bg-gray-900/40 border-b border-white/20 dark:border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(15,23,42,0.04)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:text-white"
                     >
                       {headerGroup.headers.map((header) => (
                         <div
@@ -187,10 +201,8 @@ export default function ClientTable() {
                           // height: `${virtualRow.size}px`,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className={`flex border-b border-light-gray-200/80 dark:bg-gray-800 dark:border-gray-700 hover:bg-light-gray-100 dark:hover:bg-gray-600 ${
-                          parseInt(row.id) % 2 === 0
-                            ? "bg-light-gray-100/50 dark:bg-gray-800/50"
-                            : "bg-white"
+                        className={`flex border-b border-light-gray-200/30 dark:border-gray-700/50 bg-white/15 dark:bg-gray-900/15 hover:bg-white/30 dark:hover:bg-gray-800/30 transition duration-150 ${
+                          parseInt(row.id) % 2 === 0 ? "" : ""
                         }`}
                       >
                         {row.getVisibleCells().map((cell) => (
@@ -216,6 +228,7 @@ export default function ClientTable() {
           </OverlayScrollbarsComponent>
         </div>
       </div>
+      <ScrollToTopButton scrollElement={scrollViewport} />
     </>
   );
 }

@@ -1,6 +1,5 @@
 import { ThemeProvider } from "flowbite-react";
-import { MantineProvider } from "@mantine/core";
-import { theme, flowbiteTheme } from "../../theme";
+import { flowbiteTheme } from "../../theme";
 import { siteConfig } from "@/app/config/siteConfig";
 
 // titleタグ
@@ -15,9 +14,7 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <MantineProvider theme={theme}>
-        <ThemeProvider theme={flowbiteTheme}>{children}</ThemeProvider>
-      </MantineProvider>
+      <ThemeProvider theme={flowbiteTheme}>{children}</ThemeProvider>
     </>
   );
 }

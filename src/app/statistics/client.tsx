@@ -309,6 +309,9 @@ export default function StatisticsPage() {
                     ? "viewCountBar"
                     : "default"
               }
+              countUnit={
+                activeTabConfig.dataKey === "videoCounts" ? "曲" : "回"
+              }
               {...(activeTabConfig.dataKey === "videoCounts" && {
                 onRowClick: handleVideoClick,
                 selectedVideoId: selectedVideoId,

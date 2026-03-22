@@ -10,7 +10,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("displays mobile action buttons", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Mobile action buttons should be visible
@@ -24,7 +24,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("surprise button plays random song", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Get initial song title
@@ -52,7 +52,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("original songs button filters to original songs", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // On mobile, scroll to ensure content is loaded
@@ -128,7 +128,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("playlist button opens playlist modal", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Scroll to bottom to ensure mobile action buttons are visible
@@ -163,7 +163,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("creates a new playlist from mobile", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Scroll to bottom to ensure mobile action buttons are visible
@@ -229,7 +229,7 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("closes playlist modal on mobile", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
 
     // Scroll to bottom to ensure mobile action buttons are visible

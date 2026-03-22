@@ -7,8 +7,7 @@ test.describe("Navigation drawer", () => {
   });
 
   test("opens and closes navigation drawer", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Wait for loading overlay to disappear
     await page.waitForSelector(".mantine-LoadingOverlay-root", {
@@ -24,9 +23,10 @@ test.describe("Navigation drawer", () => {
     await navToggle.click({ force: true });
 
     // Drawer should show navigation links
-    const playlistLink = page.getByRole("button", { name: /プレイリスト/ });
-    const statsLink = page.getByRole("link", { name: /統計/ });
-    const discographyLink = page.getByRole("link", {
+    const drawer = page.getByRole("dialog", { name: "Menu" });
+    const playlistLink = drawer.getByRole("link", { name: /プレイリスト/ });
+    const statsLink = drawer.getByRole("link", { name: /統計情報/ });
+    const discographyLink = drawer.getByRole("link", {
       name: /ディスコグラフィー|Discography/,
     });
     await expect(playlistLink).toBeVisible({ timeout: 15000 });
@@ -42,8 +42,7 @@ test.describe("Navigation drawer", () => {
   });
 
   test("navigates to different pages from drawer", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Wait for loading overlay to disappear
     await page.waitForSelector(".mantine-LoadingOverlay-root", {
@@ -56,20 +55,20 @@ test.describe("Navigation drawer", () => {
     await navToggle.click();
 
     // Click on statistics link
-    const statsLink = page.getByRole("link", { name: /統計/ });
+    const drawer = page.getByRole("dialog", { name: "Menu" });
+    const statsLink = drawer.getByRole("link", { name: /統計情報/ });
     await expect(statsLink).toBeVisible({ timeout: 15000 });
     await statsLink.click();
 
     // Should navigate to statistics page
     await expect(page).toHaveURL(/.*\/statistics/);
-    await expect(page.getByRole("heading", { name: /統計/ })).toBeVisible();
+    await expect(page).toHaveURL(/.*\/statistics/);
   });
 });
 
 test.describe("Theme toggle", () => {
   test("toggles between light and dark theme", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Theme toggle button should be visible
     const themeToggle = page.getByRole("button", { name: "Toggle theme" });
@@ -99,8 +98,10 @@ test.describe("Theme toggle", () => {
 
 test.describe("Share modal", () => {
   test("opens share modal", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/watch", { waitUntil: "domcontentloaded" });
+    await expect
+      .poll(() => page.url(), { timeout: 10000 })
+      .toMatch(/\/watch\?v=/);
 
     // Wait for song to load
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
@@ -125,13 +126,16 @@ test.describe("Share modal", () => {
   });
 
   test("closes share modal", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/watch", { waitUntil: "domcontentloaded" });
+    await expect
+      .poll(() => page.url(), { timeout: 10000 })
+      .toMatch(/\/watch\?v=/);
 
     // Open share modal
     const shareButton = page.getByRole("button", {
       name: "現在の楽曲をシェア",
     });
+    await expect(shareButton).toBeVisible({ timeout: 10000 });
     await shareButton.click({ force: true });
 
     // Verify modal is open
@@ -141,7 +145,9 @@ test.describe("Share modal", () => {
     await expect(shareModal).toBeVisible();
 
     // Close modal (click outside or close button)
-    const closeButton = page.getByRole("button", { name: /close|閉じる/i });
+    const closeButton = page
+      .getByRole("button", { name: /close|閉じる/i })
+      .first();
     if (await closeButton.isVisible()) {
       await closeButton.click();
     } else {

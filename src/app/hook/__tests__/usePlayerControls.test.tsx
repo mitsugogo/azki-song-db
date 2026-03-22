@@ -749,7 +749,7 @@ describe("usePlayerControls", () => {
 
   describe("handlePlayerOnReady", () => {
     it("再生開始が行われ、既存の URL パラメータは保持される", () => {
-      (window as any).location.href = "http://localhost/?v=vid1&t=120";
+      (window as any).location.href = "http://localhost/watch?v=vid1&t=120";
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
       const player = createMockPlayer();
 

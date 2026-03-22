@@ -36,6 +36,7 @@ export default function DataTable<
   selectedVideoId,
   songs,
   visualMode = "default",
+  countUnit = "回",
 }: {
   data: T[];
   caption: string;
@@ -48,6 +49,7 @@ export default function DataTable<
   selectedVideoId?: string | null;
   songs?: Song[];
   visualMode?: "default" | "ranked" | "viewCountBar";
+  countUnit?: string;
 }) {
   type ColumnSort = { id: string; desc: boolean };
 
@@ -280,17 +282,13 @@ export default function DataTable<
                           width: "100%",
                           transform: `translateY(${virtualRow.start - tableBodyOffsetTop}px)`,
                         }}
-                        className={`flex ${
+                        className={`flex border-b border-white/20 dark:border-white/10 ${
                           onRowClick ? "cursor-pointer select-none" : ""
                         } ${
                           parseInt(row.id) % 2 === 0
-                            ? "bg-light-gray-100 dark:bg-gray-800/70"
+                            ? "bg-white/15 dark:bg-gray-900/15"
                             : ""
-                        } ${
-                          visualMode === "ranked"
-                            ? "hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"
-                            : ""
-                        }`}
+                        } hover:bg-white/30 dark:hover:bg-gray-800/30 transition duration-150`}
                       >
                         {row.getVisibleCells().map((cell, idx) => (
                           <div
@@ -322,7 +320,7 @@ export default function DataTable<
                                     {Number(cell.getValue()).toLocaleString()}
                                   </span>
                                   <span className="text-light-gray-700 dark:text-light-gray-400">
-                                    回
+                                    {countUnit}
                                   </span>
                                 </div>
                                 <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
@@ -431,7 +429,7 @@ export default function DataTable<
                                     >
                                       <div className="shrink-0 w-20 px-3 py-1 text-center">
                                         <Link
-                                          href={`/?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}&q=video_id:${s.video_id}`}
+                                          href={`/watch?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}&q=video_id:${s.video_id}`}
                                           className=" hover:text-primary-600 dark:hover:text-white"
                                         >
                                           <BsPlayCircle

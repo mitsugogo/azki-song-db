@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@mantine/core";
 import { FaMusic, FaTag, FaUser, FaUsers } from "react-icons/fa6";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
+import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
@@ -157,10 +158,10 @@ const SearchBrowseView = ({
                   {category.songs.map((song) => (
                     <article
                       key={`${song.video_id}-${song.start}-${song.title}`}
-                      className="bg-white dark:bg-gray-800 rounded overflow-hidden border border-gray-200 dark:border-gray-700 hover:bg-primary-200 dark:hover:bg-gray-600 shadow-sm"
+                      className="card-glassmorphism hover-lift-shadow overflow-hidden"
                     >
                       <Link
-                        href={`/?v=${song.video_id}${song.start ? `&t=${song.start}s` : ""}`}
+                        href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}`}
                         className="block"
                       >
                         <div className="w-full aspect-video bg-black">
@@ -194,6 +195,7 @@ const SearchBrowseView = ({
       ) : (
         <FilterModeGrid filterModeResult={filterModeData} />
       )}
+      <ScrollToTopButton />
     </div>
   );
 };

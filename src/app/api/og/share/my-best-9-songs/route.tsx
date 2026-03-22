@@ -30,9 +30,9 @@ const fallbackOgImage = () =>
   new ImageResponse(
     <div
       style={{
-        backgroundColor: "#1a0a12",
+        backgroundColor: "#090f2a",
         backgroundImage:
-          "linear-gradient(135deg, #1a0a12 0%, #3a0e2a 45%, #1d0a1b 100%)",
+          "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -203,9 +203,9 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#1a0a12",
+          backgroundColor: "#090f2a",
           backgroundImage:
-            "linear-gradient(135deg, #1a0a12 0%, #3a0e2a 45%, #1d0a1b 100%)",
+            "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -224,9 +224,9 @@ export async function GET(req: NextRequest) {
             position: "absolute",
             inset: 0,
             display: "flex",
-            opacity: 0.8,
+            opacity: 0.88,
             backgroundImage:
-              "radial-gradient(650px 300px at 85% 10%, rgba(244, 52, 139, 0.35), transparent 50%), radial-gradient(520px 260px at 10% 95%, rgba(209, 28, 118, 0.3), transparent 50%)",
+              "radial-gradient(700px 320px at 88% 12%, rgba(244, 114, 182, 0.3), transparent 58%), radial-gradient(520px 300px at 12% 92%, rgba(59, 130, 246, 0.2), transparent 62%)",
           }}
         />
 

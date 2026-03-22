@@ -103,7 +103,26 @@ export async function generateMetadata({
           s.tags?.some((t) => t.includes("MV")),
         ) ?? metadataCandidates[0])
       : metadataCandidates[0];
-  if (!matchedForMeta) return { title: slug };
+  const canonical = new URL(
+    `/discography/${encodeURIComponent(resolved.category)}/${encodeURIComponent(slug)}`,
+    baseUrl,
+  ).toString();
+
+  if (!matchedForMeta)
+    return {
+      title: slug,
+      openGraph: {
+        title: slug,
+        description: siteConfig.siteName,
+        url: canonical,
+        siteName: siteConfig.siteName,
+        locale: "ja_JP",
+        type: "website",
+      },
+      alternates: {
+        canonical,
+      },
+    };
   const title = matchedForMeta.title
     ? `${matchedForMeta.title} | ${matchedForMeta.artist} | Discography | ${siteConfig.siteName}`
     : `${matchedForMeta.album} | ${matchedForMeta.artist} | Discography | ${siteConfig.siteName}`;
@@ -128,6 +147,7 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title,
@@ -135,7 +155,20 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImageUrl.toString()],
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: "ja_JP",
+      type: "website",
+      images: [{ url: ogImagePath, width: 1200, height: 630, alt: ogTitle }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImagePath],
+    },
+    alternates: {
+      canonical,
     },
   };
 }

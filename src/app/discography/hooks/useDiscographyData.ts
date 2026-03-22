@@ -71,11 +71,29 @@ export function useDiscographyData(
     );
   }, [songs, groupByAlbum]);
 
+  // 全楽曲の統計
+  const allSongCountsByReleaseDate = useMemo(() => {
+    const allFiltered = songs.filter(
+      (s) =>
+        isPossibleOriginalSong(s) ||
+        isCollaborationSong(s) ||
+        isFesOverallSong(s) ||
+        isCoverSong(s),
+    );
+    return createStatistics(
+      // ユニークにする
+      allFiltered,
+      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      groupByAlbum,
+    );
+  }, [songs, groupByAlbum]);
+
   return {
     loading,
     songs,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
+    allSongCountsByReleaseDate,
   };
 }
