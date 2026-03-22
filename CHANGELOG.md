@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/mitsugogo/azki-song-db/compare/v1.34.6...v2.0.0) (2026-03-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* v2.0.0
+
+### Features
+
+* v2.0.0 ([6c916fa](https://github.com/mitsugogo/azki-song-db/commit/6c916faf54837258a6e823a1c315ec0b8d0c59e7))
+* 全面リニューアル ([067eff1](https://github.com/mitsugogo/azki-song-db/commit/067eff16fab7ca887d3e131e7d13f3e1d9432634))
+
+
+### Bug Fixes
+
+* ダークモードが回帰する場合があったのを修正 ([d26ec06](https://github.com/mitsugogo/azki-song-db/commit/d26ec0617574395af8bfb0633b120cf7e95e5ce4))
+* 再生ページで検索ワードを消すと検索ページに移動させられてしまうのを修正 ([f2db7d9](https://github.com/mitsugogo/azki-song-db/commit/f2db7d9629edce850154dc57f2435a2a6233f534))
+* 収録動画タブの単位を修正 ([97f971a](https://github.com/mitsugogo/azki-song-db/commit/97f971a53bd8fc0bbb67ca376bb7b061177956b7))
+* 年表の余白調整 ([1d83fe6](https://github.com/mitsugogo/azki-song-db/commit/1d83fe6da57909ac9a5158b42a5942ed0cabebe9))
+* 検索ページでの右はみ出しを修正 ([e7b5c6f](https://github.com/mitsugogo/azki-song-db/commit/e7b5c6f532f25d8a5ff508869015a4dc469d27b2))
+* 背景グラデループを修正 ([f2d4ae6](https://github.com/mitsugogo/azki-song-db/commit/f2d4ae6e2a042099cdefb7f69cb4b1a56ddd872c))
+* 詳細ページがスクロールできないバグを修正 ([74faf56](https://github.com/mitsugogo/azki-song-db/commit/74faf56334b13111fd82fdc443a43109e189d057))
+
 ### [1.34.6](https://github.com/mitsugogo/azki-song-db/compare/v1.34.5...v1.34.6) (2026-03-18)
 
 
