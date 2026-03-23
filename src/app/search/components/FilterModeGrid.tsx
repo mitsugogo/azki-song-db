@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { SearchFilterModeResult } from "../hook/useSearchFilterModeData";
+import { useTranslations } from "next-intl";
 
 interface FilterModeGridProps {
   filterModeResult: Exclude<
@@ -10,6 +11,7 @@ interface FilterModeGridProps {
 
 const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
   const { filterMode, data } = filterModeResult;
+  const t = useTranslations("SearchBrowse");
 
   return (
     <div className="p-3">
@@ -37,7 +39,8 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.artist}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      {item.count}回
+                      {item.count}
+                      {t("timesSuffix")}
                     </div>
                   </div>
                 </Link>
@@ -65,7 +68,8 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.artist}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      {item.count}曲
+                      {item.count}
+                      {t("songsSuffix")}
                     </div>
                   </div>
                 </Link>
@@ -93,7 +97,8 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.tag}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      {item.count}曲
+                      {item.count}
+                      {t("songsSuffix")}
                     </div>
                   </div>
                 </Link>
@@ -125,7 +130,8 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.singer}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      {item.count}曲
+                      {item.count}
+                      {t("songsSuffix")}
                     </div>
                   </div>
                 </Link>
@@ -161,11 +167,12 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                     </div>
                     {item.unitName && (
                       <div className="text-xs text-gray-400 dark:text-light-gray-500 line-clamp-1 mt-1">
-                        （{item.members}）
+                        ({item.members})
                       </div>
                     )}
                     <div className="text-xs text-gray-500 dark:text-light-gray-300 mt-1">
-                      {item.count}曲
+                      {item.count}
+                      {t("songsSuffix")}
                     </div>
                   </div>
                 </Link>
@@ -191,7 +198,8 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.artist}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      最終配信日: {new Date(item.lastSung).toLocaleDateString()}
+                      {t("lastSungLabel")}{" "}
+                      {new Date(item.lastSung).toLocaleDateString()}
                     </div>
                   </div>
                 </Link>

@@ -21,11 +21,20 @@ export type SongModeGroup = "mode" | "theme";
 
 export type SongModeMenuItem = {
   mode: SongMode;
-  label: string;
+  labelKey:
+    | "all"
+    | "original"
+    | "cover"
+    | "collaboration"
+    | "karaoke"
+    | "collabKaraoke"
+    | "shorts";
   icon: IconType;
   buttonClassName: string;
   group?: SongModeGroup;
 };
+
+type Translator = (key: string) => string;
 
 const SONG_MODE_TRIGGER_BUTTON_BASE_CLASS_NAME =
   "px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0";
@@ -33,14 +42,14 @@ const SONG_MODE_TRIGGER_BUTTON_BASE_CLASS_NAME =
 export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   {
     mode: "",
-    label: "全曲",
+    labelKey: "all",
     icon: LuDatabase,
     buttonClassName:
       "bg-indigo-400 hover:bg-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600",
   },
   {
     mode: "original-songs",
-    label: "オリ曲",
+    labelKey: "original",
     icon: LuCrown,
     buttonClassName:
       "bg-tan-400 hover:bg-tan-500 dark:bg-tan-700 dark:hover:bg-tan-600",
@@ -48,7 +57,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "cover-songs",
-    label: "カバー曲",
+    labelKey: "cover",
     icon: LuMusic,
     buttonClassName:
       "bg-sky-400 hover:bg-sky-500 dark:bg-sky-700 dark:hover:bg-sky-600",
@@ -56,7 +65,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "collaboration-songs",
-    label: "ユニット・ゲスト参加曲",
+    labelKey: "collaboration",
     icon: LuUsers,
     buttonClassName:
       "bg-green-400 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-500",
@@ -64,7 +73,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "tag:歌枠",
-    label: "歌枠",
+    labelKey: "karaoke",
     icon: LuMicVocal,
     buttonClassName:
       "bg-violet-400 hover:bg-violet-500 dark:bg-violet-700 dark:hover:bg-violet-600",
@@ -72,7 +81,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "tag:コラボ|tag:歌枠",
-    label: "コラボ歌枠",
+    labelKey: "collabKaraoke",
     icon: LuUsers,
     buttonClassName:
       "bg-pink-400 hover:bg-pink-500 dark:bg-pink-700 dark:hover:bg-pink-600",
@@ -80,7 +89,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "tag:楽曲紹介shorts",
-    label: "楽曲紹介shorts",
+    labelKey: "shorts",
     icon: LuLibrary,
     buttonClassName:
       "bg-lime-500 hover:bg-lime-600 dark:bg-lime-700 dark:hover:bg-lime-600",
@@ -93,10 +102,12 @@ export const SONG_MODE_TRIGGER_BUTTON_CLASS_NAME = `${SONG_MODE_TRIGGER_BUTTON_B
   "bg-tan-400 hover:bg-tan-500 dark:bg-tan-500 dark:hover:bg-tan-600"
 }`;
 
-export const SONG_MODE_GROUP_LABELS: Record<SongModeGroup, string> = {
-  mode: "モード",
-  theme: "テーマ",
-};
+export const getSongModeGroupLabels = (
+  t: Translator,
+): Record<SongModeGroup, string> => ({
+  mode: t("groupMode"),
+  theme: t("groupTheme"),
+});
 
 export const getSongMode = (term: string): SongMode => {
   const tokens = term
@@ -126,13 +137,18 @@ export const getSongMode = (term: string): SongMode => {
   return "";
 };
 
-export const getSongModeLabel = (term: string) => {
+export const getSongModeLabel = (term: string, t: Translator) => {
   const currentMode = getSongMode(term);
-  return (
-    SONG_MODE_MENU_ITEMS.find((item) => item.mode === currentMode)?.label ??
-    "全曲"
-  );
+  return SONG_MODE_MENU_ITEMS.find((item) => item.mode === currentMode)
+    ? t(
+        SONG_MODE_MENU_ITEMS.find((item) => item.mode === currentMode)!
+          .labelKey,
+      )
+    : t("all");
 };
+
+export const getSongModeItemLabel = (item: SongModeMenuItem, t: Translator) =>
+  t(item.labelKey);
 
 export const getSongModeIcon = (term: string): IconType => {
   const currentMode = getSongMode(term);

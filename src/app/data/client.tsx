@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Song } from "../types/song";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import {
   useReactTable,
@@ -22,7 +22,8 @@ import {
   OverlayScrollbarsComponent,
   OverlayScrollbarsComponentRef,
 } from "overlayscrollbars-react";
-import columns from "./columns";
+import { getColumns } from "./columns";
+import { useTranslations } from "next-intl";
 
 export default function ClientTable() {
   const { allSongs, isLoading } = useSongs();
@@ -33,11 +34,13 @@ export default function ClientTable() {
     null,
   );
 
+  const t = useTranslations("Data");
+
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   const table = useReactTable({
     data: songs,
-    columns,
+    columns: getColumns(t),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     state: {
@@ -110,12 +113,12 @@ export default function ClientTable() {
   return (
     <>
       <div className="grow p-0 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">収録データ</h1>
-        <p className="mb-4 px-3">本データベースの情報を表示しています。</p>
+        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
+        <p className="mb-4 px-3">{t("description")}</p>
         <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
           <TextInput
             icon={HiSearch}
-            placeholder="検索..."
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => setFilterQuery(e.target.value)}
           />
           <OverlayScrollbarsComponent

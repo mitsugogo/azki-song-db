@@ -34,6 +34,7 @@ import {
   MdPlaylistAdd,
   MdPlaylistAddCheck,
 } from "react-icons/md";
+import { useTranslations } from "next-intl";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { FaGear } from "react-icons/fa6";
 
@@ -158,6 +159,8 @@ export default function PlayerControlsBar({
   isTheaterMode,
   onToggleTheaterMode,
 }: Props) {
+  const t = useTranslations("Watch.playerControls");
+
   // Mobile menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setIsMenuOpen(false));
@@ -627,7 +630,7 @@ export default function PlayerControlsBar({
             onClick={onTogglePlay}
             disabled={disabled}
             className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label={isPlaying ? "一時停止" : "再生"}
+            aria-label={isPlaying ? t("pause") : t("play")}
           >
             {isPlaying ? (
               <FaPause className="text-xl text-white" />
@@ -641,7 +644,7 @@ export default function PlayerControlsBar({
             onClick={onNext}
             className="group flex h-7 w-7 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={disabled || nextDisabled}
-            aria-label="次の曲へ"
+            aria-label={t("nextSong")}
           >
             <FaStepForward className="text-xl text-white" />
           </button>
@@ -658,10 +661,10 @@ export default function PlayerControlsBar({
               className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={
                 isTouchDevice
-                  ? "音量調整"
+                  ? t("volumeControl")
                   : isMuted || volumeValue === 0
-                    ? "ミュート解除"
-                    : "ミュート"
+                    ? t("unmute")
+                    : t("mute")
               }
             >
               {isMuted || volumeValue === 0 ? (
@@ -718,13 +721,13 @@ export default function PlayerControlsBar({
           <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
             <div
               className="line-clamp-1 text-sm font-medium text-white select-none"
-              aria-label="曲名"
+              aria-label={t("songTitle")}
             >
               {displaySongTitle}
             </div>
             <div
               className="line-clamp-1 text-xs text-white/60 select-none"
-              aria-label="アーティスト"
+              aria-label={t("artist")}
             >
               {displaySongArtist}
             </div>
@@ -735,9 +738,7 @@ export default function PlayerControlsBar({
           {currentSong && (
             <Tooltip
               label={
-                isTheaterMode
-                  ? "シアターモードを終了"
-                  : "シアターモードに切り替え"
+                isTheaterMode ? t("exitTheaterMode") : t("enterTheaterMode")
               }
             >
               <button
@@ -749,9 +750,7 @@ export default function PlayerControlsBar({
                     : "hover:bg-white/20"
                 }`}
                 aria-label={
-                  isTheaterMode
-                    ? "シアターモードを終了"
-                    : "シアターモードに切り替え"
+                  isTheaterMode ? t("exitTheaterMode") : t("enterTheaterMode")
                 }
                 aria-pressed={isTheaterMode}
               >
@@ -771,8 +770,8 @@ export default function PlayerControlsBar({
               <Tooltip
                 label={
                   isInFavorites(currentSong)
-                    ? "お気に入りから削除"
-                    : "お気に入りに追加"
+                    ? t("removeFromFavorites")
+                    : t("addToFavorites")
                 }
               >
                 <button
@@ -781,8 +780,8 @@ export default function PlayerControlsBar({
                   className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
                   aria-label={
                     isInFavorites(currentSong)
-                      ? "お気に入りから削除"
-                      : "お気に入りに追加"
+                      ? t("removeFromFavorites")
+                      : t("addToFavorites")
                   }
                 >
                   {isInFavorites(currentSong) ? (
@@ -794,24 +793,24 @@ export default function PlayerControlsBar({
               </Tooltip>
 
               {/* Share button */}
-              <Tooltip label="現在の楽曲をシェア">
+              <Tooltip label={t("shareCurrentSong")}>
                 <button
                   type="button"
                   onClick={onOpenShareModal}
                   className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
-                  aria-label="現在の楽曲をシェア"
+                  aria-label={t("shareCurrentSong")}
                 >
                   <FaShare className="text-base" />
                 </button>
               </Tooltip>
 
-              <Tooltip label="設定">
+              <Tooltip label={t("settings")}>
                 <div className="relative" ref={pcMenuRef}>
                   <button
                     type="button"
                     onClick={() => setIsPcMenuOpen(!isPcMenuOpen)}
                     className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
-                    aria-label="設定"
+                    aria-label={t("settings")}
                   >
                     <FaGear className="text-base" />
                   </button>
@@ -827,7 +826,7 @@ export default function PlayerControlsBar({
                                 setHideFutureSongs(event.target.checked)
                               }
                               color="pink"
-                              label="セトリネタバレ防止モード"
+                              label={t("spoilerFreeSetlist")}
                               className="cursor-pointer w-full"
                               withThumbIndicator={false}
                             />
@@ -855,18 +854,18 @@ export default function PlayerControlsBar({
                                 <FaPlus className="inline mr-2" />
                               )}
                               {isInAnyPlaylist(currentSong)
-                                ? "プレイリスト追加済み"
-                                : "プレイリストに追加"}
+                                ? t("playlistAdded")
+                                : t("addToPlaylist")}
                             </button>
                           </Menu.Target>
 
                           <Menu.Dropdown>
-                            <Menu.Label>プレイリスト</Menu.Label>
+                            <Menu.Label>{t("playlist")}</Menu.Label>
 
                             {playlists.length === 0 && (
                               <div className="ml-3 mb-3">
                                 <span className="text-sm text-gray-300">
-                                  プレイリストはありません
+                                  {t("noPlaylists")}
                                 </span>
                               </div>
                             )}
@@ -917,7 +916,7 @@ export default function PlayerControlsBar({
                               }}
                             >
                               <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                              新しいプレイリストを作成
+                              {t("createNewPlaylist")}
                             </MenuItem>
                           </Menu.Dropdown>
                         </Menu>
@@ -936,7 +935,7 @@ export default function PlayerControlsBar({
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
-                aria-label="メニュー"
+                aria-label={t("menu")}
               >
                 <svg
                   className="w-5 h-5"
@@ -960,7 +959,7 @@ export default function PlayerControlsBar({
                             setHideFutureSongs(event.target.checked)
                           }
                           color="pink"
-                          label="セトリネタバレ防止モード"
+                          label={t("spoilerFreeSetlist")}
                           className="cursor-pointer w-full"
                           withThumbIndicator={false}
                         />
@@ -981,8 +980,8 @@ export default function PlayerControlsBar({
                         <FaRegStar className="inline mr-2" />
                       )}
                       {isInFavorites(currentSong)
-                        ? "お気に入りから削除"
-                        : "お気に入りに追加"}
+                        ? t("removeFromFavorites")
+                        : t("addToFavorites")}
                     </button>
                   </div>
                   <div className="py-2">
@@ -994,7 +993,7 @@ export default function PlayerControlsBar({
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                     >
                       <FaShare className="inline mr-2" />
-                      現在の楽曲をシェア
+                      {t("shareCurrentSong")}
                     </button>
                   </div>
                   <div className="py-2">
@@ -1015,18 +1014,18 @@ export default function PlayerControlsBar({
                             <FaPlus className="inline mr-2" />
                           )}
                           {isInAnyPlaylist(currentSong)
-                            ? "プレイリスト追加済み"
-                            : "プレイリストに追加"}
+                            ? t("playlistAdded")
+                            : t("addToPlaylist")}
                         </button>
                       </Menu.Target>
 
                       <Menu.Dropdown>
-                        <Menu.Label>プレイリスト</Menu.Label>
+                        <Menu.Label>{t("playlist")}</Menu.Label>
 
                         {playlists.length === 0 && (
                           <div className="ml-3 mb-3">
                             <span className="text-sm text-gray-300">
-                              プレイリストはありません
+                              {t("noPlaylists")}
                             </span>
                           </div>
                         )}
@@ -1077,7 +1076,7 @@ export default function PlayerControlsBar({
                           }}
                         >
                           <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                          新しいプレイリストを作成
+                          {t("createNewPlaylist")}
                         </MenuItem>
                       </Menu.Dropdown>
                     </Menu>

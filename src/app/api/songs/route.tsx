@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
+    const isEnglish = hl.startsWith("en");
+
     const sheets = google.sheets({
       version: "v4",
       auth: process.env.GOOGLE_API_KEY,
@@ -157,6 +161,11 @@ export async function GET() {
             /(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/))([^?&]{11})/,
           )?.[1] || "";
         const broadcastAt = convertToDate(getNum("broadcast_at"));
+        const titleEn = getStr("title_en");
+        const localizedTitle = isEnglish ? titleEn || titleValue : titleValue;
+        const artistJa = getStr("artist");
+        const artistEn = getStr("artist_en");
+        const localizedArtist = isEnglish ? artistEn || artistJa : artistJa;
 
         // 組み合わせてユニークな文字列にする
         const uniqKey =
@@ -164,18 +173,12 @@ export async function GET() {
 
         songs.push({
           source_order: sourceOrder++,
-          title: titleValue,
-          title_en: getStr("title_en"),
+          title: localizedTitle,
           slug: slugify(titleValue) || videoId,
           slugv2: slugifyV2(uniqKey),
-          artist: getStr("artist"),
-          artists: getStr("artist")
-            .split("、")
-            .map((a) => a.trim())
-            .filter(Boolean),
-          artist_en: getStr("artist_en"),
-          artists_en: getStr("artist_en")
-            .split(",")
+          artist: localizedArtist,
+          artists: localizedArtist
+            .split(/[,,、]/)
             .map((a) => a.trim())
             .filter(Boolean),
           sing: getStr("sing"),

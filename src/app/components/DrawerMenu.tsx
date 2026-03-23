@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "flowbite-react";
 import { Badge, Drawer, Modal, Tooltip } from "@mantine/core";
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
+import { useTranslations } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
@@ -20,6 +21,7 @@ type DrawerNavItem = {
   name: string;
   href: string;
   current?: boolean;
+  label?: string;
 };
 
 type DrawerNavCategory = {
@@ -58,14 +60,36 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
   const { songsFetchedAt } = useSongs();
   const { currentSong } = useGlobalPlayer();
+  const t = useTranslations("DrawerMenu");
+
+  const categoryLabelMap: Record<string, string> = {
+    活動の記録: t("categoryActivity"),
+    シェア: t("categoryShare"),
+  };
+
+  const itemLabelMap: Record<string, string> = {
+    "/": t("home"),
+    "/search": t("search"),
+    "/discography": t("discography"),
+    "/summary": t("activity"),
+    "/statistics": t("statistics"),
+    "/data": t("allData"),
+    "/share/my-best-9-songs": t("myBest9Songs"),
+  };
 
   const navigation = useMemo<DrawerNavCategory[]>(() => {
     return pageList.map((category) => ({
       ...category,
-      items: category.items.map((item) => ({
-        ...item,
-        current: item.href !== "#" && item.href === pathname,
-      })),
+      items: category.items.map((item) => {
+        const originalHref = item.href;
+        const resolvedLabel = itemLabelMap[originalHref] ?? item.name;
+        return {
+          ...item,
+          label: resolvedLabel,
+          href: item.href,
+          current: originalHref !== "#" && originalHref === pathname,
+        };
+      }),
     }));
   }, [pathname]);
 
@@ -101,7 +125,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
       <Drawer
         opened={opened}
         onClose={onClose}
-        title="Menu"
+        title={t("title")}
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
         <div className="grow space-y-1">
@@ -109,7 +133,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             <div key={categoryIndex}>
               {category.category && (
                 <div className="ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase">
-                  {category.category}
+                  {categoryLabelMap[category.category] ?? category.category}
                 </div>
               )}
               {category.items.map((item) => {
@@ -129,7 +153,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                     className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses}`}
                     onClick={onClose}
                   >
-                    {item.name}
+                    {item.label ?? item.name}
                   </Link>
                 );
               })}
@@ -138,7 +162,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
           <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
 
           <div className="ml-3 text-xs text-light-gray-300 dark:text-gray-300">
-            管理機能
+            {t("management")}
           </div>
           <Link
             href="/playlist"
@@ -146,7 +170,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
             onClick={onClose}
           >
-            プレイリスト
+            {t("playlist")}
           </Link>
 
           <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
@@ -162,7 +186,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 }}
               >
                 <MdInstallMobile className="mr-2 inline text-xl" />
-                アプリをインストール
+                {t("installApp")}
               </div>
               <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
             </>
@@ -177,7 +201,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
               onClose();
             }}
           >
-            このサイトについて
+            {t("about")}
           </Link>
           <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
 
@@ -201,7 +225,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             <Tooltip
               arrowOffset={10}
               arrowSize={4}
-              label="ソロライブ！"
+              label={t("soloLive")}
               withArrow
               position="top"
             >
@@ -260,7 +284,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 className="font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
                 onClick={onClose}
               >
-                不具合報告
+                {t("reportIssue")}
               </a>
             </div>
 
@@ -286,7 +310,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
         opened={showAcknowledgment}
         onClose={() => setShowAcknowledgment(false)}
         size="auto"
-        title="このサイトについて"
+        title={t("about")}
         overlayProps={{ backgroundOpacity: 0.5, blur: 5 }}
         fullScreen={isMobile}
       >
@@ -296,7 +320,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
             onClick={() => setShowAcknowledgment(false)}
           >
-            閉じる
+            {t("close")}
           </Button>
         </div>
       </Modal>

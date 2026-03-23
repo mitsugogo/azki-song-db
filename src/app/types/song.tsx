@@ -3,7 +3,11 @@ export interface Song {
   slugv2?: string;
   source_order?: number;
   title: string;
+  title_en?: string;
   artist: string;
+  artist_en?: string;
+  artists?: string[];
+  artists_en?: string[];
   album: string;
   lyricist: string;
   composer: string;

@@ -11,6 +11,7 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "../config/filters";
+import { useTranslations } from "next-intl";
 
 const SongItem = ({
   song,
@@ -24,6 +25,7 @@ const SongItem = ({
   onClick: (key: string) => void;
 }) => {
   const router = useRouter();
+  const t = useTranslations("Discography");
   const albumSlug = song.firstVideo.album ? slugify(song.firstVideo.album) : "";
 
   const getSongPath = () => {
@@ -111,14 +113,17 @@ const SongItem = ({
               {song.isAlbum && groupByAlbum
                 ? `${new Date(song.firstVideo.album_release_at).toLocaleDateString()}`
                 : `${new Date(song.firstVideo.broadcast_at).toLocaleDateString()}`}
-              {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
-
-              {song.videos.length == 1 && song.videos[0].view_count && (
-                <div className="mt-2 text-xs">
-                  <FaPlay className="inline mr-2 -mt-1" />
-                  {song.videos[0].view_count.toLocaleString()}回再生
-                </div>
-              )}
+              {song.isAlbum && groupByAlbum
+                ? ` (${song.count}${t("songsSuffix")})`
+                : ""}
+              {song.videos.length === 1 &&
+                (song?.videos[0]?.view_count ?? 0) > 0 && (
+                  <div className="mt-2 text-xs">
+                    <FaPlay className="inline mr-2 -mt-1" />
+                    {song?.videos[0]?.view_count?.toLocaleString() ?? 0}
+                    {t("viewsSuffix")}
+                  </div>
+                )}
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { TagsInput, TagsInputProps, Group, Text } from "@mantine/core";
 import { useMemo } from "react";
 import { HiSearch } from "react-icons/hi";
 import { FaMusic, FaUser, FaTag, FaUsers, FaCalendar } from "react-icons/fa6";
+import { useLocale, useTranslations } from "next-intl";
 import { Song } from "../types/song";
 import {
   collabUnits,
@@ -21,9 +22,15 @@ export default function SearchInput({
   allSongs,
   searchValue,
   onSearchChange,
-  placeholder = "検索",
+  placeholder,
   className,
 }: SearchInputProps) {
+  const locale = useLocale();
+  const t = useTranslations("SearchInput");
+  const isEnglish = locale === "en";
+
+  const resolvedPlaceholder = placeholder ?? t("search");
+
   const searchData = useMemo(() => {
     const availableTags = Array.from(
       new Set(allSongs.flatMap((song) => song.tags)),
@@ -34,7 +41,17 @@ export default function SearchInput({
     ).filter((milestone) => milestone !== "");
 
     const availableArtists = Array.from(
-      new Set(allSongs.map((song) => song.artist)),
+      new Set([
+        ...allSongs.map((song) => song.artist),
+        ...(isEnglish
+          ? allSongs.flatMap((song) =>
+              (song.artist_en ?? "")
+                .split(/[,、]/)
+                .map((artist) => artist.trim())
+                .filter(Boolean),
+            )
+          : []),
+      ]),
     ).filter((artist) => artist !== "");
 
     const availableSingers = Array.from(
@@ -49,7 +66,14 @@ export default function SearchInput({
     );
 
     const availableTitles = Array.from(
-      new Set(allSongs.map((song) => song.title)),
+      new Set([
+        ...allSongs.map((song) => song.title),
+        ...(isEnglish
+          ? allSongs
+              .map((song) => song.title_en ?? "")
+              .filter((title) => title !== "")
+          : []),
+      ]),
     ).filter((title) => title !== "");
 
     const availableLyricists = Array.from(
@@ -100,58 +124,63 @@ export default function SearchInput({
           return sortedUnitMembers.every((m, i) => m === sortedSingers[i]);
         });
       })
-      .map((unit) => unit.unitName);
+      .map((unit) => {
+        // ロケールに応じて英語表記があれば英語を優先、なければ通称を返す
+        if (isEnglish && unit.hl && unit.hl.en) return unit.hl.en;
+        return unit.unitName;
+      })
+      .filter((v, i, arr) => arr.indexOf(v) === i); // 重複排除
 
     return [
       {
-        group: "アーティスト",
+        group: t("groupArtist"),
         items: availableArtists.map((artist) => `artist:${artist}`),
       },
       {
-        group: "歌った人",
+        group: t("groupSinger"),
         items: availableSingers.map((singer) => `sing:${singer}`),
       },
       {
-        group: "ユニット",
+        group: t("groupUnit"),
         items: availableUnits.map((unit) => `unit:${unit}`),
       },
       {
-        group: "曲名",
+        group: t("groupTitle"),
         items: availableTitles.map((title) => `title:${title}`),
       },
       {
-        group: "作詞",
+        group: t("groupLyricist"),
         items: availableLyricists.map((lyricist) => `lyricist:${lyricist}`),
       },
       {
-        group: "作曲",
+        group: t("groupComposer"),
         items: availableComposers.map((composer) => `composer:${composer}`),
       },
       {
-        group: "編曲",
+        group: t("groupArranger"),
         items: availableArrangers.map((arranger) => `arranger:${arranger}`),
       },
       {
-        group: "タグ",
+        group: t("groupTag"),
         items: availableTags.map((tag) => `tag:${tag}`),
       },
       {
-        group: "マイルストーン",
+        group: t("groupMilestone"),
         items: availableMilestones.map((milestone) => `milestone:${milestone}`),
       },
       {
-        group: "配信年",
+        group: t("groupYear"),
         items: Array.from(new Set(allSongs.map((song) => song.year)))
           .filter((year): year is number => year !== undefined)
           .sort((a, b) => b - a)
           .map((year) => `year:${year}`),
       },
       {
-        group: "季節",
+        group: t("groupSeason"),
         items: ["season:春", "season:夏", "season:秋", "season:冬"],
       },
     ];
-  }, [allSongs]);
+  }, [allSongs, isEnglish, t]);
 
   const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
     option,
@@ -189,7 +218,7 @@ export default function SearchInput({
 
   return (
     <TagsInput
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       leftSection={<HiSearch />}
       data={searchData}
       renderOption={renderMultiSelectOption}

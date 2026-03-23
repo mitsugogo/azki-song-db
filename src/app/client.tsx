@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "../i18n/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { Burger, Skeleton, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useLocale, useTranslations } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
 import SearchInput from "./components/SearchInput";
 import Footer from "./components/Footer";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 import ThemeToggle from "./components/ThemeToggle";
 import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { siteConfig } from "./config/siteConfig";
@@ -90,11 +91,15 @@ function groupRecentUpdates(items: Song[], limit: number = 3) {
 
 export default function ClientTop() {
   const router = useRouter();
+  const locale = useLocale();
   const [isPending, startTransition] = useTransition();
   const [isScrolled, setIsScrolled] = useState(false);
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
+  const t = useTranslations("Home");
+  const tHeader = useTranslations("Header");
+  const tDrawer = useTranslations("DrawerMenu");
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
   useEffect(() => {
@@ -136,7 +141,7 @@ export default function ClientTop() {
   const handleSearch = () => {
     const query = searchValue.join("|").trim();
     startTransition(() => {
-      router.push(query ? `/search?q=${encodeURIComponent(query)}` : "/search");
+      router.push(query ? `/search?q=${encodeURIComponent(query)}` : `/search`);
     });
   };
 
@@ -159,7 +164,7 @@ export default function ClientTop() {
                   aria-label="Toggle navigation"
                 />
                 <Link
-                  href="/"
+                  href={`/`}
                   className="inline-block truncate text-base font-semibold tracking-[0.12em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"
                 >
                   {siteConfig.siteNameUpper}
@@ -168,19 +173,23 @@ export default function ClientTop() {
 
               <div className="flex shrink-0 items-center justify-end sm:gap-2">
                 <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
-                  <Link href="/search" className="hover:text-primary-500">
+                  <Link href={`/search`} className="hover:text-primary-500">
                     <LuSearch />
                   </Link>
-                  <Link href="/discography" className="hover:text-primary-500">
-                    Discography
+                  <Link
+                    href={`/discography`}
+                    className="hover:text-primary-500"
+                  >
+                    {tDrawer("discography")}
                   </Link>
-                  <Link href="/summary" className="hover:text-primary-500">
-                    Activities
+                  <Link href={`/summary`} className="hover:text-primary-500">
+                    {tDrawer("activity")}
                   </Link>
-                  <Link href="/statistics" className="hover:text-primary-500">
-                    Stats
+                  <Link href={`/statistics`} className="hover:text-primary-500">
+                    {tDrawer("statistics")}
                   </Link>
                 </nav>
+                <LanguageSwitcher />
                 <ThemeToggle className="hover:text-primary-500 dark:hover:text-white dark:hover:bg-primary-800" />
               </div>
             </div>
@@ -189,15 +198,15 @@ export default function ClientTop() {
           <main className="flex flex-1 flex-col">
             <section className="flex min-h-[48dvh] flex-col items-center justify-center py-10 text-center sm:py-16">
               <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/70 dark:text-pink-200/70">
-                AZKi VIRTUAL DiVA
+                {t("brand")}
               </p>
               <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-                音楽で辿る、
+                {t("heroLine1")}
                 <br />
-                Virtual DiVA AZKiの軌跡。
+                {t("heroLine2")}
               </h1>
               <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
-                AZKiさんのオリジナル楽曲、コラボ・カバー楽曲、歌枠で歌唱したセットリストを収録した、非公式の楽曲データベースです。
+                {t("description")}
               </p>
 
               <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
@@ -205,7 +214,7 @@ export default function ClientTop() {
                   allSongs={allSongs}
                   searchValue={searchValue}
                   onSearchChange={setSearchValue}
-                  placeholder="曲名、アーティスト、タグなどで検索"
+                  placeholder={tHeader("searchPlaceholder")}
                   className="[&_input]:h-12 [&_input]:text-base"
                 />
                 <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -216,11 +225,11 @@ export default function ClientTop() {
                     disabled={isPending}
                   >
                     {isPending ? (
-                      "検索中..."
+                      t("searching")
                     ) : (
                       <>
                         <LuSearch className="mr-1 inline" />
-                        検索する
+                        {t("searchButton")}
                       </>
                     )}
                   </button>
@@ -232,17 +241,17 @@ export default function ClientTop() {
                     label={
                       <>
                         <LuSparkles className="mr-1 inline" />
-                        ランダムに楽曲を再生開始します
+                        {t("surpriseTooltip")}
                       </>
                     }
                   >
                     <Link
-                      href="/watch"
+                      href={`/watch`}
                       className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
                       aria-label="ランダム再生"
                     >
                       <LuSparkles className="mr-1 inline" />
-                      Surprise me
+                      {t("surpriseMe")}
                     </Link>
                   </Tooltip>
                 </div>
@@ -253,10 +262,10 @@ export default function ClientTop() {
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    Recommended
+                    {t("recommendedLabel")}
                   </p>
                   <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    おすすめ楽曲
+                    {t("recommendedTitle")}
                   </h2>
                 </div>
               </div>
@@ -309,7 +318,14 @@ export default function ClientTop() {
                           <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
                             <span>{song.year}</span>
                             <span>
-                              {new Date(song.broadcast_at).toLocaleDateString()}
+                              {new Date(song.broadcast_at).toLocaleDateString(
+                                locale,
+                                {
+                                  year: "numeric",
+                                  month: locale === "ja" ? "numeric" : "short",
+                                  day: "numeric",
+                                },
+                              )}
                             </span>
                           </div>
                         </div>
@@ -321,10 +337,10 @@ export default function ClientTop() {
               <div className="mt-16 space-y-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    Recent Updates
+                    {t("recentUpdatesLabel")}
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    更新情報
+                    {t("recentUpdatesTitle")}
                   </h3>
                 </div>
 
@@ -370,7 +386,7 @@ export default function ClientTop() {
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    更新情報はありません
+                    {t("noRecentUpdates")}
                   </p>
                 )}
               </div>
@@ -401,14 +417,19 @@ export default function ClientTop() {
                   rel="noopener noreferrer"
                   className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
                 >
-                  ホロライブ公式
+                  {t("hololiveOfficial")}
                 </Link>
               </div>
 
               <p className="mt-4 text-center text-xs text-gray-500/80 dark:text-gray-100/80">
                 {isLoading
-                  ? "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中"
-                  : `収録楽曲数: ${allSongs.length.toLocaleString()}曲${songsUpdatedLabel ? ` / 最終更新日: ${songsUpdatedLabel}` : ""}`}
+                  ? t("statsLoading")
+                  : t("stats", {
+                      count: allSongs.length.toLocaleString(),
+                      date: songsUpdatedLabel
+                        ? t("lastUpdated", { date: songsUpdatedLabel })
+                        : "",
+                    })}
               </p>
             </section>
           </main>

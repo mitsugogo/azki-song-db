@@ -1,10 +1,17 @@
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import PlaylistDetailPage from "./client";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "プレイリスト";
-  const subtitle = "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
+  const locale = await getLocale();
+  const tMeta = await getTranslations({
+    namespace: "Metadata.playlist",
+    locale,
+  });
+  const title = tMeta("title") ?? "プレイリスト";
+  const subtitle =
+    tMeta("description") ?? "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
   ogImageUrl.searchParams.set("subtitle", subtitle);
@@ -15,14 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
-    title: `プレイリスト | ${siteConfig.siteName}`,
-    description: "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
+    title: `${title} | ${siteConfig.siteName}`,
+    description: subtitle,
     openGraph: {
       title,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
     },

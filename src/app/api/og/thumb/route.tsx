@@ -8,6 +8,7 @@ export const runtime = "edge";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const v = searchParams.get("v");
     const t = searchParams.get("t") || "0";
 
@@ -20,7 +21,9 @@ export async function GET(req: NextRequest) {
 
     const video_id = v;
     const start = t.toString().replace("s", "");
-    const songs = await fetch(baseUrl + "/api/songs")
+    const songs = await fetch(
+      `${baseUrl}/api/songs?hl=${encodeURIComponent(hl)}`,
+    )
       .then((res) => res.json())
       .catch(() => []);
     const song: Song = songs.find(

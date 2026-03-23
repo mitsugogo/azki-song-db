@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Song } from "../../../types/song";
 import { LuFolder } from "react-icons/lu";
 import slugify from "../../../lib/slugify";
@@ -9,6 +9,7 @@ import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Badge, LoadingOverlay, Modal } from "@mantine/core";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { renderLinkedText } from "../../../lib/textLinkify";
 import {
   isCollaborationSong,
@@ -28,6 +29,8 @@ export default function ClientPage({
   category: string;
   slug: string;
 }) {
+  const t = useTranslations("Discography");
+  const tLabels = useTranslations("labels");
   const { allSongs, isLoading } = useSongs();
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
 
@@ -50,8 +53,8 @@ export default function ClientPage({
   if (!matched || matched.length === 0) {
     return (
       <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold">楽曲が見つかりません</h1>
-        <p className="text-sm text-gray-600">指定された楽曲は存在しません。</p>
+        <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
+        <p className="text-sm text-gray-600">{t("notFoundDescription")}</p>
       </div>
     );
   }
@@ -110,10 +113,10 @@ export default function ClientPage({
           {
             label:
               category === "originals"
-                ? "オリジナル楽曲"
+                ? t("originalsLabel")
                 : category === "covers"
-                  ? "カバー楽曲"
-                  : "ユニット・ゲスト楽曲",
+                  ? t("coversLabel")
+                  : t("unitLabel"),
             href: `/discography/${encodeURIComponent(category)}`,
           },
           ...(song.album
@@ -143,7 +146,7 @@ export default function ClientPage({
           <div
             className="overflow-hidden shadow-lg cursor-zoom-in"
             onClick={() => setThumbnailModalOpen(true)}
-            title="クリックして拡大"
+            title={t("thumbnailClickTitle")}
           >
             <YoutubeThumbnail
               videoId={song.video_id}
@@ -265,7 +268,8 @@ export default function ClientPage({
               rel="noopener noreferrer"
               className="inline-block bg-red-600 text-white py-2 px-4 rounded-md"
             >
-              <FaYoutube className="inline mr-1 -mt-1" /> YouTube
+              <FaYoutube className="inline mr-1 -mt-1" />{" "}
+              {t("buttons.watchOnYouTube")}
             </a>
             <Link
               href={
@@ -275,7 +279,7 @@ export default function ClientPage({
               }
               className="inline-block ml-3 bg-primary-600 text-white py-2 px-4 rounded-md"
             >
-              <FaPlay className="inline mr-1 -mt-1" /> 再生
+              <FaPlay className="inline mr-1 -mt-1" /> {t("buttons.play")}
             </Link>
 
             <a
@@ -284,7 +288,7 @@ export default function ClientPage({
               rel="noopener noreferrer"
               className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
             >
-              <FaXTwitter className="inline mr-1 -mt-1" /> シェア
+              <FaXTwitter className="inline mr-1 -mt-1" /> {t("buttons.share")}
             </a>
           </div>
         </div>
@@ -323,7 +327,9 @@ export default function ClientPage({
           <div>
             {relatedAlbum && relatedAlbum.length > 0 && (
               <>
-                <h2 className="text-lg font-semibold mb-2">関連動画</h2>
+                <h2 className="text-lg font-semibold mb-2">
+                  {t("relatedVideos")}
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {Array.from(
                     new Map(relatedAlbum.map((s) => [s.video_id, s])).values(),
@@ -378,7 +384,7 @@ export default function ClientPage({
             {relatedSameTitle && relatedSameTitle.length > 0 && (
               <>
                 <h2 className="text-lg font-semibold mb-2 mt-4">
-                  この曲を歌った歌枠 ({relatedSameTitle.length})
+                  {t("relatedStreamsTitle", { count: relatedSameTitle.length })}
                 </h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {Array.from(

@@ -3,7 +3,7 @@
 import { Breadcrumbs } from "@mantine/core";
 import { ThemeProvider } from "flowbite-react";
 import { HiChevronRight, HiHome } from "react-icons/hi";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, flowbiteTheme } from "@/app/theme";
 import { Header } from "@/app/components/Header";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";

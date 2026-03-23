@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 const isSameLocalDate = (left: string | Date, right: string | Date) => {
   const leftDate = new Date(left);
@@ -28,6 +29,7 @@ const isSameLocalDate = (left: string | Date, right: string | Date) => {
 };
 
 export default function ViewStat({ videoId }: { videoId: string }) {
+  const t = useTranslations("Discography");
   const [period, setPeriod] = useState<"7d" | "30d" | "365d" | "all">("30d");
   const { data: viewHistory, loading: viewHistoryLoading } = useStatViewCount(
     videoId,
@@ -97,10 +99,10 @@ export default function ViewStat({ videoId }: { videoId: string }) {
   const [startFromZero, setStartFromZero] = useState<boolean>(true);
 
   const VALID_PERIODS = [
-    { key: "7d", label: "7日" },
-    { key: "30d", label: "30日" },
-    { key: "365d", label: "365日" },
-    { key: "all", label: "全期間" },
+    { key: "7d", label: t("stats.periods.7d") },
+    { key: "30d", label: t("stats.periods.30d") },
+    { key: "365d", label: t("stats.periods.365d") },
+    { key: "all", label: t("stats.periods.all") },
   ] as const;
 
   const displayedChartData = useMemo(() => {
@@ -113,6 +115,30 @@ export default function ViewStat({ videoId }: { videoId: string }) {
       return new Date(d.isoDate) >= cutoff;
     });
   }, [chartData, period]);
+
+  const locale = useLocale();
+
+  const formatMilestoneLabel = (n: number, localeStr: string) => {
+    if (!n || n <= 0) return "";
+    // Japanese: show in 万 (10k) units -> 7万, 100万
+    if (localeStr && localeStr.startsWith("ja")) {
+      if (n >= 10000) {
+        return `${Math.floor(n / 10000)}万再生達成`;
+      }
+      return `${n.toLocaleString()}再生達成`;
+    }
+
+    // English: use K/M short units: 70K, 1.2M
+    if (n >= 1000000) {
+      const m = (n / 1000000).toFixed(1).replace(/\.0$/, "");
+      return `${m}M views reached`;
+    }
+    if (n >= 1000) {
+      const k = Math.floor(n / 1000);
+      return `${k}K views reached`;
+    }
+    return `${n.toLocaleString()} views reached`;
+  };
 
   const milestoneDisplay = useMemo(() => {
     if (chartData.length === 0) return null;
@@ -146,7 +172,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     });
 
     return {
-      targetLabel: `${Math.floor(milestone.targetCount / 10000)}万再生達成`,
+      targetLabel: formatMilestoneLabel(milestone.targetCount ?? 0, locale),
       achievedDateLabel: new Date(milestone.achievedAt).toLocaleDateString(),
       isoDate: achievedIsoDate,
       date: achievedPoint.date,
@@ -211,14 +237,14 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               (diff === null || diff === undefined) &&
               (pct === null || pct === undefined)
             )
-              return "前日比: —";
+              return t("stats.yesterdayPctNone");
             const sign =
               diff == null ? "" : diff > 0 ? "+" : diff < 0 ? "-" : "";
             const diffText =
               diff === null || diff === undefined
-                ? "—"
+                ? (t("stats.yesterdayDiffNone") as string)
                 : `${sign}${formatNumber(Math.abs(diff))}`;
-            return `前日差: ${diffText}`;
+            return `${t("stats.yesterdayDiffLabel")} : ${diffText}`;
           })()}
         </div>
       </div>
@@ -342,10 +368,10 @@ export default function ViewStat({ videoId }: { videoId: string }) {
                               : "#666",
                     }}
                   >
-                    前日差: {diffText}
+                    {t("stats.yesterdayDiffLabel")} : {diffText}
                   </div>
                   <div style={{ fontSize: 12, color: "#666" }}>
-                    前日比: {pctText}
+                    {t("stats.yesterdayPctLabel")} : {pctText}
                   </div>
                 </div>
               );
@@ -448,15 +474,15 @@ export default function ViewStat({ videoId }: { videoId: string }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-2 mt-4">統計</h2>
+      <h2 className="text-lg font-semibold mb-2 mt-4">{t("stats.title")}</h2>
       <div className="text-sm text-gray-700 dark:text-gray-200 mb-4">
-        毎日0:00～1:00(JST)ぐらいに更新
+        {t("stats.updatedNote")}
       </div>
       {milestoneDisplay && (
         <div className="mb-3 text-sm text-gray-700 dark:text-gray-200">
           <ul className="list-disc list-inside">
             <li>
-              {milestoneDisplay.targetLabel}（達成日:{" "}
+              {milestoneDisplay.targetLabel}（{t("stats.achievedOnLabel")}:{" "}
               {milestoneDisplay.achievedDateLabel}）
             </li>
           </ul>
@@ -492,7 +518,9 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               " px-2 py-1 rounded text-sm"
             }
           >
-            0から: {startFromZero ? "ON" : "OFF"}
+            {t("stats.startFromZeroLabel", {
+              state: startFromZero ? t("stats.stateOn") : t("stats.stateOff"),
+            })}
           </button>
         </div>
       </div>
@@ -516,7 +544,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               pctKey="viewPctDiff"
               startFromZero={startFromZero}
               color="#8884d8"
-              name="再生数"
+              name={t("stats.metrics.viewCount")}
               milestone={
                 milestoneDisplay && milestoneDisplay.isInCurrentPeriod
                   ? {
@@ -534,7 +562,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               pctKey="likePctDiff"
               startFromZero={startFromZero}
               color="#82ca9d"
-              name="高評価数"
+              name={t("stats.metrics.likeCount")}
             />
             <MetricChart
               data={displayedChartData}
@@ -543,7 +571,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               pctKey="commentPctDiff"
               startFromZero={startFromZero}
               color="#ff7f50"
-              name="コメント"
+              name={t("stats.metrics.commentCount")}
             />
           </div>
         </div>

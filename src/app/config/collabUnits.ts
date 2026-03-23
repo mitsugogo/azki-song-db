@@ -3,6 +3,10 @@ export interface CollabUnit {
   members: string[]; // メンバー名配列（ソート順は問わない）
   unitName: string; // 通称
 
+  hl?: {
+    en: string; // 英語表記（任意）
+  };
+
   // 結成に関する情報
   formationDate?: string; // 結成日（ユニット名の初出）
   formationExtraInfo?: string; // 結成に関する追加情報（例: 配信内容の説明）
@@ -24,6 +28,9 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "星街すいせい"],
     unitName: "AS_tar",
+    hl: {
+      en: "AS_tar",
+    },
     formationDate: "2024-06-02",
     formationExtraInfo:
       "PlateUp!配信にてアンケートをしてユニット名が正式に決定。",
@@ -32,6 +39,9 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "風真いろは"],
     unitName: "あずいろ",
+    hl: {
+      en: "AZUIRO",
+    },
     formationDate: "2022-09-07",
     formationExtraInfo: "アンドロイドガールのカバーがあずいろの初出。",
     formationExtraURL: "https://www.youtube.com/watch?v=_NC_pqMt5rY",
@@ -39,10 +49,16 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "ときのそら", "ロボ子さん", "さくらみこ", "星街すいせい"],
     unitName: "0期生",
+    hl: {
+      en: "0th Generation",
+    },
   },
   {
     members: ["ときのそら", "AZKi"],
     unitName: "SorAZ",
+    hl: {
+      en: "SorAZ",
+    },
     formationDate: "2019-07-27",
     formationExtraInfo:
       "「【SPライブゲスト：ときのそら】AZKi生放送 #8　Talk&Live」の配信内で、SorAZのユニット名が決定。「そらちゃん」と呼び始めたのもここから。",
@@ -51,22 +67,37 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["天音かなた", "沙花叉クロヱ", "AZKi"],
     unitName: "かなけん",
+    hl: {
+      en: "KANAKEN",
+    },
   },
   {
     members: ["AZKi", "天音かなた"],
     unitName: "かなあず",
+    hl: {
+      en: "KanaAZ",
+    },
   },
   {
     members: ["AZKi", "沙花叉クロヱ"],
     unitName: "さかずき",
+    hl: {
+      en: "Sakazuki",
+    },
   },
   {
     members: ["AZKi", "春先のどか"],
     unitName: "あずのど",
+    hl: {
+      en: "AZNODO",
+    },
   },
   {
     members: ["AZKi", "雪花ラミィ", "博衣こより"],
     unitName: "KoZMy",
+    hl: {
+      en: "KoZMy",
+    },
     formationDate: "2025-08-03",
     formationExtraInfo:
       "2025/08/03、3人によるマシュマロ雑談配信の告知でKoZMyが初めて使用された。",
@@ -75,10 +106,16 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["AZKi", "音乃瀬奏"],
     unitName: "あずのせ",
+    hl: {
+      en: "AZNOSE",
+    },
   },
   {
     members: ["AZKi", "兎田ぺこら"],
     unitName: "ぺこあず",
+    hl: {
+      en: "PEKOAZ",
+    },
   },
   {
     members: ["AZKi", "ロボ子さん"],
@@ -123,10 +160,16 @@ export const collabUnits: CollabUnit[] = [
   {
     members: ["星街すいせい", "AZKi", "Moona Hoshinova", "IRyS"],
     unitName: "Star Flower",
+    hl: {
+      en: "Star Flower",
+    },
   },
   {
     members: ["AZKi", "天音かなた", "雪花ラミィ"],
     unitName: "KALAZ",
+    hl: {
+      en: "KALAZ",
+    },
   },
   {
     members: ["大神ミオ", "白上フブキ"],
@@ -170,15 +213,23 @@ export const getCollabUnitName = (members: string[]): string | null => {
 
 // 通称からメンバー配列を取得（大文字小文字を区別しない）
 export const getCollabMembers = (unitName: string): string[] | null => {
-  const unit = collabUnits.find(
-    (u) => u.unitName.toLowerCase() === unitName.toLowerCase(),
-  );
+  const normalize = (s: string) => s.replace(/[\s_-]+/g, "").toLowerCase();
+  const target = normalize(unitName);
+  const unit = collabUnits.find((u) => {
+    if (normalize(u.unitName) === target) return true;
+    if (u.hl && u.hl.en && normalize(u.hl.en) === target) return true;
+    return false;
+  });
   return unit ? unit.members : null;
 };
 
 // ユニット通称かどうかを判定（大文字小文字を区別しない）
 export const isCollabUnit = (unitName: string): boolean => {
-  return collabUnits.some(
-    (u) => u.unitName.toLowerCase() === unitName.toLowerCase(),
-  );
+  const normalize = (s: string) => s.replace(/[\s_-]+/g, "").toLowerCase();
+  const target = normalize(unitName);
+  return collabUnits.some((u) => {
+    if (normalize(u.unitName) === target) return true;
+    if (u.hl && u.hl.en && normalize(u.hl.en) === target) return true;
+    return false;
+  });
 };

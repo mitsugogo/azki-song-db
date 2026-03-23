@@ -6,7 +6,8 @@ import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
 import { Badge } from "flowbite-react";
 import { Indicator } from "@mantine/core";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 interface SongListItemProps {
   song: Song;
@@ -38,6 +39,7 @@ const SongListItem = React.memo(
       const isNewSong =
         new Date(song.broadcast_at) >
         new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      const t = useTranslations("Watch.nowPlayingSongInfoDetail");
 
       return (
         <li
@@ -149,7 +151,7 @@ const SongListItem = React.memo(
                 {song.live_call && (
                   <span className="text-xs">
                     <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
-                      コール
+                      {t("callBadge")}
                     </Badge>
                   </span>
                 )}

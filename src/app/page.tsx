@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import ClientTop from "./client";
 import { metadata } from "./layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
@@ -21,37 +22,41 @@ const getParamValue = (value: string | string[] | undefined) => {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ogImagePath = `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌の素晴らしさを伝えるサイト")}&w=1200&h=630`;
+  const locale = await getLocale();
+  const t = await getTranslations({ namespace: "Metadata.home", locale });
+
+  const description = t("description");
+  const ogSubtitle = t("ogSubtitle");
+  const ogAlt = t("ogAlt", { siteName: siteConfig.siteName });
+
+  const ogImagePath = `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`;
   const canonical = new URL("/", baseUrl).toString();
 
   return {
     ...metadata,
     title: siteConfig.siteName,
-    description:
-      "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    description,
     openGraph: {
       ...metadata.openGraph,
       title: siteConfig.siteName,
-      description:
-        "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      description,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [
         {
           url: ogImagePath,
           width: 1200,
           height: 630,
-          alt: `${siteConfig.siteName} - AZKiさんの歌の素晴らしさを伝えるサイト`,
+          alt: ogAlt,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
       title: siteConfig.siteName,
-      description:
-        "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      description,
       images: [ogImagePath],
     },
     alternates: {

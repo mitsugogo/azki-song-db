@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { MyBestNineSongs } from "@/app/hook/useMyBestNineSongs";
 
 type Props = {
@@ -25,10 +26,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // 取得失敗時はデフォルトメタデータを使用
   }
 
-  let pageTitle = "好きな曲9選";
-  let description = "AZKiの好きな曲をシェアしています";
-  let ogTitle = "好きな曲9選";
-  let ogDescription = "AZKiの好きな曲9選";
+  const locale = await getLocale();
+  const tMeta = await getTranslations({ namespace: "Metadata.share", locale });
+
+  let pageTitle = tMeta("myBest9Title") ?? "好きな曲9選";
+  let description =
+    tMeta("myBest9Description") ?? "AZKiの好きな曲をシェアしています";
+  let ogTitle = tMeta("myBest9OgTitle") ?? "好きな曲9選";
+  let ogDescription = tMeta("myBest9OgDescription") ?? "AZKiの好きな曲9選";
 
   if (selection) {
     pageTitle = `${selection.title}${selection.author ? ` | ${selection.author}` : ""} | ${siteConfig.siteName}`;
@@ -54,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: ogDescription,
       url: canonical.toString(),
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       images: [
         {
           url: ogImagePath,

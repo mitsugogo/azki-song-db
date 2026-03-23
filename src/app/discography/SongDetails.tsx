@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Table,
   TableBody,
@@ -18,8 +18,10 @@ import { StatisticsItem } from "./createStatistics";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
 import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
+import { useTranslations } from "next-intl";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
+  const t = useTranslations("Discography");
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
   const rawVideos = song.videos || [];
@@ -198,7 +200,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             )}
           </h2>
           <p className="text-sm">
-            アーティスト:{" "}
+            {t("table.artist")}{" "}
             <Link
               href={`/search?q=artist:${encodeURIComponent(song.firstVideo.artist)}`}
               className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
@@ -210,7 +212,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <>
               {song.firstVideo.lyricist && (
                 <p className="text-sm">
-                  作詞:{" "}
+                  {t("table.lyricist")}{" "}
                   {song.firstVideo.lyricist.split("、").map((n, i) => (
                     <Link
                       key={i + "_lyricist"}
@@ -224,7 +226,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               )}
               {song.firstVideo.composer && (
                 <p className="text-sm">
-                  作曲:{" "}
+                  {t("table.composer")}{" "}
                   {song.firstVideo.composer.split("、").map((n, i) => (
                     <Link
                       key={i + "_composer"}
@@ -238,7 +240,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               )}
               {song.firstVideo.arranger && (
                 <p className="text-sm">
-                  編曲:{" "}
+                  {t("table.arranger")}{" "}
                   {song.firstVideo.arranger.split("、").map((n, i) => (
                     <Link
                       key={i + "_arranger"}
@@ -254,7 +256,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           )}
           {song.song.tags.includes("カバー曲") && (
             <p className="text-sm">
-              カバー:{" "}
+              {t("labels.cover")}{" "}
               {coverArtists.map((n, i) => (
                 <span key={`${n}_${i}_coverArtist`}>
                   <Link
@@ -296,7 +298,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       .map((m) => `sing:${encodeURIComponent(m)}`)
                       .join("|")}`}
                   >
-                    この組み合わせ
+                    {t("badge.thisCombination")}
                   </Badge>
                 </span>
               )}
@@ -305,7 +307,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           {!song.isAlbum && (
             <span>
               <p className="text-sm">
-                公開日:{" "}
+                {t("labels.publishedDate")}{" "}
                 {new Date(song.lastVideo.broadcast_at).toLocaleDateString()}
               </p>
             </span>
@@ -313,7 +315,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
 
           {song.firstVideo.album_release_at && (
             <p className="text-sm">
-              発売日:{" "}
+              {t("labels.releaseDate")}{" "}
               {new Date(
                 song.firstVideo.album_release_at ??
                   song.firstVideo.broadcast_at ??
@@ -321,7 +323,9 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               ).toLocaleDateString()}
             </p>
           )}
-          <p className="text-sm">収録曲数: {videos.length}曲</p>
+          <p className="text-sm">
+            {t("tracksCount", { count: videos.length })}
+          </p>
 
           <div className="mt-4 overflow-y-auto max-h-62.5">
             <Table striped hoverable border={3}>
@@ -329,22 +333,22 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 <TableRow>
                   <TableHeadCell className="px-2 py-1"></TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    曲名
+                    {t("table.songName")}
                   </TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    アーティスト
+                    {t("table.artist")}
                   </TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    作詞
+                    {t("table.lyricist")}
                   </TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    作曲
+                    {t("table.composer")}
                   </TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    編曲
+                    {t("table.arranger")}
                   </TableHeadCell>
                   <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
-                    動画公開日
+                    {t("table.videoDate")}
                   </TableHeadCell>
                 </TableRow>
               </TableHead>
@@ -456,7 +460,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               rel="noopener noreferrer"
               className="text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
             >
-              <FaYoutube className="mr-2" /> YouTubeで見る
+              <FaYoutube className="mr-2" /> {t("buttons.watchOnYouTube")}
             </Link>
             <Link
               href={
@@ -466,7 +470,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               }
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center sm:justify-start"
             >
-              <FaDatabase className="mr-2" /> データベースで見る
+              <FaDatabase className="mr-2" /> {t("buttons.viewInDatabase")}
             </Link>
           </div>
         </div>

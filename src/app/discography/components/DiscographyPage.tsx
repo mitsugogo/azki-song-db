@@ -5,10 +5,11 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses } from "../../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 
 import { useDiscographyData } from "../hooks/useDiscographyData";
 import { useItemVisibility } from "../hooks/useItemVisibility";
@@ -34,6 +35,7 @@ export default function DiscographyPage({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("Discography");
 
   // 初期カテゴリがサーバ側から渡された場合、それを優先してタブを切り替える
   useEffect(() => {
@@ -154,10 +156,10 @@ export default function DiscographyPage({
           separator={<HiChevronRight className={breadcrumbClasses.separator} />}
         >
           <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
+            <HiHome className="w-4 h-4 mr-1.5" /> {t("homeLabel")}
           </Link>
           <Link href="/discography" className={breadcrumbClasses.link}>
-            楽曲一覧
+            {t("breadcrumb")}
           </Link>
 
           {/** カテゴリに応じたパスを追加 */}
@@ -179,7 +181,17 @@ export default function DiscographyPage({
                 if (label) {
                   return (
                     <Link href={pathname} className={breadcrumbClasses.link}>
-                      {label}
+                      {cat.includes("original")
+                        ? t("tabs.originals", { count: 0 }).replace(
+                            /\s*\(0\)/,
+                            "",
+                          )
+                        : cat.includes("collab") || cat.includes("unit")
+                          ? t("tabs.unit", { count: 0 }).replace(/\s*\(0\)/, "")
+                          : t("tabs.covers", { count: 0 }).replace(
+                              /\s*\(0\)/,
+                              "",
+                            )}
                     </Link>
                   );
                 }
@@ -191,14 +203,13 @@ export default function DiscographyPage({
           })()}
         </Breadcrumbs>
 
-        <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
+        <h1 className="font-extrabold text-2xl p-3 mb-2">{t("title")}</h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          {/* タブによって表示を切り替え */}
           {activeTab === 0
-            ? "オリジナル楽曲の一覧です。"
+            ? t("tabDescriptions.originals")
             : activeTab === 1
-              ? "ユニット・ゲスト楽曲の一覧です。"
-              : "カバー楽曲の一覧です。"}
+              ? t("tabDescriptions.unit")
+              : t("tabDescriptions.covers")}
         </p>
 
         <DiscographyControls
@@ -224,15 +235,13 @@ export default function DiscographyPage({
               }`
               }
             >
-              オリジナル楽曲 (
-              {
-                Array.from(
+              {t("tabs.originals", {
+                count: Array.from(
                   new Set(
                     originalSongCountsByReleaseDate.map((s) => s.song.title),
                   ),
-                ).length
-              }
-              )
+                ).length,
+              })}
             </Tab>
             <Tab
               as="button"
@@ -245,7 +254,7 @@ export default function DiscographyPage({
               }`
               }
             >
-              ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
+              {t("tabs.unit", { count: unitSongCountsByReleaseDate.length })}
             </Tab>
             <Tab
               as="button"
@@ -258,7 +267,7 @@ export default function DiscographyPage({
               }`
               }
             >
-              カバー楽曲 ({coverSongCountsByReleaseDate.length})
+              {t("tabs.covers", { count: coverSongCountsByReleaseDate.length })}
             </Tab>
           </TabList>
           <TabPanels>

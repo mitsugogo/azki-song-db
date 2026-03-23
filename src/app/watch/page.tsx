@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import WatchPageClient from "./client";
 import { metadata } from "../layout";
 import { Song } from "../types/song";
@@ -20,6 +22,8 @@ const getParamValue = (value: string | string[] | undefined) => {
 export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
+  const locale = await getLocale();
+  const tMeta = await getTranslations({ namespace: "Metadata.watch", locale });
   const params = await searchParams;
   const q = getParamValue(params.q);
   const v = getParamValue(params.v) ?? getParamValue(params.videoId);
@@ -27,10 +31,10 @@ export async function generateMetadata({
   const playlist = getParamValue(params.playlist);
 
   let title = `${siteConfig.siteName}`;
-  let description = "AZKiさんの歌の素晴らしさを伝えるサイト";
+  let description = tMeta("description");
 
   let ogTitle = `${siteConfig.siteName}`;
-  let ogSubtitle = "AZKiさんの歌の素晴らしさを伝えるサイト";
+  let ogSubtitle = tMeta("ogSubtitle", { siteName: siteConfig.siteName });
 
   let ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
@@ -53,24 +57,27 @@ export async function generateMetadata({
     };
 
     if (isOriginalSongsMode) {
-      title = `オリジナル曲モード | ${siteConfig.siteName}`;
-      ogTitle = "オリジナル曲モード";
-      ogSubtitle = "AZKiさんのオリジナル楽曲を集めたプレイリスト";
+      title = tMeta("mode.original.title", { siteName: siteConfig.siteName });
+      ogTitle = tMeta("mode.original.ogTitle");
+      ogSubtitle = tMeta("mode.original.ogSubtitle");
     } else if (isCoverSongsMode) {
-      title = `カバー曲モード | ${siteConfig.siteName}`;
-      ogTitle = "カバー曲モード";
-      ogSubtitle = "AZKiさんのカバー楽曲を集めたプレイリスト";
+      title = tMeta("mode.cover.title", { siteName: siteConfig.siteName });
+      ogTitle = tMeta("mode.cover.ogTitle");
+      ogSubtitle = tMeta("mode.cover.ogSubtitle");
     } else if (isCollaborationSongsMode) {
-      title = `コラボ曲モード | ${siteConfig.siteName}`;
-      ogTitle = "コラボ曲モード";
-      ogSubtitle = "AZKiさんのコラボ楽曲を集めたプレイリスト";
+      title = tMeta("mode.collab.title", { siteName: siteConfig.siteName });
+      ogTitle = tMeta("mode.collab.ogTitle");
+      ogSubtitle = tMeta("mode.collab.ogSubtitle");
     } else {
       let matched = false;
       for (const [prefix, { icon }] of Object.entries(prefixMap)) {
         if (q.startsWith(prefix)) {
           const displayTerm = q.replace(prefix, "");
-          title = `${displayTerm}の検索結果 | ${siteConfig.siteName}`;
-          ogTitle = `${icon} ${displayTerm}の検索結果`;
+          title = tMeta("search.prefixTitle", {
+            term: displayTerm,
+            siteName: siteConfig.siteName,
+          });
+          ogTitle = tMeta("search.prefixOgTitle", { icon, term: displayTerm });
           ogSubtitle = `${siteConfig.siteName}`;
           matched = true;
           break;
@@ -78,8 +85,11 @@ export async function generateMetadata({
       }
 
       if (!matched) {
-        title = `「${q}」の検索結果 | ${siteConfig.siteName}`;
-        ogTitle = `「${q}」の検索結果`;
+        title = tMeta("search.queryTitle", {
+          q,
+          siteName: siteConfig.siteName,
+        });
+        ogTitle = tMeta("search.queryOgTitle", { q });
         ogSubtitle = `${siteConfig.siteName}`;
       }
     }
@@ -94,27 +104,32 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("v", v);
     ogImageUrl.searchParams.set("t", t);
 
-    const songs = await fetch(new URL("/api/songs", baseUrl)).then((res) =>
-      res.json(),
-    );
+    const songsUrl = new URL("/api/songs", baseUrl);
+    songsUrl.searchParams.set("hl", locale);
+    const songs = await fetch(songsUrl).then((res) => res.json());
     const song = songs.find(
       (s: Song) => s.video_id === v && parseInt(s.start) === parseInt(t, 10),
     );
 
     if (song) {
       title = `${song.title} - ${song.artist} | ${siteConfig.siteName}`;
-      description = `${song.video_title} (配信日時:${new Date(
-        song.broadcast_at,
-      ).toLocaleDateString("ja-JP")})`;
+      const localizedDate = new Date(song.broadcast_at).toLocaleDateString(
+        locale,
+      );
+      description = tMeta("song.description", {
+        videoTitle: song.video_title,
+        date: localizedDate,
+      });
       ogTitle = title;
-      ogSubtitle = `${song.video_title} (配信日時:${new Date(
-        song.broadcast_at,
-      ).toLocaleDateString("ja-JP")})`;
+      ogSubtitle = tMeta("song.ogSubtitle", {
+        videoTitle: song.video_title,
+        date: localizedDate,
+      });
     }
   } else if (v) {
-    const songs = await fetch(new URL("/api/songs/", baseUrl)).then((res) =>
-      res.json(),
-    );
+    const songsUrl = new URL("/api/songs/", baseUrl);
+    songsUrl.searchParams.set("hl", locale);
+    const songs = await fetch(songsUrl).then((res) => res.json());
     const filteredSongs = songs.filter((s: Song) => s.video_id === v);
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];
@@ -162,9 +177,12 @@ export async function generateMetadata({
     };
 
     const decoded = decodePlaylistUrlParam(playlist);
-    title = `プレイリスト「${decoded.name}」 | ${siteConfig.siteName}`;
-    ogTitle = `📒 ${decoded.name}`;
-    ogSubtitle = `${decoded.songs.length}曲の楽曲をまとめたプレイリスト`;
+    title = tMeta("playlist.title", {
+      name: decoded.name,
+      siteName: siteConfig.siteName,
+    });
+    ogTitle = tMeta("playlist.ogTitle", { name: decoded.name });
+    ogSubtitle = tMeta("playlist.ogSubtitle", { count: decoded.songs.length });
     ogImageUrl.searchParams.set("title", ogTitle);
     ogImageUrl.searchParams.set("subtitle", ogSubtitle);
     ogImageUrl.searchParams.set("titlecolor", "b81e8a");

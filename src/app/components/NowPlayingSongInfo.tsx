@@ -10,9 +10,10 @@ import {
   Tooltip,
   TooltipGroup,
 } from "@mantine/core";
+import { useLocale, useTranslations } from "next-intl";
 import { useTextSelection } from "@mantine/hooks";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FaPlus, FaThumbsUp, FaUsers } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
@@ -27,6 +28,7 @@ type DescriptionCollapsibleProps = {
   viewCount?: string | number | null;
   uploadDate?: string | null;
   tags?: string[];
+  locale: string;
 };
 
 type MergedChannelInfo = {
@@ -52,13 +54,15 @@ const DescriptionCollapsible = ({
   viewCount,
   uploadDate,
   tags,
+  locale,
 }: DescriptionCollapsibleProps) => {
+  const t = useTranslations("Watch.nowPlayingSongInfo");
   const [expanded, setExpanded] = useState(false);
 
   const lines = text.split(/\r\n|\n/);
   const isTruncatable = lines.length > 3;
   const collapsedText = lines.slice(0, 3).join("\n");
-  const formatedViewCount = formatViewCountJP(viewCount);
+  const formatedViewCount = formatViewCount(viewCount, locale, t);
 
   // Mantine hook: 現在のテキスト選択を取得
   const selection = useTextSelection();
@@ -136,11 +140,13 @@ const DescriptionCollapsible = ({
             className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
           >
             {expanded
-              ? Number(viewCount ?? 0).toLocaleString() + " 回視聴"
+              ? t("views", {
+                  count: Number(viewCount ?? 0).toLocaleString(locale),
+                })
               : formatedViewCount}{" "}
             {uploadDate && "・"}{" "}
             {isDateString(uploadDate)
-              ? new Date(uploadDate || "").toLocaleDateString()
+              ? new Date(uploadDate || "").toLocaleDateString(locale)
               : uploadDate}
             {tags && tags.length > 0 && (
               <>
@@ -185,7 +191,7 @@ const DescriptionCollapsible = ({
           className="text-xs text-muted-foreground mt-1 cursor-pointer text-gray-200 dark:text-gray-100 hover:text-gray-50 dark:hover:text-gray-200"
           onClick={handleToggle}
         >
-          {expanded ? "折りたたむ" : "続きを表示"}
+          {expanded ? t("collapse") : t("showMore")}
         </div>
       )}
     </div>
@@ -206,6 +212,9 @@ const MainChannelInfo = ({
   size?: number;
   collabChs?: MergedChannelInfo[] | null;
 }) => {
+  const locale = useLocale();
+  const t = useTranslations("Watch.nowPlayingSongInfo");
+
   // コラボチャンネルがある場合（最大2人まで受け付ける）
   if (collabChs && collabChs.length <= 2) {
     const collabs = collabChs.slice(0, 2);
@@ -292,7 +301,7 @@ const MainChannelInfo = ({
             </div>
             {ch.subscriberCount !== null && (
               <div className="text-xs text-muted-foreground truncate">
-                チャンネル登録者 {formatSubscribersJP(ch.subscriberCount)}
+                {formatSubscribers(ch.subscriberCount, locale, t)}
               </div>
             )}
           </Link>
@@ -323,7 +332,7 @@ const MainChannelInfo = ({
                 </div>
                 {c.subscriberCount !== null && (
                   <div className="text-xs text-muted-foreground truncate">
-                    チャンネル登録者 {formatSubscribersJP(c.subscriberCount)}
+                    {formatSubscribers(c.subscriberCount, locale, t)}
                   </div>
                 )}
               </div>
@@ -361,7 +370,7 @@ const MainChannelInfo = ({
           </span>
           {ch.subscriberCount !== null && (
             <span className="text-xs text-muted-foreground truncate">
-              チャンネル登録者 {formatSubscribersJP(ch.subscriberCount)}
+              {formatSubscribers(ch.subscriberCount, locale, t)}
             </span>
           )}
         </div>
@@ -371,26 +380,41 @@ const MainChannelInfo = ({
 };
 
 // 数値を日本語の "万人" 表示に整形
-function formatSubscribersJP(count: number) {
+function formatSubscribers(
+  count: number,
+  locale: string,
+  t: (key: string, values?: any) => string,
+) {
   if (count == null) return count ?? "";
   const num = Number(count);
   if (!Number.isFinite(num)) return "";
-  if (num < 10_000) return `${num.toLocaleString()}人`;
-  const man = num / 10_000;
-  // 100万以上は整数表示、それ以外は小数1位まで表示（末尾.0は省略）
-  const display =
-    man >= 100 ? `${Math.round(man)}` : `${Math.round(man * 10) / 10}`;
-  return `${display.replace(/\.0$/, "")}万人`;
+  if (locale === "ja") {
+    if (num < 10_000)
+      return t("subscribers", { count: `${num.toLocaleString(locale)}人` });
+    const man = num / 10_000;
+    const display =
+      man >= 100 ? `${Math.round(man)}` : `${Math.round(man * 10) / 10}`;
+    return t("subscribers", { count: `${display.replace(/\.0$/, "")}万人` });
+  }
+  return t("subscribers", { count: num.toLocaleString(locale) });
 }
 
-// 再生回数を日本語の万単位に整形
-function formatViewCountJP(count?: string | number | null) {
+function formatViewCount(
+  count: string | number | null | undefined,
+  locale: string,
+  t: (key: string, values?: any) => string,
+) {
   if (count == null) return "";
   const value = typeof count === "string" ? Number(count) : count;
   if (!Number.isFinite(value)) return "";
-  if (value < 10_000) return `${Math.round(value).toLocaleString()} 回視聴`;
-  const man = Math.floor(value / 10_000);
-  return `${man}万 回視聴`;
+  if (locale === "ja") {
+    if (value < 10_000) {
+      return t("views", { count: Math.round(value).toLocaleString(locale) });
+    }
+    const man = Math.floor(value / 10_000);
+    return t("collapsedViews", { count: man.toLocaleString(locale) });
+  }
+  return t("views", { count: Math.round(value).toLocaleString(locale) });
 }
 
 interface NowPlayingSongInfoProps {
@@ -427,6 +451,8 @@ const NowPlayingSongInfo = ({
   videoData,
   videoInfo,
 }: NowPlayingSongInfoProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Watch.nowPlayingSongInfo");
   const { channels: channelsRegistry, isLoading: channelsLoading } =
     useChannels();
 
@@ -676,8 +702,10 @@ const NowPlayingSongInfo = ({
                                     className={`ml-auto flex flex-none text-nowrap ${remaining <= 2 ? "lg:hidden" : ""} items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-50/30 dark:hover:bg-gray-800/60 self-center cursor-pointer`}
                                   >
                                     {showAllChannels
-                                      ? `折りたたむ`
-                                      : `他 ${remaining} チャンネル`}
+                                      ? t("collapse")
+                                      : t("otherChannels", {
+                                          count: remaining,
+                                        })}
                                     <Tooltip.Group
                                       openDelay={100}
                                       closeDelay={100}
@@ -759,7 +787,7 @@ const NowPlayingSongInfo = ({
                         onClick={() => setShowAllChannels((v) => !v)}
                         className="mt-1 text-xs text-muted-foreground hover:underline cursor-pointer"
                       >
-                        折りたたむ
+                        {t("collapse")}
                       </button>
                     )}
                   </div>
@@ -777,7 +805,11 @@ const NowPlayingSongInfo = ({
                         </div>
                       ) : (
                         <Tooltip
-                          label={`最終更新: ${new Date(videoInfo.lastFetchedAt).toLocaleString()}`}
+                          label={t("lastUpdated", {
+                            date: new Date(
+                              videoInfo.lastFetchedAt,
+                            ).toLocaleString(locale),
+                          })}
                           withArrow
                         >
                           <div className="cursor-pointer">
@@ -826,6 +858,7 @@ const NowPlayingSongInfo = ({
                     viewCount={videoInfo.statistics?.viewCount}
                     uploadDate={videoInfo.snippet.publishedAt}
                     tags={displayTags}
+                    locale={locale}
                   />
                 </div>
               </div>

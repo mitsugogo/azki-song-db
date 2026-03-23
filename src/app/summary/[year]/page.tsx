@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { metadata } from "../../layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Props = {
   params: Promise<{ year: string }>;
 };
 
-// Pre-render all available year pages so `generateMetadata` receives a concrete
-// `params.year` during static generation.
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${baseUrl}/api/songs`, { cache: "no-store" });
+    const res = await fetch(`${baseUrl}/api/songs?hl=ja`, {
+      cache: "no-store",
+    });
     const songs = (await res.json()) as any[];
     const years = Array.from(
       new Set(songs.map((s) => Number(s.year)).filter((y) => !Number.isNaN(y))),
@@ -24,29 +25,20 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // incoming params
-
-  // `params` may be a Promise in Next.js dynamic API handlers — await it before
-  // accessing its properties to avoid the runtime error shown in dev logs.
   const resolvedParams = (await (params as unknown)) as
     | { year?: string | string[] }
     | undefined;
 
-  // resolved params processed
-
   const rawYearParam = String(resolvedParams?.year ?? "");
-  // If params.year is an array (shouldn't be for [year], but handle defensively)
   const paramStr = Array.isArray(resolvedParams?.year)
     ? resolvedParams.year.join("/")
     : rawYearParam;
 
-  // Decode and normalize (also convert fullwidth digits to ASCII)
   const decoded = decodeURIComponent(String(paramStr)).trim();
   const normalized = decoded.replace(/[\uFF10-\uFF19]/g, (c) =>
     String(c.charCodeAt(0) - 0xff10),
   );
 
-  // Try to extract a 4-digit year first, then fallback to any digit sequence
   let yearNum = NaN;
   const fourDigit = normalized.match(/(\d{4})/);
   if (fourDigit) {
@@ -60,14 +52,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const locale = await getLocale();
+  const tMeta = await getTranslations({
+    namespace: "Metadata.summary",
+    locale,
+  });
+
   const hasValidYear = Number.isFinite(yearNum) && !Number.isNaN(yearNum);
   const titleBase = hasValidYear
-    ? `AZKiさんの${yearNum}年の歌の活動`
-    : `まとめ`;
+    ? tMeta("yearTitle", { year: String(yearNum) })
+    : tMeta("title");
 
   const subtitle = hasValidYear
-    ? `${yearNum}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました`
-    : `AZKiさんの歌の活動まとめ`;
+    ? tMeta("yearDescription", { year: String(yearNum) })
+    : tMeta("description");
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", titleBase);
@@ -89,7 +87,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: titleBase }],
     },
@@ -106,13 +104,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 import YearSummaryClient from "./YearSummaryClient";
-import Link from "next/link";
-import { Breadcrumbs } from "@mantine/core";
-import { FaHome } from "react-icons/fa";
-import { HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../../theme";
+import SummaryYearClient from "./SummaryYearClient";
 
 export default async function Page({ params }: Props) {
+  const locale = await getLocale();
   const resolvedParams = await params;
   const rawYearParam = resolvedParams.year;
 
@@ -128,7 +123,12 @@ export default async function Page({ params }: Props) {
     }
   }
   // Fetch songs
-  const res = await fetch(`${baseUrl}/api/songs`, { cache: "no-store" });
+  const res = await fetch(
+    `${baseUrl}/api/songs?hl=${encodeURIComponent(locale)}`,
+    {
+      cache: "no-store",
+    },
+  );
   const songs = (await res.json()) as any[];
 
   const songsOfYear = Number.isNaN(yearNum)
@@ -141,40 +141,13 @@ export default async function Page({ params }: Props) {
       ? Number(songsOfYear[0].year)
       : null;
 
+  // Render client component for UI translations; metadata remains server-side.
   return (
-    <div className="grow p-2 lg:p-6 lg:pb-0 overflow-auto">
-      <div className="mb-4">
-        <Breadcrumbs
-          aria-label="Breadcrumb"
-          className={breadcrumbClasses.root}
-          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-        >
-          <Link href="/" className={breadcrumbClasses.link}>
-            <FaHome className="inline mr-1" /> Home
-          </Link>
-          <Link href="/summary" className={breadcrumbClasses.link}>
-            活動記録
-          </Link>
-          <Link
-            href={`/summary/${rawYearParam}`}
-            className={breadcrumbClasses.link}
-          >
-            {displayYearServer ? `${displayYearServer}年` : `詳細`}
-          </Link>
-        </Breadcrumbs>
-      </div>
-
-      <div className="flex items-center justify-between mb-3">
-        <h1 className="font-extrabold text-2xl">
-          {displayYearServer ? `${displayYearServer}年` : `まとめ`}
-        </h1>
-      </div>
-
-      <YearSummaryClient
-        initialSongs={songsOfYear}
-        year={Number.isNaN(yearNum) ? NaN : yearNum}
-        displayYearServer={displayYearServer}
-      />
-    </div>
+    <SummaryYearClient
+      initialSongs={songsOfYear}
+      year={Number.isNaN(yearNum) ? NaN : yearNum}
+      displayYearServer={displayYearServer}
+      rawYearParam={rawYearParam}
+    />
   );
 }

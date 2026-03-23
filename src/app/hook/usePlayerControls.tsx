@@ -9,6 +9,19 @@ import { siteConfig } from "../config/siteConfig";
 import historyHelper from "../lib/history";
 import { WATCH_PATH, normalizeWatchTimeParam } from "../lib/watchUrl";
 
+// サーバ側のルーティング設定と同期するため、クライアント上の現在の URL
+// にロケールプレフィックスが付いているかを検出して付与するヘルパー。
+const detectAndPrefixLocale = (path: string) => {
+  try {
+    const segments = window.location.pathname.split("/").filter(Boolean);
+    const first = segments[0];
+    if (first === "ja" || first === "en") {
+      return `/${first}${path}`;
+    }
+  } catch (_) {}
+  return path;
+};
+
 // YouTubePlayer に getVideoData メソッドを追加した拡張型
 type YouTubePlayerWithVideoData = YouTubePlayer & {
   getVideoData: () => YouTubeVideoData;
@@ -150,7 +163,7 @@ const usePlayerControls = (
   useEffect(() => {
     const url = new URL(window.location.href);
     if (videoId) {
-      url.pathname = WATCH_PATH;
+      url.pathname = detectAndPrefixLocale(WATCH_PATH);
       const existingT = url.searchParams.get("t");
       buildSearchParamsWithVtFirst(
         url,
@@ -343,7 +356,7 @@ const usePlayerControls = (
         // 再生中の場合は現在の再生位置を示す t パラメータを更新する
         try {
           const url = new URL(window.location.href);
-          url.pathname = WATCH_PATH;
+          url.pathname = detectAndPrefixLocale(WATCH_PATH);
           const songStart = Number(song?.start ?? targetStartTime);
           const tVal = normalizeWatchTimeParam(songStart);
           buildSearchParamsWithVtFirst(url, targetVideoId, tVal);
@@ -364,7 +377,7 @@ const usePlayerControls = (
       // === 異なる動画への切り替え ===
       // URL 表示や Player リセットが必要な場合のみ履歴操作を行う
       const url = new URL(window.location.href);
-      url.pathname = WATCH_PATH;
+      url.pathname = detectAndPrefixLocale(WATCH_PATH);
       // 新しい動画に切り替える際は、ターゲットの開始時刻に合わせて t を設定する。
       // 通常は曲の定義された start を優先して URL に反映する。
       const songStart = Number(song?.start ?? targetStartTime);

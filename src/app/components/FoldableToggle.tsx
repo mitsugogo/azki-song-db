@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import { FaLaptop } from "react-icons/fa6";
 import { BsSquareHalf } from "react-icons/bs";
+import { useTranslations } from "next-intl";
 
 // 折りたたみモードの状態の型
 type FoldableMode = "default" | "foldable";
 
 const FoldableToggle = () => {
+  const t = useTranslations("FoldableToggle");
   // 'foldable-mode'というキーでlocalStorageに保存される状態を定義
   // デフォルト値は 'default'
   const [foldableMode, setFoldableMode] = useLocalStorage<FoldableMode>({
@@ -45,11 +47,7 @@ const FoldableToggle = () => {
       type="button"
       className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-800 p-2 rounded-md"
       onClick={handleClick}
-      title={
-        foldableMode === "foldable"
-          ? "折りたたみモード: ON"
-          : "折りたたみモード: OFF"
-      }
+      title={foldableMode === "foldable" ? t("on") : t("off")}
     >
       {getFoldableIcon()}
     </button>

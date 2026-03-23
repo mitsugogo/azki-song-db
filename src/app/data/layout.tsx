@@ -7,7 +7,7 @@ import { siteConfig } from "../config/siteConfig";
 
 // titleタグ
 export const metadata = {
-  title: `収録データ | ${siteConfig.siteName}`,
+  title: `Recorded Data | ${siteConfig.siteName}`,
 };
 
 export default function StatsLayout({

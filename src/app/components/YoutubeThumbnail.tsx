@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
 import { useState, useEffect } from "react";
 
@@ -53,13 +52,13 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
           outcontainerClassName || ""
         } ${className || ""}`}
       >
-        <Image
+        <img
           key={videoId}
           src={imageUrl}
           alt={alt}
-          fill={true}
-          className={`outfit-image ${imageClassName || ""}`}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""}`}
+          loading="lazy"
+          decoding="async"
           onLoad={handleOnLoad}
           onError={handleError}
           style={{
@@ -73,14 +72,14 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
 
   return (
     <div className={`relative aspect-video ${outcontainerClassName || ""}`}>
-      <Image
+      <img
         src={imageUrl}
         alt={alt}
-        fill={true}
-        className={`outfit-image ${imageClassName || ""} ${
+        className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""} ${
           loading ? "hidden" : ""
         }`}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        loading="lazy"
+        decoding="async"
         onLoad={handleOnLoad}
         onError={handleError}
         style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}

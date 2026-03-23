@@ -1,10 +1,11 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchTermChips from "./SearchTermChips";
+import { useTranslations } from "next-intl";
 
 interface VirtualRow {
   index: number;
@@ -45,6 +46,8 @@ const SearchResultsView = ({
   totalSize,
   measureElement,
 }: SearchResultsViewProps) => {
+  const t = useTranslations("SearchResults");
+  const tHeader = useTranslations("Header");
   const firstStart = virtualRows.length > 0 ? virtualRows[0].start : 0;
   const lastEnd =
     virtualRows.length > 0 ? virtualRows[virtualRows.length - 1].end : 0;
@@ -55,14 +58,16 @@ const SearchResultsView = ({
       className="grow lg:p-6 lg:pb-0 overflow-y-auto overflow-x-hidden"
       style={{ scrollbarGutter: "stable" }}
     >
-      <SearchBreadcrumb currentLabel={`「${searchTerm}」の検索結果`} />
+      <SearchBreadcrumb
+        currentLabel={t("labelWithQuery", { term: searchTerm })}
+      />
 
       <div className="mb-4">
-        <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
+        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
         <div className="px-3 pb-3">
           <SearchTermChips terms={searchTokens} />
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {filteredSongs.length} 件の楽曲が見つかりました
+            {t("foundCount", { count: filteredSongs.length })}
           </p>
         </div>
       </div>
@@ -72,6 +77,7 @@ const SearchResultsView = ({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        placeholder={tHeader("searchPlaceholder")}
       />
 
       <div className="p-3">

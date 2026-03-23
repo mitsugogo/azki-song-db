@@ -31,7 +31,7 @@ import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
 import { breadcrumbClasses } from "@/app/theme";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { FaPlay } from "react-icons/fa6";
 

@@ -12,9 +12,10 @@ import {
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { IoAlbums, IoTime } from "react-icons/io5";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi";
+import { useLocale, useTranslations } from "next-intl";
 import MilestoneBadge from "./MilestoneBadge";
 import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
@@ -45,6 +46,8 @@ const NowPlayingSongInfoDetail = ({
   setSearchTerm,
   changeCurrentSong,
 }: NowPlayingSongInfoDetailProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Watch.nowPlayingSongInfoDetail");
   const [isTimestampExpand, setIsTimestampExpand] = useState(false);
   const [isSangFrameExpand, setIsSangFrameExpand] = useState(false);
 
@@ -83,7 +86,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaCompactDisc className="text-base" />
-                    <span className="ml-1">タイトル:</span>
+                    <span className="ml-1">{t("title")}</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -110,7 +113,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaUser className="text-base" />
-                    <span className="ml-1">アーティスト:</span>
+                    <span className="ml-1">{t("artist")}</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -151,14 +154,14 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaUser className="text-base" />
-                    <span className="ml-1">作詞/作曲/編曲:</span>
+                    <span className="ml-1">{t("credits")}</span>
                   </span>
                 </dt>
                 <dd className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-3">
                   {currentSong.lyricist && (
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-muted-foreground text-sm">
-                        作詞
+                        {t("lyricist")}
                       </span>
                       {currentSong.lyricist
                         .split("、")
@@ -196,7 +199,7 @@ const NowPlayingSongInfoDetail = ({
                   {currentSong.composer && (
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-muted-foreground text-sm">
-                        作曲
+                        {t("composer")}
                       </span>
                       {currentSong.composer
                         .split("、")
@@ -234,7 +237,7 @@ const NowPlayingSongInfoDetail = ({
                   {currentSong.arranger && (
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-muted-foreground text-sm">
-                        編曲
+                        {t("arranger")}
                       </span>
                       {currentSong.arranger
                         .split("、")
@@ -277,7 +280,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoAlbums className="text-base" />
-                    <span className="ml-1">アルバム:</span>
+                    <span className="ml-1">{t("album")}</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -315,7 +318,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <PiMicrophoneStageFill className="text-base" />
-                  <span className="ml-1">歌った人:</span>
+                  <span className="ml-1">{t("singers")}</span>
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
@@ -384,7 +387,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaYoutube className="text-base" />
-                  <span className="ml-1">動画タイトル:</span>
+                  <span className="ml-1">{t("videoTitle")}</span>
                 </span>
               </dt>
               <dd>
@@ -416,7 +419,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaCalendar className="text-base" />
-                  <span className="ml-1">配信日:</span>
+                  <span className="ml-1">{t("broadcastDate")}</span>
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
@@ -448,7 +451,9 @@ const NowPlayingSongInfoDetail = ({
                     }
                   }}
                 >
-                  {new Date(currentSong.broadcast_at).toLocaleDateString()}
+                  {new Date(currentSong.broadcast_at).toLocaleDateString(
+                    locale,
+                  )}
                 </Badge>
               </dd>
             </div>
@@ -457,7 +462,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaTag className="text-base" />
-                  <span className="ml-1">タグ:</span>
+                  <span className="ml-1">{t("tags")}</span>
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
@@ -494,7 +499,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaBook className="text-base" />
-                    <span className="ml-1">マイルストーン:</span>
+                    <span className="ml-1">{t("milestones")}</span>
                   </span>
                 </dt>
                 <dd className="flex flex-wrap gap-1">
@@ -535,7 +540,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <IoTime className="text-base" />
-                    <span className="ml-1">セトリ:</span>
+                    <span className="ml-1">{t("setlist")}</span>
                   </span>
                 </dt>
                 <dd className="grow flex flex-col gap-1 text-xs lg:text-sm relative">
@@ -545,7 +550,7 @@ const NowPlayingSongInfoDetail = ({
                       className="w-full text-center bg-gray-50/50 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
                       onClick={() => setIsTimestampExpand(!isTimestampExpand)}
                     >
-                      クリックして展開&nbsp;
+                      {t("clickToExpand")}&nbsp;
                       <HiChevronDown className="inline" />
                     </button>
                   )}
@@ -633,9 +638,9 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <MdSpeakerNotes className="text-base" />
-                    <span className="ml-1">コーレス:</span>
+                    <span className="ml-1">{t("callResponse")}</span>
                     <Tooltip
-                      label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                      label={t("callResponseHelp")}
                       w={300}
                       multiline
                       withArrow
@@ -720,7 +725,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <MdSpeakerNotes className="text-base" />
-                    <span className="ml-1">ライブノート:</span>
+                    <span className="ml-1">{t("liveNote")}</span>
                   </span>
                 </dt>
                 <dd>
@@ -736,7 +741,7 @@ const NowPlayingSongInfoDetail = ({
                 <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                   <span className="inline-flex items-center">
                     <FaBook className="text-base" />
-                    <span className="ml-1">追加情報:</span>
+                    <span className="ml-1">{t("additionalInfo")}</span>
                   </span>
                 </dt>
                 <dd
@@ -767,7 +772,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaRepeat className="text-base" />
-                  <span className="ml-1">歌った回数:</span>
+                  <span className="ml-1">{t("timesSung")}</span>
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
@@ -776,7 +781,7 @@ const NowPlayingSongInfoDetail = ({
                     allSongs.filter((song) => song.title === currentSong.title)
                       .length
                   }{" "}
-                  回
+                  {t("times")}
                 </Badge>
               </dd>
             </div>
@@ -786,7 +791,7 @@ const NowPlayingSongInfoDetail = ({
               <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
                 <span className="inline-flex items-center">
                   <FaYoutube className="text-base" />
-                  <span className="ml-1">この曲を歌った枠:</span>
+                  <span className="ml-1">{t("videosWithSong")}</span>
                 </span>
               </dt>
               <dd className="flex flex-col gap-1">
@@ -805,7 +810,7 @@ const NowPlayingSongInfoDetail = ({
                         }`}
                       >
                         {new Date(song.broadcast_at).toLocaleDateString(
-                          "ja-JP",
+                          locale,
                           {
                             year: "numeric",
                             month: "2-digit",
@@ -847,7 +852,7 @@ const NowPlayingSongInfoDetail = ({
                     className="w-full text-center bg-gray-50/50 dark:bg-gray-900 text-xs py-1 px-2 cursor-pointer rounded"
                     onClick={() => setIsSangFrameExpand(true)}
                   >
-                    クリックして展開&nbsp;
+                    {t("clickToExpand")}&nbsp;
                     <HiChevronDown className="inline" />
                   </button>
                 )}

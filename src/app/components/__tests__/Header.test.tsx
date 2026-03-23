@@ -17,7 +17,21 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
-  usePathname: () => "/watch",
+  usePathname: () => "/ja/watch",
+}));
+
+vi.mock("next-intl", () => ({
+  useLocale: () => "ja",
+  useTranslations:
+    () =>
+    (key: string): string => {
+      const dict: Record<string, string> = {
+        toggleNavigation: "ナビゲーションを開く",
+        searchPlaceholder: "曲名、アーティスト、タグなどで検索",
+        languageSwitcher: "言語切替",
+      };
+      return dict[key] ?? key;
+    },
 }));
 
 vi.mock("@mantine/core", () => ({
@@ -43,6 +57,11 @@ vi.mock("../FoldableToggle", () => ({
 vi.mock("../DrawerMenu", () => ({
   __esModule: true,
   default: () => <div data-testid="drawer-menu" />,
+}));
+
+vi.mock("../LanguageSwitcher", () => ({
+  __esModule: true,
+  default: () => <div data-testid="language-switcher" />,
 }));
 
 vi.mock("../../hook/useSongs", () => ({

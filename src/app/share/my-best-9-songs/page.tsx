@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import MyBestNineSongsPageClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Props = {
   searchParams: Promise<{ title?: string | string[] }>;
@@ -19,16 +20,25 @@ export async function generateMetadata({
   const params = await searchParams;
   const rawTitle = Array.isArray(params.title) ? params.title[0] : params.title;
   const normalizedTitle = rawTitle?.trim().slice(0, 50) || null;
-  const pageTitle = getTitle(normalizedTitle);
+  const locale = await getLocale();
+  const tMeta = await getTranslations({ namespace: "Metadata.share", locale });
+
+  const pageTitle = normalizedTitle
+    ? `${tMeta("myBest9WithTopic", {
+        title: normalizedTitle,
+        siteName: siteConfig.siteName,
+      })}
+    `
+    : tMeta("myBest9TitleWithSite", { siteName: siteConfig.siteName });
 
   const ogTitle = normalizedTitle
-    ? `お題:「${normalizedTitle}」`
-    : "究極の9曲ジェネレーター";
-  const ogDescription = "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！";
+    ? tMeta("myBest9OgWithTopic", { title: normalizedTitle })
+    : tMeta("myBest9OgTitle");
+  const ogDescription = tMeta("myBest9OgDescription");
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
-  ogImageUrl.searchParams.set("subtitle", "究極の9曲ジェネレーター");
+  ogImageUrl.searchParams.set("subtitle", tMeta("myBest9OgTitle"));
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
 
@@ -47,7 +57,7 @@ export async function generateMetadata({
       url: pageUrl.toString(),
       type: "website",
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       images: [
         {
           url: ogImagePath,

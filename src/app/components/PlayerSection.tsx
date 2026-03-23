@@ -21,6 +21,7 @@ import {
   getSongModeLabel,
   getSongModeTriggerButtonClassName,
 } from "./songModeMenu";
+import { useTranslations } from "next-intl";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -129,7 +130,8 @@ export default function PlayerSection({
     if (song.slug) return song.slug;
     return `${song.title}::${song.artist}`;
   }, []);
-  const currentSongModeLabel = getSongModeLabel(searchTerm);
+  const tMode = useTranslations("Watch.songMode");
+  const currentSongModeLabel = getSongModeLabel(searchTerm, tMode);
   const currentSongModeIcon = getSongModeIcon(searchTerm);
   const currentSongModeButtonClassName =
     getSongModeTriggerButtonClassName(searchTerm);

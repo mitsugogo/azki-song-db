@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "@mantine/core/styles.css";
 import "@mantine/spotlight/styles.css";
 import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { MantineProvider } from "@mantine/core";
+import { NextIntlClientProvider } from "next-intl";
 import { theme } from "./theme";
 import ClientProviders from "./components/ClientProviders";
 import { siteConfig, baseUrl } from "./config/siteConfig";
+import { routing } from "../i18n/routing";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,15 +88,23 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerStore = await headers();
+  const localeHeader = headerStore.get("x-locale");
+  const locale = routing.locales.includes(
+    localeHeader as (typeof routing.locales)[number],
+  )
+    ? (localeHeader as (typeof routing.locales)[number])
+    : routing.defaultLocale;
+  const messages = (await import(`../messages/${locale}.json`)).default;
   const shouldInjectToolbar = process.env.NODE_ENV === "development";
   return (
     <html
-      lang="ja"
+      lang={locale}
       className={`${notoSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <head>
@@ -114,12 +125,14 @@ export default function RootLayout({
       <body
         className={`antialiased bg-white dark:bg-azki-gradient bg-fixed transition-colors duration-700`}
       >
-        <MantineProvider theme={theme}>
-          <ClientProviders>
-            {children}
-            {shouldInjectToolbar && <VercelToolbar />}
-          </ClientProviders>
-        </MantineProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <MantineProvider theme={theme}>
+            <ClientProviders>
+              {children}
+              {shouldInjectToolbar && <VercelToolbar />}
+            </ClientProviders>
+          </MantineProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,14 +1,31 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ROUTE_RANGES } from "../config/timelineRoutes";
 import { VISUAL_CHANGES } from "../config/timelineVisuals";
 import { Song } from "../types/song";
 import useMilestones from "../hook/useMilestones";
 import { Badge } from "@mantine/core";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { useTranslations, useLocale } from "next-intl";
+
+type TimelineMilestone = {
+  date: Date;
+  text: string;
+  note: string;
+  url: string;
+  is_external: boolean;
+};
+
+function toDateKey(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 export default function Timeline({ songs }: { songs: Song[] }) {
+  const t = useTranslations("Summary");
   const activityStart = new Date(2018, 10, 15);
 
   const msPerDay = 1000 * 60 * 60 * 24;
@@ -20,60 +37,59 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     .flatMap((s) =>
       (s.milestones || []).map((m: string) => ({
         date: new Date(s.broadcast_at),
-        text: m,
+        text: m.trim(),
+        note: "",
+        url: "",
+        is_external: false,
       })),
     );
 
-  const apiMilestones = (externalMilestones || [])
+  const apiMilestones: TimelineMilestone[] = (externalMilestones || [])
     .map((m) => ({
       date: m.date ? new Date(m.date) : null,
-      text: m.content,
+      text: m.content?.trim() || "",
       note: m.note || "",
       url: m.url || "",
       is_external: true, // APIからのマイルストーンかどうか
     }))
-    .filter((m) => m.date && m.text) as {
-    date: Date;
-    text: string;
-    note?: string;
-    url?: string;
-    is_external?: boolean;
-  }[];
+    .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
 
-  const allMilestones = [...songMilestones, ...apiMilestones].sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  );
+  const allMilestones: TimelineMilestone[] = [
+    ...songMilestones,
+    ...apiMilestones,
+  ].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const uniqueMilestones = (() => {
-    const map = new Map<
-      string,
-      { date: Date; note?: string; url?: string; is_external?: boolean }
-    >();
+    const map = new Map<string, TimelineMilestone>();
+
     for (const m of allMilestones) {
-      const prev = map.get(m.text);
-      if (!prev || m.date.getTime() < prev.date.getTime())
-        map.set(m.text, {
-          date: m.date,
-          note: (m as any).note,
-          url: (m as any).url,
-          is_external: (m as any).is_external,
-        });
+      const key = `${toDateKey(m.date)}::${m.text}`;
+      const prev = map.get(key);
+
+      if (!prev) {
+        map.set(key, m);
+        continue;
+      }
+
+      map.set(key, {
+        ...prev,
+        note: prev.note || m.note,
+        url: prev.url || m.url,
+        is_external: prev.is_external || m.is_external,
+      });
     }
-    return Array.from(map.entries())
-      .map(([text, obj]) => ({
-        text,
-        date: obj.date,
-        note: obj.note,
-        url: obj.url,
-        is_external: obj.is_external || false,
-      }))
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    return Array.from(map.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
   })();
 
   return (
     <>
-      <div key="timeline" className="col-span-full mt-6 p-3 border-t pb-6">
-        <h2 className="font-bold text-xl mb-2">活動年表</h2>
+      <div
+        key="timeline"
+        className="col-span-full mt-6 p-3 border-t pb-20 lg:pb-24"
+      >
+        <h2 className="font-bold text-xl mb-2">{t("timelineTitle")}</h2>
         {(() => {
           const start = activityStart;
           const lastMilestoneTime =
@@ -86,11 +102,13 @@ export default function Timeline({ songs }: { songs: Song[] }) {
           const end = new Date(
             Math.max(lastMilestoneTime, Date.now(), minEndTime),
           );
+          // 日単位のタイムラインとして、終端日は当日末まで含める
+          end.setHours(23, 59, 59, 999);
           const totalRange = Math.max(1, end.getTime() - start.getTime());
 
           // レイアウト定数（px）
           const topPadding = 12;
-          const bottomPadding = 56;
+          const bottomPadding = 96;
           const minGap = 26;
 
           // 総日数に比例して高さを追加し、セグメントの圧縮を避ける（1日あたり0.55px）
@@ -99,20 +117,32 @@ export default function Timeline({ songs }: { songs: Song[] }) {
           // マイルストーン数に応じて確実に十分な高さを確保する
           // API 由来のマイルストーンが増えた場合でも縦方向の余裕を持たせる
           const heightByItems =
-            topPadding + bottomPadding + uniqueMilestones.length * 40;
+            topPadding + bottomPadding + uniqueMilestones.length * 52;
 
           const timelineHeight = Math.max(
             800,
             heightByItems,
             heightByDays + topPadding + bottomPadding,
           );
+          const timelineInnerHeight = Math.max(
+            1,
+            timelineHeight - topPadding - bottomPadding,
+          );
+          const endTime = end.getTime();
+          const arrowEndCompensationPx = 14;
+
+          const locale = useLocale();
+          const isJP = locale === "ja";
 
           const routeRanges = ROUTE_RANGES.map((r) => {
             const from = new Date(r.from).setHours(0, 0, 0, 0);
             const to = r.to
               ? new Date(r.to).setHours(23, 59, 59, 999)
               : Infinity;
-            return { label: r.label, from, to };
+            const label = (r as any).labelKey
+              ? t((r as any).labelKey)
+              : r.label;
+            return { label, from, to };
           });
 
           const overlaps = routeRanges.map((r) => {
@@ -133,7 +163,10 @@ export default function Timeline({ songs }: { songs: Song[] }) {
             const to = v.to
               ? new Date(v.to).setHours(23, 59, 59, 999)
               : Infinity;
-            return { label: v.label, from, to, color: v.color };
+            const label = (v as any).labelKey
+              ? t((v as any).labelKey)
+              : v.label;
+            return { label, from, to, color: v.color };
           });
 
           const visualOverlaps = visualRanges.map((r) => {
@@ -151,10 +184,13 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                   const startRatio =
                     (o.segStart - start.getTime()) / totalRange;
                   const endRatio = (o.segEnd - start.getTime()) / totalRange;
-                  const topPx = Math.max(0, startRatio * timelineHeight);
+                  const reachesTimelineEnd = o.segEnd >= endTime - 1;
+                  const topPx =
+                    topPadding + Math.max(0, startRatio) * timelineInnerHeight;
                   const heightPx = Math.max(
                     6,
-                    (endRatio - startRatio) * timelineHeight,
+                    (endRatio - startRatio) * timelineInnerHeight +
+                      (reachesTimelineEnd ? arrowEndCompensationPx : 0),
                   );
                   return (
                     <div
@@ -180,10 +216,19 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                         className="rounded-l"
                       />
                       <div
-                        style={{
-                          writingMode: "vertical-rl",
-                          textOrientation: "upright",
-                        }}
+                        style={
+                          isJP
+                            ? {
+                                writingMode: "vertical-rl",
+                                textOrientation: "upright",
+                              }
+                            : {
+                                transform: "rotate(90deg)",
+                                transformOrigin: "center",
+                                display: "inline-block",
+                                whiteSpace: "nowrap",
+                              }
+                        }
                         className="text-xs text-center text-light-gray-500 dark:text-light-gray-400 z-10"
                       >
                         {o.label}
@@ -198,10 +243,13 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                   const startRatio =
                     (o.segStart - start.getTime()) / totalRange;
                   const endRatio = (o.segEnd - start.getTime()) / totalRange;
-                  const topPx = Math.max(0, startRatio * timelineHeight);
+                  const reachesTimelineEnd = o.segEnd >= endTime - 1;
+                  const topPx =
+                    topPadding + Math.max(0, startRatio) * timelineInnerHeight;
                   const heightPx = Math.max(
                     6,
-                    (endRatio - startRatio) * timelineHeight,
+                    (endRatio - startRatio) * timelineInnerHeight +
+                      (reachesTimelineEnd ? arrowEndCompensationPx : 0),
                   );
                   return (
                     <div
@@ -227,10 +275,19 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                         className="rounded-l"
                       />
                       <div
-                        style={{
-                          writingMode: "vertical-rl",
-                          textOrientation: "upright",
-                        }}
+                        style={
+                          isJP
+                            ? {
+                                writingMode: "vertical-rl",
+                                textOrientation: "upright",
+                              }
+                            : {
+                                transform: "rotate(90deg)",
+                                transformOrigin: "center",
+                                display: "inline-block",
+                                whiteSpace: "nowrap",
+                              }
+                        }
                         className="text-xs text-center text-light-gray-500 dark:text-light-gray-400 z-10"
                       >
                         {o.label}
@@ -316,21 +373,13 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             {m.date.toLocaleDateString("ja-JP")}
                           </span>{" "}
                           —{" "}
-                          {m.is_external && (!m.url || m.url.trim() === "") && (
-                            <span>{m.text}</span>
-                          )}
-                          {(!m.is_external ||
-                            (m.is_external &&
-                              m.url &&
-                              m.url.trim() !== "")) && (
-                            <Link
-                              href={m.url ? m.url : `/?q=milestone:${m.text}`}
-                              className="text-primary"
-                              target={m.url ? "_blank" : undefined}
-                            >
-                              {m.text}
-                            </Link>
-                          )}
+                          <Link
+                            href={m.url ? m.url : `/?q=milestone:${m.text}`}
+                            className="text-primary"
+                            target={m.url ? "_blank" : undefined}
+                          >
+                            {m.text}
+                          </Link>
                           {m.note ? (
                             <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
                               {m.note}
@@ -352,8 +401,9 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                           ) : null}
                         </div>
                         <div className="pr-2 text-right whitespace-nowrap">
-                          活動日数:{" "}
-                          <span className="font-semibold">{daysSince}</span>日
+                          {t("daysActiveLabel")}{" "}
+                          <span className="font-semibold">{daysSince}</span>
+                          {t("daysSuffix")}
                         </div>
                       </div>
                     );

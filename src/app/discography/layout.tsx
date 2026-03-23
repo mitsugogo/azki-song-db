@@ -4,11 +4,19 @@ import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { flowbiteTheme } from "../theme";
 import { siteConfig } from "../config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
 
 // titleタグ
-export const metadata = {
-  title: `楽曲一覧 | ${siteConfig.siteName}`,
-};
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    namespace: "Metadata.discography",
+    locale,
+  });
+  return {
+    title: t("title", { siteName: siteConfig.siteName }),
+  };
+}
 
 export default function StatsLayout({
   children,

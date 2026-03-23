@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import slugify from "../../lib/slugify";
 import { Song } from "../../types/song";
 import { siteConfig } from "@/app/config/siteConfig";
@@ -37,7 +38,7 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
   });
 }
 
-async function fetchSongsFromApi(): Promise<Song[]> {
+async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
   const candidates = [
     process.env.NEXT_PUBLIC_BASE_URL,
     process.env.PUBLIC_BASE_URL,
@@ -49,7 +50,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 
   for (const base of candidates) {
     try {
-      const res = await fetch(new URL(`/api/songs`, base));
+      const songsUrl = new URL(`/api/songs`, base);
+      songsUrl.searchParams.set("hl", locale);
+      const res = await fetch(songsUrl);
       if (res.ok) {
         return (await res.json()) as Song[];
       }
@@ -59,7 +62,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
   }
 
   try {
-    const res = await fetch(new URL(`/api/songs`, siteConfig.siteUrl));
+    const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
+    songsUrl.searchParams.set("hl", locale);
+    const res = await fetch(songsUrl);
     if (res.ok) return (await res.json()) as Song[];
   } catch (e) {
     // ignore
@@ -73,6 +78,8 @@ export default async function CategoryOrLegacyRedirect({
 }: {
   params: Promise<{ category: string }>;
 }) {
+  const headerStore = await headers();
+  const locale = headerStore.get("x-locale") ?? "ja";
   const resolved = await params;
   const possibleSlug = decodeURIComponent(resolved.category || "");
   const lower = possibleSlug.toLowerCase();
@@ -97,7 +104,7 @@ export default async function CategoryOrLegacyRedirect({
   if (covers.has(lower) || lower.includes("cover")) {
     return <CategoryClient category="covers" />;
   }
-  const songs: Song[] = await fetchSongsFromApi();
+  const songs: Song[] = await fetchSongsFromApi(locale);
 
   let filteredSongs = songs.filter(
     (s) =>
