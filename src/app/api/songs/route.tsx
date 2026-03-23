@@ -59,7 +59,9 @@ export async function GET() {
     // 取得したいフィールドと、スプレッドシート上の見出し名（エイリアス）の定義
     const HEADER_SCHEMA = [
       { key: "title", aliases: ["曲名", "title"] },
+      { key: "title_en", aliases: ["曲名_en", "title_en"] },
       { key: "artist", aliases: ["アーティスト", "artist"] },
+      { key: "artist_en", aliases: ["アーティスト_en", "artist_en"] },
       { key: "sing", aliases: ["歌った人", "sing"] },
       { key: "video", aliases: ["動画", "video", "video_uri"] },
       { key: "start", aliases: ["start", "開始", "開始時刻"] },
@@ -163,9 +165,19 @@ export async function GET() {
         songs.push({
           source_order: sourceOrder++,
           title: titleValue,
+          title_en: getStr("title_en"),
           slug: slugify(titleValue) || videoId,
           slugv2: slugifyV2(uniqKey),
           artist: getStr("artist"),
+          artists: getStr("artist")
+            .split("、")
+            .map((a) => a.trim())
+            .filter(Boolean),
+          artist_en: getStr("artist_en"),
+          artists_en: getStr("artist_en")
+            .split(",")
+            .map((a) => a.trim())
+            .filter(Boolean),
           sing: getStr("sing"),
           lyricist: getStr("lyricist"),
           composer: getStr("composer"),
