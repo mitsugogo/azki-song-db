@@ -97,6 +97,7 @@
   "overrides": {
     "cookie": "^0.7.1",
     "path-to-regexp": "^6.2.3",
-    "serialize-javascript": "^7.0.3"
+    "serialize-javascript": "^7.0.3",
+    "@swc/helpers": "^0.5.19"
   }
 }
