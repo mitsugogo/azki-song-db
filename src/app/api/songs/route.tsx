@@ -2,6 +2,7 @@ import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
+import { Song } from "@/app/types/song";
 
 export async function GET(request: Request) {
   try {
@@ -75,6 +76,7 @@ export async function GET(request: Request) {
       { key: "extra", aliases: ["備考", "extra", "note"] },
       { key: "milestones", aliases: ["マイルストーン", "milestones"] },
       { key: "album", aliases: ["アルバム", "album"] },
+      { key: "album_en", aliases: ["アルバム_en", "album_en"] },
       { key: "album_release_at", aliases: ["アルバム発売日", "発売日"] },
       {
         key: "album_is_compilation",
@@ -88,7 +90,7 @@ export async function GET(request: Request) {
       { key: "view_count", aliases: ["再生数", "view_count"] },
     ] as const;
 
-    const songs: any[] = [];
+    const songs: Song[] = [];
     let sourceOrder = 0;
 
     response.data.sheets?.forEach((sheet) => {
@@ -167,6 +169,11 @@ export async function GET(request: Request) {
         const artistEn = getStr("artist_en");
         const localizedArtist = isEnglish ? artistEn || artistJa : artistJa;
 
+        const albumEn = getStr("album_en");
+        const localizedAlbum = isEnglish
+          ? albumEn || getStr("album")
+          : getStr("album");
+
         // 組み合わせてユニークな文字列にする
         const uniqKey =
           videoId + "_" + parseTimeFromNumberValue(getNum("start"));
@@ -182,10 +189,26 @@ export async function GET(request: Request) {
             .map((a) => a.trim())
             .filter(Boolean),
           sing: getStr("sing"),
+          sings: getStr("sing")
+            .split(/[,,、]/)
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+          hl: {
+            ja: {
+              title: titleValue,
+              artist: artistJa,
+              album: getStr("album"),
+            },
+            en: {
+              title: titleEn,
+              artist: artistEn,
+              album: albumEn,
+            },
+          },
           lyricist: getStr("lyricist"),
           composer: getStr("composer"),
           arranger: getStr("arranger"),
-          album: getStr("album"),
+          album: localizedAlbum,
           album_list_uri: getLink("album"),
           album_release_at: getNum("album_release_at")
             ? convertToDate(getNum("album_release_at"))
@@ -210,7 +233,7 @@ export async function GET(request: Request) {
           live_call: getStr("live_call"),
           live_note: getStr("live_note"),
           view_count: getNum("view_count"),
-        });
+        } as Song);
       });
     });
 
@@ -226,19 +249,61 @@ export async function GET(request: Request) {
     });
 
     const now = new Date();
-    return NextResponse.json(songs, {
-      headers: {
-        "Cache-Control":
-          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
-        "Vercel-Cache-Tag": buildVercelCacheTagHeader([
-          cacheTags.coreDataset,
-          cacheTags.songs,
-          cacheTags.songsList,
-        ]),
-        "x-data-updated": now.toISOString(),
-        "Last-Modified": now.toUTCString(),
+    return NextResponse.json(
+      // 日本語以外の場合、取得が終わったsongsから英語が既に設定されているものがあればそれで上書きして返却する
+      !isEnglish
+        ? songs
+        : songs.map((song) => {
+            const titleJa = song.hl.ja.title;
+            const artistJa = song.hl.ja.artist;
+
+            // 翻訳データを探す
+            const translated = songs.find(
+              (s) =>
+                s.hl.ja.title === titleJa &&
+                s.hl.ja.artist === artistJa &&
+                s.hl?.en?.title,
+            );
+
+            if (translated) {
+              const titleEn = translated.hl?.en?.title || song.title;
+              const artistEn = translated.hl?.en?.artist || song.artist;
+              const albumEn = translated.hl?.en?.album || song.album;
+              return {
+                ...song,
+                title: titleEn,
+                artist: artistEn,
+                album: albumEn,
+                hl: {
+                  ja: {
+                    title: titleJa,
+                    artist: artistJa,
+                    album: song.hl.ja.album,
+                  },
+                  en: {
+                    title: titleEn,
+                    artist: artistEn,
+                    album: albumEn,
+                  },
+                },
+              };
+            }
+            return song; // 翻訳がない場合はそのまま
+          }),
+      {
+        headers: {
+          "Cache-Control":
+            "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+          "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+            cacheTags.coreDataset,
+            cacheTags.songs,
+            cacheTags.songsList,
+          ]),
+          "x-data-updated": now.toISOString(),
+          "Last-Modified": now.toUTCString(),
+        },
       },
-    });
+    );
   } catch (error) {
     console.error("Error fetching data from Google Sheets:", error);
     return NextResponse.json(
