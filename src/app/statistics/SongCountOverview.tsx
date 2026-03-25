@@ -119,7 +119,9 @@ export default function SongCountOverview({
           artist: item.song?.artist || "",
           videoId: item.song?.video_id || "",
           targetCount: item.viewMilestone!.targetCount,
-          currentViewCount: Number(item.song?.view_count ?? 0),
+          currentViewCount:
+            (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
+            0,
           date: achievedAt,
         };
       })
@@ -142,7 +144,9 @@ export default function SongCountOverview({
           artist: item.song?.artist || "",
           videoId: item.song?.video_id || "",
           targetCount: item.viewMilestone!.targetCount,
-          currentViewCount: Number(item.song?.view_count ?? 0),
+          currentViewCount:
+            (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
+            0,
           date: estimatedAt,
         };
       })
