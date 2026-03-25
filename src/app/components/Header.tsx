@@ -50,7 +50,7 @@ export function Header() {
                 aria-label={t("toggleNavigation")}
               />
             </div>
-            <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
+            <div className="flex flex-1 items-center justify-start ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
                 <a href="/">
                   <h1 className="text-lg lg:text-lg font-semibold tracking-[0.06em]">

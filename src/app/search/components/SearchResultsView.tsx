@@ -5,7 +5,8 @@ import { Song } from "../../types/song";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchTermChips from "./SearchTermChips";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 
 interface VirtualRow {
   index: number;
@@ -47,6 +48,7 @@ const SearchResultsView = ({
   measureElement,
 }: SearchResultsViewProps) => {
   const t = useTranslations("SearchResults");
+  const locale = useLocale();
   const tHeader = useTranslations("Header");
   const firstStart = virtualRows.length > 0 ? virtualRows[0].start : 0;
   const lastEnd =
@@ -160,7 +162,7 @@ const SearchResultsView = ({
                           </div>
                         )}
                         <div className="text-xs text-gray-200 dark:text-gray-300 mt-1">
-                          {new Date(song.broadcast_at).toLocaleDateString()}
+                          {formatDate(song.broadcast_at, locale)}
                         </div>
                       </div>
                     </Link>

@@ -425,8 +425,7 @@ export default function DataTable<
                                 {songs
                                   .filter((s) => s.video_id === selectedVideoId)
                                   .sort(
-                                    (a, b) =>
-                                      parseInt(a.start) - parseInt(b.start),
+                                    (a, b) => Number(a.start) - Number(b.start),
                                   )
                                   .map((s) => (
                                     <div
@@ -445,7 +444,7 @@ export default function DataTable<
                                         </Link>
                                       </div>
                                       <div className="shrink-0 w-32 px-3 py-1 text-sm">
-                                        {new Date(parseInt(s.start) * 1000)
+                                        {new Date(Number(s.start) * 1000)
                                           .toISOString()
                                           .substring(11, 19)}
                                       </div>

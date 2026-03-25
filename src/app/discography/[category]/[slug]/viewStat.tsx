@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../../lib/formatDate";
 
 const isSameLocalDate = (left: string | Date, right: string | Date) => {
   const leftDate = new Date(left);
@@ -55,11 +56,12 @@ export default function ViewStat({ videoId }: { videoId: string }) {
   }, []);
 
   const stats = viewHistory?.statistics ?? [];
+  const locale = useLocale();
 
   // 元の日時 (ISO) を保持してソート／フィルタに使う
   const fullChartData = stats
     .map((s) => ({
-      date: s.datetime ? new Date(s.datetime).toLocaleDateString() : "",
+      date: s.datetime ? formatDate(s.datetime, locale) : "",
       isoDate: s.datetime ? new Date(s.datetime).toISOString() : null,
       viewCount: s.viewCount ?? 0,
       likeCount: s.likeCount ?? 0,
@@ -116,8 +118,6 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     });
   }, [chartData, period]);
 
-  const locale = useLocale();
-
   const formatMilestoneLabel = (n: number, localeStr: string) => {
     if (!n || n <= 0) return "";
     // Japanese: show in 万 (10k) units -> 7万, 100万
@@ -173,7 +173,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
 
     return {
       targetLabel: formatMilestoneLabel(milestone.targetCount ?? 0, locale),
-      achievedDateLabel: new Date(milestone.achievedAt).toLocaleDateString(),
+      achievedDateLabel: formatDate(milestone.achievedAt, locale),
       isoDate: achievedIsoDate,
       date: achievedPoint.date,
       viewCount: achievedPoint.viewCount,

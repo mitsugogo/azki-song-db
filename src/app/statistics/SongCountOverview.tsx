@@ -6,6 +6,7 @@ import { FaCalendar, FaPlay, FaYoutube } from "react-icons/fa6";
 
 import { StatisticsItem } from "../types/statisticsItem";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
+import { formatDate } from "../lib/formatDate";
 import { useLocale, useTranslations } from "next-intl";
 
 export type SongCountOverviewProps = {
@@ -201,7 +202,7 @@ export default function SongCountOverview({
             </p>
             <p className="mt-1 text-sm font-semibold text-light-gray-900 dark:text-light-gray-100">
               {overview.latestBroadcastAt
-                ? new Date(overview.latestBroadcastAt).toLocaleDateString()
+                ? formatDate(overview.latestBroadcastAt, locale)
                 : "-"}
             </p>
           </div>
@@ -283,7 +284,7 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {item.date.toLocaleDateString("ja-JP")}
+                            {formatDate(item.date, "ja-JP")}
                           </span>
                         </div>
                       </div>
@@ -369,7 +370,7 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {item.date.toLocaleDateString(locale)}{" "}
+                            {formatDate(item.date, locale)}{" "}
                             {t("estimatedAchievement")}
                           </span>
                         </div>

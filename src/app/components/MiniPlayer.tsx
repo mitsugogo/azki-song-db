@@ -67,7 +67,7 @@ export default function MiniPlayer() {
   const isWatchPage = isWatchPagePath(pathname);
 
   const sortedSongs = useMemo(() => {
-    return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
+    return [...allSongs].sort((a, b) => Number(b.start) - Number(a.start));
   }, [allSongs]);
 
   // 初期位置を設定（保存された位置またはデフォルト位置）
@@ -373,8 +373,7 @@ export default function MiniPlayer() {
 
         // 曲の更新チェック
         const foundSong = sortedSongs.find(
-          (s) =>
-            s.video_id === currentSong.video_id && parseInt(s.start) <= time,
+          (s) => s.video_id === currentSong.video_id && Number(s.start) <= time,
         );
         if (
           foundSong &&

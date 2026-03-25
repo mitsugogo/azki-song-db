@@ -13,6 +13,7 @@ import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { LuFolder } from "react-icons/lu";
 import DiscographyBreadcrumbs from "../components/DiscographyBreadcrumbs";
 import { useTranslations } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 import { siteConfig } from "@/app/config/siteConfig";
 
 function resolveSongCategory(
@@ -38,13 +39,6 @@ function getCategoryBreadcrumb(song: Song): { labelKey: string; href: string } {
     return { labelKey: "unitLabel", href: "/discography/collab" };
   }
   return { labelKey: "coversLabel", href: "/discography/covers" };
-}
-
-function formatDate(value?: string): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString();
 }
 
 export default function AlbumClient({
@@ -166,7 +160,7 @@ export default function AlbumClient({
           {updatedAt && (
             <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
               {tWatch("lastUpdated", {
-                date: new Date(updatedAt).toLocaleDateString("ja-JP"),
+                date: formatDate(updatedAt, "ja"),
               })}
             </p>
           )}

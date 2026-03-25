@@ -13,9 +13,10 @@ import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import useFavorites from "../../hook/useFavorites";
 import { Song } from "@/app/types/song";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Loading from "@/app/loading";
 import { FaRegTrashCan, FaBars } from "react-icons/fa6";
+import { formatDate } from "../../lib/formatDate";
 
 import {
   DndContext,
@@ -65,6 +66,7 @@ const SortableRow = ({
   onPreview: () => void;
 }) => {
   const t = useTranslations("Playlist");
+  const locale = useLocale();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: `${s.videoId}-${s.start}` });
 
@@ -78,7 +80,7 @@ const SortableRow = ({
   }`;
 
   const formattedBroadcastDate = s.songinfo.broadcast_at
-    ? new Date(s.songinfo.broadcast_at).toLocaleDateString()
+    ? formatDate(s.songinfo.broadcast_at, locale)
     : null;
 
   return (

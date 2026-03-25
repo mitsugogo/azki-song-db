@@ -6,7 +6,8 @@ import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
 import { Badge } from "flowbite-react";
 import { Indicator } from "@mantine/core";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 import { Link } from "@/i18n/navigation";
 
 interface SongListItemProps {
@@ -40,6 +41,7 @@ const SongListItem = React.memo(
         new Date(song.broadcast_at) >
         new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
       const t = useTranslations("Watch.nowPlayingSongInfoDetail");
+      const locale = useLocale();
 
       return (
         <li
@@ -145,8 +147,7 @@ const SongListItem = React.memo(
               </div>
               <div className="flex items-center justify-between text-[0.7rem] uppercase  text-gray-400 dark:text-gray-300">
                 <span>
-                  {song.broadcast_at &&
-                    new Date(song.broadcast_at).toLocaleDateString()}
+                  {song.broadcast_at && formatDate(song.broadcast_at, locale)}
                 </span>
                 {song.live_call && (
                   <span className="text-xs">

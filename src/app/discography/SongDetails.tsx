@@ -18,10 +18,12 @@ import { StatisticsItem } from "./createStatistics";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
 import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const t = useTranslations("Discography");
+  const locale = useLocale();
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
 
   const rawVideos = song.videos || [];
@@ -308,7 +310,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <span>
               <p className="text-sm">
                 {t("labels.publishedDate")}{" "}
-                {new Date(song.lastVideo.broadcast_at).toLocaleDateString()}
+                {formatDate(song.lastVideo.broadcast_at, locale)}
               </p>
             </span>
           )}
@@ -316,11 +318,12 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           {song.firstVideo.album_release_at && (
             <p className="text-sm">
               {t("labels.releaseDate")}{" "}
-              {new Date(
+              {formatDate(
                 song.firstVideo.album_release_at ??
                   song.firstVideo.broadcast_at ??
                   song.lastVideo.broadcast_at,
-              ).toLocaleDateString()}
+                locale,
+              )}
             </p>
           )}
           <p className="text-sm">
@@ -442,7 +445,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                           ))}
                     </TableCell>
                     <TableCell className="px-2 py-1 dark:text-light-gray-500">
-                      {new Date(s.broadcast_at).toLocaleDateString()}
+                      {formatDate(s.broadcast_at, locale)}
                     </TableCell>
                   </TableRow>
                 ))}

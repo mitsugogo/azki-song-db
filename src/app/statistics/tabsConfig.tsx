@@ -4,6 +4,7 @@ import { Badge } from "flowbite-react";
 import { HiMusicNote, HiUserCircle, HiPlay, HiTag } from "react-icons/hi";
 import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
 import { ColumnDef } from "@tanstack/react-table";
+import { formatDate } from "../lib/formatDate";
 
 import {
   isCollaborationSong,
@@ -17,7 +18,7 @@ import {
 } from "../lib/statisticsRenderers";
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
-import { FC, SVGProps } from "react";
+import { FC, SVGProps, use } from "react";
 
 type TabConfig = {
   title: string;
@@ -216,8 +217,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         accessorKey: "lastVideo.broadcast_at",
         header: t("columns.achievedDate"),
         cell: (info) =>
-          info.getValue<string>() &&
-          new Date(info.getValue<string>()).toLocaleDateString(),
+          info.getValue<string>() && formatDate(info.getValue<string>()),
       },
       {
         accessorKey: "lastVideo",
@@ -260,8 +260,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         accessorKey: "lastVideo.broadcast_at",
         header: t("columns.broadcastDate"),
         cell: (info) =>
-          info.getValue<string>() &&
-          new Date(info.getValue<string>()).toLocaleDateString(),
+          info.getValue<string>() && formatDate(info.getValue<string>()),
         size: 800,
       },
     ],
@@ -349,7 +348,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         id: "broadcast_at",
         accessorKey: "firstVideo.broadcast_at",
         header: t("columns.releaseOrPremiereDate"),
-        cell: (info) => new Date(info.getValue<number>()).toLocaleDateString(),
+        cell: (info) => formatDate(info.getValue<number>()),
       },
       {
         id: "lastVideo.broadcast_at",
@@ -448,7 +447,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         id: "broadcast_at",
         accessorKey: "firstVideo.broadcast_at",
         header: t("columns.releaseOrPremiereDate"),
-        cell: (info) => new Date(info.getValue<number>()).toLocaleDateString(),
+        cell: (info) => formatDate(info.getValue<number>()),
       },
       {
         id: "lastVideo.broadcast_at",

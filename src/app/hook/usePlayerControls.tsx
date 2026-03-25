@@ -207,7 +207,7 @@ const usePlayerControls = (
 
   // 全曲をstart降順でソート（曲検索用）
   const sortedAllSongs = useMemo(() => {
-    return [...allSongs].sort((a, b) => parseInt(b.start) - parseInt(a.start));
+    return [...allSongs].sort((a, b) => Number(b.start) - Number(a.start));
   }, [allSongs]);
 
   const songsByVideo = useMemo(() => {
@@ -306,9 +306,9 @@ const usePlayerControls = (
         const targetSongs = sortedAllSongs
           .slice()
           .filter((s) => s.video_id === targetVideoId)
-          .sort((a, b) => parseInt(b.start) - parseInt(a.start));
+          .sort((a, b) => Number(b.start) - Number(a.start));
         song =
-          targetSongs.find((s) => parseInt(s.start) <= targetStartTime) ?? null;
+          targetSongs.find((s) => Number(s.start) <= targetStartTime) ?? null;
       }
       if (!song) return;
 
@@ -431,7 +431,7 @@ const usePlayerControls = (
   const searchCurrentSongOnVideo = useCallback(
     (video_id: string, currentTime: number) => {
       return sortedAllSongs.find(
-        (s) => s.video_id === video_id && parseInt(s.start) <= currentTime,
+        (s) => s.video_id === video_id && Number(s.start) <= currentTime,
       );
     },
     [allSongs],

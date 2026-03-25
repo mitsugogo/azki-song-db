@@ -8,6 +8,7 @@ import useMilestones from "../hook/useMilestones";
 import { Badge } from "@mantine/core";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 
 type TimelineMilestone = {
   date: Date;
@@ -370,7 +371,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                       >
                         <div className="pl-2">
                           <span className="w-20 inline-block">
-                            {m.date.toLocaleDateString("ja-JP")}
+                            {formatDate(m.date, locale)}
                           </span>{" "}
                           —{" "}
                           <Link

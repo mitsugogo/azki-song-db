@@ -7,7 +7,8 @@ import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 import {
   FilterMode,
   SearchFilterModeResult,
@@ -42,6 +43,7 @@ const SearchBrowseView = ({
   filterModeData,
 }: SearchBrowseViewProps) => {
   const t = useTranslations("SearchBrowse");
+  const locale = useLocale();
   const tHeader = useTranslations("Header");
   return (
     <div className="grow lg:p-6 lg:pb-0 overflow-auto">
@@ -186,7 +188,7 @@ const SearchBrowseView = ({
                             </div>
                           )}
                           <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                            {new Date(song.broadcast_at).toLocaleDateString()}
+                            {formatDate(song.broadcast_at, locale)}
                           </div>
                         </div>
                       </Link>

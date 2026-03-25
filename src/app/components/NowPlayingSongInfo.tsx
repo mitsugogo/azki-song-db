@@ -18,6 +18,7 @@ import { FaPlus, FaThumbsUp, FaUsers } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
 import React, { use, useEffect, useMemo, useState, useRef } from "react";
+import { formatDate } from "../lib/formatDate";
 import useChannels from "../hook/useChannels";
 import { ChannelEntry } from "../types/api/yt/channels";
 import { getCollabUnitName } from "../config/collabUnits";
@@ -146,7 +147,7 @@ const DescriptionCollapsible = ({
               : formatedViewCount}{" "}
             {uploadDate && "・"}{" "}
             {isDateString(uploadDate)
-              ? new Date(uploadDate || "").toLocaleDateString(locale)
+              ? formatDate(uploadDate || "", locale)
               : uploadDate}
             {tags && tags.length > 0 && (
               <>

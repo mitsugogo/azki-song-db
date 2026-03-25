@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { FaYoutube } from "react-icons/fa6";
 import { BsPlayCircleFill } from "react-icons/bs";
 import { useLocale, useTranslations } from "next-intl";
+import { formatDate } from "./formatDate";
 
 export const renderLastVideoCell = (
   lastVideo: Song,
@@ -80,7 +81,7 @@ function LastVideoCell({
             </a>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {new Date(lastVideo.broadcast_at).toLocaleDateString(locale)}
+            {formatDate(lastVideo.broadcast_at, locale)}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <a
@@ -106,11 +107,14 @@ function LastVideoCell({
   );
 }
 
-const formatMilestoneDate = (date: string | null | undefined) => {
+const formatMilestoneDate = (
+  date: string | null | undefined,
+  locale?: string,
+) => {
   if (!date) return null;
   const parsedDate = new Date(date);
   if (isNaN(parsedDate.getTime())) return null;
-  return parsedDate.toLocaleDateString();
+  return formatDate(parsedDate, locale || undefined);
 };
 
 export const renderViewCountCell = (
@@ -155,7 +159,7 @@ function ViewCountCell({
 
   const remain = getRemainCount(viewCount);
   if (remain) {
-    const estimatedAt = formatMilestoneDate(milestone?.estimatedAt);
+    const estimatedAt = formatMilestoneDate(milestone?.estimatedAt, locale);
     return (
       <div className="flex flex-col gap-1">
         <span>{t("remaining", { count: remain.toLocaleString(locale) })}</span>
@@ -170,7 +174,7 @@ function ViewCountCell({
 
   const after = getAfterCount(viewCount);
   if (after) {
-    const achievedAt = formatMilestoneDate(milestone?.achievedAt);
+    const achievedAt = formatMilestoneDate(milestone?.achievedAt, locale);
     return (
       <div className="flex flex-col gap-1">
         <Badge color="success" className="inline whitespace-nowrap w-fit">

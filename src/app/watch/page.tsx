@@ -7,6 +7,7 @@ import { Song } from "../types/song";
 import { Playlist } from "../hook/usePlaylists";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
+import { formatDate } from "@/app/lib/formatDate";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -108,14 +109,12 @@ export async function generateMetadata({
     songsUrl.searchParams.set("hl", locale);
     const songs = await fetch(songsUrl).then((res) => res.json());
     const song = songs.find(
-      (s: Song) => s.video_id === v && parseInt(s.start) === parseInt(t, 10),
+      (s: Song) => s.video_id === v && Number(s.start) === Number(t),
     );
 
     if (song) {
       title = `${song.title} - ${song.artist} | ${siteConfig.siteName}`;
-      const localizedDate = new Date(song.broadcast_at).toLocaleDateString(
-        locale,
-      );
+      const localizedDate = formatDate(song.broadcast_at, locale);
       description = tMeta("song.description", {
         videoTitle: song.video_title,
         date: localizedDate,

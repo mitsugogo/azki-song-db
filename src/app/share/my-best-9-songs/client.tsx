@@ -19,6 +19,7 @@ import {
 } from "@mantine/core";
 import { MdContentCopy } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Song } from "../../types/song";
 import useMyBestNineSongsDraft from "../../hook/useMyBestNineSongsDraft";
 import useSearch from "../../hook/useSearch";
@@ -58,12 +59,14 @@ const normalizeStart = (value: unknown): string | null => {
   return withoutSuffix;
 };
 
-const formatBroadcastDate = (value: string): string => {
+import { formatDate } from "../../lib/formatDate";
+
+const formatBroadcastDate = (value: string, locale?: string): string => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return "配信日不明";
   }
-  return date.toLocaleDateString("ja-JP");
+  return formatDate(date, locale);
 };
 
 /**
@@ -100,6 +103,7 @@ export default function MyBestNineSongsPage() {
 
   const { draft, saveDraft, clearDraft } = useMyBestNineSongsDraft();
   const { allSongs, isLoading } = useSongs();
+  const locale = useLocale();
   const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
     useGlobalPlayer();
 
@@ -295,7 +299,7 @@ export default function MyBestNineSongsPage() {
   // 曲を選択から削除
   const removeSong = (videoId: string, start: string) => {
     const newSelected = selectedSongs.filter(
-      (s) => !(s.video_id === videoId && s.start === start),
+      (s) => !(s.video_id === videoId && String(s.start) === start),
     );
     setSelectedSongs(newSelected);
     const songEntries = newSelected.map((s) => ({
@@ -413,7 +417,7 @@ export default function MyBestNineSongsPage() {
             <div
               key={`${song.video_id}-${song.start}`}
               className="relative cursor-pointer rounded overflow-hidden border border-pink-300 bg-pink-50 shadow-sm transition hover:bg-pink-100 dark:border-pink-700 dark:bg-gray-800 dark:hover:bg-pink-900/20"
-              onClick={() => removeSong(song.video_id, song.start)}
+              onClick={() => removeSong(song.video_id, String(song.start))}
             >
               <div className="w-full aspect-video bg-black">
                 <YoutubeThumbnail
@@ -430,7 +434,7 @@ export default function MyBestNineSongsPage() {
                   {song.artist}
                 </Text>
                 <Text size="xs" c="dimmed" mt={2}>
-                  {formatBroadcastDate(song.broadcast_at)}
+                  {formatBroadcastDate(song.broadcast_at, locale)}
                 </Text>
                 <MantineButton
                   size="compact-xs"
@@ -807,7 +811,10 @@ export default function MyBestNineSongsPage() {
                                     if (!isSelected && !isDisabled) {
                                       addSong(song);
                                     } else if (isSelected) {
-                                      removeSong(song.video_id, song.start);
+                                      removeSong(
+                                        song.video_id,
+                                        String(song.start),
+                                      );
                                     }
                                   }}
                                   className={`cursor-pointer rounded overflow-hidden border shadow-sm transition ${
@@ -837,7 +844,10 @@ export default function MyBestNineSongsPage() {
                                       {song.artist}
                                     </Text>
                                     <Text size="xs" c="dimmed" mt={2}>
-                                      {formatBroadcastDate(song.broadcast_at)}
+                                      {formatBroadcastDate(
+                                        song.broadcast_at,
+                                        locale,
+                                      )}
                                     </Text>
                                     <MantineButton
                                       size="compact-xs"

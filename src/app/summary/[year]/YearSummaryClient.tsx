@@ -12,6 +12,7 @@ import useSongs from "../../hook/useSongs";
 import { siteConfig } from "@/app/config/siteConfig";
 import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 
 type Props = {
   initialSongs: Song[];
@@ -421,7 +422,7 @@ export default function YearSummaryClient({
                   )}
                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                     &nbsp;-&nbsp;
-                    {new Date(milestone.broadcast_at).toLocaleDateString()}
+                    {formatDate(milestone.broadcast_at, locale)}
                   </span>
                 </div>
               </li>
@@ -713,7 +714,7 @@ export default function YearSummaryClient({
                         </div>
                       )}
                       <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                        {new Date(g.broadcast_at).toLocaleDateString()}
+                        {formatDate(g.broadcast_at, locale)}
                       </div>
                     </div>
                   </Link>
@@ -758,7 +759,7 @@ export default function YearSummaryClient({
                       {s.sing}
                     </div>
                     <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                      {new Date(s.broadcast_at).toLocaleDateString()}
+                      {formatDate(s.broadcast_at, locale)}
                     </div>
                   </div>
                 </Link>
@@ -866,7 +867,7 @@ export default function YearSummaryClient({
                               </div>
                             )}
                             <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                              {new Date(g.broadcast_at).toLocaleDateString()}
+                              {formatDate(g.broadcast_at, locale)}
                             </div>
 
                             {g.milestones &&
@@ -952,7 +953,7 @@ export default function YearSummaryClient({
                                   {v.title}
                                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                                     <br />
-                                    {v.broadcast_at.toLocaleDateString()}
+                                    {formatDate(v.broadcast_at, locale)}
                                   </span>
                                 </Link>
                               </div>

@@ -16,6 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi";
 import { useLocale, useTranslations } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 import MilestoneBadge from "./MilestoneBadge";
 import { MdSpeakerNotes } from "react-icons/md";
 import { Tooltip } from "@mantine/core";
@@ -54,7 +55,7 @@ const NowPlayingSongInfoDetail = ({
   // タイムスタンプ
   const videoTimestamps = allSongs
     .filter((song) => song.video_id === currentSong?.video_id)
-    .sort((a, b) => (parseInt(a.start) || 0) - (parseInt(b.start) || 0));
+    .sort((a, b) => (a.start || 0) - (b.start || 0));
 
   const sameTitleSongs = allSongs
     .filter((song) => song.title === currentSong?.title)
@@ -427,16 +428,17 @@ const NowPlayingSongInfoDetail = ({
                   radius="sm"
                   color={`${
                     searchTerm.includes(
-                      `date:${new Date(currentSong.broadcast_at).toLocaleDateString()}`,
+                      `date:${formatDate(currentSong.broadcast_at, locale)}`,
                     )
                       ? "blue"
                       : "gray"
                   }`}
                   style={{ cursor: "pointer" }}
                   onClick={() => {
-                    const broadcastDate = new Date(
+                    const broadcastDate = formatDate(
                       currentSong.broadcast_at,
-                    ).toLocaleDateString();
+                      locale,
+                    );
                     const existsSameDate = searchTerm.includes(
                       `date:${broadcastDate}`,
                     );
@@ -451,9 +453,7 @@ const NowPlayingSongInfoDetail = ({
                     }
                   }}
                 >
-                  {new Date(currentSong.broadcast_at).toLocaleDateString(
-                    locale,
-                  )}
+                  {formatDate(currentSong.broadcast_at, locale)}
                 </Badge>
               </dd>
             </div>
@@ -588,7 +588,7 @@ const NowPlayingSongInfoDetail = ({
                                   changeCurrentSong(song);
                                 }}
                               >
-                                {new Date(parseInt(song.start) * 1000)
+                                {new Date(song.start * 1000)
                                   .toISOString()
                                   .substring(11, 19)}
                               </Link>
@@ -809,14 +809,11 @@ const NowPlayingSongInfoDetail = ({
                             : "border-transparent"
                         }`}
                       >
-                        {new Date(song.broadcast_at).toLocaleDateString(
-                          locale,
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          },
-                        )}{" "}
+                        {formatDate(song.broadcast_at, locale, {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })}{" "}
                         -{" "}
                         <Link
                           key={index}

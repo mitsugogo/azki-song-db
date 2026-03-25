@@ -11,7 +11,8 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "../config/filters";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 
 const SongItem = ({
   song,
@@ -26,6 +27,7 @@ const SongItem = ({
 }) => {
   const router = useRouter();
   const t = useTranslations("Discography");
+  const locale = useLocale();
   const albumSlug = song.firstVideo.album ? slugify(song.firstVideo.album) : "";
 
   const getSongPath = () => {
@@ -73,10 +75,11 @@ const SongItem = ({
               song.song.album_is_compilation
                 ? ""
                 : " / " + song.firstVideo.artist
-            } (${new Date(song.firstVideo.album_release_at).toLocaleDateString()})`
-          : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
+            } (${formatDate(song.firstVideo.album_release_at, locale)})`
+          : `${song.firstVideo.title} - ${song.firstVideo.artist} (${formatDate(
               song.firstVideo.broadcast_at,
-            ).toLocaleDateString()})`
+              locale,
+            )})`
       }
       onClick={handleClick}
       style={{
@@ -111,8 +114,8 @@ const SongItem = ({
                 : `${song.firstVideo.title} / ${song.firstVideo.artist}`}
               <br />
               {song.isAlbum && groupByAlbum
-                ? `${new Date(song.firstVideo.album_release_at).toLocaleDateString()}`
-                : `${new Date(song.firstVideo.broadcast_at).toLocaleDateString()}`}
+                ? `${formatDate(song.firstVideo.album_release_at, locale)}`
+                : `${formatDate(song.firstVideo.broadcast_at, locale)}`}
               {song.isAlbum && groupByAlbum
                 ? ` (${song.count}${t("songsSuffix")})`
                 : ""}

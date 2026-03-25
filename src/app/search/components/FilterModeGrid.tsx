@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { SearchFilterModeResult } from "../hook/useSearchFilterModeData";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 
 interface FilterModeGridProps {
   filterModeResult: Exclude<
@@ -12,6 +13,7 @@ interface FilterModeGridProps {
 const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
   const { filterMode, data } = filterModeResult;
   const t = useTranslations("SearchBrowse");
+  const locale = useLocale();
 
   return (
     <div className="p-3">
@@ -67,6 +69,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                     <div className="font-medium text-sm line-clamp-2">
                       {item.artist}
                     </div>
+
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
                       {item.count}
                       {t("songsSuffix")}
@@ -198,8 +201,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
                       {item.artist}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-light-gray-400 mt-1">
-                      {t("lastSungLabel")}{" "}
-                      {new Date(item.lastSung).toLocaleDateString()}
+                      {t("lastSungLabel")} {formatDate(item.lastSung, locale)}
                     </div>
                   </div>
                 </Link>

@@ -3,11 +3,13 @@
 import { Link } from "@/i18n/navigation";
 import { Song } from "../types/song";
 import { useLoading } from "../context/LoadingContext";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 
 export default function YearsTile({ songs }: { songs: Song[] }) {
   const { setLoading } = useLoading();
   const t = useTranslations("Summary");
+  const locale = useLocale();
   const counts = songs.reduce<Record<number, number>>((acc, s) => {
     const y = Number(s.year);
     if (!Number.isNaN(y)) acc[y] = (acc[y] || 0) + 1;
@@ -79,7 +81,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                         className="text-sm text-light-gray-600 dark:text-light-gray-400"
                       >
                         • {s.milestones.join(", ")} (
-                        {new Date(s.broadcast_at).toLocaleDateString("ja-JP")})
+                        {formatDate(s.broadcast_at, locale)})
                       </li>
                     ),
                   )}

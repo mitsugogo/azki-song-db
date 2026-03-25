@@ -15,6 +15,7 @@ import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { siteConfig } from "./config/siteConfig";
 import useSongs from "./hook/useSongs";
 import { buildWatchHref } from "./lib/watchUrl";
+import { formatDate } from "./lib/formatDate";
 import { flowbiteTheme } from "./theme";
 import { ThemeProvider } from "flowbite-react";
 import { LuSearch, LuSparkles } from "react-icons/lu";
@@ -75,11 +76,8 @@ function groupRecentUpdates(items: Song[], limit: number = 3) {
     .sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime())
     .slice(0, limit)
     .map(({ videoId, videoTitle, songs, count, latestDate }) => ({
-      date: latestDate.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }),
+      // ISO文字列で渡して、表示側でロケールに応じて整形する
+      date: latestDate.toISOString(),
       videoId,
       videoTitle,
       songs,
@@ -135,7 +133,7 @@ export default function ClientTop() {
       return songsFetchedAt;
     }
 
-    return date.toLocaleDateString("ja-JP");
+    return formatDate(date, locale);
   }, [songsFetchedAt]);
 
   const handleSearch = () => {
@@ -317,16 +315,7 @@ export default function ClientTop() {
                           </div>
                           <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
                             <span>{song.year}</span>
-                            <span>
-                              {new Date(song.broadcast_at).toLocaleDateString(
-                                locale,
-                                {
-                                  year: "numeric",
-                                  month: locale === "ja" ? "numeric" : "short",
-                                  day: "numeric",
-                                },
-                              )}
-                            </span>
+                            <span>{formatDate(song.broadcast_at, locale)}</span>
                           </div>
                         </div>
                       </Link>
@@ -353,8 +342,6 @@ export default function ClientTop() {
                 ) : recentUpdates.length > 0 ? (
                   <div className="space-y-4">
                     {recentUpdates.map((update) => {
-                      // YYYY/MM/DD 形式を YYYY.MM.DD に変換
-                      const formattedDate = update.date.replace(/\//g, ".");
                       return (
                         <Link
                           key={update.videoId}
@@ -362,7 +349,7 @@ export default function ClientTop() {
                           className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                         >
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                            {formattedDate}{" "}
+                            {formatDate(update.date, locale)}{" "}
                             <span className="pl-3 text-gray-100">
                               {update.count}曲追加
                             </span>

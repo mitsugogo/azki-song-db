@@ -5,9 +5,7 @@ import { Badge } from "flowbite-react";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
 type TFuncLike = (key: string, values?: Record<string, any>) => string;
-
-const formatDate = (v?: string) =>
-  v ? new Date(v).toLocaleDateString("ja-JP") : "-";
+import { formatDate } from "../lib/formatDate";
 const formatTimeFromSeconds = (s?: string) => {
   if (!s) return "-";
   const n = parseInt(s || "0");

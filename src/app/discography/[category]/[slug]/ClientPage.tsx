@@ -9,7 +9,8 @@ import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Badge, LoadingOverlay, Modal } from "@mantine/core";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../../lib/formatDate";
 import { renderLinkedText } from "../../../lib/textLinkify";
 import {
   isCollaborationSong,
@@ -30,6 +31,7 @@ export default function ClientPage({
   slug: string;
 }) {
   const t = useTranslations("Discography");
+  const locale = useLocale();
   const tLabels = useTranslations("labels");
   const { allSongs, isLoading } = useSongs();
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
@@ -251,13 +253,12 @@ export default function ClientPage({
           )}
           {song.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-              発売日:{" "}
-              {new Date(song.album_release_at).toLocaleDateString("ja-JP")}
+              発売日: {formatDate(song.album_release_at, "ja")}
             </p>
           )}
           {!song.album_release_at && song.broadcast_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-              配信日: {new Date(song.broadcast_at).toLocaleDateString("ja-JP")}
+              配信日: {formatDate(song.broadcast_at, "ja")}
             </p>
           )}
 
@@ -410,7 +411,7 @@ export default function ClientPage({
                         <div className="text-sm flex-1">
                           <div className="font-medium">{s.video_title}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {new Date(s.broadcast_at).toLocaleDateString()} 配信
+                            {formatDate(s.broadcast_at, locale)} 配信
                           </div>
                           <div className="mt-2 space-x-2">
                             <a

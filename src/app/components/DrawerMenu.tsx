@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "flowbite-react";
 import { Badge, Drawer, Modal, Tooltip } from "@mantine/core";
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
@@ -14,6 +14,7 @@ import Acknowledgment from "./Acknowledgment";
 import { pageList } from "../pagelists";
 import usePWAInstall from "../hook/usePWAInstall";
 import useSongs from "../hook/useSongs";
+import { formatDate } from "../lib/formatDate";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import type { Song } from "../types/song";
 
@@ -61,6 +62,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
   const { songsFetchedAt } = useSongs();
   const { currentSong } = useGlobalPlayer();
   const t = useTranslations("DrawerMenu");
+  const locale = useLocale();
 
   const categoryLabelMap: Record<string, string> = {
     活動の記録: t("categoryActivity"),
@@ -261,8 +263,8 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                     {appVersion === "dev" ? "dev" : `v${appVersion}`}
                   </Link>
                   <span className="mx-1"></span>
-                  (Build: {new Date(buildDate).toLocaleDateString()}, Songs:{" "}
-                  {new Date(songsFetchedAt).toLocaleDateString()})
+                  (Build: {formatDate(buildDate, locale)}, Songs:{" "}
+                  {formatDate(songsFetchedAt, locale)})
                 </>
               )}
             </div>

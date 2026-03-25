@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { formatDate } from "@/app/lib/formatDate";
 
 export const runtime = "edge";
 
@@ -229,7 +230,7 @@ export async function GET(req: NextRequest) {
             {song.tags.join(", ")}
           </div>
           <div style={{ fontSize: 20, color: "#fc3488" }}>
-            {new Date(song.broadcast_at).toLocaleDateString("ja-JP") + " 配信"}
+            {formatDate(song.broadcast_at, hl) + " 配信"}
           </div>
         </div>
       </div>,
