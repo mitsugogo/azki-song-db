@@ -98,6 +98,8 @@
     "cookie": "^0.7.1",
     "path-to-regexp": "^6.2.3",
     "serialize-javascript": "^7.0.3",
-    "@swc/helpers": "^0.5.19"
+    "@swc/helpers": "^0.5.19",
+    "glob": "^9.3.0",
+    "rimraf": "^4.0.0"
   }
 }
