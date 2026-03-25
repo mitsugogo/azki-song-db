@@ -4,7 +4,7 @@ import { Song } from "../types/song";
 import { Badge } from "flowbite-react";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
-import type { TFunc } from "next-intl";
+type TFuncLike = (key: string, values?: Record<string, any>) => string;
 
 const formatDate = (v?: string) =>
   v ? new Date(v).toLocaleDateString("ja-JP") : "-";
@@ -36,7 +36,7 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
   );
 };
 
-export const getColumns = (t: TFunc): ColumnDef<Song>[] => [
+export const getColumns = (t: TFuncLike): ColumnDef<Song>[] => [
   {
     id: "index",
     header: t("table.index"),
