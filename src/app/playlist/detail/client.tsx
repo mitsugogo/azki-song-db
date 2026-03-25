@@ -371,8 +371,8 @@ export default function PlaylistDetailPage() {
         </Link>
         <span className={breadcrumbClasses.link}>
           {t("detail.breadcrumbTitle", {
-            id: playlist?.id,
-            name: playlist?.name,
+            id: playlist?.id ?? "",
+            name: playlist?.name ?? "",
           })}
         </span>
       </Breadcrumbs>
