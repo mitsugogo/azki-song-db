@@ -268,7 +268,10 @@ export async function GET(request: Request) {
             if (translated) {
               const titleEn = translated.hl?.en?.title || song.title;
               const artistEn = translated.hl?.en?.artist || song.artist;
-              const albumEn = translated.hl?.en?.album || song.album;
+              // song.album が空の場合は translated のアルバム名を引き継がない
+              const albumEn = song.album
+                ? translated.hl?.en?.album || song.album
+                : "";
               return {
                 ...song,
                 title: titleEn,
