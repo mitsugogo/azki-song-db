@@ -91,6 +91,12 @@ import { Header } from "../Header";
 describe("Header", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    global.__mockNextRouter = {
+      push: pushMock,
+      replace: vi.fn(),
+      back: vi.fn(),
+      refresh: vi.fn(),
+    };
   });
 
   it("watchページで検索バーをクリアしたときはsearchに遷移せずqのみ削除する", () => {
