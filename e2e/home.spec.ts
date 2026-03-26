@@ -25,7 +25,9 @@ test.describe("Home page", () => {
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Toggle theme" }),
+      page.getByRole("button", {
+        name: /toggle theme|テーマ|Theme toggle/i,
+      }),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "検索する" })).toBeVisible();
     await expect(page.getByText("おすすめ楽曲")).toBeVisible();

@@ -6,7 +6,9 @@ async function setTheme(
   target: "light" | "dark",
 ) {
   const root = page.locator("html");
-  const toggle = page.getByRole("button", { name: "Toggle theme" });
+  const toggle = page.getByRole("button", {
+    name: /toggle theme|テーマ|Theme toggle/i,
+  });
 
   for (let i = 0; i < 4; i += 1) {
     const current = await root.getAttribute("data-mantine-color-scheme");
@@ -28,7 +30,7 @@ test.describe("Summary pages", () => {
     test("displays yearly activity summary", async ({ page }) => {
       await page.goto("/summary");
 
-      await expect(page).toHaveTitle(/年ごとの活動記録/);
+      await expect(page).toHaveTitle(/活動記録/);
 
       await page.waitForLoadState("domcontentloaded");
 

@@ -667,10 +667,10 @@ test.describe("検索フィルタ時の次曲遷移", () => {
     await nextBtn.click();
 
     await expect(page).toHaveURL(
-      new RegExp(`([?&])t=${Number(third.start)}(?:&|$)`),
+      new RegExp(`([?&])t=${Number(third.start)}s(?:&|$)`),
     );
     await expect(page).not.toHaveURL(
-      new RegExp(`([?&])t=${Number(middle.start)}(?:&|$)`),
+      new RegExp(`([?&])t=${Number(middle.start)}s(?:&|$)`),
     );
   });
 });

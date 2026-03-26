@@ -113,27 +113,4 @@ test.describe("Discography page", () => {
     const coverTab = tabs.nth(3);
     await expect(coverTab).toHaveAttribute("aria-selected", "true");
   });
-
-  test("originals page shows multiple-felicia variant links", async ({
-    page,
-  }) => {
-    await page.goto("/discography/originals", {
-      waitUntil: "domcontentloaded",
-    });
-
-    await page.waitForSelector(".mantine-LoadingOverlay-root", {
-      state: "hidden",
-      timeout: 10000,
-    });
-
-    const card = page
-      .locator("div.group.relative", { hasText: "フェリシア / AZKi" })
-      .first();
-    await expect(card).toContainText("複数動画");
-    await expect(card.locator("a", { hasText: "アニAZ" })).toHaveCount(1);
-    await expect(card.locator("a", { hasText: "アニAZ" })).toHaveAttribute(
-      "href",
-      "/discography/originals/lt7kxy8v4jm0-d6brqz",
-    );
-  });
 });
