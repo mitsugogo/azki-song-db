@@ -12,7 +12,7 @@ import useSongs from "../../hook/useSongs";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { LuFolder } from "react-icons/lu";
 import DiscographyBreadcrumbs from "../components/DiscographyBreadcrumbs";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { siteConfig } from "@/app/config/siteConfig";
 
@@ -50,6 +50,7 @@ export default function AlbumClient({
 }) {
   const { allSongs, isLoading } = useSongs();
   const t = useTranslations("Discography");
+  const locale = useLocale();
   const tAlbum = useTranslations("DiscographyAlbum");
   const tData = useTranslations("Data");
   const tWatchDetail = useTranslations("Watch.nowPlayingSongInfoDetail");
@@ -152,7 +153,7 @@ export default function AlbumClient({
           )}
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
             {tData("table.album_release_at")} :{" "}
-            {formatDate(leadSong.album_release_at)}
+            {formatDate(leadSong.album_release_at, locale)}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
             {t("tracksCount", { count: albumSongs.length })}
@@ -253,7 +254,7 @@ export default function AlbumClient({
                   </span>
                   <span>
                     {tWatchDetail("broadcastDate") || "動画公開日:"}{" "}
-                    {formatDate(song.broadcast_at)}
+                    {formatDate(song.broadcast_at, locale)}
                   </span>
                 </div>
               </article>

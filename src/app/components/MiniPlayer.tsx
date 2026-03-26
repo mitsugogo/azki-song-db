@@ -2,7 +2,7 @@
 
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import useSongs from "../hook/useSongs";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import YouTubePlayer from "./YouTubePlayer";
@@ -10,7 +10,6 @@ import { applyPersistedVolumeToPlayer } from "../hook/usePlayerVolume";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
-import { useRouter } from "next/navigation";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { WATCH_PATH, isWatchPagePath } from "../lib/watchUrl";
 

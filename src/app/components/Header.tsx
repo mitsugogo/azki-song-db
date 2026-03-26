@@ -1,7 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { FaYoutube } from "react-icons/fa6";
 import { Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";

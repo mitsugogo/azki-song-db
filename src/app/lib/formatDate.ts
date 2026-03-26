@@ -5,9 +5,9 @@ export function formatDate(
   locale?: string,
   options?: Intl.DateTimeFormatOptions,
 ) {
-  if (!locale) {
-    locale = useLocale();
-  }
+  const effectiveLocale =
+    locale ||
+    (typeof window !== "undefined" ? useLocale() : "ja").replace("_", "-");
 
   const date = input instanceof Date ? input : new Date(input);
   if (Number.isNaN(date.getTime())) {
@@ -16,12 +16,14 @@ export function formatDate(
 
   const defaultOpts: Intl.DateTimeFormatOptions = {
     year: "numeric",
-    month: locale === "ja" ? "2-digit" : "short",
-    day: locale === "ja" ? "2-digit" : "numeric",
+    month: effectiveLocale.startsWith("ja") ? "2-digit" : "short",
+    day: effectiveLocale.startsWith("ja") ? "2-digit" : "numeric",
   };
 
   const formatOpts = options ? { ...defaultOpts, ...options } : defaultOpts;
 
-  const resolvedLocale = locale === "ja" ? "ja-JP" : locale || undefined;
+  const resolvedLocale = effectiveLocale.startsWith("ja")
+    ? "ja-JP"
+    : effectiveLocale;
   return date.toLocaleDateString(resolvedLocale, formatOpts);
 }
