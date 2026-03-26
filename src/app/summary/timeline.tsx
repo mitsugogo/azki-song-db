@@ -8,6 +8,7 @@ import useMilestones from "../hook/useMilestones";
 import { Badge } from "@mantine/core";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
+import { useRef, useState, useLayoutEffect } from "react";
 import { formatDate } from "../lib/formatDate";
 
 type TimelineMilestone = {
@@ -45,6 +46,20 @@ export default function Timeline({ songs }: { songs: Song[] }) {
       })),
     );
 
+  // 同じ milestone text が複数日付で出現する場合は、最も早い日付のみを利用
+  const dedupedSongMilestones = Array.from(
+    songMilestones
+      .reduce((map, milestone) => {
+        const key = milestone.text;
+        const existing = map.get(key);
+        if (!existing || milestone.date.getTime() < existing.date.getTime()) {
+          map.set(key, milestone);
+        }
+        return map;
+      }, new Map<string, TimelineMilestone>())
+      .values(),
+  );
+
   const apiMilestones: TimelineMilestone[] = (externalMilestones || [])
     .map((m) => ({
       date: m.date ? new Date(m.date) : null,
@@ -56,7 +71,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
 
   const allMilestones: TimelineMilestone[] = [
-    ...songMilestones,
+    ...dedupedSongMilestones,
     ...apiMilestones,
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -84,6 +99,53 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     );
   })();
 
+  const locale = useLocale();
+  const isJP = locale === "ja";
+
+  // バンドと帯の位置合わせのため、実際のレンダリング後に各行の上端y座標を計測する
+  const flexContainerRef = useRef<HTMLDivElement>(null);
+  const [measuredPositions, setMeasuredPositions] = useState<number[] | null>(
+    null,
+  );
+  const [measuredBandHeight, setMeasuredBandHeight] = useState<number | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    const container = flexContainerRef.current;
+    if (!container) return;
+
+    const measure = () => {
+      const parentTop = container.getBoundingClientRect().top;
+      const items = container.querySelectorAll<HTMLElement>(
+        "[data-milestone-idx]",
+      );
+      if (items.length === 0) return;
+
+      const positions: number[] = [];
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        positions.push(rect.top - parentTop); // 上端を基準
+      });
+      setMeasuredPositions(positions);
+      setMeasuredBandHeight(container.offsetHeight);
+    };
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(() => {
+      measure();
+    });
+    resizeObserver.observe(container);
+
+    window.addEventListener("resize", measure);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [uniqueMilestones.length]);
+
   return (
     <>
       <div
@@ -93,47 +155,99 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         <h2 className="font-bold text-xl mb-2">{t("timelineTitle")}</h2>
         {(() => {
           const start = activityStart;
-          const lastMilestoneTime =
-            uniqueMilestones[uniqueMilestones.length - 1]?.date?.getTime() ??
-            activityStart.getTime();
-
-          const finalMileStoneTime =
-            uniqueMilestones[0]?.date?.getTime() ?? Date.now();
-          const minEndTime = finalMileStoneTime;
           const end = new Date(
-            Math.max(lastMilestoneTime, Date.now(), minEndTime),
+            Math.max(
+              uniqueMilestones[uniqueMilestones.length - 1]?.date?.getTime() ??
+                Date.now(),
+              Date.now(),
+            ),
           );
-          // 日単位のタイムラインとして、終端日は当日末まで含める
           end.setHours(23, 59, 59, 999);
           const totalRange = Math.max(1, end.getTime() - start.getTime());
 
-          // レイアウト定数（px）
+          // 1日あたりのpx（帯の位置計算用）
+          const pxPerDay = 0.55;
+          // 推定行高さ（帯の位置計算に使用する近似値）
+          const estimatedItemHeight = 30;
           const topPadding = 12;
-          const bottomPadding = 96;
-          const minGap = 26;
+          const bottomPadding = 48;
 
-          // 総日数に比例して高さを追加し、セグメントの圧縮を避ける（1日あたり0.55px）
-          const heightByDays = (totalRange / msPerDay) * 0.55;
+          // アイテム間スペーサー高さ（日数差に比例、余白がない場合は0）
+          const spacers = uniqueMilestones.slice(0, -1).map((m, i) => {
+            const next = uniqueMilestones[i + 1];
+            const days = (next.date.getTime() - m.date.getTime()) / msPerDay;
+            return Math.max(0, days * pxPerDay - estimatedItemHeight);
+          });
 
-          // マイルストーン数に応じて確実に十分な高さを確保する
-          // API 由来のマイルストーンが増えた場合でも縦方向の余裕を持たせる
-          const heightByItems =
-            topPadding + bottomPadding + uniqueMilestones.length * 52;
-
+          const totalSpacerHeight = spacers.reduce((a, b) => a + b, 0);
+          // 帯の高さ計算用（実際のコンテンツ高さの近似）
           const timelineHeight = Math.max(
             800,
-            heightByItems,
-            heightByDays + topPadding + bottomPadding,
-          );
-          const timelineInnerHeight = Math.max(
-            1,
-            timelineHeight - topPadding - bottomPadding,
+            topPadding +
+              uniqueMilestones.length * estimatedItemHeight +
+              totalSpacerHeight +
+              bottomPadding,
           );
           const endTime = end.getTime();
-          const arrowEndCompensationPx = 14;
 
-          const locale = useLocale();
-          const isJP = locale === "ja";
+          // 各マイルストーンの実際のy座標（行の上端）を事前計算
+          const itemPositions: number[] = [];
+          let cumY = topPadding;
+          for (let i = 0; i < uniqueMilestones.length; i++) {
+            itemPositions.push(cumY);
+            if (i < spacers.length) {
+              cumY += estimatedItemHeight + spacers[i];
+            }
+          }
+          const bandHeight = Math.max(
+            timelineHeight,
+            cumY + estimatedItemHeight + bottomPadding,
+          );
+
+          const effectivePositions = measuredPositions ?? itemPositions;
+          const effectiveBandHeight = measuredBandHeight ?? bandHeight;
+
+          // 日付をy座標に変換（マイルストーン上端にスナップ/補間）
+          const dateToY = (ts: number): number => {
+            const n = uniqueMilestones.length;
+            if (n === 0) return topPadding;
+
+            const firstDate = uniqueMilestones[0].date.getTime();
+            const lastDate = uniqueMilestones[n - 1].date.getTime();
+
+            if (ts <= firstDate) return effectivePositions[0];
+            if (ts >= lastDate) return effectivePositions[n - 1];
+
+            const sameIndex = uniqueMilestones.findIndex(
+              (m) => m.date.getTime() === ts,
+            );
+            if (sameIndex >= 0) {
+              return effectivePositions[sameIndex];
+            }
+
+            for (let i = 0; i < n - 1; i++) {
+              const t0 = uniqueMilestones[i].date.getTime();
+              const t1 = uniqueMilestones[i + 1].date.getTime();
+              if (ts > t0 && ts < t1) {
+                const ratio = (ts - t0) / Math.max(1, t1 - t0);
+                return (
+                  effectivePositions[i] +
+                  ratio * (effectivePositions[i + 1] - effectivePositions[i])
+                );
+              }
+            }
+
+            return effectivePositions[n - 1];
+          };
+
+          // 帯セグメントのpx位置を計算するヘルパー（実際のマイルストーン位置に合わせる）
+          const calcBand = (segStart: number, segEnd: number) => {
+            const topPx = dateToY(segStart);
+            const reachesEnd = segEnd >= endTime - 1;
+            const bottomPx = reachesEnd ? effectiveBandHeight : dateToY(segEnd);
+            const heightPx = Math.max(6, bottomPx - topPx);
+            return { topPx, heightPx };
+          };
 
           const routeRanges = ROUTE_RANGES.map((r) => {
             const from = new Date(r.from).setHours(0, 0, 0, 0);
@@ -152,6 +266,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
             const dur = Math.max(0, segEnd - segStart);
             return { ...r, segStart, segEnd, dur };
           });
+
           const colors = [
             ["rgba(99,102,241,0.12)", "rgba(99,102,241,0.6)"],
             ["rgba(16,185,129,0.12)", "rgba(16,185,129,0.6)"],
@@ -177,22 +292,31 @@ export default function Timeline({ songs }: { songs: Song[] }) {
             return { ...r, segStart, segEnd, dur };
           });
 
+          // 帯ラベルの共通スタイル
+          const bandLabelStyle = isJP
+            ? {
+                writingMode: "vertical-rl" as const,
+                textOrientation: "upright" as const,
+              }
+            : {
+                transform: "rotate(90deg)",
+                transformOrigin: "center",
+                display: "inline-block",
+                whiteSpace: "nowrap" as const,
+              };
+
           return (
-            <div className="flex" style={{ height: timelineHeight }}>
-              <div className="w-12 relative mr-2 h-full">
+            // min-height で縦積みコンテンツが帯より長くなっても溢れない
+            <div
+              ref={flexContainerRef}
+              className="flex"
+              style={{ minHeight: bandHeight }}
+            >
+              {/* ルート帯 */}
+              <div className="w-6 sm:w-12 relative mr-1 sm:mr-2 shrink-0">
                 {overlaps.map((o, i) => {
                   if (o.dur === 0) return null;
-                  const startRatio =
-                    (o.segStart - start.getTime()) / totalRange;
-                  const endRatio = (o.segEnd - start.getTime()) / totalRange;
-                  const reachesTimelineEnd = o.segEnd >= endTime - 1;
-                  const topPx =
-                    topPadding + Math.max(0, startRatio) * timelineInnerHeight;
-                  const heightPx = Math.max(
-                    6,
-                    (endRatio - startRatio) * timelineInnerHeight +
-                      (reachesTimelineEnd ? arrowEndCompensationPx : 0),
-                  );
+                  const { topPx, heightPx } = calcBand(o.segStart, o.segEnd);
                   return (
                     <div
                       key={o.label}
@@ -214,22 +338,9 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             "polygon(0% 0%, 100% 0%, 100% 90%, 50% 100%, 0% 90%)",
                           opacity: 0.3,
                         }}
-                        className="rounded-l"
                       />
                       <div
-                        style={
-                          isJP
-                            ? {
-                                writingMode: "vertical-rl",
-                                textOrientation: "upright",
-                              }
-                            : {
-                                transform: "rotate(90deg)",
-                                transformOrigin: "center",
-                                display: "inline-block",
-                                whiteSpace: "nowrap",
-                              }
-                        }
+                        style={bandLabelStyle}
                         className="text-xs text-center text-light-gray-500 dark:text-light-gray-400 z-10"
                       >
                         {o.label}
@@ -238,20 +349,11 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                   );
                 })}
               </div>
-              <div className="w-12 relative mr-2 h-full">
-                {visualOverlaps.map((o, i) => {
+              {/* 衣装帯 */}
+              <div className="w-6 sm:w-12 relative mr-1 sm:mr-2 shrink-0">
+                {visualOverlaps.map((o) => {
                   if (o.dur === 0) return null;
-                  const startRatio =
-                    (o.segStart - start.getTime()) / totalRange;
-                  const endRatio = (o.segEnd - start.getTime()) / totalRange;
-                  const reachesTimelineEnd = o.segEnd >= endTime - 1;
-                  const topPx =
-                    topPadding + Math.max(0, startRatio) * timelineInnerHeight;
-                  const heightPx = Math.max(
-                    6,
-                    (endRatio - startRatio) * timelineInnerHeight +
-                      (reachesTimelineEnd ? arrowEndCompensationPx : 0),
-                  );
+                  const { topPx, heightPx } = calcBand(o.segStart, o.segEnd);
                   return (
                     <div
                       key={o.label}
@@ -273,22 +375,9 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             "polygon(0% 0%, 100% 0%, 100% 90%, 50% 100%, 0% 90%)",
                           opacity: 0.3,
                         }}
-                        className="rounded-l"
                       />
                       <div
-                        style={
-                          isJP
-                            ? {
-                                writingMode: "vertical-rl",
-                                textOrientation: "upright",
-                              }
-                            : {
-                                transform: "rotate(90deg)",
-                                transformOrigin: "center",
-                                display: "inline-block",
-                                whiteSpace: "nowrap",
-                              }
-                        }
+                        style={bandLabelStyle}
                         className="text-xs text-center text-light-gray-500 dark:text-light-gray-400 z-10"
                       >
                         {o.label}
@@ -297,80 +386,21 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                   );
                 })}
               </div>
-              <div className="flex-1 relative h-full">
-                {(() => {
-                  const minGap = 26; // px
-                  const avail = Math.max(
-                    100,
-                    timelineHeight - topPadding - bottomPadding,
-                  );
-
-                  // 生の位置（px、上からの距離）
-                  const raw = uniqueMilestones.map((m) => {
-                    const t = (m.date.getTime() - start.getTime()) / totalRange;
-                    return topPadding + Math.max(0, Math.min(1, t)) * avail;
-                  });
-
-                  // 前方/後方パスで最小間隔を維持
-                  const adj: number[] = raw.slice();
-                  // 希望する間隔用の空間が足りない場合、`minGap` を比例して縮小
-                  const n = adj.length;
-                  let effectiveMinGap = minGap;
-                  const required = (n - 1) * effectiveMinGap;
-                  if (required > avail && n > 1) {
-                    effectiveMinGap = Math.max(6, Math.floor(avail / n));
-                  }
-
-                  // 位置を調整するために前方・後方に繰り返し処理
-                  for (let iter = 0; iter < 3; iter++) {
-                    // 前方パス
-                    for (let i = 1; i < n; i++) {
-                      if (adj[i] < adj[i - 1] + effectiveMinGap) {
-                        adj[i] = adj[i - 1] + effectiveMinGap;
-                      }
-                    }
-                    // 後方パス
-                    for (let i = n - 2; i >= 0; i--) {
-                      if (adj[i] > adj[i + 1] - effectiveMinGap) {
-                        adj[i] = adj[i + 1] - effectiveMinGap;
-                      }
-                    }
-                  }
-
-                  // 利用可能範囲にクランプし、はみ出す場合はシフト
-                  const topLimit = topPadding;
-                  const bottomLimit = topPadding + avail;
-                  // 下側のオーバーフローを計算
-                  const overflow = Math.max(0, adj[n - 1] - bottomLimit);
-                  if (overflow > 0) {
-                    for (let i = 0; i < n; i++) adj[i] = adj[i] - overflow;
-                  }
-                  // 上端がパディングより上にならないようにする
-                  if (adj[0] < topLimit) {
-                    const under = topLimit - adj[0];
-                    for (let i = 0; i < n; i++) adj[i] = adj[i] + under;
-                  }
-
-                  return uniqueMilestones.map((m, idx) => {
-                    const daysSince =
-                      Math.floor(
-                        (m.date.getTime() - activityStart.getTime()) / msPerDay,
-                      ) + 1;
-                    const topPx = Math.round(adj[idx] ?? topPadding);
-                    return (
+              {/* マイルストーン縦積みリスト */}
+              <div className="flex-1" style={{ paddingTop: topPadding }}>
+                {uniqueMilestones.map((m, idx) => {
+                  const daysSince =
+                    Math.floor(
+                      (m.date.getTime() - activityStart.getTime()) / msPerDay,
+                    ) + 1;
+                  return (
+                    <div key={idx}>
                       <div
-                        key={idx}
-                        style={{
-                          position: "absolute",
-                          top: `${topPx}px`,
-                          left: 0,
-                          right: 0,
-                          transform: "translateY(-50%)",
-                        }}
-                        className="flex items-center justify-between text-sm text-light-gray-600 dark:text-light-gray-400 hover:bg-light-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1"
+                        data-milestone-idx={idx}
+                        className="flex items-start justify-between text-sm text-light-gray-600 dark:text-light-gray-400 hover:bg-light-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1"
                       >
-                        <div className="pl-2">
-                          <span className="w-20 inline-block">
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
                             {formatDate(m.date, locale)}
                           </span>{" "}
                           —{" "}
@@ -401,15 +431,20 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             </Badge>
                           ) : null}
                         </div>
-                        <div className="pr-2 text-right whitespace-nowrap">
+                        <div className="hidden sm:block pr-2 text-right whitespace-nowrap shrink-0">
                           {t("daysActiveLabel")}{" "}
                           <span className="font-semibold">{daysSince}</span>
                           {t("daysSuffix")}
                         </div>
                       </div>
-                    );
-                  });
-                })()}
+                      {/* 次アイテムまでの日数に比例したスペーサー */}
+                      {idx < uniqueMilestones.length - 1 &&
+                        spacers[idx] > 0 && (
+                          <div style={{ height: spacers[idx] }} />
+                        )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
