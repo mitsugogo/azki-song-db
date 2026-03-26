@@ -1,8 +1,7 @@
 "use client";
 
 import { FaCompactDisc, FaMusic, FaPlay } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
-import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
