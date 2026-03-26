@@ -347,6 +347,7 @@
       "arranger": "Arranger",
       "videoDate": "Published"
     },
+    "relatedStreamsTitle": "Streams that sang this song ({count})",
     "buttons": {
       "watchOnYouTube": "Watch on YouTube",
       "viewInDatabase": "View in database",
@@ -356,6 +357,13 @@
     "badge": {
       "thisCombination": "This combination"
     },
+    "labels": {
+      "publishedDate": "Published date:",
+      "releaseDate": "Release date:",
+      "cover": "Cover:"
+    },
+    "thumbnailClickTitle": "Click to enlarge",
+    "relatedStreamsTitle": "Streams that sang this song ({count})",
     "tracksCount": "Tracks: {count}",
     "stats": {
       "title": "Statistics",
@@ -379,8 +387,7 @@
     "notFoundTitle": "Song not found",
     "notFoundDescription": "The specified song does not exist.",
     "thumbnailClickTitle": "Click to enlarge",
-    "relatedVideos": "Related videos",
-    "relatedStreamsTitle": "Streams that sang this song ({count})"
+    "relatedVideos": "Related videos"
   },
   "DiscographyAlbum": {
     "notFoundTitle": "Album not found | {site}",

@@ -351,13 +351,22 @@
       "videoDate": "動画公開日"
     },
     "covers": "カバー楽曲 ({count})",
+    "relatedStreamsTitle": "この曲を歌った歌枠 ({count})",
     "buttons": {
       "watchOnYouTube": "YouTubeで見る",
-      "viewInDatabase": "データベースで見る"
+      "viewInDatabase": "データベースで見る",
+      "play": "再生",
+      "share": "シェア"
     },
     "badge": {
       "thisCombination": "この組み合わせ"
     },
+    "labels": {
+      "publishedDate": "公開日:",
+      "releaseDate": "リリース日:",
+      "cover": "カバー:"
+    },
+    "thumbnailClickTitle": "クリックして拡大",
     "tracksCount": "収録曲数: {count}曲",
     "stats": {
       "title": "統計",
