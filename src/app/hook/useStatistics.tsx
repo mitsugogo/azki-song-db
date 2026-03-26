@@ -21,15 +21,17 @@ const isOfficialOriginalRelease = (song: Song) => {
 
 const getOriginalReleaseKey = (song: Song) => {
   const baseKey = `${song.title}__${song.artist}`;
+  const releaseId =
+    song.slugv2 || `${song.video_id}__${Number(song.start ?? 0)}`;
 
   if (song.tags.some((tag) => tag.includes("MV"))) {
-    return `${baseKey}__mv`;
+    return `${baseKey}__mv__${releaseId}`;
   }
   if (song.tags.includes("アートトラック")) {
-    return `${baseKey}__art-track`;
+    return `${baseKey}__art-track__${releaseId}`;
   }
 
-  return `${baseKey}__other`;
+  return `${baseKey}__other__${releaseId}`;
 };
 
 export function useStatistics({ songs }: UseStatisticsProps) {

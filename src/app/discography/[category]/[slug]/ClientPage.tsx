@@ -345,11 +345,15 @@ export default function ClientPage({
                         key={s.video_id}
                         className="flex items-center gap-3 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
                       >
-                        <img
-                          src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
-                          className="w-28 h-16 object-cover rounded"
-                          alt={s.video_title}
-                        />
+                        <div className="w-28 h-16 overflow-hidden rounded">
+                          <YoutubeThumbnail
+                            videoId={s.video_id}
+                            alt={s.video_title}
+                            fill={false}
+                            className="w-full h-full"
+                            imageClassName="object-cover"
+                          />
+                        </div>
                         <div className="text-sm flex-1">
                           <div className="font-medium">
                             <Link href={internalHref}>{s.title}</Link>
@@ -403,11 +407,15 @@ export default function ClientPage({
                         key={s.video_id}
                         className="flex items-center gap-2 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
                       >
-                        <img
-                          src={`https://i.ytimg.com/vi/${s.video_id}/mqdefault.jpg`}
-                          className="w-28 h-16 object-cover rounded"
-                          alt={s.video_title}
-                        />
+                        <div className="w-28 h-16 overflow-hidden rounded">
+                          <YoutubeThumbnail
+                            videoId={s.video_id}
+                            alt={s.video_title}
+                            fill={false}
+                            className="w-full h-full"
+                            imageClassName="object-cover"
+                          />
+                        </div>
                         <div className="text-sm flex-1">
                           <div className="font-medium">{s.video_title}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">

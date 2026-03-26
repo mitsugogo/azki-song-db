@@ -2,6 +2,7 @@
 
 import { FaCompactDisc, FaMusic, FaPlay } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
@@ -13,6 +14,7 @@ import {
 } from "../config/filters";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
+import { normalizeSongTitle } from "./utils/normalizeSongTitle";
 
 const SongItem = ({
   song,
@@ -29,17 +31,21 @@ const SongItem = ({
   const t = useTranslations("Discography");
   const locale = useLocale();
   const albumSlug = song.firstVideo.album ? slugify(song.firstVideo.album) : "";
+  const displayTitle = normalizeSongTitle(
+    song.firstVideo.title,
+    song.firstVideo.artist,
+  );
 
-  const getSongPath = () => {
-    const target = song.firstVideo;
-    const slug = target.slugv2 || target.slug || slugify(target.title);
+  const getSongPath = (target?: typeof song.firstVideo) => {
+    const video = target ?? song.firstVideo;
+    const slug = video.slugv2 || video.slug || slugify(video.title);
     if (!slug) return null;
 
-    const category = isPossibleOriginalSong(target)
+    const category = isPossibleOriginalSong(video)
       ? "originals"
-      : isCollaborationSong(target)
+      : isCollaborationSong(video)
         ? "collab"
-        : isCoverSong(target)
+        : isCoverSong(video)
           ? "covers"
           : null;
 
@@ -54,6 +60,10 @@ const SongItem = ({
     }
 
     if (!song.isAlbum) {
+      if (song.videos.length > 1) {
+        onClick(song.key);
+        return;
+      }
       const songPath = getSongPath();
       if (songPath) {
         router.push(songPath);
@@ -76,7 +86,7 @@ const SongItem = ({
                 ? ""
                 : " / " + song.firstVideo.artist
             } (${formatDate(song.firstVideo.album_release_at, locale)})`
-          : `${song.firstVideo.title} - ${song.firstVideo.artist} (${formatDate(
+          : `${displayTitle} - ${song.firstVideo.artist} (${formatDate(
               song.firstVideo.broadcast_at,
               locale,
             )})`
@@ -111,7 +121,7 @@ const SongItem = ({
                       ? ""
                       : " / " + song.firstVideo.artist
                   }`
-                : `${song.firstVideo.title} / ${song.firstVideo.artist}`}
+                : `${displayTitle} / ${song.firstVideo.artist}`}
               <br />
               {song.isAlbum && groupByAlbum
                 ? `${formatDate(song.firstVideo.album_release_at, locale)}`

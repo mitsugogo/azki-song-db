@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import {
   Table,
@@ -20,25 +20,22 @@ import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
+import { normalizeSongTitle } from "./utils/normalizeSongTitle";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const t = useTranslations("Discography");
   const locale = useLocale();
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
+  const displayTitle = normalizeSongTitle(
+    song.firstVideo.title,
+    song.firstVideo.artist,
+  );
 
   const rawVideos = song.videos || [];
   const videos = useMemo(() => {
     const map = new Map<string, any>();
     for (const v of rawVideos) {
-      const title = (v.title || "").trim();
-      const artist = (v.artist || "").trim();
-      const singers = ((v.sing || "") as string)
-        .split("、")
-        .map((s: string) => s.trim())
-        .filter(Boolean)
-        .sort()
-        .join("、");
-      const key = `${title}__${artist}__${singers}`;
+      const key = v.slugv2 || `${v.video_id}__${Number(v.start ?? 0)}`;
       if (!map.has(key)) {
         map.set(key, v);
       } else {
@@ -62,9 +59,11 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const [displayedVideoId, setDisplayedVideoId] = useState<string>(
     song.firstVideo.video_id,
   );
-  const [prevVideoId, setPrevVideoId] = useState<string | null>(null);
-  const [prevVisible, setPrevVisible] = useState(false);
-  const [currVisible, setCurrVisible] = useState(true);
+  const displayedVideoIdRef = useRef<string>(song.firstVideo.video_id);
+
+  useEffect(() => {
+    displayedVideoIdRef.current = displayedVideoId;
+  }, [displayedVideoId]);
 
   const coverArtists = useMemo(() => {
     // videos の sing を "、" で分割して個別のアーティスト名を順序を保ってユニーク化
@@ -87,7 +86,6 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
 
   // スライドショー間隔（ミリ秒）
   const SLIDE_INTERVAL = 5000;
-  const TRANSITION_DURATION = 500; // ms, Tailwind の duration-500 と合わせる
 
   // 自動スライド（ホバー中は表示を変えない）
   useEffect(() => {
@@ -97,46 +95,26 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
       setCurrentIndex((i) => {
         const next = (i + 1) % videos.length;
         const nextId = videos[next].video_id;
-        const oldId = displayedVideoId;
-
-        // 準備: prev をセットし、curr を非表示にしてから次のフレームで入れ替える
-        setPrevVideoId(oldId);
-        setPrevVisible(true);
-        setCurrVisible(false);
         setDisplayedVideoId(nextId);
-
-        requestAnimationFrame(() => {
-          // フェード開始: prev をフェードアウト、curr をフェードイン
-          setPrevVisible(false);
-          setCurrVisible(true);
-        });
-
-        // TRANSITION_DURATION 後に prev を削除
-        setTimeout(() => {
-          setPrevVideoId(null);
-          setPrevVisible(false);
-        }, TRANSITION_DURATION + 50);
+        displayedVideoIdRef.current = nextId;
 
         return next;
       });
     }, SLIDE_INTERVAL);
     return () => clearInterval(id);
-  }, [videos, hoveredVideo, displayedVideoId]);
+  }, [videos, hoveredVideo]);
 
   // hoveredVideo が変わったら即時表示（フェードなし）
   useEffect(() => {
     if (hoveredVideo) {
-      // ホバー中はホバービデオを即時表示。prev をクリアしてフェードなしで切替。
-      setPrevVideoId(null);
-      setPrevVisible(false);
+      // ホバー中はホバービデオを即時表示。
       setDisplayedVideoId(hoveredVideo);
-      setCurrVisible(true);
+      displayedVideoIdRef.current = hoveredVideo;
     } else {
       // ホバー解除時は currentIndex の位置に戻す
-      setDisplayedVideoId(
-        videos[currentIndex]?.video_id ?? song.firstVideo.video_id,
-      );
-      setCurrVisible(true);
+      const nextId = videos[currentIndex]?.video_id ?? song.firstVideo.video_id;
+      setDisplayedVideoId(nextId);
+      displayedVideoIdRef.current = nextId;
     }
   }, [hoveredVideo, currentIndex, videos, song.firstVideo.video_id]);
 
@@ -158,33 +136,12 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             />
           ) : (
             <>
-              {/* 前の画像（フェードアウト） */}
-              {prevVideoId && (
-                <div
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    prevVisible ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <YoutubeThumbnail
-                    videoId={prevVideoId}
-                    alt={song.firstVideo.video_title}
-                    fill={true}
-                  />
-                </div>
-              )}
-
-              {/* 現在表示中の画像（フェードイン） */}
-              <div
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                  currVisible ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <YoutubeThumbnail
-                  videoId={displayedVideoId}
-                  alt={song.firstVideo.video_title}
-                  fill={true}
-                />
-              </div>
+              <YoutubeThumbnail
+                key={displayedVideoId}
+                videoId={displayedVideoId}
+                alt={song.firstVideo.video_title}
+                fill={true}
+              />
             </>
           )}
         </div>
@@ -198,7 +155,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 {song.firstVideo.album}
               </Link>
             ) : (
-              song.firstVideo.title
+              displayTitle
             )}
           </h2>
           <p className="text-sm">

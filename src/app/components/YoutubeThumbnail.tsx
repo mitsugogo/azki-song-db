@@ -62,7 +62,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
           onLoad={handleOnLoad}
           onError={handleError}
           style={{
-            opacity: loading ? 0 : 1,
+            opacity: 1,
             transition: "opacity 0.5s",
           }}
         />
@@ -75,14 +75,12 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
       <img
         src={imageUrl}
         alt={alt}
-        className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""} ${
-          loading ? "hidden" : ""
-        }`}
+        className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""}`}
         loading="lazy"
         decoding="async"
         onLoad={handleOnLoad}
         onError={handleError}
-        style={{ opacity: loading ? 0 : 1, transition: "opacity 0.5s" }}
+        style={{ opacity: 1, transition: "opacity 0.5s" }}
       />
     </div>
   );
