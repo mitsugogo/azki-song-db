@@ -204,7 +204,10 @@ export default function Timeline({ songs }: { songs: Song[] }) {
             cumY + estimatedItemHeight + bottomPadding,
           );
 
-          const effectivePositions = measuredPositions ?? itemPositions;
+          const effectivePositions =
+            measuredPositions?.length === uniqueMilestones.length
+              ? measuredPositions
+              : itemPositions;
           const effectiveBandHeight = measuredBandHeight ?? bandHeight;
 
           // 日付をy座標に変換（マイルストーン上端にスナップ/補間）
