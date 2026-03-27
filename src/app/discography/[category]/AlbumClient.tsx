@@ -118,7 +118,7 @@ export default function AlbumClient({
   const categoryBreadcrumb = getCategoryBreadcrumb(leadSong);
 
   return (
-    <div className="p-6 w-full mx-auto">
+    <div className="grow min-h-0 w-full mx-auto overflow-auto p-6">
       <DiscographyBreadcrumbs
         items={[
           {
