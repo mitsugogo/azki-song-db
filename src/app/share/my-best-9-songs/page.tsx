@@ -7,13 +7,6 @@ type Props = {
   searchParams: Promise<{ title?: string | string[] }>;
 };
 
-const getTitle = (titleParam?: string | null) => {
-  if (titleParam) {
-    return `お題:「${titleParam}」 | 究極の9曲ジェネレーター | ${siteConfig.siteName}`;
-  }
-  return `究極の9曲ジェネレーター | ${siteConfig.siteName}`;
-};
-
 export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {

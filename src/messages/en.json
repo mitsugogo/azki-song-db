@@ -22,7 +22,7 @@
     "anniversaries": "Anniversaries",
     "statistics": "Statistics",
     "allData": "All Data",
-    "myBest9Songs": "My Best 9 Songs"
+    "myBest9Songs": "Cloud Nine"
   },
   "SearchInput": {
     "search": "Search",
@@ -139,6 +139,7 @@
       "shareCurrentSong": "Share current song"
     }
   },
+
   "Home": {
     "brand": "AZKi VIRTUAL DiVA",
     "heroLine1": "A Musical Odyssey:",
@@ -218,12 +219,12 @@
       "ogAlt": "{siteName} - Data list"
     },
     "share": {
-      "myBest9Title": "My Best 9 Generator | {siteName}",
-      "myBest9TitleWithSite": "My Best 9 Generator | {siteName}",
-      "myBest9WithTopic": "Topic: \"{title}\" | My Best 9 Generator | {siteName}",
-      "myBest9OgTitle": "My Best 9 Generator",
+      "myBest9Title": "Cloud Nine Generator | {siteName}",
+      "myBest9TitleWithSite": "Cloud Nine Generator | {siteName}",
+      "myBest9WithTopic": "Topic: \"{title}\" | Cloud Nine Generator | {siteName}",
+      "myBest9OgTitle": "Cloud Nine Generator",
       "myBest9OgWithTopic": "Topic: \"{title}\"",
-      "myBest9OgDescription": "Create and share your ultimate 9 AZKi songs!",
+      "myBest9OgDescription": "Create and share your Cloud Nine selection!",
       "myBest9Description": "Share your favorite AZKi songs"
     },
     "summary": {
@@ -241,6 +242,80 @@
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"
+    }
+  },
+  "Share": {
+    "share": {
+      "loading": "Loading...",
+      "notFoundTitle": "Share not found",
+      "notFoundDescription": "Failed to load share data",
+      "backToHome": "Back to home",
+      "songsCount": "{count} songs",
+      "missingCount": "({count} songs missing)",
+      "noSongsFound": "No songs found",
+      "createFromTopic": "Create Cloud Nine from this topic"
+    },
+    "copied": "Copied",
+    "index": {
+      "title": "Share",
+      "description": "Share your selection results on social media."
+    },
+    "features": {
+      "myBest9": {
+        "title": "Cloud Nine Generator",
+        "description": "Pick your favorite 9 songs from originals, covers, unit songs, and livestreams to share on social media."
+      }
+    },
+    "myBest9": {
+      "defaultTitle": "Cloud Nine AZKi Songs",
+      "unknownBroadcastDate": "Unknown stream date",
+      "pageTitle": "Cloud Nine AZKi Songs Generator",
+      "lead": "Pick up to 9 songs from originals and livestreams, then share them on social media.",
+      "selectedSongsTitle": "Selected songs",
+      "play": "Play",
+      "clickToRemove": "Click to remove",
+      "form": {
+        "titleLabel": "Title",
+        "titlePlaceholder": "e.g. Cloud Nine AZKi Songs",
+        "authorLabel": "Author (optional)",
+        "authorPlaceholder": "e.g. mitsugogo"
+      },
+      "tooltip": {
+        "copyThemeUrl": "Copy URL to request this topic",
+        "copyToClipboard": "Copy to clipboard"
+      },
+      "button": {
+        "copyThemeUrl": "Copy topic URL",
+        "copy": "Copy",
+        "shareOnX": "Share on X (Twitter)",
+        "saving": "Saving...",
+        "generated": "Share URL created",
+        "generate": "Generate share URL",
+        "reset": "Reset"
+      },
+      "selectedCount": "Selected: {count}/9",
+      "status": { "selected": "Selected", "unselected": "Not selected" },
+      "generatedUrlTitle": "Share URL",
+      "tip": {
+        "previewHelp": "When you share the created URL, thumbnails of the 9 songs appear in the preview."
+      },
+      "selectSongsTitle": "Select songs ({count}/9)",
+      "filters": {
+        "all": "All",
+        "original": "Originals",
+        "cover": "Covers",
+        "unitGuest": "Unit / Guest",
+        "liveSinging": "Livestreams",
+        "collaboration": "Collabs"
+      },
+      "search": { "placeholder": "Search by title, artist, etc." },
+      "displaying": "Displaying: {count} songs",
+      "totalSuffix": "songs",
+      "alerts": {
+        "titleRequired": "Please enter a title",
+        "selectAtLeastOne": "Please select at least one song",
+        "saveFailed": "Failed to save shared data"
+      }
     }
   },
   "Playlist": {
@@ -354,7 +429,6 @@
       "arranger": "Arranger",
       "videoDate": "Published"
     },
-    "relatedStreamsTitle": "Streams that sang this song ({count})",
     "buttons": {
       "watchOnYouTube": "Watch on YouTube",
       "viewInDatabase": "View in database",
@@ -369,7 +443,6 @@
       "releaseDate": "Release date:",
       "cover": "Cover:"
     },
-    "thumbnailClickTitle": "Click to enlarge",
     "relatedStreamsTitle": "Streams that sang this song ({count})",
     "tracksCount": "Tracks: {count}",
     "stats": {

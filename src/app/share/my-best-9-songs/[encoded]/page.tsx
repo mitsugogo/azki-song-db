@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import useMyBestNineSongs, {
@@ -17,6 +18,8 @@ export default function Page() {
   const encoded = Array.isArray(encodedParam)
     ? encodedParam[0] || ""
     : encodedParam || "";
+
+  const t = useTranslations("Share");
 
   const [selection, setSelection] = useState<MyBestNineSongs | null>(null);
   const [isSelectionLoading, setIsSelectionLoading] = useState(true);
@@ -128,7 +131,9 @@ export default function Page() {
       <div className="grow p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">読み込み中...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {t("share.loading")}
+          </p>
         </div>
       </div>
     );
@@ -138,15 +143,17 @@ export default function Page() {
     return (
       <div className="grow p-6 flex items-center justify-center">
         <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold mb-2">シェアが見つかりません</h1>
+          <h1 className="text-2xl font-bold mb-2">
+            {t("share.notFoundTitle")}
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {error || "データの読み込みに失敗しました"}
+            {error || t("share.notFoundDescription")}
           </p>
           <Link
             href="/"
             className="inline-block px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition"
           >
-            ホームに戻る
+            {t("share.backToHome")}
           </Link>
         </div>
       </div>
@@ -171,10 +178,10 @@ export default function Page() {
             </p>
           )}
           <p className="text-sm text-gray-500 dark:text-gray-200">
-            {selectedSongs.length}曲
+            {t("share.songsCount", { count: selectedSongs.length })}
             {missingCount > 0 && (
               <span className="ml-2 text-yellow-600 dark:text-yellow-400">
-                ({missingCount}曲が見つかりません)
+                {t("share.missingCount", { count: missingCount })}
               </span>
             )}
           </p>
@@ -233,7 +240,7 @@ export default function Page() {
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400">
-              曲が見つかりませんでした
+              {t("share.noSongsFound")}
             </p>
           </div>
         )}
@@ -244,14 +251,14 @@ export default function Page() {
             href={createPageHref}
             className="inline-block px-4 py-2 rounded bg-pink-600 text-white hover:bg-pink-700 transition mb-4"
           >
-            このお題で9選を作成する
+            {t("share.createFromTopic")}
           </Link>
           <div>
             <Link
               href="/"
               className="inline-block text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 transition"
             >
-              ← ホームに戻る
+              ← {t("share.backToHome")}
             </Link>
           </div>
         </div>

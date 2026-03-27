@@ -243,6 +243,85 @@
       "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
     }
   },
+  "Share": {
+    "share": {
+      "loading": "読み込み中...",
+      "notFoundTitle": "シェアが見つかりません",
+      "notFoundDescription": "データの読み込みに失敗しました",
+      "backToHome": "ホームに戻る",
+      "songsCount": "{count}曲",
+      "missingCount": "({count}曲が見つかりません)",
+      "noSongsFound": "曲が見つかりませんでした",
+      "createFromTopic": "このお題で9選を作成する"
+    },
+    "copied": "コピーしました！",
+    "index": {
+      "title": "共有",
+      "description": "楽曲の選択結果をSNSで共有できる機能です。"
+    },
+    "features": {
+      "myBest9": {
+        "title": "究極の9曲ジェネレーター",
+        "description": "オリジナル曲・カバー曲・ユニット曲・歌枠の中から好きな9曲を選んで、SNSで共有できます。"
+      }
+    },
+    "myBest9": {
+      "defaultTitle": "私が選んだ究極の9曲",
+      "unknownBroadcastDate": "配信日不明",
+      "pageTitle": "究極の9曲ジェネレーター",
+      "lead": "オリジナル曲や歌枠から、最大9曲を選んでSNSで共有できます",
+      "selectedSongsTitle": "選択済みの曲",
+      "play": "再生",
+      "clickToRemove": "クリックで削除",
+      "form": {
+        "titleLabel": "タイトル",
+        "titlePlaceholder": "例: 私が選んだ究極の九曲",
+        "authorLabel": "作成者名（任意）",
+        "authorPlaceholder": "例: みつごご"
+      },
+      "tooltip": {
+        "copyThemeUrl": "このタイトルで回答を募集するURLをコピー",
+        "copyToClipboard": "クリップボードにコピー"
+      },
+      "button": {
+        "copyThemeUrl": "このお題を募集するURLをコピー",
+        "copy": "コピー",
+        "shareOnX": "X（Twitter）でシェア",
+        "saving": "保存中...",
+        "generated": "共有URL作成済み",
+        "generate": "共有URLを生成",
+        "reset": "リセット"
+      },
+      "selectedCount": "選択済み: {count}/9",
+      "status": {
+        "selected": "選択中",
+        "unselected": "未選択"
+      },
+      "generatedUrlTitle": "共有URL",
+      "tip": {
+        "previewHelp": "作成したURLをSNSで共有すると、プレビュー画面に9曲のサムネイルが表示されます"
+      },
+      "selectSongsTitle": "曲を選択 ({count}/9)",
+      "filters": {
+        "all": "全て",
+        "original": "オリ曲",
+        "cover": "カバー曲",
+        "unitGuest": "ユニット・ゲスト曲",
+        "liveSinging": "歌枠",
+        "collaboration": "コラボ"
+      },
+      "search": {
+        "placeholder": "曲名、アーティストなどで検索"
+      },
+      "displaying": "表示中: {count}曲",
+      "totalSuffix": "曲",
+      "alerts": {
+        "titleRequired": "タイトルを入力してください",
+        "selectAtLeastOne": "最低1曲は選択してください",
+        "saveFailed": "共有データの保存に失敗しました"
+      }
+    }
+  },
   "Playlist": {
     "title": "プレイリスト",
     "manageTitle": "プレイリストの管理",
@@ -435,7 +514,6 @@
       "view_count": "再生数"
     }
   },
-
   "Anniversaries": {
     "homeLabel": "HOME",
     "breadcrumb": "記念日",
@@ -455,7 +533,6 @@
     "linkLabel": "リンク",
     "openLink": "リンク"
   },
-
   "Statistics": {
     "title": "統計情報",
     "selectTabAriaLabel": "統計タブ選択",
@@ -611,11 +688,9 @@
       }
     }
   },
-
   "Footer": {
     "disclaimer": "本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。"
   },
-
   "Summary": {
     "timelineTitle": "活動年表",
     "yearSuffix": "年",
@@ -718,5 +793,8 @@
         "linkText": "LICENSE"
       }
     }
+  },
+  "myBest9": {
+    "unknownBroadcastDate": "配信日不明"
   }
 }

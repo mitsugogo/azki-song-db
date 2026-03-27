@@ -19,7 +19,7 @@ import {
 } from "@mantine/core";
 import { MdContentCopy } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Song } from "../../types/song";
 import useMyBestNineSongsDraft from "../../hook/useMyBestNineSongsDraft";
 import useSearch from "../../hook/useSearch";
@@ -43,7 +43,6 @@ type SongCategoryFilter =
   | "unit-guest"
   | "live-singing"
   | "collaboration";
-const DEFAULT_TITLE = "私が選んだAZKi究極の9曲";
 
 const normalizeStart = (value: unknown): string | null => {
   if (value === null || value === undefined) return null;
@@ -61,10 +60,14 @@ const normalizeStart = (value: unknown): string | null => {
 
 import { formatDate } from "../../lib/formatDate";
 
-const formatBroadcastDate = (value: string, locale?: string): string => {
+const formatBroadcastDate = (
+  value: string,
+  locale?: string,
+  t?: (key: string) => string,
+): string => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "配信日不明";
+    return t ? t("myBest9.unknownBroadcastDate") : "配信日不明";
   }
   return formatDate(date, locale);
 };
@@ -89,7 +92,7 @@ export default function MyBestNineSongsPage() {
   const hasRestoredDraftRef = useRef(false);
 
   const [activeFilter, setActiveFilter] = useState<SongCategoryFilter>("all");
-  const [title, setTitle] = useState(() => queryTitle || DEFAULT_TITLE);
+  const [title, setTitle] = useState(() => queryTitle || "");
   const [author, setAuthor] = useState("");
   const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
   const [generatedUrl, setGeneratedUrl] = useState("");
@@ -104,6 +107,8 @@ export default function MyBestNineSongsPage() {
   const { draft, saveDraft, clearDraft } = useMyBestNineSongsDraft();
   const { allSongs, isLoading } = useSongs();
   const locale = useLocale();
+  const t = useTranslations("Share");
+  const dm = useTranslations("DrawerMenu");
   const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
     useGlobalPlayer();
 
@@ -246,7 +251,11 @@ export default function MyBestNineSongsPage() {
     if (hasRestoredDraftRef.current) return;
     if (draft && allSongs.length > 0) {
       hasRestoredDraftRef.current = true;
-      setTitle(initialQueryTitleRef.current || draft.title || DEFAULT_TITLE);
+      setTitle(
+        initialQueryTitleRef.current ||
+          draft.title ||
+          t("myBest9.defaultTitle"),
+      );
       setAuthor(draft.author || "");
 
       // ドラフトの曲を復元
@@ -332,12 +341,12 @@ export default function MyBestNineSongsPage() {
   // 共有URLを生成
   const handleGenerateUrl = async () => {
     if (!title.trim()) {
-      alert("タイトルを入力してください");
+      alert(t("myBest9.alerts.titleRequired"));
       return;
     }
 
     if (selectedSongs.length === 0) {
-      alert("最低1曲は選択してください");
+      alert(t("myBest9.alerts.selectAtLeastOne"));
       return;
     }
 
@@ -367,7 +376,7 @@ export default function MyBestNineSongsPage() {
         const errorData = (await response.json().catch(() => ({}))) as {
           error?: string;
         };
-        throw new Error(errorData.error || "共有データの保存に失敗しました");
+        throw new Error(errorData.error || t("myBest9.alerts.saveFailed"));
       }
 
       const data = (await response.json()) as { id: string };
@@ -377,9 +386,7 @@ export default function MyBestNineSongsPage() {
       lockedSelectionKeyRef.current = currentSelectionKey;
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "共有データの保存に失敗しました";
+        error instanceof Error ? error.message : t("myBest9.alerts.saveFailed");
       alert(message);
     } finally {
       setIsSaving(false);
@@ -410,7 +417,7 @@ export default function MyBestNineSongsPage() {
     return (
       <div className="mb-4">
         <Text size="sm" fw={500} mb={8}>
-          選択済みの曲
+          {t("myBest9.selectedSongsTitle")}
         </Text>
         <div className={gridClassName}>
           {selectedSongs.map((song) => (
@@ -434,7 +441,7 @@ export default function MyBestNineSongsPage() {
                   {song.artist}
                 </Text>
                 <Text size="xs" c="dimmed" mt={2}>
-                  {formatBroadcastDate(song.broadcast_at, locale)}
+                  {formatBroadcastDate(song.broadcast_at, locale, t)}
                 </Text>
                 <MantineButton
                   size="compact-xs"
@@ -447,10 +454,10 @@ export default function MyBestNineSongsPage() {
                   }}
                 >
                   <FaPlay className="mr-1" />
-                  再生
+                  {t("myBest9.play")}
                 </MantineButton>
                 <Text size="xs" c="dimmed" mt={2}>
-                  クリックで削除
+                  {t("myBest9.clickToRemove")}
                 </Text>
               </div>
             </div>
@@ -468,19 +475,21 @@ export default function MyBestNineSongsPage() {
         separator={<HiChevronRight className={breadcrumbClasses.separator} />}
       >
         <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
+          <HiHome className="w-4 h-4 mr-1.5" /> {dm("home")}
         </Link>
         <Link href="/share" className={breadcrumbClasses.link}>
-          共有
+          {t("index.title")}
         </Link>
-        <span className={breadcrumbClasses.link}>究極の9曲ジェネレーター</span>
+        <span className={breadcrumbClasses.link}>{t("myBest9.pageTitle")}</span>
       </Breadcrumbs>
 
       <div>
-        <h1 className="font-extrabold text-2xl p-3">究極の9曲ジェネレーター</h1>
+        <h1 className="font-extrabold text-2xl p-3">
+          {t("myBest9.pageTitle")}
+        </h1>
         <div className="p-3">
           <p className="text-sm text-gray-600 dark:text-light-gray-400">
-            オリジナル曲や歌枠から、最大9曲を選んでSNSで共有できます
+            {t("myBest9.lead")}
           </p>
         </div>
       </div>
@@ -495,8 +504,8 @@ export default function MyBestNineSongsPage() {
                 {/* タイトル入力 */}
                 <div>
                   <TextInput
-                    label="タイトル"
-                    placeholder="例: 私が選んだAZKi究極の九曲"
+                    label={t("myBest9.form.titleLabel")}
+                    placeholder={t("myBest9.form.titlePlaceholder")}
                     value={title}
                     onChange={(e) => handleTitleChange(e.currentTarget.value)}
                     maxLength={50}
@@ -508,8 +517,8 @@ export default function MyBestNineSongsPage() {
                   <Tooltip
                     label={
                       copiedThemeUrl
-                        ? "コピーしました！"
-                        : "このタイトルで回答を募集するURLをコピー"
+                        ? t("copied")
+                        : t("myBest9.tooltip.copyThemeUrl")
                     }
                   >
                     <MantineButton
@@ -526,8 +535,8 @@ export default function MyBestNineSongsPage() {
                       disabled={!title.trim()}
                     >
                       {copiedThemeUrl
-                        ? "コピーしました！"
-                        : "このお題を募集するURLをコピー"}
+                        ? t("copied")
+                        : t("myBest9.button.copyThemeUrl")}
                     </MantineButton>
                   </Tooltip>
                 </div>
@@ -535,8 +544,8 @@ export default function MyBestNineSongsPage() {
                 {/* 作成者名入力 */}
                 <div>
                   <TextInput
-                    label="作成者名（任意）"
-                    placeholder="例: みつごご"
+                    label={t("myBest9.form.authorLabel")}
+                    placeholder={t("myBest9.form.authorPlaceholder")}
                     value={author}
                     onChange={(e) => handleAuthorChange(e.currentTarget.value)}
                     maxLength={30}
@@ -549,13 +558,19 @@ export default function MyBestNineSongsPage() {
                 {/* 選択状況 */}
                 <div>
                   <Group justify="space-between" mb={8}>
-                    <Text fw={500}>選択済み: {selectedSongs.length}/9</Text>
+                    <Text fw={500}>
+                      {t("myBest9.selectedCount", {
+                        count: selectedSongs.length,
+                      })}
+                    </Text>
                     <Badge
                       size="sm"
                       variant="dot"
                       color={isFilled ? "green" : "gray"}
                     >
-                      {isFilled ? "選択中" : "未選択"}
+                      {isFilled
+                        ? t("myBest9.status.selected")
+                        : t("myBest9.status.unselected")}
                     </Badge>
                   </Group>
                   <Progress value={filledPercentage} color="pink" />
@@ -565,7 +580,7 @@ export default function MyBestNineSongsPage() {
                 {generatedUrl && (
                   <div>
                     <Text size="sm" fw={500} mb={8}>
-                      共有URL
+                      {t("myBest9.generatedUrlTitle")}
                     </Text>
                     <Group grow>
                       <input
@@ -576,7 +591,9 @@ export default function MyBestNineSongsPage() {
                       />
                       <Tooltip
                         label={
-                          copied ? "コピーしました！" : "クリップボードにコピー"
+                          copied
+                            ? t("copied")
+                            : t("myBest9.tooltip.copyToClipboard")
                         }
                       >
                         <MantineButton
@@ -589,7 +606,7 @@ export default function MyBestNineSongsPage() {
                           variant="light"
                           size="sm"
                         >
-                          コピー
+                          {t("myBest9.button.copy")}
                         </MantineButton>
                       </Tooltip>
                     </Group>
@@ -602,7 +619,7 @@ export default function MyBestNineSongsPage() {
                       color="dark"
                       fullWidth
                     >
-                      X（Twitter）でシェア
+                      {t("myBest9.button.shareOnX")}
                     </MantineButton>
                   </div>
                 )}
@@ -621,16 +638,16 @@ export default function MyBestNineSongsPage() {
                   size="md"
                 >
                   {isSaving
-                    ? "保存中..."
+                    ? t("myBest9.button.saving")
                     : isGenerateLocked
-                      ? "共有URL作成済み"
-                      : "共有URLを生成"}
+                      ? t("myBest9.button.generated")
+                      : t("myBest9.button.generate")}
                 </MantineButton>
 
                 {/* ドラフト削除 */}
                 <MantineButton
                   onClick={() => {
-                    setTitle(DEFAULT_TITLE);
+                    setTitle(t("myBest9.defaultTitle"));
                     setAuthor("");
                     setSelectedSongs([]);
                     clearDraft();
@@ -642,7 +659,7 @@ export default function MyBestNineSongsPage() {
                   color="red"
                   fullWidth
                 >
-                  リセット
+                  {t("myBest9.button.reset")}
                 </MantineButton>
 
                 {/* TIP */}
@@ -656,8 +673,7 @@ export default function MyBestNineSongsPage() {
                     size="xs"
                     className="leading-relaxed text-blue-900 dark:text-blue-100"
                   >
-                    💡
-                    作成したURLをSNSで共有すると、プレビュー画面に9曲のサムネイルが表示されます
+                    💡 {t("myBest9.tip.previewHelp")}
                   </Text>
                 </Paper>
               </Stack>
@@ -677,7 +693,9 @@ export default function MyBestNineSongsPage() {
               <Stack gap="md">
                 <div>
                   <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    曲を選択 ({selectedSongs.length}/9)
+                    {t("myBest9.selectSongsTitle", {
+                      count: selectedSongs.length,
+                    })}
                   </h2>
                 </div>
 
@@ -695,7 +713,7 @@ export default function MyBestNineSongsPage() {
                       variant={activeFilter === "all" ? "filled" : "light"}
                       onClick={() => setActiveFilter("all")}
                     >
-                      全て
+                      {t("myBest9.filters.all")}
                     </MantineButton>
                     <MantineButton
                       size="xs"
@@ -703,7 +721,7 @@ export default function MyBestNineSongsPage() {
                       variant={activeFilter === "original" ? "filled" : "light"}
                       onClick={() => setActiveFilter("original")}
                     >
-                      オリ曲
+                      {t("myBest9.filters.original")}
                     </MantineButton>
                     <MantineButton
                       size="xs"
@@ -711,7 +729,7 @@ export default function MyBestNineSongsPage() {
                       variant={activeFilter === "cover" ? "filled" : "light"}
                       onClick={() => setActiveFilter("cover")}
                     >
-                      カバー曲
+                      {t("myBest9.filters.cover")}
                     </MantineButton>
                     <MantineButton
                       size="xs"
@@ -721,7 +739,7 @@ export default function MyBestNineSongsPage() {
                       }
                       onClick={() => setActiveFilter("unit-guest")}
                     >
-                      ユニット・ゲスト曲
+                      {t("myBest9.filters.unitGuest")}
                     </MantineButton>
                     <MantineButton
                       size="xs"
@@ -731,7 +749,7 @@ export default function MyBestNineSongsPage() {
                       }
                       onClick={() => setActiveFilter("live-singing")}
                     >
-                      歌枠
+                      {t("myBest9.filters.liveSinging")}
                     </MantineButton>
                     <MantineButton
                       size="xs"
@@ -741,20 +759,20 @@ export default function MyBestNineSongsPage() {
                       }
                       onClick={() => setActiveFilter("collaboration")}
                     >
-                      コラボ
+                      {t("myBest9.filters.collaboration")}
                     </MantineButton>
                   </Group>
                   <TextInput
-                    placeholder="曲名、アーティストなどで検索"
+                    placeholder={t("myBest9.search.placeholder")}
                     value={songSearchQuery}
                     onChange={(e) => setSongSearchQuery(e.currentTarget.value)}
                     leftSection={<HiSearch />}
                     mb={8}
                   />
                   <Text size="sm" c="dimmed" mb={8}>
-                    表示中: {displayedSongs.length}曲
+                    {t("myBest9.displaying", { count: displayedSongs.length })}
                     {songSearchQuery.trim() &&
-                      ` / ${uniqueCategorySongs.length}曲中`}
+                      ` / ${uniqueCategorySongs.length} ${t("myBest9.totalSuffix")}`}
                   </Text>
                   <div className="h-95 lg:h-[calc(100dvh-280px)] min-h-95">
                     {isLoading ? (
@@ -847,6 +865,7 @@ export default function MyBestNineSongsPage() {
                                       {formatBroadcastDate(
                                         song.broadcast_at,
                                         locale,
+                                        t,
                                       )}
                                     </Text>
                                     <MantineButton
