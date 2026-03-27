@@ -19,6 +19,7 @@
     "search": "Search",
     "discography": "Discography",
     "activity": "Activity",
+    "anniversaries": "Anniversaries",
     "statistics": "Statistics",
     "allData": "All Data",
     "myBest9Songs": "My Best 9 Songs"
@@ -231,6 +232,12 @@
       "yearTitle": "AZKi's song activity in {year}",
       "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals"
     },
+    "anniversaries": {
+      "title": "Anniversaries",
+      "description": "Browse anniversaries related to AZKi's activities and songs.",
+      "ogSubtitle": "Anniversary list - {siteName}",
+      "ogAlt": "{siteName} - Anniversary list"
+    },
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"
@@ -423,6 +430,25 @@
       "year": "Year",
       "view_count": "View count"
     }
+  },
+  "Anniversaries": {
+    "homeLabel": "HOME",
+    "breadcrumb": "Anniversaries",
+    "title": "Anniversaries",
+    "description": "A list of anniversaries related to AZKi.",
+    "featuredTitle": "Closest Anniversary",
+    "countdownFormat": "remains: {days}d {hours}h {minutes}m {seconds}s",
+    "countdownFinished": "Any moment now",
+    "loading": "Loading anniversaries...",
+    "empty": "No anniversaries to display.",
+    "nextDateLabel": "Next",
+    "daysUntil": "In {days} days",
+    "daysUntilLabel": "In",
+    "anniversaryNameLabel": "Anniversary",
+    "firstDateLabel": "First",
+    "noteLabel": "Note",
+    "linkLabel": "Link",
+    "openLink": "Open link"
   },
   "Statistics": {
     "title": "Statistics",

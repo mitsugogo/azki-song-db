@@ -183,6 +183,12 @@ export default function ClientTop() {
                   <Link href={`/summary`} className="hover:text-primary-500">
                     {tDrawer("activity")}
                   </Link>
+                  <Link
+                    href={`/anniversaries`}
+                    className="hover:text-primary-500"
+                  >
+                    {tDrawer("anniversaries")}
+                  </Link>
                   <Link href={`/statistics`} className="hover:text-primary-500">
                     {tDrawer("statistics")}
                   </Link>

@@ -19,6 +19,7 @@
     "search": "検索",
     "discography": "Discography",
     "activity": "活動記録",
+    "anniversaries": "記念日",
     "statistics": "統計情報",
     "allData": "全データ",
     "myBest9Songs": "究極の9曲"
@@ -231,6 +232,12 @@
       "yearTitle": "AZKiさんの{year}年の歌の活動",
       "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました"
     },
+    "anniversaries": {
+      "title": "記念日",
+      "description": "AZKiさんの活動や楽曲に関する記念日を一覧表示します。",
+      "ogSubtitle": "記念日一覧 - {siteName}",
+      "ogAlt": "{siteName} - 記念日一覧"
+    },
     "playlist": {
       "title": "プレイリスト",
       "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
@@ -427,6 +434,26 @@
       "year": "年",
       "view_count": "再生数"
     }
+  },
+
+  "Anniversaries": {
+    "homeLabel": "HOME",
+    "breadcrumb": "記念日",
+    "title": "記念日",
+    "description": "AZKiさんに縁がある記念日をまとめました。",
+    "featuredTitle": "もっとも近い記念日",
+    "countdownFormat": "あと {days}日 {hours}時間 {minutes}分 {seconds}秒",
+    "countdownFinished": "まもなくです",
+    "loading": "記念日データを読み込み中...",
+    "empty": "表示できる記念日はありません。",
+    "nextDateLabel": "次回",
+    "daysUntil": "あと{days}日",
+    "daysUntilLabel": "あと何日",
+    "anniversaryNameLabel": "記念日",
+    "firstDateLabel": "初回",
+    "noteLabel": "メモ",
+    "linkLabel": "リンク",
+    "openLink": "リンク"
   },
 
   "Statistics": {
