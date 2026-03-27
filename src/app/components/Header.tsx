@@ -51,11 +51,11 @@ export function Header() {
             </div>
             <div className="flex flex-1 items-center justify-start ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
-                <a href="/">
+                <Link href="/">
                   <h1 className="text-lg lg:text-lg font-semibold tracking-[0.06em]">
                     {siteConfig.siteNameUpper}
                   </h1>
-                </a>
+                </Link>
               </div>
               {/* 検索フィールド - lg以上で表示 */}
               <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:mx-4">
