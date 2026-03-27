@@ -139,7 +139,6 @@
       "shareCurrentSong": "Share current song"
     }
   },
-
   "Home": {
     "brand": "AZKi VIRTUAL DiVA",
     "heroLine1": "A Musical Odyssey:",
@@ -294,7 +293,10 @@
         "reset": "Reset"
       },
       "selectedCount": "Selected: {count}/9",
-      "status": { "selected": "Selected", "unselected": "Not selected" },
+      "status": {
+        "selected": "Selected",
+        "unselected": "Not selected"
+      },
       "generatedUrlTitle": "Share URL",
       "tip": {
         "previewHelp": "When you share the created URL, thumbnails of the 9 songs appear in the preview."
@@ -308,7 +310,9 @@
         "liveSinging": "Livestreams",
         "collaboration": "Collabs"
       },
-      "search": { "placeholder": "Search by title, artist, etc." },
+      "search": {
+        "placeholder": "Search by title, artist, etc."
+      },
       "displaying": "Displaying: {count} songs",
       "totalSuffix": "songs",
       "alerts": {
@@ -427,7 +431,17 @@
       "lyricist": "Lyricist",
       "composer": "Composer",
       "arranger": "Arranger",
-      "videoDate": "Published"
+      "videoDate": "Published",
+      "buttons": {
+        "play": "play",
+        "share": "share",
+        "watchOnYouTube": "Watch on YouTube"
+      },
+      "notFoundDescription": "The specified song does not exist.",
+      "notFoundTitle": "No songs found",
+      "relatedStreamsTitle": "Singing frame for this song ({count})",
+      "relatedVideos": "Related videos",
+      "thumbnailClickTitle": "Click to enlarge"
     },
     "buttons": {
       "watchOnYouTube": "Watch on YouTube",
@@ -448,7 +462,12 @@
     "stats": {
       "title": "Statistics",
       "updatedNote": "Updated daily around 0:00–1:00 JST",
-      "periods": { "7d": "7d", "30d": "30d", "365d": "365d", "all": "All" },
+      "periods": {
+        "7d": "7d",
+        "30d": "30d",
+        "365d": "365d",
+        "all": "All"
+      },
       "yesterdayDiffLabel": "Daily change",
       "yesterdayPctLabel": "Daily %",
       "yesterdayPctNone": "Daily %: —",
@@ -467,7 +486,8 @@
     "notFoundTitle": "Song not found",
     "notFoundDescription": "The specified song does not exist.",
     "thumbnailClickTitle": "Click to enlarge",
-    "relatedVideos": "Related videos"
+    "relatedVideos": "Related videos",
+    "covers": "cover songs ({count])"
   },
   "DiscographyAlbum": {
     "notFoundTitle": "Album not found | {site}",
@@ -678,11 +698,9 @@
       }
     }
   },
-
   "Footer": {
     "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
   },
-
   "Summary": {
     "timelineTitle": "Timeline",
     "yearSuffix": "",
@@ -785,5 +803,8 @@
         "linkText": "LICENSE"
       }
     }
+  },
+  "myBest9": {
+    "unknownBroadcastDate": "Delivery date unknown"
   }
 }

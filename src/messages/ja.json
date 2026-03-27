@@ -477,7 +477,10 @@
         "commentCount": "コメント"
       },
       "achievedOnLabel": "達成日"
-    }
+    },
+    "notFoundDescription": "指定された楽曲は存在しません。",
+    "notFoundTitle": "楽曲がありません",
+    "relatedVideos": "関連動画"
   },
   "DiscographyAlbum": {
     "notFoundTitle": "アルバムが見つかりません | {site}",
@@ -796,5 +799,12 @@
   },
   "myBest9": {
     "unknownBroadcastDate": "配信日不明"
+  },
+  "FilterExtra": {
+    "lastSungLabel": "最新:"
+  },
+  "suffixes": {
+    "songs": "曲",
+    "times": "回"
   }
 }
