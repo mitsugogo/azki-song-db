@@ -383,7 +383,7 @@ export async function GET(request: Request) {
               ? mappedArtists?.join(", ")
               : translated?.hl?.en?.artist || song.artist;
             const singsEn = mappedSings || song.sings;
-            const singEn = mappedSing || song.sing;
+            const singEn = mappedSing ? mappedSings?.join(", ") : song.sing;
 
             // song.album が空の場合は translated のアルバム名を引き継がない
             const albumEn = song.album
