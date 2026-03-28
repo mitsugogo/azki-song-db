@@ -323,7 +323,7 @@ const NowPlayingSongInfoDetail = ({
                 </span>
               </dt>
               <dd className="flex flex-wrap gap-1">
-                {currentSong.sing.split("、").map((sing, index) => {
+                {currentSong.sings.map((sing, index) => {
                   const existsSameSing = searchTerm.includes(`sing:${sing}`);
                   return (
                     <Badge
@@ -348,8 +348,8 @@ const NowPlayingSongInfoDetail = ({
                   );
                 })}
                 {(() => {
-                  const members = currentSong.sing.split("、");
-                  const unitName = getCollabUnitName(members);
+                  const members = currentSong.sings;
+                  const unitName = getCollabUnitName(members, locale);
                   if (!unitName) return null;
 
                   const existsSameUnit = searchTerm.includes(

@@ -806,5 +806,15 @@
   },
   "myBest9": {
     "unknownBroadcastDate": "Delivery date unknown"
+  },
+  "SearchPage": {
+    "originalSongs": "Original Songs",
+    "coverSongs": "Covers",
+    "coverCollab": "Covers (Collab)",
+    "karaoke": "Karaoke Streams",
+    "anniversaryLive": "Anniversary Live",
+    "guestAppearance": "Guest Appearances",
+    "ballad": "Ballads",
+    "acoustic": "Acoustic / Live Performance"
   }
 }

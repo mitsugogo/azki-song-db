@@ -112,9 +112,14 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
         "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
         "date:": (s, v) => {
+          const dateString = new Date(v).toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+          });
           const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
-          if (dateRegex.test(v)) {
-            const [year, month, day] = v.split("/").map(Number);
+          if (dateRegex.test(dateString)) {
+            const [year, month, day] = dateString.split("/").map(Number);
             const date = new Date(s.broadcast_at);
             return (
               date.getFullYear() === year &&

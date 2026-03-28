@@ -806,5 +806,15 @@
   "suffixes": {
     "songs": "曲",
     "times": "回"
+  },
+  "SearchPage": {
+    "originalSongs": "オリ曲",
+    "coverSongs": "歌ってみた",
+    "coverCollab": "歌ってみたコラボ",
+    "karaoke": "歌枠",
+    "anniversaryLive": "記念ライブ",
+    "guestAppearance": "ゲスト出演",
+    "ballad": "しっとり",
+    "acoustic": "アコースティック・生演奏"
   }
 }

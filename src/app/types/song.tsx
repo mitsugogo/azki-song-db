@@ -13,11 +13,15 @@ export interface Song {
       title: string;
       artist: string;
       album?: string;
+      sing?: string;
+      sings?: string[];
     };
     en?: {
       title?: string;
       artist?: string;
       album?: string;
+      sing?: string;
+      sings?: string[];
     };
   };
   album: string;

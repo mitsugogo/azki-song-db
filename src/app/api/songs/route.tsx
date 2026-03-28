@@ -16,21 +16,28 @@ export async function GET(request: Request) {
     });
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
+    const ranges = [
+      // 翻訳用マップ
+      "artists!A:B",
+      "song_titles!A:C",
+
+      // データ
+      "歌枠2021以前!A:L",
+      "歌枠2022!A:L",
+      "歌枠2023!A:M", // 列範囲を少し広めに設定
+      "歌枠2024!A:L",
+      "歌枠2025!A:M",
+      "歌枠2026!A:M",
+      "記念ライブ系!A:R",
+      "オリ曲!A:V",
+      "カバー!A:U",
+      "ゲスト・fesなど!A:M",
+      "特殊!A:R",
+    ];
+
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: [
-        "歌枠2021以前!A:L",
-        "歌枠2022!A:L",
-        "歌枠2023!A:M", // 列範囲を少し広めに設定
-        "歌枠2024!A:L",
-        "歌枠2025!A:M",
-        "歌枠2026!A:M",
-        "記念ライブ系!A:R",
-        "オリ曲!A:V",
-        "カバー!A:U",
-        "ゲスト・fesなど!A:M",
-        "特殊!A:R",
-      ],
+      ranges,
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -92,15 +99,87 @@ export async function GET(request: Request) {
 
     const songs: Song[] = [];
     let sourceOrder = 0;
+    // 翻訳用マップ（英語時のみ使用）
+    const artistsMap: Record<string, string> = {};
+    const titlesMap: Record<string, string> = {};
 
-    response.data.sheets?.forEach((sheet) => {
+    const sheetsArr = response.data.sheets || [];
+
+    // 翻訳用シートのみを先に処理してマップを作成
+    sheetsArr.forEach((sheet) => {
+      const sheetRows = sheet.data?.[0]?.rowData || [];
+      if (sheetRows.length < 2) return;
+
+      const headerValues = sheetRows[0].values || [];
+      const colMap: Record<string, number> = {};
+      HEADER_SCHEMA.forEach((def) => {
+        const index = headerValues.findIndex((cell) => {
+          const cellStr =
+            cell.userEnteredValue?.stringValue || cell.formattedValue || "";
+          return def.aliases.some(
+            (alias) => normalize(alias) === normalize(cellStr),
+          );
+        });
+        colMap[def.key] = index;
+      });
+
+      const sheetTitle = (sheet.properties?.title || "").toLowerCase();
+      if (sheetTitle === "artists") {
+        sheetRows.slice(1).forEach((row) => {
+          const vals = row.values || [];
+          const ja =
+            (colMap["artist"] !== -1 && vals[colMap["artist"]]
+              ? vals[colMap["artist"]].userEnteredValue?.stringValue ||
+                vals[colMap["artist"]].formattedValue ||
+                ""
+              : "") || "";
+          const en =
+            (colMap["artist_en"] !== -1 && vals[colMap["artist_en"]]
+              ? vals[colMap["artist_en"]].userEnteredValue?.stringValue ||
+                vals[colMap["artist_en"]].formattedValue ||
+                ""
+              : "") || "";
+          if (ja) artistsMap[normalize(ja)] = en || "";
+        });
+      }
+
+      if (sheetTitle === "song_titles") {
+        sheetRows.slice(1).forEach((row) => {
+          const vals = row.values || [];
+          const title =
+            (colMap["title"] !== -1 && vals[colMap["title"]]
+              ? vals[colMap["title"]].userEnteredValue?.stringValue ||
+                vals[colMap["title"]].formattedValue ||
+                ""
+              : "") || "";
+          const artist =
+            (colMap["artist"] !== -1 && vals[colMap["artist"]]
+              ? vals[colMap["artist"]].userEnteredValue?.stringValue ||
+                vals[colMap["artist"]].formattedValue ||
+                ""
+              : "") || "";
+          const titleEn =
+            (colMap["title_en"] !== -1 && vals[colMap["title_en"]]
+              ? vals[colMap["title_en"]].userEnteredValue?.stringValue ||
+                vals[colMap["title_en"]].formattedValue ||
+                ""
+              : "") || "";
+          if (title && artist) {
+            const key = `${normalize(title)}|${normalize(artist)}`;
+            titlesMap[key] = titleEn || "";
+          }
+        });
+      }
+    });
+
+    // データシートを処理して songs を構築
+    sheetsArr.forEach((sheet) => {
       const sheetRows = sheet.data?.[0]?.rowData || [];
       if (sheetRows.length < 2) return; // ヘッダーとデータが必要
 
       const headerValues = sheetRows[0].values || [];
 
-      // 1. このシートにおける列インデックスのマップを作成
-      // 例: { title: 2, artist: 3, ... }
+      // 列マップ
       const colMap: Record<string, number> = {};
       HEADER_SCHEMA.forEach((def) => {
         const index = headerValues.findIndex((cell) => {
@@ -113,7 +192,9 @@ export async function GET(request: Request) {
         colMap[def.key] = index; // 見つからない場合は -1
       });
 
-      // 2. データ行の処理
+      const sheetTitle = (sheet.properties?.title || "").toLowerCase();
+      if (sheetTitle === "artists" || sheetTitle === "song_titles") return; // 翻訳シートはスキップ
+
       sheetRows.slice(1).forEach((row) => {
         const vals = row.values || [];
 
@@ -198,11 +279,21 @@ export async function GET(request: Request) {
               title: titleValue,
               artist: artistJa,
               album: getStr("album"),
+              sing: getStr("sing"),
+              sings: getStr("sing")
+                .split(/[,,、]/)
+                .map((s) => s.trim())
+                .filter((s) => s !== ""),
             },
             en: {
               title: titleEn,
               artist: artistEn,
               album: albumEn,
+              sing: getStr("sing"),
+              sings: getStr("sing")
+                .split(/[,,、]/)
+                .map((s) => s.trim())
+                .filter((s) => s !== ""),
             },
           },
           lyricist: getStr("lyricist"),
@@ -257,7 +348,27 @@ export async function GET(request: Request) {
             const titleJa = song.hl.ja.title;
             const artistJa = song.hl.ja.artist;
 
-            // 翻訳データを探す
+            // まず翻訳シートのマップを優先 (title + artist でキーを作る)
+            const titleKey = `${normalize(titleJa)}|${normalize(artistJa)}`;
+            const titleEnFromMap = titlesMap[titleKey] || "";
+
+            // アーティストは配列要素ごとにマップを適用
+            const mappedArtists = song.artists?.map((a) =>
+              artistsMap[normalize(a)] ? artistsMap[normalize(a)] : a,
+            );
+            const anyArtistTranslated = song.artists?.some(
+              (a) => !!artistsMap[normalize(a)],
+            );
+
+            // sing / sings も artistsMap を使って翻訳
+            const mappedSings = song.sings?.map((s) =>
+              artistsMap[normalize(s)] ? artistsMap[normalize(s)] : s,
+            );
+            const mappedSing = song.sing
+              ? artistsMap[normalize(song.sing)] || song.sing
+              : song.sing;
+
+            // 翻訳データを探す（既存の行ベースの翻訳をフォールバックとして使用）
             const translated = songs.find(
               (s) =>
                 s.hl.ja.title === titleJa &&
@@ -265,33 +376,48 @@ export async function GET(request: Request) {
                 s.hl?.en?.title,
             );
 
-            if (translated) {
-              const titleEn = translated.hl?.en?.title || song.title;
-              const artistEn = translated.hl?.en?.artist || song.artist;
-              // song.album が空の場合は translated のアルバム名を引き継がない
-              const albumEn = song.album
-                ? translated.hl?.en?.album || song.album
-                : "";
-              return {
-                ...song,
-                title: titleEn,
-                artist: artistEn,
-                album: albumEn,
-                hl: {
-                  ja: {
-                    title: titleJa,
-                    artist: artistJa,
-                    album: song.hl.ja.album,
-                  },
-                  en: {
-                    title: titleEn,
-                    artist: artistEn,
-                    album: albumEn,
-                  },
+            const titleEn =
+              titleEnFromMap || translated?.hl?.en?.title || song.title;
+
+            const artistEn = anyArtistTranslated
+              ? mappedArtists?.join(", ")
+              : translated?.hl?.en?.artist || song.artist;
+            const singsEn = mappedSings || song.sings;
+            const singEn = mappedSing || song.sing;
+
+            // song.album が空の場合は translated のアルバム名を引き継がない
+            const albumEn = song.album
+              ? translated?.hl?.en?.album || song.album
+              : "";
+
+            // 何も翻訳が見つからなければ元の song を返す
+            if (!titleEn && !artistEn) return song;
+
+            return {
+              ...song,
+              title: titleEn,
+              artist: artistEn,
+              artists: mappedArtists || song.artists,
+              sing: singEn,
+              sings: singsEn,
+              album: albumEn,
+              hl: {
+                ja: {
+                  title: titleJa,
+                  artist: artistJa,
+                  album: song.hl.ja.album,
+                  sing: song.hl.ja.sing,
+                  sings: song.hl.ja.sings,
                 },
-              };
-            }
-            return song; // 翻訳がない場合はそのまま
+                en: {
+                  title: titleEn,
+                  artist: artistEn,
+                  album: albumEn,
+                  sing: singEn,
+                  sings: singsEn,
+                },
+              },
+            };
           }),
       {
         headers: {

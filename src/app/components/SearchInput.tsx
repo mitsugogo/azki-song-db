@@ -57,10 +57,7 @@ export default function SearchInput({
     const availableSingers = Array.from(
       new Set(
         allSongs.flatMap((song) =>
-          song.sing
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
+          song.sings.map((s) => s.trim()).filter((s) => s !== ""),
         ),
       ),
     );
@@ -70,7 +67,7 @@ export default function SearchInput({
         ...allSongs.map((song) => song.title),
         ...(isEnglish
           ? allSongs
-              .map((song) => song.title_en ?? "")
+              .map((song) => song.title ?? "")
               .filter((title) => title !== "")
           : []),
       ]),
@@ -114,10 +111,7 @@ export default function SearchInput({
         // 実際にそのユニットの曲が存在するかチェック
         return allSongs.some((song) => {
           if (song.sing === "") return false;
-          const singers = song.sing
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== "");
+          const singers = song.hl?.ja?.sings || song.sings;
           if (singers.length !== unit.members.length) return false;
           const sortedSingers = normalizeMemberNames(singers);
           const sortedUnitMembers = normalizeMemberNames(unit.members);
@@ -126,7 +120,7 @@ export default function SearchInput({
       })
       .map((unit) => {
         // ロケールに応じて英語表記があれば英語を優先、なければ通称を返す
-        if (isEnglish && unit.hl && unit.hl.en) return unit.hl.en;
+        if (isEnglish && unit.hl && unit.hl.en) return unit.hl.en.unitName;
         return unit.unitName;
       })
       .filter((v, i, arr) => arr.indexOf(v) === i); // 重複排除
