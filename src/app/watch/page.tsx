@@ -104,6 +104,7 @@ export async function generateMetadata({
     ogImageUrl = new URL("/api/og/thumb", baseUrl);
     ogImageUrl.searchParams.set("v", v);
     ogImageUrl.searchParams.set("t", t);
+    ogImageUrl.searchParams.set("hl", locale);
 
     const songsUrl = new URL("/api/songs", baseUrl);
     songsUrl.searchParams.set("hl", locale);
@@ -140,12 +141,14 @@ export async function generateMetadata({
           "t",
           normalizeWatchTimeParam(song.start) ?? "",
         );
+        ogImageUrl.searchParams.set("hl", locale);
         ogTitle = title;
       } else {
         title = `${song.video_title} | ${siteConfig.siteName}`;
         ogTitle = title;
         ogImageUrl = new URL("/api/og/videothumb", baseUrl);
         ogImageUrl.searchParams.set("v", v);
+        ogImageUrl.searchParams.set("hl", locale);
       }
     }
   }
