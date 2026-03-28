@@ -397,7 +397,18 @@ function formatSubscribers(
       man >= 100 ? `${Math.round(man)}` : `${Math.round(man * 10) / 10}`;
     return t("subscribers", { count: `${display.replace(/\.0$/, "")}万人` });
   }
-  return t("subscribers", { count: num.toLocaleString(locale) });
+  // For non-Japanese locales, use compact notation (e.g. 1.31M) like YouTube.
+  try {
+    const formatter = new Intl.NumberFormat(locale || "en", {
+      notation: "compact",
+      compactDisplay: "short",
+      maximumFractionDigits: 2,
+    });
+    const formatted = formatter.format(num);
+    return t("subscribers", { count: formatted });
+  } catch (e) {
+    return t("subscribers", { count: num.toLocaleString(locale) });
+  }
 }
 
 function formatViewCount(
