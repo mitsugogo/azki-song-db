@@ -1,18 +1,43 @@
+"use client";
+
 /* eslint @typescript-eslint/no-explicit-any: off */
 import { Badge } from "flowbite-react";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { Song } from "../types/song";
 import { ViewMilestoneInfo } from "../types/viewMilestone";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FaYoutube } from "react-icons/fa6";
 import { BsPlayCircleFill } from "react-icons/bs";
+import { useLocale, useTranslations } from "next-intl";
+import { formatDate } from "./formatDate";
 
 export const renderLastVideoCell = (
   lastVideo: Song,
   hiddenTitle = false,
   link = true,
 ) => {
-  if (!lastVideo) return <span className="text-sm">なし</span>;
+  return (
+    <LastVideoCell
+      lastVideo={lastVideo}
+      hiddenTitle={hiddenTitle}
+      link={link}
+    />
+  );
+};
+
+function LastVideoCell({
+  lastVideo,
+  hiddenTitle,
+  link,
+}: {
+  lastVideo: Song;
+  hiddenTitle: boolean;
+  link: boolean;
+}) {
+  const t = useTranslations("Statistics.renderers.lastVideoCell");
+  const locale = useLocale();
+
+  if (!lastVideo) return <span className="text-sm">{t("none")}</span>;
 
   const videoUrl = `${lastVideo.video_uri}`;
   const appPlayUrl = `/watch?v=${lastVideo.video_id}&q=video_id:${lastVideo.video_id}`;
@@ -56,7 +81,7 @@ export const renderLastVideoCell = (
             </a>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {new Date(lastVideo.broadcast_at).toLocaleDateString()}
+            {formatDate(lastVideo.broadcast_at, locale)}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <a
@@ -66,42 +91,81 @@ export const renderLastVideoCell = (
               className="inline-flex items-center gap-1 rounded-md bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700"
             >
               <FaYoutube size={12} />
-              YouTube
+              {t("youtube")}
             </a>
             <Link
               href={appPlayUrl}
               className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-primary-700"
             >
               <BsPlayCircleFill size={12} />
-              再生
+              {t("play")}
             </Link>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
-const formatMilestoneDate = (date: string | null | undefined) => {
+const formatMilestoneDate = (
+  date: string | null | undefined,
+  locale?: string,
+) => {
   if (!date) return null;
   const parsedDate = new Date(date);
   if (isNaN(parsedDate.getTime())) return null;
-  return parsedDate.toLocaleDateString();
+  return formatDate(parsedDate, locale || undefined);
 };
 
 export const renderViewCountCell = (
   viewCount: number,
   milestone?: ViewMilestoneInfo | null,
 ) => {
+  return <ViewCountCell viewCount={viewCount} milestone={milestone} />;
+};
+
+function ViewCountCell({
+  viewCount,
+  milestone,
+}: {
+  viewCount: number;
+  milestone?: ViewMilestoneInfo | null;
+}) {
+  const t = useTranslations("Statistics.renderers.viewCountCell");
+  const locale = useLocale();
+
+  const formatMilestone = (count: number) => {
+    if (locale.startsWith("ja") && count >= 10000 && count % 10000 === 0) {
+      return t("milestoneJa", {
+        count: Math.floor(count / 10000).toLocaleString(locale),
+      });
+    }
+
+    if (locale.startsWith("en")) {
+      const compact = new Intl.NumberFormat("en", {
+        notation: "compact",
+        compactDisplay: "short",
+        maximumFractionDigits: 1,
+      })
+        .format(count)
+        .replace(/\.0K$/, "k")
+        .replace(/K$/, "k");
+
+      return t("milestone", { count: compact });
+    }
+
+    return t("milestone", { count: count.toLocaleString(locale) });
+  };
+
   const remain = getRemainCount(viewCount);
   if (remain) {
-    const estimatedAt = formatMilestoneDate(milestone?.estimatedAt);
+    const estimatedAt = formatMilestoneDate(milestone?.estimatedAt, locale);
     return (
       <div className="flex flex-col gap-1">
-        <span>{`あと ${remain.toLocaleString()} 再生`}</span>
+        <span>{t("remaining", { count: remain.toLocaleString(locale) })}</span>
         {estimatedAt && (
           <span className="text-xs text-muted-foreground">
-            達成見込み: {estimatedAt}
+            {t("estimatedAt", { date: estimatedAt })}
           </span>
         )}
       </div>
@@ -110,15 +174,15 @@ export const renderViewCountCell = (
 
   const after = getAfterCount(viewCount);
   if (after) {
-    const achievedAt = formatMilestoneDate(milestone?.achievedAt);
+    const achievedAt = formatMilestoneDate(milestone?.achievedAt, locale);
     return (
       <div className="flex flex-col gap-1">
         <Badge color="success" className="inline whitespace-nowrap w-fit">
-          {Math.floor(after / 10000)}万再生達成
+          {formatMilestone(after)}
         </Badge>
         {achievedAt && (
           <span className="text-xs text-muted-foreground">
-            達成日: {achievedAt}
+            {t("achievedAt", { date: achievedAt })}
           </span>
         )}
       </div>
@@ -126,7 +190,7 @@ export const renderViewCountCell = (
   }
 
   return null;
-};
+}
 
 const getRemainCount = (viewCount: number) => {
   if (viewCount < 100000) {
@@ -150,7 +214,7 @@ const getAfterCount = (viewCount: number) => {
     const milestone = Math.floor(viewCount / 1000000) * 1000000;
     // +10000までの範囲
     if (viewCount <= milestone + 10000) {
-      return viewCount;
+      return milestone;
     }
   }
   // 30～90万台の処理
@@ -158,7 +222,7 @@ const getAfterCount = (viewCount: number) => {
     const milestone = Math.floor(viewCount / 100000) * 100000;
     // +10000までの範囲
     if (viewCount <= milestone + 10000) {
-      return viewCount;
+      return milestone;
     }
   }
   // 10万台の処理
@@ -166,7 +230,7 @@ const getAfterCount = (viewCount: number) => {
     const milestone = Math.floor(viewCount / 100000) * 100000;
     // +5000までの範囲
     if (viewCount <= milestone + 5000) {
-      return viewCount;
+      return milestone;
     }
   }
   // 10万までの処理
@@ -174,7 +238,7 @@ const getAfterCount = (viewCount: number) => {
     const milestone = Math.floor(viewCount / 10000) * 10000;
     // +1000までの範囲
     if (viewCount <= milestone + 1000) {
-      return viewCount;
+      return milestone;
     }
   }
 
@@ -184,6 +248,11 @@ const getAfterCount = (viewCount: number) => {
 
 export const viewCountSortFn = (rowA: any, rowB: any) => {
   const extractViewCount = (row: any) => {
+    const fromEffective = Number(row.original?.effectiveViewCount);
+    if (Number.isFinite(fromEffective) && fromEffective > 0) {
+      return fromEffective;
+    }
+
     const fromSong = Number(row.original?.song?.view_count);
     if (Number.isFinite(fromSong) && fromSong > 0) return fromSong;
 

@@ -9,5 +9,13 @@
       "createTheme(?:<\\w+>)?\\s*\\(([^)]*)\\)",
       "{?\\s?[\\w].*:\\s*?[\"'`]([^\"'`]*).*?,?\\s?}?"
     ]
-  ]
+  ],
+  "i18n-ally.localesPaths": [
+    "coverage/i18n",
+    "src/i18n",
+    "src/messages",
+    "src/app/i18n"
+  ],
+  "i18n-ally.sourceLanguage": "ja",
+  "i18n-ally.keystyle": "nested"
 }

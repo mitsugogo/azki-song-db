@@ -32,7 +32,7 @@ const useMyBestNineSongs = () => {
   const isDuplicate = useCallback(
     (selection: MyBestNineSongs, song: Song): boolean => {
       return !!selection.songs.find(
-        (entry) => entry.v === song.video_id && entry.s === song.start,
+        (entry) => entry.v === song.video_id && entry.s === String(song.start),
       );
     },
     [],
@@ -45,14 +45,14 @@ const useMyBestNineSongs = () => {
 
     selection.songs.push({
       v: song.video_id,
-      s: song.start,
+      s: String(song.start),
     });
   }, []);
 
   // 曲を削除
   const removeSong = useCallback((selection: MyBestNineSongs, song: Song) => {
     selection.songs = selection.songs.filter(
-      (entry) => entry.v !== song.video_id || entry.s !== song.start,
+      (entry) => entry.v !== song.video_id || entry.s !== String(song.start),
     );
   }, []);
 
@@ -60,7 +60,7 @@ const useMyBestNineSongs = () => {
   const isSongIncluded = useCallback(
     (selection: MyBestNineSongs, song: Song): boolean => {
       return !!selection.songs.find(
-        (entry) => entry.v === song.video_id && entry.s === song.start,
+        (entry) => entry.v === song.video_id && entry.s === String(song.start),
       );
     },
     [],

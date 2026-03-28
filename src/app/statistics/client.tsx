@@ -3,20 +3,27 @@
 import { useState, useEffect, useMemo } from "react";
 import { Select, Tabs } from "@mantine/core";
 import { HiArrowUp } from "react-icons/hi";
+import { useTranslations } from "next-intl";
 
 import DataTable from "./datatable";
 import SongCountOverview from "./SongCountOverview";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
 import useStatViewCounts from "../hook/useStatViewCounts";
-import { TABS_CONFIG } from "./tabsConfig";
 import Loading from "../loading";
 import historyHelper from "../lib/history";
 import { buildViewMilestoneInfo } from "../lib/viewMilestone";
 import { StatisticsItem } from "../types/statisticsItem";
+import { getTabsConfig } from "./tabsConfig";
 
 export default function StatisticsPage() {
-  const tabKeys = useMemo(() => TABS_CONFIG.map((tab) => tab.dataKey), []);
+  const t = useTranslations("Statistics");
+  const tabsConfig = useMemo(() => getTabsConfig(t), [t]);
+
+  const tabKeys = useMemo(
+    () => tabsConfig.map((tab) => tab.dataKey),
+    [tabsConfig],
+  );
   const defaultTab = tabKeys[0] ?? "songCounts";
 
   const [activeTab, setActiveTab] = useState<string>(defaultTab);
@@ -35,7 +42,12 @@ export default function StatisticsPage() {
         ...statistics.originalSongCountsByReleaseDate,
         ...statistics.coverSongCountsByReleaseDate,
       ]
-        .map((item) => item.song?.video_id)
+        .map(
+          (item) =>
+            item.song?.video_id ||
+            item.firstVideo?.video_id ||
+            item.lastVideo?.video_id,
+        )
         .filter(Boolean),
     [
       statistics.originalSongCountsByReleaseDate,
@@ -51,11 +63,23 @@ export default function StatisticsPage() {
       items: typeof statistics.originalSongCountsByReleaseDate,
     ) =>
       items.map((item) => {
-        const viewCount = Number(item.song?.view_count ?? 0);
-        const history = viewStatisticsByVideoId[item.song?.video_id || ""];
+        const statVideoId =
+          item.song?.video_id ||
+          item.firstVideo?.video_id ||
+          item.lastVideo?.video_id ||
+          "";
+        const history = viewStatisticsByVideoId[statVideoId] || [];
+        const latestHistoryViewCount =
+          history[history.length - 1]?.viewCount ?? 0;
+        const songViewCount = Number(item.song?.view_count ?? 0);
+        const effectiveViewCount =
+          songViewCount > 0 ? songViewCount : latestHistoryViewCount;
+
         return {
           ...item,
-          viewMilestone: buildViewMilestoneInfo(viewCount, history),
+          statVideoId,
+          effectiveViewCount,
+          viewMilestone: buildViewMilestoneInfo(effectiveViewCount, history),
         };
       });
 
@@ -105,66 +129,72 @@ export default function StatisticsPage() {
     switch (dataKey) {
       case "songCounts":
         return {
-          primaryLabel: "曲の種類",
-          totalCountLabel: "総歌唱回数",
-          topLabel: "最多曲",
-          countUnit: "回",
+          primaryLabel: t("overview.songCounts.primaryLabel"),
+          totalCountLabel: t("overview.songCounts.totalCountLabel"),
+          topLabel: t("overview.songCounts.topLabel"),
+          countUnit: t("overview.songCounts.countUnit"),
         };
       case "artistCounts":
         return {
-          primaryLabel: "アーティスト数",
-          totalCountLabel: "総歌唱回数",
-          topLabel: "最多アーティスト",
-          countUnit: "回",
+          primaryLabel: t("overview.artistCounts.primaryLabel"),
+          totalCountLabel: t("overview.artistCounts.totalCountLabel"),
+          topLabel: t("overview.artistCounts.topLabel"),
+          countUnit: t("overview.artistCounts.countUnit"),
         };
       case "originalSongCounts":
         return {
-          primaryLabel: "オリ曲数",
-          totalCountLabel: "総歌唱回数",
-          topLabel: "最多オリ曲",
-          countUnit: "回",
+          primaryLabel: t("overview.originalSongCounts.primaryLabel"),
+          totalCountLabel: t("overview.originalSongCounts.totalCountLabel"),
+          topLabel: t("overview.originalSongCounts.topLabel"),
+          countUnit: t("overview.originalSongCounts.countUnit"),
         };
       case "tagCounts":
         return {
-          primaryLabel: "タグ数",
-          totalCountLabel: "総収録回数",
-          topLabel: "最多タグ",
-          countUnit: "件",
+          primaryLabel: t("overview.tagCounts.primaryLabel"),
+          totalCountLabel: t("overview.tagCounts.totalCountLabel"),
+          topLabel: t("overview.tagCounts.topLabel"),
+          countUnit: t("overview.tagCounts.countUnit"),
         };
       case "milestoneCounts":
         return {
-          primaryLabel: "マイルストーン数",
-          totalCountLabel: "総登場回数",
-          topLabel: "最新マイルストーン",
-          countUnit: "回",
+          primaryLabel: t("overview.milestoneCounts.primaryLabel"),
+          totalCountLabel: t("overview.milestoneCounts.totalCountLabel"),
+          topLabel: t("overview.milestoneCounts.topLabel"),
+          countUnit: t("overview.milestoneCounts.countUnit"),
         };
       case "videoCounts":
         return {
-          primaryLabel: "動画数",
-          totalCountLabel: "総歌唱回数",
-          topLabel: "最多動画",
-          countUnit: "回",
+          primaryLabel: t("overview.videoCounts.primaryLabel"),
+          totalCountLabel: t("overview.videoCounts.totalCountLabel"),
+          topLabel: t("overview.videoCounts.topLabel"),
+          countUnit: t("overview.videoCounts.countUnit"),
         };
       case "originalSongCountsByReleaseDate":
         return {
-          primaryLabel: "収録楽曲数",
-          totalCountLabel: "総歌唱回数",
+          primaryLabel: t(
+            "overview.originalSongCountsByReleaseDate.primaryLabel",
+          ),
+          totalCountLabel: t(
+            "overview.originalSongCountsByReleaseDate.totalCountLabel",
+          ),
           topLabel: "",
-          countUnit: "回",
+          countUnit: t("overview.originalSongCountsByReleaseDate.countUnit"),
         };
       case "coverSongCountsByReleaseDate":
         return {
-          primaryLabel: "収録楽曲数",
-          totalCountLabel: "総歌唱回数",
+          primaryLabel: t("overview.coverSongCountsByReleaseDate.primaryLabel"),
+          totalCountLabel: t(
+            "overview.coverSongCountsByReleaseDate.totalCountLabel",
+          ),
           topLabel: "",
-          countUnit: "回",
+          countUnit: t("overview.coverSongCountsByReleaseDate.countUnit"),
         };
       default:
         return {
-          primaryLabel: "項目数",
-          totalCountLabel: "総回数",
-          topLabel: "最多項目",
-          countUnit: "回",
+          primaryLabel: t("overview.default.primaryLabel"),
+          totalCountLabel: t("overview.default.totalCountLabel"),
+          topLabel: t("overview.default.topLabel"),
+          countUnit: t("overview.default.countUnit"),
         };
     }
   };
@@ -192,11 +222,9 @@ export default function StatisticsPage() {
 
     const url = new URL(window.location.href);
     url.searchParams.set("tab", nextTab);
-    // タブ切替は履歴を増やさない（戻る操作で過去のタブが大量に残るのを防ぐ）
     historyHelper.replaceUrlIfDifferent(url.href);
   };
 
-  // ページを開いた時にURLの"tab"を取得してタブを選択する
   useEffect(() => {
     const url = new URL(window.location.href);
     setActiveTab(resolveTabFromSearchParam(url.searchParams.get("tab")));
@@ -225,8 +253,8 @@ export default function StatisticsPage() {
   };
 
   const activeTabConfig = useMemo(
-    () => TABS_CONFIG.find((tab) => tab.dataKey === activeTab),
-    [activeTab],
+    () => tabsConfig.find((tab) => tab.dataKey === activeTab),
+    [activeTab, tabsConfig],
   );
 
   if (loading) {
@@ -239,15 +267,15 @@ export default function StatisticsPage() {
 
   return (
     <div className="grow">
-      <h1 className="font-extrabold text-2xl p-3">統計情報</h1>
+      <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
 
       <Tabs value={activeTab} onChange={handleTabChange} variant="default">
         <div className="md:hidden px-3 pb-2">
           <Select
-            aria-label="統計タブ選択"
+            aria-label={t("selectTabAriaLabel")}
             value={activeTab}
             onChange={handleTabChange}
-            data={TABS_CONFIG.map((tab) => ({
+            data={tabsConfig.map((tab) => ({
               value: tab.dataKey,
               label: tab.title,
             }))}
@@ -260,9 +288,9 @@ export default function StatisticsPage() {
 
         <div className="border-b border-gray-200 dark:border-gray-700 hidden md:block">
           <Tabs.List className="flex whitespace-nowrap overflow-x-auto overflow-y-hidden">
-            {TABS_CONFIG.map((tab) => (
+            {tabsConfig.map((tab) => (
               <Tabs.Tab
-                id={`tab-${TABS_CONFIG.indexOf(tab)}`}
+                id={`tab-${tabsConfig.indexOf(tab)}`}
                 key={`${tab.title}-${tab.dataKey}-header`}
                 value={tab.dataKey}
                 leftSection={
@@ -310,7 +338,9 @@ export default function StatisticsPage() {
                     : "default"
               }
               countUnit={
-                activeTabConfig.dataKey === "videoCounts" ? "曲" : "回"
+                activeTabConfig.dataKey === "videoCounts"
+                  ? t("units.songs")
+                  : t("units.times")
               }
               {...(activeTabConfig.dataKey === "videoCounts" && {
                 onRowClick: handleVideoClick,
@@ -326,7 +356,7 @@ export default function StatisticsPage() {
         <button
           type="button"
           onClick={handleBackToTop}
-          aria-label="ページ上部へ戻る"
+          aria-label={t("backToTopAriaLabel")}
           className="fixed bottom-4 right-4 z-40 inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-lg transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
         >
           <HiArrowUp className="h-5 w-5" />

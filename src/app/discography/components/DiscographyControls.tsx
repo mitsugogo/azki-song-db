@@ -1,4 +1,5 @@
 import { ToggleSwitch } from "flowbite-react";
+import { useTranslations } from "next-intl";
 
 interface DiscographyControlsProps {
   groupByAlbum: boolean;
@@ -22,16 +23,17 @@ export default function DiscographyControls({
   onGroupByYearChange,
   onOnlyOriginalMVChange,
 }: DiscographyControlsProps) {
+  const t = useTranslations("Discography");
   return (
     <div className="flex items-center justify-end mb-4 space-x-4">
       <ToggleSwitch
-        label="アルバムごとに表示"
+        label={t("controls.groupByAlbum")}
         checked={groupByAlbum}
         onChange={onGroupByAlbumChange}
       />
 
       <ToggleSwitch
-        label="年ごとに区切る"
+        label={t("controls.groupByYear")}
         checked={groupByYear}
         onChange={onGroupByYearChange}
       />
@@ -39,7 +41,7 @@ export default function DiscographyControls({
       {/* オリジナル楽曲タブのときのみ表示するオプション */}
       {activeTab === 0 && (
         <ToggleSwitch
-          label="オリ曲MVのみ"
+          label={t("controls.onlyOriginalMV")}
           checked={onlyOriginalMV}
           onChange={onOnlyOriginalMVChange}
         />

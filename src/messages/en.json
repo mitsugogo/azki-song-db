@@ -1,0 +1,827 @@
+{
+  "Header": {
+    "toggleNavigation": "Toggle navigation",
+    "searchPlaceholder": "Search by title, artist, tags",
+    "languageSwitcher": "Language switcher"
+  },
+  "DrawerMenu": {
+    "title": "Menu",
+    "management": "Management",
+    "playlist": "Playlist",
+    "installApp": "Install app",
+    "about": "About this site",
+    "soloLive": "Solo live!",
+    "reportIssue": "Report an issue",
+    "close": "Close",
+    "categoryActivity": "Activity",
+    "categoryShare": "Share",
+    "home": "HOME",
+    "search": "Search",
+    "discography": "Discography",
+    "activity": "Activity",
+    "anniversaries": "Anniversaries",
+    "statistics": "Statistics",
+    "allData": "All Data",
+    "myBest9Songs": "Cloud Nine"
+  },
+  "SearchInput": {
+    "search": "Search",
+    "groupArtist": "Artist",
+    "groupSinger": "Singer",
+    "groupUnit": "Unit",
+    "groupTitle": "Title",
+    "groupLyricist": "Lyricist",
+    "groupComposer": "Composer",
+    "groupArranger": "Arranger",
+    "groupTag": "Tag",
+    "groupMilestone": "Milestone",
+    "groupYear": "Year",
+    "groupSeason": "Season"
+  },
+  "ThemeToggle": {
+    "label": "Toggle theme"
+  },
+  "FoldableToggle": {
+    "on": "Foldable mode: ON",
+    "off": "Foldable mode: OFF"
+  },
+  "Watch": {
+    "searchAndSongList": {
+      "randomOtherSong": "Surprise me with another song",
+      "playlist": "Playlist",
+      "songList": "Songs",
+      "songsUnit": "songs",
+      "songsUnit_w/o_en": "",
+      "sortAscending": "Ascending",
+      "sortDescending": "Descending",
+      "search": "Search",
+      "close": "Close",
+      "createPlaylistLead": "Create a playlist and build your own set list.",
+      "createPlaylist": "Create playlist",
+      "nowPlayingPlaylist": "♪ Now playing playlist \"{name}\" ({count} songs)",
+      "selectPlaylist": "Select a playlist to play",
+      "favorites": "Favorites",
+      "copyPlaylistUrl": "Copy the URL to share this playlist",
+      "disablePlaylistMode": "Exit playlist playback mode"
+    },
+    "songMode": {
+      "all": "All Songs",
+      "original": "Originals",
+      "cover": "Covers",
+      "collaboration": "Collabs / Guest Songs",
+      "karaoke": "Karaoke",
+      "collabKaraoke": "Collab Karaoke",
+      "shorts": "Song Intro Shorts",
+      "groupMode": "Mode",
+      "groupTheme": "Theme"
+    },
+    "nowPlayingSongInfo": {
+      "views": "{count} views",
+      "collapsedViews": "{count}0K views",
+      "showMore": "Show more",
+      "collapse": "Show less",
+      "subscribers": "{count} subscribers",
+      "otherChannels": "{count} more channels",
+      "lastUpdated": "Last updated: {date}"
+    },
+    "nowPlayingSongInfoDetail": {
+      "title": "Title:",
+      "artist": "Artist:",
+      "credits": "Lyrics / Composition / Arrangement:",
+      "lyricist": "Lyrics",
+      "composer": "Composition",
+      "arranger": "Arrangement",
+      "album": "Album:",
+      "singers": "Singers:",
+      "videoTitle": "Video title:",
+      "broadcastDate": "Stream date:",
+      "tags": "Tags:",
+      "milestones": "Milestones:",
+      "setlist": "Setlist:",
+      "clickToExpand": "Click to expand",
+      "callResponse": "Call & Response:",
+      "callBadge": "C&R",
+      "callResponseHelp": "Call and response is an optional bonus for extra fun. Enjoying the live comes first, so there is no need to memorize everything.",
+      "liveNote": "Live note:",
+      "additionalInfo": "Additional info:",
+      "timesSung": "Times sung:",
+      "times": "times",
+      "videosWithSong": "Streams where this song was sung:"
+    },
+    "createPlaylistModal": {
+      "title": "Create a new playlist",
+      "name": "Playlist name",
+      "placeholder": "Enter playlist name...",
+      "duplicate": "A playlist with the same name already exists",
+      "create": "Create"
+    },
+    "playerControls": {
+      "play": "Play",
+      "pause": "Pause",
+      "nextSong": "Next song",
+      "volumeControl": "Adjust volume",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "songTitle": "Song title",
+      "artist": "Artist",
+      "enterTheaterMode": "Enter theater mode",
+      "exitTheaterMode": "Exit theater mode",
+      "settings": "Settings",
+      "spoilerFreeSetlist": "Spoiler-free setlist mode",
+      "playlistAdded": "Already in playlist",
+      "addToPlaylist": "Add to playlist",
+      "playlist": "Playlist",
+      "noPlaylists": "No playlists yet",
+      "createNewPlaylist": "Create a new playlist",
+      "menu": "Menu",
+      "removeFromFavorites": "Remove from favorites",
+      "addToFavorites": "Add to favorites",
+      "shareCurrentSong": "Share current song"
+    }
+  },
+  "Home": {
+    "brand": "AZKi VIRTUAL DiVA",
+    "heroLine1": "A Musical Odyssey:",
+    "heroLine2": "Virtual DiVA AZKi",
+    "description": "An unofficial song database collecting AZKi's original songs, collabs & covers, and setlists sung on livestreams.",
+    "searchButton": "Search",
+    "searching": "Searching...",
+    "surpriseTooltip": "Randomly start playing a song",
+    "surpriseMe": "Surprise me",
+    "recommendedLabel": "Recommended",
+    "recommendedTitle": "Recommended songs",
+    "recentUpdatesLabel": "Recent Updates",
+    "recentUpdatesTitle": "Updates",
+    "noRecentUpdates": "No recent updates",
+    "hololiveOfficial": "Hololive official",
+    "statsLoading": "Total songs: loading / Last updated: loading",
+    "stats": "Total songs: {count} songs{date}",
+    "lastUpdated": " / Last updated: {date}"
+  },
+  "Metadata": {
+    "home": {
+      "description": "A database for enjoying the songs of Virtual DiVA AZKi from hololive, including songs performed in karaoke streams, original tracks, and live setlists.",
+      "ogSubtitle": "A site dedicated to sharing the greatness of AZKi's songs",
+      "ogAlt": "{siteName} - A site dedicated to sharing the greatness of AZKi's songs"
+    },
+    "watch": {
+      "description": "A page for viewing and searching songs. Display content by title, playlist, or video ID.",
+      "ogSubtitle": "Watch page - {siteName}",
+      "ogAlt": "{siteName} - Watch page",
+      "mode": {
+        "original": {
+          "title": "Originals mode | {siteName}",
+          "ogTitle": "Originals mode",
+          "ogSubtitle": "A playlist collecting AZKi's original songs"
+        },
+        "cover": {
+          "title": "Covers mode | {siteName}",
+          "ogTitle": "Covers mode",
+          "ogSubtitle": "A playlist collecting AZKi's cover songs"
+        },
+        "collab": {
+          "title": "Collab mode | {siteName}",
+          "ogTitle": "Collab mode",
+          "ogSubtitle": "A playlist collecting AZKi's collaboration songs"
+        }
+      },
+      "search": {
+        "prefixTitle": "Search results for {term} | {siteName}",
+        "prefixOgTitle": "{icon} {term} search results",
+        "queryTitle": "Search results for \"{q}\" | {siteName}",
+        "queryOgTitle": "Search results for \"{q}\""
+      },
+      "song": {
+        "description": "{videoTitle} (Stream date: {date})",
+        "ogSubtitle": "{videoTitle} (Stream date: {date})"
+      },
+      "playlist": {
+        "title": "Playlist \"{name}\" | {siteName}",
+        "ogTitle": "📒 {name}",
+        "ogSubtitle": "A playlist containing {count} songs"
+      }
+    },
+    "discography": {
+      "title": "Discography | {siteName}",
+      "description": "A list of songs released or performed so far, including originals, covers and collaborations.",
+      "ogSubtitle": "Discography - {siteName}",
+      "ogAlt": "{siteName} - Discography"
+    },
+    "search": {
+      "description": "Search songs by title, artist, tag and more.",
+      "ogSubtitle": "Search results - {siteName}",
+      "ogAlt": "{siteName} - Search results"
+    },
+    "data": {
+      "description": "Displays information collected in the database.",
+      "ogSubtitle": "Data list - {siteName}",
+      "ogAlt": "{siteName} - Data list"
+    },
+    "share": {
+      "myBest9Title": "Cloud Nine Generator | {siteName}",
+      "myBest9TitleWithSite": "Cloud Nine Generator | {siteName}",
+      "myBest9WithTopic": "Topic: \"{title}\" | Cloud Nine Generator | {siteName}",
+      "myBest9OgTitle": "Cloud Nine Generator",
+      "myBest9OgWithTopic": "Topic: \"{title}\"",
+      "myBest9OgDescription": "Create and share your Cloud Nine selection!",
+      "myBest9Description": "Share your favorite AZKi songs"
+    },
+    "summary": {
+      "title": "Activity Summary",
+      "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.).",
+      "yearTitle": "AZKi's song activity in {year}",
+      "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals"
+    },
+    "anniversaries": {
+      "title": "Anniversaries",
+      "description": "Browse anniversaries related to AZKi's activities and songs.",
+      "ogSubtitle": "Anniversary list - {siteName}",
+      "ogAlt": "{siteName} - Anniversary list"
+    },
+    "playlist": {
+      "title": "Playlist",
+      "description": "AZKi's original and cover songs collection"
+    }
+  },
+  "Share": {
+    "share": {
+      "loading": "Loading...",
+      "notFoundTitle": "Share not found",
+      "notFoundDescription": "Failed to load share data",
+      "backToHome": "Back to home",
+      "songsCount": "{count} songs",
+      "missingCount": "({count} songs missing)",
+      "noSongsFound": "No songs found",
+      "createFromTopic": "Create Cloud Nine from this topic"
+    },
+    "copied": "Copied",
+    "index": {
+      "title": "Share",
+      "description": "Share your selection results on social media."
+    },
+    "features": {
+      "myBest9": {
+        "title": "Cloud Nine Generator",
+        "description": "Pick your favorite 9 songs from originals, covers, unit songs, and livestreams to share on social media."
+      }
+    },
+    "myBest9": {
+      "defaultTitle": "Cloud Nine AZKi Songs",
+      "unknownBroadcastDate": "Unknown stream date",
+      "pageTitle": "Cloud Nine AZKi Songs Generator",
+      "lead": "Pick up to 9 songs from originals and livestreams, then share them on social media.",
+      "selectedSongsTitle": "Selected songs",
+      "play": "Play",
+      "clickToRemove": "Click to remove",
+      "form": {
+        "titleLabel": "Title",
+        "titlePlaceholder": "e.g. Cloud Nine AZKi Songs",
+        "authorLabel": "Author (optional)",
+        "authorPlaceholder": "e.g. mitsugogo"
+      },
+      "tooltip": {
+        "copyThemeUrl": "Copy URL to request this topic",
+        "copyToClipboard": "Copy to clipboard"
+      },
+      "button": {
+        "copyThemeUrl": "Copy topic URL",
+        "copy": "Copy",
+        "shareOnX": "Share on X (Twitter)",
+        "saving": "Saving...",
+        "generated": "Share URL created",
+        "generate": "Generate share URL",
+        "reset": "Reset"
+      },
+      "selectedCount": "Selected: {count}/9",
+      "status": {
+        "selected": "Selected",
+        "unselected": "Not selected"
+      },
+      "generatedUrlTitle": "Share URL",
+      "tip": {
+        "previewHelp": "When you share the created URL, thumbnails of the 9 songs appear in the preview."
+      },
+      "selectSongsTitle": "Select songs ({count}/9)",
+      "filters": {
+        "all": "All",
+        "original": "Originals",
+        "cover": "Covers",
+        "unitGuest": "Unit / Guest",
+        "liveSinging": "Livestreams",
+        "collaboration": "Collabs"
+      },
+      "search": {
+        "placeholder": "Search by title, artist, etc."
+      },
+      "displaying": "Displaying: {count} songs",
+      "totalSuffix": "songs",
+      "alerts": {
+        "titleRequired": "Please enter a title",
+        "selectAtLeastOne": "Please select at least one song",
+        "saveFailed": "Failed to save shared data"
+      }
+    }
+  },
+  "Playlist": {
+    "title": "Playlist",
+    "manageTitle": "Manage playlists",
+    "favoritesName": "Favorites",
+    "aria": {
+      "selectPlaylist": "Select playlist",
+      "selectRow": "Select row"
+    },
+    "createNew": "Create new playlist",
+    "deleteSelected": "Delete selected playlists",
+    "confirmDelete": "Delete {count} selected playlists. Are you sure?",
+    "songsLabel": "Songs:",
+    "updatedLabel": "Updated:",
+    "copyUrl": "Copy share URL",
+    "copied": "Copied",
+    "head": {
+      "play": "Play",
+      "index": "#",
+      "name": "Playlist name",
+      "songs": "Songs",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "shareUrl": "Share URL"
+    },
+    "deletedTitle": "Playlist deleted",
+    "urlCopiedTitle": "Share URL copied",
+    "detail": {
+      "notFound": "Playlist with this ID was not found",
+      "deleteSelectedSongs": "Delete selected songs",
+      "clearAllSongs": "Delete all songs in playlist",
+      "preview": "Preview",
+      "youtube": "YouTube",
+      "streamed": "Streamed",
+      "header": "Playlist #{id}: {name}",
+      "breadcrumbTitle": "#{id} ({name})",
+      "table": {
+        "sort": "Sort",
+        "selectAll": "Select/Deselect all rows",
+        "trackArtist": "Track / Artist",
+        "video": "Video",
+        "empty": "No songs in the playlist"
+      }
+    }
+  },
+  "SearchBrowse": {
+    "title": "Search",
+    "summary": "Search songs. Collected {countSongs} songs across {countVideos} videos.",
+    "seeMore": "» See more",
+    "noResults": "No matching songs",
+    "filters": {
+      "category": "Category",
+      "title": "Title",
+      "artist": "Artist",
+      "tag": "Tag",
+      "singer": "Singer",
+      "collab": "Collab / Unit",
+      "notSungForYear": "Not sung for over a year"
+    },
+    "timesSuffix": " times",
+    "songsSuffix": " songs",
+    "lastSungLabel": "Last sung:"
+  },
+  "suffixes": {
+    "times": " times",
+    "songs": " songs"
+  },
+  "FilterExtra": {
+    "lastSungLabel": "Last sung:"
+  },
+  "SearchResults": {
+    "labelWithQuery": "Search results for \"{term}\"",
+    "title": "Search results",
+    "foundCount": "{count} songs found"
+  },
+  "Discography": {
+    "entryDescription": "{title} - {artist} song information",
+    "homeLabel": "HOME",
+    "breadcrumb": "Discography",
+    "title": "Discography",
+    "description": "A list of songs released so far, including originals, collaborations, covers, and livestream setlists.",
+    "tabs": {
+      "all": "All ({count})",
+      "originals": "Original songs ({count})",
+      "unit": "Unit / guest songs ({count})",
+      "covers": "Covers ({count})"
+    },
+    "originalsLabel": "Original songs",
+    "unitLabel": "Unit / guest songs",
+    "coversLabel": "Covers",
+    "songsSuffix": " songs",
+    "viewsSuffix": " views",
+    "controls": {
+      "groupByAlbum": "Group by album",
+      "groupByYear": "Group by year",
+      "onlyOriginalMV": "Original MVs only"
+    },
+    "tabDescriptions": {
+      "originals": "A list of original songs.",
+      "unit": "A list of unit / guest songs.",
+      "covers": "A list of cover songs."
+    },
+    "yearHeader": "{year} ({count} songs)",
+    "unknownYear": "Unknown",
+    "table": {
+      "songName": "Title",
+      "artist": "Artist",
+      "lyricist": "Lyricist",
+      "composer": "Composer",
+      "arranger": "Arranger",
+      "videoDate": "Published",
+      "buttons": {
+        "play": "play",
+        "share": "share",
+        "watchOnYouTube": "Watch on YouTube"
+      },
+      "notFoundDescription": "The specified song does not exist.",
+      "notFoundTitle": "No songs found",
+      "relatedStreamsTitle": "Singing frame for this song ({count})",
+      "relatedVideos": "Related videos",
+      "thumbnailClickTitle": "Click to enlarge"
+    },
+    "buttons": {
+      "watchOnYouTube": "Watch on YouTube",
+      "viewInDatabase": "View in database",
+      "play": "Play",
+      "share": "Share"
+    },
+    "badge": {
+      "thisCombination": "This combination"
+    },
+    "labels": {
+      "publishedDate": "Published date:",
+      "releaseDate": "Release date:",
+      "cover": "Cover:"
+    },
+    "relatedStreamsTitle": "Streams that sang this song ({count})",
+    "tracksCount": "Tracks: {count}",
+    "stats": {
+      "title": "Statistics",
+      "updatedNote": "Updated daily around 0:00–1:00 JST",
+      "periods": {
+        "7d": "7d",
+        "30d": "30d",
+        "365d": "365d",
+        "all": "All"
+      },
+      "yesterdayDiffLabel": "Daily change",
+      "yesterdayPctLabel": "Daily %",
+      "yesterdayPctNone": "Daily %: —",
+      "yesterdayDiffNone": "Daily change: —",
+      "milestoneReached": "{label}",
+      "startFromZeroLabel": "Start from zero: {state}",
+      "stateOn": "ON",
+      "stateOff": "OFF",
+      "metrics": {
+        "viewCount": "Views",
+        "likeCount": "Likes",
+        "commentCount": "Comments"
+      },
+      "achievedOnLabel": "Achieved on"
+    },
+    "notFoundTitle": "Song not found",
+    "notFoundDescription": "The specified song does not exist.",
+    "thumbnailClickTitle": "Click to enlarge",
+    "relatedVideos": "Related videos",
+    "covers": "cover songs ({count])"
+  },
+  "DiscographyAlbum": {
+    "notFoundTitle": "Album not found | {site}",
+    "notFoundDescription": "The specified album does not exist.",
+    "descriptionPattern": "Showing {count} tracks from {album}."
+  },
+  "Data": {
+    "homeLabel": "HOME",
+    "breadcrumb": "Recorded Data",
+    "title": "List of Recorded Data",
+    "description": "Displays information from this database.",
+    "searchPlaceholder": "Search...",
+    "table": {
+      "index": "#",
+      "play": "Play",
+      "title": "Title",
+      "artist": "Artist",
+      "lyricist": "Lyricist",
+      "composer": "Composer",
+      "arranger": "Arranger",
+      "sing": "Performed by",
+      "album": "Album",
+      "album_list_uri": "Album list URI",
+      "link": "Link",
+      "album_release_at": "Album release date",
+      "album_is_compilation": "Compilation",
+      "video_title": "Video title",
+      "start": "Start timestamp",
+      "end": "End timestamp",
+      "tags": "Tags",
+      "broadcast_at": "Published date",
+      "milestones": "Milestones",
+      "year": "Year",
+      "view_count": "View count"
+    }
+  },
+  "Anniversaries": {
+    "homeLabel": "HOME",
+    "breadcrumb": "Anniversaries",
+    "title": "Anniversaries",
+    "description": "A list of anniversaries related to AZKi.",
+    "featuredTitle": "Closest Anniversary",
+    "countdownFormat": "remains: {days}d {hours}h {minutes}m {seconds}s",
+    "countdownFinished": "Any moment now",
+    "loading": "Loading anniversaries...",
+    "empty": "No anniversaries to display.",
+    "nextDateLabel": "Next",
+    "daysUntil": "In {days} days",
+    "daysUntilLabel": "In",
+    "anniversaryNameLabel": "Anniversary",
+    "firstDateLabel": "First",
+    "noteLabel": "Note",
+    "linkLabel": "Link",
+    "openLink": "Open link"
+  },
+  "Statistics": {
+    "title": "Statistics",
+    "selectTabAriaLabel": "Select statistics tab",
+    "backToTopAriaLabel": "Back to top",
+    "units": {
+      "times": "times",
+      "songs": "songs"
+    },
+    "page": {
+      "title": "Statistics",
+      "description": "A summary of AZKi's karaoke setlists, original songs, and cover songs.",
+      "home": "Home"
+    },
+    "overview": {
+      "latestUpdated": "Latest update",
+      "achievedInLast7Days": "Achieved in last 7 days",
+      "estimatedAchievement": "Estimated achievement",
+      "none": "None",
+      "openThumbnailOnYoutube": "Open thumbnail of {title} on YouTube",
+      "milestoneLabelJa": "{count}x10k views reached",
+      "milestoneLabel": "{count} views reached",
+      "songCounts": {
+        "primaryLabel": "Song types",
+        "totalCountLabel": "Total sing count",
+        "topLabel": "Most sung song",
+        "countUnit": "times"
+      },
+      "artistCounts": {
+        "primaryLabel": "Artists",
+        "totalCountLabel": "Total sing count",
+        "topLabel": "Most sung artist",
+        "countUnit": "times"
+      },
+      "originalSongCounts": {
+        "primaryLabel": "Original songs",
+        "totalCountLabel": "Total sing count",
+        "topLabel": "Most sung original",
+        "countUnit": "times"
+      },
+      "tagCounts": {
+        "primaryLabel": "Tags",
+        "totalCountLabel": "Total records",
+        "topLabel": "Most used tag",
+        "countUnit": "items"
+      },
+      "milestoneCounts": {
+        "primaryLabel": "Milestones",
+        "totalCountLabel": "Total appearances",
+        "topLabel": "Latest milestone",
+        "countUnit": "times"
+      },
+      "videoCounts": {
+        "primaryLabel": "Videos",
+        "totalCountLabel": "Total sing count",
+        "topLabel": "Top video",
+        "countUnit": "times"
+      },
+      "originalSongCountsByReleaseDate": {
+        "primaryLabel": "Recorded songs",
+        "totalCountLabel": "Total sing count",
+        "countUnit": "times"
+      },
+      "coverSongCountsByReleaseDate": {
+        "primaryLabel": "Recorded songs",
+        "totalCountLabel": "Total sing count",
+        "countUnit": "times"
+      },
+      "default": {
+        "primaryLabel": "Items",
+        "totalCountLabel": "Total",
+        "topLabel": "Top item",
+        "countUnit": "times"
+      }
+    },
+    "table": {
+      "searchPlaceholder": "Search...",
+      "noResultsWithQuery": "No results found for \"{query}\".",
+      "noData": "No data available."
+    },
+    "columns": {
+      "songName": "Song",
+      "artistName": "Artist name",
+      "artist": "Artist",
+      "count": "Count",
+      "latest": "Latest",
+      "tag": "Tag",
+      "recordedCount": "Records",
+      "milestone": "Milestone",
+      "achievedDate": "Achieved date",
+      "video": "Video",
+      "songCount": "Songs",
+      "broadcastDate": "Broadcast date",
+      "detail": "Detail",
+      "viewCount": "Views",
+      "viewCountLabel": "View milestone",
+      "releaseOrPremiereDate": "Release / premiere date",
+      "singers": "Singers"
+    },
+    "tabs": {
+      "songCounts": {
+        "title": "By song",
+        "caption": "By song",
+        "description": "How many times each song was sung"
+      },
+      "artistCounts": {
+        "title": "By artist",
+        "caption": "By artist",
+        "description": "How many times each artist was sung"
+      },
+      "originalSongCounts": {
+        "title": "Originals (count)",
+        "caption": "Originals (count)",
+        "description": "Number of times original songs were sung"
+      },
+      "tagCounts": {
+        "title": "Tags",
+        "caption": "Tags",
+        "description": "Videos with each tag"
+      },
+      "milestoneCounts": {
+        "title": "Milestones",
+        "caption": "Milestones",
+        "description": "Streams that marked major milestones"
+      },
+      "videoCounts": {
+        "title": "Recorded videos",
+        "caption": "Recorded videos",
+        "description": "Videos currently recorded in the database"
+      },
+      "originalByRelease": {
+        "title": "Originals",
+        "caption": "Originals",
+        "description": "Release date or first premiere date of original songs. Duplicates may exist for MV and art track entries of the same song."
+      },
+      "coverByRelease": {
+        "title": "Cover songs",
+        "caption": "Cover songs",
+        "description": "Release date or first premiere date of cover songs"
+      }
+    },
+    "renderers": {
+      "lastVideoCell": {
+        "none": "None",
+        "youtube": "YouTube",
+        "play": "Play"
+      },
+      "viewCountCell": {
+        "remaining": "{count} views to go",
+        "estimatedAt": "Estimated: {date}",
+        "achievedAt": "Achieved: {date}",
+        "milestoneJa": "{count}x10k views reached",
+        "milestone": "{count} views reached"
+      }
+    }
+  },
+  "Footer": {
+    "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
+  },
+  "Summary": {
+    "timelineTitle": "Timeline",
+    "yearSuffix": "",
+    "monthSuffix": " months",
+    "daySuffix": " days",
+    "songsSuffix": " songs",
+    "daysActiveLabel": "Days active:",
+    "daysSuffix": " days",
+    "homeLabel": "HOME",
+    "page": {
+      "title": "Activity Summary",
+      "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.). Click a year for details.",
+      "activityDays": "Days active: {days} (since 2018/11/15 — {duration})"
+    },
+    "duration": "{years} years {months} months {days} days",
+    "yearCards": {
+      "recordedSongsLabel": "Recorded songs",
+      "sungInStreamsLabel": "Songs sung in streams",
+      "guestSongsLabel": "Guest appearances",
+      "originalSongsLabel": "Original songs",
+      "coversLabel": "Covers"
+    },
+    "milestonesTitle": "Milestones",
+    "frequentSongsTitle": "Most sung in streams",
+    "frequentArtistsTitle": "Top artists in streams",
+    "collabCountsTitle": "Frequent collaborators",
+    "monthsTitle": "Monthly song counts",
+    "monthOfYearSuffix": "",
+    "originalAndCoverMV": "Original & cover MVs",
+    "originalLabel": "Originals",
+    "coverLabel": "Covers",
+    "collaborativeLabel": "Collabs / duets / guest ({count})",
+    "videosTitle": "Videos in {year}",
+    "viewModeTile": "Tile",
+    "viewModeList": "List",
+    "searchPlaceholder": "Enter search term",
+    "clearButtonLabel": "Clear",
+    "noData": "No data",
+    "routes": {
+      "alpha": "Route α",
+      "beta": "Route β",
+      "gamma": "Route γ",
+      "new": "New route"
+    },
+    "visuals": {
+      "first": "1st costume",
+      "second": "2nd costume",
+      "third": "3rd costume",
+      "fourth": "4th costume"
+    }
+  },
+  "Acknowledgment": {
+    "intro": {
+      "p1": "This site is an unofficial fan site maintained by volunteers.",
+      "p2": "It was created to help more people discover the wonderful singing voice of AZKi from Hololive.",
+      "p3": "If you find songs or videos you like, please share them on social media and support AZKi's activities!"
+    },
+    "video": {
+      "heading": "About videos",
+      "p1": "Videos and archives are produced and distributed by Hololive Production, AZKi, and the respective channel owners.",
+      "p2": "Rights to videos belong to their owners. If a creator makes a video private, it may no longer be viewable.",
+      "p3": "This site lists official videos that are publicly available, not third-party clips or highlights."
+    },
+    "aggregation": {
+      "heading": "About aggregation",
+      "p1": "The aggregation covers AZKi singing videos that are publicly available on YouTube, including karaoke streams, Anniversary Lives, live broadcasts, music videos, covers, MVs, and guest appearances.",
+      "p2": "Some streams (e.g. Hololive Generation 0 Anniversary Live) may include parts where AZKi did not sing.",
+      "p3": "Membership-only, private, or paid distribution videos that are not widely viewable are excluded.",
+      "p4": "Aggregation is done manually, so there may be delays, errors, or inconsistencies.",
+      "contact": {
+        "prefix": "If you notice missing or incorrect information, please contact",
+        "and": "or",
+        "github": "GitHub",
+        "suffix": "."
+      }
+    },
+    "icon": {
+      "heading": "About the icon",
+      "p1": {
+        "prefix": "The icon is provided by",
+        "linkText": "わいす / Ys (@YsWeissYs)",
+        "suffix": "."
+      },
+      "p2": "The source code is MIT LICENSE, but the icon is not covered by that license."
+    },
+    "changelog": {
+      "heading": "Changelog",
+      "linkText": "CHANGELOG",
+      "suffix": "for details"
+    },
+    "admin": {
+      "heading": "Administrator",
+      "github": "GitHub",
+      "twitter": "(@mitsugogo)"
+    },
+    "license": {
+      "heading": "License",
+      "p1": {
+        "prefix": "MIT",
+        "linkText": "LICENSE"
+      }
+    }
+  },
+  "myBest9": {
+    "unknownBroadcastDate": "Delivery date unknown"
+  },
+  "SearchPage": {
+    "originalSongs": "Original Songs",
+    "coverSongs": "Covers",
+    "coverCollab": "Covers (Collab)",
+    "karaoke": "Karaoke Streams",
+    "anniversaryLive": "Anniversary Live",
+    "guestAppearance": "Guest Appearances",
+    "ballad": "Ballads",
+    "acoustic": "Acoustic / Live Performance"
+  },
+  "ShareModal": {
+    "title": "Share",
+    "description": "Share AZKi's beautiful singing voice!",
+    "youtubeUrl": "YouTube URL",
+    "copied": "Copied",
+    "close": "Close"
+  }
+}

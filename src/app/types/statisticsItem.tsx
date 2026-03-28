@@ -7,5 +7,7 @@ export interface StatisticsItem {
   song: Song;
   firstVideo: Song;
   lastVideo: Song;
+  effectiveViewCount?: number;
+  statVideoId?: string;
   viewMilestone?: ViewMilestoneInfo | null;
 }

@@ -1,9 +1,10 @@
 /* eslint @typescript-eslint/no-explicit-any: off */
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "flowbite-react";
 import { HiMusicNote, HiUserCircle, HiPlay, HiTag } from "react-icons/hi";
 import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
 import { ColumnDef } from "@tanstack/react-table";
+import { formatDate } from "../lib/formatDate";
 
 import {
   isCollaborationSong,
@@ -17,7 +18,7 @@ import {
 } from "../lib/statisticsRenderers";
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
-import { FC, SVGProps } from "react";
+import { FC, SVGProps, use } from "react";
 
 type TabConfig = {
   title: string;
@@ -31,6 +32,8 @@ type TabConfig = {
   minWidth?: number | string;
   columns: ColumnDef<StatisticsItem, any>[];
 };
+
+type Translate = (key: string) => string;
 
 const getDiscographyLink = (song: Song) => {
   if (!song?.slugv2) return null;
@@ -47,20 +50,20 @@ const getDiscographyLink = (song: Song) => {
   return null;
 };
 
-export const TABS_CONFIG: TabConfig[] = [
+export const getTabsConfig = (t: Translate): TabConfig[] => [
   // 1. 曲名別
   {
-    title: "曲名別",
+    title: t("tabs.songCounts.title"),
     icon: HiMusicNote,
     dataKey: "songCounts",
-    caption: "曲名別",
-    description: "曲名ごとで歌った回数です",
+    caption: t("tabs.songCounts.caption"),
+    description: t("tabs.songCounts.description"),
     initialSort: { id: "count", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
-        header: "曲名",
+        header: t("columns.songName"),
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
@@ -71,11 +74,11 @@ export const TABS_CONFIG: TabConfig[] = [
         ),
         size: 300,
       },
-      { accessorKey: "song.artist", header: "アーティスト名" },
-      { accessorKey: "count", header: "回数" },
+      { accessorKey: "song.artist", header: t("columns.artistName") },
+      { accessorKey: "count", header: t("columns.count") },
       {
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         minSize: 800,
       },
@@ -83,17 +86,17 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 2. アーティスト名別
   {
-    title: "アーティスト名別",
+    title: t("tabs.artistCounts.title"),
     icon: HiUserCircle,
     dataKey: "artistCounts",
-    caption: "アーティスト名別",
-    description: "アーティストごとで歌った回数です",
+    caption: t("tabs.artistCounts.caption"),
+    description: t("tabs.artistCounts.description"),
     initialSort: { id: "count", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
-        header: "アーティスト名",
+        header: t("columns.artistName"),
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
@@ -104,10 +107,10 @@ export const TABS_CONFIG: TabConfig[] = [
         ),
         size: 300,
       },
-      { accessorKey: "count", header: "回数" },
+      { accessorKey: "count", header: t("columns.count") },
       {
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
@@ -115,17 +118,17 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 3. オリ曲 (回数)
   {
-    title: "オリ曲（回数）",
+    title: t("tabs.originalSongCounts.title"),
     icon: HiPlay,
     dataKey: "originalSongCounts",
-    caption: "オリ曲（回数）",
-    description: "オリジナル楽曲の歌った回数です",
+    caption: t("tabs.originalSongCounts.caption"),
+    description: t("tabs.originalSongCounts.description"),
     initialSort: { id: "count", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
-        header: "曲名",
+        header: t("columns.songName"),
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
@@ -136,11 +139,11 @@ export const TABS_CONFIG: TabConfig[] = [
         ),
         size: 300,
       },
-      { accessorKey: "count", header: "回数" },
+      { accessorKey: "count", header: t("columns.count") },
       {
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
@@ -148,17 +151,17 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 4. タグ
   {
-    title: "タグ",
+    title: t("tabs.tagCounts.title"),
     icon: HiTag,
     dataKey: "tagCounts",
-    caption: "タグ",
-    description: "タグがつけられている動画です",
+    caption: t("tabs.tagCounts.caption"),
+    description: t("tabs.tagCounts.description"),
     initialSort: { id: "count", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
-        header: "タグ",
+        header: t("columns.tag"),
         cell: (info) => (
           <Link
             href={`/?q=tag:${info.getValue<string>()}`}
@@ -173,12 +176,12 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "count",
-        header: "収録数",
+        header: t("columns.recordedCount"),
         cell: (info) => info.getValue().toLocaleString(),
       },
       {
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
@@ -186,17 +189,17 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 5. マイルストーン
   {
-    title: "マイルストーン",
+    title: t("tabs.milestoneCounts.title"),
     icon: FaStar,
     dataKey: "milestoneCounts",
-    caption: "マイルストーン",
-    description: "活動の節目となった配信",
+    caption: t("tabs.milestoneCounts.caption"),
+    description: t("tabs.milestoneCounts.description"),
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         accessorKey: "key",
-        header: "マイルストーン",
+        header: t("columns.milestone"),
         cell: (info) => (
           <Link
             href={`/?q=milestone:${info.getValue<string>()}`}
@@ -212,14 +215,13 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         id: "broadcast_at",
         accessorKey: "lastVideo.broadcast_at",
-        header: "達成日",
+        header: t("columns.achievedDate"),
         cell: (info) =>
-          info.getValue<string>() &&
-          new Date(info.getValue<string>()).toLocaleDateString(),
+          info.getValue<string>() && formatDate(info.getValue<string>()),
       },
       {
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 800,
       },
@@ -227,18 +229,18 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 6. 収録動画
   {
-    title: "収録動画",
+    title: t("tabs.videoCounts.title"),
     icon: FaYoutube,
     dataKey: "videoCounts",
-    caption: "収録動画",
-    description: "現在データベースに収録されている動画一覧です",
+    caption: t("tabs.videoCounts.caption"),
+    description: t("tabs.videoCounts.description"),
     initialSort: { id: "lastVideo.broadcast_at", direction: "desc" },
     minWidth: 1024,
     columns: [
       {
         id: "lastVideo.video_title",
         accessorKey: "lastVideo",
-        header: "動画",
+        header: t("columns.video"),
         sortingFn: (rowA, rowB) => {
           const a = rowA.original.lastVideo?.video_title || "";
           const b = rowB.original.lastVideo?.video_title || "";
@@ -250,34 +252,32 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "count",
-        header: "曲数",
+        header: t("columns.songCount"),
         cell: (info) => info.getValue<number>(),
       },
       {
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo.broadcast_at",
-        header: "配信日",
+        header: t("columns.broadcastDate"),
         cell: (info) =>
-          info.getValue<string>() &&
-          new Date(info.getValue<string>()).toLocaleDateString(),
+          info.getValue<string>() && formatDate(info.getValue<string>()),
         size: 800,
       },
     ],
   },
   // 7. オリ曲 (リリース日)
   {
-    title: "オリ曲",
+    title: t("tabs.originalByRelease.title"),
     icon: FaCompactDisc,
     dataKey: "originalSongCountsByReleaseDate",
-    caption: "オリ曲",
-    description:
-      "オリジナル楽曲のリリース日 または 動画初公開日 です。MVとアートトラックを収録しているため、同一曲でも重複があります。",
+    caption: t("tabs.originalByRelease.caption"),
+    description: t("tabs.originalByRelease.description"),
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1700,
     columns: [
       {
         id: "discographyLink",
-        header: "詳細",
+        header: t("columns.detail"),
         enableSorting: false,
         cell: (info) => {
           const href = getDiscographyLink(info.row.original.song);
@@ -288,7 +288,7 @@ export const TABS_CONFIG: TabConfig[] = [
               href={href}
               className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
             >
-              詳細
+              {t("columns.detail")}
             </Link>
           );
         },
@@ -296,7 +296,7 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "song.title",
-        header: "曲名",
+        header: t("columns.songName"),
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
@@ -309,7 +309,7 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "song.artist",
-        header: "アーティスト",
+        header: t("columns.artist"),
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
@@ -323,22 +323,19 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         id: "viewCount",
         accessorKey: "song.view_count",
-        accessorFn: (row) => row.song?.view_count ?? 0,
-        header: "再生回数",
+        accessorFn: (row) =>
+          row.effectiveViewCount ?? row.song?.view_count ?? 0,
+        header: t("columns.viewCount"),
         cell: (info) => {
-          return info.getValue<string>() ? (
-            Number(info.getValue<string>()).toLocaleString()
-          ) : (
-            <div className="animate-pulse h-3 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-          );
+          const value = Number(info.getValue<number>() ?? 0);
+          return value > 0 ? value.toLocaleString() : "-";
         },
       },
       {
         id: "viewCountLbl",
-        accessorFn: (row) => {
-          return row.song?.view_count ?? 0;
-        },
-        header: "再生回数ラベル",
+        accessorFn: (row) =>
+          row.effectiveViewCount ?? row.song?.view_count ?? 0,
+        header: t("columns.viewCountLabel"),
         cell: (info) =>
           renderViewCountCell(
             info.getValue<number>(),
@@ -350,13 +347,13 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         id: "broadcast_at",
         accessorKey: "firstVideo.broadcast_at",
-        header: "リリース日/初公開日",
-        cell: (info) => new Date(info.getValue<number>()).toLocaleDateString(),
+        header: t("columns.releaseOrPremiereDate"),
+        cell: (info) => formatDate(info.getValue<number>()),
       },
       {
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 600,
       },
@@ -364,17 +361,17 @@ export const TABS_CONFIG: TabConfig[] = [
   },
   // 8. カバー楽曲
   {
-    title: "カバー楽曲",
+    title: t("tabs.coverByRelease.title"),
     icon: HiMusicNote,
     dataKey: "coverSongCountsByReleaseDate",
-    caption: "カバー楽曲",
-    description: "カバー楽曲のリリース日 または 動画初公開日 です",
+    caption: t("tabs.coverByRelease.caption"),
+    description: t("tabs.coverByRelease.description"),
     initialSort: { id: "broadcast_at", direction: "desc" },
     minWidth: 1700,
     columns: [
       {
         id: "discographyLink",
-        header: "詳細",
+        header: t("columns.detail"),
         enableSorting: false,
         cell: (info) => {
           const href = getDiscographyLink(info.row.original.song);
@@ -385,7 +382,7 @@ export const TABS_CONFIG: TabConfig[] = [
               href={href}
               className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
             >
-              詳細
+              {t("columns.detail")}
             </Link>
           );
         },
@@ -393,7 +390,7 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "song.title",
-        header: "曲名",
+        header: t("columns.songName"),
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
@@ -406,7 +403,7 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "song.artist",
-        header: "アーティスト",
+        header: t("columns.artist"),
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
@@ -419,25 +416,25 @@ export const TABS_CONFIG: TabConfig[] = [
       },
       {
         accessorKey: "song.sing",
-        header: "歌った人",
+        header: t("columns.singers"),
         cell: (info) => info.getValue<string>(),
       },
       {
         id: "viewCount",
         accessorKey: "song.view_count",
-        accessorFn: (row) => row.song?.view_count ?? 0,
-        header: "再生回数",
+        accessorFn: (row) =>
+          row.effectiveViewCount ?? row.song?.view_count ?? 0,
+        header: t("columns.viewCount"),
         cell: (info) =>
-          info.getValue<string>() ? (
-            Number(info.getValue<string>()).toLocaleString()
-          ) : (
-            <div className="animate-pulse h-3 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-          ),
+          Number(info.getValue<number>() ?? 0) > 0
+            ? Number(info.getValue<number>()).toLocaleString()
+            : "-",
       },
       {
         id: "viewCountLbl",
-        accessorFn: (row) => row.song?.view_count ?? 0,
-        header: "再生回数ラベル",
+        accessorFn: (row) =>
+          row.effectiveViewCount ?? row.song?.view_count ?? 0,
+        header: t("columns.viewCountLabel"),
         cell: (info) =>
           renderViewCountCell(
             info.getValue<number>(),
@@ -449,13 +446,13 @@ export const TABS_CONFIG: TabConfig[] = [
       {
         id: "broadcast_at",
         accessorKey: "firstVideo.broadcast_at",
-        header: "リリース日/初公開日",
-        cell: (info) => new Date(info.getValue<number>()).toLocaleDateString(),
+        header: t("columns.releaseOrPremiereDate"),
+        cell: (info) => formatDate(info.getValue<number>()),
       },
       {
         id: "lastVideo.broadcast_at",
         accessorKey: "lastVideo",
-        header: "最新",
+        header: t("columns.latest"),
         cell: (info) => renderLastVideoCell(info.getValue<Song>()),
         size: 500,
       },

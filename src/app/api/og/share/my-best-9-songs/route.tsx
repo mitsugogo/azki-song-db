@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
   try {
     const requestUrl = new URL(req.url);
     const { searchParams } = requestUrl;
+    const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const origin = requestUrl.origin;
     const id = searchParams.get("id");
 
@@ -105,7 +106,9 @@ export async function GET(req: NextRequest) {
     }
 
     // 曲データを取得
-    const songs = await fetch(`${origin}/api/songs`)
+    const songs = await fetch(
+      `${origin}/api/songs?hl=${encodeURIComponent(hl)}`,
+    )
       .then((res) => res.json())
       .catch(() => []);
 

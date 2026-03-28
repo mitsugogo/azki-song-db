@@ -42,7 +42,7 @@ describe("usePlayerControls", () => {
   const mockSongs: Song[] = [
     {
       video_id: "vid1",
-      start: "0",
+      start: 0,
       end: "",
       title: "Song 1",
       artist: "Artist 1",
@@ -60,10 +60,21 @@ describe("usePlayerControls", () => {
       lyricist: "",
       composer: "",
       arranger: "",
+      hl: {
+        ja: {
+          title: "",
+          artist: "",
+          album: undefined,
+          sing: undefined,
+          sings: undefined,
+        },
+        en: undefined,
+      },
+      sings: [],
     },
     {
       video_id: "vid2",
-      start: "10",
+      start: 10,
       end: "",
       title: "Song 2",
       artist: "Artist 2",
@@ -81,10 +92,21 @@ describe("usePlayerControls", () => {
       lyricist: "",
       composer: "",
       arranger: "",
+      hl: {
+        ja: {
+          title: "",
+          artist: "",
+          album: undefined,
+          sing: undefined,
+          sings: undefined,
+        },
+        en: undefined,
+      },
+      sings: [],
     },
     {
       video_id: "vid3",
-      start: "20",
+      start: 20,
       end: "",
       title: "Song 3",
       artist: "Artist 3",
@@ -102,6 +124,17 @@ describe("usePlayerControls", () => {
       lyricist: "",
       composer: "",
       arranger: "",
+      hl: {
+        ja: {
+          title: "",
+          artist: "",
+          album: undefined,
+          sing: undefined,
+          sings: undefined,
+        },
+        en: undefined,
+      },
+      sings: [],
     },
   ];
 
@@ -112,6 +145,8 @@ describe("usePlayerControls", () => {
     vi.clearAllMocks();
     localStorage.clear();
     mockGlobalPlayer = createMockGlobalPlayer();
+    // document.title をテスト毎に初期化（前のテストの副作用を防ぐ）
+    document.title = siteConfig.siteName;
     // window.locationを簡易モック
     originalLocation = window.location;
     delete (window as any).location;
@@ -157,9 +192,9 @@ describe("usePlayerControls", () => {
   it("songがnullでvideoIdとstartTimeが与えられた場合、該当する曲を選ぶ", () => {
     const allSongs: Song[] = [
       { ...mockSongs[0] },
-      { ...mockSongs[1], video_id: "vidX", start: "0" },
-      { ...mockSongs[2], video_id: "vidX", start: "10" },
-      { ...mockSongs[0], video_id: "vidX", start: "20" },
+      { ...mockSongs[1], video_id: "vidX", start: 0 },
+      { ...mockSongs[2], video_id: "vidX", start: 10 },
+      { ...mockSongs[0], video_id: "vidX", start: 20 },
     ];
 
     const { result } = renderHook(() =>
@@ -173,7 +208,7 @@ describe("usePlayerControls", () => {
 
     expect(result.current.currentSong).toBeTruthy();
     expect(result.current.currentSong?.video_id).toBe("vidX");
-    expect(parseInt(result.current.currentSong!.start)).toBeLessThanOrEqual(15);
+    expect(Number(result.current.currentSong!.start)).toBeLessThanOrEqual(15);
   });
 
   it("nullだけ渡すと何もしない", () => {
@@ -369,9 +404,9 @@ describe("usePlayerControls", () => {
       result.current.changeCurrentSong(mockSongs[0]);
     });
 
-    // currentSongInfoはあるがisPlayingがfalseの場合
+    // currentSong 設定によりタイトルが更新される
     rerender();
-    expect(document.title).toBe(siteConfig.siteName);
+    expect(document.title).toBe("Song 1 / Artist 1 | " + siteConfig.siteName);
   });
 
   it("videoIdが変わるとvideoIdRefが更新される", () => {
@@ -395,7 +430,7 @@ describe("usePlayerControls", () => {
   it("videoIdとstartTimeを直接指定して再生できる", () => {
     const allSongs: Song[] = [
       ...mockSongs,
-      { ...mockSongs[0], video_id: "directVid", start: "100" },
+      { ...mockSongs[0], video_id: "directVid", start: 100 },
     ];
 
     const { result } = renderHook(() =>
@@ -445,7 +480,7 @@ describe("usePlayerControls", () => {
     const sameVideoSongs: Song[] = [
       {
         video_id: "sameVid",
-        start: "0",
+        start: 0,
         end: "",
         title: "Song A",
         artist: "Artist A",
@@ -463,10 +498,21 @@ describe("usePlayerControls", () => {
         lyricist: "",
         composer: "",
         arranger: "",
+        hl: {
+          ja: {
+            title: "",
+            artist: "",
+            album: undefined,
+            sing: undefined,
+            sings: undefined,
+          },
+          en: undefined,
+        },
+        sings: [],
       },
       {
         video_id: "sameVid",
-        start: "100",
+        start: 100,
         end: "",
         title: "Song B",
         artist: "Artist B",
@@ -484,10 +530,21 @@ describe("usePlayerControls", () => {
         lyricist: "",
         composer: "",
         arranger: "",
+        hl: {
+          ja: {
+            title: "",
+            artist: "",
+            album: undefined,
+            sing: undefined,
+            sings: undefined,
+          },
+          en: undefined,
+        },
+        sings: [],
       },
       {
         video_id: "sameVid",
-        start: "200",
+        start: 200,
         end: "",
         title: "Song C",
         artist: "Artist C",
@@ -505,6 +562,17 @@ describe("usePlayerControls", () => {
         lyricist: "",
         composer: "",
         arranger: "",
+        hl: {
+          ja: {
+            title: "",
+            artist: "",
+            album: undefined,
+            sing: undefined,
+            sings: undefined,
+          },
+          en: undefined,
+        },
+        sings: [],
       },
     ];
 
@@ -630,7 +698,7 @@ describe("usePlayerControls", () => {
         ...sameVideoSongs,
         {
           video_id: "differentVid",
-          start: "50",
+          start: 50,
           end: "",
           title: "Song D",
           artist: "Artist D",
@@ -648,6 +716,17 @@ describe("usePlayerControls", () => {
           lyricist: "",
           composer: "",
           arranger: "",
+          hl: {
+            ja: {
+              title: "",
+              artist: "",
+              album: undefined,
+              sing: undefined,
+              sings: undefined,
+            },
+            en: undefined,
+          },
+          sings: [],
         },
       ];
 
@@ -683,8 +762,8 @@ describe("usePlayerControls", () => {
       const videoSongs: Song[] = [
         {
           video_id: "vidSeq",
-          start: "30",
-          end: "90",
+          start: 30,
+          end: 90,
           title: "Segment 1",
           artist: "Artist S",
           album: "",
@@ -701,11 +780,22 @@ describe("usePlayerControls", () => {
           lyricist: "",
           composer: "",
           arranger: "",
+          hl: {
+            ja: {
+              title: "",
+              artist: "",
+              album: undefined,
+              sing: undefined,
+              sings: undefined,
+            },
+            en: undefined,
+          },
+          sings: [],
         },
         {
           video_id: "vidSeq",
-          start: "100",
-          end: "150",
+          start: 100,
+          end: 150,
           title: "Segment 2",
           artist: "Artist S",
           album: "",
@@ -722,6 +812,17 @@ describe("usePlayerControls", () => {
           lyricist: "",
           composer: "",
           arranger: "",
+          hl: {
+            ja: {
+              title: "",
+              artist: "",
+              album: undefined,
+              sing: undefined,
+              sings: undefined,
+            },
+            en: undefined,
+          },
+          sings: [],
         },
       ];
 
@@ -900,8 +1001,8 @@ describe("usePlayerControls", () => {
 
     it("ENDEDで次の曲に遷移しメッセージがリセットされる", () => {
       const songs: Song[] = [
-        { ...mockSongs[0], video_id: "endVid", start: "0" },
-        { ...mockSongs[1], video_id: "endVid", start: "100" },
+        { ...mockSongs[0], video_id: "endVid", start: 0 },
+        { ...mockSongs[1], video_id: "endVid", start: 100 },
       ];
       const player = createMockPlayer("endVid", 10);
 
@@ -935,12 +1036,12 @@ describe("usePlayerControls", () => {
 
     it("検索フィルタ中のENDEDではフィルタ内の次曲に遷移する", () => {
       const filteredSongs: Song[] = [
-        { ...mockSongs[0], video_id: "qVid", start: "100" },
-        { ...mockSongs[1], video_id: "qVid", start: "300" },
+        { ...mockSongs[0], video_id: "qVid", start: 100 },
+        { ...mockSongs[1], video_id: "qVid", start: 300 },
       ];
       const allSongs: Song[] = [
         ...filteredSongs,
-        { ...mockSongs[2], video_id: "qVid", start: "200" },
+        { ...mockSongs[2], video_id: "qVid", start: 200 },
       ];
       const player = createMockPlayer("qVid", 350);
 
@@ -965,8 +1066,8 @@ describe("usePlayerControls", () => {
 
     it("自動遷移ではskipSeekが使われる", () => {
       const sameVideoSongs: Song[] = [
-        { ...mockSongs[0], video_id: "autoVid", start: "0" },
-        { ...mockSongs[1], video_id: "autoVid", start: "100" },
+        { ...mockSongs[0], video_id: "autoVid", start: 0 },
+        { ...mockSongs[1], video_id: "autoVid", start: 100 },
       ];
       const player = createMockPlayer("autoVid", 120);
 
@@ -994,11 +1095,11 @@ describe("usePlayerControls", () => {
 
     it("フィルタ外の曲検出時は次曲に自動遷移する", () => {
       const songs: Song[] = [
-        { ...mockSongs[0], video_id: "filterVid", start: "100" },
-        { ...mockSongs[1], video_id: "filterVid", start: "200" },
+        { ...mockSongs[0], video_id: "filterVid", start: 100 },
+        { ...mockSongs[1], video_id: "filterVid", start: 200 },
       ];
       const allSongs: Song[] = [
-        { ...mockSongs[2], video_id: "filterVid", start: "50" },
+        { ...mockSongs[2], video_id: "filterVid", start: 50 },
         ...songs,
       ];
       const player = createMockPlayer("filterVid", 60);

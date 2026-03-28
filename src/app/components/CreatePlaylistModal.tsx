@@ -1,6 +1,7 @@
 import { Input, Modal } from "@mantine/core";
 import { Button } from "flowbite-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import usePlaylists from "../hook/usePlaylists";
 
 interface CreatePlaylistModalProps {
@@ -12,6 +13,7 @@ export default function CreatePlaylistModal({
   onenModal,
   setOpenModal,
 }: CreatePlaylistModalProps) {
+  const t = useTranslations("Watch.createPlaylistModal");
   const [newPlaylistName, setNewPlaylistName] = useState("");
 
   // プレイリスト
@@ -20,12 +22,12 @@ export default function CreatePlaylistModal({
     <Modal
       opened={onenModal}
       onClose={() => setOpenModal(false)}
-      title="新規プレイリストを作成"
+      title={t("title")}
       centered
     >
-      <Input.Wrapper label="プレイリスト名" required withAsterisk>
+      <Input.Wrapper label={t("name")} required withAsterisk>
         <Input
-          placeholder="プレイリスト名を入力..."
+          placeholder={t("placeholder")}
           value={newPlaylistName}
           onChange={(event) =>
             setNewPlaylistName(event.target.value.substring(0, 200))
@@ -35,9 +37,7 @@ export default function CreatePlaylistModal({
         />
       </Input.Wrapper>
       {isDuplicate(newPlaylistName) && (
-        <p className="text-red-500 text-xs">
-          同じ名前のプレイリストは作成できません
-        </p>
+        <p className="text-red-500 text-xs">{t("duplicate")}</p>
       )}
       <Button
         className="mt-4"
@@ -51,7 +51,7 @@ export default function CreatePlaylistModal({
           setOpenModal(false);
         }}
       >
-        作成
+        {t("create")}
       </Button>
     </Modal>
   );

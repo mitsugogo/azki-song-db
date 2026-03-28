@@ -1,6 +1,7 @@
 export const HOME_PATH = "/";
 export const SEARCH_PATH = "/search";
 export const WATCH_PATH = "/watch";
+const SUPPORTED_LOCALE_PREFIXES = new Set(["ja", "en"]);
 
 type WatchHrefOptions = {
   videoId?: string | null;
@@ -70,5 +71,22 @@ export function buildWatchHref({
 }
 
 export function isWatchPagePath(pathname: string | null | undefined) {
-  return pathname === WATCH_PATH;
+  if (!pathname) return false;
+
+  const rawPath = pathname.split("?")[0]?.split("#")[0] ?? "";
+  const normalizedPath =
+    rawPath !== "/" && rawPath.endsWith("/") ? rawPath.slice(0, -1) : rawPath;
+
+  if (normalizedPath === WATCH_PATH) return true;
+
+  const segments = normalizedPath.split("/").filter(Boolean);
+  if (
+    segments.length >= 2 &&
+    SUPPORTED_LOCALE_PREFIXES.has(segments[0]) &&
+    `/${segments.slice(1).join("/")}` === WATCH_PATH
+  ) {
+    return true;
+  }
+
+  return false;
 }

@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { routing } from "./i18n/routing";
+import createMiddleware from "next-intl/middleware";
 
 // 固定の許可オリジン
 const allowedOrigins = [
@@ -37,7 +39,56 @@ function isAllowedOrigin(origin: string): boolean {
   return false;
 }
 
+export const middleware = createMiddleware({
+  locales: routing.locales,
+  defaultLocale: routing.defaultLocale,
+  localeDetection: false,
+});
+
 export function proxy(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/api")) {
+    const requestHeaders = new Headers(request.headers);
+    const segments = request.nextUrl.pathname.split("/").filter(Boolean);
+    const maybeLocale = segments[0];
+    const locale = routing.locales.includes(
+      maybeLocale as (typeof routing.locales)[number],
+    )
+      ? maybeLocale
+      : routing.defaultLocale;
+
+    requestHeaders.set("x-locale", locale);
+
+    if (locale !== routing.defaultLocale) {
+      const rewrittenUrl = request.nextUrl.clone();
+      const restSegments = segments.slice(1);
+      rewrittenUrl.pathname =
+        restSegments.length > 0 ? `/${restSegments.join("/")}` : "/";
+      return NextResponse.rewrite(rewrittenUrl, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
+    if (maybeLocale === routing.defaultLocale) {
+      const rewrittenUrl = request.nextUrl.clone();
+      const restSegments = segments.slice(1);
+      rewrittenUrl.pathname =
+        restSegments.length > 0 ? `/${restSegments.join("/")}` : "/";
+      return NextResponse.rewrite(rewrittenUrl, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
   const origin = request.headers.get("origin") ?? "";
   const allowed = origin ? isAllowedOrigin(origin) : false;
 
@@ -69,5 +120,10 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: [
+    "/",
+    "/(ja|en)/:path*",
+    "/((?!_next|_vercel|.*\\..*).*)",
+    "/api/:path*",
+  ],
 };

@@ -60,6 +60,7 @@
     "googleapis": "^171.4.0",
     "motion": "^12.34.3",
     "next": "^16.1.7",
+    "next-intl": "^4.8.3",
     "next-pwa": "^5.6.0",
     "overlayscrollbars-react": "^0.5.6",
     "react": "19.2.4",
@@ -83,7 +84,7 @@
     "@types/react-dom": "^19",
     "@types/youtube-player": "^5.5.11",
     "@vitest/coverage-v8": "^4.0.18",
-    "eslint": "^10",
+    "eslint": "^9 || ^10",
     "eslint-config-next": "16.1.6",
     "jsdom": "^28.1.0",
     "postcss": "^8.5.6",
@@ -96,6 +97,9 @@
   "overrides": {
     "cookie": "^0.7.1",
     "path-to-regexp": "^6.2.3",
-    "serialize-javascript": "^7.0.3"
+    "serialize-javascript": "^7.0.3",
+    "@swc/helpers": "^0.5.19",
+    "glob": "^9.3.0",
+    "rimraf": "^4.0.0"
   }
 }

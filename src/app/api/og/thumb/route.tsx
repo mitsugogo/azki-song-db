@@ -2,12 +2,14 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { formatDate } from "@/app/lib/formatDate";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const v = searchParams.get("v");
     const t = searchParams.get("t") || "0";
 
@@ -20,12 +22,13 @@ export async function GET(req: NextRequest) {
 
     const video_id = v;
     const start = t.toString().replace("s", "");
-    const songs = await fetch(baseUrl + "/api/songs")
+    const songs = await fetch(
+      `${baseUrl}/api/songs?hl=${encodeURIComponent(hl)}`,
+    )
       .then((res) => res.json())
       .catch(() => []);
     const song: Song = songs.find(
-      (s: Song) =>
-        s.video_id === video_id && parseInt(s.start) === parseInt(start),
+      (s: Song) => s.video_id === video_id && Number(s.start) === Number(start),
     );
     if (!song) {
       return new Response("Song not found", { status: 404 });
@@ -229,7 +232,7 @@ export async function GET(req: NextRequest) {
             {song.tags.join(", ")}
           </div>
           <div style={{ fontSize: 20, color: "#fc3488" }}>
-            {new Date(song.broadcast_at).toLocaleDateString("ja-JP")}
+            {formatDate(song.broadcast_at, hl)}
           </div>
         </div>
       </div>,

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import SearchPageClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
@@ -23,8 +24,12 @@ export async function generateMetadata({
   };
 
   // OG画像のタイトルを生成
-  let ogTitle = "検索";
-  let ogSubtitle = "楽曲を検索できます";
+  const locale = await getLocale();
+  const tMeta = await getTranslations({ namespace: "Metadata.search", locale });
+  const messages = (await import(`../../messages/${locale}.json`)).default;
+
+  let ogTitle = messages.SearchBrowse?.title ?? "検索";
+  let ogSubtitle = tMeta("ogSubtitle", { siteName: siteConfig.siteName });
   let displayTerm = searchTerm;
 
   if (searchTerm) {
@@ -33,7 +38,10 @@ export async function generateMetadata({
     for (const [prefix, { icon }] of Object.entries(prefixMap)) {
       if (searchTerm.startsWith(prefix)) {
         displayTerm = searchTerm.replace(prefix, "");
-        ogTitle = `${icon} ${displayTerm}の検索結果`;
+        const label = messages.SearchResults?.labelWithQuery
+          ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm)
+          : `「${displayTerm}」の検索結果`;
+        ogTitle = `${icon} ${label}`;
         ogSubtitle = `${siteConfig.siteName}`;
         matched = true;
         break;
@@ -41,7 +49,9 @@ export async function generateMetadata({
     }
 
     if (!matched) {
-      ogTitle = `「${displayTerm}」の検索結果`;
+      ogTitle = messages.SearchResults?.labelWithQuery
+        ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm)
+        : `「${displayTerm}」の検索結果`;
       ogSubtitle = `${siteConfig.siteName}`;
     }
   }
@@ -54,17 +64,20 @@ export async function generateMetadata({
 
   return {
     title: searchTerm
-      ? `${displayTerm}の検索結果 | ${siteConfig.siteName}`
-      : `検索 | ${siteConfig.siteName}`,
-    description: "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
+      ? `${messages.SearchResults?.labelWithQuery ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm) : `${displayTerm}の検索結果`} | ${siteConfig.siteName}`
+      : `${messages.SearchBrowse?.title ?? "検索"} | ${siteConfig.siteName}`,
+    description:
+      messages.SearchBrowse?.summary ??
+      "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
     openGraph: {
       title: ogTitle,
       description:
+        messages.SearchBrowse?.summary ??
         "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
       url: canonical.toString(),
       type: "website",
       siteName: `${siteConfig.siteName}`,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       images: [
         {
           url: ogImagePath,
@@ -78,6 +91,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description:
+        messages.SearchBrowse?.summary ??
         "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
       images: [ogImagePath],
     },

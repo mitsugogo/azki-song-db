@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { Song } from "../types/song";
+import { useTranslations } from "next-intl";
 import SongsList from "./SongList";
 import { Button } from "flowbite-react";
 import {
@@ -44,8 +45,9 @@ import MobileActionButtons from "./MobileActionButtons";
 import {
   getSongModeIcon,
   getSongModeLabel,
+  getSongModeGroupLabels,
+  getSongModeItemLabel,
   getSongModeTriggerButtonClassName,
-  SONG_MODE_GROUP_LABELS,
   SONG_MODE_MENU_ITEMS,
   type SongModeGroup,
 } from "./songModeMenu";
@@ -88,11 +90,14 @@ export default function SearchAndSongList({
   setIsOverlayOpen,
   isTheaterMode,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
+  const t = useTranslations("Watch.searchAndSongList");
+  const tSongMode = useTranslations("Watch.songMode");
   const overlayOpen = Boolean(isOverlayOpen);
-  const currentSongModeLabel = getSongModeLabel(searchTerm);
+  const currentSongModeLabel = getSongModeLabel(searchTerm, tSongMode);
   const CurrentSongModeIcon = getSongModeIcon(searchTerm);
   const currentSongModeButtonClassName =
     getSongModeTriggerButtonClassName(searchTerm);
+  const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
 
   const songModeMenuItems = SONG_MODE_MENU_ITEMS;
   const songModeUngroupedItems = songModeMenuItems.filter(
@@ -204,7 +209,7 @@ export default function SearchAndSongList({
           >
             <span className="text-sm">
               <LuSparkles className="mr-1 inline" />
-              <span className="foldable:hidden">ランダムで他の曲にする</span>
+              <span className="foldable:hidden">{t("randomOtherSong")}</span>
               <span className="hidden foldable:inline">Surprise Me</span>
             </span>
           </Button>
@@ -232,7 +237,7 @@ export default function SearchAndSongList({
                         leftSection={<ModeIcon className="w-4 h-4" />}
                         onClick={() => setSearchTerm(item.mode)}
                       >
-                        {item.label}
+                        {getSongModeItemLabel(item, tSongMode)}
                       </Menu.Item>
                     );
                   })}
@@ -247,9 +252,7 @@ export default function SearchAndSongList({
                       return (
                         <Fragment key={group}>
                           <Menu.Divider />
-                          <Menu.Label>
-                            {SONG_MODE_GROUP_LABELS[group]}
-                          </Menu.Label>
+                          <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
                           {items.map((item) => {
                             const ModeIcon = item.icon;
                             return (
@@ -258,7 +261,7 @@ export default function SearchAndSongList({
                                 leftSection={<ModeIcon className="w-4 h-4" />}
                                 onClick={() => setSearchTerm(item.mode)}
                               >
-                                {item.label}
+                                {getSongModeItemLabel(item, tSongMode)}
                               </Menu.Item>
                             );
                           })}
@@ -280,7 +283,7 @@ export default function SearchAndSongList({
                   setShowPlaylistSelector(true);
                 }}
               >
-                プレイリスト
+                {t("playlist")}
               </Button>
             </Grid.Col>
           </Grid>
@@ -312,12 +315,14 @@ export default function SearchAndSongList({
                 setSearchValue(values);
                 setSearchTerm(values.join("|"));
               }}
-              placeholder="検索"
+              placeholder={t("search")}
             />
           </div>
           <div className="mb-2 flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground dark:text-white">
-              楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
+              {t("songList")} ({songs.length}
+              {t("songsUnit_w/o_en")}/{allSongs.length}
+              {t("songsUnit_w/o_en")})
             </p>
             <button
               type="button"
@@ -326,7 +331,7 @@ export default function SearchAndSongList({
                   previousOrder === "asc" ? "desc" : "asc",
                 )
               }
-              aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+              aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
               className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
                 songs.length > 15 ? "mr-11" : ""
               }`}
@@ -379,10 +384,10 @@ export default function SearchAndSongList({
                       setSearchValue(values);
                       setSearchTerm(values.join("|"));
                     }}
-                    placeholder="検索"
+                    placeholder={t("search")}
                   />
                 </div>
-                <Tooltip withArrow label="閉じる">
+                <Tooltip withArrow label={t("close")}>
                   <button
                     aria-label="Close song list"
                     onClick={() => setIsOverlayOpen?.(false)}
@@ -397,7 +402,9 @@ export default function SearchAndSongList({
 
             <div className="px-3 py-0 flex items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground dark:text-white">
-                楽曲一覧 ({songs.length}曲/{allSongs.length}曲)
+                {t("songList")} ({songs.length}
+                {t("songsUnit")}/{allSongs.length}
+                {t("songsUnit")})
               </p>
               <button
                 type="button"
@@ -406,7 +413,7 @@ export default function SearchAndSongList({
                     previousOrder === "asc" ? "desc" : "asc",
                   )
                 }
-                aria-label={`並び順: ${sortOrder === "asc" ? "昇順" : "降順"}`}
+                aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
                 className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
               >
                 {sortOrder === "asc" ? (
@@ -438,20 +445,18 @@ export default function SearchAndSongList({
       <Modal
         opened={showPlaylistSelector}
         onClose={() => setShowPlaylistSelector(false)}
-        title="プレイリスト"
+        title={t("playlist")}
       >
         <Modal.Body>
           {playlists.length === 0 && favorites.length === 0 ? (
             <>
-              <div>
-                プレイリストを作成して、自分だけのセットリストを作成しましょう！
-              </div>
+              <div>{t("createPlaylistLead")}</div>
               <MantineButton
                 onClick={() => setOpenCreatePlaylistModal(true)}
                 className="mt-2"
               >
                 <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                プレイリストを作成
+                {t("createPlaylist")}
               </MantineButton>
             </>
           ) : (
@@ -459,24 +464,23 @@ export default function SearchAndSongList({
               {currentPlaylist && (
                 <>
                   <div className="bg-green-100 dark:bg-gray-800 py-2 px-3 rounded text-sm">
-                    ♪ 「{currentPlaylist?.name}」プレイリスト (
-                    {currentPlaylist?.songs.length}
-                    曲) を再生中
+                    {t("nowPlayingPlaylist", {
+                      name: currentPlaylist?.name ?? "",
+                      count: currentPlaylist?.songs.length ?? 0,
+                    })}
                   </div>
                   <div className="my-3 border-b border-gray-300"></div>
                 </>
               )}
 
-              <div className="mb-2 mx-3 text-sm">
-                再生するプレイリストを選択してください
-              </div>
+              <div className="mb-2 mx-3 text-sm">{t("selectPlaylist")}</div>
               <ScrollArea h={400}>
                 {/* お気に入りを最上段に表示 */}
                 {favorites.length > 0 &&
                   (() => {
                     const favoritesPlaylist: Playlist = {
                       id: "system-favorites",
-                      name: "お気に入り",
+                      name: t("favorites"),
                       songs: favorites,
                       createdAt: new Date().toISOString(),
                       updatedAt: new Date().toISOString(),
@@ -507,7 +511,8 @@ export default function SearchAndSongList({
                             {favoritesPlaylist.name}
                           </span>
                           <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
-                            ({favorites.length}曲)
+                            ({favorites.length}
+                            {t("songsUnit")})
                           </span>
                         </div>
 
@@ -518,10 +523,7 @@ export default function SearchAndSongList({
                           timeout={2000}
                         >
                           {({ copied, copy }) => (
-                            <Tooltip
-                              withArrow
-                              label="URLをコピーしてプレイリストをシェアできます"
-                            >
+                            <Tooltip withArrow label={t("copyPlaylistUrl")}>
                               <MantineButton
                                 onClick={copy}
                                 color={`${copied ? "green" : "gray"}`}
@@ -562,7 +564,8 @@ export default function SearchAndSongList({
                       )}
                       <span className="font-semibold">{playlist.name}</span>
                       <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
-                        ({playlist.songs.length}曲)
+                        ({playlist.songs.length}
+                        {t("songsUnit")})
                       </span>
                     </div>
 
@@ -573,10 +576,7 @@ export default function SearchAndSongList({
                       timeout={2000}
                     >
                       {({ copied, copy }) => (
-                        <Tooltip
-                          withArrow
-                          label="URLをコピーしてプレイリストをシェアできます"
-                        >
+                        <Tooltip withArrow label={t("copyPlaylistUrl")}>
                           <MantineButton
                             onClick={copy}
                             color={`${copied ? "green" : "gray"}`}
@@ -605,7 +605,7 @@ export default function SearchAndSongList({
                     <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
                   }
                 >
-                  プレイリスト再生モードを解除
+                  {t("disablePlaylistMode")}
                 </MantineButton>
               </div>
             </>
@@ -617,7 +617,7 @@ export default function SearchAndSongList({
           className="ml-3"
           onClick={() => setShowPlaylistSelector(false)}
         >
-          閉じる
+          {t("close")}
         </MantineButton>
       </Modal>
 

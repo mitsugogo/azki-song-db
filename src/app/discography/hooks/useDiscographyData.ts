@@ -10,6 +10,7 @@ import {
   isOriginalSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
+import { normalizeSongTitle } from "../utils/normalizeSongTitle";
 
 /**
  * Discographyページのデータフェッチと統計計算を管理するカスタムフック
@@ -21,6 +22,7 @@ export function useDiscographyData(
   const { allSongs, isLoading } = useSongs();
   const loading = isLoading;
   const songs = allSongs;
+  const getSongKeyTitle = (s: Song) => normalizeSongTitle(s.title, s.artist);
 
   // オリジナル楽曲の統計
   const originalSongCountsByReleaseDate = useMemo(() => {
@@ -32,7 +34,8 @@ export function useDiscographyData(
     });
     return createStatistics(
       originals,
-      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      (s) =>
+        groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
     );
   }, [songs, groupByAlbum, onlyOriginalMV]);
@@ -44,7 +47,8 @@ export function useDiscographyData(
     );
     return createStatistics(
       units,
-      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      (s) =>
+        groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
     );
   }, [songs, groupByAlbum]);
@@ -64,8 +68,11 @@ export function useDiscographyData(
       covers,
       (s) => {
         const singers = normalizeSingers(s);
-        if (groupByAlbum) return s.album || `${s.title}__${singers}` || s.title;
-        return singers ? `${s.title}__${singers}` : s.title;
+        const normalizedTitle = getSongKeyTitle(s);
+        if (groupByAlbum) {
+          return s.album || `${normalizedTitle}__${singers}` || normalizedTitle;
+        }
+        return singers ? `${normalizedTitle}__${singers}` : normalizedTitle;
       },
       groupByAlbum,
     );
@@ -83,7 +90,8 @@ export function useDiscographyData(
     return createStatistics(
       // ユニークにする
       allFiltered,
-      (s) => (groupByAlbum ? s.album || s.title : s.title),
+      (s) =>
+        groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
     );
   }, [songs, groupByAlbum]);

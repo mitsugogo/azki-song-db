@@ -1,7 +1,7 @@
 export const siteConfig = {
   siteName: "AZKi Song Database",
   siteNameUpper: "AZKi SONG DATABASE",
-  shortName: "AZ Song DB",
+  shortName: "AZKi Song DB",
   siteSlug: "azki-song-db",
 
   // 推しのチャンネル名、URL

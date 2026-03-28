@@ -12,9 +12,11 @@ import { useSelection } from "@mantine/hooks";
 import usePlaylists, { Playlist } from "../../hook/usePlaylists";
 import useFavorites from "../../hook/useFavorites";
 import { Song } from "@/app/types/song";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import Loading from "@/app/loading";
-import { FaRegTrashCan, FaBars } from "react-icons/fa6"; // FaBarsを追加
+import { FaRegTrashCan, FaBars } from "react-icons/fa6";
+import { formatDate } from "../../lib/formatDate";
 
 import {
   DndContext,
@@ -63,6 +65,8 @@ const SortableRow = ({
   onCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPreview: () => void;
 }) => {
+  const t = useTranslations("Playlist");
+  const locale = useLocale();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: `${s.videoId}-${s.start}` });
 
@@ -76,7 +80,7 @@ const SortableRow = ({
   }`;
 
   const formattedBroadcastDate = s.songinfo.broadcast_at
-    ? new Date(s.songinfo.broadcast_at).toLocaleDateString()
+    ? formatDate(s.songinfo.broadcast_at, locale)
     : null;
 
   return (
@@ -94,7 +98,7 @@ const SortableRow = ({
       </Table.Td>
       <Table.Td>
         <Checkbox
-          aria-label="Select row"
+          aria-label={t("aria.selectRow")}
           checked={isSelected}
           onChange={onCheckboxChange}
         />
@@ -123,7 +127,7 @@ const SortableRow = ({
             </div>
             {formattedBroadcastDate && (
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-200">
-                {formattedBroadcastDate} 配信
+                {formattedBroadcastDate} {t("detail.streamed")}
               </div>
             )}
 
@@ -135,11 +139,11 @@ const SortableRow = ({
                 className="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700"
               >
                 <FaYoutube className="mr-1" />
-                YouTube
+                {t("detail.youtube")}
               </a>
               <Button color="pink" size="compact-sm" onClick={onPreview}>
                 <LuPlay className="mr-1" />
-                プレビュー
+                {t("detail.preview")}
               </Button>
             </div>
           </div>
@@ -150,6 +154,9 @@ const SortableRow = ({
 };
 
 export default function PlaylistDetailPage() {
+  const t = useTranslations("Playlist");
+  const g = useTranslations("DrawerMenu");
+
   const [id, setId] = useState("");
   const { allSongs, isLoading } = useSongs();
   const [playlistSongs, setPlaylistSongs] = useState<
@@ -198,7 +205,7 @@ export default function PlaylistDetailPage() {
     if (isFavoritesMode) {
       const favoritesPlaylist: Playlist = {
         id: "system-favorites",
-        name: "お気に入り",
+        name: t("favoritesName"),
         songs: favorites,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -334,7 +341,7 @@ export default function PlaylistDetailPage() {
   if (isLoading) {
     return (
       <div className="grow lg:p-6 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
+        <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
         <Loading />
       </div>
     );
@@ -343,9 +350,9 @@ export default function PlaylistDetailPage() {
   if (!playlist) {
     return (
       <div className="grow lg:p-6 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
+        <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
         <div className="p-3">
-          <p>このIDのプレイリストは見つかりません</p>
+          <p>{t("detail.notFound")}</p>
         </div>
       </div>
     );
@@ -359,27 +366,32 @@ export default function PlaylistDetailPage() {
         separator={<HiChevronRight className={breadcrumbClasses.separator} />}
       >
         <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
+          <HiHome className="w-4 h-4 mr-1.5" /> {g("home")}
         </Link>
         <Link href="/playlist" className={breadcrumbClasses.link}>
-          プレイリスト
+          {t("title")}
         </Link>
-        <span
-          className={breadcrumbClasses.link}
-        >{`#${playlist?.id} (${playlist?.name})`}</span>
+        <span className={breadcrumbClasses.link}>
+          {t("detail.breadcrumbTitle", {
+            id: playlist?.id ?? "",
+            name: playlist?.name ?? "",
+          })}
+        </span>
       </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3 pl-0">プレイリストの管理</h1>
+      <h1 className="font-extrabold text-2xl p-3 pl-0">{t("manageTitle")}</h1>
 
       <div className="flex justify-between items-center mb-3 sm:flex-row sm:items-baseline">
-        <h2 className="hidden lg:flex font-semibold">{`#${id} のプレイリスト: ${playlist.name}`}</h2>
+        <h2 className="hidden lg:flex font-semibold">
+          {t("detail.header", { id, name: playlist.name })}
+        </h2>
         <div className="flex items-center gap-2 sm:mt-0">
           <Button
             color="red"
             onClick={handleDeleteSelected}
             disabled={selection.length === 0}
           >
-            選択した曲を削除
+            {t("detail.deleteSelectedSongs")}
           </Button>
           <Button
             color="red"
@@ -388,9 +400,7 @@ export default function PlaylistDetailPage() {
             }
             disabled={playlist.songs.length === 0}
           >
-            <FaRegTrashCan className="mr-2" />{" "}
-            <span className="hidden lg:inline">プレイリスト内の曲を</span>
-            すべて削除
+            <FaRegTrashCan className="mr-2" /> {t("detail.clearAllSongs")}
           </Button>
         </div>
       </div>
@@ -404,10 +414,10 @@ export default function PlaylistDetailPage() {
           <Table striped highlightOnHover withColumnBorders>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>並べ替え</Table.Th>
+                <Table.Th>{t("detail.table.sort")}</Table.Th>
                 <Table.Th>
                   <Checkbox
-                    aria-label="Select deselect all rows"
+                    aria-label={t("detail.table.selectAll")}
                     indeterminate={handlers.isSomeSelected()}
                     checked={handlers.isAllSelected()}
                     onChange={() => {
@@ -420,15 +430,15 @@ export default function PlaylistDetailPage() {
                   />
                 </Table.Th>
                 <Table.Th>#</Table.Th>
-                <Table.Th>曲/アーティスト</Table.Th>
-                <Table.Th>動画</Table.Th>
+                <Table.Th>{t("detail.table.trackArtist")}</Table.Th>
+                <Table.Th>{t("detail.table.video")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             {playlistSongs.length === 0 && (
               <Table.Tbody>
                 <Table.Tr>
                   <Table.Td colSpan={5} className="text-center">
-                    プレイリスト内に曲がありません
+                    {t("detail.table.empty")}
                   </Table.Td>
                 </Table.Tr>
               </Table.Tbody>

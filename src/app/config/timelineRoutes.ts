@@ -1,14 +1,36 @@
 export type RouteConfig = {
   label: string;
+  // next-intl の翻訳キー（存在する場合は表示時に翻訳して使う）
+  labelKey?: string;
   from: string;
   to: string | null;
 };
 
 export const ROUTE_RANGES: RouteConfig[] = [
-  { label: "ルートα", from: "2018-11-15", to: "2021-04-10" },
-  { label: "ルートβ", from: "2021-04-11", to: "2023-06-30" },
-  { label: "ルートγ", from: "2023-07-01", to: "2025-06-30" },
-  { label: "新たなルート", from: "2025-07-01", to: null },
+  {
+    label: "ルートα",
+    labelKey: "routes.alpha",
+    from: "2018-11-15",
+    to: "2021-04-10",
+  },
+  {
+    label: "ルートβ",
+    labelKey: "routes.beta",
+    from: "2021-04-11",
+    to: "2023-06-30",
+  },
+  {
+    label: "ルートγ",
+    labelKey: "routes.gamma",
+    from: "2023-07-01",
+    to: "2025-06-30",
+  },
+  {
+    label: "新たなルート",
+    labelKey: "routes.new",
+    from: "2025-07-01",
+    to: null,
+  },
 ];
 
 export default ROUTE_RANGES;

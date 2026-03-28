@@ -1,5 +1,6 @@
 import { Song } from "../../types/song";
 import SearchTermChips from "./SearchTermChips";
+import { useTranslations } from "next-intl";
 import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 
@@ -18,16 +19,17 @@ const SearchNoResultsView = ({
   setSearchValue,
   setSearchTerm,
 }: SearchNoResultsViewProps) => {
+  const t = useTranslations("SearchBrowse");
   return (
     <div className="grow lg:p-6 lg:pb-0 overflow-auto">
       <SearchBreadcrumb />
 
       <div className="mb-4">
-        <h1 className="font-extrabold text-2xl p-3">検索結果</h1>
+        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
         <div className="px-3 pb-3">
           <SearchTermChips terms={searchTokens} />
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            該当する曲がありません
+            {t("noResults")}
           </p>
         </div>
       </div>
