@@ -36,8 +36,8 @@ export interface Song {
   video_title: string;
   video_uri: string;
   video_id: string;
-  start: number;
-  end: number;
+  start: number | "";
+  end: number | "";
   broadcast_at: string;
   year: number;
   tags: string[];
