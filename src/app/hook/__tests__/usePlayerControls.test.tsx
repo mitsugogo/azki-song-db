@@ -112,6 +112,8 @@ describe("usePlayerControls", () => {
     vi.clearAllMocks();
     localStorage.clear();
     mockGlobalPlayer = createMockGlobalPlayer();
+    // document.title をテスト毎に初期化（前のテストの副作用を防ぐ）
+    document.title = siteConfig.siteName;
     // window.locationを簡易モック
     originalLocation = window.location;
     delete (window as any).location;
@@ -369,9 +371,9 @@ describe("usePlayerControls", () => {
       result.current.changeCurrentSong(mockSongs[0]);
     });
 
-    // currentSongInfoはあるがisPlayingがfalseの場合
+    // currentSong 設定によりタイトルが更新される
     rerender();
-    expect(document.title).toBe(siteConfig.siteName);
+    expect(document.title).toBe("Song 1 / Artist 1 | " + siteConfig.siteName);
   });
 
   it("videoIdが変わるとvideoIdRefが更新される", () => {
