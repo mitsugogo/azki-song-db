@@ -198,12 +198,11 @@ const usePlayerControls = (
 
   // 現在の楽曲が変わったらtitleを変更する
   useEffect(() => {
-    const title =
-      isPlaying && currentSong
-        ? `${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
-        : defaultDocumentTitleRef.current;
+    const title = currentSong
+      ? `${currentSong.title} / ${currentSong.artist} | ${siteConfig.siteName}`
+      : defaultDocumentTitleRef.current;
     document.title = title;
-  }, [currentSong, isPlaying]);
+  }, [currentSong]);
 
   // 全曲をstart降順でソート（曲検索用）
   const sortedAllSongs = useMemo(() => {
