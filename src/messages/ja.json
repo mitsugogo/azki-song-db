@@ -816,5 +816,12 @@
     "guestAppearance": "ゲスト出演",
     "ballad": "しっとり",
     "acoustic": "アコースティック・生演奏"
+  },
+  "ShareModal": {
+    "title": "シェア",
+    "description": "AZKiさんの素敵な歌声をシェアしましょう！",
+    "youtubeUrl": "YouTube URL",
+    "copied": "コピーしました！",
+    "close": "閉じる"
   }
 }

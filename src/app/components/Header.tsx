@@ -36,6 +36,22 @@ export function Header() {
     return path;
   };
 
+  const getLocaleFromPath = (path: string) => {
+    const segments = path.split("/").filter(Boolean);
+    const first = segments[0];
+    return routing.locales.includes(first as (typeof routing.locales)[number])
+      ? first
+      : routing.defaultLocale;
+  };
+
+  const buildLocalizedPath = (path: string, locale: string) => {
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    if (locale === routing.defaultLocale) {
+      return normalized;
+    }
+    return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
+  };
+
   return (
     <>
       <header className="relative bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
@@ -89,9 +105,15 @@ export function Header() {
                         normalizedPath !== "/search"
                       ) {
                         // 他のページから検索ページへ遷移する際は、既存の v/t を保持して遷移する
+                        const currentLocale = getLocaleFromPath(currentPath);
+                        const searchPath = buildLocalizedPath(
+                          "/search",
+                          currentLocale,
+                        );
+
                         if (typeof window !== "undefined") {
                           const url = new URL(window.location.href);
-                          url.pathname = "/search";
+                          url.pathname = searchPath;
                           if (query) {
                             url.searchParams.set("q", query);
                           } else {
@@ -105,17 +127,23 @@ export function Header() {
                           router.push(target);
                         } else {
                           const searchUrl = query
-                            ? `/search?q=${encodeURIComponent(query)}`
-                            : "/search";
+                            ? `${searchPath}?q=${encodeURIComponent(query)}`
+                            : searchPath;
                           router.push(searchUrl);
                         }
                       } else {
                         // 再生ページと検索ページでは、URLパラメータを更新
-                        const targetPath = normalizeLocalizedPath(currentPath);
+                        const currentLocale = getLocaleFromPath(currentPath);
+                        const normalizedPath =
+                          normalizeLocalizedPath(currentPath);
+                        const localizedPath = buildLocalizedPath(
+                          normalizedPath,
+                          currentLocale,
+                        );
 
                         if (query) {
                           router.push(
-                            `${targetPath}?q=${encodeURIComponent(query)}`,
+                            `${localizedPath}?q=${encodeURIComponent(query)}`,
                           );
                         } else {
                           // 検索ワードをクリアする際は、既存の検索パラメータ(v/t 等)を保持しつつ q のみ削除する
@@ -124,11 +152,11 @@ export function Header() {
                             url.searchParams.delete("q");
                             const searchString = url.searchParams.toString();
                             const target = searchString
-                              ? `${targetPath}?${searchString}`
-                              : targetPath;
+                              ? `${localizedPath}?${searchString}`
+                              : localizedPath;
                             router.push(target);
                           } else {
-                            router.push(targetPath);
+                            router.push(localizedPath);
                           }
                         }
                       }

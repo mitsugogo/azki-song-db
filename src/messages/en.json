@@ -816,5 +816,12 @@
     "guestAppearance": "Guest Appearances",
     "ballad": "Ballads",
     "acoustic": "Acoustic / Live Performance"
+  },
+  "ShareModal": {
+    "title": "Share",
+    "description": "Share AZKi's beautiful singing voice!",
+    "youtubeUrl": "YouTube URL",
+    "copied": "Copied",
+    "close": "Close"
   }
 }
