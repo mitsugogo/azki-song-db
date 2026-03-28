@@ -29,6 +29,7 @@ export async function generateMetadata({
   const q = getParamValue(params.q);
   const v = getParamValue(params.v) ?? getParamValue(params.videoId);
   const t = normalizeWatchTimeParam(getParamValue(params.t));
+  const tSeconds = t ? Number(String(t).replace(/s$/i, "")) : null;
   const playlist = getParamValue(params.playlist);
 
   let title = `${siteConfig.siteName}`;
@@ -110,7 +111,11 @@ export async function generateMetadata({
     songsUrl.searchParams.set("hl", locale);
     const songs = await fetch(songsUrl).then((res) => res.json());
     const song = songs.find(
-      (s: Song) => s.video_id === v && Number(s.start) === Number(t),
+      (s: Song) =>
+        s.video_id === v &&
+        (tSeconds === null
+          ? Number(s.start) === Number(t)
+          : Number(s.start) === tSeconds),
     );
 
     if (song) {
@@ -122,8 +127,10 @@ export async function generateMetadata({
       });
       ogTitle = title;
       ogSubtitle = tMeta("song.ogSubtitle", {
-        videoTitle: song.video_title,
         date: localizedDate,
+        title: song.title,
+        artist: song.artist,
+        videoTitle: song.video_title,
       });
     }
   } else if (v) {
