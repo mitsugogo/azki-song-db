@@ -111,9 +111,11 @@ export function Header() {
                         }
                       } else {
                         // 再生ページと検索ページでは、URLパラメータを更新
+                        const targetPath = normalizeLocalizedPath(currentPath);
+
                         if (query) {
                           router.push(
-                            `${currentPath}?q=${encodeURIComponent(query)}`,
+                            `${targetPath}?q=${encodeURIComponent(query)}`,
                           );
                         } else {
                           // 検索ワードをクリアする際は、既存の検索パラメータ(v/t 等)を保持しつつ q のみ削除する
@@ -122,11 +124,11 @@ export function Header() {
                             url.searchParams.delete("q");
                             const searchString = url.searchParams.toString();
                             const target = searchString
-                              ? `${currentPath}?${searchString}`
-                              : currentPath;
+                              ? `${targetPath}?${searchString}`
+                              : targetPath;
                             router.push(target);
                           } else {
-                            router.push(currentPath);
+                            router.push(targetPath);
                           }
                         }
                       }
