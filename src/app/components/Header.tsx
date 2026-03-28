@@ -52,9 +52,14 @@ export function Header() {
             <div className="flex flex-1 items-center justify-start ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
                 <Link href="/">
-                  <h1 className="text-lg lg:text-lg font-semibold tracking-[0.06em]">
-                    {siteConfig.siteNameUpper}
-                  </h1>
+                  <>
+                    <h1 className="hidden lg:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
+                      {siteConfig.siteNameUpper}
+                    </h1>
+                    <h1 className="lg:hidden text-lg font-semibold tracking-[0.04em]">
+                      {siteConfig.shortName}
+                    </h1>
+                  </>
                 </Link>
               </div>
               {/* 検索フィールド - lg以上で表示 */}
@@ -141,7 +146,12 @@ export function Header() {
                 <FaYoutube className="mr-1" />
                 {siteConfig.channelName}
               </Link>
-              <LanguageSwitcher />
+              <div className="hidden lg:inline-flex">
+                <LanguageSwitcher />
+              </div>
+              <div className="lg:hidden">
+                <LanguageSwitcher compact />
+              </div>
               <FoldableToggle />
               <ThemeToggle />
             </div>

@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "../../i18n/routing";
+import { Menu } from "@mantine/core";
+import { FaGlobe } from "react-icons/fa6";
 
 const options: Array<{
   value: (typeof routing.locales)[number];
@@ -12,7 +14,11 @@ const options: Array<{
   { value: "en", label: "EN" },
 ];
 
-export default function LanguageSwitcher() {
+type Props = {
+  compact?: boolean;
+};
+
+export default function LanguageSwitcher({ compact = false }: Props) {
   const pathname = usePathname() ?? "/";
   const locale = useLocale();
   const t = useTranslations("Header");
@@ -41,6 +47,40 @@ export default function LanguageSwitcher() {
       window.location.assign(targetPath);
     }
   };
+
+  if (compact) {
+    return (
+      <Menu withinPortal>
+        <Menu.Target>
+          <button
+            type="button"
+            aria-label={t("languageSwitcher")}
+            title={t("languageSwitcher")}
+            className="outline-none cursor-pointer ml-2 p-2 rounded-md hover:bg-primary-600 dark:hover:bg-primary-800"
+          >
+            <FaGlobe />
+          </button>
+        </Menu.Target>
+
+        <Menu.Dropdown>
+          {options.map((option) => (
+            <Menu.Item
+              key={option.value}
+              onClick={() => handleSwitchLocale(option.value)}
+              aria-pressed={option.value === locale}
+              className={`px-3 py-1 rounded-md ${
+                option.value === locale
+                  ? "bg-primary-700 text-white dark:bg-white dark:text-primary"
+                  : "text-primary dark:text-white"
+              }`}
+            >
+              {option.label}
+            </Menu.Item>
+          ))}
+        </Menu.Dropdown>
+      </Menu>
+    );
+  }
 
   return (
     <div
