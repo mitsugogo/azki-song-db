@@ -1,26 +1,40 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { FaYoutube } from "react-icons/fa6";
 import { Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useTranslations } from "next-intl";
 import ThemeToggle from "./ThemeToggle";
 import FoldableToggle from "./FoldableToggle";
+import LanguageSwitcher from "./LanguageSwitcher";
 import useSongs from "../hook/useSongs";
 import useSearch from "../hook/useSearch";
 import SearchInput from "./SearchInput";
 import DrawerMenu from "./DrawerMenu";
 import { siteConfig } from "@/app/config/siteConfig";
+import { routing } from "../../i18n/routing";
 
 export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt } = useSongs();
   const { searchTerm, setSearchTerm } = useSearch(allSongs);
+  const t = useTranslations("Header");
   const router = useRouter();
   const pathname = usePathname() ?? "/";
 
+  const normalizeLocalizedPath = (path: string) => {
+    const segments = path.split("/").filter(Boolean);
+    if (
+      segments.length > 0 &&
+      routing.locales.includes(segments[0] as (typeof routing.locales)[number])
+    ) {
+      const rest = segments.slice(1).join("/");
+      return rest ? `/${rest}` : "/";
+    }
+    return path;
+  };
   return (
     <>
       <header className="relative bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
@@ -31,16 +45,21 @@ export function Header() {
                 opened={drawerOpened}
                 onClick={toggleDrawer}
                 color="white"
-                aria-label="Toggle navigation"
+                aria-label={t("toggleNavigation")}
               />
             </div>
-            <div className="flex flex-1 items-center justify-center sm:justify-start sm:ml-12">
+            <div className="flex flex-1 items-center justify-start ml-12">
               <div className="flex shrink-0 items-center lg:ml-2">
-                <a href="/">
-                  <h1 className="text-lg lg:text-lg font-semibold tracking-[0.06em]">
-                    {siteConfig.siteNameUpper}
-                  </h1>
-                </a>
+                <Link href="/">
+                  <>
+                    <h1 className="hidden lg:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
+                      {siteConfig.siteNameUpper}
+                    </h1>
+                    <h1 className="lg:hidden text-lg font-semibold tracking-[0.04em]">
+                      {siteConfig.shortName}
+                    </h1>
+                  </>
+                </Link>
               </div>
               {/* 検索フィールド - lg以上で表示 */}
               <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:mx-4">
@@ -56,17 +75,24 @@ export function Header() {
                       const query = values.join("|");
 
                       // 現在のパスを取得
-                      const path =
+                      const currentPath =
                         typeof window !== "undefined"
                           ? window.location.pathname
                           : pathname;
+                      const normalizedPath =
+                        normalizeLocalizedPath(currentPath);
 
                       // 再生ページと検索ページ以外では、検索ページに遷移
-                      if (path !== "/watch" && path !== "/search") {
-                        // 他のページから検索ページへ遷移する際は、既存の v/t を保持して遷移する
+                      if (
+                        normalizedPath !== "/watch" &&
+                        normalizedPath !== "/search"
+                      ) {
+                        // 他のページから検索ページへ遷移する際は、既存の v/t 等を保持して遷移する
+                        const searchPath = "/search";
+
                         if (typeof window !== "undefined") {
                           const url = new URL(window.location.href);
-                          url.pathname = "/search";
+                          url.pathname = searchPath;
                           if (query) {
                             url.searchParams.set("q", query);
                           } else {
@@ -85,26 +111,30 @@ export function Header() {
                           router.push(searchUrl);
                         }
                       } else {
-                        // 再生ページと検索ページでは、URLパラメータを更新
-                        if (query) {
-                          router.push(`${path}?q=${encodeURIComponent(query)}`);
-                        } else {
-                          // 検索ワードをクリアする際は、既存の検索パラメータ(v/t 等)を保持しつつ q のみ削除する
-                          if (typeof window !== "undefined") {
-                            const url = new URL(window.location.href);
-                            url.searchParams.delete("q");
-                            const searchString = url.searchParams.toString();
-                            const target = searchString
-                              ? `${path}?${searchString}`
-                              : path;
-                            router.push(target);
+                        // 再生ページと検索ページでは、URLパラメータを更新（既存のパラメータは保持）
+                        const pagePath = normalizedPath;
+
+                        if (typeof window !== "undefined") {
+                          const url = new URL(window.location.href);
+                          if (query) {
+                            url.searchParams.set("q", query);
                           } else {
-                            router.push(path);
+                            url.searchParams.delete("q");
                           }
+                          const searchString = url.searchParams.toString();
+                          const target = searchString
+                            ? `${pagePath}?${searchString}`
+                            : pagePath;
+                          router.push(target);
+                        } else {
+                          const target = query
+                            ? `${pagePath}?q=${encodeURIComponent(query)}`
+                            : pagePath;
+                          router.push(target);
                         }
                       }
                     }}
-                    placeholder="曲名、アーティスト、タグなどで検索"
+                    placeholder={t("searchPlaceholder")}
                     className="[&_input]:h-7"
                   />
                 </div>
@@ -119,6 +149,12 @@ export function Header() {
                 <FaYoutube className="mr-1" />
                 {siteConfig.channelName}
               </Link>
+              <div className="hidden lg:inline-flex">
+                <LanguageSwitcher />
+              </div>
+              <div className="lg:hidden">
+                <LanguageSwitcher compact />
+              </div>
               <FoldableToggle />
               <ThemeToggle />
             </div>

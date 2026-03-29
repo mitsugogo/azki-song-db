@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Song } from "../../../types/song";
 import slugify from "../../../lib/slugify";
@@ -47,7 +48,7 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
   return entries;
 }
 
-async function fetchSongsFromApi(): Promise<Song[]> {
+async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
   const candidates = [
     process.env.NEXT_PUBLIC_BASE_URL,
     process.env.PUBLIC_BASE_URL,
@@ -59,7 +60,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 
   for (const base of candidates) {
     try {
-      const res = await fetch(new URL(`/api/songs`, base));
+      const songsUrl = new URL(`/api/songs`, base);
+      songsUrl.searchParams.set("hl", locale);
+      const res = await fetch(songsUrl);
       if (res.ok) {
         return (await res.json()) as Song[];
       }
@@ -69,7 +72,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
   }
 
   try {
-    const res = await fetch(new URL(`/api/songs`, siteConfig.siteUrl));
+    const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
+    songsUrl.searchParams.set("hl", locale);
+    const res = await fetch(songsUrl);
     if (res.ok) {
       return (await res.json()) as Song[];
     }
@@ -93,23 +98,34 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const locale = await getLocale();
+  const messages = (await import(`../../../../messages/${locale}.json`))
+    .default;
   const resolved = await params;
   const albumSlug = decodeURIComponent(resolved.slug);
-  const songs: Song[] = await fetchSongsFromApi();
+  const songs: Song[] = await fetchSongsFromApi(locale);
   const matched = buildAlbumEntries(songs).find(
     (entry) => entry.slug === albumSlug,
   );
 
   if (!matched) {
+    const title =
+      messages.DiscographyAlbum?.notFoundTitle?.replace(
+        "{site}",
+        siteConfig.siteName,
+      ) ?? `Album not found | ${siteConfig.siteName}`;
+    const desc =
+      messages.DiscographyAlbum?.notFoundDescription ??
+      "The specified album does not exist.";
     return {
-      title: `アルバムが見つかりません | ${siteConfig.siteName}`,
-      description: "指定されたアルバムは存在しません。",
+      title,
+      description: desc,
       openGraph: {
-        title: `アルバムが見つかりません | ${siteConfig.siteName}`,
-        description: "指定されたアルバムは存在しません。",
+        title,
+        description: desc,
         url: new URL(`/discography/album/${albumSlug}`, baseUrl).toString(),
         siteName: siteConfig.siteName,
-        locale: "ja_JP",
+        locale: locale === "ja" ? "ja_JP" : "en_US",
         type: "website",
       },
       alternates: {
@@ -122,7 +138,11 @@ export async function generateMetadata({
   }
 
   const title = `${matched.album} | Discography | ${siteConfig.siteName}`;
-  const description = `${matched.album} の収録曲 ${matched.songs.length} 曲を表示します。`;
+  const description = messages.DiscographyAlbum?.descriptionPattern
+    ? messages.DiscographyAlbum.descriptionPattern
+        .replace("{album}", matched.album)
+        .replace("{count}", String(matched.songs.length))
+    : `${matched.album}`;
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set(
@@ -147,7 +167,7 @@ export async function generateMetadata({
       description,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
     },
@@ -168,9 +188,10 @@ export default async function DiscographyAlbumPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const locale = await getLocale();
   const resolved = await params;
   const albumSlug = decodeURIComponent(resolved.slug);
-  const songs = await fetchSongsFromApi();
+  const songs = await fetchSongsFromApi(locale);
   const matched = buildAlbumEntries(songs).find(
     (entry) => entry.slug === albumSlug,
   );

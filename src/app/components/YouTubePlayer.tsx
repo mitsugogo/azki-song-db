@@ -3,6 +3,7 @@ import { Song } from "../types/song";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { Options } from "youtube-player/dist/types";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
+import { useLocale } from "next-intl";
 
 interface YouTubePlayerProps {
   video_id?: string;
@@ -22,6 +23,8 @@ function YouTubePlayerComponent({
   const showControls =
     typeof showNativeControls === "boolean" ? showNativeControls : true;
 
+  const locale = useLocale();
+
   const opts: Options = useMemo(() => {
     return {
       width: "100%",
@@ -37,11 +40,12 @@ function YouTubePlayerComponent({
         controls: showControls ? 1 : 0,
         start: startTime,
         rel: 0, // 再生終了後に同じチャンネルの動画を表示
+        hl: locale || "ja", // 動画のUI
         origin:
           typeof window !== "undefined" ? window.location.origin : undefined,
       },
     } as Options;
-  }, [video_id, startTime, showNativeControls]);
+  }, [video_id, startTime, showNativeControls, locale]);
 
   return (
     <YouTube

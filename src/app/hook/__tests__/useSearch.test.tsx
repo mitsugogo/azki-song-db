@@ -5,6 +5,7 @@ import { Song } from "../../types/song";
 import { useSearchParams } from "next/navigation";
 
 const decodePlaylistUrlParamMock = vi.fn();
+const useLocaleMock = vi.fn(() => "ja");
 
 // モック
 vi.mock("next/navigation", () => ({
@@ -17,12 +18,18 @@ vi.mock("../usePlaylists", () => ({
   }),
 }));
 
+vi.mock("next-intl", () => ({
+  useLocale: () => useLocaleMock(),
+}));
+
 describe("useSearch", () => {
   const mockSongs: Song[] = [
     {
       video_id: "vid1",
       title: "Test Song 1",
+      title_en: "Test Song 1 EN",
       artist: "Artist A",
+      artist_en: "Artist A EN",
       album: "Album X",
       sing: "Singer 1",
       tags: ["オリ曲", "ロック"],
@@ -44,7 +51,9 @@ describe("useSearch", () => {
     {
       video_id: "vid2",
       title: "Test Song 2",
+      title_en: "Second Song",
       artist: "Artist B",
+      artist_en: "Artist B",
       album: "Album Y",
       sing: "AZKi",
       tags: ["カバー"],
@@ -66,7 +75,9 @@ describe("useSearch", () => {
     {
       video_id: "vid3",
       title: "Winter Song",
+      title_en: "Winter Song",
       artist: "Artist A",
+      artist_en: "Artist A",
       album: "Album Z",
       sing: "Singer 2",
       tags: ["オリ曲"],
@@ -89,9 +100,49 @@ describe("useSearch", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useLocaleMock.mockReturnValue("ja");
     (useSearchParams as any).mockReturnValue({
       get: vi.fn(() => null),
     });
+  });
+
+  it("日本語モードではtitle_en/artist_enのみではヒットしない", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm("second song");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(0);
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("英語モードでは日本語と英語の両方で検索できる", async () => {
+    useLocaleMock.mockReturnValue("en");
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm("second song");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("vid2");
+      },
+      { timeout: 1000 },
+    );
+
+    act(() => {
+      result.current.setSearchTerm("artist a");
+    });
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(2);
+      },
+      { timeout: 1000 },
+    );
   });
 
   it("初期状態では全ての曲を返す", () => {

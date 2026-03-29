@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Song } from "../../types/song";
 import { FaDatabase, FaPlay, FaYoutube } from "react-icons/fa6";
 import { LoadingOverlay } from "@mantine/core";
@@ -12,6 +12,9 @@ import useSongs from "../../hook/useSongs";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { LuFolder } from "react-icons/lu";
 import DiscographyBreadcrumbs from "../components/DiscographyBreadcrumbs";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
+import { siteConfig } from "@/app/config/siteConfig";
 
 function resolveSongCategory(
   song: Song,
@@ -27,22 +30,15 @@ function buildSongDetailPath(song: Song): string {
   return `/discography/${category}/${encodeURIComponent(slug)}`;
 }
 
-function getCategoryBreadcrumb(song: Song): { label: string; href: string } {
+function getCategoryBreadcrumb(song: Song): { labelKey: string; href: string } {
   const category = resolveSongCategory(song);
   if (category === "originals") {
-    return { label: "オリジナル楽曲", href: "/discography/originals" };
+    return { labelKey: "originalsLabel", href: "/discography/originals" };
   }
   if (category === "collaborations") {
-    return { label: "ユニット・ゲスト楽曲", href: "/discography/collab" };
+    return { labelKey: "unitLabel", href: "/discography/collab" };
   }
-  return { label: "カバー楽曲", href: "/discography/covers" };
-}
-
-function formatDate(value?: string): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString();
+  return { labelKey: "coversLabel", href: "/discography/covers" };
 }
 
 export default function AlbumClient({
@@ -53,6 +49,12 @@ export default function AlbumClient({
   coverVideoId?: string;
 }) {
   const { allSongs, isLoading } = useSongs();
+  const t = useTranslations("Discography");
+  const locale = useLocale();
+  const tAlbum = useTranslations("DiscographyAlbum");
+  const tData = useTranslations("Data");
+  const tWatchDetail = useTranslations("Watch.nowPlayingSongInfoDetail");
+  const tWatch = useTranslations("Watch.nowPlayingSongInfo");
   const songs: Song[] = allSongs ?? [];
   const albumSongs = Array.from(
     new Map(
@@ -94,10 +96,10 @@ export default function AlbumClient({
   if (albumSongs.length === 0) {
     return (
       <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold">アルバムが見つかりません</h1>
-        <p className="text-sm text-gray-600">
-          指定されたアルバムの収録曲を取得できませんでした。
-        </p>
+        <h1 className="text-2xl font-bold">
+          {tAlbum("notFoundTitle", { site: siteConfig.siteName })}
+        </h1>
+        <p className="text-sm text-gray-600">{tAlbum("notFoundDescription")}</p>
       </div>
     );
   }
@@ -116,10 +118,13 @@ export default function AlbumClient({
   const categoryBreadcrumb = getCategoryBreadcrumb(leadSong);
 
   return (
-    <div className="p-6 w-full mx-auto">
+    <div className="grow min-h-0 w-full mx-auto overflow-auto p-6">
       <DiscographyBreadcrumbs
         items={[
-          { label: categoryBreadcrumb.label, href: categoryBreadcrumb.href },
+          {
+            label: t(categoryBreadcrumb.labelKey),
+            href: categoryBreadcrumb.href,
+          },
           {
             label: (
               <>
@@ -143,18 +148,21 @@ export default function AlbumClient({
           <h1 className="text-2xl font-extrabold mt-4 mb-2">{albumName}</h1>
           {!isCoverAlbum && (
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              アーティスト: {leadSong.artist}
+              {tWatchDetail("artist")} {leadSong.artist}
             </p>
           )}
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-            発売日: {formatDate(leadSong.album_release_at)}
+            {tData("table.album_release_at")} :{" "}
+            {formatDate(leadSong.album_release_at, locale)}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-            収録曲数: {albumSongs.length}曲
+            {t("tracksCount", { count: albumSongs.length })}
           </p>
           {updatedAt && (
             <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-              最終公開日: {new Date(updatedAt).toLocaleDateString("ja-JP")}
+              {tWatch("lastUpdated", {
+                date: formatDate(updatedAt, "ja"),
+              })}
             </p>
           )}
 
@@ -168,13 +176,13 @@ export default function AlbumClient({
               rel="noopener noreferrer"
               className="text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-full flex items-center justify-center"
             >
-              <FaYoutube className="mr-2" /> YouTubeで見る
+              <FaYoutube className="mr-2" /> {t("buttons.watchOnYouTube")}
             </Link>
             <Link
               href={`/watch?q=album:${encodeURIComponent(albumName)}&v=${leadSong.video_id}`}
               className="text-white bg-primary-600 hover:bg-primary-700 py-2 px-4 rounded-full flex items-center justify-center"
             >
-              <FaDatabase className="mr-2" /> データベースで見る
+              <FaDatabase className="mr-2" /> {t("buttons.viewInDatabase")}
             </Link>
           </div>
         </aside>
@@ -218,24 +226,36 @@ export default function AlbumClient({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1.5 leading-none"
                       >
-                        <FaYoutube className="text-xs" /> YouTube
+                        <FaYoutube className="text-xs" />{" "}
+                        {t("buttons.watchOnYouTube")}
                       </Link>
                       <Link
                         href={`/watch?v=${song.video_id}&q=album:${encodeURIComponent(song.album ?? "")}`}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold px-2.5 py-1.5 leading-none"
                       >
-                        <FaPlay className="text-xs" /> 再生
+                        <FaPlay className="text-xs" /> {t("buttons.play")}
                       </Link>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-1 text-xs text-gray-600 dark:text-light-gray-500 flex flex-wrap items-center gap-x-4 gap-y-1 pl-13 md:pl-14">
-                  <span>歌: {song.sing || "-"}</span>
-                  <span>作詞: {song.lyricist || "-"}</span>
-                  <span>作曲: {song.composer || "-"}</span>
-                  <span>編曲: {song.arranger || "-"}</span>
-                  <span>動画公開日: {formatDate(song.broadcast_at)}</span>
+                  <span>
+                    {tWatchDetail("singers") || "歌:"} {song.sing || "-"}
+                  </span>
+                  <span>
+                    {tWatchDetail("lyricist") || "作詞"}: {song.lyricist || "-"}
+                  </span>
+                  <span>
+                    {tWatchDetail("composer") || "作曲"}: {song.composer || "-"}
+                  </span>
+                  <span>
+                    {tWatchDetail("arranger") || "編曲"}: {song.arranger || "-"}
+                  </span>
+                  <span>
+                    {tWatchDetail("broadcastDate") || "動画公開日:"}{" "}
+                    {formatDate(song.broadcast_at, locale)}
+                  </span>
                 </div>
               </article>
             ))}

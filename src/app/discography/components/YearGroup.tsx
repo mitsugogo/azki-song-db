@@ -2,6 +2,7 @@ import { StatisticsItem } from "../createStatistics";
 import SongItem from "../SongItem";
 import SongDetails from "../SongDetails";
 import { getGridCols } from "../utils/gridHelpers";
+import { useTranslations } from "next-intl";
 
 interface YearGroupProps {
   year: string;
@@ -27,6 +28,7 @@ export default function YearGroup({
   targetRef,
   onItemClick,
 }: YearGroupProps) {
+  const t = useTranslations("Discography");
   const totalCount = groupItems.reduce(
     (sum, g) => sum + (g.song.count || 0),
     0,
@@ -44,7 +46,7 @@ export default function YearGroup({
           <div className="flex items-center">
             <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
             <div className="px-3 text-sm font-medium text-gray-600 dark:text-gray-300">
-              [{year}] ({totalCount}曲)
+              {t("yearHeader", { year, count: totalCount })}
             </div>
             <div className="flex-1 border-t border-gray-300 dark:border-gray-700" />
           </div>

@@ -5,6 +5,39 @@ import PlayerControlsBar from "../PlayerControlsBar";
 import { MantineProvider } from "@mantine/core";
 import type { Song } from "../../types/song";
 
+// i18n mock for useTranslations
+vi.mock("next-intl", () => ({
+  useLocale: () => "ja",
+  useTranslations:
+    () =>
+    (key: string): string => {
+      const dict: Record<string, string> = {
+        play: "再生",
+        pause: "一時停止",
+        nextSong: "次の曲へ",
+        volumeControl: "音量調整",
+        mute: "ミュート",
+        unmute: "ミュート解除",
+        songTitle: "曲名",
+        artist: "アーティスト",
+        enterTheaterMode: "シアターモードに切り替え",
+        exitTheaterMode: "シアターモードを終了",
+        settings: "設定",
+        spoilerFreeSetlist: "セトリネタバレ防止モード",
+        playlistAdded: "プレイリスト追加済み",
+        addToPlaylist: "プレイリストに追加",
+        playlist: "プレイリスト",
+        noPlaylists: "プレイリストはありません",
+        createNewPlaylist: "新しいプレイリストを作成",
+        menu: "メニュー",
+        removeFromFavorites: "お気に入りから削除",
+        addToFavorites: "お気に入りに追加",
+        shareCurrentSong: "現在の楽曲をシェア",
+      };
+      return dict[key] ?? key;
+    },
+}));
+
 // Mock Mantine hooks and components used
 vi.mock("@mantine/hooks", () => ({
   useClickOutside: (fn: any) => ({ current: null }),
@@ -56,12 +89,23 @@ const baseSong: Song = {
   video_title: "",
   video_uri: "",
   video_id: "vid1",
-  start: "0",
-  end: "",
+  start: 0,
+  end: 0,
   broadcast_at: "",
   year: 0,
   tags: [],
   milestones: [],
+  hl: {
+    ja: {
+      title: "",
+      artist: "",
+      album: undefined,
+      sing: undefined,
+      sings: undefined,
+    },
+    en: undefined,
+  },
+  sings: [],
 };
 
 // Polyfill matchMedia for Mantine internals in the test environment
@@ -96,7 +140,9 @@ describe("PlayerControlsBar", () => {
     onToggleTheaterMode = vi.fn() as unknown as () => void;
     setHideFutureSongs = vi.fn() as unknown as (value: boolean) => void;
     onVolumeChange = vi.fn() as unknown as (
-      e: React.ChangeEvent<HTMLInputElement>,
+      e:
+        | React.ChangeEvent<HTMLInputElement>
+        | React.SyntheticEvent<HTMLInputElement, Event>,
     ) => void;
     vi.clearAllMocks();
   });
@@ -243,8 +289,8 @@ describe("PlayerControlsBar", () => {
 
   it("hover tooltip and highlight align (absolute time mode)", () => {
     const songsInVideo = [
-      { ...baseSong, start: "10", title: "Song A" },
-      { ...baseSong, start: "40", title: "Song B" },
+      { ...baseSong, start: 10, title: "Song A" },
+      { ...baseSong, start: 40, title: "Song B" },
     ];
 
     // mount a small wrapper to let setHoveredChapter update hoveredChapter prop

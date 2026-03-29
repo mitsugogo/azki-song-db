@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Song } from "../types/song";
 import { fetchJsonDedup } from "../lib/fetchDedup";
 
@@ -10,6 +11,7 @@ let cachedSongsFetchedAt: string | null = null;
  * 曲データの取得と管理を行うカスタムフック
  */
 const useSongs = () => {
+  const locale = useLocale();
   const [allSongs, setAllSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
@@ -125,7 +127,9 @@ const useSongs = () => {
     // use shared dedup fetch util
     const startFetch = () => {
       if (!songsPromiseForUseSongs) {
-        songsPromiseForUseSongs = fetchJsonDedup<Song[]>("/api/songs");
+        songsPromiseForUseSongs = fetchJsonDedup<Song[]>(
+          `/api/songs?hl=${encodeURIComponent(locale || "ja")}`,
+        );
       }
 
       const p = songsPromiseForUseSongs;
@@ -169,7 +173,7 @@ const useSongs = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [locale]);
 
   return {
     allSongs,

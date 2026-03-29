@@ -1,0 +1,827 @@
+{
+  "Header": {
+    "toggleNavigation": "ナビゲーションを開く",
+    "searchPlaceholder": "曲名、アーティスト、タグなどで検索",
+    "languageSwitcher": "言語切替"
+  },
+  "DrawerMenu": {
+    "title": "メニュー",
+    "management": "管理機能",
+    "playlist": "プレイリスト",
+    "installApp": "アプリをインストール",
+    "about": "このサイトについて",
+    "soloLive": "ソロライブ！",
+    "reportIssue": "不具合報告",
+    "close": "閉じる",
+    "categoryActivity": "活動の記録",
+    "categoryShare": "シェア",
+    "home": "HOME",
+    "search": "検索",
+    "discography": "Discography",
+    "activity": "活動記録",
+    "anniversaries": "記念日",
+    "statistics": "統計情報",
+    "allData": "全収録データ",
+    "myBest9Songs": "究極の9曲"
+  },
+  "SearchInput": {
+    "search": "検索",
+    "groupArtist": "アーティスト",
+    "groupSinger": "歌った人",
+    "groupUnit": "ユニット",
+    "groupTitle": "曲名",
+    "groupLyricist": "作詞",
+    "groupComposer": "作曲",
+    "groupArranger": "編曲",
+    "groupTag": "タグ",
+    "groupMilestone": "マイルストーン",
+    "groupYear": "配信年",
+    "groupSeason": "季節"
+  },
+  "ThemeToggle": {
+    "label": "テーマ切替"
+  },
+  "FoldableToggle": {
+    "on": "折りたたみモード: ON",
+    "off": "折りたたみモード: OFF"
+  },
+  "Watch": {
+    "searchAndSongList": {
+      "randomOtherSong": "ランダムで他の曲にする",
+      "playlist": "プレイリスト",
+      "songList": "楽曲一覧",
+      "songsUnit": "曲",
+      "songsUnit_w/o_en": "曲",
+      "sortAscending": "昇順",
+      "sortDescending": "降順",
+      "search": "検索",
+      "close": "閉じる",
+      "createPlaylistLead": "プレイリストを作成して、自分だけのセットリストを作成しましょう！",
+      "createPlaylist": "プレイリストを作成",
+      "nowPlayingPlaylist": "♪ 「{name}」プレイリスト ({count}曲) を再生中",
+      "selectPlaylist": "再生するプレイリストを選択してください",
+      "favorites": "お気に入り",
+      "copyPlaylistUrl": "URLをコピーしてプレイリストをシェアできます",
+      "disablePlaylistMode": "プレイリスト再生モードを解除"
+    },
+    "songMode": {
+      "all": "全曲",
+      "original": "オリ曲",
+      "cover": "カバー曲",
+      "collaboration": "ユニット・ゲスト参加曲",
+      "karaoke": "歌枠",
+      "collabKaraoke": "コラボ歌枠",
+      "shorts": "楽曲紹介shorts",
+      "groupMode": "モード",
+      "groupTheme": "テーマ"
+    },
+    "nowPlayingSongInfo": {
+      "views": "{count} 回視聴",
+      "collapsedViews": "{count}万 回視聴",
+      "showMore": "続きを表示",
+      "collapse": "折りたたむ",
+      "subscribers": "チャンネル登録者 {count}",
+      "otherChannels": "他 {count} チャンネル",
+      "lastUpdated": "最終更新: {date}"
+    },
+    "nowPlayingSongInfoDetail": {
+      "title": "タイトル:",
+      "artist": "アーティスト:",
+      "credits": "作詞/作曲/編曲:",
+      "lyricist": "作詞",
+      "composer": "作曲",
+      "arranger": "編曲",
+      "album": "アルバム:",
+      "singers": "歌った人:",
+      "videoTitle": "動画タイトル:",
+      "broadcastDate": "配信日:",
+      "tags": "タグ:",
+      "milestones": "マイルストーン:",
+      "setlist": "セトリ:",
+      "clickToExpand": "クリックして展開",
+      "callResponse": "コーレス:",
+      "callBadge": "コール",
+      "callResponseHelp": "コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！",
+      "liveNote": "ライブノート:",
+      "additionalInfo": "追加情報:",
+      "timesSung": "歌った回数:",
+      "times": "回",
+      "videosWithSong": "この曲を歌った枠:"
+    },
+    "createPlaylistModal": {
+      "title": "新規プレイリストを作成",
+      "name": "プレイリスト名",
+      "placeholder": "プレイリスト名を入力...",
+      "duplicate": "同じ名前のプレイリストは作成できません",
+      "create": "作成"
+    },
+    "playerControls": {
+      "play": "再生",
+      "pause": "一時停止",
+      "nextSong": "次の曲へ",
+      "volumeControl": "音量調整",
+      "mute": "ミュート",
+      "unmute": "ミュート解除",
+      "songTitle": "曲名",
+      "artist": "アーティスト",
+      "enterTheaterMode": "シアターモードに切り替え",
+      "exitTheaterMode": "シアターモードを終了",
+      "settings": "設定",
+      "spoilerFreeSetlist": "セトリネタバレ防止モード",
+      "playlistAdded": "プレイリスト追加済み",
+      "addToPlaylist": "プレイリストに追加",
+      "playlist": "プレイリスト",
+      "noPlaylists": "プレイリストはありません",
+      "createNewPlaylist": "新しいプレイリストを作成",
+      "menu": "メニュー",
+      "removeFromFavorites": "お気に入りから削除",
+      "addToFavorites": "お気に入りに追加",
+      "shareCurrentSong": "現在の楽曲をシェア"
+    }
+  },
+  "Home": {
+    "brand": "AZKi VIRTUAL DiVA",
+    "heroLine1": "　音楽で辿る、",
+    "heroLine2": "　Virtual DiVA AZKiの軌跡。",
+    "description": "AZKiさんのオリジナル楽曲、コラボ・カバー楽曲、歌枠で歌唱したセットリストを収録した、非公式の楽曲データベースです。",
+    "searchButton": "検索する",
+    "searching": "検索中...",
+    "surpriseTooltip": "ランダムに楽曲を再生開始します",
+    "surpriseMe": "Surprise me",
+    "recommendedLabel": "RECOMMENDED",
+    "recommendedTitle": "おすすめ楽曲",
+    "recentUpdatesLabel": "Updates",
+    "recentUpdatesTitle": "更新情報",
+    "noRecentUpdates": "更新情報はありません",
+    "hololiveOfficial": "ホロライブ公式",
+    "statsLoading": "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中",
+    "stats": "収録楽曲数: {count}曲{date}",
+    "lastUpdated": " / 最終更新日: {date}"
+  },
+  "Metadata": {
+    "home": {
+      "description": "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      "ogSubtitle": "AZKiさんの歌の素晴らしさを伝えるサイト",
+      "ogAlt": "{siteName} - AZKiさんの歌の素晴らしさを伝えるサイト"
+    },
+    "watch": {
+      "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、ビデオIDでコンテンツを表示します。",
+      "ogSubtitle": "視聴ページ - {siteName}",
+      "ogAlt": "{siteName} - 視聴ページ",
+      "mode": {
+        "original": {
+          "title": "オリジナル曲モード | {siteName}",
+          "ogTitle": "オリジナル曲モード",
+          "ogSubtitle": "AZKiさんのオリジナル楽曲を集めたプレイリスト"
+        },
+        "cover": {
+          "title": "カバー曲モード | {siteName}",
+          "ogTitle": "カバー曲モード",
+          "ogSubtitle": "AZKiさんのカバー楽曲を集めたプレイリスト"
+        },
+        "collab": {
+          "title": "コラボ曲モード | {siteName}",
+          "ogTitle": "コラボ曲モード",
+          "ogSubtitle": "AZKiさんのコラボ楽曲を集めたプレイリスト"
+        }
+      },
+      "search": {
+        "prefixTitle": "{term}の検索結果 | {siteName}",
+        "prefixOgTitle": "{icon} {term}の検索結果",
+        "queryTitle": "「{q}」の検索結果 | {siteName}",
+        "queryOgTitle": "「{q}」の検索結果"
+      },
+      "song": {
+        "description": "{videoTitle} (配信日時:{date})",
+        "ogSubtitle": "{videoTitle} (配信日時:{date})"
+      },
+      "playlist": {
+        "title": "プレイリスト「{name}」 | {siteName}",
+        "ogTitle": "📒 {name}",
+        "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト"
+      }
+    },
+    "discography": {
+      "title": "楽曲一覧 | {siteName}",
+      "description": "これまでに配信・公開された楽曲の一覧ページです。オリジナル・カバー・コラボを含みます。",
+      "ogSubtitle": "楽曲一覧 - {siteName}",
+      "ogAlt": "{siteName} - 楽曲一覧"
+    },
+    "search": {
+      "description": "曲名、アーティスト、タグなどで楽曲を検索できます。",
+      "ogSubtitle": "検索結果 - {siteName}",
+      "ogAlt": "{siteName} - 検索結果"
+    },
+    "data": {
+      "description": "データベースに収録された情報を一覧表示します。",
+      "ogSubtitle": "データ一覧 - {siteName}",
+      "ogAlt": "{siteName} - データ一覧"
+    },
+    "share": {
+      "myBest9Title": "究極の9曲ジェネレーター | {siteName}",
+      "myBest9TitleWithSite": "究極の9曲ジェネレーター | {siteName}",
+      "myBest9WithTopic": "お題:「{title}」 | 究極の9曲ジェネレーター | {siteName}",
+      "myBest9OgTitle": "究極の9曲ジェネレーター",
+      "myBest9OgWithTopic": "お題:「{title}」",
+      "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
+      "myBest9Description": "AZKiの好きな曲をシェアしています"
+    },
+    "summary": {
+      "title": "活動記録",
+      "description": "その年のAZKiさんの活動（収録楽曲数・カバー/オリ曲など）をまとめています",
+      "yearTitle": "AZKiさんの{year}年の歌の活動",
+      "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました"
+    },
+    "anniversaries": {
+      "title": "記念日",
+      "description": "AZKiさんの活動や楽曲に関する記念日を一覧表示します。",
+      "ogSubtitle": "記念日一覧 - {siteName}",
+      "ogAlt": "{siteName} - 記念日一覧"
+    },
+    "playlist": {
+      "title": "プレイリスト",
+      "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
+    }
+  },
+  "Share": {
+    "share": {
+      "loading": "読み込み中...",
+      "notFoundTitle": "シェアが見つかりません",
+      "notFoundDescription": "データの読み込みに失敗しました",
+      "backToHome": "ホームに戻る",
+      "songsCount": "{count}曲",
+      "missingCount": "({count}曲が見つかりません)",
+      "noSongsFound": "曲が見つかりませんでした",
+      "createFromTopic": "このお題で9選を作成する"
+    },
+    "copied": "コピーしました！",
+    "index": {
+      "title": "共有",
+      "description": "楽曲の選択結果をSNSで共有できる機能です。"
+    },
+    "features": {
+      "myBest9": {
+        "title": "究極の9曲ジェネレーター",
+        "description": "オリジナル曲・カバー曲・ユニット曲・歌枠の中から好きな9曲を選んで、SNSで共有できます。"
+      }
+    },
+    "myBest9": {
+      "defaultTitle": "私が選んだ究極の9曲",
+      "unknownBroadcastDate": "配信日不明",
+      "pageTitle": "究極の9曲ジェネレーター",
+      "lead": "オリジナル曲や歌枠から、最大9曲を選んでSNSで共有できます",
+      "selectedSongsTitle": "選択済みの曲",
+      "play": "再生",
+      "clickToRemove": "クリックで削除",
+      "form": {
+        "titleLabel": "タイトル",
+        "titlePlaceholder": "例: 私が選んだ究極の九曲",
+        "authorLabel": "作成者名（任意）",
+        "authorPlaceholder": "例: みつごご"
+      },
+      "tooltip": {
+        "copyThemeUrl": "このタイトルで回答を募集するURLをコピー",
+        "copyToClipboard": "クリップボードにコピー"
+      },
+      "button": {
+        "copyThemeUrl": "このお題を募集するURLをコピー",
+        "copy": "コピー",
+        "shareOnX": "X（Twitter）でシェア",
+        "saving": "保存中...",
+        "generated": "共有URL作成済み",
+        "generate": "共有URLを生成",
+        "reset": "リセット"
+      },
+      "selectedCount": "選択済み: {count}/9",
+      "status": {
+        "selected": "選択中",
+        "unselected": "未選択"
+      },
+      "generatedUrlTitle": "共有URL",
+      "tip": {
+        "previewHelp": "作成したURLをSNSで共有すると、プレビュー画面に9曲のサムネイルが表示されます"
+      },
+      "selectSongsTitle": "曲を選択 ({count}/9)",
+      "filters": {
+        "all": "全て",
+        "original": "オリ曲",
+        "cover": "カバー曲",
+        "unitGuest": "ユニット・ゲスト曲",
+        "liveSinging": "歌枠",
+        "collaboration": "コラボ"
+      },
+      "search": {
+        "placeholder": "曲名、アーティストなどで検索"
+      },
+      "displaying": "表示中: {count}曲",
+      "totalSuffix": "曲",
+      "alerts": {
+        "titleRequired": "タイトルを入力してください",
+        "selectAtLeastOne": "最低1曲は選択してください",
+        "saveFailed": "共有データの保存に失敗しました"
+      }
+    }
+  },
+  "Playlist": {
+    "title": "プレイリスト",
+    "manageTitle": "プレイリストの管理",
+    "favoritesName": "お気に入り",
+    "aria": {
+      "selectPlaylist": "プレイリストを選択",
+      "selectRow": "行を選択"
+    },
+    "createNew": "新規プレイリスト作成",
+    "deleteSelected": "選択したプレイリストを削除",
+    "confirmDelete": "選択した{count}個のプレイリストを削除します。よろしいですか?",
+    "songsLabel": "曲数:",
+    "updatedLabel": "更新日:",
+    "copyUrl": "共有用URLコピー",
+    "copied": "コピーしました",
+    "head": {
+      "play": "再生",
+      "index": "#",
+      "name": "プレイリスト名",
+      "songs": "曲数",
+      "createdAt": "作成日",
+      "updatedAt": "最終更新",
+      "shareUrl": "共有URL"
+    },
+    "deletedTitle": "プレイリストを削除しました",
+    "urlCopiedTitle": "共有用URLをコピーしました",
+    "detail": {
+      "notFound": "このIDのプレイリストは見つかりません",
+      "deleteSelectedSongs": "選択した曲を削除",
+      "clearAllSongs": "プレイリスト内の曲をすべて削除",
+      "preview": "プレビュー",
+      "youtube": "YouTube",
+      "streamed": "配信",
+      "header": "#{id} のプレイリスト: {name}",
+      "breadcrumbTitle": "#{id} ({name})",
+      "table": {
+        "sort": "並べ替え",
+        "selectAll": "全選択/解除",
+        "trackArtist": "曲/アーティスト",
+        "video": "動画",
+        "empty": "プレイリスト内に曲がありません"
+      }
+    }
+  },
+  "SearchBrowse": {
+    "title": "検索",
+    "summary": "楽曲を検索できます。全{countSongs}曲、{countVideos}動画を収録。",
+    "seeMore": "» もっと見る",
+    "noResults": "該当する曲がありません",
+    "filters": {
+      "category": "カテゴリー",
+      "title": "曲名",
+      "artist": "アーティスト",
+      "tag": "タグ",
+      "singer": "歌った人",
+      "collab": "コラボ・ユニット",
+      "notSungForYear": "1年以上歌ってない曲"
+    },
+    "timesSuffix": "回",
+    "songsSuffix": "曲",
+    "lastSungLabel": "最終配信日:"
+  },
+  "SearchResults": {
+    "labelWithQuery": "「{term}」の検索結果",
+    "title": "検索結果",
+    "foundCount": "{count} 件の楽曲が見つかりました"
+  },
+  "Discography": {
+    "entryDescription": "{title} - {artist}の楽曲情報",
+    "homeLabel": "HOME",
+    "breadcrumb": "楽曲一覧",
+    "title": "Discography",
+    "description": "これまでに配信された楽曲の一覧です。オリジナル楽曲、コラボ・カバー楽曲、歌枠で歌唱したセットリストを収録しています。",
+    "tabs": {
+      "all": "すべて ({count})",
+      "originals": "オリジナル楽曲 ({count})",
+      "unit": "ユニット・ゲスト楽曲 ({count})",
+      "covers": "カバー楽曲 ({count})"
+    },
+    "originalsLabel": "オリジナル楽曲",
+    "unitLabel": "ユニット・ゲスト楽曲",
+    "coversLabel": "カバー楽曲",
+    "songsSuffix": "曲",
+    "viewsSuffix": "回再生",
+    "controls": {
+      "groupByAlbum": "アルバムごとに表示",
+      "groupByYear": "年ごとに区切る",
+      "onlyOriginalMV": "オリ曲MVのみ"
+    },
+    "tabDescriptions": {
+      "originals": "オリジナル楽曲の一覧です。",
+      "unit": "ユニット・ゲスト楽曲の一覧です。",
+      "covers": "カバー楽曲の一覧です。"
+    },
+    "yearHeader": "{year}年 ({count}曲)",
+    "unknownYear": "不明",
+    "table": {
+      "songName": "曲名",
+      "artist": "アーティスト",
+      "lyricist": "作詞",
+      "composer": "作曲",
+      "arranger": "編曲",
+      "notFoundTitle": "楽曲が見つかりません",
+      "notFoundDescription": "指定された楽曲は存在しません。",
+      "thumbnailClickTitle": "クリックして拡大",
+      "buttons": {
+        "play": "再生",
+        "share": "シェア",
+        "watchOnYouTube": "YouTubeで見る"
+      },
+      "relatedVideos": "関連動画",
+      "relatedStreamsTitle": "この曲を歌った歌枠 ({count})",
+      "videoDate": "動画公開日"
+    },
+    "covers": "カバー楽曲 ({count})",
+    "relatedStreamsTitle": "この曲を歌った歌枠 ({count})",
+    "buttons": {
+      "watchOnYouTube": "YouTubeで見る",
+      "viewInDatabase": "データベースで見る",
+      "play": "再生",
+      "share": "シェア"
+    },
+    "badge": {
+      "thisCombination": "この組み合わせ"
+    },
+    "labels": {
+      "publishedDate": "公開日:",
+      "releaseDate": "リリース日:",
+      "cover": "カバー:"
+    },
+    "thumbnailClickTitle": "クリックして拡大",
+    "tracksCount": "収録曲数: {count}曲",
+    "stats": {
+      "title": "統計",
+      "updatedNote": "毎日0:00～1:00(JST)ぐらいに更新",
+      "periods": {
+        "7d": "7日",
+        "30d": "30日",
+        "365d": "365日",
+        "all": "全期間"
+      },
+      "yesterdayDiffLabel": "前日差",
+      "yesterdayPctLabel": "前日比",
+      "yesterdayPctNone": "前日比: —",
+      "yesterdayDiffNone": "前日差: —",
+      "milestoneReached": "{label}",
+      "startFromZeroLabel": "0から: {state}",
+      "stateOn": "ON",
+      "stateOff": "OFF",
+      "metrics": {
+        "viewCount": "再生数",
+        "likeCount": "高評価数",
+        "commentCount": "コメント"
+      },
+      "achievedOnLabel": "達成日"
+    },
+    "notFoundDescription": "指定された楽曲は存在しません。",
+    "notFoundTitle": "楽曲がありません",
+    "relatedVideos": "関連動画"
+  },
+  "DiscographyAlbum": {
+    "notFoundTitle": "アルバムが見つかりません | {site}",
+    "notFoundDescription": "指定されたアルバムの収録曲を取得できませんでした。",
+    "descriptionPattern": "{album} の収録曲 {count} 曲を表示します。"
+  },
+  "Data": {
+    "homeLabel": "HOME",
+    "breadcrumb": "収録データ",
+    "title": "全収録データ",
+    "description": "本データベースの情報を表示しています。",
+    "searchPlaceholder": "検索...",
+    "table": {
+      "index": "#",
+      "play": "再生",
+      "title": "タイトル",
+      "artist": "アーティスト",
+      "lyricist": "作詞",
+      "composer": "作曲",
+      "arranger": "編曲",
+      "sing": "歌った人",
+      "album": "アルバム",
+      "album_list_uri": "アルバム一覧URI",
+      "link": "リンク",
+      "album_release_at": "アルバム発売日",
+      "album_is_compilation": "コンピレーション",
+      "video_title": "動画タイトル",
+      "start": "開始タイムスタンプ",
+      "end": "終了タイムスタンプ",
+      "tags": "タグ",
+      "broadcast_at": "公開日",
+      "milestones": "マイルストーン",
+      "year": "年",
+      "view_count": "再生数"
+    }
+  },
+  "Anniversaries": {
+    "homeLabel": "HOME",
+    "breadcrumb": "記念日",
+    "title": "記念日",
+    "description": "AZKiさんに縁がある記念日をまとめました。",
+    "featuredTitle": "もっとも近い記念日",
+    "countdownFormat": "あと {days}日 {hours}時間 {minutes}分 {seconds}秒",
+    "countdownFinished": "まもなくです",
+    "loading": "記念日データを読み込み中...",
+    "empty": "表示できる記念日はありません。",
+    "nextDateLabel": "次回",
+    "daysUntil": "あと{days}日",
+    "daysUntilLabel": "あと何日",
+    "anniversaryNameLabel": "記念日",
+    "firstDateLabel": "初回",
+    "noteLabel": "メモ",
+    "linkLabel": "リンク",
+    "openLink": "リンク"
+  },
+  "Statistics": {
+    "title": "統計情報",
+    "selectTabAriaLabel": "統計タブ選択",
+    "backToTopAriaLabel": "ページ上部へ戻る",
+    "units": {
+      "times": "回",
+      "songs": "曲"
+    },
+    "page": {
+      "title": "統計情報",
+      "description": "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
+      "home": "HOME"
+    },
+    "overview": {
+      "latestUpdated": "最新更新",
+      "achievedInLast7Days": "直近7日で達成",
+      "estimatedAchievement": "達成見込み",
+      "none": "該当なし",
+      "openThumbnailOnYoutube": "{title} のサムネイルをYouTubeで開く",
+      "milestoneLabelJa": "{count}万再生達成",
+      "milestoneLabel": "{count}再生達成",
+      "songCounts": {
+        "primaryLabel": "曲の種類",
+        "totalCountLabel": "総歌唱回数",
+        "topLabel": "最多曲",
+        "countUnit": "回"
+      },
+      "artistCounts": {
+        "primaryLabel": "アーティスト数",
+        "totalCountLabel": "総歌唱回数",
+        "topLabel": "最多アーティスト",
+        "countUnit": "回"
+      },
+      "originalSongCounts": {
+        "primaryLabel": "オリ曲数",
+        "totalCountLabel": "総歌唱回数",
+        "topLabel": "最多オリ曲",
+        "countUnit": "回"
+      },
+      "tagCounts": {
+        "primaryLabel": "タグ数",
+        "totalCountLabel": "総収録回数",
+        "topLabel": "最多タグ",
+        "countUnit": "件"
+      },
+      "milestoneCounts": {
+        "primaryLabel": "マイルストーン数",
+        "totalCountLabel": "総登場回数",
+        "topLabel": "最新マイルストーン",
+        "countUnit": "回"
+      },
+      "videoCounts": {
+        "primaryLabel": "動画数",
+        "totalCountLabel": "総歌唱回数",
+        "topLabel": "最多動画",
+        "countUnit": "回"
+      },
+      "originalSongCountsByReleaseDate": {
+        "primaryLabel": "収録楽曲数",
+        "totalCountLabel": "総歌唱回数",
+        "countUnit": "回"
+      },
+      "coverSongCountsByReleaseDate": {
+        "primaryLabel": "収録楽曲数",
+        "totalCountLabel": "総歌唱回数",
+        "countUnit": "回"
+      },
+      "default": {
+        "primaryLabel": "項目数",
+        "totalCountLabel": "総回数",
+        "topLabel": "最多項目",
+        "countUnit": "回"
+      }
+    },
+    "table": {
+      "searchPlaceholder": "検索...",
+      "noResultsWithQuery": "「{query}」に一致する結果は見つかりませんでした。",
+      "noData": "表示できるデータがありません。"
+    },
+    "columns": {
+      "songName": "曲名",
+      "artistName": "アーティスト名",
+      "artist": "アーティスト",
+      "count": "回数",
+      "latest": "最新",
+      "tag": "タグ",
+      "recordedCount": "収録数",
+      "milestone": "マイルストーン",
+      "achievedDate": "達成日",
+      "video": "動画",
+      "songCount": "曲数",
+      "broadcastDate": "配信日",
+      "detail": "詳細",
+      "viewCount": "再生回数",
+      "viewCountLabel": "再生回数ラベル",
+      "releaseOrPremiereDate": "リリース日/初公開日",
+      "singers": "歌った人"
+    },
+    "tabs": {
+      "songCounts": {
+        "title": "曲名別",
+        "caption": "曲名別",
+        "description": "曲名ごとで歌った回数です"
+      },
+      "artistCounts": {
+        "title": "アーティスト名別",
+        "caption": "アーティスト名別",
+        "description": "アーティストごとで歌った回数です"
+      },
+      "originalSongCounts": {
+        "title": "オリ曲（回数）",
+        "caption": "オリ曲（回数）",
+        "description": "オリジナル楽曲の歌った回数です"
+      },
+      "tagCounts": {
+        "title": "タグ",
+        "caption": "タグ",
+        "description": "タグがつけられている動画です"
+      },
+      "milestoneCounts": {
+        "title": "マイルストーン",
+        "caption": "マイルストーン",
+        "description": "活動の節目となった配信"
+      },
+      "videoCounts": {
+        "title": "収録動画",
+        "caption": "収録動画",
+        "description": "現在データベースに収録されている動画一覧です"
+      },
+      "originalByRelease": {
+        "title": "オリ曲",
+        "caption": "オリ曲",
+        "description": "オリジナル楽曲のリリース日 または 動画初公開日 です。MVとアートトラックを収録しているため、同一曲でも重複があります。"
+      },
+      "coverByRelease": {
+        "title": "カバー楽曲",
+        "caption": "カバー楽曲",
+        "description": "カバー楽曲のリリース日 または 動画初公開日 です"
+      }
+    },
+    "renderers": {
+      "lastVideoCell": {
+        "none": "なし",
+        "youtube": "YouTube",
+        "play": "再生"
+      },
+      "viewCountCell": {
+        "remaining": "あと {count} 再生",
+        "estimatedAt": "達成見込み: {date}",
+        "achievedAt": "達成日: {date}",
+        "milestoneJa": "{count}万再生達成",
+        "milestone": "{count}再生達成"
+      }
+    }
+  },
+  "Footer": {
+    "disclaimer": "本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。"
+  },
+  "Summary": {
+    "timelineTitle": "活動年表",
+    "yearSuffix": "年",
+    "monthSuffix": "ヶ月",
+    "daySuffix": "日",
+    "songsSuffix": "曲",
+    "daysActiveLabel": "活動日数:",
+    "daysSuffix": "日",
+    "homeLabel": "HOME",
+    "page": {
+      "title": "活動記録",
+      "description": "各年ごとの活動の要約ページです。年をクリックすると詳細ページへ移動します。",
+      "activityDays": "活動日数: {days} 日目（2018/11/15 から {duration} 経過）"
+    },
+    "duration": "{years}年{months}ヶ月{days}日",
+    "yearCards": {
+      "recordedSongsLabel": "収録楽曲",
+      "sungInStreamsLabel": "歌枠で歌った曲数",
+      "guestSongsLabel": "ゲストで歌った曲数",
+      "originalSongsLabel": "オリジナル楽曲",
+      "coversLabel": "カバー楽曲"
+    },
+    "milestonesTitle": "マイルストーン",
+    "frequentSongsTitle": "歌枠でよく歌った楽曲",
+    "frequentArtistsTitle": "歌枠でよく歌ったアーティスト",
+    "collabCountsTitle": "歌でよくコラボしたホロメン・アーティスト",
+    "monthsTitle": "月別の歌唱曲数",
+    "monthOfYearSuffix": "月",
+    "originalAndCoverMV": "オリ曲・カバー曲MV",
+    "originalLabel": "オリ曲",
+    "coverLabel": "カバー曲",
+    "collaborativeLabel": "コラボ・デュエット・ゲスト参加 ({count})",
+    "videosTitle": "{year}年の動画",
+    "viewModeTile": "タイル",
+    "viewModeList": "リスト",
+    "searchPlaceholder": "検索ワードを入力",
+    "clearButtonLabel": "クリア",
+    "noData": "データがありません。",
+    "routes": {
+      "alpha": "ルートα",
+      "beta": "ルートβ",
+      "gamma": "ルートγ",
+      "new": "新たなルート"
+    },
+    "visuals": {
+      "first": "1st衣装",
+      "second": "2nd衣装",
+      "third": "3rd衣装",
+      "fourth": "4th衣装"
+    }
+  },
+  "Acknowledgment": {
+    "intro": {
+      "p1": "本サイトは有志による非公式のファンサイトです。",
+      "p2": "ホロライブ所属のAZKiさんの素敵な歌声を、もっと多くの方々に知ってもらうために制作しました。",
+      "p3": "気になった歌や動画はどんどんSNSにシェアして、AZKiさんの活動を応援しましょう！"
+    },
+    "video": {
+      "heading": "動画について",
+      "p1": "動画やアーカイブはホロライブプロダクション様及び、AZKi様、各チャンネルの管理者が制作・配信したものです。",
+      "p2": "動画の権利は所有者に帰属します。また、制作者が動画を非公開にした場合は閲覧できなくなります。",
+      "p3": "本サイトでは、第三者による動画（いわゆる切り抜き動画）ではなく、公式で公開されている動画を掲載しています。"
+    },
+    "aggregation": {
+      "heading": "集計について",
+      "p1": "集計対象は、YouTube上で一般公開されている歌枠・記念ライブ・生放送・Music Video・カバー楽曲・MV・ゲスト出演など、AZKiさんの歌唱動画を対象にしています。",
+      "p2": "「0期生記念ライブ」など一部の配信については、AZKiさんが歌唱していない部分も収録している場合があります。",
+      "p3": "メンバーシップ限定動画や非公開動画、有料配信など広く閲覧できない動画は対象外としています。",
+      "p4": "集計は手作業で行っているため、更新の遅延や誤り、表記揺れなどがあるかもしれません。",
+      "contact": {
+        "prefix": "情報の不足や誤りに気づいた場合は、",
+        "and": "や",
+        "github": "GitHub",
+        "suffix": "までご連絡ください。"
+      }
+    },
+    "icon": {
+      "heading": "アイコンについて",
+      "p1": {
+        "prefix": "アイコンは、",
+        "linkText": "わいす / Ys (@YsWeissYs)",
+        "suffix": "さんにご提供いただいたアイコンを使用しています。"
+      },
+      "p2": "ソースコードはMIT LICENSEですが、アイコンについては適用されませんのでご注意ください。"
+    },
+    "changelog": {
+      "heading": "更新履歴",
+      "linkText": "CHANGELOG",
+      "suffix": "を参照"
+    },
+    "admin": {
+      "heading": "管理者",
+      "github": "GitHub",
+      "twitter": "(@mitsugogo)"
+    },
+    "license": {
+      "heading": "ライセンス",
+      "p1": {
+        "prefix": "MIT",
+        "linkText": "LICENSE"
+      }
+    }
+  },
+  "myBest9": {
+    "unknownBroadcastDate": "配信日不明"
+  },
+  "FilterExtra": {
+    "lastSungLabel": "最新:"
+  },
+  "suffixes": {
+    "songs": "曲",
+    "times": "回"
+  },
+  "SearchPage": {
+    "originalSongs": "オリ曲",
+    "coverSongs": "歌ってみた",
+    "coverCollab": "歌ってみたコラボ",
+    "karaoke": "歌枠",
+    "anniversaryLive": "記念ライブ",
+    "guestAppearance": "ゲスト出演",
+    "ballad": "しっとり",
+    "acoustic": "アコースティック・生演奏"
+  },
+  "ShareModal": {
+    "title": "シェア",
+    "description": "AZKiさんの素敵な歌声をシェアしましょう！",
+    "youtubeUrl": "YouTube URL",
+    "copied": "コピーしました！",
+    "close": "閉じる"
+  }
+}

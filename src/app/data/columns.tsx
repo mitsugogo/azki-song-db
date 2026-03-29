@@ -1,12 +1,11 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { Song } from "../types/song";
 import { Badge } from "flowbite-react";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
-
-const formatDate = (v?: string) =>
-  v ? new Date(v).toLocaleDateString("ja-JP") : "-";
+type TFuncLike = (key: string, values?: Record<string, any>) => string;
+import { formatDate } from "../lib/formatDate";
 const formatTimeFromSeconds = (s?: string) => {
   if (!s) return "-";
   const n = parseInt(s || "0");
@@ -35,15 +34,15 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
   );
 };
 
-export const columns: ColumnDef<Song>[] = [
+export const getColumns = (t: TFuncLike): ColumnDef<Song>[] => [
   {
     id: "index",
-    header: "#",
+    header: t("table.index"),
     cell: (info) => info.row.index + 1,
     size: 80,
   },
   {
-    header: "再生",
+    header: t("table.play"),
     cell: (info) => (
       <Link
         href={`/watch?v=${info.row.original.video_id}${Number(info.row.original.start) > 0 ? `&t=${info.row.original.start}` : ""}`}
@@ -56,7 +55,7 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "title",
-    header: "タイトル",
+    header: t("table.title"),
     cell: (info) => (
       <Link
         href={`/search?q=title:${info.getValue<string>()}`}
@@ -70,7 +69,7 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "artist",
-    header: "アーティスト",
+    header: t("table.artist"),
     cell: (info) => (
       <Link
         href={`/search?q=artist:${info.getValue<string>()}`}
@@ -84,28 +83,28 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "lyricist",
-    header: "作詞",
+    header: t("table.lyricist"),
     cell: (info) => info.getValue<string>() || "",
     size: 200,
     enableResizing: true,
   },
   {
     accessorKey: "composer",
-    header: "作曲",
+    header: t("table.composer"),
     cell: (info) => info.getValue<string>() || "",
     size: 200,
     enableResizing: true,
   },
   {
     accessorKey: "arranger",
-    header: "編曲",
+    header: t("table.arranger"),
     cell: (info) => info.getValue<string>() || "",
     size: 200,
     enableResizing: true,
   },
   {
     accessorKey: "sing",
-    header: "歌った人",
+    header: t("table.sing"),
     size: 300,
     cell: (info) => (
       <div>
@@ -126,7 +125,7 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "album",
-    header: "アルバム",
+    header: t("table.album"),
     size: 150,
     cell: (info) => (
       <Link
@@ -139,11 +138,11 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "album_list_uri",
-    header: "アルバム一覧URI",
+    header: t("table.album_list_uri"),
     cell: (info) =>
       info.getValue<string>() ? (
         <Link href={info.getValue<string>()} target="_blank" rel="noreferrer">
-          リンク
+          {t("table.link")}
         </Link>
       ) : (
         ""
@@ -152,18 +151,18 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "album_release_at",
-    header: "アルバム発売日",
+    header: t("table.album_release_at"),
     cell: (info) =>
       info.getValue() ? formatDate(info.getValue<string>()) : "",
     size: 150,
   },
   {
     accessorKey: "album_is_compilation",
-    header: "コンピレーション",
+    header: t("table.album_is_compilation"),
     cell: (info) =>
       info.getValue<boolean>() ? (
         <Badge color="info" size="xs">
-          Compilation
+          {t("table.album_is_compilation")}
         </Badge>
       ) : (
         ""
@@ -172,7 +171,7 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "video_title",
-    header: "動画タイトル",
+    header: t("table.video_title"),
     cell: (info) => (
       <Link
         href={`https://www.youtube.com/watch?v=${info.row.original.video_id}`}
@@ -188,35 +187,35 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "start",
-    header: "開始タイムスタンプ",
+    header: t("table.start"),
     enableSorting: false,
     cell: (info) => formatTimeFromSeconds(info.getValue<string>()),
     size: 120,
   },
   {
     accessorKey: "end",
-    header: "終了タイムスタンプ",
+    header: t("table.end"),
     enableSorting: false,
     cell: (info) => formatTimeFromSeconds(info.getValue<string>()),
     size: 120,
   },
   {
     accessorKey: "tags",
-    header: "タグ",
+    header: t("table.tags"),
     cell: (info) => renderArrayBadges(info.getValue<string[]>(), "tag"),
     size: 350,
     enableResizing: true,
   },
   {
     accessorKey: "broadcast_at",
-    header: "公開日",
+    header: t("table.broadcast_at"),
     cell: (info) =>
       info.getValue() ? formatDate(info.getValue<string>()) : "-",
     size: 120,
   },
   {
     accessorKey: "milestones",
-    header: "マイルストーン",
+    header: t("table.milestones"),
     cell: (info) =>
       info.getValue<string[]>()?.length > 0
         ? info.getValue<string[]>()?.map((m, index) => (
@@ -235,17 +234,17 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     accessorKey: "year",
-    header: "年",
+    header: t("table.year"),
     cell: (info) =>
       info.getValue<number>() ? String(info.getValue<number>()) : "",
     size: 80,
   },
   {
     accessorKey: "view_count",
-    header: "再生数",
+    header: t("table.view_count"),
     cell: (info) => formatNumber(info.getValue<number>()),
     size: 120,
   },
 ];
 
-export default columns;
+export default getColumns;

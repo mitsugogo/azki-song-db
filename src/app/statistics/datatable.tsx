@@ -15,10 +15,11 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { Badge, TextInput } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { BsPlayCircle } from "react-icons/bs";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
+import { useTranslations } from "next-intl";
 
 export default function DataTable<
   T extends
@@ -51,6 +52,7 @@ export default function DataTable<
   visualMode?: "default" | "ranked" | "viewCountBar";
   countUnit?: string;
 }) {
+  const t = useTranslations("Statistics.table");
   type ColumnSort = { id: string; desc: boolean };
 
   const initialSorting = useMemo(() => {
@@ -153,7 +155,11 @@ export default function DataTable<
 
   const maxViewCount = useMemo(() => {
     return data.reduce((max, item) => {
-      const viewCount = Number((item as StatisticsItem)?.song?.view_count ?? 0);
+      const viewCount = Number(
+        (item as StatisticsItem)?.effectiveViewCount ??
+          (item as StatisticsItem)?.song?.view_count ??
+          0,
+      );
       if (!Number.isFinite(viewCount)) return max;
       return Math.max(max, viewCount);
     }, 0);
@@ -185,7 +191,7 @@ export default function DataTable<
       <div className="grow mt-3">
         <div className="py-2 lg:mb-3 lg:py-0 text-sm font-normal">
           <TextInput
-            placeholder="検索..."
+            placeholder={t("searchPlaceholder")}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             className="max-w-sm"
@@ -250,8 +256,8 @@ export default function DataTable<
             {rows.length === 0 ? (
               <div className="px-6 py-10 text-center text-sm text-light-gray-700 dark:text-light-gray-400">
                 {inputValue.trim().length > 0
-                  ? `「${inputValue.trim()}」に一致する結果は見つかりませんでした。`
-                  : "表示できるデータがありません。"}
+                  ? t("noResultsWithQuery", { query: inputValue.trim() })
+                  : t("noData")}
               </div>
             ) : (
               <div
@@ -419,8 +425,7 @@ export default function DataTable<
                                 {songs
                                   .filter((s) => s.video_id === selectedVideoId)
                                   .sort(
-                                    (a, b) =>
-                                      parseInt(a.start) - parseInt(b.start),
+                                    (a, b) => Number(a.start) - Number(b.start),
                                   )
                                   .map((s) => (
                                     <div
@@ -439,7 +444,7 @@ export default function DataTable<
                                         </Link>
                                       </div>
                                       <div className="shrink-0 w-32 px-3 py-1 text-sm">
-                                        {new Date(parseInt(s.start) * 1000)
+                                        {new Date(Number(s.start) * 1000)
                                           .toISOString()
                                           .substring(11, 19)}
                                       </div>

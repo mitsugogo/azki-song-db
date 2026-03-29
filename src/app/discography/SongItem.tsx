@@ -1,7 +1,7 @@
 "use client";
 
 import { FaCompactDisc, FaMusic, FaPlay } from "react-icons/fa6";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { StatisticsItem } from "./createStatistics";
@@ -11,6 +11,9 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "../config/filters";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
+import { normalizeSongTitle } from "./utils/normalizeSongTitle";
 
 const SongItem = ({
   song,
@@ -24,18 +27,24 @@ const SongItem = ({
   onClick: (key: string) => void;
 }) => {
   const router = useRouter();
+  const t = useTranslations("Discography");
+  const locale = useLocale();
   const albumSlug = song.firstVideo.album ? slugify(song.firstVideo.album) : "";
+  const displayTitle = normalizeSongTitle(
+    song.firstVideo.title,
+    song.firstVideo.artist,
+  );
 
-  const getSongPath = () => {
-    const target = song.firstVideo;
-    const slug = target.slugv2 || target.slug || slugify(target.title);
+  const getSongPath = (target?: typeof song.firstVideo) => {
+    const video = target ?? song.firstVideo;
+    const slug = video.slugv2 || video.slug || slugify(video.title);
     if (!slug) return null;
 
-    const category = isPossibleOriginalSong(target)
+    const category = isPossibleOriginalSong(video)
       ? "originals"
-      : isCollaborationSong(target)
+      : isCollaborationSong(video)
         ? "collab"
-        : isCoverSong(target)
+        : isCoverSong(video)
           ? "covers"
           : null;
 
@@ -50,6 +59,10 @@ const SongItem = ({
     }
 
     if (!song.isAlbum) {
+      if (song.videos.length > 1) {
+        onClick(song.key);
+        return;
+      }
       const songPath = getSongPath();
       if (songPath) {
         router.push(songPath);
@@ -71,10 +84,11 @@ const SongItem = ({
               song.song.album_is_compilation
                 ? ""
                 : " / " + song.firstVideo.artist
-            } (${new Date(song.firstVideo.album_release_at).toLocaleDateString()})`
-          : `${song.firstVideo.title} - ${song.firstVideo.artist} (${new Date(
+            } (${formatDate(song.firstVideo.album_release_at, locale)})`
+          : `${displayTitle} - ${song.firstVideo.artist} (${formatDate(
               song.firstVideo.broadcast_at,
-            ).toLocaleDateString()})`
+              locale,
+            )})`
       }
       onClick={handleClick}
       style={{
@@ -106,19 +120,22 @@ const SongItem = ({
                       ? ""
                       : " / " + song.firstVideo.artist
                   }`
-                : `${song.firstVideo.title} / ${song.firstVideo.artist}`}
+                : `${displayTitle} / ${song.firstVideo.artist}`}
               <br />
               {song.isAlbum && groupByAlbum
-                ? `${new Date(song.firstVideo.album_release_at).toLocaleDateString()}`
-                : `${new Date(song.firstVideo.broadcast_at).toLocaleDateString()}`}
-              {song.isAlbum && groupByAlbum ? ` (${song.count}曲)` : ""}
-
-              {song.videos.length == 1 && song.videos[0].view_count && (
-                <div className="mt-2 text-xs">
-                  <FaPlay className="inline mr-2 -mt-1" />
-                  {song.videos[0].view_count.toLocaleString()}回再生
-                </div>
-              )}
+                ? `${formatDate(song.firstVideo.album_release_at, locale)}`
+                : `${formatDate(song.firstVideo.broadcast_at, locale)}`}
+              {song.isAlbum && groupByAlbum
+                ? ` (${song.count}${t("songsSuffix")})`
+                : ""}
+              {song.videos.length === 1 &&
+                (song?.videos[0]?.view_count ?? 0) > 0 && (
+                  <div className="mt-2 text-xs">
+                    <FaPlay className="inline mr-2 -mt-1" />
+                    {song?.videos[0]?.view_count?.toLocaleString() ?? 0}
+                    {t("viewsSuffix")}
+                  </div>
+                )}
             </div>
           </div>
         </div>

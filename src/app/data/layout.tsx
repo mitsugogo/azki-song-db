@@ -3,11 +3,13 @@ import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { flowbiteTheme } from "../theme";
-import { siteConfig } from "../config/siteConfig";
+import { Viewport } from "next";
 
-// titleタグ
-export const metadata = {
-  title: `収録データ | ${siteConfig.siteName}`,
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 10,
+  userScalable: true,
 };
 
 export default function StatsLayout({

@@ -1,5 +1,7 @@
 # AZKi Song Database
 
+[![Test](https://github.com/mitsugogo/azki-song-db/actions/workflows/test.yml/badge.svg)](https://github.com/mitsugogo/azki-song-db/actions/workflows/test.yml)
+
 > [!NOTE]  
 > 日本語のREADME -> [README_ja.md](./README_ja.md)
 

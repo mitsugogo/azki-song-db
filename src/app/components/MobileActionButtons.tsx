@@ -4,11 +4,13 @@ import { Fragment } from "react";
 import { Grid } from "@mantine/core";
 import { Menu } from "@mantine/core";
 import { Button } from "flowbite-react";
+import { useTranslations } from "next-intl";
 import type { IconType } from "react-icons";
 import { LuChevronDown, LuSparkles } from "react-icons/lu";
 import usePlaylists from "../hook/usePlaylists";
 import {
-  SONG_MODE_GROUP_LABELS,
+  getSongModeGroupLabels,
+  getSongModeItemLabel,
   SONG_MODE_MENU_ITEMS,
   SONG_MODE_TRIGGER_BUTTON_CLASS_NAME,
   type SongMode,
@@ -35,6 +37,8 @@ export default function MobileActionButtons({
   songModeMenuItems = SONG_MODE_MENU_ITEMS,
   onPlaylist,
 }: Props) {
+  const t = useTranslations("Watch.searchAndSongList");
+  const tSongMode = useTranslations("Watch.songMode");
   const { isNowPlayingPlaylist } = usePlaylists();
   const defaultModeIcon = songModeMenuItems[0]?.icon;
   const CurrentSongModeIcon = currentSongModeIcon ?? defaultModeIcon;
@@ -45,6 +49,7 @@ export default function MobileActionButtons({
     mode: songModeMenuItems.filter((item) => item.group === "mode"),
     theme: songModeMenuItems.filter((item) => item.group === "theme"),
   } as const;
+  const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
   return (
     <div>
       <Grid grow gutter={{ base: 5 }}>
@@ -75,7 +80,7 @@ export default function MobileActionButtons({
                     <CurrentSongModeIcon className="w-4 h-4 justify-self-center" />
                   )}
                   <span className="text-center">
-                    {currentSongModeLabel ?? "全曲"}
+                    {currentSongModeLabel ?? tSongMode("all")}
                   </span>
                   <LuChevronDown className="w-4 h-4 justify-self-center" />
                 </span>
@@ -91,7 +96,7 @@ export default function MobileActionButtons({
                     leftSection={<ModeIcon className="w-4 h-4" />}
                     onClick={() => onSelectSongMode(item.mode)}
                   >
-                    {item.label}
+                    {getSongModeItemLabel(item, tSongMode)}
                   </Menu.Item>
                 );
               })}
@@ -106,7 +111,7 @@ export default function MobileActionButtons({
                   return (
                     <Fragment key={group}>
                       <Menu.Divider />
-                      <Menu.Label>{SONG_MODE_GROUP_LABELS[group]}</Menu.Label>
+                      <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
                       {items.map((item) => {
                         const ModeIcon = item.icon;
                         return (
@@ -115,7 +120,7 @@ export default function MobileActionButtons({
                             leftSection={<ModeIcon className="w-4 h-4" />}
                             onClick={() => onSelectSongMode(item.mode)}
                           >
-                            {item.label}
+                            {getSongModeItemLabel(item, tSongMode)}
                           </Menu.Item>
                         );
                       })}
@@ -137,7 +142,7 @@ export default function MobileActionButtons({
               onPlaylist();
             }}
           >
-            プレイリスト
+            {t("playlist")}
           </Button>
         </Grid.Col>
       </Grid>

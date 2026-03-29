@@ -4,6 +4,8 @@ import {
   normalizeMemberNames,
 } from "../../config/collabUnits";
 import { Song } from "../../types/song";
+import { useLocale } from "next-intl";
+import { Locale } from "@/app/types/locale";
 
 export type FilterMode =
   | "categories"
@@ -134,18 +136,20 @@ const getSingerData = (allSongs: Song[]): SingerFilterItem[] => {
     .sort((a, b) => sortJapaneseAndEnglish(a.singer, b.singer));
 };
 
-const getCollabData = (allSongs: Song[]): CollabFilterItem[] => {
+const getCollabData = (
+  allSongs: Song[],
+  locale: Locale = "ja",
+): CollabFilterItem[] => {
   const collabCountMap = new Map<string, CollabFilterItem>();
   allSongs.forEach((song) => {
     if (song.sing !== "") {
-      const singers = song.sing
-        .split("、")
+      const singers = song.sings
         .map((singer) => singer.trim())
         .filter((singer) => singer !== "");
       if (singers.length >= 2) {
         const sortedSingers = normalizeMemberNames(singers);
         const normalizedCollab = sortedSingers.join("、");
-        const unitName = getCollabUnitName(sortedSingers);
+        const unitName = getCollabUnitName(sortedSingers, locale);
 
         const existing = collabCountMap.get(normalizedCollab);
         if (existing) {
@@ -202,6 +206,7 @@ const getNotSungForYearData = (
 const getFilterModeData = (
   allSongs: Song[],
   filterMode: FilterMode,
+  locale: Locale = "ja",
 ): SearchFilterModeResult => {
   switch (filterMode) {
     case "title": {
@@ -231,7 +236,7 @@ const getFilterModeData = (
     case "collab": {
       return {
         filterMode,
-        data: getCollabData(allSongs),
+        data: getCollabData(allSongs, locale),
       };
     }
     case "not-sung-for-a-year": {
@@ -255,10 +260,11 @@ const getFilterModeData = (
 const useSearchFilterModeData = (
   allSongs: Song[],
   filterMode: FilterMode,
+  locale: Locale = "ja",
 ): SearchFilterModeResult => {
   return useMemo(
-    () => getFilterModeData(allSongs, filterMode),
-    [allSongs, filterMode],
+    () => getFilterModeData(allSongs, filterMode, locale),
+    [allSongs, filterMode, locale],
   );
 };
 
