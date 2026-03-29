@@ -3,6 +3,7 @@ import SongItem from "../SongItem";
 import SongDetails from "../SongDetails";
 import YearGroup from "./YearGroup";
 import { getGridCols } from "../utils/gridHelpers";
+import { useTranslations } from "next-intl";
 
 interface ContentRendererProps {
   data: StatisticsItem[];
@@ -30,6 +31,7 @@ export default function ContentRenderer({
   targetRef,
   onItemClick,
 }: ContentRendererProps) {
+  const t = useTranslations("Discography");
   // 年ごとに区切るオプション
   if (groupByYear) {
     const getYear = (s: StatisticsItem) => {
@@ -37,7 +39,11 @@ export default function ContentRenderer({
         ? (s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at)
         : s.firstVideo.broadcast_at;
       const d = new Date(dateStr);
-      return isNaN(d.getFullYear()) ? "Unknown" : String(d.getFullYear());
+      return isNaN(d.getFullYear())
+        ? t
+          ? t("unknownYear")
+          : "Unknown"
+        : String(d.getFullYear());
     };
 
     // 年ごとにグループ化（降順）

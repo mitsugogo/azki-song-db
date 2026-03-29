@@ -15,10 +15,26 @@ import { HiHome, HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses } from "../theme";
 import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { routing } from "@/i18n/routing";
 import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
 
 export default function PlaylistPage() {
+  const t = useTranslations("Playlist");
+  const g = useTranslations("DrawerMenu");
+
+  const locale = useLocale();
+
+  const buildShareUrl = (playlistParam: string) => {
+    const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+    return (
+      (typeof window !== "undefined" ? window.location.origin : "") +
+      `${prefix}/?playlist=` +
+      playlistParam
+    );
+  };
+
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
@@ -51,7 +67,7 @@ export default function PlaylistPage() {
   // お気に入りを仮想プレイリストとして作成
   const favoritesPlaylist = {
     id: "system-favorites",
-    name: "お気に入り",
+    name: t("favoritesName"),
     songs: favorites,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -71,14 +87,14 @@ export default function PlaylistPage() {
         separator={<HiChevronRight className={breadcrumbClasses.separator} />}
       >
         <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
+          <HiHome className="w-4 h-4 mr-1.5" /> {g("home")}
         </Link>
         <Link href="/playlist" className={breadcrumbClasses.link}>
-          プレイリスト
+          {t("title")}
         </Link>
       </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3">プレイリストの管理</h1>
+      <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
 
       <CreatePlaylistModal
         onenModal={openCreatePlaylistModal}
@@ -91,18 +107,14 @@ export default function PlaylistPage() {
           onClick={() => setOpenCreatePlaylistModal(true)}
           leftSection={<MdPlaylistAdd className="w-6 h-6" />}
         >
-          新規プレイリスト作成
+          {t("createNew")}
         </Button>
         <Button
           color="red"
           className="mt-3 lg:mt-0 lg:ml-3"
           disabled={selectedRows.length === 0}
           onClick={() => {
-            if (
-              !confirm(
-                `選択した${selectedRows.length}個のプレイリストを削除します。よろしいですか?`,
-              )
-            ) {
+            if (!confirm(t("confirmDelete", { count: selectedRows.length }))) {
               return;
             }
             selectedRows.forEach((id) => {
@@ -113,7 +125,7 @@ export default function PlaylistPage() {
             setSelectedRows([]);
           }}
         >
-          選択したプレイリストを削除
+          {t("deleteSelected")}
         </Button>
       </div>
 
@@ -134,7 +146,7 @@ export default function PlaylistPage() {
                 <div className="flex items-center">
                   {!isFavorites && (
                     <Checkbox
-                      aria-label="Select playlist"
+                      aria-label={t("aria.selectPlaylist")}
                       checked={selectedRows.includes(playlist.id || "")}
                       onChange={(event) =>
                         setSelectedRows(
@@ -167,7 +179,10 @@ export default function PlaylistPage() {
                   )}
                 </div>
                 <Link
-                  href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                  href={{
+                    pathname: "/",
+                    query: { playlist: encodePlaylistUrlParam(playlist) },
+                  }}
                   className="text-primary hover:text-primary-600 dark:hover:text-primary-500"
                 >
                   <FaPlay size={20} />
@@ -175,12 +190,12 @@ export default function PlaylistPage() {
               </div>
               <div className="mt-2 text-sm text-gray-300">
                 <p>
-                  曲数: {playlist.songs.length}
+                  {t("songsLabel")} {playlist.songs.length}
                   {!isFavorites && ` / ${getMaxLimit()}`}
                 </p>
                 {!isFavorites && (
                   <p>
-                    更新日:{" "}
+                    {t("updatedLabel")}{" "}
                     {new Date(playlist.updatedAt as string).toLocaleString()}
                   </p>
                 )}
@@ -188,11 +203,7 @@ export default function PlaylistPage() {
               <div className="mt-4 flex justify-end">
                 {playlist.songs.length > 0 && (
                   <CopyButton
-                    value={
-                      window.location.origin +
-                      "?playlist=" +
-                      encodePlaylistUrlParam(playlist)
-                    }
+                    value={buildShareUrl(encodePlaylistUrlParam(playlist))}
                     timeout={3000}
                   >
                     {({ copied, copy }) => (
@@ -205,7 +216,7 @@ export default function PlaylistPage() {
                           setShowCopylinkToast(true);
                         }}
                       >
-                        {copied ? "コピーしました" : "共有用URLコピー"}
+                        {copied ? t("copied") : t("copyUrl")}
                       </Button>
                     )}
                   </CopyButton>
@@ -222,13 +233,13 @@ export default function PlaylistPage() {
           <Table.Thead>
             <Table.Tr>
               <Table.Th></Table.Th>
-              <Table.Th>再生</Table.Th>
-              <Table.Th>#</Table.Th>
-              <Table.Th>プレイリスト名</Table.Th>
-              <Table.Th>曲数</Table.Th>
-              <Table.Th>作成日</Table.Th>
-              <Table.Th>最終更新</Table.Th>
-              <Table.Th>共有URL</Table.Th>
+              <Table.Th>{t("head.play")}</Table.Th>
+              <Table.Th>{t("head.index")}</Table.Th>
+              <Table.Th>{t("head.name")}</Table.Th>
+              <Table.Th>{t("head.songs")}</Table.Th>
+              <Table.Th>{t("head.createdAt")}</Table.Th>
+              <Table.Th>{t("head.updatedAt")}</Table.Th>
+              <Table.Th>{t("head.shareUrl")}</Table.Th>
             </Table.Tr>
           </Table.Thead>
 
@@ -249,7 +260,7 @@ export default function PlaylistPage() {
                   <Table.Td>
                     {!isFavorites && (
                       <Checkbox
-                        aria-label="Select row"
+                        aria-label={t("aria.selectRow")}
                         checked={selectedRows.includes(playlist.id || "")}
                         onChange={(event) =>
                           setSelectedRows(
@@ -265,12 +276,15 @@ export default function PlaylistPage() {
                   </Table.Td>
                   <Table.Td>
                     <Link
-                      href={`/?playlist=${encodePlaylistUrlParam(playlist)}`}
+                      href={{
+                        pathname: "/",
+                        query: { playlist: encodePlaylistUrlParam(playlist) },
+                      }}
                       className="text-primary hover:text-primary-600 dark:text-primary-600 dark:hover:text-primary-500 hover:underline"
                     >
                       <Button size="xs" color="gray" radius={"sm"}>
                         <FaPlay className="mr-1" />
-                        再生
+                        {t("head.play")}
                       </Button>
                     </Link>
                   </Table.Td>
@@ -324,11 +338,7 @@ export default function PlaylistPage() {
                   <Table.Td>
                     {playlist.songs.length > 0 && (
                       <CopyButton
-                        value={
-                          window.location.origin +
-                          "?playlist=" +
-                          encodePlaylistUrlParam(playlist)
-                        }
+                        value={buildShareUrl(encodePlaylistUrlParam(playlist))}
                         timeout={3000}
                       >
                         {({ copied, copy }) => (
@@ -341,7 +351,7 @@ export default function PlaylistPage() {
                               setShowCopylinkToast(true);
                             }}
                           >
-                            {copied ? "コピーしました" : "共有用URLコピー"}
+                            {copied ? t("copied") : t("copyUrl")}
                           </Button>
                         )}
                       </CopyButton>
@@ -357,7 +367,7 @@ export default function PlaylistPage() {
       {showDeletePlaylistToast && (
         <div className="fixed top-[80px] right-4">
           <Notification
-            title="プレイリストを削除しました"
+            title={t("deletedTitle")}
             icon={<FaCheck />}
             color="green"
             onClose={() => setShowDeletePlaylistToast(false)}
@@ -369,7 +379,7 @@ export default function PlaylistPage() {
       {showCopylinkToast && (
         <div className="fixed top-[80px] right-4">
           <Notification
-            title="共有用URLをコピーしました"
+            title={t("urlCopiedTitle")}
             icon={<FaCheck />}
             color="green"
             onClose={() => setShowCopylinkToast(false)}

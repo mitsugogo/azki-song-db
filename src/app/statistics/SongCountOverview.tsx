@@ -6,6 +6,8 @@ import { FaCalendar, FaPlay, FaYoutube } from "react-icons/fa6";
 
 import { StatisticsItem } from "../types/statisticsItem";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
+import { formatDate } from "../lib/formatDate";
+import { useLocale, useTranslations } from "next-intl";
 
 export type SongCountOverviewProps = {
   items: StatisticsItem[];
@@ -29,12 +31,35 @@ type MilestoneHighlight = {
   date: Date;
 };
 
-function formatMilestoneLabel(targetCount: number) {
-  if (targetCount >= 10000 && targetCount % 10000 === 0) {
-    return `${(targetCount / 10000).toLocaleString()}万再生達成`;
+function formatMilestoneLabel(
+  targetCount: number,
+  locale: string,
+  t: (key: string, values?: Record<string, string | number | Date>) => string,
+) {
+  if (
+    locale.startsWith("ja") &&
+    targetCount >= 10000 &&
+    targetCount % 10000 === 0
+  ) {
+    return t("milestoneLabelJa", {
+      count: (targetCount / 10000).toLocaleString(locale),
+    });
   }
 
-  return `${targetCount.toLocaleString()}再生達成`;
+  if (locale.startsWith("en")) {
+    const compact = new Intl.NumberFormat("en", {
+      notation: "compact",
+      compactDisplay: "short",
+      maximumFractionDigits: 1,
+    })
+      .format(targetCount)
+      .replace(/\.0K$/, "k")
+      .replace(/K$/, "k");
+
+    return t("milestoneLabel", { count: compact });
+  }
+
+  return t("milestoneLabel", { count: targetCount.toLocaleString(locale) });
 }
 
 export default function SongCountOverview({
@@ -46,6 +71,9 @@ export default function SongCountOverview({
   showMilestoneHighlights = false,
   showTopTile = true,
 }: SongCountOverviewProps) {
+  const t = useTranslations("Statistics.overview");
+  const locale = useLocale();
+
   const overview = useMemo(() => {
     const totalSongKinds = items.length;
     const totalSings = items.reduce((sum, item) => sum + item.count, 0);
@@ -91,7 +119,9 @@ export default function SongCountOverview({
           artist: item.song?.artist || "",
           videoId: item.song?.video_id || "",
           targetCount: item.viewMilestone!.targetCount,
-          currentViewCount: Number(item.song?.view_count ?? 0),
+          currentViewCount:
+            (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
+            0,
           date: achievedAt,
         };
       })
@@ -114,7 +144,9 @@ export default function SongCountOverview({
           artist: item.song?.artist || "",
           videoId: item.song?.video_id || "",
           targetCount: item.viewMilestone!.targetCount,
-          currentViewCount: Number(item.song?.view_count ?? 0),
+          currentViewCount:
+            (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
+            0,
           date: estimatedAt,
         };
       })
@@ -170,11 +202,11 @@ export default function SongCountOverview({
           )}
           <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
-              最新更新
+              {t("latestUpdated")}
             </p>
             <p className="mt-1 text-sm font-semibold text-light-gray-900 dark:text-light-gray-100">
               {overview.latestBroadcastAt
-                ? new Date(overview.latestBroadcastAt).toLocaleDateString()
+                ? formatDate(overview.latestBroadcastAt, locale)
                 : "-"}
             </p>
           </div>
@@ -184,11 +216,11 @@ export default function SongCountOverview({
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
-              直近7日で達成
+              {t("achievedInLast7Days")}
             </p>
             {milestoneHighlights.achievedInLast7Days.length === 0 ? (
               <p className="mt-2 text-xs text-light-gray-700 dark:text-light-gray-400">
-                該当なし
+                {t("none")}
               </p>
             ) : (
               <ul className="mt-2 space-y-1.5">
@@ -204,7 +236,9 @@ export default function SongCountOverview({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-0.5 block w-16 shrink-0 overflow-hidden rounded"
-                          aria-label={`${item.title} のサムネイルをYouTubeで開く`}
+                          aria-label={t("openThumbnailOnYoutube", {
+                            title: item.title,
+                          })}
                         >
                           <YoutubeThumbnail
                             videoId={item.videoId}
@@ -241,7 +275,11 @@ export default function SongCountOverview({
                               size="xs"
                               className="align-middle"
                             >
-                              {formatMilestoneLabel(item.targetCount)}
+                              {formatMilestoneLabel(
+                                item.targetCount,
+                                locale,
+                                t,
+                              )}
                             </Badge>
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
@@ -250,7 +288,7 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {item.date.toLocaleDateString("ja-JP")}
+                            {formatDate(item.date, "ja-JP")}
                           </span>
                         </div>
                       </div>
@@ -262,11 +300,11 @@ export default function SongCountOverview({
           </div>
           <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
             <p className="text-xs text-light-gray-700 dark:text-light-gray-400">
-              達成見込み
+              {t("estimatedAchievement")}
             </p>
             {milestoneHighlights.estimatedInNext7Days.length === 0 ? (
               <p className="mt-2 text-xs text-light-gray-700 dark:text-light-gray-400">
-                該当なし
+                {t("none")}
               </p>
             ) : (
               <ul className="mt-2 space-y-1.5">
@@ -282,7 +320,9 @@ export default function SongCountOverview({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-0.5 block w-16 shrink-0 overflow-hidden rounded"
-                          aria-label={`${item.title} のサムネイルをYouTubeで開く`}
+                          aria-label={t("openThumbnailOnYoutube", {
+                            title: item.title,
+                          })}
                         >
                           <YoutubeThumbnail
                             videoId={item.videoId}
@@ -321,7 +361,11 @@ export default function SongCountOverview({
                               size="xs"
                               className="align-middle"
                             >
-                              {formatMilestoneLabel(item.targetCount)}
+                              {formatMilestoneLabel(
+                                item.targetCount,
+                                locale,
+                                t,
+                              )}
                             </Badge>
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
@@ -330,7 +374,8 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {item.date.toLocaleDateString("ja-JP")} 達成見込み
+                            {formatDate(item.date, locale)}{" "}
+                            {t("estimatedAchievement")}
                           </span>
                         </div>
                       </div>

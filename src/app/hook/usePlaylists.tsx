@@ -47,7 +47,8 @@ const usePlaylists = () => {
   // 該当のプレイリストに入っているかチェック
   const isInPlaylist = useCallback((playlist: Playlist, song: Song) => {
     const find = playlist.songs.find(
-      (entry) => entry.videoId == song?.video_id && entry.start == song?.start,
+      (entry) =>
+        entry.videoId == song?.video_id && entry.start == String(song?.start),
     );
     return !!find;
   }, []);
@@ -85,7 +86,7 @@ const usePlaylists = () => {
   // プレイリストに追加
   const addToPlaylist = (playlist: Playlist, song: Song) => {
     const videoId = song.video_id;
-    const start = song.start;
+    const start = String(song.start);
 
     // 上限判定
     if (isLimit(playlist)) return;
@@ -108,7 +109,7 @@ const usePlaylists = () => {
   // プレイリストから削除
   const removeFromPlaylist = (playlist: Playlist, song: Song) => {
     const videoId = song.video_id;
-    const start = song.start;
+    const start = String(song.start);
     setPlaylists((prev) =>
       prev.map((p) =>
         isSamePlaylist(p, playlist)

@@ -20,6 +20,8 @@ import SearchResultsView from "./components/SearchResultsView";
 import SearchNoResultsView from "./components/SearchNoResultsView";
 import SearchBrowseView from "./components/SearchBrowseView";
 import { isCoverSong, isOriginalSong } from "../config/filters";
+import { useLocale, useTranslations } from "next-intl";
+import { Locale } from "@/app/types/locale";
 
 interface TagCategory {
   label: string;
@@ -61,15 +63,17 @@ const SearchPageClient = () => {
     }
   }, [searchTokens, searchValue]);
 
+  const t = useTranslations("SearchPage");
+
   const tagCategories: TagCategory[] = useMemo(
     () => [
       {
-        label: "オリ曲",
+        label: t("originalSongs"),
         value: "tag:オリ曲",
         filter: (songs) => songs.filter((song) => isOriginalSong(song)),
       },
       {
-        label: "歌ってみた",
+        label: t("coverSongs"),
         value: "tag:歌ってみた",
         filter: (songs) =>
           songs.filter(
@@ -77,7 +81,7 @@ const SearchPageClient = () => {
           ),
       },
       {
-        label: "歌ってみたコラボ",
+        label: t("coverCollab"),
         value: "tag:歌ってみた|tag:コラボ",
         filter: (songs) =>
           songs.filter(
@@ -85,24 +89,24 @@ const SearchPageClient = () => {
           ),
       },
       {
-        label: "歌枠",
+        label: t("karaoke"),
         value: "tag:歌枠",
         filter: (songs) => songs.filter((song) => song.tags.includes("歌枠")),
       },
       {
-        label: "記念ライブ",
+        label: t("anniversaryLive"),
         value: "tag:記念ライブ",
         filter: (songs) =>
           songs.filter((song) => song.tags.includes("記念ライブ")),
       },
       {
-        label: "ゲスト出演",
+        label: t("guestAppearance"),
         value: "tag:ゲスト出演",
         filter: (songs) =>
           songs.filter((song) => song.tags.includes("ゲスト出演")),
       },
       {
-        label: "しっとり",
+        label: t("ballad"),
         value: "バラード|しっとり",
         filter: (songs) =>
           songs.filter(
@@ -114,7 +118,7 @@ const SearchPageClient = () => {
           ),
       },
       {
-        label: "アコースティック・生演奏",
+        label: t("acoustic"),
         value: "tag:アコースティック|アコースティック|生演奏",
         filter: (songs) =>
           songs.filter(
@@ -167,7 +171,12 @@ const SearchPageClient = () => {
     [hasSearchTerm, songs],
   );
 
-  const filterModeData = useSearchFilterModeData(allSongs, filterMode);
+  const locale = useLocale();
+  const filterModeData = useSearchFilterModeData(
+    allSongs,
+    filterMode,
+    locale as Locale,
+  );
   const isShowingSearchResults =
     !isLoading && hasSearchTerm && filteredSongs.length > 0;
 

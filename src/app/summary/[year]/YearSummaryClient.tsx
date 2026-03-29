@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useState, FormEvent } from "react";
 import { Song } from "../../types/song";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Badge, Button, Input, InputClearButton } from "@mantine/core";
 import useSearch from "../../hook/useSearch";
 import { HiSearch } from "react-icons/hi";
@@ -11,6 +11,8 @@ import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { siteConfig } from "@/app/config/siteConfig";
 import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 
 type Props = {
   initialSongs: Song[];
@@ -23,6 +25,19 @@ export default function YearSummaryClient({
   year,
   displayYearServer,
 }: Props) {
+  const t = useTranslations("Summary");
+  const locale = useLocale();
+
+  const formatMonthLabel = (m: number) => {
+    try {
+      const dtf = new Intl.DateTimeFormat(locale || undefined, {
+        month: "long",
+      });
+      return dtf.format(new Date(2020, m - 1, 1));
+    } catch (e) {
+      return `${m}${t("monthOfYearSuffix")}`;
+    }
+  };
   const [mounted, setMounted] = useState(false);
   const [videoViewMode, setVideoViewMode] = useState<"grid" | "list">("list");
   const [searchValue, setSearchValue] = useState("");
@@ -314,7 +329,7 @@ export default function YearSummaryClient({
       <div className="grid grid-cols-3 gap-4">
         <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            収録楽曲
+            {t("yearCards.recordedSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
             <Link href={`/?q=year:${displayYear}`}>
@@ -324,7 +339,7 @@ export default function YearSummaryClient({
         </div>
         <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            歌枠で歌った曲数
+            {t("yearCards.sungInStreamsLabel")}
           </div>
           <div className="text-2xl font-bold">
             <Link href={`/?q=year:${displayYear}|tag:歌枠`}>
@@ -338,7 +353,7 @@ export default function YearSummaryClient({
         </div>
         <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            ゲストで歌った曲数
+            {t("yearCards.guestSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
             <Link href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
@@ -353,7 +368,7 @@ export default function YearSummaryClient({
 
         <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            オリジナル楽曲
+            {t("yearCards.originalSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
             <Link href={`/?q=year:${displayYear}|original-songs`}>
@@ -369,7 +384,7 @@ export default function YearSummaryClient({
         </div>
         <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
-            カバー楽曲
+            {t("yearCards.coversLabel")}
           </div>
           <div className="text-2xl font-bold">
             <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
@@ -385,7 +400,7 @@ export default function YearSummaryClient({
 
       {displayYear && milestonesByYear[Number(displayYear)] ? (
         <section>
-          <h2 className="text-xl font-semibold mb-4">マイルストーン</h2>
+          <h2 className="text-xl font-semibold mb-4">{t("milestonesTitle")}</h2>
           <ul className="space-y-2 list-disc ml-6">
             {milestonesByYear[Number(displayYear)].map((milestone, index) => (
               <li key={index}>
@@ -407,7 +422,7 @@ export default function YearSummaryClient({
                   )}
                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                     &nbsp;-&nbsp;
-                    {new Date(milestone.broadcast_at).toLocaleDateString()}
+                    {formatDate(milestone.broadcast_at, locale)}
                   </span>
                 </div>
               </li>
@@ -418,10 +433,12 @@ export default function YearSummaryClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
-          <h2 className="text-lg font-semibold mb-2">歌枠でよく歌った楽曲</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {t("frequentSongsTitle")}
+          </h2>
           {top10.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
+              {t("noData")}
             </p>
           ) : (
             <ol className="list-decimal pl-5">
@@ -472,11 +489,11 @@ export default function YearSummaryClient({
 
         <section>
           <h2 className="text-lg font-semibold mb-2">
-            歌枠でよく歌ったアーティスト
+            {t("frequentArtistsTitle")}
           </h2>
           {topArtists.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
+              {t("noData")}
             </p>
           ) : (
             <ol className="list-decimal pl-5">
@@ -522,11 +539,11 @@ export default function YearSummaryClient({
         {/*　コラボ回数が多かったホロメン */}
         <section>
           <h2 className="text-lg font-semibold mb-2">
-            歌でよくコラボしたホロメン・アーティスト
+            {t("collabCountsTitle")}
           </h2>
           {collabCountsBySinger.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
+              {t("noData")}
             </p>
           ) : (
             <ol className="list-decimal pl-5">
@@ -574,10 +591,10 @@ export default function YearSummaryClient({
 
         {/* 月別曲数 */}
         <section>
-          <h2 className="text-lg font-semibold mb-2">月別の歌唱曲数</h2>
+          <h2 className="text-lg font-semibold mb-2">{t("monthsTitle")}</h2>
           {monthsWithSongs.length === 0 ? (
             <p className="text-sm text-gray-700 dark:text-light-gray-400">
-              データがありません。
+              {t("noData")}
             </p>
           ) : (
             <ul>
@@ -605,9 +622,12 @@ export default function YearSummaryClient({
                       }}
                     />
                     <div className="relative z-10 flex items-center justify-between px-2 py-1">
-                      <div className="font-medium">{month}月</div>
+                      <div className="font-medium">
+                        {formatMonthLabel(month)}
+                      </div>
                       <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
-                        {songs.length}曲
+                        {songs.length}
+                        {t("songsSuffix")}
                       </div>
                     </div>
                   </div>
@@ -622,7 +642,7 @@ export default function YearSummaryClient({
       {songsFiltered.length > 0 && (
         <section className="mt-6">
           <h2 className="text-lg font-semibold mb-2">
-            オリ曲・カバー曲MV (
+            {t("originalAndCoverMV")} (
             {
               songsFiltered.filter((s) =>
                 (s.tags || []).some(
@@ -641,14 +661,14 @@ export default function YearSummaryClient({
               className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
-              オリ曲
+              {t("originalLabel")}
             </Link>
             <Link
               href={`/?q=year:${displayYear}|tag:カバー曲`}
               className="ml-4 text-sm hover:underline text-primary dark:text-primary-300"
             >
               <FaPlay className="inline-block mr-1" />
-              カバー曲
+              {t("coverLabel")}
             </Link>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
@@ -694,7 +714,7 @@ export default function YearSummaryClient({
                         </div>
                       )}
                       <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                        {new Date(g.broadcast_at).toLocaleDateString()}
+                        {formatDate(g.broadcast_at, locale)}
                       </div>
                     </div>
                   </Link>
@@ -708,7 +728,9 @@ export default function YearSummaryClient({
       {collaborativeSongs.length > 0 && (
         <section className="mt-6">
           <h2 className="text-lg font-semibold mb-2">
-            コラボ・デュエット・ゲスト参加 ({(collaborativeSongs || []).length})
+            {t("collaborativeLabel", {
+              count: (collaborativeSongs || []).length,
+            })}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             {(collaborativeSongs || []).map((s) => (
@@ -737,7 +759,7 @@ export default function YearSummaryClient({
                       {s.sing}
                     </div>
                     <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                      {new Date(s.broadcast_at).toLocaleDateString()}
+                      {formatDate(s.broadcast_at, locale)}
                     </div>
                   </div>
                 </Link>
@@ -749,7 +771,9 @@ export default function YearSummaryClient({
 
       <section className="my-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold">{displayYear}年の動画</h2>
+          <h2 className="text-lg font-semibold">
+            {t("videosTitle", { year: displayYear })}
+          </h2>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -760,7 +784,7 @@ export default function YearSummaryClient({
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
-              タイル
+              {t("viewModeTile")}
             </button>
             <button
               type="button"
@@ -771,7 +795,7 @@ export default function YearSummaryClient({
                   : "bg-gray-100 dark:bg-gray-700"
               }`}
             >
-              リスト
+              {t("viewModeList")}
             </button>
           </div>
         </div>
@@ -781,7 +805,7 @@ export default function YearSummaryClient({
             <Input
               type="search"
               name="search"
-              placeholder="検索ワードを入力"
+              placeholder={t("searchPlaceholder")}
               className="flex-1 border-gray-300 dark:border-gray-600 rounded-lg"
               value={searchValue}
               onChange={(event) => setSearchValue(event.currentTarget.value)}
@@ -792,7 +816,7 @@ export default function YearSummaryClient({
                     setSearchValue("");
                     setSearchTerm("");
                   }}
-                  aria-label="close"
+                  aria-label={t("clearButtonLabel")}
                 />
               }
             />
@@ -811,7 +835,7 @@ export default function YearSummaryClient({
             {monthsWithSongs.map(([month, monthSongs]) => (
               <div key={month}>
                 <h3 className="text-md font-semibold mb-2 bg-primary-200 dark:bg-primary-900 p-2 ">
-                  {month}月 ({monthSongs.length})
+                  {formatMonthLabel(month)} ({monthSongs.length})
                 </h3>
                 {mounted && videoViewMode === "grid" ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
@@ -843,7 +867,7 @@ export default function YearSummaryClient({
                               </div>
                             )}
                             <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                              {new Date(g.broadcast_at).toLocaleDateString()}
+                              {formatDate(g.broadcast_at, locale)}
                             </div>
 
                             {g.milestones &&
@@ -929,7 +953,7 @@ export default function YearSummaryClient({
                                   {v.title}
                                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                                     <br />
-                                    {v.broadcast_at.toLocaleDateString()}
+                                    {formatDate(v.broadcast_at, locale)}
                                   </span>
                                 </Link>
                               </div>

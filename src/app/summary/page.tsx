@@ -1,17 +1,17 @@
-import Link from "next/link";
-import { Breadcrumbs } from "@mantine/core";
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import { FaHome } from "react-icons/fa";
-import { HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
-import SummaryTopClient from "./client";
+import SummaryPageClient from "./page.client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "年ごとの活動記録";
-  const subtitle =
-    "年ごとの活動（収録楽曲数・カバー/オリ曲など）をまとめています";
+  const locale = await getLocale();
+  const tMeta = await getTranslations({
+    namespace: "Metadata.summary",
+    locale,
+  });
+  const title = tMeta("title");
+  const subtitle = tMeta("description");
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
     },
@@ -82,37 +82,5 @@ export default async function Page() {
     return result;
   })();
 
-  // Flowbite Breadcrumb will be rendered directly in JSX below
-
-  return (
-    <div className="grow lg:p-6 lg:pb-0">
-      <div className="mb-4">
-        <Breadcrumbs
-          aria-label="Breadcrumb"
-          className={breadcrumbClasses.root}
-          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-        >
-          <Link href="/" className={breadcrumbClasses.link}>
-            <FaHome className="inline mr-1" /> Home
-          </Link>
-          <Link href="/summary" className={breadcrumbClasses.link}>
-            活動記録
-          </Link>
-        </Breadcrumbs>
-      </div>
-      <h1 className="font-extrabold text-2xl p-3">活動記録</h1>
-
-      <div className="p-3">
-        <p className="text-sm text-light-gray-400 mb-4">
-          各年ごとの活動の要約ページです。年をクリックすると詳細ページへ移動します。
-        </p>
-        <p className="text-sm text-light-gray-400 mb-4">
-          活動日数: <span className="font-semibold">{activityDays}</span>
-          日目（2018/11/15 から {avtivityDurationStr}経過）
-        </p>
-
-        <SummaryTopClient />
-      </div>
-    </div>
-  );
+  return <SummaryPageClient />;
 }

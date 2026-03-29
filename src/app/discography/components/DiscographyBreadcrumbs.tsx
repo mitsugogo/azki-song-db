@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { breadcrumbClasses } from "../../theme";
 import { Breadcrumbs } from "@mantine/core";
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 type DiscographyBreadcrumbItem = {
   label: ReactNode;
@@ -16,6 +17,7 @@ export default function DiscographyBreadcrumbs({
 }: {
   items: DiscographyBreadcrumbItem[];
 }) {
+  const t = useTranslations("Discography");
   return (
     <Breadcrumbs
       aria-label="Breadcrumb"
@@ -23,10 +25,10 @@ export default function DiscographyBreadcrumbs({
       separator={<HiChevronRight className={breadcrumbClasses.separator} />}
     >
       <Link href="/" className={breadcrumbClasses.link}>
-        <HiHome className="w-4 h-4 mr-1.5" /> Home
+        <HiHome className="w-4 h-4 mr-1.5" /> {t("homeLabel")}
       </Link>
       <Link href="/discography" className={breadcrumbClasses.link}>
-        楽曲一覧
+        {t("breadcrumb")}
       </Link>
       {items.map((item, index) => {
         const key = item.href ? `${item.href}-${index}` : `item-${index}`;

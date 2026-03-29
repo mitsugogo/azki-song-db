@@ -1,17 +1,16 @@
 import StatisticsPage from "./client";
-import { Breadcrumbs } from "@mantine/core";
 
 import type { Metadata } from "next";
 import { metadata } from "../layout";
-import Link from "next/link";
-import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { getTranslations, getLocale } from "next-intl/server";
+import StatisticsBreadcrumb from "./StatisticsBreadcrumb";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "統計情報";
-  const subtitle =
-    "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています";
+  const locale = await getLocale();
+  const t = await getTranslations("Statistics.page");
+  const title = t("title");
+  const subtitle = t("description");
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
@@ -24,16 +23,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `統計情報 | ${siteConfig.siteName}`,
-    description:
-      "AZKiさんの歌枠のセトリやオリジナル楽曲・カバー楽曲などをまとめています",
+    title: `${title} | ${siteConfig.siteName}`,
+    description: subtitle,
     openGraph: {
       ...metadata.openGraph,
       title,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: title }],
     },
@@ -49,21 +47,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
+export default async function Page() {
   return (
     <div className="grow p-2 lg:p-6 lg:pb-10">
-      <Breadcrumbs
-        aria-label="Breadcrumb"
-        className={breadcrumbClasses.root}
-        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-      >
-        <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> Home
-        </Link>
-        <Link href="/statistics" className={breadcrumbClasses.link}>
-          統計情報
-        </Link>
-      </Breadcrumbs>
+      <StatisticsBreadcrumb />
       <StatisticsPage />
     </div>
   );

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses } from "../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
@@ -14,6 +14,7 @@ import DiscographyControls from "./components/DiscographyControls";
 import ContentRenderer from "./components/ContentRenderer";
 import { scrollToAnchor } from "./utils/scrollHelpers";
 import Loading from "../loading";
+import { useTranslations } from "next-intl";
 
 const TAB_URLS = [
   "/discography",
@@ -34,6 +35,7 @@ export default function DiscographyClient({
 }: {
   initialTab?: number;
 }) {
+  const t = useTranslations("Discography");
   const [activeTab, setActiveTab] = useState(initialTab);
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [groupByYear, setGroupByYear] = useState(false);
@@ -149,17 +151,15 @@ export default function DiscographyClient({
           separator={<HiChevronRight className={breadcrumbClasses.separator} />}
         >
           <Link href="/" className={breadcrumbClasses.link}>
-            <HiHome className="w-4 h-4 mr-1.5" /> Home
+            <HiHome className="w-4 h-4 mr-1.5" /> {t("homeLabel")}
           </Link>
           <Link href="/discography" className={breadcrumbClasses.link}>
-            楽曲一覧
+            {t("breadcrumb")}
           </Link>
         </Breadcrumbs>
 
-        <h1 className="font-extrabold text-2xl p-3 mb-2">Discography</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
-          これまでに配信された楽曲の一覧です。オリ曲、コラボ楽曲、カバー楽曲などをまとめています。
-        </p>
+        <h1 className="font-extrabold text-2xl p-3 pl-0 mb-2">{t("title")}</h1>
+        <p className="mb-6 text-sm text-muted-foreground">{t("description")}</p>
 
         <DiscographyControls
           groupByAlbum={groupByAlbum}
@@ -174,16 +174,18 @@ export default function DiscographyClient({
         <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
           <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
             <Tab as="button" className={tabClass}>
-              すべて ({allSongCountsByReleaseDate.length})
+              {t("tabs.all", { count: allSongCountsByReleaseDate.length })}
             </Tab>
             <Tab as="button" className={tabClass}>
-              オリジナル楽曲 ({originalSongCountsByReleaseDate.length})
+              {t("tabs.originals", {
+                count: originalSongCountsByReleaseDate.length,
+              })}
             </Tab>
             <Tab as="button" className={tabClass}>
-              ユニット・ゲスト楽曲 ({unitSongCountsByReleaseDate.length})
+              {t("tabs.unit", { count: unitSongCountsByReleaseDate.length })}
             </Tab>
             <Tab as="button" className={tabClass}>
-              カバー楽曲 ({coverSongCountsByReleaseDate.length})
+              {t("tabs.covers", { count: coverSongCountsByReleaseDate.length })}
             </Tab>
           </TabList>
           <TabPanels>

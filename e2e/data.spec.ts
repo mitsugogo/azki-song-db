@@ -11,7 +11,7 @@ test.describe("Data page", () => {
   test("displays data table with song information", async ({ page }) => {
     await page.goto("/data");
 
-    await expect(page).toHaveTitle(/収録データ一覧/);
+    await expect(page).toHaveTitle(/全収録データ/);
 
     // Wait for the table to load
     await page.waitForLoadState("domcontentloaded");

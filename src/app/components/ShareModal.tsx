@@ -1,9 +1,13 @@
+"use client";
+
 import { Song } from "../types/song";
 import { Modal, TextInput, Button, Divider } from "@mantine/core";
 import { HiClipboardCopy } from "react-icons/hi";
 import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Label } from "flowbite-react";
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { routing } from "@/i18n/routing";
 import { siteConfig } from "../config/siteConfig";
 
 // Propsの型定義
@@ -20,15 +24,20 @@ export default function ShareModal({
   baseUrl,
   onClose,
 }: ShareModalProps) {
+  const t = useTranslations("ShareModal");
   const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
+
+  const locale = useLocale();
+  const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
 
   const youtubeUrl = `https://www.youtube.com/watch?v=${currentSong?.video_id}${
     currentSong && Number(currentSong.start) > 0
       ? `&t=${currentSong.start}s`
       : ""
   }`;
-  const databaseUrl = `${baseUrl}/watch?v=${currentSong?.video_id}${
+
+  const databaseUrl = `${baseUrl}${localePrefix}/watch?v=${currentSong?.video_id}${
     currentSong && Number(currentSong.start) > 0
       ? `&t=${currentSong.start}`
       : ""
@@ -54,16 +63,16 @@ export default function ShareModal({
     <Modal
       opened={openShareModal}
       onClose={onClose}
-      title="シェア"
-      overlayProps={{ opacity: 0.5, blur: 4 }}
+      title={t("title")}
+      overlayProps={{ opacity: 0.76, blur: 4 }}
     >
       <div className="">
-        <p className="mb-4">AZKiさんの素敵な歌声をシェアしましょう！</p>
+        <p className="mb-4">{t("description")}</p>
         {/* YouTube URL */}
         <div>
           <Label>
             <FaYoutube className="inline" />
-            &nbsp;YouTube URL
+            &nbsp;{t("youtubeUrl")}
           </Label>
           <div className="relative">
             <TextInput className="w-full" value={youtubeUrl} readOnly />
@@ -77,7 +86,7 @@ export default function ShareModal({
             </button>
             {showCopiedYoutube && (
               <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
-                copied!
+                {t("copied")}
               </div>
             )}
           </div>
@@ -131,7 +140,7 @@ export default function ShareModal({
             </button>
             {showCopied && (
               <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
-                copied!
+                {t("copied")}
               </div>
             )}
           </div>
@@ -164,7 +173,7 @@ export default function ShareModal({
         <Divider className="my-4" />
         <div className="flex justify-end">
           <Button variant="filled" color="dark" onClick={onClose}>
-            閉じる
+            {t("close")}
           </Button>
         </div>
       </div>

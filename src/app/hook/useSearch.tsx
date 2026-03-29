@@ -5,6 +5,7 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { getCollabMembers, normalizeMemberNames } from "../config/collabUnits";
 import { useSearchParams } from "next/navigation";
 import historyHelper from "../lib/history";
+import { useLocale } from "next-intl";
 import {
   filterOriginalSongs,
   isCollaborationSong,
@@ -24,6 +25,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   const [songs, setSongs] = useState<Song[]>([]);
   const syncUrl = options?.syncUrl ?? true;
   const urlUpdateMode = options?.urlUpdateMode ?? "replace";
+  const locale = useLocale();
 
   // 通常検索
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,8 +86,13 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
       const prefixSearches: {
         [key: string]: (song: Song, value: string) => boolean;
       } = {
-        "title:": (s, v) => s.title.toLowerCase().includes(v),
-        "artist:": (s, v) => s.artist.toLowerCase().includes(v),
+        "title:": (s, v) =>
+          s.title.toLowerCase().includes(v) ||
+          (locale === "en" && (s.title_en?.toLowerCase().includes(v) ?? false)),
+        "artist:": (s, v) =>
+          s.artist.toLowerCase().includes(v) ||
+          (locale === "en" &&
+            (s.artist_en?.toLowerCase().includes(v) ?? false)),
         "album:": (s, v) => s.album.toLowerCase().includes(v),
         "sing:": (s, v) =>
           s.sing
@@ -105,9 +112,14 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
         "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
         "date:": (s, v) => {
+          const dateString = new Date(v).toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+          });
           const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
-          if (dateRegex.test(v)) {
-            const [year, month, day] = v.split("/").map(Number);
+          if (dateRegex.test(dateString)) {
+            const [year, month, day] = dateString.split("/").map(Number);
             const date = new Date(s.broadcast_at);
             return (
               date.getFullYear() === year &&
@@ -182,6 +194,10 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
       return (
         song.title.toLowerCase().includes(word) ||
         song.artist.toLowerCase().includes(word) ||
+        (locale === "en" &&
+          (song.title_en?.toLowerCase().includes(word) ?? false)) ||
+        (locale === "en" &&
+          (song.artist_en?.toLowerCase().includes(word) ?? false)) ||
         song.album.toLowerCase().includes(word) ||
         song.sing
           .toLowerCase()
@@ -197,7 +213,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         (song.extra?.toLowerCase().includes(word) ?? false)
       );
     },
-    [milestoneVideoIdMap],
+    [locale, milestoneVideoIdMap],
   );
 
   // 曲を検索するcallback

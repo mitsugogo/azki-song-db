@@ -22,7 +22,7 @@ const useFavorites = () => {
   const addToFavorites = useCallback(
     (song: Song) => {
       const videoId = song.video_id;
-      const start = song.start;
+      const start = String(song.start);
 
       // 既に追加済みの場合はスキップ
       const exists = favorites.some(
@@ -39,7 +39,7 @@ const useFavorites = () => {
   const removeFromFavorites = useCallback(
     (song: Song) => {
       const videoId = song.video_id;
-      const start = song.start;
+      const start = String(song.start);
       setFavorites((prev) =>
         prev.filter(
           (entry) => !(entry.videoId === videoId && entry.start === start),
@@ -54,7 +54,8 @@ const useFavorites = () => {
     (song: Song) => {
       return favorites.some(
         (entry) =>
-          entry.videoId === song?.video_id && entry.start === song?.start,
+          entry.videoId === song?.video_id &&
+          entry.start === String(song?.start),
       );
     },
     [favorites],

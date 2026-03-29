@@ -1,11 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Song } from "../types/song";
 import { useLoading } from "../context/LoadingContext";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../lib/formatDate";
 
 export default function YearsTile({ songs }: { songs: Song[] }) {
   const { setLoading } = useLoading();
+  const t = useTranslations("Summary");
+  const locale = useLocale();
   const counts = songs.reduce<Record<number, number>>((acc, s) => {
     const y = Number(s.year);
     if (!Number.isNaN(y)) acc[y] = (acc[y] || 0) + 1;
@@ -53,9 +57,13 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
           onClick={() => setLoading(true)}
         >
           <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold">{year}年</span>
+            <span className="text-lg font-semibold">
+              {year}
+              {t("yearSuffix")}
+            </span>
             <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1">
-              {counts[year]}曲
+              {counts[year]}
+              {t("songsSuffix")}
             </span>
           </div>
           <div>
@@ -73,7 +81,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                         className="text-sm text-light-gray-600 dark:text-light-gray-400"
                       >
                         • {s.milestones.join(", ")} (
-                        {new Date(s.broadcast_at).toLocaleDateString("ja-JP")})
+                        {formatDate(s.broadcast_at, locale)})
                       </li>
                     ),
                   )}

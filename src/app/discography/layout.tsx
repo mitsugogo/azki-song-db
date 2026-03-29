@@ -4,10 +4,26 @@ import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { flowbiteTheme } from "../theme";
 import { siteConfig } from "../config/siteConfig";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Viewport } from "next";
 
 // titleタグ
-export const metadata = {
-  title: `楽曲一覧 | ${siteConfig.siteName}`,
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    namespace: "Metadata.discography",
+    locale,
+  });
+  return {
+    title: t("title", { siteName: siteConfig.siteName }),
+  };
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 10,
+  userScalable: true,
 };
 
 export default function StatsLayout({

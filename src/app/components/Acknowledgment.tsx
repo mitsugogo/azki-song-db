@@ -1,52 +1,36 @@
 import { List } from "@mantine/core";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { FaGithub } from "react-icons/fa6";
+import { useTranslations } from "next-intl";
 
 const Acknowledgment = () => {
+  const t = useTranslations("Acknowledgment");
+
   return (
     <>
       <div className="text-sm text-muted">
-        <p>本サイトは有志による非公式のファンサイトです。</p>
-        <p>
-          ホロライブ所属のAZKiさんの素敵な歌声を、もっと多くの方々に知ってもらうために制作しました。
-        </p>
-        <p>
-          気になった歌や動画はどんどんSNSにシェアして、AZKiさんの活動を応援しましょう！
-        </p>
+        <p>{t("intro.p1")}</p>
+        <p>{t("intro.p2")}</p>
+        <p>{t("intro.p3")}</p>
       </div>
 
-      <h3 className="mt-5 font-semibold">動画について</h3>
+      <h3 className="mt-5 font-semibold">{t("video.heading")}</h3>
 
       <div className="text-sm text-muted mt-1">
-        <p>
-          動画やアーカイブはホロライブプロダクション様及び、AZKi様、各チャンネルの管理者が制作・配信したものです。
-        </p>
-        <p className="mt-2">
-          動画の権利は所有者に帰属します。また、制作者が動画を非公開にした場合は閲覧できなくなります。
-        </p>
-        <p className="mt-2">
-          本サイトでは、第三者による動画（いわゆる切り抜き動画）ではなく、公式で公開されている動画を掲載しています。
-        </p>
+        <p>{t("video.p1")}</p>
+        <p className="mt-2">{t("video.p2")}</p>
+        <p className="mt-2">{t("video.p3")}</p>
       </div>
 
-      <h3 className="mt-5 font-semibold">集計について</h3>
+      <h3 className="mt-5 font-semibold">{t("aggregation.heading")}</h3>
 
       <div className="text-sm text-muted mt-1">
+        <p>{t("aggregation.p1")}</p>
+        <p className="mt-2">{t("aggregation.p2")}</p>
+        <p className="mt-2">{t("aggregation.p3")}</p>
+        <p className="mt-2">{t("aggregation.p4")}</p>
         <p>
-          集計対象は、YouTube上で一般公開されている歌枠・記念ライブ・生放送・Music
-          Video・カバー楽曲・MV・ゲスト出演など、AZKiさんの歌唱動画を対象にしています。
-        </p>
-        <p className="mt-2">
-          「0期生記念ライブ」など一部の配信については、AZKiさんが歌唱していない部分も収録している場合があります。
-        </p>
-        <p className="mt-2">
-          メンバーシップ限定動画や非公開動画、有料配信など広く閲覧できない動画は対象外としています。
-        </p>
-        <p className="mt-2">
-          集計は手作業で行っているため、更新の遅延や誤り、表記揺れなどがあるかもしれません。
-        </p>
-        <p>
-          情報の不足や誤りに気づいた場合は、
+          {t("aggregation.contact.prefix")}
           <Link
             href="https://x.com/mitsugogo"
             className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
@@ -55,40 +39,38 @@ const Acknowledgment = () => {
           >
             @mitsugogo
           </Link>{" "}
-          や{" "}
+          {t("aggregation.contact.and")}{" "}
           <a
             href="https://github.com/mitsugogo/azki-song-db"
             target="_blank"
             rel="noopener noreferrer"
+            className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
           >
             <FaGithub className="inline mr-1" />
-            GitHub
+            {t("aggregation.contact.github")}
           </a>{" "}
-          までご連絡ください。
+          {t("aggregation.contact.suffix")}
         </p>
       </div>
 
-      <h3 className="mt-5 font-semibold">アイコンについて</h3>
+      <h3 className="mt-5 font-semibold">{t("icon.heading")}</h3>
       <div className="text-sm text-muted mt-1">
         <p>
-          アイコンは、
+          {t("icon.p1.prefix")}
           <Link
             href="https://x.com/YsWeissYs"
             className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
             target="_blank"
             rel="noopener noreferrer"
           >
-            わいす / Ys (@YsWeissYs)
+            {t("icon.p1.linkText")}
           </Link>{" "}
-          さんにご提供いただいたアイコンを使用しています。
+          {t("icon.p1.suffix")}
         </p>
-        <p className="mt-2">
-          ソースコードはMIT
-          LICENSEですが、アイコンについては適用されませんのでご注意ください。
-        </p>
+        <p className="mt-2">{t("icon.p2")}</p>
       </div>
 
-      <h3 className="mt-5 font-semibold">更新履歴</h3>
+      <h3 className="mt-5 font-semibold">{t("changelog.heading")}</h3>
 
       <div className="text-sm text-muted">
         <p>
@@ -99,13 +81,13 @@ const Acknowledgment = () => {
             rel="noopener noreferrer"
           >
             <FaGithub className="inline-block mr-1" />
-            CHANGELOG
+            {t("changelog.linkText")}
           </Link>{" "}
-          を参照
+          {t("changelog.suffix")}
         </p>
       </div>
 
-      <h3 className="mt-5 font-semibold">管理者</h3>
+      <h3 className="mt-5 font-semibold">{t("admin.heading")}</h3>
 
       <div className="text-sm text-muted">
         <p>
@@ -116,7 +98,7 @@ const Acknowledgment = () => {
             rel="noopener noreferrer"
           >
             <FaGithub className="inline-block mr-1" />
-            GitHub
+            {t("admin.github")}
           </Link>
           &nbsp;
           <Link
@@ -125,15 +107,15 @@ const Acknowledgment = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            (@mitsugogo)
+            {t("admin.twitter")}
           </Link>
         </p>
       </div>
 
-      <h3 className="mt-5 font-semibold">ライセンス</h3>
+      <h3 className="mt-5 font-semibold">{t("license.heading")}</h3>
       <div className="text-sm text-muted">
         <p>
-          MIT{" "}
+          {t("license.p1.prefix")}
           <Link
             href="https://github.com/mitsugogo/azki-song-db/blob/main/LICENSE"
             className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
@@ -141,7 +123,7 @@ const Acknowledgment = () => {
             rel="noopener noreferrer"
           >
             <FaGithub className="inline-block mr-1" />
-            LICENSE
+            {t("license.p1.linkText")}
           </Link>
         </p>
       </div>

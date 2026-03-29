@@ -21,31 +21,32 @@ export const createStatistics = <T extends StatisticsItem>(
       : [keyFn(song) as string];
     keys.forEach((key) => {
       const isAlbum = "album" in song && song.album;
+      const current = map.get(key);
       let firstVideo: Song | undefined;
       let lastVideo: Song | undefined;
       let videos: Song[] = [];
       if (groupByAlbum && isAlbum) {
-        firstVideo = map.get(key)?.firstVideo ?? song;
+        firstVideo = current?.firstVideo ?? song;
         lastVideo = song;
 
-        const v = map.get(key)?.videos;
+        const v = current?.videos;
         v?.push(song);
         videos = v ?? [song];
       } else {
         firstVideo =
-          (map.get(key)?.firstVideo.broadcast_at ?? 0) < song.broadcast_at
-            ? map.get(key)?.firstVideo
+          (current?.firstVideo.broadcast_at ?? 0) < song.broadcast_at
+            ? current?.firstVideo
             : song;
         lastVideo =
-          (map.get(key)?.lastVideo.broadcast_at ?? 0) > song.broadcast_at
-            ? map.get(key)?.lastVideo
+          (current?.lastVideo.broadcast_at ?? 0) > song.broadcast_at
+            ? current?.lastVideo
             : song;
-        videos.push(song);
+        videos = [...(current?.videos ?? []), song];
       }
 
       map.set(key, {
         key,
-        count: (map.get(key)?.count || 0) + 1,
+        count: (current?.count || 0) + 1,
         song,
         isAlbum: isAlbum,
         firstVideo: firstVideo,

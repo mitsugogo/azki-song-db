@@ -429,7 +429,7 @@ describe("useStatistics", () => {
     const [calledSongs, keyFn] = originalReleaseCall!;
     const keys = calledSongs.map((song) => keyFn(song));
 
-    expect(keys).toContain("同名曲__AZKi__mv");
-    expect(keys).toContain("同名曲__AZKi__art-track");
+    expect(keys[0]).toContain("同名曲__AZKi__mv");
+    expect(keys[1]).toContain("同名曲__AZKi__art-track");
   });
 });

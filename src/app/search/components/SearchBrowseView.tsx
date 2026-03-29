@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@mantine/core";
 import { FaMusic, FaTag, FaUser, FaUsers } from "react-icons/fa6";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
@@ -7,6 +7,8 @@ import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "../../lib/formatDate";
 import {
   FilterMode,
   SearchFilterModeResult,
@@ -40,17 +42,22 @@ const SearchBrowseView = ({
   categorySongs,
   filterModeData,
 }: SearchBrowseViewProps) => {
+  const t = useTranslations("SearchBrowse");
+  const locale = useLocale();
+  const tHeader = useTranslations("Header");
   return (
     <div className="grow lg:p-6 lg:pb-0 overflow-auto">
       <SearchBreadcrumb />
 
       <div>
-        <h1 className="font-extrabold text-2xl p-3">検索</h1>
+        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
         <div className="p-3">
           <p className="text-sm text-gray-600 dark:text-light-gray-400">
-            楽曲を検索できます。全{allSongs.length}
-            曲、{Array.from(new Set(allSongs.map((s) => s.video_id))).length}
-            動画を収録。
+            {t("summary", {
+              countSongs: allSongs.length.toLocaleString(),
+              countVideos: Array.from(new Set(allSongs.map((s) => s.video_id)))
+                .length,
+            })}
           </p>
         </div>
       </div>
@@ -60,7 +67,7 @@ const SearchBrowseView = ({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
-        placeholder="曲名、アーティスト、タグなどで検索"
+        placeholder={tHeader("searchPlaceholder")}
       />
 
       <div className="px-3 mb-6">
@@ -71,7 +78,7 @@ const SearchBrowseView = ({
             size="sm"
             onClick={() => setFilterMode("categories")}
           >
-            カテゴリー
+            {t("filters.category")}
           </Button>
           <Button
             variant={filterMode === "title" ? "filled" : "light"}
@@ -80,7 +87,7 @@ const SearchBrowseView = ({
             onClick={() => setFilterMode("title")}
             leftSection={<FaMusic />}
           >
-            曲名
+            {t("filters.title")}
           </Button>
           <Button
             variant={filterMode === "artist" ? "filled" : "light"}
@@ -89,7 +96,7 @@ const SearchBrowseView = ({
             onClick={() => setFilterMode("artist")}
             leftSection={<FaUser />}
           >
-            アーティスト
+            {t("filters.artist")}
           </Button>
           <Button
             variant={filterMode === "tag" ? "filled" : "light"}
@@ -98,7 +105,7 @@ const SearchBrowseView = ({
             onClick={() => setFilterMode("tag")}
             leftSection={<FaTag />}
           >
-            タグ
+            {t("filters.tag")}
           </Button>
           <Button
             variant={filterMode === "singer" ? "filled" : "light"}
@@ -107,7 +114,7 @@ const SearchBrowseView = ({
             onClick={() => setFilterMode("singer")}
             leftSection={<FaUser />}
           >
-            歌った人
+            {t("filters.singer")}
           </Button>
           <Button
             variant={filterMode === "collab" ? "filled" : "light"}
@@ -116,7 +123,7 @@ const SearchBrowseView = ({
             onClick={() => setFilterMode("collab")}
             leftSection={<FaUsers />}
           >
-            コラボ・ユニット
+            {t("filters.collab")}
           </Button>
           <Button
             variant={filterMode === "not-sung-for-a-year" ? "filled" : "light"}
@@ -124,7 +131,7 @@ const SearchBrowseView = ({
             size="sm"
             onClick={() => setFilterMode("not-sung-for-a-year")}
           >
-            1年以上歌ってない曲
+            {t("filters.notSungForYear")}
           </Button>
         </div>
       </div>
@@ -142,7 +149,7 @@ const SearchBrowseView = ({
                     href={`/search?q=${encodeURIComponent(category.value)}`}
                     className="text-sm text-pink-600 dark:text-pink-400 hover:underline"
                   >
-                    » もっと見る
+                    {t("seeMore")}
                   </a>
                 )}
               </div>
@@ -150,7 +157,7 @@ const SearchBrowseView = ({
               {category.songs.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    該当する曲がありません
+                    {t("noResults")}
                   </p>
                 </div>
               ) : (
@@ -181,7 +188,7 @@ const SearchBrowseView = ({
                             </div>
                           )}
                           <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                            {new Date(song.broadcast_at).toLocaleDateString()}
+                            {formatDate(song.broadcast_at, locale)}
                           </div>
                         </div>
                       </Link>

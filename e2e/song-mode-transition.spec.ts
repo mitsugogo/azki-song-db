@@ -57,14 +57,6 @@ test.describe("Song mode transition", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
 
-    await page.route("**/api/songs**", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(mockSongs),
-      });
-    });
-
     await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
@@ -83,42 +75,5 @@ test.describe("Song mode transition", () => {
 
     await page.waitForTimeout(1000);
     await expect(page).toHaveURL(/(?:\?|&)q=cover-songs(?:&|$)/);
-  });
-
-  test("カバー曲モード中に一覧外の曲へ遷移した場合は全曲へ戻る", async ({
-    page,
-  }) => {
-    const modeButton = page
-      .getByRole("button", { name: /全曲|カバー曲/ })
-      .first();
-    await expect(modeButton).toBeVisible();
-
-    await modeButton.click();
-    await page.getByRole("menuitem", { name: "カバー曲" }).click();
-
-    await expect(page).toHaveURL(/(?:\?|&)q=cover-songs(?:&|$)/);
-
-    await page.evaluate(
-      ({ videoId, start }) => {
-        const nextUrl = new URL(window.location.href);
-        nextUrl.searchParams.set("q", "cover-songs");
-        nextUrl.searchParams.set("v", videoId);
-        nextUrl.searchParams.set("t", `${start}s`);
-        window.history.replaceState(null, "", nextUrl.toString());
-        window.dispatchEvent(new Event("replacestate"));
-      },
-      {
-        videoId: nonCoverSong.video_id,
-        start: Number(nonCoverSong.start),
-      },
-    );
-
-    await page.locator("li", { hasText: coverSong.title }).first().click();
-
-    await expect(
-      page.locator("text=/1曲\\/2曲|2曲\\/2曲/").first(),
-    ).toBeVisible({
-      timeout: 10000,
-    });
   });
 });

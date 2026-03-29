@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Song } from "../../../types/song";
 import slugify from "../../../lib/slugify";
 
@@ -10,7 +11,7 @@ import {
 } from "@/app/config/filters";
 import ClientPage from "./ClientPage";
 
-async function fetchSongsFromApi(): Promise<Song[]> {
+async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
   const candidates = [
     process.env.NEXT_PUBLIC_BASE_URL,
     process.env.PUBLIC_BASE_URL,
@@ -22,7 +23,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 
   for (const base of candidates) {
     try {
-      const res = await fetch(new URL(`/api/songs`, base));
+      const songsUrl = new URL(`/api/songs`, base);
+      songsUrl.searchParams.set("hl", locale);
+      const res = await fetch(songsUrl);
       if (res.ok) {
         return (await res.json()) as Song[];
       }
@@ -33,7 +36,9 @@ async function fetchSongsFromApi(): Promise<Song[]> {
 
   // 最後の手段として production を試す
   try {
-    const res = await fetch(new URL(`/api/songs`, siteConfig.siteUrl));
+    const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
+    songsUrl.searchParams.set("hl", locale);
+    const res = await fetch(songsUrl);
     if (res.ok) {
       return (await res.json()) as Song[];
     }
@@ -81,8 +86,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug?: string }>;
 }): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ namespace: "Discography", locale });
   const resolved = await params;
-  const songs: Song[] = await fetchSongsFromApi();
+  const songs: Song[] = await fetchSongsFromApi(locale);
   const slug = decodeURIComponent(resolved.slug || "");
 
   const originals = songs.filter(
@@ -116,7 +123,7 @@ export async function generateMetadata({
         description: siteConfig.siteName,
         url: canonical,
         siteName: siteConfig.siteName,
-        locale: "ja_JP",
+        locale: locale === "ja" ? "ja_JP" : "en_US",
         type: "website",
       },
       alternates: {
@@ -128,7 +135,17 @@ export async function generateMetadata({
     : `${matchedForMeta.album} | ${matchedForMeta.artist} | Discography | ${siteConfig.siteName}`;
   const description =
     matchedForMeta.extra ??
-    `${matchedForMeta.title} - ${matchedForMeta.artist}の楽曲情報`;
+    (matchedForMeta.title
+      ? t("entryDescription", {
+          title: matchedForMeta.title,
+          artist: matchedForMeta.artist,
+        })
+      : matchedForMeta.album
+        ? t("entryDescription", {
+            title: matchedForMeta.album,
+            artist: matchedForMeta.artist,
+          })
+        : siteConfig.siteName);
 
   // OGP 画像生成
   let ogImageUrl = new URL("/api/og", baseUrl);
@@ -157,7 +174,7 @@ export async function generateMetadata({
       description,
       url: canonical,
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [{ url: ogImagePath, width: 1200, height: 630, alt: ogTitle }],
     },
