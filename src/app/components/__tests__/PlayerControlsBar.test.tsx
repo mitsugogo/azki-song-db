@@ -89,12 +89,23 @@ const baseSong: Song = {
   video_title: "",
   video_uri: "",
   video_id: "vid1",
-  start: "0",
-  end: "",
+  start: 0,
+  end: 0,
   broadcast_at: "",
   year: 0,
   tags: [],
   milestones: [],
+  hl: {
+    ja: {
+      title: "",
+      artist: "",
+      album: undefined,
+      sing: undefined,
+      sings: undefined,
+    },
+    en: undefined,
+  },
+  sings: [],
 };
 
 // Polyfill matchMedia for Mantine internals in the test environment
@@ -129,7 +140,9 @@ describe("PlayerControlsBar", () => {
     onToggleTheaterMode = vi.fn() as unknown as () => void;
     setHideFutureSongs = vi.fn() as unknown as (value: boolean) => void;
     onVolumeChange = vi.fn() as unknown as (
-      e: React.ChangeEvent<HTMLInputElement>,
+      e:
+        | React.ChangeEvent<HTMLInputElement>
+        | React.SyntheticEvent<HTMLInputElement, Event>,
     ) => void;
     vi.clearAllMocks();
   });
@@ -276,8 +289,8 @@ describe("PlayerControlsBar", () => {
 
   it("hover tooltip and highlight align (absolute time mode)", () => {
     const songsInVideo = [
-      { ...baseSong, start: "10", title: "Song A" },
-      { ...baseSong, start: "40", title: "Song B" },
+      { ...baseSong, start: 10, title: "Song A" },
+      { ...baseSong, start: 40, title: "Song B" },
     ];
 
     // mount a small wrapper to let setHoveredChapter update hoveredChapter prop

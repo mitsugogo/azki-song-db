@@ -5,8 +5,8 @@ import type { Song } from "../../types/song";
 
 const coverSong: Song = {
   video_id: "cover-1",
-  start: "0",
-  end: "60",
+  start: 0,
+  end: 60,
   title: "Cover Song",
   artist: "AZKi",
   album: "",
@@ -23,12 +23,23 @@ const coverSong: Song = {
   year: 2025,
   tags: ["カバー曲"],
   milestones: [],
+  hl: {
+    ja: {
+      title: "",
+      artist: "",
+      album: undefined,
+      sing: undefined,
+      sings: undefined,
+    },
+    en: undefined,
+  },
+  sings: [],
 };
 
 const originalSong: Song = {
   video_id: "orig-1",
-  start: "30",
-  end: "120",
+  start: 30,
+  end: 120,
   title: "Original Song",
   artist: "AZKi",
   album: "",
@@ -45,6 +56,17 @@ const originalSong: Song = {
   year: 2025,
   tags: ["オリ曲"],
   milestones: [],
+  hl: {
+    ja: {
+      title: "",
+      artist: "",
+      album: undefined,
+      sing: undefined,
+      sings: undefined,
+    },
+    en: undefined,
+  },
+  sings: [],
 };
 
 const allSongs: Song[] = [coverSong, originalSong];

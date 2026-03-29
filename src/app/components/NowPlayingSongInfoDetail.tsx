@@ -588,7 +588,7 @@ const NowPlayingSongInfoDetail = ({
                                   changeCurrentSong(song);
                                 }}
                               >
-                                {new Date(song.start * 1000)
+                                {new Date(Number(song.start) * 1000)
                                   .toISOString()
                                   .substring(11, 19)}
                               </Link>
