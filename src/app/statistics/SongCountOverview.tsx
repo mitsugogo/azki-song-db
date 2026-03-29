@@ -288,7 +288,7 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {formatDate(item.date, "ja-JP")}
+                            {formatDate(item.date, locale)}
                           </span>
                         </div>
                       </div>

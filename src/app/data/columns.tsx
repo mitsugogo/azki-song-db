@@ -34,7 +34,10 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
   );
 };
 
-export const getColumns = (t: TFuncLike): ColumnDef<Song>[] => [
+export const getColumns = (
+  t: TFuncLike,
+  locale?: string,
+): ColumnDef<Song>[] => [
   {
     id: "index",
     header: t("table.index"),
@@ -153,7 +156,7 @@ export const getColumns = (t: TFuncLike): ColumnDef<Song>[] => [
     accessorKey: "album_release_at",
     header: t("table.album_release_at"),
     cell: (info) =>
-      info.getValue() ? formatDate(info.getValue<string>()) : "",
+      info.getValue() ? formatDate(info.getValue<string>(), locale) : "",
     size: 150,
   },
   {
@@ -210,7 +213,7 @@ export const getColumns = (t: TFuncLike): ColumnDef<Song>[] => [
     accessorKey: "broadcast_at",
     header: t("table.broadcast_at"),
     cell: (info) =>
-      info.getValue() ? formatDate(info.getValue<string>()) : "-",
+      info.getValue() ? formatDate(info.getValue<string>(), locale) : "-",
     size: 120,
   },
   {

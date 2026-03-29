@@ -147,6 +147,9 @@
     "searchButton": "Search",
     "searching": "Searching...",
     "surpriseTooltip": "Randomly start playing a song",
+    "aria": {
+      "randomPlay": "Random play"
+    },
     "surpriseMe": "Surprise me",
     "recommendedLabel": "Recommended",
     "recommendedTitle": "Recommended songs",
@@ -165,6 +168,7 @@
       "ogAlt": "{siteName} - A site dedicated to sharing the greatness of AZKi's songs"
     },
     "watch": {
+      "keywords": "AZKi,songs,summary,songs,Discography,original songs,collaboration songs,cover songs,karaoke,live,setlist,hololive",
       "description": "A page for viewing and searching songs. Display content by title, playlist, or video ID.",
       "ogSubtitle": "Watch page - {siteName}",
       "ogAlt": "{siteName} - Watch page",
@@ -198,7 +202,8 @@
       "playlist": {
         "title": "Playlist \"{name}\" | {siteName}",
         "ogTitle": "📒 {name}",
-        "ogSubtitle": "A playlist containing {count} songs"
+        "ogSubtitle": "A playlist containing {count} songs",
+        "keywords": "AZKi,歌,まとめ,楽曲,Discography,original songs,collaboration songs,cover songs,karaoke,live,setlist,hololive"
       }
     },
     "discography": {
@@ -381,6 +386,7 @@
       "notSungForYear": "Not sung for over a year"
     },
     "timesSuffix": " times",
+    "unknown": "Unknown",
     "songsSuffix": " songs",
     "lastSungLabel": "Last sung:"
   },
@@ -619,6 +625,8 @@
     },
     "table": {
       "searchPlaceholder": "Search...",
+      "timestamp": "Timestamp",
+      "setlistTitle": "Setlist",
       "noResultsWithQuery": "No results found for \"{query}\".",
       "noData": "No data available."
     },
@@ -729,6 +737,7 @@
     "collabCountsTitle": "Frequent collaborators",
     "monthsTitle": "Monthly song counts",
     "monthOfYearSuffix": "",
+    "timesSuffix": " times",
     "originalAndCoverMV": "Original & cover MVs",
     "originalLabel": "Originals",
     "coverLabel": "Covers",

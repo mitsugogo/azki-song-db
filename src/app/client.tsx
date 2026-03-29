@@ -252,7 +252,7 @@ export default function ClientTop() {
                     <Link
                       href={`/watch`}
                       className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
-                      aria-label="ランダム再生"
+                      aria-label={t("aria.randomPlay")}
                     >
                       <LuSparkles className="mr-1 inline" />
                       {t("surpriseMe")}

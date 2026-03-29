@@ -37,7 +37,7 @@ export default function DataTable<
   selectedVideoId,
   songs,
   visualMode = "default",
-  countUnit = "回",
+  countUnit,
 }: {
   data: T[];
   caption: string;
@@ -53,6 +53,8 @@ export default function DataTable<
   countUnit?: string;
 }) {
   const t = useTranslations("Statistics.table");
+  const tStats = useTranslations("Statistics");
+  const resolvedCountUnit = countUnit ?? tStats("units.times");
   type ColumnSort = { id: string; desc: boolean };
 
   const initialSorting = useMemo(() => {
@@ -326,7 +328,7 @@ export default function DataTable<
                                     {Number(cell.getValue()).toLocaleString()}
                                   </span>
                                   <span className="text-light-gray-700 dark:text-light-gray-400">
-                                    {countUnit}
+                                    {tStats("units.times")}
                                   </span>
                                 </div>
                                 <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
@@ -354,7 +356,7 @@ export default function DataTable<
                                     {Number(cell.getValue()).toLocaleString()}
                                   </span>
                                   <span className="text-light-gray-700 dark:text-light-gray-400">
-                                    回
+                                    {tStats("units.times")}
                                   </span>
                                 </div>
                                 <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-light-gray-300 dark:bg-gray-700">
@@ -393,31 +395,31 @@ export default function DataTable<
                             }}
                           >
                             <h3 className="text-lg font-semibold mb-2">
-                              セットリスト (
+                              {t("setlistTitle")} (
                               {
                                 songs.filter(
                                   (s) => s.video_id === selectedVideoId,
                                 ).length
                               }
-                              曲)
+                              {tStats("units.songs")})
                             </h3>
                             <div className="w-full">
                               {/* Inner Header */}
                               <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700">
                                 <div className="shrink-0 w-20 px-3 py-1">
-                                  再生
+                                  {tStats("renderers.lastVideoCell.play")}
                                 </div>
                                 <div className="shrink-0 w-32 px-3 py-1">
-                                  タイムスタンプ
+                                  {t("timestamp")}
                                 </div>
                                 <div className="flex-1 min-w-0 px-3 py-1">
-                                  曲名
+                                  {tStats("columns.songName")}
                                 </div>
                                 <div className="flex-1 min-w-0 px-3 py-1">
-                                  アーティスト
+                                  {tStats("columns.artist")}
                                 </div>
                                 <div className="flex-1 min-w-0 px-3 py-1 hidden md:block">
-                                  タグ
+                                  {tStats("columns.tag")}
                                 </div>
                               </div>
                               {/* Inner Body */}

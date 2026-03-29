@@ -212,8 +212,8 @@ export default function YearSummaryClient({
   const displayYear = isYearValid
     ? hasYear
       ? yearNumber
-      : (clientYear ?? inferredYearFromSongs ?? "不明")
-    : "不明";
+      : (clientYear ?? inferredYearFromSongs ?? t("unknown"))
+    : t("unknown");
 
   useEffect(() => {
     if (Number.isFinite(year)) return;
@@ -444,15 +444,15 @@ export default function YearSummaryClient({
             <ol className="list-decimal pl-5">
               {(() => {
                 const maxCount = Math.max(...top10.map((t) => t.count), 1);
-                return top10.map((t) => {
+                return top10.map((s) => {
                   const query: Record<string, string> = {};
-                  if (t.video_id) query.v = t.video_id;
-                  if (t.start) query.t = `${t.start}s`;
+                  if (s.video_id) query.v = s.video_id;
+                  if (s.start) query.t = `${s.start}s`;
                   if (isYearValid) query.q = `year:${displayYear}`;
-                  const pct = Math.round((t.count / maxCount) * 100);
+                  const pct = Math.round((s.count / maxCount) * 100);
 
                   return (
-                    <li key={`${t.title}-${t.artist}`} className="mb-2">
+                    <li key={`${s.title}-${s.artist}`} className="mb-2">
                       <div className="relative rounded overflow-hidden">
                         <div
                           className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"
@@ -468,14 +468,15 @@ export default function YearSummaryClient({
                             className="block hover:underline"
                           >
                             <div className="font-medium">
-                              {t.title}
+                              {s.title}
                               <span className="text-sm text-gray-700 dark:text-light-gray-400">
-                                &nbsp;-&nbsp;{t.artist}
+                                &nbsp;-&nbsp;{s.artist}
                               </span>
                             </div>
                           </Link>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
-                            {t.count}回
+                            {s.count}
+                            {t("timesSuffix")}
                           </div>
                         </div>
                       </div>
@@ -524,7 +525,8 @@ export default function YearSummaryClient({
                             </Link>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
-                            {a.count}回
+                            {a.count}
+                            {t("timesSuffix")}
                           </div>
                         </div>
                       </div>
@@ -577,7 +579,8 @@ export default function YearSummaryClient({
                             </Link>
                           </div>
                           <div className="ml-4 text-sm text-gray-700 dark:text-light-gray-400 text-nowrap">
-                            {a.count}曲
+                            {a.count}
+                            {t("songsSuffix")}
                           </div>
                         </div>
                       </div>
@@ -901,7 +904,7 @@ export default function YearSummaryClient({
                         const id = s.video_id || `noid-${s.broadcast_at}`;
                         if (!byVideo[id])
                           byVideo[id] = {
-                            title: s.video_title || "(不明)",
+                            title: s.video_title || t("unknown"),
                             id,
                             uri: s.video_uri || "",
                             broadcast_at: new Date(s.broadcast_at),
@@ -958,7 +961,8 @@ export default function YearSummaryClient({
                                 </Link>
                               </div>
                               <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                                {v.songs.length}曲
+                                {v.songs.length}
+                                {t("songsSuffix")}
                               </div>
                             </div>
                             <ul className="mt-2 ml-3 pl-4 list-disc">
