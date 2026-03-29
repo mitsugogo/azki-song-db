@@ -5,7 +5,7 @@ async function globalSetup() {
   try {
     // 環境変数や Playwright の baseURL を考慮して絶対URLを作成する
     const host = process.env.HOST ?? "127.0.0.1";
-    const port = process.env.PORT ?? "3001";
+    const port = process.env.PORT ?? "3000";
     const defaultBase = `http://${host}:${port}`;
     const baseApiRaw =
       process.env.PLAYWRIGHT_BASE_URL ??
