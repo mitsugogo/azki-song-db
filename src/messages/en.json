@@ -497,7 +497,7 @@
   "Data": {
     "homeLabel": "HOME",
     "breadcrumb": "Recorded Data",
-    "title": "List of Recorded Data",
+    "title": "All recorded data",
     "description": "Displays information from this database.",
     "searchPlaceholder": "Search...",
     "table": {

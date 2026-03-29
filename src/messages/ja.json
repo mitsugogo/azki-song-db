@@ -21,7 +21,7 @@
     "activity": "活動記録",
     "anniversaries": "記念日",
     "statistics": "統計情報",
-    "allData": "全データ",
+    "allData": "全収録データ",
     "myBest9Songs": "究極の9曲"
   },
   "SearchInput": {
@@ -490,7 +490,7 @@
   "Data": {
     "homeLabel": "HOME",
     "breadcrumb": "収録データ",
-    "title": "収録データ一覧",
+    "title": "全収録データ",
     "description": "本データベースの情報を表示しています。",
     "searchPlaceholder": "検索...",
     "table": {

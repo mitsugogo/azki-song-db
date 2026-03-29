@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { flowbiteTheme } from "../theme";
 import { siteConfig } from "../config/siteConfig";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Viewport } from "next";
 
 // titleタグ
 export async function generateMetadata() {
@@ -17,6 +18,13 @@ export async function generateMetadata() {
     title: t("title", { siteName: siteConfig.siteName }),
   };
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 10,
+  userScalable: true,
+};
 
 export default function StatsLayout({
   children,
