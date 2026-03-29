@@ -65,7 +65,7 @@ test.describe("Home page", () => {
     if (hasRecommended) {
       await recommendedLink.click();
     } else {
-      await page.getByRole("link", { name: "Surprise me" }).click();
+      await page.getByRole("link", { name: "ランダム再生" }).click();
     }
 
     await expect(page).toHaveURL(/\/watch/);

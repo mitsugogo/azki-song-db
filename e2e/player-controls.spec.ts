@@ -13,9 +13,7 @@ test.describe("Player Control Bar", () => {
     // 曲リストが表示されるまで待機
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
     // 最初の曲をクリックして iframe を表示
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
     await songItems.first().click();
     // iframe が表示されるまで待機
     await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
@@ -52,9 +50,7 @@ test.describe("Player Control Bar", () => {
       if (msg.type() === "error") errors.push(msg.text());
     });
 
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
 
     // 連続クリック（素早く別の曲を選択）
     await songItems.first().click();
@@ -313,9 +309,7 @@ test.describe("同一動画内での曲切り替え", () => {
     // 曲リストが表示されるまで待機
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
     // 最初の曲をクリックして iframe を表示
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
     await songItems.first().click();
     // iframe が表示されるまで待機
     await expect(page.locator('iframe[src*="youtube.com"]')).toBeVisible();
@@ -329,9 +323,7 @@ test.describe("同一動画内での曲切り替え", () => {
     const initialTitle = await songTitle.textContent();
 
     // 曲リストから別の曲をクリック
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
     const songCount = await songItems.count();
 
     if (songCount > 1) {
@@ -371,9 +363,7 @@ test.describe("同一動画内での曲切り替え", () => {
 
   test("曲選択時にURLパラメータが更新される", async ({ page }) => {
     // 曲リストから曲をクリック
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
     const songCount = await songItems.count();
 
     if (songCount > 0) {
@@ -400,9 +390,7 @@ test.describe("同一動画内での曲切り替え", () => {
     await page.waitForTimeout(3000);
 
     // 曲リストから曲をクリック
-    const songItems = page
-      .locator("li")
-      .filter({ hasText: /\d{1,2}\/\d{1,2}\/\d{4}/ });
+    const songItems = page.locator("li");
     const songCount = await songItems.count();
 
     if (songCount < 2) {
