@@ -533,8 +533,7 @@ const NowPlayingSongInfo = ({
     const singerNames = allSongs
       .filter((song) => song.video_id === currentSong.video_id)
       .flatMap((song) =>
-        (song.sing ?? "")
-          .split("、")
+        (song.hl?.ja?.sings ?? song.sings ?? "")
           .map((name) => name.trim())
           .filter(Boolean),
       )
@@ -674,6 +673,7 @@ const NowPlayingSongInfo = ({
                           // この組み合わせにユニット名があるか
                           const unitName = getCollabUnitName(
                             dedupedChannels.flatMap((ch) => [ch.artistname]),
+                            locale,
                           );
 
                           return (

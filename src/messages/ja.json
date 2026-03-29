@@ -147,6 +147,9 @@
     "searchButton": "検索する",
     "searching": "検索中...",
     "surpriseTooltip": "ランダムに楽曲を再生開始します",
+    "aria": {
+      "randomPlay": "ランダム再生"
+    },
     "surpriseMe": "Surprise me",
     "recommendedLabel": "RECOMMENDED",
     "recommendedTitle": "おすすめ楽曲",
@@ -165,6 +168,7 @@
       "ogAlt": "{siteName} - AZKiさんの歌の素晴らしさを伝えるサイト"
     },
     "watch": {
+      "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
       "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、ビデオIDでコンテンツを表示します。",
       "ogSubtitle": "視聴ページ - {siteName}",
       "ogAlt": "{siteName} - 視聴ページ",
@@ -198,7 +202,8 @@
       "playlist": {
         "title": "プレイリスト「{name}」 | {siteName}",
         "ogTitle": "📒 {name}",
-        "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト"
+        "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト",
+        "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ"
       }
     },
     "discography": {
@@ -325,7 +330,8 @@
   "Playlist": {
     "title": "プレイリスト",
     "manageTitle": "プレイリストの管理",
-    "favoritesName": "お気に入り",
+    "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト",
+    "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
     "aria": {
       "selectPlaylist": "プレイリストを選択",
       "selectRow": "行を選択"
@@ -381,6 +387,7 @@
       "notSungForYear": "1年以上歌ってない曲"
     },
     "timesSuffix": "回",
+    "unknown": "不明",
     "songsSuffix": "曲",
     "lastSungLabel": "最終配信日:"
   },
@@ -612,6 +619,8 @@
     },
     "table": {
       "searchPlaceholder": "検索...",
+      "timestamp": "タイムスタンプ",
+      "setlistTitle": "セットリスト",
       "noResultsWithQuery": "「{query}」に一致する結果は見つかりませんでした。",
       "noData": "表示できるデータがありません。"
     },
@@ -722,6 +731,7 @@
     "collabCountsTitle": "歌でよくコラボしたホロメン・アーティスト",
     "monthsTitle": "月別の歌唱曲数",
     "monthOfYearSuffix": "月",
+    "timesSuffix": "回",
     "originalAndCoverMV": "オリ曲・カバー曲MV",
     "originalLabel": "オリ曲",
     "coverLabel": "カバー曲",

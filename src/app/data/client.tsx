@@ -24,6 +24,7 @@ import {
 } from "overlayscrollbars-react";
 import { getColumns } from "./columns";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 
 export default function ClientTable() {
   const { allSongs, isLoading } = useSongs();
@@ -35,12 +36,13 @@ export default function ClientTable() {
   );
 
   const t = useTranslations("Data");
+  const locale = useLocale();
 
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   const table = useReactTable({
     data: songs,
-    columns: getColumns(t),
+    columns: getColumns(t, locale),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     state: {
