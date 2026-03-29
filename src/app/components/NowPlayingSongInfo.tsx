@@ -606,11 +606,6 @@ const NowPlayingSongInfo = ({
     videoData?.title ?? videoTitle ?? currentSong?.video_title ?? "";
   const resolvedDescription = videoInfo?.snippet?.localized?.description ?? "";
 
-  // debug!!!
-  useEffect(() => {
-    console.log("channels", channels);
-  }, [channels]);
-
   // YouTube準拠: タイトルにハッシュタグがある場合はそれを優先し、
   // タイトルに無い場合のみ説明文先頭から最大3件を表示する
   const displayTags = useMemo(
