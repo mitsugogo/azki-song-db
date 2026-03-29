@@ -1029,7 +1029,7 @@ describe("usePlayerControls", () => {
         } as any);
       });
 
-      expect(result.current.currentSong?.start).toBe("100");
+      expect(result.current.currentSong?.start).toBe(100);
       expect(result.current.isPlaying).toBe(false);
       expect(result.current.timedLiveCallText).toBeNull();
     });
@@ -1060,8 +1060,8 @@ describe("usePlayerControls", () => {
         } as any);
       });
 
-      expect(result.current.currentSong?.start).toBe("300");
-      expect(result.current.currentSong?.start).not.toBe("200");
+      expect(result.current.currentSong?.start).toBe(300);
+      expect(result.current.currentSong?.start).not.toBe(200);
     });
 
     it("自動遷移ではskipSeekが使われる", () => {
@@ -1089,7 +1089,7 @@ describe("usePlayerControls", () => {
         vi.advanceTimersByTime(500);
       });
 
-      expect(result.current.currentSong?.start).toBe("100");
+      expect(result.current.currentSong?.start).toBe(100);
       expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
     });
 
@@ -1122,7 +1122,7 @@ describe("usePlayerControls", () => {
         vi.advanceTimersByTime(500);
       });
 
-      expect(result.current.currentSong?.start).toBe("100");
+      expect(result.current.currentSong?.start).toBe(100);
     });
   });
 });
