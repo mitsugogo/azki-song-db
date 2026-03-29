@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/mitsugogo/azki-song-db/compare/v2.0.0...v2.1.0) (2026-03-29)
+
+
+### Features
+
+* 記念日のページを追加 ([be67860](https://github.com/mitsugogo/azki-song-db/commit/be67860ab6f4071b07a76431b19505422deb6c92))
+
+
+### Bug Fixes
+
+* handle undefined playlist properties in breadcrumb title ([599933d](https://github.com/mitsugogo/azki-song-db/commit/599933d3a574a8aa2c1b3efbc7c3c2aa34d8e8cf))
+* Headerコンポーネントのリンクを<a>から<Link>に変更 ([9c8d741](https://github.com/mitsugogo/azki-song-db/commit/9c8d741911d3f0718862c4e50dffbf61aea33000))
+* OG画像が翻訳されてないのを修正 ([172995d](https://github.com/mitsugogo/azki-song-db/commit/172995d781efb4134b3ce96c436867c1c1debb19))
+* replace TFunc type with TFuncLike in columns.tsx ([4be6fa8](https://github.com/mitsugogo/azki-song-db/commit/4be6fa86ec71b0408514cb2c22dfe1dceeab8ed2))
+* singsのマッピング修正 ([ca60307](https://github.com/mitsugogo/azki-song-db/commit/ca6030755a7209a787d594ba8a7024c20fd09db4))
+* Songの型パズル修正 ([b2f4616](https://github.com/mitsugogo/azki-song-db/commit/b2f4616c2a6f6fa92a11756352de413362f649da))
+* translatedアルバム名の条件を修正 ([ab33154](https://github.com/mitsugogo/azki-song-db/commit/ab33154257230c5e1ffe74615dbc40336658f626))
+* update package-lock.json to sync with package.json ([e5a0f9f](https://github.com/mitsugogo/azki-song-db/commit/e5a0f9faa6517bb20b3cb37f0a7f262f624f6ce6))
+* update package.json to include glob and rimraf dependencies ([cf6c31b](https://github.com/mitsugogo/azki-song-db/commit/cf6c31bdfeda09da5e46a6f2fafa09edf0c3cb8c))
+* アルバム内の楽曲一覧がスクロールできないバグを修正 ([48bd5d2](https://github.com/mitsugogo/azki-song-db/commit/48bd5d2ad84a1c7f663a56caa8bd43a7c5ab3533))
+* テストのためのモックを追加し、翻訳機能を強化 ([35ff475](https://github.com/mitsugogo/azki-song-db/commit/35ff475e045fe17475433ce78644bd205996e1f9))
+* メタタグ修正 ([b156841](https://github.com/mitsugogo/azki-song-db/commit/b156841031c17758467fbdd1e5c7a5ea2a97da61))
+* 同名タイトルの曲が片方に寄せられてしまうバグを修正 ([5f5c947](https://github.com/mitsugogo/azki-song-db/commit/5f5c947771d8de35de7dd607fa0a81549118d545))
+* 検索時にパスが二重になるバグを修正 ([8793586](https://github.com/mitsugogo/azki-song-db/commit/879358633cbd0ac006616354a2a90e8da160edfa))
+* 検索結果が二重になるバグを修正 ([4fb770e](https://github.com/mitsugogo/azki-song-db/commit/4fb770ecefdf6779196f244ee09624667c07fc8a))
+* 活動年表のレイアウト崩れを修正 ([726b32a](https://github.com/mitsugogo/azki-song-db/commit/726b32a37f3acf2c1265450be90f89c3ed42dd0d))
+* 統計情報の再生数が0表示になってしまっているのを修正 ([0977abc](https://github.com/mitsugogo/azki-song-db/commit/0977abc4f2ddc3fbeb4be3333e00bf0ac0f91197))
+* 言語パス考慮漏れ ([a36de60](https://github.com/mitsugogo/azki-song-db/commit/a36de60bdf4e928f6e263d4e84fc19f497eb53bd))
+* 高さ計算バグ修正 ([9eb62d8](https://github.com/mitsugogo/azki-song-db/commit/9eb62d8fa4a3aa122f779c04535bdfab1e05d95d))
+
 ## [2.0.0](https://github.com/mitsugogo/azki-song-db/compare/v1.34.6...v2.0.0) (2026-03-22)
 
 
