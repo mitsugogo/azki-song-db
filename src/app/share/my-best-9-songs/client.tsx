@@ -191,9 +191,9 @@ export default function MyBestNineSongsPage() {
 
   // タイル一覧の表示幅から列数を計算（base:2, lg:3, xl:4）
   const tileColumnCount = useMemo(() => {
-    if (windowWidth >= 1280) return 4;
-    if (windowWidth >= 1024) return 3;
-    return 2;
+    if (windowWidth >= 768) return 5;
+    if (windowWidth >= 640) return 4;
+    return 3;
   }, [windowWidth]);
 
   const tileRowCount = useMemo(() => {
