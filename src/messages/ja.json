@@ -169,7 +169,7 @@
     },
     "watch": {
       "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
-      "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、ビデオIDでコンテンツを表示します。",
+      "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、videoIDでコンテンツを表示します。",
       "ogSubtitle": "視聴ページ - {siteName}",
       "ogAlt": "{siteName} - 視聴ページ",
       "mode": {

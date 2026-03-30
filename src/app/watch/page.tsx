@@ -141,7 +141,7 @@ export async function generateMetadata({
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];
       if (filteredSongs.length === 1) {
-        title = `${song.video_title} | ${siteConfig.siteName}`;
+        title = `${song.title} - ${song.artist} | ${siteConfig.siteName}`;
         ogImageUrl = new URL("/api/og/thumb", baseUrl);
         ogImageUrl.searchParams.set("v", v);
         ogImageUrl.searchParams.set(
@@ -150,12 +150,23 @@ export async function generateMetadata({
         );
         ogImageUrl.searchParams.set("hl", locale);
         ogTitle = title;
+        description = tMeta("song.description", {
+          videoTitle: song.video_title,
+          date: formatDate(song.broadcast_at, locale),
+        });
+        ogSubtitle = tMeta("song.ogSubtitle", {
+          date: formatDate(song.broadcast_at, locale),
+          title: song.title,
+          artist: song.artist,
+          videoTitle: song.video_title,
+        });
       } else {
-        title = `${song.video_title} | ${siteConfig.siteName}`;
+        title = `watch: ${song.video_title} | ${siteConfig.siteName}`;
         ogTitle = title;
         ogImageUrl = new URL("/api/og/videothumb", baseUrl);
         ogImageUrl.searchParams.set("v", v);
         ogImageUrl.searchParams.set("hl", locale);
+        description = song.video_title;
       }
     }
   }
