@@ -48,13 +48,14 @@ const parseToTargetDateTime = (input: string) => {
   return parsed;
 };
 
-const getDaysUntil = (nextDateAt: string) => {
+const getDaysUntil = (nextDateAt: string, nowMsArg?: number) => {
   const target = parseToLocalDayStart(nextDateAt);
   if (!target) {
     return null;
   }
 
-  const today = new Date();
+  const nowMsLocal = typeof nowMsArg === "number" ? nowMsArg : Date.now();
+  const today = new Date(nowMsLocal);
   const todayStart = new Date(
     today.getFullYear(),
     today.getMonth(),
@@ -93,32 +94,37 @@ export default function AnniversariesPageClient() {
     [items],
   );
 
-  const featuredAnniversary = useMemo(
-    () =>
+  const featuredAnniversary = useMemo(() => {
+    return (
       sortedItems.find((item) => {
-        const target = parseToTargetDateTime(item.next_date_at);
-        if (!target) {
-          return false;
-        }
-        return target.getTime() >= nowMs;
-      }) || null,
-    [nowMs, sortedItems],
-  );
+        const days = getDaysUntil(item.next_date_at, nowMs);
+        return days !== null && days >= 0;
+      }) || null
+    );
+  }, [nowMs, sortedItems]);
 
   const featuredCountdown = useMemo(() => {
     if (!featuredAnniversary) {
       return null;
     }
 
-    const target = parseToTargetDateTime(featuredAnniversary.next_date_at);
-    if (!target) {
-      return null;
+    const daysUntil = getDaysUntil(featuredAnniversary.next_date_at, nowMs);
+    if (daysUntil === null) return null;
+
+    // 当日はその日の終わりまでの残り時間を表示する（次の日の開始まで）
+    let targetMs: number | null = null;
+    if (daysUntil === 0) {
+      const dayStart = parseToLocalDayStart(featuredAnniversary.next_date_at);
+      if (!dayStart) return null;
+      targetMs = dayStart.getTime() + dayInMs; // 翌日の00:00（当日の終わり）
+    } else {
+      const target = parseToTargetDateTime(featuredAnniversary.next_date_at);
+      if (!target) return null;
+      targetMs = target.getTime();
     }
 
-    const diff = target.getTime() - nowMs;
-    if (diff <= 0) {
-      return t("countdownFinished");
-    }
+    const diff = targetMs - nowMs;
+    if (diff <= 0) return t("countdownFinished");
 
     const days = Math.floor(diff / dayInMs);
     const hours = Math.floor((diff % dayInMs) / hourInMs);
