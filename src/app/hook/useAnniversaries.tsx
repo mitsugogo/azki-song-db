@@ -58,23 +58,15 @@ const useAnniversaries = () => {
           .map((item: Partial<AnniversaryItem>) => ({
             date: item?.date || "",
             first_date_at: item?.first_date_at || "",
-            next_date_at: item?.next_date_at || "",
+            // next_date_at is computed on client if needed
             name: item?.name || "",
-            formatted_name: item?.formatted_name || "",
             url: item?.url || "",
             note: item?.note || "",
           }))
-          .filter((item: AnniversaryItem) => Boolean(item.formatted_name))
+          .filter((item: AnniversaryItem) => Boolean(item.name))
           .sort((a: AnniversaryItem, b: AnniversaryItem) => {
-            const aTime = new Date(a.next_date_at).getTime();
-            const bTime = new Date(b.next_date_at).getTime();
-            const aSafe = Number.isFinite(aTime)
-              ? aTime
-              : Number.MAX_SAFE_INTEGER;
-            const bSafe = Number.isFinite(bTime)
-              ? bTime
-              : Number.MAX_SAFE_INTEGER;
-            return aSafe - bSafe;
+            // deterministic ordering: sort by name
+            return (a.name || "").localeCompare(b.name || "");
           });
 
         cachedAnniversariesByLocale.set(normalizedLocale, normalizedItems);

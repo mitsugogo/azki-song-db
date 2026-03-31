@@ -239,6 +239,7 @@
     },
     "anniversaries": {
       "title": "Anniversaries",
+      "featuredTodayTitle": "Anniversary 🎉",
       "description": "Browse anniversaries related to AZKi's activities and songs.",
       "ogSubtitle": "Anniversary list - {siteName}",
       "ogAlt": "{siteName} - Anniversary list"
@@ -547,7 +548,8 @@
     "firstDateLabel": "First",
     "noteLabel": "Note",
     "linkLabel": "Link",
-    "openLink": "Open link"
+    "openLink": "Open link",
+    "featuredTodayTitle": "Anniversary🎉"
   },
   "Statistics": {
     "title": "Statistics",
