@@ -80,11 +80,25 @@ export async function GET(request: Request) {
       colMap[def.key] = index; // 見つからない場合は -1
     });
 
-    const convertToDate = (numberValue: number) => {
+    // Excel/Sheets serial -> ISO (JST midnight) helper
+    const excelSerialToJstIso = (
+      numberValue: number,
+      overrideYear?: number,
+    ) => {
       if (!numberValue) return "";
-      return new Date(
-        numberValue * 24 * 60 * 60 * 1000 + new Date(1899, 11, 30).getTime(),
-      ).toISOString();
+      const JST_OFFSET = 9 * 60 * 60 * 1000; // JST = UTC+9
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const baseUtc = Date.UTC(1899, 11, 30); // 1899-12-30 UTC base for Excel serial
+
+      // Get UTC date components for the serial value
+      const d = new Date(baseUtc + Math.round(numberValue * DAY_MS));
+      const year = overrideYear ?? d.getUTCFullYear();
+      const month = d.getUTCMonth();
+      const day = d.getUTCDate();
+
+      // Build a timestamp that represents JST midnight for that calendar date
+      const targetUtcMs = Date.UTC(year, month, day) - JST_OFFSET;
+      return new Date(targetUtcMs).toISOString();
     };
 
     const items: AnniversaryItem[] = [];
@@ -118,14 +132,21 @@ export async function GET(request: Request) {
         const firstDateNum = getNum("first_date");
         if (!firstDateNum) return "";
 
-        const now = new Date();
-        const firstDate = new Date(convertToDate(firstDateNum));
-        firstDate.setFullYear(now.getFullYear());
+        const JST_OFFSET = 9 * 60 * 60 * 1000;
+        const nowEpoch = Date.now();
+        const nowJstYear = new Date(nowEpoch + JST_OFFSET).getUTCFullYear();
 
-        if (firstDate < now) {
-          firstDate.setFullYear(now.getFullYear() + 1);
+        // 今の年の記念日（JST midnight の UTC 表現）を作る
+        let candidateIso = excelSerialToJstIso(firstDateNum, nowJstYear);
+        let candidateEpoch = candidateIso
+          ? new Date(candidateIso).getTime()
+          : 0;
+
+        // 既に過ぎている場合は翌年を使う
+        if (candidateEpoch <= nowEpoch) {
+          candidateIso = excelSerialToJstIso(firstDateNum, nowJstYear + 1);
         }
-        return firstDate.toISOString();
+        return candidateIso;
       })();
 
       const name = getStr("name");
@@ -136,20 +157,30 @@ export async function GET(request: Request) {
       const localizedNote = locale === "en" && note_en ? note_en : note;
       items.push({
         // JST基準でMM/DD形式にする
-        date: new Date(convertToDate(getNum("date")))
-          .toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" })
+        date: new Date(excelSerialToJstIso(getNum("date")))
+          .toLocaleDateString("ja-JP", {
+            timeZone: "Asia/Tokyo",
+            month: "2-digit",
+            day: "2-digit",
+          })
           .replace(/\//g, "/"),
-        first_date_at: convertToDate(getNum("first_date")),
+        first_date_at: excelSerialToJstIso(getNum("first_date")),
 
         next_date_at: nextDateAt,
         name: localizedName,
 
         // 「活動{n}周年」や「{year}生誕」となっているので次回のnextDateAtを基準にplaceholderを置換する
         formatted_name: (() => {
+          const JST_OFFSET = 9 * 60 * 60 * 1000;
           const nextDate = new Date(nextDateAt);
-          const yearDiff =
-            nextDate.getFullYear() -
-            new Date(convertToDate(getNum("first_date"))).getFullYear();
+          const nextYearJst = new Date(
+            nextDate.getTime() + JST_OFFSET,
+          ).getUTCFullYear();
+          const firstDateIso = excelSerialToJstIso(getNum("first_date"));
+          const firstYearJst = new Date(
+            new Date(firstDateIso).getTime() + JST_OFFSET,
+          ).getUTCFullYear();
+          const yearDiff = nextYearJst - firstYearJst;
           const formattedYearDiff =
             locale === "en" ? getOrdinal(yearDiff) : String(yearDiff);
           return localizedName
