@@ -15,13 +15,17 @@ const hourInMs = 60 * 60 * 1000;
 const minuteInMs = 60 * 1000;
 const secondInMs = 1000;
 
-const parseToLocalDayStart = (input: string) => {
+// 日本時間（JST）基準でその日の開始（00:00 JST）の Date を返す
+const jstOffsetMs = 9 * hourInMs;
+const parseToJstDayStart = (input: string) => {
   const dateOnlyMatch = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (dateOnlyMatch) {
     const year = Number(dateOnlyMatch[1]);
     const month = Number(dateOnlyMatch[2]);
     const day = Number(dateOnlyMatch[3]);
-    return new Date(year, month - 1, day);
+    // JST のその日の 00:00 を表す UTC 時刻を作る
+    const utcMs = Date.UTC(year, month - 1, day, 0, 0, 0) - jstOffsetMs;
+    return new Date(utcMs);
   }
 
   const parsed = new Date(input);
@@ -29,7 +33,13 @@ const parseToLocalDayStart = (input: string) => {
     return null;
   }
 
-  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  // parsed を JST にシフトして JST の年月日を取り、その日の JST 00:00 を返す
+  const jst = new Date(parsed.getTime() + jstOffsetMs);
+  const year = jst.getUTCFullYear();
+  const month = jst.getUTCMonth();
+  const day = jst.getUTCDate();
+  const utcMs = Date.UTC(year, month, day, 0, 0, 0) - jstOffsetMs;
+  return new Date(utcMs);
 };
 
 const parseToTargetDateTime = (input: string) => {
@@ -38,7 +48,9 @@ const parseToTargetDateTime = (input: string) => {
     const year = Number(dateOnlyMatch[1]);
     const month = Number(dateOnlyMatch[2]);
     const day = Number(dateOnlyMatch[3]);
-    return new Date(year, month - 1, day, 0, 0, 0, 0);
+    // date-only は JST のその日の 00:00 をターゲットとする
+    const utcMs = Date.UTC(year, month - 1, day, 0, 0, 0) - jstOffsetMs;
+    return new Date(utcMs);
   }
 
   const parsed = new Date(input);
@@ -49,22 +61,21 @@ const parseToTargetDateTime = (input: string) => {
 };
 
 const getDaysUntil = (nextDateAt: string, nowMsArg?: number) => {
-  const target = parseToLocalDayStart(nextDateAt);
+  const target = parseToJstDayStart(nextDateAt);
   if (!target) {
     return null;
   }
 
   const nowMsLocal = typeof nowMsArg === "number" ? nowMsArg : Date.now();
-  const today = new Date(nowMsLocal);
-  const todayStart = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-  return Math.max(
-    0,
-    Math.ceil((target.getTime() - todayStart.getTime()) / dayInMs),
-  );
+  // 今の時刻を JST にシフトして JST の年月日でその日の開始（00:00 JST）を計算
+  const jstNowMs = nowMsLocal + jstOffsetMs;
+  const jstNow = new Date(jstNowMs);
+  const year = jstNow.getUTCFullYear();
+  const month = jstNow.getUTCMonth();
+  const day = jstNow.getUTCDate();
+  const todayStartUtcMs = Date.UTC(year, month, day, 0, 0, 0) - jstOffsetMs;
+  const diffDays = Math.ceil((target.getTime() - todayStartUtcMs) / dayInMs);
+  return Math.max(0, diffDays);
 };
 
 export default function AnniversariesPageClient() {
@@ -82,46 +93,112 @@ export default function AnniversariesPageClient() {
     };
   }, []);
 
-  const sortedItems = useMemo(
-    () =>
-      [...items].sort((a, b) => {
-        const aTime = new Date(a.next_date_at).getTime();
-        const bTime = new Date(b.next_date_at).getTime();
-        const aSafe = Number.isFinite(aTime) ? aTime : Number.MAX_SAFE_INTEGER;
-        const bSafe = Number.isFinite(bTime) ? bTime : Number.MAX_SAFE_INTEGER;
-        return aSafe - bSafe;
-      }),
-    [items],
-  );
+  const sortedItems = useMemo(() => {
+    const jstNow = new Date(nowMs + jstOffsetMs);
+    const nowMonth = jstNow.getUTCMonth() + 1;
+    const nowDay = jstNow.getUTCDate();
+    // compute next occurrence for each item and sort: today first, then days until
+    const withNext = items.map((it) => {
+      const nextIso = computeNextIsoForItem(it, nowMs);
+      const days = nextIso ? getDaysUntil(nextIso, nowMs) : null;
+      return { it, nextIso, days };
+    });
+
+    withNext.sort((A, B) => {
+      const aIsToday = (() => {
+        if (!A.nextIso) return false;
+        const d = new Date(
+          parseToJstDayStart(A.nextIso)!.getTime() + jstOffsetMs,
+        );
+        return d.getUTCMonth() + 1 === nowMonth && d.getUTCDate() === nowDay;
+      })();
+      const bIsToday = (() => {
+        if (!B.nextIso) return false;
+        const d = new Date(
+          parseToJstDayStart(B.nextIso)!.getTime() + jstOffsetMs,
+        );
+        return d.getUTCMonth() + 1 === nowMonth && d.getUTCDate() === nowDay;
+      })();
+      if (aIsToday && !bIsToday) return -1;
+      if (bIsToday && !aIsToday) return 1;
+
+      const aKey = A.days === null ? Number.MAX_SAFE_INTEGER : A.days;
+      const bKey = B.days === null ? Number.MAX_SAFE_INTEGER : B.days;
+      if (aKey !== bKey) return aKey - bKey;
+
+      const aTime = A.nextIso
+        ? new Date(A.nextIso).getTime()
+        : Number.MAX_SAFE_INTEGER;
+      const bTime = B.nextIso
+        ? new Date(B.nextIso).getTime()
+        : Number.MAX_SAFE_INTEGER;
+      return aTime - bTime;
+    });
+
+    return withNext.map((v) => v.it);
+  }, [items, nowMs]);
 
   const featuredAnniversary = useMemo(() => {
-    return (
-      sortedItems.find((item) => {
-        const days = getDaysUntil(item.next_date_at, nowMs);
-        return days !== null && days >= 0;
-      }) || null
+    // まず日本時間の月/日が今日と一致する記念日を探す（API の next_date_at が翌年になっている場合に対応）
+    const getJstMonthDay = (dateStr?: string | null, item?: any) => {
+      // dateStr may be empty because API no longer returns next_date_at; allow item to compute
+      const source =
+        dateStr || (item ? computeNextIsoForItem(item, nowMs) : "");
+      if (!source) return null;
+      const target = parseToJstDayStart(source);
+      if (!target) return null;
+      const d = new Date(target.getTime() + jstOffsetMs);
+      return { month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+    };
+
+    const nowJst = new Date(
+      (typeof nowMs === "number" ? nowMs : Date.now()) + jstOffsetMs,
     );
+    const nowMonth = nowJst.getUTCMonth() + 1;
+    const nowDay = nowJst.getUTCDate();
+
+    const todayItem = sortedItems.find((item) => {
+      const md = getJstMonthDay(undefined, item);
+      return md !== null && md.month === nowMonth && md.day === nowDay;
+    });
+    if (todayItem) return todayItem;
+
+    // 当日がなければ従来通り次に来る記念日を返す
+    const nextItem = sortedItems.find((item) => {
+      const nextIso = computeNextIsoForItem(item, nowMs);
+      const days = nextIso ? getDaysUntil(nextIso, nowMs) : null;
+      return days !== null && days > 0;
+    });
+    return nextItem || null;
   }, [nowMs, sortedItems]);
 
   const featuredCountdown = useMemo(() => {
     if (!featuredAnniversary) {
       return null;
     }
-
-    const daysUntil = getDaysUntil(featuredAnniversary.next_date_at, nowMs);
+    const nextIso = computeNextIsoForItem(featuredAnniversary, nowMs);
+    const daysUntil = nextIso ? getDaysUntil(nextIso, nowMs) : null;
     if (daysUntil === null) return null;
 
-    // 当日はその日の終わりまでの残り時間を表示する（次の日の開始まで）
-    let targetMs: number | null = null;
-    if (daysUntil === 0) {
-      const dayStart = parseToLocalDayStart(featuredAnniversary.next_date_at);
-      if (!dayStart) return null;
-      targetMs = dayStart.getTime() + dayInMs; // 翌日の00:00（当日の終わり）
-    } else {
-      const target = parseToTargetDateTime(featuredAnniversary.next_date_at);
-      if (!target) return null;
-      targetMs = target.getTime();
-    }
+    // 当日の判定は JST の月/日一致で行う（API の next_date_at が翌年になっている場合に対応）
+    const isMonthDayToday = (() => {
+      const target = parseToJstDayStart(
+        computeNextIsoForItem(featuredAnniversary, nowMs),
+      );
+      if (!target) return false;
+      const d = new Date(target.getTime() + jstOffsetMs);
+      const jstNow = new Date(nowMs + jstOffsetMs);
+      return (
+        d.getUTCMonth() === jstNow.getUTCMonth() &&
+        d.getUTCDate() === jstNow.getUTCDate()
+      );
+    })();
+    if (isMonthDayToday) return null;
+    const target = parseToTargetDateTime(
+      computeNextIsoForItem(featuredAnniversary, nowMs),
+    );
+    if (!target) return null;
+    const targetMs = target.getTime();
 
     const diff = targetMs - nowMs;
     if (diff <= 0) return t("countdownFinished");
@@ -133,6 +210,114 @@ export default function AnniversariesPageClient() {
 
     return t("countdownFormat", { days, hours, minutes, seconds });
   }, [featuredAnniversary, nowMs, t]);
+
+  const getYearFromDate = (dateStr?: string | null) => {
+    if (!dateStr) return null;
+    const dateOnlyMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnlyMatch) return Number(dateOnlyMatch[1]);
+    const parsed = new Date(dateStr);
+    if (Number.isNaN(parsed.getTime())) return null;
+    const jst = new Date(parsed.getTime() + jstOffsetMs);
+    return jst.getUTCFullYear();
+  };
+
+  // first_date_at(date) を基準に次回日付を JST で計算（当日だけは当年を返す）
+  function computeNextIsoForItem(item: any, nowMsArg?: number) {
+    const nowMsLocal = typeof nowMsArg === "number" ? nowMsArg : Date.now();
+    const nowJst = new Date(nowMsLocal + jstOffsetMs);
+    const nowYear = nowJst.getUTCFullYear();
+    const nowMonth = nowJst.getUTCMonth();
+    const nowDay = nowJst.getUTCDate();
+
+    // Prefer first_date_at if provided (ISO string representing JST midnight UTC)
+    const firstIso = item.first_date_at || "";
+    if (firstIso) {
+      const parsed = new Date(firstIso);
+      if (!Number.isNaN(parsed.getTime())) {
+        const jst = new Date(parsed.getTime() + jstOffsetMs);
+        const month = jst.getUTCMonth();
+        const day = jst.getUTCDate();
+        // 当年の候補日
+        const candidateUtc =
+          Date.UTC(nowYear, month, day, 0, 0, 0) - jstOffsetMs;
+        const isToday = month === nowMonth && day === nowDay;
+        if (isToday || candidateUtc > nowMsLocal) {
+          return new Date(candidateUtc).toISOString();
+        }
+        const nextUtc =
+          Date.UTC(nowYear + 1, month, day, 0, 0, 0) - jstOffsetMs;
+        return new Date(nextUtc).toISOString();
+      }
+    }
+
+    // fallback: if `date` is provided as MM/DD
+    const dateStr = item.date || "";
+    const mdMatch = (dateStr || "").match(/^(\d{2})\/(\d{2})$/);
+    if (mdMatch) {
+      const month = Number(mdMatch[1]) - 1;
+      const day = Number(mdMatch[2]);
+      const candidateUtc = Date.UTC(nowYear, month, day, 0, 0, 0) - jstOffsetMs;
+      const isToday = month === nowMonth && day === nowDay;
+      if (isToday || candidateUtc > nowMsLocal) {
+        return new Date(candidateUtc).toISOString();
+      }
+      const nextUtc = Date.UTC(nowYear + 1, month, day, 0, 0, 0) - jstOffsetMs;
+      return new Date(nextUtc).toISOString();
+    }
+
+    return "";
+  }
+
+  const formatWithAnniversary = (item: any) => {
+    const template = item.name || "";
+    if (!template) return "";
+
+    const nextIso = computeNextIsoForItem(item, nowMs);
+    if (!nextIso) return template;
+
+    const nextJst = new Date(new Date(nextIso).getTime() + jstOffsetMs);
+    const occurrenceYear = nextJst.getUTCFullYear();
+
+    let result = template.replace(/\{year\}/g, String(occurrenceYear));
+
+    if (result.includes("{n}")) {
+      const firstYear = getYearFromDate(item.first_date_at || item.date);
+      if (firstYear) {
+        const n = occurrenceYear - firstYear;
+        if (Number.isFinite(n) && n > 0) {
+          const isEnLocale = (locale || "").toString().startsWith("en");
+          const ordinal = (v: number) => {
+            const mod10 = v % 10;
+            const mod100 = v % 100;
+            if (mod10 === 1 && mod100 !== 11) return `${v}st`;
+            if (mod10 === 2 && mod100 !== 12) return `${v}nd`;
+            if (mod10 === 3 && mod100 !== 13) return `${v}rd`;
+            return `${v}th`;
+          };
+          result = result.replace(
+            /\{n\}/g,
+            isEnLocale ? ordinal(n) : String(n),
+          );
+        }
+      }
+    }
+
+    return result;
+  };
+
+  const isFeaturedToday = (() => {
+    if (!featuredAnniversary) return false;
+    const target = parseToJstDayStart(
+      computeNextIsoForItem(featuredAnniversary, nowMs),
+    );
+    if (!target) return false;
+    const d = new Date(target.getTime() + jstOffsetMs);
+    const jstNow = new Date(nowMs + jstOffsetMs);
+    return (
+      d.getUTCMonth() === jstNow.getUTCMonth() &&
+      d.getUTCDate() === jstNow.getUTCDate()
+    );
+  })();
 
   return (
     <div className="grow p-2 lg:p-6 lg:pb-10">
@@ -156,21 +341,26 @@ export default function AnniversariesPageClient() {
         </p>
       </div>
 
-      {featuredAnniversary && featuredCountdown && (
+      {featuredAnniversary && (
         <section className="mx-2 mb-2 rounded-xl border border-primary-300/40 bg-primary-50/70 p-4 shadow-sm dark:border-pink-200/20 dark:bg-gray-900/50">
           <p className="text-xs font-semibold tracking-wide text-primary-700 dark:text-pink-200">
-            {t("featuredTitle")}
+            {isFeaturedToday ? t("featuredTodayTitle") : t("featuredTitle")}
           </p>
           <h2 className="mt-1 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
-            {featuredAnniversary.formatted_name}
+            {formatWithAnniversary(featuredAnniversary)}
           </h2>
           <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
             {t("nextDateLabel")}:{" "}
-            {formatDate(featuredAnniversary.next_date_at, locale)}
+            {formatDate(
+              computeNextIsoForItem(featuredAnniversary, nowMs),
+              locale,
+            )}
           </p>
-          <p className="mt-1 text-sm font-semibold text-primary-700 dark:text-pink-200">
-            {featuredCountdown}
-          </p>
+          {featuredCountdown && (
+            <p className="mt-1 text-sm font-semibold text-primary-700 dark:text-pink-200">
+              {featuredCountdown}
+            </p>
+          )}
         </section>
       )}
 
@@ -187,18 +377,42 @@ export default function AnniversariesPageClient() {
           <div className="p-2 md:hidden">
             <table className="w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
               {sortedItems.map((item, index) => {
-                const nextDate = item.next_date_at
-                  ? formatDate(item.next_date_at, locale)
-                  : "-";
+                let nextDate: string;
+                let daysUntil: number | null;
+                // compute next occurrence client-side
+                const itemNextIso = computeNextIsoForItem(item, nowMs);
+                if (itemNextIso) {
+                  const target = parseToJstDayStart(itemNextIso);
+                  if (target) {
+                    const md = new Date(target.getTime() + jstOffsetMs);
+                    const jstNow = new Date(nowMs + jstOffsetMs);
+                    const isMonthDayToday =
+                      md.getUTCMonth() === jstNow.getUTCMonth() &&
+                      md.getUTCDate() === jstNow.getUTCDate();
+                    if (isMonthDayToday) {
+                      const y = jstNow.getUTCFullYear();
+                      const m = String(md.getUTCMonth() + 1).padStart(2, "0");
+                      const d = String(md.getUTCDate()).padStart(2, "0");
+                      nextDate = formatDate(`${y}-${m}-${d}`, locale);
+                      daysUntil = 0;
+                    } else {
+                      nextDate = formatDate(itemNextIso, locale);
+                      daysUntil = getDaysUntil(itemNextIso);
+                    }
+                  } else {
+                    nextDate = formatDate(itemNextIso, locale);
+                    daysUntil = getDaysUntil(itemNextIso);
+                  }
+                } else {
+                  nextDate = "-";
+                  daysUntil = null;
+                }
                 const firstDate = item.first_date_at
                   ? formatDate(item.first_date_at, locale)
                   : "-";
-                const daysUntil = item.next_date_at
-                  ? getDaysUntil(item.next_date_at)
-                  : null;
 
                 return (
-                  <tbody key={`${item.formatted_name}-${index}`}>
+                  <tbody key={`${item.name}-${index}`}>
                     <tr className="border-t border-light-gray-200/60 text-gray-800 dark:border-white/10 dark:text-gray-100">
                       <th className="w-20 px-3 pt-3 pb-1 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
                         {t("nextDateLabel")}
@@ -210,7 +424,7 @@ export default function AnniversariesPageClient() {
                         {t("anniversaryNameLabel")}
                       </th>
                       <td className="px-3 pt-3 pb-1 font-semibold">
-                        {item.formatted_name}
+                        {formatWithAnniversary(item)}
                       </td>
                     </tr>
                     <tr className="text-gray-800 dark:text-gray-100">
@@ -225,7 +439,9 @@ export default function AnniversariesPageClient() {
                       </th>
                       <td className="px-3 pt-1 pb-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
                         {daysUntil !== null
-                          ? t("daysUntil", { days: daysUntil })
+                          ? daysUntil === 0
+                            ? "-"
+                            : t("daysUntil", { days: daysUntil })
                           : "-"}
                       </td>
                     </tr>
@@ -274,33 +490,59 @@ export default function AnniversariesPageClient() {
               </thead>
               <tbody>
                 {sortedItems.map((item, index) => {
-                  const nextDate = item.next_date_at
-                    ? formatDate(item.next_date_at, locale)
-                    : "-";
+                  let nextDate: string;
+                  let daysUntil: number | null;
+                  // compute next occurrence client-side
+                  const itemNextIso = computeNextIsoForItem(item, nowMs);
+                  if (itemNextIso) {
+                    const target = parseToJstDayStart(itemNextIso);
+                    if (target) {
+                      const md = new Date(target.getTime() + jstOffsetMs);
+                      const jstNow = new Date(nowMs + jstOffsetMs);
+                      const isMonthDayToday =
+                        md.getUTCMonth() === jstNow.getUTCMonth() &&
+                        md.getUTCDate() === jstNow.getUTCDate();
+                      if (isMonthDayToday) {
+                        const y = jstNow.getUTCFullYear();
+                        const m = String(md.getUTCMonth() + 1).padStart(2, "0");
+                        const d = String(md.getUTCDate()).padStart(2, "0");
+                        nextDate = formatDate(`${y}-${m}-${d}`, locale);
+                        daysUntil = 0;
+                      } else {
+                        nextDate = formatDate(itemNextIso, locale);
+                        daysUntil = getDaysUntil(itemNextIso);
+                      }
+                    } else {
+                      nextDate = formatDate(itemNextIso, locale);
+                      daysUntil = getDaysUntil(itemNextIso);
+                    }
+                  } else {
+                    nextDate = "-";
+                    daysUntil = null;
+                  }
                   const firstDate = item.first_date_at
                     ? formatDate(item.first_date_at, locale)
                     : "-";
-                  const daysUntil = item.next_date_at
-                    ? getDaysUntil(item.next_date_at)
-                    : null;
 
                   return (
                     <tr
-                      key={`${item.formatted_name}-${index}`}
+                      key={`${item.name}-${index}`}
                       className="border-t border-light-gray-200/60 align-top text-gray-800 dark:border-white/10 dark:text-gray-100"
                     >
                       <td className="px-3 py-3 whitespace-nowrap">
                         {nextDate}
                       </td>
                       <td className="px-3 py-3 font-semibold whitespace-nowrap">
-                        {item.formatted_name}
+                        {formatWithAnniversary(item)}
                       </td>
                       <td className="px-3 py-3 whitespace-nowrap">
                         {firstDate}
                       </td>
                       <td className="px-3 py-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
                         {daysUntil !== null
-                          ? t("daysUntil", { days: daysUntil })
+                          ? daysUntil === 0
+                            ? "-"
+                            : t("daysUntil", { days: daysUntil })
                           : "-"}
                       </td>
                       <td className="px-3 py-3 text-gray-600 dark:text-gray-300">

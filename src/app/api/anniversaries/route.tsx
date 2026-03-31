@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import { AnniversaryItem } from "@/app/types/anniversaryItem";
 import { Locale } from "@/app/types/locale";
-import { getOrdinal } from "@/app/lib/formatDate";
 
 type HeaderKey =
   | "date"
@@ -127,28 +126,6 @@ export async function GET(request: Request) {
           : "";
       };
 
-      // JST基準で次回の記念日を計算
-      const nextDateAt = (() => {
-        const firstDateNum = getNum("first_date");
-        if (!firstDateNum) return "";
-
-        const JST_OFFSET = 9 * 60 * 60 * 1000;
-        const nowEpoch = Date.now();
-        const nowJstYear = new Date(nowEpoch + JST_OFFSET).getUTCFullYear();
-
-        // 今の年の記念日（JST midnight の UTC 表現）を作る
-        let candidateIso = excelSerialToJstIso(firstDateNum, nowJstYear);
-        let candidateEpoch = candidateIso
-          ? new Date(candidateIso).getTime()
-          : 0;
-
-        // 既に過ぎている場合は翌年を使う
-        if (candidateEpoch <= nowEpoch) {
-          candidateIso = excelSerialToJstIso(firstDateNum, nowJstYear + 1);
-        }
-        return candidateIso;
-      })();
-
       const name = getStr("name");
       const name_en = getStr("name_en");
       const localizedName = locale === "en" && name_en ? name_en : name;
@@ -166,27 +143,7 @@ export async function GET(request: Request) {
           .replace(/\//g, "/"),
         first_date_at: excelSerialToJstIso(getNum("first_date")),
 
-        next_date_at: nextDateAt,
         name: localizedName,
-
-        // 「活動{n}周年」や「{year}生誕」となっているので次回のnextDateAtを基準にplaceholderを置換する
-        formatted_name: (() => {
-          const JST_OFFSET = 9 * 60 * 60 * 1000;
-          const nextDate = new Date(nextDateAt);
-          const nextYearJst = new Date(
-            nextDate.getTime() + JST_OFFSET,
-          ).getUTCFullYear();
-          const firstDateIso = excelSerialToJstIso(getNum("first_date"));
-          const firstYearJst = new Date(
-            new Date(firstDateIso).getTime() + JST_OFFSET,
-          ).getUTCFullYear();
-          const yearDiff = nextYearJst - firstYearJst;
-          const formattedYearDiff =
-            locale === "en" ? getOrdinal(yearDiff) : String(yearDiff);
-          return localizedName
-            .replace("{n}", formattedYearDiff)
-            .replace("{year}", String(nextDate.getFullYear()));
-        })(),
         url: getLink("url"),
         note: localizedNote,
       });
