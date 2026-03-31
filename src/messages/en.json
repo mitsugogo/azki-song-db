@@ -69,7 +69,7 @@
       "original": "Originals",
       "cover": "Covers",
       "collaboration": "Collabs / Guest Songs",
-      "karaoke": "Karaoke",
+      "karaoke": "Singing streams",
       "collabKaraoke": "Collab Karaoke",
       "shorts": "Song Intro Shorts",
       "groupMode": "Mode",
@@ -168,7 +168,7 @@
       "ogAlt": "{siteName} - A site dedicated to sharing the greatness of AZKi's songs"
     },
     "watch": {
-      "keywords": "AZKi,songs,summary,songs,Discography,original songs,collaboration songs,cover songs,karaoke,live,setlist,hololive",
+      "keywords": "AZKi,songs,summary,songs,Discography,original songs,collaboration songs,cover songs,karaoke,singing stream,live,setlist,hololive",
       "description": "A page for viewing and searching songs. Display content by title, playlist, or video ID.",
       "ogSubtitle": "Watch page - {siteName}",
       "ogAlt": "{siteName} - Watch page",
@@ -559,7 +559,7 @@
     },
     "page": {
       "title": "Statistics",
-      "description": "A summary of AZKi's karaoke setlists, original songs, and cover songs.",
+      "description": "A summary of AZKi's singing streams, original songs, and cover songs.",
       "home": "Home"
     },
     "overview": {
@@ -820,7 +820,7 @@
     "originalSongs": "Original Songs",
     "coverSongs": "Covers",
     "coverCollab": "Covers (Collab)",
-    "karaoke": "Karaoke Streams",
+    "karaoke": "Singing streams",
     "anniversaryLive": "Anniversary Live",
     "guestAppearance": "Guest Appearances",
     "ballad": "Ballads",
