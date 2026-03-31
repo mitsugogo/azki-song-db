@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.4](https://github.com/mitsugogo/azki-song-db/compare/v2.1.3...v2.1.4) (2026-03-31)
+
+
+### Bug Fixes
+
+* 記念日の周年数組み立てに失敗する場合があったのを修正 ([4aa083d](https://github.com/mitsugogo/azki-song-db/commit/4aa083db9fd1a749cb4ba18d00eb7f87922e2392))
+
 ### [2.1.3](https://github.com/mitsugogo/azki-song-db/compare/v2.1.2...v2.1.3) (2026-03-31)
 
 
