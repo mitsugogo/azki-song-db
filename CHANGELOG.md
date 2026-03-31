@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.3](https://github.com/mitsugogo/azki-song-db/compare/v2.1.2...v2.1.3) (2026-03-31)
+
+
+### Bug Fixes
+
+* 表示が9時間ずれるのを修正 ([13501f7](https://github.com/mitsugogo/azki-song-db/commit/13501f78cca139754e0bfcdc8b112f5e3d3e0a26))
+
 ### [2.1.2](https://github.com/mitsugogo/azki-song-db/compare/v2.1.1...v2.1.2) (2026-03-30)
 
 ### [2.1.1](https://github.com/mitsugogo/azki-song-db/compare/v2.1.0...v2.1.1) (2026-03-29)
