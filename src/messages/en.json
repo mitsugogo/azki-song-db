@@ -384,7 +384,21 @@
       "tag": "Tag",
       "singer": "Singer",
       "collab": "Collab / Unit",
+      "relatedArtists": "AZKi's song history (stream date:2026/04/01)",
       "notSungForYear": "Not sung for over a year"
+    },
+    "relatedArtists": {
+      "noteTitle": "About this information",
+      "noteDescription": "This is a list of artists that were mentioned in the stream <a href=\"https://youtu.be/Y5BPxMCI6oU?t=1089\" class=\"text-primary\">#AZKi初配信</a> on April 1, 2026 as those she frequently listens to or has been influenced by.",
+      "emptyCategory": "No matching songs yet",
+      "categories": {
+        "childhood": "Childhood",
+        "anisongGamesong": "Anime / Game songs",
+        "voiceActor": "Voice actors",
+        "internetVocaloid": "Internet / Vocaloid",
+        "jpopOthers": "J-POP and others",
+        "creator": "Composers / creators"
+      }
     },
     "timesSuffix": " times",
     "unknown": "Unknown",

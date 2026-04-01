@@ -40,6 +40,35 @@ test.describe("Search page", () => {
     expect(page.url()).not.toContain("tag=");
   });
 
+  test("selects browse tab from tab query parameter", async ({ page }) => {
+    await page.goto("/search?tab=related-artists");
+
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page).toHaveURL(/tab=related-artists/);
+    await expect(page.getByText("この情報について")).toBeVisible();
+    await expect(page).toHaveTitle(/AZKiさんの音楽遍歴\(2026\/04\/01\)/);
+
+    const ogTitle = await page
+      .locator('meta[property="og:title"]')
+      .getAttribute("content");
+    expect(ogTitle).toContain("AZKiさんの音楽遍歴(2026/04/01)");
+  });
+
+  test("switches browse tab after loading tab query parameter", async ({
+    page,
+  }) => {
+    await page.goto("/search?tab=related-artists");
+
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page).toHaveURL(/tab=related-artists/);
+
+    await page.getByRole("button", { name: "アーティスト" }).click();
+    await expect(page).toHaveURL(/tab=artist/);
+
+    await page.getByRole("button", { name: "カテゴリー" }).click();
+    await expect(page).not.toHaveURL(/tab=/);
+  });
+
   test("filters songs by search term", async ({ page }) => {
     await page.goto("/watch");
     await page.waitForLoadState("domcontentloaded");

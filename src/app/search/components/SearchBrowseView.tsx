@@ -1,6 +1,12 @@
 import { Link } from "@/i18n/navigation";
 import { Button } from "@mantine/core";
-import { FaMusic, FaTag, FaUser, FaUsers } from "react-icons/fa6";
+import {
+  FaChartSimple,
+  FaMusic,
+  FaTag,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa6";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
@@ -14,6 +20,7 @@ import {
   SearchBrowseSortMode,
   SearchFilterModeResult,
 } from "../hook/useSearchFilterModeData";
+import RelatedArtistsSection from "./RelatedArtistsSection";
 
 interface CategorySection {
   label: string;
@@ -56,10 +63,11 @@ const SearchBrowseView = ({
     "tag",
     "singer",
     "collab",
+    "related-artists",
   ].includes(filterMode);
 
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className="grow overflow-auto pb-24 lg:p-6 lg:pb-8">
       <SearchBreadcrumb />
 
       <div>
@@ -137,6 +145,15 @@ const SearchBrowseView = ({
             leftSection={<FaUsers />}
           >
             {t("filters.collab")}
+          </Button>
+          <Button
+            variant={filterMode === "related-artists" ? "filled" : "light"}
+            color="pink"
+            size="sm"
+            onClick={() => setFilterMode("related-artists")}
+            leftSection={<FaChartSimple />}
+          >
+            {t("filters.relatedArtists")}
           </Button>
           <Button
             variant={filterMode === "not-sung-for-a-year" ? "filled" : "light"}
@@ -236,6 +253,8 @@ const SearchBrowseView = ({
             </section>
           ))}
         </div>
+      ) : filterModeData.filterMode === "related-artists" ? (
+        <RelatedArtistsSection categories={filterModeData.data} />
       ) : (
         <FilterModeGrid filterModeResult={filterModeData} />
       )}

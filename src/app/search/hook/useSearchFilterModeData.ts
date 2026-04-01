@@ -3,8 +3,11 @@ import {
   getCollabUnitName,
   normalizeMemberNames,
 } from "../../config/collabUnits";
+import {
+  azkiRelatedArtists,
+  RelatedArtistCategoryKey,
+} from "../../config/azkiRelatedArtists";
 import { Song } from "../../types/song";
-import { useLocale } from "next-intl";
 import { Locale } from "@/app/types/locale";
 
 export type FilterMode =
@@ -14,6 +17,7 @@ export type FilterMode =
   | "tag"
   | "singer"
   | "collab"
+  | "related-artists"
   | "not-sung-for-a-year";
 
 export type SearchBrowseSortMode = "count-desc" | "alpha-asc";
@@ -52,6 +56,11 @@ export interface NotSungForYearFilterItem {
   count: number;
 }
 
+export interface RelatedArtistsCategoryFilterItem {
+  categoryKey: RelatedArtistCategoryKey;
+  artists: ArtistFilterItem[];
+}
+
 export interface FilterModeDataMap {
   categories: [];
   title: TitleFilterItem[];
@@ -59,6 +68,7 @@ export interface FilterModeDataMap {
   tag: TagFilterItem[];
   singer: SingerFilterItem[];
   collab: CollabFilterItem[];
+  "related-artists": RelatedArtistsCategoryFilterItem[];
   "not-sung-for-a-year": NotSungForYearFilterItem[];
 }
 
@@ -266,6 +276,43 @@ const getNotSungForYearData = (
     );
 };
 
+const countArtistSongs = (songs: Song[], artistName: string): number => {
+  const target = artistName.toLowerCase();
+  return songs.reduce((count, song) => {
+    const directArtistMatch = song.artist.toLowerCase().includes(target);
+    const artistsMatch = (song.artists || []).some((artist) =>
+      artist.toLowerCase().includes(target),
+    );
+    return directArtistMatch || artistsMatch ? count + 1 : count;
+  }, 0);
+};
+
+const getRelatedArtistsData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): RelatedArtistsCategoryFilterItem[] => {
+  return azkiRelatedArtists.map((category) => {
+    const artists = category.artists
+      .map((artist) => ({
+        artist,
+        count: countArtistSongs(allSongs, artist),
+      }))
+      .filter((item) => item.count > 0)
+      .sort((a, b) => {
+        const artistCompare = sortJapaneseAndEnglish(a.artist, b.artist);
+        if (sortMode === "count-desc") {
+          return sortByCountDescThen(a.count, b.count, artistCompare);
+        }
+        return artistCompare;
+      });
+
+    return {
+      categoryKey: category.key,
+      artists,
+    };
+  });
+};
+
 const getFilterModeData = (
   allSongs: Song[],
   filterMode: FilterMode,
@@ -301,6 +348,12 @@ const getFilterModeData = (
       return {
         filterMode,
         data: getCollabData(allSongs, sortMode, locale),
+      };
+    }
+    case "related-artists": {
+      return {
+        filterMode,
+        data: getRelatedArtistsData(allSongs, sortMode),
       };
     }
     case "not-sung-for-a-year": {
