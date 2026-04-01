@@ -11,6 +11,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import {
   FilterMode,
+  SearchBrowseSortMode,
   SearchFilterModeResult,
 } from "../hook/useSearchFilterModeData";
 
@@ -28,6 +29,8 @@ interface SearchBrowseViewProps {
   setSearchTerm: (term: string) => void;
   filterMode: FilterMode;
   setFilterMode: (mode: FilterMode) => void;
+  sortMode: SearchBrowseSortMode;
+  setSortMode: (mode: SearchBrowseSortMode) => void;
   categorySongs: CategorySection[];
   filterModeData: SearchFilterModeResult;
 }
@@ -39,12 +42,22 @@ const SearchBrowseView = ({
   setSearchTerm,
   filterMode,
   setFilterMode,
+  sortMode,
+  setSortMode,
   categorySongs,
   filterModeData,
 }: SearchBrowseViewProps) => {
   const t = useTranslations("SearchBrowse");
   const locale = useLocale();
   const tHeader = useTranslations("Header");
+  const isSortableMode = [
+    "title",
+    "artist",
+    "tag",
+    "singer",
+    "collab",
+  ].includes(filterMode);
+
   return (
     <div className="grow lg:p-6 lg:pb-0 overflow-auto">
       <SearchBreadcrumb />
@@ -134,6 +147,30 @@ const SearchBrowseView = ({
             {t("filters.notSungForYear")}
           </Button>
         </div>
+
+        {isSortableMode && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-light-gray-400">
+              {t("sort.label")}
+            </span>
+            <Button
+              variant={sortMode === "count-desc" ? "filled" : "light"}
+              color="pink"
+              size="xs"
+              onClick={() => setSortMode("count-desc")}
+            >
+              {t("sort.countDesc")}
+            </Button>
+            <Button
+              variant={sortMode === "alpha-asc" ? "filled" : "light"}
+              color="pink"
+              size="xs"
+              onClick={() => setSortMode("alpha-asc")}
+            >
+              {t("sort.alphaAsc")}
+            </Button>
+          </div>
+        )}
       </div>
 
       {filterModeData.filterMode === "categories" ? (

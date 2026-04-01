@@ -14,6 +14,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
 import useSearchFilterModeData, {
   FilterMode,
+  SearchBrowseSortMode,
 } from "./hook/useSearchFilterModeData";
 import SearchLoadingView from "./components/SearchLoadingView";
 import SearchResultsView from "./components/SearchResultsView";
@@ -46,6 +47,7 @@ const SearchPageClient = () => {
   const [windowWidth, setWindowWidth] = useState(0);
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("categories");
+  const [sortMode, setSortMode] = useState<SearchBrowseSortMode>("count-desc");
 
   const { songs, searchTerm, searchTokens, setSearchTerm } = useSearch(
     allSongs,
@@ -175,6 +177,7 @@ const SearchPageClient = () => {
   const filterModeData = useSearchFilterModeData(
     allSongs,
     filterMode,
+    sortMode,
     locale as Locale,
   );
   const isShowingSearchResults =
@@ -301,6 +304,8 @@ const SearchPageClient = () => {
         setSearchTerm={setSearchTerm}
         filterMode={filterMode}
         setFilterMode={setFilterMode}
+        sortMode={sortMode}
+        setSortMode={setSortMode}
         categorySongs={categorySongs}
         filterModeData={filterModeData}
       />

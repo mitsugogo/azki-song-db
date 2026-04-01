@@ -16,6 +16,8 @@ export type FilterMode =
   | "collab"
   | "not-sung-for-a-year";
 
+export type SearchBrowseSortMode = "count-desc" | "alpha-asc";
+
 export interface TitleFilterItem {
   title: string;
   artist: string;
@@ -71,7 +73,21 @@ const sortJapaneseAndEnglish = (a: string, b: string): number => {
   return a.localeCompare(b, "ja");
 };
 
-const getTitleData = (allSongs: Song[]): TitleFilterItem[] => {
+const sortByCountDescThen = (
+  countA: number,
+  countB: number,
+  tieBreaker: number,
+): number => {
+  if (countA !== countB) {
+    return countB - countA;
+  }
+  return tieBreaker;
+};
+
+const getTitleData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): TitleFilterItem[] => {
   const titleCountMap = new Map<string, number>();
   allSongs.forEach((song) => {
     const key = `${song.title}|||${song.artist}`;
@@ -83,10 +99,24 @@ const getTitleData = (allSongs: Song[]): TitleFilterItem[] => {
       const [title, artist] = combined.split("|||");
       return { title, artist, count };
     })
-    .sort((a, b) => sortJapaneseAndEnglish(a.title, b.title));
+    .sort((a, b) => {
+      const titleCompare = sortJapaneseAndEnglish(a.title, b.title);
+      const artistCompare = sortJapaneseAndEnglish(a.artist, b.artist);
+      if (sortMode === "count-desc") {
+        return sortByCountDescThen(
+          a.count,
+          b.count,
+          titleCompare || artistCompare,
+        );
+      }
+      return titleCompare || artistCompare;
+    });
 };
 
-const getArtistData = (allSongs: Song[]): ArtistFilterItem[] => {
+const getArtistData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): ArtistFilterItem[] => {
   const artistCountMap = new Map<string, number>();
   allSongs.forEach((song) => {
     if (song.artist !== "") {
@@ -99,10 +129,19 @@ const getArtistData = (allSongs: Song[]): ArtistFilterItem[] => {
 
   return Array.from(artistCountMap.entries())
     .map(([artist, count]) => ({ artist, count }))
-    .sort((a, b) => sortJapaneseAndEnglish(a.artist, b.artist));
+    .sort((a, b) => {
+      const artistCompare = sortJapaneseAndEnglish(a.artist, b.artist);
+      if (sortMode === "count-desc") {
+        return sortByCountDescThen(a.count, b.count, artistCompare);
+      }
+      return artistCompare;
+    });
 };
 
-const getTagData = (allSongs: Song[]): TagFilterItem[] => {
+const getTagData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): TagFilterItem[] => {
   const tagCountMap = new Map<string, number>();
   allSongs.forEach((song) => {
     song.tags.forEach((tag) => {
@@ -114,10 +153,19 @@ const getTagData = (allSongs: Song[]): TagFilterItem[] => {
 
   return Array.from(tagCountMap.entries())
     .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => sortJapaneseAndEnglish(a.tag, b.tag));
+    .sort((a, b) => {
+      const tagCompare = sortJapaneseAndEnglish(a.tag, b.tag);
+      if (sortMode === "count-desc") {
+        return sortByCountDescThen(a.count, b.count, tagCompare);
+      }
+      return tagCompare;
+    });
 };
 
-const getSingerData = (allSongs: Song[]): SingerFilterItem[] => {
+const getSingerData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): SingerFilterItem[] => {
   const singerCountMap = new Map<string, number>();
   allSongs.forEach((song) => {
     if (song.sing !== "") {
@@ -133,11 +181,18 @@ const getSingerData = (allSongs: Song[]): SingerFilterItem[] => {
 
   return Array.from(singerCountMap.entries())
     .map(([singer, count]) => ({ singer, count }))
-    .sort((a, b) => sortJapaneseAndEnglish(a.singer, b.singer));
+    .sort((a, b) => {
+      const singerCompare = sortJapaneseAndEnglish(a.singer, b.singer);
+      if (sortMode === "count-desc") {
+        return sortByCountDescThen(a.count, b.count, singerCompare);
+      }
+      return singerCompare;
+    });
 };
 
 const getCollabData = (
   allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
   locale: Locale = "ja",
 ): CollabFilterItem[] => {
   const collabCountMap = new Map<string, CollabFilterItem>();
@@ -165,7 +220,15 @@ const getCollabData = (
     }
   });
 
-  return Array.from(collabCountMap.values()).sort((a, b) => b.count - a.count);
+  return Array.from(collabCountMap.values()).sort((a, b) => {
+    const collabA = a.unitName || a.members;
+    const collabB = b.unitName || b.members;
+    const collabCompare = sortJapaneseAndEnglish(collabA, collabB);
+    if (sortMode === "count-desc") {
+      return sortByCountDescThen(a.count, b.count, collabCompare);
+    }
+    return collabCompare;
+  });
 };
 
 const getNotSungForYearData = (
@@ -206,37 +269,38 @@ const getNotSungForYearData = (
 const getFilterModeData = (
   allSongs: Song[],
   filterMode: FilterMode,
+  sortMode: SearchBrowseSortMode,
   locale: Locale = "ja",
 ): SearchFilterModeResult => {
   switch (filterMode) {
     case "title": {
       return {
         filterMode,
-        data: getTitleData(allSongs),
+        data: getTitleData(allSongs, sortMode),
       };
     }
     case "artist": {
       return {
         filterMode,
-        data: getArtistData(allSongs),
+        data: getArtistData(allSongs, sortMode),
       };
     }
     case "tag": {
       return {
         filterMode,
-        data: getTagData(allSongs),
+        data: getTagData(allSongs, sortMode),
       };
     }
     case "singer": {
       return {
         filterMode,
-        data: getSingerData(allSongs),
+        data: getSingerData(allSongs, sortMode),
       };
     }
     case "collab": {
       return {
         filterMode,
-        data: getCollabData(allSongs, locale),
+        data: getCollabData(allSongs, sortMode, locale),
       };
     }
     case "not-sung-for-a-year": {
@@ -260,11 +324,12 @@ const getFilterModeData = (
 const useSearchFilterModeData = (
   allSongs: Song[],
   filterMode: FilterMode,
+  sortMode: SearchBrowseSortMode,
   locale: Locale = "ja",
 ): SearchFilterModeResult => {
   return useMemo(
-    () => getFilterModeData(allSongs, filterMode, locale),
-    [allSongs, filterMode, locale],
+    () => getFilterModeData(allSongs, filterMode, sortMode, locale),
+    [allSongs, filterMode, sortMode, locale],
   );
 };
 

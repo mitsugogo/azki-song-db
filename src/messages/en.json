@@ -389,7 +389,12 @@
     "timesSuffix": " times",
     "unknown": "Unknown",
     "songsSuffix": " songs",
-    "lastSungLabel": "Last sung:"
+    "lastSungLabel": "Last sung:",
+    "sort": {
+      "label": "Sort:",
+      "countDesc": "Most songs first",
+      "alphaAsc": "A to Z"
+    }
   },
   "suffixes": {
     "times": " times",

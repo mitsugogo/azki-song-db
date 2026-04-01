@@ -389,7 +389,12 @@
     "timesSuffix": "回",
     "unknown": "不明",
     "songsSuffix": "曲",
-    "lastSungLabel": "最終配信日:"
+    "lastSungLabel": "最終配信日:",
+    "sort": {
+      "label": "並び替え:",
+      "countDesc": "収録数が多い順",
+      "alphaAsc": "A→Z順"
+    }
   },
   "SearchResults": {
     "labelWithQuery": "「{term}」の検索結果",
