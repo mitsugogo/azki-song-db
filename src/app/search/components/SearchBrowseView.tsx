@@ -1,6 +1,12 @@
 import { Link } from "@/i18n/navigation";
 import { Button } from "@mantine/core";
-import { FaMusic, FaTag, FaUser, FaUsers } from "react-icons/fa6";
+import {
+  FaChartSimple,
+  FaMusic,
+  FaTag,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa6";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
@@ -11,8 +17,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import {
   FilterMode,
+  SearchBrowseSortMode,
   SearchFilterModeResult,
 } from "../hook/useSearchFilterModeData";
+import RelatedArtistsSection from "./RelatedArtistsSection";
 
 interface CategorySection {
   label: string;
@@ -28,6 +36,8 @@ interface SearchBrowseViewProps {
   setSearchTerm: (term: string) => void;
   filterMode: FilterMode;
   setFilterMode: (mode: FilterMode) => void;
+  sortMode: SearchBrowseSortMode;
+  setSortMode: (mode: SearchBrowseSortMode) => void;
   categorySongs: CategorySection[];
   filterModeData: SearchFilterModeResult;
 }
@@ -39,14 +49,25 @@ const SearchBrowseView = ({
   setSearchTerm,
   filterMode,
   setFilterMode,
+  sortMode,
+  setSortMode,
   categorySongs,
   filterModeData,
 }: SearchBrowseViewProps) => {
   const t = useTranslations("SearchBrowse");
   const locale = useLocale();
   const tHeader = useTranslations("Header");
+  const isSortableMode = [
+    "title",
+    "artist",
+    "tag",
+    "singer",
+    "collab",
+    "related-artists",
+  ].includes(filterMode);
+
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className="grow overflow-auto pb-24 lg:p-6 lg:pb-8">
       <SearchBreadcrumb />
 
       <div>
@@ -126,6 +147,15 @@ const SearchBrowseView = ({
             {t("filters.collab")}
           </Button>
           <Button
+            variant={filterMode === "related-artists" ? "filled" : "light"}
+            color="pink"
+            size="sm"
+            onClick={() => setFilterMode("related-artists")}
+            leftSection={<FaChartSimple />}
+          >
+            {t("filters.relatedArtists")}
+          </Button>
+          <Button
             variant={filterMode === "not-sung-for-a-year" ? "filled" : "light"}
             color="pink"
             size="sm"
@@ -134,6 +164,30 @@ const SearchBrowseView = ({
             {t("filters.notSungForYear")}
           </Button>
         </div>
+
+        {isSortableMode && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-light-gray-400">
+              {t("sort.label")}
+            </span>
+            <Button
+              variant={sortMode === "count-desc" ? "filled" : "light"}
+              color="pink"
+              size="xs"
+              onClick={() => setSortMode("count-desc")}
+            >
+              {t("sort.countDesc")}
+            </Button>
+            <Button
+              variant={sortMode === "alpha-asc" ? "filled" : "light"}
+              color="pink"
+              size="xs"
+              onClick={() => setSortMode("alpha-asc")}
+            >
+              {t("sort.alphaAsc")}
+            </Button>
+          </div>
+        )}
       </div>
 
       {filterModeData.filterMode === "categories" ? (
@@ -199,6 +253,8 @@ const SearchBrowseView = ({
             </section>
           ))}
         </div>
+      ) : filterModeData.filterMode === "related-artists" ? (
+        <RelatedArtistsSection categories={filterModeData.data} />
       ) : (
         <FilterModeGrid filterModeResult={filterModeData} />
       )}

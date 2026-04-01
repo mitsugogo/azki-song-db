@@ -384,12 +384,31 @@
       "tag": "タグ",
       "singer": "歌った人",
       "collab": "コラボ・ユニット",
+      "relatedArtists": "AZKiさんの音楽遍歴(2026/04/01)",
       "notSungForYear": "1年以上歌ってない曲"
+    },
+    "relatedArtists": {
+      "noteTitle": "この情報について",
+      "noteDescription": "この一覧は 2026/04/01 に配信された <a href=\"https://youtu.be/Y5BPxMCI6oU?t=1089\" class=\"text-primary\">#AZKi初配信</a> にて話されていた、よく聴いていたり影響をうけたアーティストの一覧です。",
+      "emptyCategory": "該当する楽曲はまだありません",
+      "categories": {
+        "childhood": "小さい頃",
+        "anisongGamesong": "アニソン・ゲーソン",
+        "voiceActor": "声優",
+        "internetVocaloid": "インターネット・ボカロ",
+        "jpopOthers": "J-POP他",
+        "creator": "作家"
+      }
     },
     "timesSuffix": "回",
     "unknown": "不明",
     "songsSuffix": "曲",
-    "lastSungLabel": "最終配信日:"
+    "lastSungLabel": "最終配信日:",
+    "sort": {
+      "label": "並び替え:",
+      "countDesc": "収録数が多い順",
+      "alphaAsc": "A→Z順"
+    }
   },
   "SearchResults": {
     "labelWithQuery": "「{term}」の検索結果",

@@ -32,7 +32,7 @@ import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
 import { breadcrumbClasses } from "@/app/theme";
-import { Link } from "@/i18n/navigation";
+import { Link, getPathname } from "@/i18n/navigation";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { FaPlay } from "react-icons/fa6";
 
@@ -380,7 +380,11 @@ export default function MyBestNineSongsPage() {
       }
 
       const data = (await response.json()) as { id: string };
-      const url = `${typeof window !== "undefined" ? window.location.origin : ""}/share/my-best-9-songs/${data.id}`;
+      const sharePath = getPathname({
+        locale,
+        href: `/share/my-best-9-songs/${data.id}`,
+      });
+      const url = `${typeof window !== "undefined" ? window.location.origin : ""}${sharePath}`;
       setGeneratedUrl(url);
       setIsGenerateLocked(true);
       lockedSelectionKeyRef.current = currentSelectionKey;
@@ -527,7 +531,11 @@ export default function MyBestNineSongsPage() {
                       color="blue"
                       leftSection={<MdContentCopy size={14} />}
                       onClick={() => {
-                        const themeUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/share/my-best-9-songs?title=${encodeURIComponent(title.trim())}`;
+                        const themePath = getPathname({
+                          locale,
+                          href: "/share/my-best-9-songs",
+                        });
+                        const themeUrl = `${typeof window !== "undefined" ? window.location.origin : ""}${themePath}?title=${encodeURIComponent(title.trim())}`;
                         navigator.clipboard.writeText(themeUrl);
                         setCopiedThemeUrl(true);
                         setTimeout(() => setCopiedThemeUrl(false), 2000);

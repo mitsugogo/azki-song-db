@@ -14,6 +14,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
 import useSearchFilterModeData, {
   FilterMode,
+  SearchBrowseSortMode,
 } from "./hook/useSearchFilterModeData";
 import SearchLoadingView from "./components/SearchLoadingView";
 import SearchResultsView from "./components/SearchResultsView";
@@ -22,6 +23,7 @@ import SearchBrowseView from "./components/SearchBrowseView";
 import { isCoverSong, isOriginalSong } from "../config/filters";
 import { useLocale, useTranslations } from "next-intl";
 import { Locale } from "@/app/types/locale";
+import { useSearchParams } from "next/navigation";
 
 interface TagCategory {
   label: string;
@@ -41,11 +43,36 @@ const getGridCols = (width: number): number => {
   return 3;
 };
 
+const isFilterMode = (value: string): value is FilterMode => {
+  return [
+    "categories",
+    "title",
+    "artist",
+    "tag",
+    "singer",
+    "collab",
+    "related-artists",
+    "not-sung-for-a-year",
+  ].includes(value);
+};
+
+const getInitialFilterMode = (): FilterMode => {
+  if (typeof window === "undefined") {
+    return "categories";
+  }
+
+  const tab = new URL(window.location.href).searchParams.get("tab");
+  return tab && isFilterMode(tab) ? tab : "categories";
+};
+
 const SearchPageClient = () => {
   const { allSongs, isLoading } = useSongs();
   const [windowWidth, setWindowWidth] = useState(0);
   const [searchValue, setSearchValue] = useState<string[]>([]);
-  const [filterMode, setFilterMode] = useState<FilterMode>("categories");
+  const [filterMode, setFilterMode] =
+    useState<FilterMode>(getInitialFilterMode);
+  const [sortMode, setSortMode] = useState<SearchBrowseSortMode>("count-desc");
+  const searchParams = useSearchParams();
 
   const { songs, searchTerm, searchTokens, setSearchTerm } = useSearch(
     allSongs,
@@ -147,6 +174,33 @@ const SearchPageClient = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!searchParams) return;
+    const tab = searchParams.get("tab");
+    const nextFilterMode: FilterMode =
+      tab && isFilterMode(tab) ? tab : "categories";
+
+    setFilterMode((current) =>
+      current === nextFilterMode ? current : nextFilterMode,
+    );
+  }, [searchParams]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const currentTab = url.searchParams.get("tab") ?? "";
+    const nextTab = filterMode === "categories" ? "" : filterMode;
+
+    if (nextTab) {
+      url.searchParams.set("tab", nextTab);
+    } else {
+      url.searchParams.delete("tab");
+    }
+
+    if (currentTab !== nextTab) {
+      historyHelper.replaceUrlIfDifferent(url.href);
+    }
+  }, [filterMode]);
+
   const colCount = useMemo(() => getGridCols(windowWidth), [windowWidth]);
   const categorySongs = useMemo(() => {
     return tagCategories.map((category) => {
@@ -175,6 +229,7 @@ const SearchPageClient = () => {
   const filterModeData = useSearchFilterModeData(
     allSongs,
     filterMode,
+    sortMode,
     locale as Locale,
   );
   const isShowingSearchResults =
@@ -301,6 +356,8 @@ const SearchPageClient = () => {
         setSearchTerm={setSearchTerm}
         filterMode={filterMode}
         setFilterMode={setFilterMode}
+        sortMode={sortMode}
+        setSortMode={setSortMode}
         categorySongs={categorySongs}
         filterModeData={filterModeData}
       />

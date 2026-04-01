@@ -138,7 +138,7 @@ export default function AnniversariesPageClient() {
     return withNext.map((v) => v.it);
   }, [items, nowMs]);
 
-  const featuredAnniversary = useMemo(() => {
+  const featuredAnniversaries = useMemo(() => {
     // まず日本時間の月/日が今日と一致する記念日を探す（API の next_date_at が翌年になっている場合に対応）
     const getJstMonthDay = (dateStr?: string | null, item?: any) => {
       // dateStr may be empty because API no longer returns next_date_at; allow item to compute
@@ -157,46 +157,53 @@ export default function AnniversariesPageClient() {
     const nowMonth = nowJst.getUTCMonth() + 1;
     const nowDay = nowJst.getUTCDate();
 
-    const todayItem = sortedItems.find((item) => {
+    const todayItems = sortedItems.filter((item) => {
       const md = getJstMonthDay(undefined, item);
       return md !== null && md.month === nowMonth && md.day === nowDay;
     });
-    if (todayItem) return todayItem;
+    if (todayItems.length > 0) return todayItems;
 
-    // 当日がなければ従来通り次に来る記念日を返す
-    const nextItem = sortedItems.find((item) => {
+    // 当日がなければ次に来る記念日を全件返す（同日重複に対応）
+    let minDays = Number.MAX_SAFE_INTEGER;
+    const nextItems: any[] = [];
+    sortedItems.forEach((item) => {
       const nextIso = computeNextIsoForItem(item, nowMs);
       const days = nextIso ? getDaysUntil(nextIso, nowMs) : null;
-      return days !== null && days > 0;
+      if (days === null || days <= 0) return;
+      if (days < minDays) {
+        minDays = days;
+        nextItems.length = 0;
+        nextItems.push(item);
+        return;
+      }
+      if (days === minDays) {
+        nextItems.push(item);
+      }
     });
-    return nextItem || null;
+
+    return nextItems;
   }, [nowMs, sortedItems]);
 
-  const featuredCountdown = useMemo(() => {
-    if (!featuredAnniversary) {
-      return null;
-    }
-    const nextIso = computeNextIsoForItem(featuredAnniversary, nowMs);
+  const getItemIsToday = (item: any) => {
+    const target = parseToJstDayStart(computeNextIsoForItem(item, nowMs));
+    if (!target) return false;
+    const d = new Date(target.getTime() + jstOffsetMs);
+    const jstNow = new Date(nowMs + jstOffsetMs);
+    return (
+      d.getUTCMonth() === jstNow.getUTCMonth() &&
+      d.getUTCDate() === jstNow.getUTCDate()
+    );
+  };
+
+  const getFeaturedCountdown = (item: any) => {
+    const nextIso = computeNextIsoForItem(item, nowMs);
     const daysUntil = nextIso ? getDaysUntil(nextIso, nowMs) : null;
     if (daysUntil === null) return null;
 
     // 当日の判定は JST の月/日一致で行う（API の next_date_at が翌年になっている場合に対応）
-    const isMonthDayToday = (() => {
-      const target = parseToJstDayStart(
-        computeNextIsoForItem(featuredAnniversary, nowMs),
-      );
-      if (!target) return false;
-      const d = new Date(target.getTime() + jstOffsetMs);
-      const jstNow = new Date(nowMs + jstOffsetMs);
-      return (
-        d.getUTCMonth() === jstNow.getUTCMonth() &&
-        d.getUTCDate() === jstNow.getUTCDate()
-      );
-    })();
+    const isMonthDayToday = getItemIsToday(item);
     if (isMonthDayToday) return null;
-    const target = parseToTargetDateTime(
-      computeNextIsoForItem(featuredAnniversary, nowMs),
-    );
+    const target = parseToTargetDateTime(nextIso);
     if (!target) return null;
     const targetMs = target.getTime();
 
@@ -209,7 +216,7 @@ export default function AnniversariesPageClient() {
     const seconds = Math.floor((diff % minuteInMs) / secondInMs);
 
     return t("countdownFormat", { days, hours, minutes, seconds });
-  }, [featuredAnniversary, nowMs, t]);
+  };
 
   const getYearFromDate = (dateStr?: string | null) => {
     if (!dateStr) return null;
@@ -305,19 +312,9 @@ export default function AnniversariesPageClient() {
     return result;
   };
 
-  const isFeaturedToday = (() => {
-    if (!featuredAnniversary) return false;
-    const target = parseToJstDayStart(
-      computeNextIsoForItem(featuredAnniversary, nowMs),
-    );
-    if (!target) return false;
-    const d = new Date(target.getTime() + jstOffsetMs);
-    const jstNow = new Date(nowMs + jstOffsetMs);
-    return (
-      d.getUTCMonth() === jstNow.getUTCMonth() &&
-      d.getUTCDate() === jstNow.getUTCDate()
-    );
-  })();
+  const hasFeaturedToday =
+    featuredAnniversaries.length > 0 &&
+    getItemIsToday(featuredAnniversaries[0]);
 
   return (
     <div className="grow p-2 lg:p-6 lg:pb-10">
@@ -341,28 +338,34 @@ export default function AnniversariesPageClient() {
         </p>
       </div>
 
-      {featuredAnniversary && (
-        <section className="mx-2 mb-2 rounded-xl border border-primary-300/40 bg-primary-50/70 p-4 shadow-sm dark:border-pink-200/20 dark:bg-gray-900/50">
-          <p className="text-xs font-semibold tracking-wide text-primary-700 dark:text-pink-200">
-            {isFeaturedToday ? t("featuredTodayTitle") : t("featuredTitle")}
-          </p>
-          <h2 className="mt-1 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
-            {formatWithAnniversary(featuredAnniversary)}
-          </h2>
-          <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-            {t("nextDateLabel")}:{" "}
-            {formatDate(
-              computeNextIsoForItem(featuredAnniversary, nowMs),
-              locale,
-            )}
-          </p>
-          {featuredCountdown && (
-            <p className="mt-1 text-sm font-semibold text-primary-700 dark:text-pink-200">
-              {featuredCountdown}
-            </p>
-          )}
-        </section>
-      )}
+      {featuredAnniversaries.length > 0 &&
+        featuredAnniversaries.map((item, index) => {
+          const featuredCountdown = getFeaturedCountdown(item);
+          return (
+            <section
+              key={`${item.name}-${index}`}
+              className="mx-2 mb-2 rounded-xl border border-primary-300/40 bg-primary-50/70 p-4 shadow-sm dark:border-pink-200/20 dark:bg-gray-900/50"
+            >
+              <p className="text-xs font-semibold tracking-wide text-primary-700 dark:text-pink-200">
+                {hasFeaturedToday
+                  ? t("featuredTodayTitle")
+                  : t("featuredTitle")}
+              </p>
+              <h2 className="mt-1 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
+                {formatWithAnniversary(item)}
+              </h2>
+              <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                {t("nextDateLabel")}:{" "}
+                {formatDate(computeNextIsoForItem(item, nowMs), locale)}
+              </p>
+              {featuredCountdown && (
+                <p className="mt-1 text-sm font-semibold text-primary-700 dark:text-pink-200">
+                  {featuredCountdown}
+                </p>
+              )}
+            </section>
+          );
+        })}
 
       {isLoading ? (
         <p className="px-3 py-6 text-sm text-gray-600 dark:text-gray-300">
