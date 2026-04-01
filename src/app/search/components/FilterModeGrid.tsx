@@ -6,7 +6,7 @@ import { formatDate } from "../../lib/formatDate";
 interface FilterModeGridProps {
   filterModeResult: Exclude<
     SearchFilterModeResult,
-    { filterMode: "categories" }
+    { filterMode: "categories" | "related-artists" }
   >;
 }
 
