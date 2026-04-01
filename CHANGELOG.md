@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/mitsugogo/azki-song-db/compare/v2.1.4...v2.2.0) (2026-04-01)
+
+
+### Features
+
+* 検索で一部カテゴリでソート出来るように ([a0a7bbe](https://github.com/mitsugogo/azki-song-db/commit/a0a7bbef2d500d36abf26e31c041a24bb70b77dc))
+
+
+### Bug Fixes
+
+* シェアURLが言語考慮されていなかったのを修正 ([df3b7b8](https://github.com/mitsugogo/azki-song-db/commit/df3b7b82598a10ab1acea4361fcb9464b35666b3))
+
 ### [2.1.4](https://github.com/mitsugogo/azki-song-db/compare/v2.1.3...v2.1.4) (2026-03-31)
 
 
