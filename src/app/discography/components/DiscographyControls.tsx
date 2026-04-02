@@ -1,3 +1,5 @@
+"use client";
+
 import { ToggleSwitch } from "flowbite-react";
 import { useTranslations } from "next-intl";
 
