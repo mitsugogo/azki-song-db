@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.1](https://github.com/mitsugogo/azki-song-db/compare/v2.2.0...v2.2.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* Discographyで右上のスイッチャーが出ないのを修正 ([f4d4754](https://github.com/mitsugogo/azki-song-db/commit/f4d47542f0c0a23c39fcddd5ca1bf81f79a6c7ff))
+
 ## [2.2.0](https://github.com/mitsugogo/azki-song-db/compare/v2.1.4...v2.2.0) (2026-04-01)
 
 
