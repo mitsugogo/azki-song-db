@@ -1,6 +1,6 @@
 "use client";
 
-import { ToggleSwitch } from "flowbite-react";
+import { Switch } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
 interface DiscographyControlsProps {
@@ -28,24 +28,27 @@ export default function DiscographyControls({
   const t = useTranslations("Discography");
   return (
     <div className="flex items-center justify-end mb-4 space-x-4">
-      <ToggleSwitch
+      <Switch
         label={t("controls.groupByAlbum")}
         checked={groupByAlbum}
         onChange={onGroupByAlbumChange}
+        withThumbIndicator={false}
       />
 
-      <ToggleSwitch
+      <Switch
         label={t("controls.groupByYear")}
         checked={groupByYear}
         onChange={onGroupByYearChange}
+        withThumbIndicator={false}
       />
 
       {/* オリジナル楽曲タブのときのみ表示するオプション */}
       {activeTab === 0 && (
-        <ToggleSwitch
+        <Switch
           label={t("controls.onlyOriginalMV")}
           checked={onlyOriginalMV}
           onChange={onOnlyOriginalMVChange}
+          withThumbIndicator={false}
         />
       )}
     </div>
