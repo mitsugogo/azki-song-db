@@ -279,8 +279,11 @@ const getNotSungForYearData = (
 const countArtistSongs = (songs: Song[], artistName: string): number => {
   const target = artistName.toLowerCase();
   return songs.reduce((count, song) => {
-    const directArtistMatch = song.artist.toLowerCase().includes(target);
-    const artistsMatch = (song.artists || []).some((artist) =>
+    // 常に日本語データを基準にアーティストを検索
+    const directArtistMatch = (song.hl?.ja?.artist ?? "")
+      .toLowerCase()
+      .includes(target);
+    const artistsMatch = (song.hl?.ja?.artists || []).some((artist: string) =>
       artist.toLowerCase().includes(target),
     );
     return directArtistMatch || artistsMatch ? count + 1 : count;
@@ -292,12 +295,33 @@ const getRelatedArtistsData = (
   sortMode: SearchBrowseSortMode,
 ): RelatedArtistsCategoryFilterItem[] => {
   return azkiRelatedArtists.map((category) => {
+    // アーティストごとに曲を絞り込んで、song.artistの表示名を取得
+    const artistDisplayMap = new Map<string, string>();
+    category.artists.forEach((artist) => {
+      const matchingSongs = allSongs.filter((song) => {
+        // 日本語データを基準に一致するか確認
+        const directArtistMatch = (song.hl?.ja?.artist ?? "")
+          .toLowerCase()
+          .includes(artist.toLowerCase());
+        const artistsMatch = (song.hl?.ja?.artists || []).some((a: string) =>
+          a.toLowerCase().includes(artist.toLowerCase()),
+        );
+        return directArtistMatch || artistsMatch;
+      });
+
+      // 最初にマッチした曲のsong.artistを表示名として使用
+      if (matchingSongs.length > 0) {
+        artistDisplayMap.set(artist, matchingSongs[0].artist);
+      }
+    });
+
     const artists = category.artists
       .map((artist) => ({
-        artist,
+        // 表示には曲データのsong.artistを使用
+        artist: artistDisplayMap.get(artist) || artist,
         count: countArtistSongs(allSongs, artist),
       }))
-      .filter((item) => item.count > 0)
+      // .filter((item) => item.count > 0)
       .sort((a, b) => {
         const artistCompare = sortJapaneseAndEnglish(a.artist, b.artist);
         if (sortMode === "count-desc") {
