@@ -278,6 +278,10 @@ export async function GET(request: Request) {
             ja: {
               title: titleValue,
               artist: artistJa,
+              artists: artistJa
+                .split(/[,,、]/)
+                .map((a) => a.trim())
+                .filter(Boolean),
               album: getStr("album"),
               sing: getStr("sing"),
               sings: getStr("sing")
@@ -288,6 +292,10 @@ export async function GET(request: Request) {
             en: {
               title: titleEn,
               artist: artistEn,
+              artists: artistEn
+                .split(/[,,、]/)
+                .map((a) => a.trim())
+                .filter(Boolean),
               album: albumEn,
               sing: getStr("sing"),
               sings: getStr("sing")

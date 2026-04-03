@@ -12,6 +12,7 @@ export interface Song {
     ja: {
       title: string;
       artist: string;
+      artists: string[];
       album?: string;
       sing?: string;
       sings?: string[];
@@ -19,6 +20,7 @@ export interface Song {
     en?: {
       title?: string;
       artist?: string;
+      artists?: string[];
       album?: string;
       sing?: string;
       sings?: string[];
