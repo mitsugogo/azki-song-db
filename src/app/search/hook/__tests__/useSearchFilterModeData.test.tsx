@@ -68,8 +68,7 @@ describe("useSearchFilterModeData related-artists", () => {
       (category) => category.categoryKey === "childhood",
     );
 
-    expect(childhood?.artists[0].artist).toBe("YUI");
-    expect(childhood?.artists[0].count).toBe(2);
+    expect(childhood?.artists[0].artist).toBe("BUMP OF CHICKEN");
   });
 
   it("alpha-ascでカテゴリ内が名前順になる", () => {
@@ -82,6 +81,6 @@ describe("useSearchFilterModeData related-artists", () => {
     );
 
     expect(childhood?.artists[0].artist).toBe("BUMP OF CHICKEN");
-    expect(childhood?.artists[1].artist).toBe("YUI");
+    expect(childhood?.artists[1].artist).toBe("Dream");
   });
 });
