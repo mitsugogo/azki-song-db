@@ -77,7 +77,7 @@ export default function ShareModal({
           <div className="relative">
             <TextInput className="w-full" value={youtubeUrl} readOnly />
             <button
-              className="absolute right-3 bottom-[-5px] transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+              className="absolute right-3 -bottom-1.25 transform -translate-y-1/2 p-1 rounded-full bg-light-gray-200 dark:bg-gray-800 hover:bg-light-gray-300 dark:hover:bg-gray-700 cursor-pointer"
               onClick={() =>
                 handleCopyToClipboard(youtubeUrl, setShowCopiedYoutube)
               }
@@ -85,7 +85,7 @@ export default function ShareModal({
               <HiClipboardCopy className="w-4 h-4" />
             </button>
             {showCopiedYoutube && (
-              <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+              <div className="absolute right-3 -bottom-2 transform -translate-y-1/2 p-1 rounded-full text-white bg-light-gray-700 dark:bg-gray-800 text-sm font-bold">
                 {t("copied")}
               </div>
             )}
@@ -133,13 +133,13 @@ export default function ShareModal({
               onClick={() => handleCopyToClipboard(databaseUrl, setShowCopied)}
             />
             <button
-              className="absolute right-3 bottom-[-5px] transform -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+              className="absolute right-3 -bottom-1.25 transform -translate-y-1/2 p-1 rounded-full bg-light-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 cursor-pointer"
               onClick={() => handleCopyToClipboard(databaseUrl, setShowCopied)}
             >
               <HiClipboardCopy className="w-4 h-4" />
             </button>
             {showCopied && (
-              <div className="absolute right-3 bottom-[-8px] transform -translate-y-1/2 p-1 rounded-full text-white bg-gray-900 dark:bg-gray-800 text-sm font-bold">
+              <div className="absolute right-3 -bottom-2 transform -translate-y-1/2 p-1 rounded-full text-white bg-light-gray-900 dark:bg-gray-800 text-sm font-bold">
                 {t("copied")}
               </div>
             )}

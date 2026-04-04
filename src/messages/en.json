@@ -907,7 +907,7 @@
   "ShareModal": {
     "title": "Share",
     "description": "Share AZKi's beautiful singing voice!",
-    "youtubeUrl": "YouTube URL",
+    "youtubeUrl": "YouTube",
     "copied": "Copied",
     "close": "Close"
   }

@@ -907,7 +907,7 @@
   "ShareModal": {
     "title": "シェア",
     "description": "AZKiさんの素敵な歌声をシェアしましょう！",
-    "youtubeUrl": "YouTube URL",
+    "youtubeUrl": "YouTube",
     "copied": "コピーしました！",
     "close": "閉じる"
   }
