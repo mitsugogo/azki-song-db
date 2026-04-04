@@ -887,6 +887,23 @@
     "cancel": "キャンセル",
     "close": "閉じる"
   },
+  "NotFoundPage": {
+    "badge": "404 NOT FOUND",
+    "title": "404 NOT FOUND",
+    "description": "お探しのページをGUESSできませんでした",
+    "hint": "歌の地図から、もう一度探してみましょう",
+    "pinAlt": "ゲッサーピンのイラスト",
+    "backToHome": "ホームに戻る",
+    "goToSearch": "検索ページへ"
+  },
+  "ErrorPage": {
+    "badge": "5XX ERROR",
+    "title": "エラーが発生しました",
+    "description": "ページの読み込みに失敗しました。時間をおいて再試行してください。",
+    "hint": "問題が続く場合は、ホームに戻って別のページからアクセスしてみてください。",
+    "retry": "再試行",
+    "backToHome": "ホームに戻る"
+  },
   "ShareModal": {
     "title": "シェア",
     "description": "AZKiさんの素敵な歌声をシェアしましょう！",
