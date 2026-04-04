@@ -52,10 +52,10 @@ export function Header() {
               <div className="flex shrink-0 items-center lg:ml-2">
                 <Link href="/">
                   <>
-                    <h1 className="hidden lg:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
+                    <h1 className="hidden sm:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
                       {siteConfig.siteNameUpper}
                     </h1>
-                    <h1 className="lg:hidden text-lg font-semibold tracking-[0.04em]">
+                    <h1 className="sm:hidden text-lg font-semibold tracking-[0.04em]">
                       {siteConfig.shortName}
                     </h1>
                   </>
