@@ -108,6 +108,9 @@ export default function ClientPage({
 
   const isCover = isCoverSong(song);
 
+  // 現在のページのURL
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+
   return (
     <div className="p-6 w-full mx-auto h-full overflow-y-auto">
       <DiscographyBreadcrumbs
@@ -284,7 +287,7 @@ export default function ClientPage({
             </Link>
 
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${song.title} - ${song.artist} \nhttps://${process.env.PUBLIC_BASE_URL ? process.env.PUBLIC_BASE_URL : "azki-song-db.vercel.app"}/discography/${encodeURIComponent(song.slug ? song.slug : `${song.album}/${encodeURIComponent(song.title)}`)}`)}`}
+              href={`https://x.com/intent/tweet?text=${encodeURIComponent(`${song.title} - ${song.artist} \n${currentUrl}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block ml-3 bg-sky-600 text-white py-2 px-4 rounded-md"
