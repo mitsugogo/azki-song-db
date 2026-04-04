@@ -1,6 +1,8 @@
+"use client";
+
 import { List } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
-import { FaGithub } from "react-icons/fa6";
+import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { useTranslations } from "next-intl";
 
 const Acknowledgment = () => {
@@ -14,21 +16,23 @@ const Acknowledgment = () => {
         <p>{t("intro.p3")}</p>
       </div>
 
-      <h3 className="mt-5 font-semibold">{t("video.heading")}</h3>
+      <h3 className="mt-5 text-xl font-extrabold">{t("video.heading")}</h3>
 
       <div className="text-sm text-muted mt-1">
         <p>{t("video.p1")}</p>
-        <p className="mt-2">{t("video.p2")}</p>
-        <p className="mt-2">{t("video.p3")}</p>
+        <p className="">{t("video.p2")}</p>
+        <p className="">{t("video.p3")}</p>
       </div>
 
-      <h3 className="mt-5 font-semibold">{t("aggregation.heading")}</h3>
+      <h3 className="mt-5 text-xl font-extrabold">
+        {t("aggregation.heading")}
+      </h3>
 
       <div className="text-sm text-muted mt-1">
         <p>{t("aggregation.p1")}</p>
         <p className="mt-2">{t("aggregation.p2")}</p>
-        <p className="mt-2">{t("aggregation.p3")}</p>
-        <p className="mt-2">{t("aggregation.p4")}</p>
+        <p className="">{t("aggregation.p3")}</p>
+        <p className="">{t("aggregation.p4")}</p>
         <p>
           {t("aggregation.contact.prefix")}
           <Link
@@ -53,7 +57,7 @@ const Acknowledgment = () => {
         </p>
       </div>
 
-      <h3 className="mt-5 font-semibold">{t("icon.heading")}</h3>
+      <h3 className="mt-5 text-xl font-extrabold">{t("icon.heading")}</h3>
       <div className="text-sm text-muted mt-1">
         <p>
           {t("icon.p1.prefix")}
@@ -100,13 +104,15 @@ const Acknowledgment = () => {
             <FaGithub className="inline-block mr-1" />
             {t("admin.github")}
           </Link>
-          &nbsp;
+        </p>
+        <p>
           <Link
             href="https://x.com/mitsugogo"
             className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
             target="_blank"
             rel="noopener noreferrer"
           >
+            <FaXTwitter className="inline-block mr-1" />
             {t("admin.twitter")}
           </Link>
         </p>

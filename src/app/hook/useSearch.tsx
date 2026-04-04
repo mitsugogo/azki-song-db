@@ -17,6 +17,84 @@ interface UseSearchOptions {
   urlUpdateMode?: "replace" | "push";
 }
 
+type SearchToken = {
+  term: string;
+  isExact: boolean;
+};
+
+const isWrappedWithQuotes = (value: string) =>
+  value.length >= 2 && value.startsWith('"') && value.endsWith('"');
+
+const parseSearchToken = (value: string): SearchToken | null => {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const prefixSeparatorIndex = normalized.indexOf(":");
+  if (prefixSeparatorIndex === -1) {
+    if (isWrappedWithQuotes(normalized)) {
+      return {
+        term: normalized.substring(1, normalized.length - 1),
+        isExact: true,
+      };
+    }
+    return { term: normalized, isExact: false };
+  }
+
+  const prefix = normalized.substring(0, prefixSeparatorIndex + 1);
+  const rawValue = normalized.substring(prefixSeparatorIndex + 1).trim();
+  if (!rawValue) {
+    return { term: `${prefix}`, isExact: false };
+  }
+
+  if (isWrappedWithQuotes(rawValue)) {
+    return {
+      term: `${prefix}${rawValue.substring(1, rawValue.length - 1)}`,
+      isExact: true,
+    };
+  }
+
+  return { term: `${prefix}${rawValue}`, isExact: false };
+};
+
+const splitByOrKeyword = (value: string): string[] => {
+  const tokens: string[] = [];
+  let inQuotes = false;
+  let segmentStart = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+
+    if (inQuotes) {
+      continue;
+    }
+
+    const maybeOperator = value.slice(index, index + 2).toLowerCase();
+    const hasLeadingSpace = index > 0 && /\s/.test(value[index - 1]);
+    const hasTrailingSpace =
+      index + 2 < value.length && /\s/.test(value[index + 2]);
+
+    if (hasLeadingSpace && hasTrailingSpace && maybeOperator === "or") {
+      const chunk = value.slice(segmentStart, index).trim();
+      if (chunk) {
+        tokens.push(chunk);
+      }
+      segmentStart = index + 2;
+      index += 1;
+    }
+  }
+
+  const lastChunk = value.slice(segmentStart).trim();
+  if (lastChunk) {
+    tokens.push(lastChunk);
+  }
+
+  return tokens;
+};
+
 /**
  * 検索ロジックを管理するカスタムフック
  * @param allSongs - 全ての曲のリスト
@@ -82,137 +160,158 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
   // 検索ロジック
   const filterCallback = useCallback(
-    (word: string) => (song: Song) => {
-      const prefixSearches: {
-        [key: string]: (song: Song, value: string) => boolean;
-      } = {
-        "title:": (s, v) =>
-          s.title.toLowerCase().includes(v) ||
-          (locale === "en" && (s.title_en?.toLowerCase().includes(v) ?? false)),
-        "artist:": (s, v) =>
-          s.artist.toLowerCase().includes(v) ||
+    (word: string, isExact = false) =>
+      (song: Song) => {
+        const equalsOrIncludes = (source: string, target: string) =>
+          isExact ? source === target : source.includes(target);
+
+        const prefixSearches: {
+          [key: string]: (song: Song, value: string) => boolean;
+        } = {
+          "title:": (s, v) =>
+            equalsOrIncludes(s.title.toLowerCase(), v) ||
+            (locale === "en" &&
+              (s.title_en
+                ? equalsOrIncludes(s.title_en.toLowerCase(), v)
+                : false)),
+          "artist:": (s, v) =>
+            equalsOrIncludes(s.artist.toLowerCase(), v) ||
+            (locale === "en" &&
+              (s.artist_en
+                ? equalsOrIncludes(s.artist_en.toLowerCase(), v)
+                : false)),
+          "album:": (s, v) => equalsOrIncludes(s.album.toLowerCase(), v),
+          "sing:": (s, v) =>
+            s.sing
+              .toLowerCase()
+              .split("、")
+              .map((sing) => sing.trim())
+              .some((sing) => equalsOrIncludes(sing, v)),
+          "lyricist:": (s, v) => equalsOrIncludes(s.lyricist.toLowerCase(), v),
+          "composer:": (s, v) => equalsOrIncludes(s.composer.toLowerCase(), v),
+          "arranger:": (s, v) => equalsOrIncludes(s.arranger.toLowerCase(), v),
+          "tag:": (s, v) =>
+            s.tags
+              .join(",")
+              .toLowerCase()
+              .split(",")
+              .map((tag) => tag.trim())
+              .some((tag) => equalsOrIncludes(tag, v)),
+          "video_id:": (s, v) => equalsOrIncludes(s.video_id.toLowerCase(), v),
+          "video_title:": (s, v) =>
+            equalsOrIncludes(s.video_title.toLowerCase(), v),
+          "extra:": (s, v) =>
+            s.extra ? equalsOrIncludes(s.extra.toLowerCase(), v) : false,
+          "date:": (s, v) => {
+            const dateString = new Date(v).toLocaleDateString("ja-JP", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+            });
+            const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
+            if (dateRegex.test(dateString)) {
+              const [year, month, day] = dateString.split("/").map(Number);
+              const date = new Date(s.broadcast_at);
+              return (
+                date.getFullYear() === year &&
+                date.getMonth() + 1 === month &&
+                date.getDate() === day
+              );
+            }
+            return false;
+          },
+          "year:": (s, v) => {
+            const yearNumber = Number(v);
+            return s.year === yearNumber;
+          },
+          "milestone:": (s, v) => {
+            if (v === "*") {
+              return Boolean(s.milestones && s.milestones.length > 0);
+            }
+            const videoIdSet = milestoneVideoIdMap.get(v.toLowerCase());
+            if (!videoIdSet) return false;
+            return videoIdSet.has(s.video_id);
+          },
+          "season:": (s, v) => {
+            const month = new Date(s.broadcast_at).getMonth() + 1;
+            switch (v) {
+              case "春":
+                return month >= 3 && month <= 5;
+              case "夏":
+                return month >= 6 && month <= 9;
+              case "秋":
+                return month >= 10 && month <= 11;
+              case "冬":
+                return month >= 12 || (month >= 1 && month <= 2);
+              default:
+                return false;
+            }
+          },
+          "unit:": (s, v) => {
+            // ユニット通称で検索
+            if (s.sing === "") return false;
+            const singers = s.sing
+              .split("、")
+              .map((singer) => singer.trim())
+              .filter((singer) => singer !== "");
+            if (singers.length < 2) return false;
+
+            // ユニット通称から実際のメンバーを取得（大文字小文字を区別しない）
+            const unitMembers = getCollabMembers(v);
+            if (!unitMembers) {
+              return false;
+            }
+
+            // 曲の歌手とユニットメンバーを正規化して比較
+            const normalizedSingers = normalizeMemberNames(singers);
+            const normalizedUnitMembers = normalizeMemberNames(unitMembers);
+
+            return (
+              normalizedSingers.length === normalizedUnitMembers.length &&
+              normalizedSingers.every(
+                (singer, i) => singer === normalizedUnitMembers[i],
+              )
+            );
+          },
+        };
+
+        for (const prefix in prefixSearches) {
+          if (word.startsWith(prefix)) {
+            return prefixSearches[prefix](song, word.substring(prefix.length));
+          }
+        }
+
+        // プレフィックスがない場合は全文検索
+        return (
+          equalsOrIncludes(song.title.toLowerCase(), word) ||
+          equalsOrIncludes(song.artist.toLowerCase(), word) ||
           (locale === "en" &&
-            (s.artist_en?.toLowerCase().includes(v) ?? false)),
-        "album:": (s, v) => s.album.toLowerCase().includes(v),
-        "sing:": (s, v) =>
-          s.sing
+            (song.title_en
+              ? equalsOrIncludes(song.title_en.toLowerCase(), word)
+              : false)) ||
+          (locale === "en" &&
+            (song.artist_en
+              ? equalsOrIncludes(song.artist_en.toLowerCase(), word)
+              : false)) ||
+          equalsOrIncludes(song.album.toLowerCase(), word) ||
+          song.sing
             .toLowerCase()
             .split("、")
-            .some((sing) => sing.includes(v)),
-        "lyricist:": (s, v) => s.lyricist.toLowerCase().includes(v),
-        "composer:": (s, v) => s.composer.toLowerCase().includes(v),
-        "arranger:": (s, v) => s.arranger.toLowerCase().includes(v),
-        "tag:": (s, v) =>
-          s.tags
+            .map((sing) => sing.trim())
+            .some((sing) => equalsOrIncludes(sing, word)) ||
+          song.tags
             .join(",")
             .toLowerCase()
             .split(",")
-            .some((tag) => tag.includes(v)),
-        "video_id:": (s, v) => s.video_id.toLowerCase().includes(v),
-        "video_title:": (s, v) => s.video_title.toLowerCase().includes(v),
-        "extra:": (s, v) => s.extra?.toLowerCase().includes(v) ?? false,
-        "date:": (s, v) => {
-          const dateString = new Date(v).toLocaleDateString("ja-JP", {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-          });
-          const dateRegex = /^\d{4}\/\d{1,2}\/\d{1,2}$/;
-          if (dateRegex.test(dateString)) {
-            const [year, month, day] = dateString.split("/").map(Number);
-            const date = new Date(s.broadcast_at);
-            return (
-              date.getFullYear() === year &&
-              date.getMonth() + 1 === month &&
-              date.getDate() === day
-            );
-          }
-          return false;
-        },
-        "year:": (s, v) => {
-          const yearNumber = Number(v);
-          return s.year === yearNumber;
-        },
-        "milestone:": (s, v) => {
-          if (v === "*") {
-            return Boolean(s.milestones && s.milestones.length > 0);
-          }
-          const videoIdSet = milestoneVideoIdMap.get(v.toLowerCase());
-          if (!videoIdSet) return false;
-          return videoIdSet.has(s.video_id);
-        },
-        "season:": (s, v) => {
-          const month = new Date(s.broadcast_at).getMonth() + 1;
-          switch (v) {
-            case "春":
-              return month >= 3 && month <= 5;
-            case "夏":
-              return month >= 6 && month <= 9;
-            case "秋":
-              return month >= 10 && month <= 11;
-            case "冬":
-              return month >= 12 || (month >= 1 && month <= 2);
-            default:
-              return false;
-          }
-        },
-        "unit:": (s, v) => {
-          // ユニット通称で検索
-          if (s.sing === "") return false;
-          const singers = s.sing
-            .split("、")
-            .map((singer) => singer.trim())
-            .filter((singer) => singer !== "");
-          if (singers.length < 2) return false;
-
-          // ユニット通称から実際のメンバーを取得（大文字小文字を区別しない）
-          const unitMembers = getCollabMembers(v);
-          if (!unitMembers) {
-            return false;
-          }
-
-          // 曲の歌手とユニットメンバーを正規化して比較
-          const normalizedSingers = normalizeMemberNames(singers);
-          const normalizedUnitMembers = normalizeMemberNames(unitMembers);
-
-          return (
-            normalizedSingers.length === normalizedUnitMembers.length &&
-            normalizedSingers.every(
-              (singer, i) => singer === normalizedUnitMembers[i],
-            )
-          );
-        },
-      };
-
-      for (const prefix in prefixSearches) {
-        if (word.startsWith(prefix)) {
-          return prefixSearches[prefix](song, word.substring(prefix.length));
-        }
-      }
-
-      // プレフィックスがない場合は全文検索
-      return (
-        song.title.toLowerCase().includes(word) ||
-        song.artist.toLowerCase().includes(word) ||
-        (locale === "en" &&
-          (song.title_en?.toLowerCase().includes(word) ?? false)) ||
-        (locale === "en" &&
-          (song.artist_en?.toLowerCase().includes(word) ?? false)) ||
-        song.album.toLowerCase().includes(word) ||
-        song.sing
-          .toLowerCase()
-          .split("、")
-          .some((sing) => sing.includes(word)) ||
-        song.tags
-          .join(",")
-          .toLowerCase()
-          .split(",")
-          .some((tag) => tag.includes(word)) ||
-        song.video_id.toLowerCase().includes(word) ||
-        song.video_title.toLowerCase().includes(word) ||
-        (song.extra?.toLowerCase().includes(word) ?? false)
-      );
-    },
+            .map((tag) => tag.trim())
+            .some((tag) => equalsOrIncludes(tag, word)) ||
+          equalsOrIncludes(song.video_id.toLowerCase(), word) ||
+          equalsOrIncludes(song.video_title.toLowerCase(), word) ||
+          (song.extra
+            ? equalsOrIncludes(song.extra.toLowerCase(), word)
+            : false)
+        );
+      },
     [locale, milestoneVideoIdMap],
   );
 
@@ -220,17 +319,47 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   const searchSongs = useCallback(
     (songsToFilter: Song[], term: string) => {
       // 検索ワードの分割(q=xxx|yyy|zzz)
-      const searchWords = term
+      const andClauses = term
         .split(/[\|]+/)
-        .map((word) => word.trim().toLowerCase())
+        .map((word) => word.trim())
         .filter(Boolean);
 
-      // 通常検索ワードの定義
-      let normalWords = searchWords.filter((word) => !word.startsWith("-"));
-      // 除外検索ワードの定義
-      const excludeWords = searchWords.filter(
-        (word) => word.startsWith("-") && word.length > 1,
-      );
+      const positiveOrGroups: SearchToken[][] = [];
+      const excludeWords: SearchToken[] = [];
+
+      andClauses.forEach((clause) => {
+        const orChunks = splitByOrKeyword(clause);
+        const group: SearchToken[] = [];
+
+        orChunks.forEach((chunk) => {
+          const trimmedChunk = chunk.trim();
+          const isExclude = trimmedChunk.startsWith("-");
+          const tokenBody = isExclude
+            ? trimmedChunk.substring(1).trim()
+            : trimmedChunk;
+          const parsedToken = parseSearchToken(tokenBody);
+
+          if (!parsedToken) {
+            return;
+          }
+
+          if (isExclude) {
+            excludeWords.push(parsedToken);
+            return;
+          }
+
+          group.push(parsedToken);
+        });
+
+        if (group.length > 0) {
+          positiveOrGroups.push(group);
+        }
+      });
+
+      const normalWords = positiveOrGroups.flat();
+
+      // song mode判定は部分一致トークンのみ対象にする
+      let filteredNormalWords = normalWords;
 
       const songModePredicates: Record<string, (song: Song) => boolean> = {
         sololive2025: filterOriginalSongs,
@@ -239,8 +368,8 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         "collaboration-songs": isCollaborationSong,
       };
 
-      const selectedSongMode = searchWords.find(
-        (word) => songModePredicates[word],
+      const selectedSongMode = filteredNormalWords.find(
+        (word) => !word.isExact && songModePredicates[word.term],
       );
 
       // 特殊モード判定
@@ -249,15 +378,17 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
       // 曲モード（オリ曲/カバー曲/コラボ曲）
       if (selectedSongMode) {
         // 検索ワードからマジックワードを除く
-        normalWords = normalWords.filter((word) => !songModePredicates[word]);
+        filteredNormalWords = filteredNormalWords.filter(
+          (word) => !songModePredicates[word.term],
+        );
 
         songsToFilter = songsToFilter.filter((song) =>
-          songModePredicates[selectedSongMode](song),
+          songModePredicates[selectedSongMode.term](song),
         );
 
         if (
-          selectedSongMode === "sololive2025" ||
-          selectedSongMode === "original-songs"
+          selectedSongMode.term === "sololive2025" ||
+          selectedSongMode.term === "original-songs"
         ) {
           songsToFilter = songsToFilter.sort((a, b) => {
             // リリース順でソート
@@ -299,7 +430,9 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
           // オリ曲モード解除
           setSearchTerm("");
-          normalWords = normalWords.filter((word) => !songModePredicates[word]);
+          filteredNormalWords = filteredNormalWords.filter(
+            (word) => !songModePredicates[word.term],
+          );
         }
       }
       // プレイリストモードの場合は、playPlaylist関数で処理済みなので
@@ -309,30 +442,45 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
         return [];
       }
 
-      const isExcluded = (song: Song, excludeWords: string[]) => {
-        return excludeWords.some((word: string) => {
-          // ハイフンを削除してからfilterCallbackを呼び出す
-          return filterCallback(word.substring(1))(song);
+      const isExcluded = (song: Song, excludeTerms: SearchToken[]) => {
+        return excludeTerms.some((word) => {
+          return filterCallback(word.term, word.isExact)(song);
         });
       };
 
-      const matchesNormalWords = (song: Song, normalWords: string[]) => {
-        return normalWords.every((word: string) => {
-          return filterCallback(word)(song);
+      const matchesOrGroups = (song: Song, groups: SearchToken[][]) => {
+        if (groups.length === 0) {
+          return true;
+        }
+
+        return groups.every((group) => {
+          return group.some((word) =>
+            filterCallback(word.term, word.isExact)(song),
+          );
         });
       };
+
+      const activeOrGroups = positiveOrGroups
+        .map((group) =>
+          group.filter(
+            (word) => !songModePredicates[word.term] || word.isExact,
+          ),
+        )
+        .filter((group) => group.length > 0);
 
       const isAlbumOnlySearch =
-        normalWords.length > 0 &&
+        filteredNormalWords.length > 0 &&
         excludeWords.length === 0 &&
-        normalWords.every((word) => word.startsWith("album:"));
+        filteredNormalWords.every((word) => word.term.startsWith("album:"));
 
       // 楽曲紹介shortsの場合は逆順に並べる
-      if (normalWords.some((word) => word === "tag:楽曲紹介shorts")) {
+      if (
+        filteredNormalWords.some((word) => word.term === "tag:楽曲紹介shorts")
+      ) {
         return songsToFilter
           .filter((song) => {
             return (
-              matchesNormalWords(song, normalWords) &&
+              matchesOrGroups(song, activeOrGroups) &&
               !isExcluded(song, excludeWords)
             );
           })
@@ -346,7 +494,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
       const filteredSongs = songsToFilter.filter((song) => {
         return (
-          matchesNormalWords(song, normalWords) &&
+          matchesOrGroups(song, activeOrGroups) &&
           !isExcluded(song, excludeWords)
         );
       });

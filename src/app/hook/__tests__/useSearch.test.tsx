@@ -278,6 +278,77 @@ describe("useSearch", () => {
     );
   });
 
+  it("ORキーワード検索が動作する", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm("title:winter OR year:2025");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(2);
+        expect(result.current.songs.map((song) => song.video_id)).toEqual(
+          expect.arrayContaining(["vid1", "vid3"]),
+        );
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("ORキーワードとAND検索を組み合わせられる", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm("title:winter OR year:2025|year:2024");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("vid3");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("クォートで完全一致（全文検索）が動作する", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm('"test song 1"');
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("vid1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("クォートで完全一致（prefix検索）が動作する", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm('title:"test song 1"');
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("vid1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("完全一致では部分一致を除外できる", async () => {
+    const { result } = renderHook(() => useSearch(mockSongs));
+
+    result.current.setSearchTerm('artist:"artist"');
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(0);
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("歌った人検索が動作する", async () => {
     const { result } = renderHook(() => useSearch(mockSongs));
 

@@ -824,7 +824,7 @@
     "admin": {
       "heading": "Administrator",
       "github": "GitHub",
-      "twitter": "(@mitsugogo)"
+      "twitter": "@mitsugogo"
     },
     "license": {
       "heading": "License",
@@ -847,10 +847,67 @@
     "ballad": "Ballads",
     "acoustic": "Acoustic / Live Performance"
   },
+  "SearchHelp": {
+    "title": "Search Help",
+    "basicSearchTitle": "Basic Search",
+    "andSearch": "AND Search (Multiple Conditions)",
+    "andSearchDesc": "Search for songs that meet all conditions. Separate keywords with | (pipe).",
+    "andSearchExample": "Example: title:winter | year:2024",
+    "orSearch": "OR Search",
+    "orSearchDesc": "Search for songs that meet any of the conditions. Enter OR between keywords (surrounded by spaces).",
+    "orSearchExample": "Example: title:winter OR year:2025",
+    "exactMatch": "Exact Match Search",
+    "exactMatchDesc": "Surround keywords with \" (double quotes) to search for exact matches only.",
+    "exactMatchExample": "Example: \"winter song\" or title:\"winter song\"",
+    "supportedPrefixes": "Supported Prefixes",
+    "prefixTitle": "title: (Song Title)",
+    "prefixArtist": "artist: (Artist)",
+    "prefixAlbum": "album: (Album)",
+    "prefixTag": "tag: (Tag)",
+    "prefixYear": "year: (Release Year)",
+    "prefixSeason": "season: (Season)"
+  },
+  "AdvancedSearch": {
+    "title": "Advanced Search",
+    "allKeywords": "All Keywords",
+    "allKeywordsDesc": "Search for songs containing all entered keywords (AND search).",
+    "allKeywordsPlaceholder": "Separate with spaces or commas",
+    "exactPhrase": "Exact Phrase",
+    "exactPhraseDesc": "Search for songs that exactly match the specified phrase.",
+    "exactPhrasePlaceholder": "Example: winter song",
+    "anyKeywords": "Any Keywords",
+    "anyKeywordsDesc": "Search for songs containing any of the entered keywords (OR search).",
+    "anyKeywordsPlaceholder": "Separate with spaces",
+    "excludeKeywords": "Exclude Keywords",
+    "excludeKeywordsDesc": "Search for songs that don't contain the entered keywords.",
+    "excludeKeywordsPlaceholder": "Separate with spaces",
+    "preview": "Preview",
+    "query": "Generated Query",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "NotFoundPage": {
+    "badge": "404 NOT FOUND",
+    "title": "404 NOT FOUND",
+    "description": "We couldn't GUESS which page you were looking for.",
+    "hint": "It seems you've landed in a location even we can't pinpoint.",
+    "pinAlt": "Guesser pin illustration",
+    "backToHome": "Back to home",
+    "goToSearch": "Go to search"
+  },
+  "ErrorPage": {
+    "badge": "5XX ERROR",
+    "title": "Failed to load this page",
+    "description": "We couldn't load this page right now. Please try again in a moment.",
+    "hint": "If the issue continues, go back home and try from another page.",
+    "retry": "Try again",
+    "backToHome": "Back to home"
+  },
   "ShareModal": {
     "title": "Share",
     "description": "Share AZKi's beautiful singing voice!",
-    "youtubeUrl": "YouTube URL",
+    "youtubeUrl": "YouTube",
     "copied": "Copied",
     "close": "Close"
   }
