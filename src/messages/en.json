@@ -22,7 +22,10 @@
     "anniversaries": "Anniversaries",
     "statistics": "Statistics",
     "allData": "All Data",
-    "myBest9Songs": "Cloud Nine"
+    "myBest9Songs": "Cloud Nine",
+    "mapSubtitle": "Step into the Map: AZKi's Left Hand",
+    "mapTitle": "AZKi Pilgrimage Map: \"Seichi-Junrei\"",
+    "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists."
   },
   "SearchInput": {
     "search": "Search",

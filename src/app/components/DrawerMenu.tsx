@@ -17,6 +17,7 @@ import useSongs from "../hook/useSongs";
 import { formatDate } from "../lib/formatDate";
 import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import type { Song } from "../types/song";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 type DrawerNavItem = {
   name: string;
@@ -242,6 +243,28 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                   2025.11.19 (Wed.) - PIA ARENA MM
                 </div>{" "}
                 AZKi SOLO LiVE 2025 &quot;Departure&quot;
+                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+              </Link>
+            </Tooltip>
+
+            <Tooltip
+              arrowOffset={10}
+              arrowSize={4}
+              label={t("mapTooltip")}
+              withArrow
+              position="top"
+            >
+              <Link
+                href="https://note.com/yspione/n/nccf2fbbdc0dc"
+                target="_blank"
+                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                onClick={onClose}
+              >
+                <div className="text-xs text-gray-400 dark:text-light-gray-500">
+                  {t("mapSubtitle")}
+                </div>{" "}
+                <FaMapMarkerAlt className="mr-1 inline text-xl" />
+                {t("mapTitle")}
                 <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
               </Link>
             </Tooltip>
