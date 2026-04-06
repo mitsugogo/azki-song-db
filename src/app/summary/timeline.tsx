@@ -406,14 +406,17 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                           <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
                             {formatDate(m.date, locale)}
                           </span>{" "}
-                          —{" "}
-                          <Link
-                            href={m.url ? m.url : `/?q=milestone:${m.text}`}
-                            className="text-primary"
-                            target={m.url ? "_blank" : undefined}
-                          >
-                            {m.text}
-                          </Link>
+                          {m.is_external && !m.url ? (
+                            <span className="font-semibold">{m.text}</span>
+                          ) : (
+                            <Link
+                              href={m.url ? m.url : `/?q=milestone:${m.text}`}
+                              className="text-primary font-semibold"
+                              target={m.url ? "_blank" : undefined}
+                            >
+                              {m.text}
+                            </Link>
+                          )}
                           {m.note ? (
                             <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
                               {m.note}
@@ -427,7 +430,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                               rel="noopener noreferrer"
                               color="gray"
                               radius="sm"
-                              className="ml-2"
+                              className="ml-2 cursor-pointer"
                             >
                               <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
                               URL
