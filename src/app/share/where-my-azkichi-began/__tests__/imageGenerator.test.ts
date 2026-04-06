@@ -39,8 +39,8 @@ describe("where-my-azkichi-began image generator helpers", () => {
     const result = buildXPostText("みつごご", 7, "ja");
 
     expect(result).toContain("みつごご");
-    expect(result).toContain("あなたのあずきちはどこから");
-    expect(result).toContain("#あなたのあずきちはどこから");
+    expect(result).toContain("あなたのあずきちはどこから？");
+    expect(result).toContain("#私はここから開拓者");
     expect(result).toContain("#AZSongDB");
   });
 
@@ -48,8 +48,8 @@ describe("where-my-azkichi-began image generator helpers", () => {
     const result = buildXPostText("Alice", 3, "en");
 
     expect(result).toContain("Alice");
-    expect(result).toContain("3 entries");
-    expect(result).toContain("#WhereDidYourAZKiJourneyBegin");
+    expect(result).toContain("AZKi timeline");
+    expect(result).toContain("#私はここから開拓者");
     expect(result).toContain("#AZSongDB");
   });
 });
