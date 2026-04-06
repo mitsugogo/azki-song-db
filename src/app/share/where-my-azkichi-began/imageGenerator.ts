@@ -52,20 +52,13 @@ export const buildXPostText = (
   handle?: string,
 ): string => {
   const cleanName = name.trim() || (locale === "ja" ? "名無し" : "Anonymous");
-  const rawHandle = handle?.trim() || "";
-  const normalizedHandle = rawHandle
-    ? rawHandle.startsWith("@")
-      ? rawHandle
-      : `${rawHandle}`
-    : "";
-
   if (locale === "en") {
     const url = new URL("/en/share/where-my-azkichi-began", baseUrl);
-    return `${cleanName}'s AZKi timeline (${rowCount} entries)\n${url.toString()}\n#WhereDidYourAZKiJourneyBegin #AZSongDB`;
+    return `${cleanName}'s AZKi timeline\n${url.toString()}\n#私はここから開拓者 #AZSongDB`;
   }
 
   const url = new URL("/share/where-my-azkichi-began", baseUrl);
-  return `${cleanName}の「あなたのあずきちはどこから？」\n${url.toString()}\n#あなたのあずきちはどこから #AZSongDB`;
+  return `${cleanName}の「あなたのあずきちはどこから？」\n${url.toString()}\n#私はここから開拓者 #AZSongDB`;
 };
 
 const loadImageElement = (src: string): Promise<HTMLImageElement> => {
