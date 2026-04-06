@@ -27,6 +27,12 @@ export const pageList: PageCategory[] = [
   },
   {
     category: "シェア",
-    items: [{ name: "究極の9曲", href: "/share/my-best-9-songs" }],
+    items: [
+      { name: "究極の9曲", href: "/share/my-best-9-songs" },
+      {
+        name: "あなたのあずきちはどこから？",
+        href: "/share/where-my-azkichi-began",
+      },
+    ],
   },
 ];

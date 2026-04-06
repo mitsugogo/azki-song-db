@@ -79,6 +79,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
     "/statistics": t("statistics"),
     "/data": t("allData"),
     "/share/my-best-9-songs": t("myBest9Songs"),
+    "/share/where-my-azkichi-began": t("whereMyAzkichiBegan"),
   };
 
   const navigation = useMemo<DrawerNavCategory[]>(() => {

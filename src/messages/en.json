@@ -25,7 +25,8 @@
     "myBest9Songs": "Cloud Nine",
     "mapSubtitle": "Step into the Map: AZKi's Left Hand",
     "mapTitle": "AZKi Pilgrimage Map: \"Seichi-Junrei\"",
-    "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists."
+    "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
+    "whereMyAzkichiBegan": "Where did your AZKi journey begin?"
   },
   "SearchInput": {
     "search": "Search",
@@ -226,13 +227,9 @@
       "ogAlt": "{siteName} - Data list"
     },
     "share": {
-      "myBest9Title": "Cloud Nine Generator | {siteName}",
-      "myBest9TitleWithSite": "Cloud Nine Generator | {siteName}",
-      "myBest9WithTopic": "Topic: \"{title}\" | Cloud Nine Generator | {siteName}",
-      "myBest9OgTitle": "Cloud Nine Generator",
-      "myBest9OgWithTopic": "Topic: \"{title}\"",
-      "myBest9OgDescription": "Create and share your Cloud Nine selection!",
-      "myBest9Description": "Share your favorite AZKi songs"
+      "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
+      "whereMyAzkichiBeganOgTitle": "Where did your AZKi journey begin?",
+      "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries"
     },
     "summary": {
       "title": "Activity Summary",
@@ -250,11 +247,6 @@
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"
-    },
-    "share": {
-      "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
-      "whereMyAzkichiBeganOgTitle": "Where did your AZKi journey begin?",
-      "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries"
     }
   },
   "Share": {
