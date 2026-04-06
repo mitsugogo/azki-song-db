@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/mitsugogo/azki-song-db/compare/v2.2.4...v2.3.0) (2026-04-06)
+
+
+### Features
+
+* 「あなたのあずきちはどこから？」ジェネレーターを追加 ([ddb27d7](https://github.com/mitsugogo/azki-song-db/commit/ddb27d71f61b057cd772a0e09d8579efcf0d10e1))
+
 ### [2.2.4](https://github.com/mitsugogo/azki-song-db/compare/v2.2.3...v2.2.4) (2026-04-06)
 
 
