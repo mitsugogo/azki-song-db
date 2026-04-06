@@ -675,7 +675,9 @@ export default function WhereMyAzkichiBeganClient() {
                       key={rowKeys[index]}
                       row={row}
                       rowCount={rows.length}
-                      onYearChange={(value) => handleRowChange(index, "year", value)}
+                      onYearChange={(value) =>
+                        handleRowChange(index, "year", value)
+                      }
                       onMonthChange={(value) =>
                         handleRowChange(index, "month", value)
                       }
