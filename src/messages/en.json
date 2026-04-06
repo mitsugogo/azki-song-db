@@ -250,6 +250,11 @@
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"
+    },
+    "share": {
+      "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
+      "whereMyAzkichiBeganOgTitle": "Where did your AZKi journey begin?",
+      "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries"
     }
   },
   "Share": {
@@ -272,6 +277,53 @@
       "myBest9": {
         "title": "Cloud Nine Generator",
         "description": "Pick your favorite 9 songs from originals, covers, unit songs, and livestreams to share on social media."
+      },
+      "whereMyAzkichiBegan": {
+        "title": "Where did your AZKi journey begin?",
+        "description": "Fill in your name, icon, and timeline to generate a resume-style portrait image for sharing."
+      }
+    },
+    "whereMyAzkichiBegan": {
+      "pageTitle": "Where did your AZKi journey begin?",
+      "lead": "Enter your name, icon, and timeline rows to generate a portrait image (1080x1350) optimized for sharing on X.",
+      "previewTitle": "Preview",
+      "previewAlt": "Generated where-my-azkichi-began image",
+      "previewPlaceholder": "Generated image will appear here",
+      "shareNotice": "- Download the image or copy it to your clipboard, then paste it on social media.",
+      "copyFallbackLabel": "Copy failed. Please copy the text below manually.",
+      "form": {
+        "nameLabel": "Name",
+        "namePlaceholder": "e.g. mitsugogo",
+        "handleLabel": "Handle (X ID)",
+        "handlePlaceholder": "e.g. @mitsugogo",
+        "iconLabel": "Icon image",
+        "iconPlaceholder": "ICON",
+        "iconHint": "Square image recommended (PNG/JPG)",
+        "iconPreviewAlt": "Uploaded icon",
+        "timelineLabel": "Timeline (valid: {count} / max: {max})",
+        "favoriteOriginalSongLabel": "Favorite original song",
+        "favoriteOriginalSongPlaceholder": "Select your favorite original song",
+        "favoriteOriginalSongHint": "You can choose one song to display below the timeline (optional)",
+        "favoriteOriginalSongNothingFound": "No matching original songs found",
+        "yearPlaceholder": "Year",
+        "monthPlaceholder": "Month",
+        "contentPlaceholder": "Content"
+      },
+      "button": {
+        "uploadIcon": "Choose icon",
+        "addRow": "Add row",
+        "dragRow": "Drag row to reorder",
+        "removeRow": "Remove",
+        "generateImage": "Generate image",
+        "download": "Download image",
+        "copyXText": "Copy X post text"
+      },
+      "alerts": {
+        "nameRequired": "Please enter your name",
+        "atLeastOneRow": "Please add at least one timeline row",
+        "generateFailed": "Failed to generate image",
+        "iconImageOnly": "Please choose an image file",
+        "iconReadFailed": "Failed to read image file"
       }
     },
     "myBest9": {
