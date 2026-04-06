@@ -22,7 +22,10 @@
     "anniversaries": "記念日",
     "statistics": "統計情報",
     "allData": "全収録データ",
-    "myBest9Songs": "究極の9曲"
+    "myBest9Songs": "究極の9曲",
+    "mapSubtitle": "AZKiさんの左手の情報はこちら",
+    "mapTitle": "AZKi聖地マップ",
+    "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。"
   },
   "SearchInput": {
     "search": "検索",
