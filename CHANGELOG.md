@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.4](https://github.com/mitsugogo/azki-song-db/compare/v2.2.3...v2.2.4) (2026-04-06)
+
+
+### Bug Fixes
+
+* マイルストーンのリンク調整 ([1782ddf](https://github.com/mitsugogo/azki-song-db/commit/1782ddf51697b4faab13022e12ab401f130e1ca4))
+
 ### [2.2.3](https://github.com/mitsugogo/azki-song-db/compare/v2.2.2...v2.2.3) (2026-04-04)
 
 
