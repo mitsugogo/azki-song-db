@@ -63,6 +63,12 @@ function ShareIndexContent() {
                 description: t("features.myBest9.description"),
                 emoji: "🎵",
               },
+              {
+                href: "/share/where-my-azkichi-began",
+                title: t("features.whereMyAzkichiBegan.title"),
+                description: t("features.whereMyAzkichiBegan.description"),
+                emoji: "🗓️",
+              },
             ];
             return features.map((feature) => (
               <Link
