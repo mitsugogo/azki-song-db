@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { Breadcrumbs } from "@mantine/core";
+import { Breadcrumbs, Button } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses } from "../../theme";
@@ -16,6 +16,16 @@ export default function SummaryYearClient(props: {
 }) {
   const { initialSongs, year, displayYearServer, rawYearParam } = props;
   const t = useTranslations("Summary");
+  const minYear = 2018;
+  const maxYear = new Date().getFullYear();
+  const prevYear =
+    typeof displayYearServer === "number" && displayYearServer > minYear
+      ? displayYearServer - 1
+      : null;
+  const nextYear =
+    typeof displayYearServer === "number" && displayYearServer < maxYear
+      ? displayYearServer + 1
+      : null;
 
   return (
     <div className="grow p-2 lg:p-6 lg:pb-0 overflow-auto">
@@ -40,6 +50,41 @@ export default function SummaryYearClient(props: {
               : t("page.title")}
           </Link>
         </Breadcrumbs>
+      </div>
+
+      {/* 前年・翌年ページャー */}
+      <div className="mb-4 w-full">
+        {displayYearServer && (
+          <div className="flex w-full items-center justify-between gap-3">
+            {prevYear ? (
+              <Button
+                component={Link}
+                href={`/summary/${prevYear}`}
+                variant="light"
+                size="sm"
+                radius="md"
+              >
+                {`<< ${prevYear}${t("yearSuffix")}`}
+              </Button>
+            ) : (
+              <div className="h-9 min-w-px" aria-hidden="true" />
+            )}
+
+            {nextYear ? (
+              <Button
+                component={Link}
+                href={`/summary/${nextYear}`}
+                variant="light"
+                size="sm"
+                radius="md"
+              >
+                {`${nextYear}${t("yearSuffix")} >>`}
+              </Button>
+            ) : (
+              <div className="h-9 min-w-px" aria-hidden="true" />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between mb-3">
