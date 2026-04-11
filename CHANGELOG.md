@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.2](https://github.com/mitsugogo/azki-song-db/compare/v2.3.1...v2.3.2) (2026-04-11)
+
+
+### Bug Fixes
+
+* 英語での生成画像のローカライズ不備を修正 ([eccb16d](https://github.com/mitsugogo/azki-song-db/commit/eccb16dcacca30f7f6ec29a115825945d1d36809))
+* 非公開動画でサムネロードが無限ループするバグを修正 (fixed [#336](https://github.com/mitsugogo/azki-song-db/issues/336)) ([f59db45](https://github.com/mitsugogo/azki-song-db/commit/f59db45de1b755242290276d218e2a51a7b92323))
+
 ### [2.3.1](https://github.com/mitsugogo/azki-song-db/compare/v2.3.0...v2.3.1) (2026-04-11)
 
 ## [2.3.0](https://github.com/mitsugogo/azki-song-db/compare/v2.2.4...v2.3.0) (2026-04-06)
