@@ -703,11 +703,7 @@ export default function YearSummaryClient({
                     className="block"
                   >
                     <div className="w-full aspect-video bg-black">
-                      <YoutubeThumbnail
-                        videoId={g.video_id}
-                        alt={g.title}
-                        fill={true}
-                      />
+                      <YoutubeThumbnail videoId={g.video_id} alt={g.title} />
                     </div>
                     <div className="p-3">
                       <div className="font-medium line-clamp-2">{g.title}</div>
@@ -747,11 +743,7 @@ export default function YearSummaryClient({
                   }&q=year:${displayYear}`}
                 >
                   <div className="w-full aspect-video bg-black">
-                    <YoutubeThumbnail
-                      videoId={s.video_id}
-                      alt={s.title}
-                      fill={true}
-                    />
+                    <YoutubeThumbnail videoId={s.video_id} alt={s.title} />
                   </div>
                   <div className="p-3">
                     <div className="font-medium line-clamp-2">{s.title}</div>
@@ -857,7 +849,6 @@ export default function YearSummaryClient({
                             <YoutubeThumbnail
                               videoId={g.video_id}
                               alt={g.title}
-                              fill={true}
                             />
                           </div>
                           <div className="p-3">
@@ -940,7 +931,6 @@ export default function YearSummaryClient({
                                     <YoutubeThumbnail
                                       videoId={v.id}
                                       alt={v.title}
-                                      fill={true}
                                     />
                                   </Link>
                                 )}

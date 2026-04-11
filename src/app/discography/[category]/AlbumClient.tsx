@@ -138,11 +138,7 @@ export default function AlbumClient({
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
         <aside className="rounded-xl bg-gray-50/20 dark:bg-gray-800 p-4">
           <div className="overflow-hidden rounded-lg">
-            <YoutubeThumbnail
-              videoId={leadSong.video_id}
-              alt={albumName}
-              fill={true}
-            />
+            <YoutubeThumbnail videoId={leadSong.video_id} alt={albumName} />
           </div>
 
           <h1 className="text-2xl font-extrabold mt-4 mb-2">{albumName}</h1>
@@ -203,7 +199,6 @@ export default function AlbumClient({
                     <YoutubeThumbnail
                       videoId={song.video_id}
                       alt={song.title}
-                      fill={true}
                       imageClassName="object-cover"
                     />
                   </div>

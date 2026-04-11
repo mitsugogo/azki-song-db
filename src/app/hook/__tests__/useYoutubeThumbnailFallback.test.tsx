@@ -47,9 +47,9 @@ describe("useYoutubeThumbnailFallback", () => {
     expect(result.current.imageUrl).toContain("hqdefault.jpg");
   });
 
-  it("全ての解像度を試した後も最後の解像度を保持する", () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
+  it("全ての解像度を試した後は再試行を停止する", () => {
+    const consoleWarnSpy = vi
+      .spyOn(console, "warn")
       .mockImplementation(() => {});
 
     const { result } = renderHook(() =>
@@ -84,7 +84,7 @@ describe("useYoutubeThumbnailFallback", () => {
 
     expect(result.current.imageUrl).toContain("default.jpg");
 
-    // さらにエラーを呼んでも変わらない
+    // 最終到達後は何度呼んでもURLが変わらず、追加ログもしない
     act(() => {
       result.current.handleError();
     });
@@ -93,9 +93,9 @@ describe("useYoutubeThumbnailFallback", () => {
     });
 
     expect(result.current.imageUrl).toContain("default.jpg");
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
 
-    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it("videoIdが変更されたら状態がリセットされる", () => {

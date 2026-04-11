@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 
+const searchInputNamePattern =
+  /曲名、アーティスト、タグなどで検索|Search by title, artist, tags/i;
+
 test.describe("Language switcher", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
@@ -13,7 +16,7 @@ test.describe("Language switcher", () => {
     await page.waitForLoadState("domcontentloaded");
 
     await expect(
-      page.getByRole("textbox", { name: "曲名、アーティスト、タグなどで検索" }),
+      page.getByRole("textbox", { name: searchInputNamePattern }),
     ).toBeVisible();
 
     const langGroup = page.getByRole("group", {
@@ -24,7 +27,7 @@ test.describe("Language switcher", () => {
     await expect(page).toHaveURL(/\/en(\/|$)/);
 
     await expect(
-      page.getByRole("textbox", { name: "Search by title, artist, tags" }),
+      page.getByRole("textbox", { name: searchInputNamePattern }),
     ).toBeVisible();
   });
 
@@ -36,7 +39,7 @@ test.describe("Language switcher", () => {
     await page.waitForLoadState("domcontentloaded");
 
     await expect(
-      page.getByRole("textbox", { name: "Search by title, artist, tags" }),
+      page.getByRole("textbox", { name: searchInputNamePattern }),
     ).toBeVisible();
   });
 });

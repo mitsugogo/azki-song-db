@@ -132,7 +132,6 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             <YoutubeThumbnail
               videoId={song.firstVideo.video_id}
               alt={song.firstVideo.video_title}
-              fill={true}
             />
           ) : (
             <>
@@ -140,7 +139,6 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 key={displayedVideoId}
                 videoId={displayedVideoId}
                 alt={song.firstVideo.video_title}
-                fill={true}
               />
             </>
           )}

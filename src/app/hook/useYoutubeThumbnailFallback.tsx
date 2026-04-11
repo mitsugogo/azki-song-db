@@ -17,6 +17,7 @@ const getImageUrl = (videoId: string, resolution: Resolution): string => {
 interface YoutubeThumbnailFallbackResult {
   imageUrl: string;
   handleError: () => void;
+  isExhausted: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ const useYoutubeThumbnailFallback = (
 ): YoutubeThumbnailFallbackResult => {
   const [currentUrlIndex, setCurrentUrlIndex] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [isExhausted, setIsExhausted] = useState(false);
 
   const imageUrl = useMemo(() => {
     const baseUrl = getImageUrl(videoId, RESOLUTIONS[currentUrlIndex]);
@@ -42,9 +44,12 @@ const useYoutubeThumbnailFallback = (
     // videoIdが変更されたら、ステートをリセット
     setCurrentUrlIndex(0);
     setRetryCount(0);
+    setIsExhausted(false);
   }, [videoId]);
 
   const handleError = useCallback(() => {
+    if (isExhausted) return;
+
     setCurrentUrlIndex((prevIndex) => {
       if (retryCount === 0) {
         // 一時的なネットワーク失敗を考慮して、現在解像度を1回だけ再試行
@@ -60,14 +65,13 @@ const useYoutubeThumbnailFallback = (
       }
 
       // 全てのフォールバックを試しても見つからなかった場合
-      console.error(
-        `Failed to load YouTube thumbnail for video ID: ${videoId}`,
-      );
+      setIsExhausted(true);
+      console.warn(`Failed to load YouTube thumbnail for video ID: ${videoId}`);
       return prevIndex;
     });
-  }, [retryCount, videoId]);
+  }, [retryCount, videoId, isExhausted]);
 
-  return { imageUrl, handleError };
+  return { imageUrl, handleError, isExhausted };
 };
 
 export default useYoutubeThumbnailFallback;

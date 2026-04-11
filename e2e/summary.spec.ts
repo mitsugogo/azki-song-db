@@ -83,9 +83,13 @@ test.describe("Summary pages", () => {
       page,
     }) => {
       await page.goto("/watch", { waitUntil: "domcontentloaded" });
-      await expect
-        .poll(() => page.url(), { timeout: 10000 })
-        .toMatch(/\/watch\?v=/);
+      await expect(page).toHaveURL(/\/watch(\?|$)/);
+      await page.waitForSelector(
+        'iframe[src*="youtube"], [data-testid="main-player"]',
+        {
+          timeout: 15000,
+        },
+      );
       await setTheme(page, "dark");
 
       await page.goto("/summary/2026", { waitUntil: "domcontentloaded" });

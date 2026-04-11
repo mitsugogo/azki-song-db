@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../YouTubePlayer", () => ({
   default: (props: any) => <div data-testid="yt-player" />,
 }));
-vi.mock("./YoutubeThumbnail", () => ({
+vi.mock("../YoutubeThumbnail", () => ({
   default: () => <div data-testid="yt-thumb" />,
 }));
 vi.mock("motion/react", () => ({

@@ -205,7 +205,6 @@ export default function Page() {
                     <YoutubeThumbnail
                       videoId={song.video_id}
                       alt={song.title}
-                      fill={true}
                     />
                     {/* オーバーレイ */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">

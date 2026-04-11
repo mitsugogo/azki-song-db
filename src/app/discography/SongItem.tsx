@@ -99,7 +99,6 @@ const SongItem = ({
         <YoutubeThumbnail
           videoId={song.firstVideo.video_id}
           alt={song.firstVideo.video_title}
-          fill={true}
         />
       </div>
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-20 opacity-0 group-hover:opacity-80 transition-opacity duration-300 dark:bg-opacity-50">

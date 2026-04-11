@@ -100,7 +100,6 @@ const SongListItem = React.memo(
                   <YoutubeThumbnail
                     videoId={song.video_id}
                     alt={song.video_title}
-                    fill={true}
                     className="w-[calc(100%-2px)]"
                     imageClassName="rounded-l-sm lg:rounded-t-sm"
                   />

@@ -309,7 +309,6 @@ export default function ClientTop() {
                           <YoutubeThumbnail
                             videoId={song.video_id}
                             alt={song.title}
-                            fill={true}
                             imageClassName="transition duration-500"
                           />
                         </div>
@@ -366,7 +365,6 @@ export default function ClientTop() {
                               <YoutubeThumbnail
                                 videoId={update.videoId}
                                 alt={update.videoTitle}
-                                fill={true}
                                 imageClassName="object-cover"
                               />
                             </div>
