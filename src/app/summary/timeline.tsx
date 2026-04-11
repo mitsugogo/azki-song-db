@@ -26,6 +26,18 @@ function toDateKey(date: Date) {
   return `${y}-${m}-${d}`;
 }
 
+function toJstMonthDayKey(date: Date) {
+  const jstOffsetMs = 9 * 60 * 60 * 1000;
+  const jstDate = new Date(date.getTime() + jstOffsetMs);
+  const m = String(jstDate.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(jstDate.getUTCDate()).padStart(2, "0");
+  return `${m}-${d}`;
+}
+
+function buildMilestoneSearchHref(text: string) {
+  return `/?q=${encodeURIComponent(`milestone:${text}`)}`;
+}
+
 export default function Timeline({ songs }: { songs: Song[] }) {
   const t = useTranslations("Summary");
   const activityStart = new Date(2018, 10, 15);
@@ -70,9 +82,53 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     }))
     .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
 
+  // songs と api で同名マイルストーンが重複する場合は、古い日付を採用しつつ
+  // api 側の URL / note を引き継ぐ。
+  const songByText = new Map(
+    dedupedSongMilestones.map((m) => [m.text, m] as const),
+  );
+  const apiByText = apiMilestones.reduce((map, milestone) => {
+    const list = map.get(milestone.text);
+    if (list) {
+      list.push(milestone);
+    } else {
+      map.set(milestone.text, [milestone]);
+    }
+    return map;
+  }, new Map<string, TimelineMilestone[]>());
+
+  const mergedCrossSourceMilestones: TimelineMilestone[] = [];
+
+  for (const songMilestone of dedupedSongMilestones) {
+    const apiGroup = apiByText.get(songMilestone.text);
+    if (!apiGroup || apiGroup.length === 0) {
+      mergedCrossSourceMilestones.push(songMilestone);
+      continue;
+    }
+
+    const oldestApi = apiGroup.reduce((oldest, current) =>
+      current.date.getTime() < oldest.date.getTime() ? current : oldest,
+    );
+    const mergedDate =
+      oldestApi.date.getTime() < songMilestone.date.getTime()
+        ? oldestApi.date
+        : songMilestone.date;
+    const mergedNote =
+      songMilestone.note || apiGroup.find((m) => Boolean(m.note))?.note || "";
+    const mergedUrl = apiGroup.find((m) => Boolean(m.url))?.url || "";
+
+    mergedCrossSourceMilestones.push({
+      ...songMilestone,
+      date: mergedDate,
+      note: mergedNote,
+      url: mergedUrl,
+      is_external: songMilestone.is_external || apiGroup.length > 0,
+    });
+  }
+
   const allMilestones: TimelineMilestone[] = [
-    ...dedupedSongMilestones,
-    ...apiMilestones,
+    ...mergedCrossSourceMilestones,
+    ...apiMilestones.filter((m) => !songByText.has(m.text)),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const uniqueMilestones = (() => {
@@ -101,6 +157,10 @@ export default function Timeline({ songs }: { songs: Song[] }) {
 
   const locale = useLocale();
   const isJP = locale === "ja";
+  const todayMonthDayKey = toJstMonthDayKey(new Date());
+  const todayMilestones = uniqueMilestones.filter(
+    (m) => toJstMonthDayKey(m.date) === todayMonthDayKey,
+  );
 
   // バンドと帯の位置合わせのため、実際のレンダリング後に各行の上端y座標を計測する
   const flexContainerRef = useRef<HTMLDivElement>(null);
@@ -153,6 +213,67 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         className="col-span-full mt-6 p-3 border-t pb-20 lg:pb-24"
       >
         <h2 className="font-bold text-xl mb-2">{t("timelineTitle")}</h2>
+        {todayMilestones.length > 0 ? (
+          <section className="mx-1 mb-3 rounded-xl border border-primary-300/40 bg-primary-50/70 p-3 shadow-sm dark:border-pink-200/20 dark:bg-gray-900/50">
+            <p className="text-md font-semibold tracking-wide text-primary-700 dark:text-pink-200">
+              {t("todayMilestonesTitle")}
+            </p>
+            <div className="mt-2 space-y-1">
+              {todayMilestones.map((m, idx) => (
+                <div
+                  key={`${toDateKey(m.date)}::${m.text}::${idx}`}
+                  className="flex items-start text-sm text-light-gray-600 dark:text-light-gray-400 rounded px-2 py-0"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
+                      {formatDate(m.date, locale)}
+                    </span>{" "}
+                    {m.is_external ? (
+                      m.url ? (
+                        <Link
+                          href={m.url}
+                          className="text-primary font-semibold"
+                          target="_blank"
+                        >
+                          {m.text}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold">{m.text}</span>
+                      )
+                    ) : (
+                      <Link
+                        href={buildMilestoneSearchHref(m.text)}
+                        className="text-primary font-semibold"
+                      >
+                        {m.text}
+                      </Link>
+                    )}
+                    {m.note ? (
+                      <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
+                        {m.note}
+                      </span>
+                    ) : null}
+                    {m.is_external && m.url ? (
+                      <Badge
+                        component="a"
+                        href={m.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="gray"
+                        radius="sm"
+                        className="ml-2 cursor-pointer"
+                      >
+                        <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
+                        URL
+                      </Badge>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         {(() => {
           const start = activityStart;
           const end = new Date(
@@ -406,13 +527,22 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                           <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
                             {formatDate(m.date, locale)}
                           </span>{" "}
-                          {m.is_external && !m.url ? (
-                            <span className="font-semibold">{m.text}</span>
+                          {m.is_external ? (
+                            m.url ? (
+                              <Link
+                                href={m.url}
+                                className="text-primary font-semibold"
+                                target="_blank"
+                              >
+                                {m.text}
+                              </Link>
+                            ) : (
+                              <span className="font-semibold">{m.text}</span>
+                            )
                           ) : (
                             <Link
-                              href={m.url ? m.url : `/?q=milestone:${m.text}`}
+                              href={buildMilestoneSearchHref(m.text)}
                               className="text-primary font-semibold"
-                              target={m.url ? "_blank" : undefined}
                             >
                               {m.text}
                             </Link>
@@ -422,7 +552,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                               {m.note}
                             </span>
                           ) : null}
-                          {m.url ? (
+                          {m.is_external && m.url ? (
                             <Badge
                               component="a"
                               href={m.url}

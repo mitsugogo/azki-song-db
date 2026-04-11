@@ -780,6 +780,7 @@
   },
   "Summary": {
     "timelineTitle": "Timeline",
+    "todayMilestonesTitle": "What happened today?",
     "yearSuffix": "",
     "monthSuffix": " months",
     "daySuffix": " days",

@@ -780,6 +780,7 @@
   },
   "Summary": {
     "timelineTitle": "活動年表",
+    "todayMilestonesTitle": "今日は何の日？",
     "yearSuffix": "年",
     "monthSuffix": "ヶ月",
     "daySuffix": "日",
@@ -800,7 +801,7 @@
       "originalSongsLabel": "オリジナル楽曲",
       "coversLabel": "カバー楽曲"
     },
-    "milestonesTitle": "マイルストーン",
+    "milestonesTitle": "できごと",
     "frequentSongsTitle": "歌枠でよく歌った楽曲",
     "frequentArtistsTitle": "歌枠でよく歌ったアーティスト",
     "collabCountsTitle": "歌でよくコラボしたホロメン・アーティスト",

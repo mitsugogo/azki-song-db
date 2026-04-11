@@ -9,10 +9,12 @@ import { HiSearch } from "react-icons/hi";
 import { FaPlay } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
+import useMilestones from "../../hook/useMilestones";
 import { siteConfig } from "@/app/config/siteConfig";
 import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 type Props = {
   initialSongs: Song[];
@@ -41,6 +43,11 @@ export default function YearSummaryClient({
   const [mounted, setMounted] = useState(false);
   const [videoViewMode, setVideoViewMode] = useState<"grid" | "list">("list");
   const [searchValue, setSearchValue] = useState("");
+  const { items: externalMilestones } = useMilestones();
+
+  const buildMilestoneSearchHref = (milestone: string) => {
+    return `/?q=${encodeURIComponent(`milestone:${milestone}`)}`;
+  };
 
   const yearNumber = Number(year);
   const hasYear = Number.isFinite(yearNumber);
@@ -287,13 +294,52 @@ export default function YearSummaryClient({
     );
   }, [collaborativeSongs]);
 
-  // マイルストーンと達成日(broadcast_at)を取得
+  // マイルストーンと達成日(broadcast_at)を取得（songs + /api/milestones）
   const milestonesByYear = useMemo(() => {
-    const milestones: Record<
-      number,
-      { broadcast_at: string; milestones: string[] }[]
-    > = {};
-    const seenMilestonesByYear: Record<number, Set<string>> = {};
+    type YearMilestone = {
+      broadcast_at: string;
+      milestone: string;
+      is_external: boolean;
+      url: string;
+    };
+
+    const milestones = new Map<number, Map<string, YearMilestone>>();
+
+    const getOrCreateYearMap = (year: number) => {
+      const current = milestones.get(year);
+      if (current) return current;
+      const next = new Map<string, YearMilestone>();
+      milestones.set(year, next);
+      return next;
+    };
+
+    const mergeMilestone = (
+      targetYear: number,
+      milestoneText: string,
+      candidate: YearMilestone,
+    ) => {
+      const yearMap = getOrCreateYearMap(targetYear);
+      const existing = yearMap.get(milestoneText);
+      if (!existing) {
+        yearMap.set(milestoneText, candidate);
+        return;
+      }
+
+      const existingTime = new Date(existing.broadcast_at).getTime();
+      const candidateTime = new Date(candidate.broadcast_at).getTime();
+      const shouldUseCandidateDate =
+        Number.isFinite(candidateTime) &&
+        (!Number.isFinite(existingTime) || candidateTime < existingTime);
+
+      yearMap.set(milestoneText, {
+        ...existing,
+        broadcast_at: shouldUseCandidateDate
+          ? candidate.broadcast_at
+          : existing.broadcast_at,
+        is_external: existing.is_external || candidate.is_external,
+        url: existing.url || candidate.url,
+      });
+    };
 
     [...songsFiltered]
       .sort(
@@ -304,25 +350,49 @@ export default function YearSummaryClient({
       .forEach((s) => {
         const year = Number(s.year);
         if (Number.isNaN(year)) return;
-        if (!milestones[year]) milestones[year] = [];
-        if (!seenMilestonesByYear[year]) seenMilestonesByYear[year] = new Set();
 
         (s.milestones || [])
           .map((milestone) => milestone.trim())
           .filter(Boolean)
           .forEach((milestone) => {
-            if (seenMilestonesByYear[year].has(milestone)) return;
-
-            seenMilestonesByYear[year].add(milestone);
-            milestones[year].push({
+            mergeMilestone(year, milestone, {
               broadcast_at: s.broadcast_at,
-              milestones: [milestone],
+              milestone,
+              is_external: false,
+              url: "",
             });
           });
       });
 
-    return milestones;
-  }, [songsFiltered]);
+    (externalMilestones || []).forEach((m) => {
+      const milestone = (m.content || "").trim();
+      if (!milestone || !m.date) return;
+
+      const parsedDate = new Date(m.date);
+      if (Number.isNaN(parsedDate.getTime())) return;
+
+      const year = parsedDate.getUTCFullYear();
+      mergeMilestone(year, milestone, {
+        broadcast_at: parsedDate.toISOString(),
+        milestone,
+        is_external: true,
+        url: m.url || "",
+      });
+    });
+
+    const result: Record<number, YearMilestone[]> = {};
+    for (const [year, items] of milestones.entries()) {
+      result[year] = Array.from(items.values()).sort(
+        (a, b) =>
+          new Date(a.broadcast_at).getTime() -
+          new Date(b.broadcast_at).getTime(),
+      );
+    }
+
+    return result;
+  }, [songsFiltered, externalMilestones]);
+
+  const displayYearMilestones = milestonesByYear[Number(displayYear)] || [];
 
   return (
     <div className="space-y-6">
@@ -398,27 +468,47 @@ export default function YearSummaryClient({
         </div>
       </div>
 
-      {displayYear && milestonesByYear[Number(displayYear)] ? (
+      {displayYear && displayYearMilestones.length > 0 ? (
         <section>
           <h2 className="text-xl font-semibold mb-4">{t("milestonesTitle")}</h2>
           <ul className="space-y-2 list-disc ml-6">
-            {milestonesByYear[Number(displayYear)].map((milestone, index) => (
+            {displayYearMilestones.map((milestone, index) => (
               <li key={index}>
                 <div className="font-medium">
-                  {milestone.milestones.map(
-                    (milestoneValue, milestoneIndex) => (
-                      <span key={`${milestoneValue}-${milestoneIndex}`}>
-                        {milestoneIndex > 0 ? ", " : ""}
+                  {milestone.is_external ? (
+                    milestone.url ? (
+                      <>
                         <Link
-                          href={`/search?${new URLSearchParams({
-                            q: `milestone:${milestoneValue}`,
-                          }).toString()}`}
-                          className="hover:underline"
+                          href={milestone.url}
+                          className="hover:underline text-primary dark:text-primary-600"
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          {milestoneValue}
+                          {milestone.milestone}
                         </Link>
-                      </span>
-                    ),
+                        <Badge
+                          component="a"
+                          href={milestone.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="gray"
+                          radius="sm"
+                          className="ml-2 cursor-pointer"
+                        >
+                          <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
+                          URL
+                        </Badge>
+                      </>
+                    ) : (
+                      <span>{milestone.milestone}</span>
+                    )
+                  ) : (
+                    <Link
+                      href={buildMilestoneSearchHref(milestone.milestone)}
+                      className="hover:underline text-primary dark:text-primary-600"
+                    >
+                      {milestone.milestone}
+                    </Link>
                   )}
                   <span className="text-sm text-gray-700 dark:text-light-gray-400">
                     &nbsp;-&nbsp;
@@ -732,9 +822,9 @@ export default function YearSummaryClient({
             })}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-            {(collaborativeSongs || []).map((s) => (
+            {(collaborativeSongs || []).map((s, index) => (
               <article
-                key={`${s.video_id || ""}-collab-${s.start || ""}`}
+                key={`${s.video_id || ""}-collab-${s.start || ""}-${index}`}
                 className="card-glassmorphism hover-lift-shadow overflow-hidden"
               >
                 <Link
