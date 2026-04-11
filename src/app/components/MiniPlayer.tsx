@@ -438,7 +438,6 @@ export default function MiniPlayer() {
               <YoutubeThumbnail
                 videoId={currentSong.video_id}
                 alt={currentSong.video_title}
-                fill={true}
                 imageClassName="w-10 h-10 rounded"
               />
             </div>

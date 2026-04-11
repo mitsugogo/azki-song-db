@@ -116,7 +116,6 @@ const SortableRow = ({
             <YoutubeThumbnail
               videoId={s.videoId}
               alt={s.songinfo.video_title}
-              fill={true}
               imageClassName="object-cover"
             />
           </div>

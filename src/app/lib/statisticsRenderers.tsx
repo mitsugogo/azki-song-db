@@ -57,7 +57,6 @@ function LastVideoCell({
                 key={lastVideo.video_id}
                 videoId={lastVideo.video_id}
                 alt={lastVideo.video_title}
-                fill={true}
               />
             </a>
           ) : (
@@ -65,7 +64,6 @@ function LastVideoCell({
               key={lastVideo.video_id}
               videoId={lastVideo.video_id}
               alt={lastVideo.video_title}
-              fill={true}
             />
           )}
         </div>

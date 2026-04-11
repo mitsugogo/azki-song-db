@@ -431,11 +431,7 @@ export default function MyBestNineSongsPage() {
               onClick={() => removeSong(song.video_id, String(song.start))}
             >
               <div className="w-full aspect-video bg-black">
-                <YoutubeThumbnail
-                  videoId={song.video_id}
-                  alt={song.title}
-                  fill={true}
-                />
+                <YoutubeThumbnail videoId={song.video_id} alt={song.title} />
               </div>
               <div className="p-3 pt-2">
                 <Text size="xs" truncate className="font-bold">
@@ -855,7 +851,6 @@ export default function MyBestNineSongsPage() {
                                     <YoutubeThumbnail
                                       videoId={song.video_id}
                                       alt={song.title}
-                                      fill={true}
                                     />
                                   </div>
                                   <div className="p-2">

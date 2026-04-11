@@ -149,7 +149,6 @@ const SearchResultsView = ({
                         <YoutubeThumbnail
                           videoId={song.video_id}
                           alt={song.title}
-                          fill={true}
                         />
                       </div>
                       <div className="p-3 pt-1">
