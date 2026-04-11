@@ -1,6 +1,16 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 
+const searchInputNamePattern =
+  /曲名、アーティスト、タグなどで検索|Search by title, artist, tags/i;
+const advancedSearchTitlePattern = /高度な検索|Advanced Search/i;
+const allKeywordsPattern = /次のキーワードをすべて含む|All Keywords/i;
+const exactPhrasePattern = /次のキーワード全体を含む|Exact Phrase/i;
+const anyKeywordsPattern = /次のキーワードのいずれかを含む|Any Keywords/i;
+const excludeKeywordsPattern = /次のキーワードを含まない|Exclude Keywords/i;
+const applyButtonPattern = /適用|Apply/i;
+const exactPhrasePlaceholderPattern = /例: winter song|Example: winter song/i;
+
 test.describe("Search page", () => {
   test.describe.configure({ mode: "serial" });
 
@@ -86,7 +96,7 @@ test.describe("Search page", () => {
 
     // Enter search term (TagsInput accepts typing)
     const searchInput = page.getByRole("textbox", {
-      name: "曲名、アーティスト、タグなどで検索",
+      name: searchInputNamePattern,
     });
     await searchInput.click();
     await searchInput.fill("year:2025");
@@ -125,7 +135,7 @@ test.describe("Search page", () => {
 
     // Enter search term
     const searchInput = page.getByRole("textbox", {
-      name: "曲名、アーティスト、タグなどで検索",
+      name: searchInputNamePattern,
     });
     await searchInput.click();
     await searchInput.fill("tag:オリ曲");
@@ -165,23 +175,23 @@ test.describe("Search page", () => {
 
     // 高度な検索ボタンをクリック
     const advancedSearchButton = page.getByRole("button", {
-      name: /高度な検索/,
+      name: advancedSearchTitlePattern,
     });
     await expect(advancedSearchButton).toBeVisible();
 
     await advancedSearchButton.click();
 
     // モーダルが開く
-    const modalTitle = page.getByText("高度な検索");
+    const modalTitle = page.getByRole("heading", {
+      name: advancedSearchTitlePattern,
+    });
     await expect(modalTitle).toBeVisible();
 
     // フィールドが表示される
-    await expect(page.getByText("次のキーワードをすべて含む")).toBeVisible();
-    await expect(page.getByText("次のキーワード全体を含む")).toBeVisible();
-    await expect(
-      page.getByText("次のキーワードのいずれかを含む"),
-    ).toBeVisible();
-    await expect(page.getByText("次のキーワードを含まない")).toBeVisible();
+    await expect(page.getByText(allKeywordsPattern)).toBeVisible();
+    await expect(page.getByText(exactPhrasePattern)).toBeVisible();
+    await expect(page.getByText(anyKeywordsPattern)).toBeVisible();
+    await expect(page.getByText(excludeKeywordsPattern)).toBeVisible();
   });
 
   test("generates query preview in advanced search", async ({ page }) => {
@@ -190,21 +200,25 @@ test.describe("Search page", () => {
 
     // 高度な検索ボタンをクリック
     const advancedSearchButton = page.getByRole("button", {
-      name: /高度な検索/,
+      name: advancedSearchTitlePattern,
     });
     await advancedSearchButton.click();
 
     // モーダルが開く
-    await expect(page.getByText("高度な検索")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: advancedSearchTitlePattern }),
+    ).toBeVisible();
+    const advancedSearchDialog = page.getByRole("dialog", {
+      name: advancedSearchTitlePattern,
+    });
 
     // 完全一致フレーズフィールドに入力
-    const exactPhraseInput = page.locator(
-      'div:has-text("次のキーワード全体を含む") ~ textarea',
-    );
-    await exactPhraseInput.first().fill("winter song");
+    await advancedSearchDialog
+      .getByPlaceholder(exactPhrasePlaceholderPattern)
+      .fill("winter song");
 
     // プレビューで "winter song" が表示される
-    await expect(page.locator("code")).toContainText('"winter song"');
+    await expect(advancedSearchDialog).toContainText('"winter song"');
   });
 
   test("applies advanced search query", async ({ page }) => {
@@ -213,25 +227,32 @@ test.describe("Search page", () => {
 
     // 高度な検索ボタンをクリック
     const advancedSearchButton = page.getByRole("button", {
-      name: /高度な検索/,
+      name: advancedSearchTitlePattern,
     });
     await advancedSearchButton.click();
 
     // モーダルが開く
-    await expect(page.getByText("高度な検索")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: advancedSearchTitlePattern }),
+    ).toBeVisible();
+    const advancedSearchDialog = page.getByRole("dialog", {
+      name: advancedSearchTitlePattern,
+    });
 
     // いずれかのキーワード（OR検索）に入力
-    const anyKeywordsInputs = page.locator(
-      'div:has-text("次のキーワードのいずれかを含む") ~ textarea',
-    );
-    await anyKeywordsInputs.first().fill("title:winter title:summer");
+    await advancedSearchDialog
+      .locator("textarea")
+      .nth(1)
+      .fill("title:winter title:summer");
 
     // 適用ボタンをクリック
-    const applyButton = page.getByRole("button", { name: "適用" });
+    const applyButton = page.getByRole("button", { name: applyButtonPattern });
     await applyButton.click();
 
     // モーダルが閉じる
-    await expect(page.getByText("高度な検索")).not.toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: advancedSearchTitlePattern }),
+    ).not.toBeVisible();
 
     // URLに検索クエリが反映される
     await page.waitForTimeout(800);
@@ -247,7 +268,7 @@ test.describe("Search page", () => {
 
     // OR検索を入力
     const searchInput = page.getByRole("textbox", {
-      name: "曲名、アーティスト、タグなどで検索",
+      name: searchInputNamePattern,
     });
     await searchInput.click();
     await searchInput.fill("title:winter OR title:summer");
@@ -271,7 +292,7 @@ test.describe("Search page", () => {
 
     // 完全一致検索を入力
     const searchInput = page.getByRole("textbox", {
-      name: "曲名、アーティスト、タグなどで検索",
+      name: searchInputNamePattern,
     });
     await searchInput.click();
 
