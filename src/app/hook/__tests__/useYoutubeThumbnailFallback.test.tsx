@@ -48,8 +48,8 @@ describe("useYoutubeThumbnailFallback", () => {
   });
 
   it("全ての解像度を試した後は再試行を停止する", () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
+    const consoleWarnSpy = vi
+      .spyOn(console, "warn")
       .mockImplementation(() => {});
 
     const { result } = renderHook(() =>
@@ -93,9 +93,9 @@ describe("useYoutubeThumbnailFallback", () => {
     });
 
     expect(result.current.imageUrl).toContain("default.jpg");
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
 
-    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it("videoIdが変更されたら状態がリセットされる", () => {

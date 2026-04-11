@@ -17,6 +17,7 @@ const getImageUrl = (videoId: string, resolution: Resolution): string => {
 interface YoutubeThumbnailFallbackResult {
   imageUrl: string;
   handleError: () => void;
+  isExhausted: boolean;
 }
 
 /**
@@ -70,7 +71,7 @@ const useYoutubeThumbnailFallback = (
     });
   }, [retryCount, videoId, isExhausted]);
 
-  return { imageUrl, handleError };
+  return { imageUrl, handleError, isExhausted };
 };
 
 export default useYoutubeThumbnailFallback;

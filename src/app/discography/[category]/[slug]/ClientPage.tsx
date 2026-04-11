@@ -352,7 +352,6 @@ export default function ClientPage({
                           <YoutubeThumbnail
                             videoId={s.video_id}
                             alt={s.video_title}
-                            fill={false}
                             className="w-full h-full"
                             imageClassName="object-cover"
                           />
@@ -414,7 +413,6 @@ export default function ClientPage({
                           <YoutubeThumbnail
                             videoId={s.video_id}
                             alt={s.video_title}
-                            fill={false}
                             className="w-full h-full"
                             imageClassName="object-cover"
                           />
