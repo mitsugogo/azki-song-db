@@ -147,6 +147,7 @@
     "brand": "AZKi VIRTUAL DiVA",
     "heroLine1": "A Musical Odyssey:",
     "heroLine2": "Virtual DiVA AZKi",
+    "heroLine2_short": "Virtual DiVA AZKi",
     "description": "An unofficial song database collecting AZKi's original songs, collabs & covers, and setlists sung on livestreams.",
     "searchButton": "Search",
     "searching": "Searching...",
