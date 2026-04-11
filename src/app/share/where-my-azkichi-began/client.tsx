@@ -308,14 +308,28 @@ export default function WhereMyAzkichiBeganClient() {
   const favoriteOriginalSongThumbnailByTitle = useMemo(() => {
     const map = new Map<string, string>();
     originalSongsSortedByRelease.forEach((song) => {
-      const title = song.title.trim();
-      if (!title || map.has(title) || !song.video_id) {
+      if (!song.video_id) {
         return;
       }
-      map.set(
-        title,
-        `https://img.youtube.com/vi/${song.video_id}/mqdefault.jpg`,
-      );
+
+      const titleCandidates = [
+        song.title,
+        song.title_en,
+        song.hl?.ja?.title,
+        song.hl?.en?.title,
+      ]
+        .map((title) => (typeof title === "string" ? title.trim() : ""))
+        .filter((title) => Boolean(title));
+
+      titleCandidates.forEach((title) => {
+        if (map.has(title)) {
+          return;
+        }
+        map.set(
+          title,
+          `https://img.youtube.com/vi/${song.video_id}/mqdefault.jpg`,
+        );
+      });
     });
     return map;
   }, [originalSongsSortedByRelease]);

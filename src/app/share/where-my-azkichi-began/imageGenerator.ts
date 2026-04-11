@@ -31,6 +31,63 @@ type WrappedText = {
   truncated: boolean;
 };
 
+type TimelineDateLabel = {
+  primary: string;
+  secondary?: string;
+};
+
+const EN_US_SHORT_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+const formatTimelineYear = (year: string, locale: "ja" | "en" = "ja") => {
+  return locale === "en" ? year : `${year}年`;
+};
+
+const formatTimelineMonth = (month: string, locale: "ja" | "en" = "ja") => {
+  return locale === "en" ? month : `${month}月`;
+};
+
+const formatTimelineDateLabel = (
+  row: Pick<TimelineRow, "year" | "month">,
+  locale: "ja" | "en" = "ja",
+): TimelineDateLabel => {
+  if (locale === "ja") {
+    return {
+      primary: formatTimelineYear(row.year, locale),
+      secondary: row.month ? formatTimelineMonth(row.month, locale) : undefined,
+    };
+  }
+
+  const numericMonth = Number.parseInt(row.month, 10);
+  if (!Number.isNaN(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+    return {
+      primary: `${EN_US_SHORT_MONTHS[numericMonth - 1]}, ${row.year}`,
+    };
+  }
+
+  if (row.month) {
+    return {
+      primary: `${row.month}, ${row.year}`,
+    };
+  }
+
+  return {
+    primary: row.year,
+  };
+};
+
 export const sanitizeTimelineRows = (
   rows: TimelineRowInput[],
   maxRows = MAX_TIMELINE_ROWS,
@@ -357,12 +414,13 @@ export const generateWhereMyAzkichiBeganImage = async (
     ctx.fillStyle = "rgba(255, 198, 224, 0.7)";
     ctx.fill();
 
+    const timelineDateLabel = formatTimelineDateLabel(row, options.locale);
     ctx.fillStyle = "#8a2f5d";
     ctx.font = "700 28px 'Noto Sans JP', sans-serif";
-    ctx.fillText(`${row.year}年`, 246, y + 40);
-    if (row.month) {
+    ctx.fillText(timelineDateLabel.primary, 246, y + 40);
+    if (timelineDateLabel.secondary) {
       ctx.font = "500 24px 'Noto Sans JP', sans-serif";
-      ctx.fillText(`${row.month}月`, 246, y + 70);
+      ctx.fillText(timelineDateLabel.secondary, 246, y + 70);
     }
 
     drawRoundedRect(ctx, 416, y, 564, metrics.rowHeight, 20);
