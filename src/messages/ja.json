@@ -963,6 +963,11 @@
     "title": "シェア",
     "description": "AZKiさんの素敵な歌声をシェアしましょう！",
     "youtubeUrl": "YouTube",
+    "qrSectionTitle": "QRコード",
+    "qrExpand": "表示",
+    "qrCollapse": "閉じる",
+    "qrAlt": "{target}のQRコード",
+    "qrTrademark": "QRコードは株式会社デンソーウェーブの登録商標です",
     "copied": "コピーしました！",
     "close": "閉じる"
   }

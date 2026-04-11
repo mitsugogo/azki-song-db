@@ -956,6 +956,11 @@
     "title": "Share",
     "description": "Share AZKi's beautiful singing voice!",
     "youtubeUrl": "YouTube",
+    "qrSectionTitle": "QR Code",
+    "qrExpand": "Show",
+    "qrCollapse": "Hide",
+    "qrAlt": "QR code for {target}",
+    "qrTrademark": "QR Code is a registered trademark of DENSO WAVE INCORPORATED in Japan and in other countries.",
     "copied": "Copied",
     "close": "Close"
   }

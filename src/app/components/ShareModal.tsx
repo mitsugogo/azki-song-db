@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "../config/siteConfig";
+import { QRCodeSVG } from "qrcode.react";
 
 // Propsの型定義
 type ShareModalProps = {
@@ -27,6 +28,8 @@ export default function ShareModal({
   const t = useTranslations("ShareModal");
   const [showCopiedYoutube, setShowCopiedYoutube] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
+  const [isQrOpen, setIsQrOpen] = useState(false);
+  const [qrTarget, setQrTarget] = useState<"youtube" | "database">("database");
 
   const locale = useLocale();
   const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
@@ -42,6 +45,9 @@ export default function ShareModal({
       ? `&t=${currentSong.start}`
       : ""
   }`;
+
+  const qrValue = qrTarget === "youtube" ? youtubeUrl : databaseUrl;
+  const hasCurrentSong = Boolean(currentSong?.video_id);
 
   const handleShareToX = (isDatabaseUrl: boolean) => {
     const text = isDatabaseUrl
@@ -169,6 +175,81 @@ export default function ShareModal({
               <FaShare className="w-3 h-3" />
             </Button>
           </div>
+        </div>
+        <Divider className="my-4" />
+        <div>
+          <button
+            type="button"
+            className="w-full flex items-center justify-between rounded-md border border-light-gray-300 dark:border-gray-700 px-3 py-2 text-sm font-semibold hover:bg-light-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+            onClick={() => setIsQrOpen((prev) => !prev)}
+            aria-expanded={isQrOpen}
+            aria-controls="share-modal-qr-panel"
+          >
+            <span>{t("qrSectionTitle")}</span>
+            <span>{isQrOpen ? t("qrCollapse") : t("qrExpand")}</span>
+          </button>
+          {isQrOpen && (
+            <div id="share-modal-qr-panel" className="mt-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Button
+                  variant={qrTarget === "youtube" ? "filled" : "light"}
+                  color="dark"
+                  size="xs"
+                  onClick={() => setQrTarget("youtube")}
+                  aria-pressed={qrTarget === "youtube"}
+                >
+                  {t("youtubeUrl")}
+                </Button>
+                <Button
+                  variant={qrTarget === "database" ? "filled" : "light"}
+                  color="dark"
+                  size="xs"
+                  onClick={() => setQrTarget("database")}
+                  aria-pressed={qrTarget === "database"}
+                >
+                  {siteConfig.siteName}
+                </Button>
+              </div>
+              {hasCurrentSong && (
+                <div className="flex justify-center rounded-md border border-light-gray-300 dark:border-gray-700 p-3 bg-white dark:bg-gray-900">
+                  <div className="relative inline-flex">
+                    <QRCodeSVG
+                      value={qrValue}
+                      size={220}
+                      level="H"
+                      role="img"
+                      aria-label={t("qrAlt", {
+                        target:
+                          qrTarget === "youtube"
+                            ? t("youtubeUrl")
+                            : siteConfig.siteName,
+                      })}
+                      includeMargin
+                    />
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      aria-hidden="true"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-600 shadow-sm ring-1 ring-gray-200 dark:bg-gray-950 dark:ring-gray-700">
+                        {qrTarget === "youtube" ? (
+                          <FaYoutube className="h-7 w-7" />
+                        ) : (
+                          <img
+                            src="/icon512_rounded.png"
+                            alt=""
+                            className="h-10 w-12 rounded-full"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <p className="mt-2 text-xs text-gray-700 dark:text-gray-300">
+            {t("qrTrademark")}
+          </p>
         </div>
         <Divider className="my-4" />
         <div className="flex justify-end">
