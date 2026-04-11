@@ -207,7 +207,8 @@ export default function ClientTop() {
               <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
                 {t("heroLine1")}
                 <br />
-                {t("heroLine2")}
+                <span className="hidden md:inline">{t("heroLine2")}</span>
+                <span className="inline md:hidden">{t("heroLine2_short")}</span>
               </h1>
               <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
                 {t("description")}
