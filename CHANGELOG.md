@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.4](https://github.com/mitsugogo/azki-song-db/compare/v2.3.3...v2.3.4) (2026-04-12)
+
+
+### Bug Fixes
+
+* 楽曲データのソート順を外から破壊する場合があったので防御 (fixed [#308](https://github.com/mitsugogo/azki-song-db/issues/308)) ([dd39004](https://github.com/mitsugogo/azki-song-db/commit/dd3900495a26d090eaf4829bbb7da23ba47a9f03))
+
 ### [2.3.3](https://github.com/mitsugogo/azki-song-db/compare/v2.3.2...v2.3.3) (2026-04-11)
 
 ### [2.3.2](https://github.com/mitsugogo/azki-song-db/compare/v2.3.1...v2.3.2) (2026-04-11)
