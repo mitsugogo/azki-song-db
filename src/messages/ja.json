@@ -648,11 +648,14 @@
     "overview": {
       "latestUpdated": "最新更新",
       "achievedInLast7Days": "直近7日で達成",
-      "estimatedAchievement": "達成見込み",
+      "estimatedAchievement": "7日以内に達成見込み",
+      "estimatedAchievementSentense": "{date} に達成見込み",
       "none": "該当なし",
-      "openThumbnailOnYoutube": "{title} のサムネイルをYouTubeで開く",
+      "openThumbnailOnYoutube": "{title} をYouTubeで開く",
       "milestoneLabelJa": "{count}万再生達成",
+      "milestoneLabelEstimateJa": "{count}万再生見込み",
       "milestoneLabel": "{count}再生達成",
+      "milestoneLabelEstimate": "{count}再生見込み",
       "songCounts": {
         "primaryLabel": "曲の種類",
         "totalCountLabel": "総歌唱回数",
@@ -704,7 +707,8 @@
         "totalCountLabel": "総回数",
         "topLabel": "最多項目",
         "countUnit": "回"
-      }
+      },
+      "viewStats": "stats"
     },
     "table": {
       "searchPlaceholder": "検索...",

@@ -38,6 +38,9 @@ export default function ViewStat({ videoId }: { videoId: string }) {
   );
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Y軸を0始まりにするかどうか（UIで切替）
+  const [startFromZero, setStartFromZero] = useState<boolean>(false);
+
   useEffect(() => {
     const root = document.documentElement;
     const syncDarkMode = () => {
@@ -96,9 +99,6 @@ export default function ViewStat({ videoId }: { videoId: string }) {
           : null,
     };
   });
-
-  // Y軸を0始まりにするかどうか（UIで切替）
-  const [startFromZero, setStartFromZero] = useState<boolean>(true);
 
   const VALID_PERIODS = [
     { key: "7d", label: t("stats.periods.7d") },

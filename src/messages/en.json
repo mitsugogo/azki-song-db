@@ -657,11 +657,14 @@
     "overview": {
       "latestUpdated": "Latest update",
       "achievedInLast7Days": "Achieved in last 7 days",
-      "estimatedAchievement": "Estimated achievement",
+      "estimatedAchievement": "Expected to be achieved within 7 days",
+      "estimatedAchievementSentense": "{date} expected to be achieved within",
       "none": "None",
-      "openThumbnailOnYoutube": "Open thumbnail of {title} on YouTube",
+      "openThumbnailOnYoutube": "Open {title} on YouTube",
       "milestoneLabelJa": "{count}x10k views reached",
+      "milestoneLabelEstimateJa": "{count}x10k views expected",
       "milestoneLabel": "{count} views reached",
+      "milestoneLabelEstimate": "{count} views expected",
       "songCounts": {
         "primaryLabel": "Song types",
         "totalCountLabel": "Total sing count",
@@ -713,7 +716,8 @@
         "totalCountLabel": "Total",
         "topLabel": "Top item",
         "countUnit": "times"
-      }
+      },
+      "viewStats": "stats"
     },
     "table": {
       "searchPlaceholder": "Search...",

@@ -1,7 +1,6 @@
 "use client";
 
-/* eslint @typescript-eslint/no-explicit-any: off */
-import { Badge } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { Song } from "../types/song";
 import { ViewMilestoneInfo } from "../types/viewMilestone";
@@ -175,7 +174,11 @@ function ViewCountCell({
     const achievedAt = formatMilestoneDate(milestone?.achievedAt, locale);
     return (
       <div className="flex flex-col gap-1">
-        <Badge color="success" className="inline whitespace-nowrap w-fit">
+        <Badge
+          color="pink"
+          radius={`sm`}
+          className="inline whitespace-nowrap w-fit"
+        >
           {formatMilestone(after)}
         </Badge>
         {achievedAt && (
