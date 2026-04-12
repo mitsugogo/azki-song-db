@@ -2,12 +2,16 @@
 
 import { useMemo } from "react";
 import { Badge } from "@mantine/core";
-import { FaCalendar, FaPlay, FaYoutube } from "react-icons/fa6";
+import { FaCalendar, FaChartBar, FaPlay, FaYoutube } from "react-icons/fa6";
 
 import { StatisticsItem } from "../types/statisticsItem";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { formatDate } from "../lib/formatDate";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { isOriginalSong } from "../config/filters";
+import { Song } from "../types/song";
+import { getDiscographyLink } from "../lib/song";
 
 export type SongCountOverviewProps = {
   items: StatisticsItem[];
@@ -29,18 +33,25 @@ type MilestoneHighlight = {
   targetCount: number;
   currentViewCount: number;
   date: Date;
+  song: Song;
 };
 
 function formatMilestoneLabel(
   targetCount: number,
   locale: string,
   t: (key: string, values?: Record<string, string | number | Date>) => string,
+  estimate: boolean = false,
 ) {
   if (
     locale.startsWith("ja") &&
     targetCount >= 10000 &&
     targetCount % 10000 === 0
   ) {
+    if (estimate) {
+      return t("milestoneLabelEstimateJa", {
+        count: (targetCount / 10000).toLocaleString(locale),
+      });
+    }
     return t("milestoneLabelJa", {
       count: (targetCount / 10000).toLocaleString(locale),
     });
@@ -57,6 +68,12 @@ function formatMilestoneLabel(
       .replace(/K$/, "k");
 
     return t("milestoneLabel", { count: compact });
+  }
+
+  if (estimate) {
+    return t("milestoneLabelEstimate", {
+      count: targetCount.toLocaleString(locale),
+    });
   }
 
   return t("milestoneLabel", { count: targetCount.toLocaleString(locale) });
@@ -123,6 +140,7 @@ export default function SongCountOverview({
             (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
             0,
           date: achievedAt,
+          song: item.song,
         };
       })
       .filter(
@@ -148,6 +166,7 @@ export default function SongCountOverview({
             (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
             0,
           date: estimatedAt,
+          song: item.song,
         };
       })
       .filter(
@@ -271,8 +290,9 @@ export default function SongCountOverview({
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-light-gray-700 dark:text-light-gray-300">
                           <span className="inline-flex items-center gap-1 leading-none">
                             <Badge
-                              color="cyan"
+                              color="pink"
                               size="xs"
+                              radius={`xs`}
                               className="align-middle"
                             >
                               {formatMilestoneLabel(
@@ -290,6 +310,19 @@ export default function SongCountOverview({
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
                             {formatDate(item.date, locale)}
                           </span>
+
+                          <Badge
+                            color="gray"
+                            component={Link}
+                            href={getDiscographyLink(item.song) || "#"}
+                            leftSection={<FaChartBar className="h-3 w-3" />}
+                            radius="xs"
+                            size="xs"
+                            variant="light"
+                            className="cursor-pointer"
+                          >
+                            {t("viewStats")}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -315,10 +348,8 @@ export default function SongCountOverview({
                   >
                     <div className="flex items-start gap-2">
                       {item.videoId ? (
-                        <a
-                          href={`https://www.youtube.com/watch?v=${item.videoId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <Link
+                          href={getDiscographyLink(item.song) || "#"}
                           className="mt-0.5 block w-16 shrink-0 overflow-hidden rounded"
                           aria-label={t("openThumbnailOnYoutube", {
                             title: item.title,
@@ -330,13 +361,13 @@ export default function SongCountOverview({
                             className="aspect-video w-full"
                             imageClassName="object-cover rounded"
                           />
-                        </a>
+                        </Link>
                       ) : (
                         <div className="mt-0.5 aspect-video w-16 shrink-0 rounded bg-light-gray-300 dark:bg-gray-700" />
                       )}
                       <div className="min-w-0">
                         {item.videoId ? (
-                          <a
+                          <Link
                             href={`https://www.youtube.com/watch?v=${item.videoId}`}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -347,7 +378,7 @@ export default function SongCountOverview({
                               {item.title}
                               {item.artist ? ` - ${item.artist}` : ""}
                             </span>
-                          </a>
+                          </Link>
                         ) : (
                           <span className="font-semibold text-primary-600 dark:text-primary-500">
                             {item.title}
@@ -357,14 +388,17 @@ export default function SongCountOverview({
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-light-gray-700 dark:text-light-gray-300">
                           <span className="inline-flex items-center gap-1 leading-none">
                             <Badge
-                              color="cyan"
+                              color="pink"
                               size="xs"
+                              radius={`xs`}
+                              variant="light"
                               className="align-middle"
                             >
                               {formatMilestoneLabel(
                                 item.targetCount,
                                 locale,
                                 t,
+                                true, // 達成見込み
                               )}
                             </Badge>
                           </span>
@@ -374,9 +408,22 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {formatDate(item.date, locale)}{" "}
-                            {t("estimatedAchievement")}
+                            {t("estimatedAchievementSentense", {
+                              date: formatDate(item.date, locale),
+                            })}
                           </span>
+                          <Badge
+                            color="gray"
+                            component={Link}
+                            href={getDiscographyLink(item.song) || "#"}
+                            leftSection={<FaChartBar className="h-3 w-3" />}
+                            radius="xs"
+                            size="xs"
+                            variant="light"
+                            className="cursor-pointer"
+                          >
+                            {t("viewStats")}
+                          </Badge>
                         </div>
                       </div>
                     </div>

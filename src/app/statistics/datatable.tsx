@@ -12,7 +12,7 @@ import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
-import { Badge, TextInput } from "flowbite-react";
+import { TextInput } from "flowbite-react";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { Link } from "@/i18n/navigation";
@@ -20,6 +20,7 @@ import { BsPlayCircle } from "react-icons/bs";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
 import { useTranslations } from "next-intl";
+import { Badge } from "@mantine/core";
 
 export default function DataTable<
   T extends

@@ -5,12 +5,7 @@ import { HiMusicNote, HiUserCircle, HiPlay, HiTag } from "react-icons/hi";
 import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "../lib/formatDate";
-
-import {
-  isCollaborationSong,
-  isCoverSong,
-  isPossibleOriginalSong,
-} from "../config/filters";
+import { getDiscographyLink } from "../lib/song";
 import {
   renderLastVideoCell,
   renderViewCountCell,
@@ -34,21 +29,6 @@ type TabConfig = {
 };
 
 type Translate = (key: string) => string;
-
-const getDiscographyLink = (song: Song) => {
-  if (!song?.slugv2) return null;
-
-  if (isPossibleOriginalSong(song)) {
-    return `/discography/originals/${encodeURIComponent(song.slugv2)}`;
-  }
-  if (isCollaborationSong(song)) {
-    return `/discography/collaborations/${encodeURIComponent(song.slugv2)}`;
-  }
-  if (isCoverSong(song)) {
-    return `/discography/covers/${encodeURIComponent(song.slugv2)}`;
-  }
-  return null;
-};
 
 export const getTabsConfig = (t: Translate): TabConfig[] => [
   // 1. 曲名別
