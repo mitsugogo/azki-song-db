@@ -213,9 +213,23 @@
     },
     "discography": {
       "title": "Discography | {siteName}",
-      "description": "A list of songs released or performed so far, including originals, covers and collaborations.",
+      "description": "This is a list page of songs that have been distributed and released so far.",
       "ogSubtitle": "Discography - {siteName}",
-      "ogAlt": "{siteName} - Discography"
+      "ogAlt": "{siteName} - Discography",
+      "category": {
+        "originals": {
+          "title": "Original songs | {siteName}",
+          "description": "A list of AZKi's original songs."
+        },
+        "collab": {
+          "title": "Collaboration songs | {siteName}",
+          "description": "A list of collaboration and unit songs featuring AZKi."
+        },
+        "covers": {
+          "title": "Cover songs | {siteName}",
+          "description": "A list of cover songs sung by AZKi."
+        }
+      }
     },
     "search": {
       "description": "Search songs by title, artist, tag and more.",
@@ -230,7 +244,14 @@
     "share": {
       "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
       "whereMyAzkichiBeganOgTitle": "Where did your AZKi journey begin?",
-      "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries"
+      "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries",
+      "myBest9Description": "Share your favorite AZKi songs",
+      "myBest9OgDescription": "Create and share the ultimate 9 songs with AZKi's songs!",
+      "myBest9OgTitle": "Ultimate 9 song generator",
+      "myBest9OgWithTopic": "Theme: \"{title}\"",
+      "myBest9Title": "Ultimate 9 song generator | {siteName}",
+      "myBest9TitleWithSite": "Ultimate 9 song generator | {siteName}",
+      "myBest9WithTopic": "Theme: \"{title}\" | Ultimate 9 song generator | {siteName}"
     },
     "summary": {
       "title": "Activity Summary",
@@ -418,7 +439,9 @@
         "video": "Video",
         "empty": "No songs in the playlist"
       }
-    }
+    },
+    "keywords": "AZKi, song, summary, song, Discography, original song, collaboration song, cover song, song frame, live, setlist, Hololive",
+    "ogSubtitle": "A playlist containing {count} songs"
   },
   "SearchBrowse": {
     "title": "Search",

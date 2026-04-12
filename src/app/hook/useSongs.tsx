@@ -7,6 +7,17 @@ let cachedSongsForUseSongs: Song[] | null = null;
 let songsPromiseForUseSongs: Promise<any> | null = null;
 let cachedSongsFetchedAt: string | null = null;
 
+const getBroadcastAtTime = (song: Song): number => {
+  const ts = new Date(song.broadcast_at).getTime();
+  return Number.isFinite(ts) ? ts : Number.NEGATIVE_INFINITY;
+};
+
+const sortSongsByBroadcastAtDesc = (songs: Song[]): Song[] => {
+  return [...songs].sort(
+    (a, b) => getBroadcastAtTime(b) - getBroadcastAtTime(a),
+  );
+};
+
 /**
  * 曲データの取得と管理を行うカスタムフック
  */
@@ -29,7 +40,10 @@ const useSongs = () => {
 
   useEffect(() => {
     if (cachedSongsForUseSongs) {
-      setAllSongs(cachedSongsForUseSongs);
+      // キャッシュとstateの参照を分離し、外部の破壊的操作による汚染を防ぐ
+      const sortedCached = sortSongsByBroadcastAtDesc(cachedSongsForUseSongs);
+      cachedSongsForUseSongs = sortedCached;
+      setAllSongs([...sortedCached]);
       // キャッシュから復元できる更新日時があれば反映する
       if (cachedSongsFetchedAt) setSongsFetchedAt(cachedSongsFetchedAt);
       setIsLoading(false);
@@ -41,17 +55,11 @@ const useSongs = () => {
     const handleData = (data: Song[] | null) => {
       if (!mounted || !Array.isArray(data)) return;
 
-      const dataCopy = [...data];
-      dataCopy.sort((a, b) => {
-        return (
-          new Date(b.broadcast_at).getTime() -
-          new Date(a.broadcast_at).getTime()
-        );
-      });
+      const dataCopy = sortSongsByBroadcastAtDesc(data);
 
       cachedSongsForUseSongs = dataCopy;
 
-      setAllSongs(dataCopy);
+      setAllSongs([...dataCopy]);
 
       const tags = [...new Set(dataCopy.flatMap((song) => song.tags))].sort();
       const songTitles = [

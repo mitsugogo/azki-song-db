@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import slugify from "../../lib/slugify";
 import { Song } from "../../types/song";
-import { siteConfig } from "@/app/config/siteConfig";
+import { baseUrl, siteConfig } from "@/app/config/siteConfig";
 import {
   isCollaborationSong,
   isCoverSong,
@@ -14,6 +16,34 @@ type AlbumEntry = {
   album: string;
   slug: string;
 };
+
+type DiscographyCategory = "originals" | "collab" | "covers";
+
+function normalizeCategorySlug(value: string): DiscographyCategory | null {
+  const lower = value.toLowerCase();
+
+  const originals = new Set(["originals", "original", "ori"]);
+  const collabs = new Set(["collab", "collabo", "collaboration", "unit"]);
+  const covers = new Set(["covers", "cover"]);
+
+  if (originals.has(lower) || lower.includes("original")) {
+    return "originals";
+  }
+
+  if (
+    collabs.has(lower) ||
+    lower.includes("collab") ||
+    lower.includes("unit")
+  ) {
+    return "collab";
+  }
+
+  if (covers.has(lower) || lower.includes("cover")) {
+    return "covers";
+  }
+
+  return null;
+}
 
 function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
   const albumNames = Array.from(
@@ -73,6 +103,72 @@ async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
   throw new Error("Failed to fetch songs from any known base URL");
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    namespace: "Metadata.discography",
+    locale,
+  });
+
+  const resolved = await params;
+  const possibleSlug = decodeURIComponent(resolved.category || "");
+  const normalizedCategory = normalizeCategorySlug(possibleSlug);
+
+  if (!normalizedCategory) {
+    return {
+      title: t("title", { siteName: siteConfig.siteName }),
+      description: t("description"),
+    };
+  }
+
+  const title = t(`category.${normalizedCategory}.title`, {
+    siteName: siteConfig.siteName,
+  });
+  const description = t(`category.${normalizedCategory}.description`);
+  const canonical = new URL(
+    `/discography/${encodeURIComponent(normalizedCategory)}`,
+    baseUrl,
+  ).toString();
+
+  const ogImage = new URL("/api/og", baseUrl);
+  ogImage.searchParams.set("title", title);
+  ogImage.searchParams.set("subtitle", description);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      siteName: siteConfig.siteName,
+      locale: locale === "ja" ? "ja_JP" : "en_US",
+      type: "website",
+      images: [
+        {
+          url: ogImage.toString(),
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage.toString()],
+    },
+  };
+}
+
 export default async function CategoryOrLegacyRedirect({
   params,
 }: {
@@ -82,27 +178,11 @@ export default async function CategoryOrLegacyRedirect({
   const locale = headerStore.get("x-locale") ?? "ja";
   const resolved = await params;
   const possibleSlug = decodeURIComponent(resolved.category || "");
-  const lower = possibleSlug.toLowerCase();
+  const normalizedCategory = normalizeCategorySlug(possibleSlug);
 
   // path ベースのカテゴリ要求であれば Discography のクライアントをレンダリング
-  const originals = new Set(["originals", "original", "ori"]);
-  const collabs = new Set(["collab", "collabo", "collaboration", "unit"]);
-  const covers = new Set(["covers", "cover"]);
-
-  if (originals.has(lower) || lower.includes("original")) {
-    return <CategoryClient category="originals" />;
-  }
-
-  if (
-    collabs.has(lower) ||
-    lower.includes("collab") ||
-    lower.includes("unit")
-  ) {
-    return <CategoryClient category="collab" />;
-  }
-
-  if (covers.has(lower) || lower.includes("cover")) {
-    return <CategoryClient category="covers" />;
+  if (normalizedCategory) {
+    return <CategoryClient category={normalizedCategory} />;
   }
   const songs: Song[] = await fetchSongsFromApi(locale);
 
