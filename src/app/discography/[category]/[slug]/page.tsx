@@ -148,23 +148,16 @@ export async function generateMetadata({
         : siteConfig.siteName);
 
   // OGP 画像生成
-  let ogImageUrl = new URL("/api/og", baseUrl);
+  let ogImageUrl = new URL("/api/og/thumb", baseUrl);
+  ogImageUrl.searchParams.set("v", matchedForMeta.video_id);
+  ogImageUrl.searchParams.set("t", matchedForMeta.start?.toString() ?? "0");
+  ogImageUrl.searchParams.set("hl", locale);
+
   const ogTitle = matchedForMeta.title
     ? `${matchedForMeta.title} / ${matchedForMeta.artist}`
     : matchedForMeta.album
       ? `${matchedForMeta.album} / ${matchedForMeta.artist}`
       : siteConfig.siteName;
-  const ogSubtitle = matchedForMeta.extra ?? siteConfig.siteName;
-
-  ogImageUrl.searchParams.set("title", ogTitle);
-  ogImageUrl.searchParams.set(
-    "subtitle",
-    Array.from(ogSubtitle).slice(0, 100).join(""),
-  );
-  ogImageUrl.searchParams.set("titlecolor", "b81e8a");
-  ogImageUrl.searchParams.set("w", "1200");
-  ogImageUrl.searchParams.set("h", "630");
-  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
     title,
@@ -176,13 +169,15 @@ export async function generateMetadata({
       siteName: siteConfig.siteName,
       locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
-      images: [{ url: ogImagePath, width: 1200, height: 630, alt: ogTitle }],
+      images: [
+        { url: ogImageUrl.toString(), width: 1200, height: 630, alt: ogTitle },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImagePath],
+      images: [ogImageUrl.toString()],
     },
     alternates: {
       canonical,

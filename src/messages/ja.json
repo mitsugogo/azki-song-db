@@ -213,9 +213,23 @@
     },
     "discography": {
       "title": "楽曲一覧 | {siteName}",
-      "description": "これまでに配信・公開された楽曲の一覧ページです。オリジナル・カバー・コラボを含みます。",
+      "description": "これまでに配信・公開された楽曲の一覧ページです。",
       "ogSubtitle": "楽曲一覧 - {siteName}",
-      "ogAlt": "{siteName} - 楽曲一覧"
+      "ogAlt": "{siteName} - 楽曲一覧",
+      "category": {
+        "originals": {
+          "title": "オリジナル楽曲 | {siteName}",
+          "description": "AZKiのオリジナル楽曲一覧です。"
+        },
+        "collab": {
+          "title": "コラボ・ユニット楽曲 | {siteName}",
+          "description": "AZKiが参加したコラボ・ユニット楽曲一覧です。"
+        },
+        "covers": {
+          "title": "カバー楽曲 | {siteName}",
+          "description": "AZKiが歌唱したカバー楽曲一覧です。"
+        }
+      }
     },
     "search": {
       "description": "曲名、アーティスト、タグなどで楽曲を検索できます。",
@@ -234,7 +248,7 @@
       "myBest9OgTitle": "究極の9曲ジェネレーター",
       "myBest9OgWithTopic": "お題:「{title}」",
       "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
-      "myBest9Description": "AZKiの好きな曲をシェアしています",
+      "myBest9Description": "AZKiの好きな曲をシェアしましょう",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
       "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して、Xでシェアしやすい縦長画像を生成できます"

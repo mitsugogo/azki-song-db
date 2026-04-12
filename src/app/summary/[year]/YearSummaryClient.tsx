@@ -545,7 +545,7 @@ export default function YearSummaryClient({
                     <li key={`${s.title}-${s.artist}`} className="mb-2">
                       <div className="relative rounded overflow-hidden">
                         <div
-                          className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"
+                          className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-blue-400 to-indigo-600 dark:from-blue-500 dark:to-indigo-400 opacity-30"
                           style={{ width: `${pct}%` }}
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
@@ -600,7 +600,7 @@ export default function YearSummaryClient({
                     <li key={`artist-${a.artist}`} className="mb-2">
                       <div className="relative rounded overflow-hidden">
                         <div
-                          className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-green-400 to-emerald-600 dark:from-green-500 dark:to-emerald-400 opacity-30"
+                          className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-green-400 to-emerald-600 dark:from-green-500 dark:to-emerald-400 opacity-30"
                           style={{ width: `${pct}%` }}
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
@@ -654,7 +654,7 @@ export default function YearSummaryClient({
                     <li key={`singer-${a.singer}`} className="mb-2">
                       <div className="relative rounded overflow-hidden">
                         <div
-                          className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-purple-400 to-pink-600 dark:from-purple-500 dark:to-pink-400 opacity-30"
+                          className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-purple-400 to-pink-600 dark:from-purple-500 dark:to-pink-400 opacity-30"
                           style={{ width: `${pct}%` }}
                         />
                         <div className="relative z-10 flex items-center justify-between px-2 py-1">
@@ -695,7 +695,7 @@ export default function YearSummaryClient({
                 <li key={`month-${month}`} className="mb-2">
                   <div className="relative rounded overflow-hidden">
                     <div
-                      className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-yellow-400 to-red-600 dark:from-yellow-500 dark:to-red-400 opacity-30"
+                      className="absolute left-0 top-0 bottom-0 bg-linear-to-r from-yellow-400 to-red-600 dark:from-yellow-500 dark:to-red-400 opacity-30"
                       style={{
                         width: `${
                           Math.max(
