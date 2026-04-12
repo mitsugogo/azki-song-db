@@ -222,7 +222,7 @@ export default function ClientTop() {
                   placeholder={tHeader("searchPlaceholder")}
                   className="[&_input]:h-12 [&_input]:text-base"
                 />
-                <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <div className="mt-4 flex items-center justify-center gap-3 flex-row">
                   <button
                     type="button"
                     onClick={handleSearch}
