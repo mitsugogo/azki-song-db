@@ -16,6 +16,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../../lib/formatDate";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const toDisplayedMilestoneDate = (date: string | Date) => {
+  const parsed = new Date(date);
+  if (isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  // 集計日ベースの達成日は表示時に1日前へ補正する
+  return new Date(parsed.getTime() - DAY_MS);
+};
+
 const isSameLocalDate = (left: string | Date, right: string | Date) => {
   const leftDate = new Date(left);
   const rightDate = new Date(right);
@@ -173,7 +184,10 @@ export default function ViewStat({ videoId }: { videoId: string }) {
 
     return {
       targetLabel: formatMilestoneLabel(milestone.targetCount ?? 0, locale),
-      achievedDateLabel: formatDate(milestone.achievedAt, locale),
+      achievedDateLabel: formatDate(
+        toDisplayedMilestoneDate(milestone.achievedAt),
+        locale,
+      ),
       isoDate: achievedIsoDate,
       date: achievedPoint.date,
       viewCount: achievedPoint.viewCount,
