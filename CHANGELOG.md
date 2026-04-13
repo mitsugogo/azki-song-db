@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.6](https://github.com/mitsugogo/azki-song-db/compare/v2.3.5...v2.3.6) (2026-04-13)
+
+
+### Bug Fixes
+
+* 達成日、達成見込み日を1日減算して表示（集計を0時JSTに行っている都合） ([5fa2fb6](https://github.com/mitsugogo/azki-song-db/commit/5fa2fb68fdb85dedcb5478a8a1836a6e8d1784a3))
+
 ### [2.3.5](https://github.com/mitsugogo/azki-song-db/compare/v2.3.4...v2.3.5) (2026-04-12)
 
 ### [2.3.4](https://github.com/mitsugogo/azki-song-db/compare/v2.3.3...v2.3.4) (2026-04-12)
