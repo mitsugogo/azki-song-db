@@ -30,9 +30,9 @@ const fallbackOgImage = () =>
   new ImageResponse(
     <div
       style={{
-        backgroundColor: "#090f2a",
+        backgroundColor: "#fdf7fb",
         backgroundImage:
-          "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
+          "linear-gradient(135deg, #ffffff 0%, #fff6fb 44%, #edf9ff 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -41,18 +41,26 @@ const fallbackOgImage = () =>
         justifyContent: "center",
         padding: "60px",
         fontFamily: "serif",
-        color: "#ffffff",
+        color: "#8c1748",
         fontSize: 48,
         fontWeight: "bold",
         textAlign: "center",
       }}
     >
-      <div style={{ marginBottom: "20px", display: "flex" }}>♪</div>
+      <div
+        style={{
+          marginBottom: "20px",
+          display: "flex",
+          color: "#5ba7e8",
+        }}
+      >
+        ♪
+      </div>
       <div style={{ display: "flex" }}>好きな曲9選</div>
       <div
         style={{
           fontSize: 24,
-          color: "#ffe3f0",
+          color: "#c2185b",
           marginTop: "20px",
           display: "flex",
         }}
@@ -206,9 +214,9 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#090f2a",
+          backgroundColor: "#fdf7fb",
           backgroundImage:
-            "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
+            "linear-gradient(135deg, #ffffff 0%, #fff6fb 44%, #edf9ff 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -227,9 +235,9 @@ export async function GET(req: NextRequest) {
             position: "absolute",
             inset: 0,
             display: "flex",
-            opacity: 0.88,
+            opacity: 0.96,
             backgroundImage:
-              "radial-gradient(700px 320px at 88% 12%, rgba(244, 114, 182, 0.3), transparent 58%), radial-gradient(520px 300px at 12% 92%, rgba(59, 130, 246, 0.2), transparent 62%)",
+              "radial-gradient(560px 320px at 12% 92%, rgba(59, 130, 246, 0.12), transparent 62%), linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.14) 28%, rgba(255, 255, 255, 0) 56%)",
           }}
         />
 
@@ -251,7 +259,7 @@ export async function GET(req: NextRequest) {
               display: "flex",
               fontSize: 52,
               fontWeight: 700,
-              color: "#ffffff",
+              color: "#8c1748",
               marginBottom: "6px",
               letterSpacing: "-0.02em",
             }}
@@ -262,7 +270,7 @@ export async function GET(req: NextRequest) {
             style={{
               display: authorText ? "flex" : "none",
               fontSize: 28,
-              color: "#ffe3f0",
+              color: "#9d3d68",
               fontWeight: 400,
             }}
           >
@@ -305,10 +313,12 @@ export async function GET(req: NextRequest) {
                     justifyContent: "flex-end",
                     flex: 1,
                     position: "relative",
-                    backgroundColor: card.url ? "#12080f" : "#2a1a22",
+                    backgroundColor: card.url
+                      ? "rgba(255, 255, 255, 0.82)"
+                      : "rgba(255, 240, 247, 0.9)",
                     borderRadius: "6px",
                     overflow: "hidden",
-                    border: "1px solid rgba(244, 52, 139, 0.2)",
+                    border: "1px solid rgba(244, 52, 139, 0.12)",
                   }}
                 >
                   {card.url ? (
@@ -335,7 +345,7 @@ export async function GET(req: NextRequest) {
                       minHeight: "42px",
                       padding: "5px 7px",
                       backgroundImage:
-                        "linear-gradient(180deg, rgba(10, 5, 9, 0) 0%, rgba(10, 5, 9, 0.92) 70%)",
+                        "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(106, 32, 68, 0.76) 78%)",
                     }}
                   >
                     <div
@@ -381,7 +391,7 @@ export async function GET(req: NextRequest) {
             bottom: "4px",
             display: "flex",
             fontSize: 18,
-            color: "#f7cfe1",
+            color: "#9d3d68",
             fontWeight: 400,
             letterSpacing: "0.05em",
           }}

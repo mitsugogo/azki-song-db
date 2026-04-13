@@ -43,6 +43,8 @@ export async function GET(req: NextRequest) {
         encodeURIComponent(title || `${siteConfig.siteName}`) +
         encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent(song.tags.join("")) +
+        encodeURIComponent("1234567890-/") +
+        encodeURIComponent("JanFebMarAprMayJunJulAugSepOctNovDec") +
         encodeURIComponent("...…,"),
     )
       .then((res) => res.text())
@@ -59,6 +61,8 @@ export async function GET(req: NextRequest) {
         encodeURIComponent(title || `${siteConfig.siteName}`) +
         encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent(song.tags.join("")) +
+        encodeURIComponent("1234567890-/") +
+        encodeURIComponent("JanFebMarAprMayJunJulAugSepOctNovDec") +
         encodeURIComponent("...…,"),
     )
       .then((res) => res.text())
@@ -73,9 +77,9 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#090f2a",
+          backgroundColor: "#fdf7fb",
           backgroundImage:
-            "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
+            "linear-gradient(135deg, #ffffff 0%, #fff6fb 44%, #edf9ff 100%)",
           height: "100%",
           width: "100%",
           display: "flex",
@@ -94,9 +98,9 @@ export async function GET(req: NextRequest) {
           style={{
             position: "absolute",
             inset: 0,
-            opacity: 0.88,
+            opacity: 0.96,
             backgroundImage:
-              "radial-gradient(700px 320px at 88% 12%, rgba(244, 114, 182, 0.34), transparent 62%), radial-gradient(520px 300px at 12% 92%, rgba(59, 130, 246, 0.24), transparent 64%)",
+              "radial-gradient(560px 320px at 12% 92%, rgba(59, 130, 246, 0.12), transparent 62%), linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.14) 28%, rgba(255, 255, 255, 0) 56%)",
           }}
         />
         <div
@@ -108,8 +112,8 @@ export async function GET(req: NextRequest) {
             height: "420px",
             borderRadius: "999px",
             background:
-              "linear-gradient(150deg, rgba(244, 114, 182, 0.5), rgba(129, 140, 248, 0.18))",
-            filter: "blur(6px)",
+              "linear-gradient(150deg, rgba(255, 226, 238, 0.22), rgba(196, 236, 255, 0.14))",
+            filter: "blur(24px)",
           }}
         />
         <div
@@ -121,7 +125,7 @@ export async function GET(req: NextRequest) {
             height: "520px",
             borderRadius: "999px",
             background:
-              "linear-gradient(165deg, rgba(30, 64, 175, 0.36), rgba(219, 39, 119, 0.18))",
+              "linear-gradient(165deg, rgba(191, 219, 254, 0.58), rgba(255, 192, 203, 0.26))",
           }}
         />
         <div
@@ -139,11 +143,13 @@ export async function GET(req: NextRequest) {
               gap: "12px",
               padding: "10px 18px",
               borderRadius: "999px",
-              backgroundColor: "rgba(255, 255, 255, 0.12)",
-              color: "#ffe3f0",
+              backgroundColor: "rgba(255, 255, 255, 0.72)",
+              color: "#c2185b",
               fontSize: 20,
               letterSpacing: "0.08em",
               alignSelf: "flex-start",
+              border: "1px solid rgba(255, 255, 255, 0.72)",
+              boxShadow: "0 16px 32px rgba(255, 140, 180, 0.16)",
             }}
           >
             {siteConfig.siteName}
@@ -155,10 +161,10 @@ export async function GET(req: NextRequest) {
               fontStyle: "normal",
               fontWeight: 700,
               display: "block",
-              color: "#ffffff",
+              color: "#8c1748",
               lineHeight: 1.15,
               letterSpacing: "0.01em",
-              textShadow: "0 12px 30px rgba(0, 0, 0, 0.35)",
+              textShadow: "0 10px 28px rgba(255, 255, 255, 0.7)",
               lineClamp: '3 "..."',
             }}
           >
@@ -174,6 +180,11 @@ export async function GET(req: NextRequest) {
             width: "100%",
             gap: "32px",
             position: "relative",
+            padding: "30px 32px",
+            borderRadius: "32px",
+            background: "rgba(255, 255, 255, 0.52)",
+            border: "1px solid rgba(255, 255, 255, 0.72)",
+            boxShadow: "0 24px 48px rgba(255, 145, 185, 0.14)",
           }}
         >
           {/* サムネイル画像 */}
@@ -187,7 +198,8 @@ export async function GET(req: NextRequest) {
               borderRadius: "18px",
               padding: "6px",
               background:
-                "linear-gradient(140deg, rgba(252, 52, 136, 0.6), rgba(209, 28, 118, 0.25))",
+                "linear-gradient(140deg, rgba(255, 120, 170, 0.86), rgba(125, 211, 252, 0.56))",
+              boxShadow: "0 14px 34px rgba(255, 138, 177, 0.22)",
             }}
           >
             <img
@@ -207,7 +219,7 @@ export async function GET(req: NextRequest) {
               display: "block",
               fontSize: 30,
               fontStyle: "normal",
-              color: "#ffe3f0",
+              color: "#6a2044",
               lineHeight: 1.4,
               flex: 1,
               lineClamp: '3 "..."',
@@ -222,16 +234,30 @@ export async function GET(req: NextRequest) {
             alignItems: "center",
             justifyContent: "space-between",
             position: "relative",
-            paddingTop: "24px",
-            color: "#f7cfe1",
+            padding: "24px 28px 0",
+            color: "#9d3d68",
             fontSize: 22,
             fontWeight: 400,
           }}
         >
-          <div style={{ letterSpacing: "0.12em", lineClamp: '1 "..."' }}>
+          <div
+            style={{
+              letterSpacing: "0.12em",
+              lineClamp: '1 "..."',
+              padding: "10px 18px",
+              borderRadius: "999px",
+              background: "rgba(255, 255, 255, 0.54)",
+            }}
+          >
             {song.tags.join(", ")}
           </div>
-          <div style={{ fontSize: 20, color: "#fc3488" }}>
+          <div
+            style={{
+              fontSize: 20,
+              color: "#c74a7d",
+              fontWeight: 700,
+            }}
+          >
             {formatDate(song.broadcast_at, hl)}
           </div>
         </div>

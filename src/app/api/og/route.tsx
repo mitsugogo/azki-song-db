@@ -13,14 +13,14 @@ export async function GET(req: NextRequest) {
       ? searchParams.get("title")?.slice(0, 100)
       : siteConfig.siteName;
 
-    const titleColor = searchParams.get("titlecolor") || "ffffff";
+    const titleColor = searchParams.get("titlecolor") || "8c1748";
 
     const hasSubTitle = searchParams.has("subtitle");
     const subTitle = hasSubTitle
       ? searchParams.get("subtitle")?.slice(0, 100)
       : "";
 
-    const subTitleColor = searchParams.get("subtitlecolor") || "ffe3f0";
+    const subTitleColor = searchParams.get("subtitlecolor") || "9d3d68";
 
     const width = searchParams.get("w") || "1200";
     const height = searchParams.get("h") || "630";
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
         encodeURIComponent(title || siteConfig.siteName) +
         encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
+        encodeURIComponent(siteConfig.siteSlug) +
         encodeURIComponent("...…"),
     )
       .then((res) => res.text())
@@ -58,9 +59,9 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#090f2a",
+          backgroundColor: "#fdf7fb",
           backgroundImage:
-            "radial-gradient(1000px 420px at 50% -20%, rgba(236, 72, 153, 0.26), transparent 62%), linear-gradient(130deg, #0a1438 0%, #1d1239 48%, #2b1138 100%)",
+            "linear-gradient(135deg, #fff7fb 0%, #ffeef7 46%, #f5f3ff 100%)",
           backgroundSize: "100% 100%",
           height: "100%",
           width: "100%",
@@ -81,9 +82,9 @@ export async function GET(req: NextRequest) {
           style={{
             position: "absolute",
             inset: 0,
-            opacity: 0.88,
+            opacity: 0.96,
             backgroundImage:
-              "radial-gradient(700px 320px at 88% 12%, rgba(244, 114, 182, 0.34), transparent 62%), radial-gradient(520px 300px at 12% 92%, rgba(59, 130, 246, 0.24), transparent 64%)",
+              "radial-gradient(560px 320px at 12% 92%, rgba(145, 184, 255, 0.12), transparent 62%), linear-gradient(180deg, rgba(255, 237, 246, 0.48) 0%, rgba(255, 237, 246, 0.18) 30%, rgba(255, 237, 246, 0) 58%)",
           }}
         />
         <div
@@ -95,8 +96,8 @@ export async function GET(req: NextRequest) {
             height: "420px",
             borderRadius: "999px",
             background:
-              "linear-gradient(150deg, rgba(244, 114, 182, 0.5), rgba(129, 140, 248, 0.18))",
-            filter: "blur(6px)",
+              "linear-gradient(150deg, rgba(255, 205, 226, 0.3), rgba(220, 226, 255, 0.16))",
+            filter: "blur(24px)",
           }}
         />
         <div
@@ -108,7 +109,7 @@ export async function GET(req: NextRequest) {
             height: "520px",
             borderRadius: "999px",
             background:
-              "linear-gradient(165deg, rgba(30, 64, 175, 0.36), rgba(219, 39, 119, 0.18))",
+              "linear-gradient(165deg, rgba(206, 198, 255, 0.4), rgba(255, 205, 226, 0.3))",
           }}
         />
         <div
@@ -126,12 +127,14 @@ export async function GET(req: NextRequest) {
               gap: "12px",
               padding: "10px 18px",
               borderRadius: "999px",
-              backgroundColor: "rgba(255, 255, 255, 0.12)",
-              color: "#ffe3f0",
+              backgroundColor: "rgba(255, 245, 250, 0.78)",
+              color: "#c2185b",
               fontSize: 20,
               fontWeight: 700,
               letterSpacing: "0.08em",
               alignSelf: "flex-start",
+              border: "1px solid rgba(255, 228, 241, 0.9)",
+              boxShadow: "0 16px 32px rgba(255, 140, 180, 0.16)",
             }}
           >
             {siteConfig.siteName}
@@ -145,7 +148,7 @@ export async function GET(req: NextRequest) {
               color: `#${titleColor}`,
               lineHeight: 1.15,
               letterSpacing: "0.01em",
-              textShadow: "0 12px 30px rgba(0, 0, 0, 0.35)",
+              textShadow: "0 10px 28px rgba(255, 255, 255, 0.7)",
             }}
           >
             {title}
@@ -170,15 +173,16 @@ export async function GET(req: NextRequest) {
             justifyContent: "space-between",
             position: "relative",
             paddingTop: "32px",
-            color: "#f7cfe1",
+            color: "#9d3d68",
             fontSize: 22,
             fontWeight: 400,
+            borderTop: "1px solid rgba(214, 92, 151, 0.16)",
           }}
         >
-          <div style={{ letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            {siteConfig.siteName}
+          <div style={{ letterSpacing: "0.12em" }}>
+            {siteConfig.siteNameUpper}
           </div>
-          <div style={{ fontSize: 20, color: "#fc3488" }}>
+          <div style={{ fontSize: 20, color: "#c74a7d", fontWeight: 700 }}>
             {siteConfig.siteSlug}
           </div>
         </div>
