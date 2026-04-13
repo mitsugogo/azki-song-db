@@ -25,6 +25,11 @@ export type SongCountOverviewProps = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+function toDisplayedMilestoneDate(date: Date): Date {
+  // 集計日ベースの値を表示用に1日前へ補正する
+  return new Date(date.getTime() - DAY_MS);
+}
+
 type MilestoneHighlight = {
   key: string;
   title: string;
@@ -308,7 +313,10 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {formatDate(item.date, locale)}
+                            {formatDate(
+                              toDisplayedMilestoneDate(item.date),
+                              locale,
+                            )}
                           </span>
 
                           <Badge
@@ -409,7 +417,10 @@ export default function SongCountOverview({
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
                             {t("estimatedAchievementSentense", {
-                              date: formatDate(item.date, locale),
+                              date: formatDate(
+                                toDisplayedMilestoneDate(item.date),
+                                locale,
+                              ),
                             })}
                           </span>
                           <Badge
