@@ -161,8 +161,14 @@ export async function generateMetadata({
           videoTitle: song.video_title,
         });
       } else {
-        title = `watch: ${song.video_title} | ${siteConfig.siteName}`;
+        title = `${song.video_title} | ${siteConfig.siteName}`;
         ogTitle = title;
+        ogSubtitle = tMeta("song.ogSubtitle", {
+          date: formatDate(song.broadcast_at, locale),
+          title: song.title,
+          artist: song.artist,
+          videoTitle: song.video_title,
+        });
         ogImageUrl = new URL("/api/og/videothumb", baseUrl);
         ogImageUrl.searchParams.set("v", v);
         ogImageUrl.searchParams.set("hl", locale);
