@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/mitsugogo/azki-song-db/compare/v2.4.0...v2.4.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* 検索hookの反映によってオリ曲再生が始まらないのを修正 ([9598a33](https://github.com/mitsugogo/azki-song-db/commit/9598a336107045708f879c2bb806f79baa3c58f6))
+
 ## [2.4.0](https://github.com/mitsugogo/azki-song-db/compare/v2.3.7...v2.4.0) (2026-04-16)
 
 
