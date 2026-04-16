@@ -4,12 +4,13 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Song } from "../types/song";
 import { useTranslations } from "next-intl";
 import SongsList from "./SongList";
-import { Button } from "flowbite-react";
+import { Button } from "@mantine/core";
 import {
   LuArrowDownWideNarrow,
   LuArrowUpWideNarrow,
@@ -41,15 +42,16 @@ import {
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
-import MobileActionButtons from "./MobileActionButtons";
 import {
+  getSongMode,
   getSongModeIcon,
-  getSongModeLabel,
   getSongModeGroupLabels,
   getSongModeItemLabel,
   getSongModeTriggerButtonClassName,
   SONG_MODE_MENU_ITEMS,
+  type SongMode,
   type SongModeGroup,
+  type SongModeMenuItem,
 } from "./songModeMenu";
 
 // Propsの型定義
@@ -84,6 +86,7 @@ export default function SearchAndSongList({
   playRandomSong,
   setSearchTerm,
   setSongs,
+  searchSongs,
   showPlaylistSelector,
   setShowPlaylistSelector,
   isOverlayOpen,
@@ -93,23 +96,41 @@ export default function SearchAndSongList({
   const t = useTranslations("Watch.searchAndSongList");
   const tSongMode = useTranslations("Watch.songMode");
   const overlayOpen = Boolean(isOverlayOpen);
-  const currentSongModeLabel = getSongModeLabel(searchTerm, tSongMode);
-  const CurrentSongModeIcon = getSongModeIcon(searchTerm);
+  const currentSongMode = getSongMode(searchTerm);
+  const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
   const currentSongModeButtonClassName =
     getSongModeTriggerButtonClassName(searchTerm);
-  const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
 
   const songModeMenuItems = SONG_MODE_MENU_ITEMS;
-  const songModeUngroupedItems = songModeMenuItems.filter(
-    (item) => !item.group,
+  const allSongModeItem =
+    songModeMenuItems.find((item) => item.mode === "") ?? songModeMenuItems[0];
+  const originalSongModeItem =
+    songModeMenuItems.find((item) => item.mode === "original-songs") ??
+    songModeMenuItems[0];
+  const karaokeSongModeItem =
+    songModeMenuItems.find((item) => item.mode === "tag:歌枠") ??
+    songModeMenuItems[0];
+  const otherSongModeMenuItems = songModeMenuItems.filter(
+    (item) =>
+      item.mode !== "" &&
+      item.mode !== "original-songs" &&
+      item.mode !== "tag:歌枠",
   );
   const songModeGroupedItems = {
-    mode: songModeMenuItems.filter((item) => item.group === "mode"),
-    theme: songModeMenuItems.filter((item) => item.group === "theme"),
+    mode: otherSongModeMenuItems.filter((item) => item.group === "mode"),
+    theme: otherSongModeMenuItems.filter((item) => item.group === "theme"),
   } as const;
+  const isOtherModeActive =
+    currentSongMode !== "" &&
+    currentSongMode !== "original-songs" &&
+    currentSongMode !== "tag:歌枠";
+  const currentOtherSongModeItem = isOtherModeActive
+    ? otherSongModeMenuItems.find((item) => item.mode === currentSongMode)
+    : undefined;
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
   const sortedSongs = useMemo(() => {
     const order = sortOrder === "asc" ? 1 : -1;
@@ -189,6 +210,198 @@ export default function SearchAndSongList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 初回マウント時のみ実行
 
+  useEffect(() => {
+    const previousSongMode = previousSongModeRef.current;
+    previousSongModeRef.current = currentSongMode;
+
+    if (previousSongMode === currentSongMode) {
+      return;
+    }
+
+    if (
+      previousSongMode === "original-songs" &&
+      currentSongMode !== "original-songs"
+    ) {
+      setSortOrder("desc");
+      return;
+    }
+
+    if (currentSongMode !== "original-songs") {
+      return;
+    }
+
+    const originalModeSongs = searchSongs(allSongs, "original-songs");
+    setSortOrder("asc");
+    setSongs(originalModeSongs);
+
+    if (originalModeSongs.length > 0) {
+      changeCurrentSong(originalModeSongs[0]);
+    }
+  }, [allSongs, changeCurrentSong, currentSongMode, searchSongs, setSongs]);
+
+  const renderSongModeToggleButton = useCallback(
+    (item: SongModeMenuItem, sizeClassName: string) => {
+      const { mode, buttonClassName } = item;
+      const label = getSongModeItemLabel(item, tSongMode);
+      const isActive = currentSongMode === mode;
+      const SongModeIcon = getSongModeIcon(mode);
+
+      return (
+        <Button
+          onClick={() => setSearchTerm(mode)}
+          // モードに応じたアイコンを表示
+          leftSection={
+            SongModeIcon ? <SongModeIcon className="w-4 h-4" /> : null
+          }
+          rightSection={<span />}
+          className={`px-3 py-1 h-8 w-full cursor-pointer rounded transition shadow-md ring-0 focus:ring-0 ${sizeClassName} ${
+            isActive
+              ? `text-white shadow-gray-400/20 dark:shadow-none ${buttonClassName}`
+              : "bg-light-gray-200 hover:bg-light-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white"
+          }`}
+          justify="space-between"
+          fullWidth
+        >
+          <span className={sizeClassName}>{label}</span>
+        </Button>
+      );
+    },
+    [currentSongMode, setSearchTerm, tSongMode],
+  );
+
+  const renderOtherSongModeMenu = useCallback(
+    (sizeClassName: string) => (
+      <Menu width={180} position="bottom-start" withArrow>
+        <Menu.Target>
+          <Button
+            className={
+              isOtherModeActive
+                ? currentSongModeButtonClassName
+                : `px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-500 ${sizeClassName}`
+            }
+            leftSection={
+              currentOtherSongModeItem ? (
+                <currentOtherSongModeItem.icon />
+              ) : (
+                <span />
+              )
+            }
+            rightSection={<LuChevronDown />}
+            fullWidth
+            justify="space-between"
+          >
+            {currentOtherSongModeItem
+              ? getSongModeItemLabel(currentOtherSongModeItem, tSongMode)
+              : tSongMode("other")}
+          </Button>
+        </Menu.Target>
+
+        <Menu.Dropdown>
+          {(Object.keys(songModeGroupedItems) as SongModeGroup[]).map(
+            (group) => {
+              const items = songModeGroupedItems[group];
+              if (items.length === 0) {
+                return null;
+              }
+
+              return (
+                <Fragment key={group}>
+                  <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
+                  {items.map((item) => {
+                    const ModeIcon = item.icon;
+                    return (
+                      <Menu.Item
+                        key={item.mode}
+                        leftSection={<ModeIcon className="w-4 h-4" />}
+                        onClick={() => setSearchTerm(item.mode)}
+                      >
+                        {getSongModeItemLabel(item, tSongMode)}
+                      </Menu.Item>
+                    );
+                  })}
+                  {group === "mode" && songModeGroupedItems.theme.length > 0 ? (
+                    <Menu.Divider />
+                  ) : null}
+                </Fragment>
+              );
+            },
+          )}
+        </Menu.Dropdown>
+      </Menu>
+    ),
+    [
+      currentOtherSongModeItem,
+      currentSongModeButtonClassName,
+      isOtherModeActive,
+      setSearchTerm,
+      songModeGroupLabels,
+      songModeGroupedItems,
+      tSongMode,
+    ],
+  );
+
+  const renderSongModeControlRows = useCallback(
+    (sizeClassName: string, randomLabel: string) => (
+      <>
+        <Grid grow gutter={{ base: 5 }} className="mt-2">
+          <Grid.Col span={4}>
+            {renderSongModeToggleButton(allSongModeItem, sizeClassName)}
+          </Grid.Col>
+          <Grid.Col span={4}>
+            {renderSongModeToggleButton(originalSongModeItem, sizeClassName)}
+          </Grid.Col>
+          <Grid.Col span={4}>
+            {renderSongModeToggleButton(karaokeSongModeItem, sizeClassName)}
+          </Grid.Col>
+        </Grid>
+        <Grid grow gutter={{ base: 5 }} className="mt-2">
+          <Grid.Col span={12}>
+            {renderOtherSongModeMenu(sizeClassName)}
+          </Grid.Col>
+        </Grid>
+        <Grid grow gutter={{ base: 5 }} className="mt-2">
+          <Grid.Col span={6}>
+            <Button
+              onClick={() => playRandomSong(songs)}
+              className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0"
+            >
+              <span className={sizeClassName}>
+                <LuSparkles className="mr-1 inline" />
+                {randomLabel}
+              </span>
+            </Button>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Button
+              className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 ${sizeClassName}  ${
+                isNowPlayingPlaylist()
+                  ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+                  : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+              }`}
+              onClick={() => {
+                setShowPlaylistSelector(true);
+              }}
+            >
+              {t("playlist")}
+            </Button>
+          </Grid.Col>
+        </Grid>
+      </>
+    ),
+    [
+      allSongModeItem,
+      isNowPlayingPlaylist,
+      karaokeSongModeItem,
+      originalSongModeItem,
+      playRandomSong,
+      renderOtherSongModeMenu,
+      renderSongModeToggleButton,
+      setShowPlaylistSelector,
+      songs,
+      t,
+    ],
+  );
+
   return (
     <section
       className={`flex sm:w-full flex-col min-h-0 sm:mx-0 transition-[width] duration-300 ease-in-out ${
@@ -203,102 +416,11 @@ export default function SearchAndSongList({
         }`}
       >
         <div className="mb-2 hidden lg:block foldable:hidden md:foldable:block">
-          <Button
-            onClick={() => playRandomSong(songs)}
-            className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0"
-          >
-            <span className="text-sm">
-              <LuSparkles className="mr-1 inline" />
-              <span className="foldable:hidden">{t("randomOtherSong")}</span>
-              <span className="hidden foldable:inline">Surprise Me</span>
-            </span>
-          </Button>
-          <Grid grow gutter={{ base: 5 }} className="mt-2">
-            <Grid.Col span={4}>
-              <Menu width={180} position="bottom-start" withArrow>
-                <Menu.Target>
-                  <Button className={currentSongModeButtonClassName}>
-                    <span className="text-sm w-full grid grid-cols-[1rem_1fr_1rem] items-center">
-                      <CurrentSongModeIcon className="w-4 h-4 justify-self-center" />
-                      <span className="text-center">
-                        {currentSongModeLabel}
-                      </span>
-                      <LuChevronDown className="w-4 h-4 justify-self-center" />
-                    </span>
-                  </Button>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  {songModeUngroupedItems.map((item) => {
-                    const ModeIcon = item.icon;
-                    return (
-                      <Menu.Item
-                        key={item.mode}
-                        leftSection={<ModeIcon className="w-4 h-4" />}
-                        onClick={() => setSearchTerm(item.mode)}
-                      >
-                        {getSongModeItemLabel(item, tSongMode)}
-                      </Menu.Item>
-                    );
-                  })}
-
-                  {(Object.keys(songModeGroupedItems) as SongModeGroup[]).map(
-                    (group) => {
-                      const items = songModeGroupedItems[group];
-                      if (items.length === 0) {
-                        return null;
-                      }
-
-                      return (
-                        <Fragment key={group}>
-                          <Menu.Divider />
-                          <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
-                          {items.map((item) => {
-                            const ModeIcon = item.icon;
-                            return (
-                              <Menu.Item
-                                key={item.mode}
-                                leftSection={<ModeIcon className="w-4 h-4" />}
-                                onClick={() => setSearchTerm(item.mode)}
-                              >
-                                {getSongModeItemLabel(item, tSongMode)}
-                              </Menu.Item>
-                            );
-                          })}
-                        </Fragment>
-                      );
-                    },
-                  )}
-                </Menu.Dropdown>
-              </Menu>
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Button
-                className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0  ${
-                  isNowPlayingPlaylist()
-                    ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
-                    : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
-                }`}
-                onClick={() => {
-                  setShowPlaylistSelector(true);
-                }}
-              >
-                {t("playlist")}
-              </Button>
-            </Grid.Col>
-          </Grid>
+          {renderSongModeControlRows("text-sm", t("randomOtherSong"))}
         </div>
 
         <div className="hidden md:block lg:hidden foldable:hidden mt-2">
-          <MobileActionButtons
-            onSurprise={() => playRandomSong(songs)}
-            onSelectSongMode={(mode) => setSearchTerm(mode)}
-            currentSongModeLabel={currentSongModeLabel}
-            currentSongModeIcon={CurrentSongModeIcon}
-            currentSongModeButtonClassName={currentSongModeButtonClassName}
-            songModeMenuItems={songModeMenuItems}
-            onPlaylist={() => setShowPlaylistSelector(true)}
-          />
+          {renderSongModeControlRows("text-xs", t("randomOtherSong"))}
         </div>
 
         <div
@@ -398,6 +520,7 @@ export default function SearchAndSongList({
                   </button>
                 </Tooltip>
               </div>
+              {renderSongModeControlRows("text-xs", t("randomOtherSong"))}
             </div>
 
             <div className="px-3 py-0 flex items-center justify-between gap-2">

@@ -109,8 +109,8 @@ export const getSongModeGroupLabels = (
   theme: t("groupTheme"),
 });
 
-export const getSongMode = (term: string): SongMode => {
-  const tokens = term
+export const getSongMode = (term?: string | null): SongMode => {
+  const tokens = (term ?? "")
     .split("|")
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
