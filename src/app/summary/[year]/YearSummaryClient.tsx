@@ -22,6 +22,32 @@ type Props = {
   displayYearServer?: number | null;
 };
 
+const normalizeExternalMilestoneUrl = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    const host = parsedUrl.hostname.replace(/^www\./, "");
+
+    if (host !== "youtube.com" && host !== "m.youtube.com") {
+      return url;
+    }
+
+    const videoId = parsedUrl.searchParams.get("v");
+    if (!videoId) {
+      return url;
+    }
+
+    const shortUrl = new URL(`https://youtu.be/${videoId}`);
+    const time = parsedUrl.searchParams.get("t");
+    if (time) {
+      shortUrl.searchParams.set("t", time);
+    }
+
+    return shortUrl.toString();
+  } catch {
+    return url;
+  }
+};
+
 export default function YearSummaryClient({
   initialSongs,
   year,
@@ -478,26 +504,36 @@ export default function YearSummaryClient({
                   {milestone.is_external ? (
                     milestone.url ? (
                       <>
-                        <Link
-                          href={milestone.url}
-                          className="hover:underline text-primary dark:text-primary-600"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {milestone.milestone}
-                        </Link>
-                        <Badge
-                          component="a"
-                          href={milestone.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="gray"
-                          radius="sm"
-                          className="ml-2 cursor-pointer"
-                        >
-                          <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
-                          URL
-                        </Badge>
+                        {(() => {
+                          const normalizedUrl = normalizeExternalMilestoneUrl(
+                            milestone.url,
+                          );
+
+                          return (
+                            <>
+                              <Link
+                                href={normalizedUrl}
+                                className="hover:underline text-primary dark:text-primary-600"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {milestone.milestone}
+                              </Link>
+                              <Badge
+                                component="a"
+                                href={normalizedUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="gray"
+                                radius="sm"
+                                className="ml-2 cursor-pointer"
+                              >
+                                <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
+                                URL
+                              </Badge>
+                            </>
+                          );
+                        })()}
                       </>
                     ) : (
                       <span>{milestone.milestone}</span>
