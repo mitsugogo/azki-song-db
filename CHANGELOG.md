@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/mitsugogo/azki-song-db/compare/v2.3.7...v2.4.0) (2026-04-16)
+
+
+### Features
+
+* モード選択ボタンにメニュー機能を追加 ([9e7f06b](https://github.com/mitsugogo/azki-song-db/commit/9e7f06bea4dd6f573857ce7eff85fe3a993cc39a))
+* 外部マイルストーンURLを正規化する機能を追加 ([f86e9e5](https://github.com/mitsugogo/azki-song-db/commit/f86e9e540e02816335af5699cd19c94c93a46d23))
+
+
+### Bug Fixes
+
+* HOSTのデフォルト値をlocalhostに変更し、ワーカー数を6に増加 ([53853e7](https://github.com/mitsugogo/azki-song-db/commit/53853e7a40df6a4b6b4f0cfc70359fbeeb29dc21))
+* OG画像のフォント設定を調整 ([41a18c8](https://github.com/mitsugogo/azki-song-db/commit/41a18c86bfe8c585a1fc0f820d3407e57f9ea9b9))
+* オリ曲モードのURLで来た時にソート順が反映されるように修正 ([9b1f5cc](https://github.com/mitsugogo/azki-song-db/commit/9b1f5cc77ba2451aa87515769dd7e7c839f602ad))
+
 ### [2.3.7](https://github.com/mitsugogo/azki-song-db/compare/v2.3.6...v2.3.7) (2026-04-14)
 
 ### [2.3.6](https://github.com/mitsugogo/azki-song-db/compare/v2.3.5...v2.3.6) (2026-04-13)
