@@ -55,8 +55,8 @@ export function Header() {
                     <h1 className="hidden sm:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
                       {siteConfig.siteNameUpper}
                     </h1>
-                    <h1 className="sm:hidden text-lg font-semibold tracking-[0.04em]">
-                      {siteConfig.shortName}
+                    <h1 className="sm:hidden text-md font-semibold tracking-[0.04em]">
+                      {siteConfig.siteNameUpper}
                     </h1>
                   </>
                 </Link>
