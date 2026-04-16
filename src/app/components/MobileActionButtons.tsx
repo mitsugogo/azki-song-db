@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Grid, Menu, Button } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { LuChevronDown, LuSparkles } from "react-icons/lu";
@@ -32,6 +33,7 @@ export default function MobileActionButtons({
 }: Props) {
   const t = useTranslations("Watch.searchAndSongList");
   const tSongMode = useTranslations("Watch.songMode");
+  const [isSongModeMenuOpen, setIsSongModeMenuOpen] = useState(false);
   const { isNowPlayingPlaylist } = usePlaylists();
   const allSongModeItem =
     songModeMenuItems.find((item) => item.mode === "") ?? songModeMenuItems[0];
@@ -68,10 +70,18 @@ export default function MobileActionButtons({
   const renderSongModeButton = (item: SongModeMenuItem) => {
     const isActive = currentSongMode === item.mode;
     const SongModeIcon = getSongModeIcon(item.mode);
-
-    return (
+    const button = (
       <Button
-        onClick={() => onSelectSongMode(item.mode)}
+        onClick={() => {
+          if (isActive) {
+            setIsSongModeMenuOpen((current) => !current);
+            return;
+          }
+
+          onSelectSongMode(item.mode);
+        }}
+        aria-haspopup={isActive ? "menu" : undefined}
+        aria-expanded={isActive ? isSongModeMenuOpen : undefined}
         leftSection={SongModeIcon ? <SongModeIcon className="w-4 h-4" /> : null}
         rightSection={<span />}
         justify="space-between"
@@ -84,6 +94,41 @@ export default function MobileActionButtons({
       >
         <span className="text-xs">{getSongModeItemLabel(item, tSongMode)}</span>
       </Button>
+    );
+
+    if (!isActive) {
+      return button;
+    }
+
+    return (
+      <Menu
+        withinPortal={false}
+        opened={isSongModeMenuOpen}
+        onChange={setIsSongModeMenuOpen}
+        width={220}
+        position="bottom-start"
+        withArrow
+      >
+        <Menu.Target>{button}</Menu.Target>
+        <Menu.Dropdown>
+          {songModeMenuItems.map((menuItem) => {
+            const ModeIcon = menuItem.icon;
+
+            return (
+              <Menu.Item
+                key={menuItem.mode || "all-songs"}
+                leftSection={<ModeIcon className="w-4 h-4" />}
+                onClick={() => {
+                  onSelectSongMode(menuItem.mode);
+                  setIsSongModeMenuOpen(false);
+                }}
+              >
+                {getSongModeItemLabel(menuItem, tSongMode)}
+              </Menu.Item>
+            );
+          })}
+        </Menu.Dropdown>
+      </Menu>
     );
   };
 

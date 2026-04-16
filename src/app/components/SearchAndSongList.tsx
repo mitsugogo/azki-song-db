@@ -132,6 +132,7 @@ export default function SearchAndSongList({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(() =>
     currentSongMode === "original-songs" ? "asc" : "desc",
   );
+  const [isSongModeMenuOpen, setIsSongModeMenuOpen] = useState(false);
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
   const sortedSongs = useMemo(() => {
@@ -241,16 +242,45 @@ export default function SearchAndSongList({
     }
   }, [allSongs, changeCurrentSong, currentSongMode, searchSongs, setSongs]);
 
+  const renderSongModeMenuItems = useCallback(
+    () =>
+      songModeMenuItems.map((item) => {
+        const SongModeIcon = item.icon;
+
+        return (
+          <Menu.Item
+            key={item.mode || "all-songs"}
+            leftSection={<SongModeIcon className="w-4 h-4" />}
+            onClick={() => {
+              setSearchTerm(item.mode);
+              setIsSongModeMenuOpen(false);
+            }}
+          >
+            {getSongModeItemLabel(item, tSongMode)}
+          </Menu.Item>
+        );
+      }),
+    [setSearchTerm, songModeMenuItems, tSongMode],
+  );
+
   const renderSongModeToggleButton = useCallback(
     (item: SongModeMenuItem, sizeClassName: string) => {
       const { mode, buttonClassName } = item;
       const label = getSongModeItemLabel(item, tSongMode);
       const isActive = currentSongMode === mode;
       const SongModeIcon = getSongModeIcon(mode);
-
-      return (
+      const button = (
         <Button
-          onClick={() => setSearchTerm(mode)}
+          onClick={() => {
+            if (isActive) {
+              setIsSongModeMenuOpen((current) => !current);
+              return;
+            }
+
+            setSearchTerm(mode);
+          }}
+          aria-haspopup={isActive ? "menu" : undefined}
+          aria-expanded={isActive ? isSongModeMenuOpen : undefined}
           // モードに応じたアイコンを表示
           leftSection={
             SongModeIcon ? <SongModeIcon className="w-4 h-4" /> : null
@@ -267,8 +297,32 @@ export default function SearchAndSongList({
           <span className={sizeClassName}>{label}</span>
         </Button>
       );
+
+      if (!isActive) {
+        return button;
+      }
+
+      return (
+        <Menu
+          withinPortal={false}
+          opened={isSongModeMenuOpen}
+          onChange={setIsSongModeMenuOpen}
+          width={220}
+          position="bottom-start"
+          withArrow
+        >
+          <Menu.Target>{button}</Menu.Target>
+          <Menu.Dropdown>{renderSongModeMenuItems()}</Menu.Dropdown>
+        </Menu>
+      );
     },
-    [currentSongMode, setSearchTerm, tSongMode],
+    [
+      currentSongMode,
+      isSongModeMenuOpen,
+      renderSongModeMenuItems,
+      setSearchTerm,
+      tSongMode,
+    ],
   );
 
   const renderOtherSongModeMenu = useCallback(
