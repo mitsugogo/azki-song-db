@@ -51,7 +51,7 @@
   },
   "Watch": {
     "searchAndSongList": {
-      "randomOtherSong": "ランダムで他の曲にする",
+      "randomOtherSong": "Surprise me",
       "playlist": "プレイリスト",
       "songList": "楽曲一覧",
       "songsUnit": "曲",
@@ -71,6 +71,7 @@
     "songMode": {
       "all": "全曲",
       "original": "オリ曲",
+      "other": "その他",
       "cover": "カバー曲",
       "collaboration": "ユニット・ゲスト参加曲",
       "karaoke": "歌枠",

@@ -16,11 +16,7 @@ import MobileActionButtons from "./MobileActionButtons";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
-import {
-  getSongModeIcon,
-  getSongModeLabel,
-  getSongModeTriggerButtonClassName,
-} from "./songModeMenu";
+import { getSongMode } from "./songModeMenu";
 import { useTranslations } from "next-intl";
 
 type DesktopPlayerControls = {
@@ -130,11 +126,7 @@ export default function PlayerSection({
     if (song.slug) return song.slug;
     return `${song.title}::${song.artist}`;
   }, []);
-  const tMode = useTranslations("Watch.songMode");
-  const currentSongModeLabel = getSongModeLabel(searchTerm, tMode);
-  const currentSongModeIcon = getSongModeIcon(searchTerm);
-  const currentSongModeButtonClassName =
-    getSongModeTriggerButtonClassName(searchTerm);
+  const currentSongMode = getSongMode(searchTerm);
 
   const hasNextInVideo = useMemo(() => {
     if (!currentSong) return false;
@@ -260,9 +252,7 @@ export default function PlayerSection({
           <MobileActionButtons
             onSurprise={() => playRandomSong?.(songs)}
             onSelectSongMode={(mode) => setSearchTerm?.(mode)}
-            currentSongModeLabel={currentSongModeLabel}
-            currentSongModeIcon={currentSongModeIcon}
-            currentSongModeButtonClassName={currentSongModeButtonClassName}
+            currentSongMode={currentSongMode}
             onPlaylist={() => setShowPlaylistSelector?.(true)}
           />
         </div>
