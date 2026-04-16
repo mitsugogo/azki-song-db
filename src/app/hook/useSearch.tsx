@@ -577,6 +577,10 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
   // リアルタイム検索（debounce適用）
   useEffect(() => {
+    if (debouncedSearchTerm !== searchTerm) {
+      return;
+    }
+
     // 楽曲のフィルタリングを実行
     const newSongs = searchSongs(allSongs, debouncedSearchTerm);
 

@@ -686,6 +686,70 @@ describe("useSearch", () => {
     window.location = originalLocation as any;
   });
 
+  it("URL の original-songs 同期直後に全曲へ戻らない", async () => {
+    const songs: Song[] = [
+      {
+        video_id: "cover1",
+        title: "Cover 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["カバー曲"],
+        video_title: "",
+        broadcast_at: "2024-01-02",
+        start: 0,
+        end: 100,
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+      {
+        video_id: "orig1",
+        title: "Original 1",
+        artist: "AZKi",
+        album: "",
+        sing: "AZKi",
+        tags: ["オリ曲"],
+        video_title: "",
+        broadcast_at: "2024-01-01",
+        start: 0,
+        end: 100,
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
+    ];
+
+    (useSearchParams as any).mockReturnValue({
+      get: vi.fn((key: string) => (key === "q" ? "original-songs" : null)),
+    });
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    await waitFor(
+      () => {
+        expect(result.current.searchTerm).toBe("original-songs");
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].video_id).toBe("orig1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("オリ曲モードが動作する", async () => {
     const songs: Song[] = [
       {
