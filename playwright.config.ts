@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // const PORT = process.env.PORT ?? "3000";
-const HOST = process.env.HOST ?? "127.0.0.1";
+const HOST = process.env.HOST ?? "localhost";
 const PORT = 3000;
 
 const defaultBase = `http://${HOST}:${PORT}`;
@@ -27,7 +27,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: 3,
+  workers: 6,
   timeout: 30000,
   reporter: [["html", { open: "never" }], ["list"], ["github"]],
   globalSetup: require.resolve("./e2e/global-setup.ts"),
