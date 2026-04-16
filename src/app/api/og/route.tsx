@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
 
     const notoSansRegular = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
+        encodeURIComponent(siteConfig.siteName) +
         encodeURIComponent(title || siteConfig.siteName) +
         encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent("...…"),
@@ -42,6 +43,7 @@ export async function GET(req: NextRequest) {
 
     const notoSansBold = await fetch(
       "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
+        encodeURIComponent(siteConfig.siteName) +
         encodeURIComponent(title || siteConfig.siteName) +
         encodeURIComponent(subTitle || `🎵 ${siteConfig.siteName}`) +
         encodeURIComponent(siteConfig.siteSlug) +
