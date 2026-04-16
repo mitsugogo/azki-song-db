@@ -185,6 +185,24 @@ describe("SearchAndSongList", () => {
     vi.clearAllMocks();
   });
 
+  it("URL直打ちでオリ曲モードを開いたときは初期表示が古い順になる", async () => {
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm="original-songs"
+      />,
+    );
+
+    await waitFor(() => {
+      const orders = screen.getAllByTestId("songs-list-order");
+      expect(orders[0]).toHaveTextContent("Old Original|New Original");
+      expect(
+        screen.getAllByRole("button", { name: "sortAscending" }).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
   it("オリ曲モードで古い順にして先頭曲を再生し、他モードで新しい順へ戻す", async () => {
     const { rerender } = render(
       <SearchAndSongList

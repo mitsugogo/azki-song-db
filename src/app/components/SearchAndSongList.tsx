@@ -129,7 +129,9 @@ export default function SearchAndSongList({
     : undefined;
 
   const [searchValue, setSearchValue] = useState<string[]>([]);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(() =>
+    currentSongMode === "original-songs" ? "asc" : "desc",
+  );
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
   const sortedSongs = useMemo(() => {
