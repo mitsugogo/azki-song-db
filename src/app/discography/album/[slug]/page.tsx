@@ -89,7 +89,7 @@ export async function generateStaticParams() {
   let songs: Song[] = [];
   try {
     songs = await fetchSongsFromApi();
-  } catch (e) {
+  } catch {
     return [];
   }
 
