@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "@mantine/core/styles.css";
 import "@mantine/spotlight/styles.css";
@@ -11,33 +10,6 @@ import { theme } from "./theme";
 import ClientProviders from "./components/ClientProviders";
 import { siteConfig, baseUrl } from "./config/siteConfig";
 import { routing } from "../i18n/routing";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-  preload: true,
-  adjustFontFallback: false,
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-  preload: true,
-  adjustFontFallback: false,
-});
-
-const notoSans = Noto_Sans_JP({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-  preload: true,
-  adjustFontFallback: false,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -103,10 +75,7 @@ export default async function RootLayout({
   const messages = (await import(`../messages/${locale}.json`)).default;
   const shouldInjectToolbar = process.env.NODE_ENV === "development";
   return (
-    <html
-      lang={locale}
-      className={`${notoSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
-    >
+    <html lang={locale} className="antialiased">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.ico" />

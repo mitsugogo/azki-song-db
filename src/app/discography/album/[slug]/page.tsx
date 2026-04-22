@@ -86,7 +86,12 @@ async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
 }
 
 export async function generateStaticParams() {
-  const songs: Song[] = await fetchSongsFromApi();
+  let songs: Song[] = [];
+  try {
+    songs = await fetchSongsFromApi();
+  } catch (e) {
+    return [];
+  }
 
   return buildAlbumEntries(songs).map((entry) => ({
     slug: entry.slug,
