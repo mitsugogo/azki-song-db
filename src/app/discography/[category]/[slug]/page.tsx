@@ -53,7 +53,8 @@ export async function generateStaticParams() {
   let songs: Song[] = [];
   try {
     songs = await fetchSongsFromApi();
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch songs in generateStaticParams:", error);
     return [];
   }
 
