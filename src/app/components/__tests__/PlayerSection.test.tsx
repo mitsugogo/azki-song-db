@@ -128,11 +128,7 @@ describe("PlayerSection", () => {
 
   const renderWithWrapper = (ui: any) =>
     render(ui, {
-      wrapper: ({ children }) => (
-        <MantineProvider>
-          {children}
-        </MantineProvider>
-      ),
+      wrapper: ({ children }) => <MantineProvider>{children}</MantineProvider>,
     });
 
   it("renders YouTubePlayer when currentSong is provided", () => {
