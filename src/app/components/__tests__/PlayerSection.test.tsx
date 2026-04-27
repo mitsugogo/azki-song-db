@@ -129,7 +129,7 @@ describe("PlayerSection", () => {
   const renderWithWrapper = (ui: any) =>
     render(ui, {
       wrapper: ({ children }) => (
-        <MantineProvider withGlobalStyles withNormalizeCSS>
+        <MantineProvider>
           {children}
         </MantineProvider>
       ),
@@ -239,7 +239,7 @@ describe("PlayerSection", () => {
 
     // Update prop and expect new text to appear
     rerender(
-      <MantineProvider withGlobalStyles withNormalizeCSS>
+      <MantineProvider>
         <PlayerSection
           currentSong={songWithLive}
           previousSong={null}

@@ -496,7 +496,7 @@ export default function MyBestNineSongsPage() {
 
       {/* メインコンテンツ */}
       <div className="px-3 pb-4">
-        <Grid gutter="lg">
+        <Grid gap="lg">
           {/* 左側：入力フォーム */}
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Paper p="lg" radius="md" withBorder>

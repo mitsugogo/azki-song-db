@@ -399,7 +399,7 @@ export default function SearchAndSongList({
   const renderSongModeControlRows = useCallback(
     (sizeClassName: string, randomLabel: string) => (
       <>
-        <Grid grow gutter={{ base: 5 }} className="mt-2">
+        <Grid grow gap={{ base: 5 }} className="mt-2">
           <Grid.Col span={4}>
             {renderSongModeToggleButton(allSongModeItem, sizeClassName)}
           </Grid.Col>
@@ -410,12 +410,12 @@ export default function SearchAndSongList({
             {renderSongModeToggleButton(karaokeSongModeItem, sizeClassName)}
           </Grid.Col>
         </Grid>
-        <Grid grow gutter={{ base: 5 }} className="mt-2">
+        <Grid grow gap={{ base: 5 }} className="mt-2">
           <Grid.Col span={12}>
             {renderOtherSongModeMenu(sizeClassName)}
           </Grid.Col>
         </Grid>
-        <Grid grow gutter={{ base: 5 }} className="mt-2">
+        <Grid grow gap={{ base: 5 }} className="mt-2">
           <Grid.Col span={6}>
             <Button
               onClick={() => playRandomSong(songs)}
