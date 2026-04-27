@@ -128,11 +128,7 @@ describe("PlayerSection", () => {
 
   const renderWithWrapper = (ui: any) =>
     render(ui, {
-      wrapper: ({ children }) => (
-        <MantineProvider withGlobalStyles withNormalizeCSS>
-          {children}
-        </MantineProvider>
-      ),
+      wrapper: ({ children }) => <MantineProvider>{children}</MantineProvider>,
     });
 
   it("renders YouTubePlayer when currentSong is provided", () => {
@@ -239,7 +235,7 @@ describe("PlayerSection", () => {
 
     // Update prop and expect new text to appear
     rerender(
-      <MantineProvider withGlobalStyles withNormalizeCSS>
+      <MantineProvider>
         <PlayerSection
           currentSong={songWithLive}
           previousSong={null}
