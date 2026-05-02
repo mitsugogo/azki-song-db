@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "flowbite-react";
 import { Badge, Drawer, Modal, Tooltip } from "@mantine/core";
-import { useMediaQuery, useViewportSize } from "@mantine/hooks";
+import { useMediaQuery } from "@mantine/hooks";
 import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { MdInstallMobile } from "react-icons/md";
@@ -57,8 +57,6 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
   const [appVersion, setAppVersion] = useState("N/A");
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const isMobile = useMediaQuery("(max-width: 50em)");
-  const { height } = useViewportSize();
-  const isShortViewport = (height || 0) < 840;
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
   const { songsFetchedAt } = useSongs();
   const { currentSong } = useGlobalPlayer();
@@ -132,91 +130,89 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
         onClose={onClose}
         title={t("title")}
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+        classNames={{ body: "flex flex-col overflow-hidden" }}
+        styles={{ body: { height: "calc(100% - 60px)" } }}
       >
-        <div className="grow space-y-1">
-          {navigation.map((category, categoryIndex) => (
-            <div key={categoryIndex}>
-              {category.category && (
-                <div className="ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase">
-                  {categoryLabelMap[category.category] ?? category.category}
-                </div>
-              )}
-              {category.items.map((item) => {
-                const isCurrent = item.current;
-                const baseClasses =
-                  "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
-                const activeClasses =
-                  "bg-primary-600 dark:bg-primary-800 text-white";
-                const inactiveClasses =
-                  "hover:bg-white/5 hover:text-primary dark:hover:text-white";
+        <div className="flex flex-col h-full">
+          <div className="overflow-y-auto space-y-1 flex-1 min-h-0">
+            {navigation.map((category, categoryIndex) => (
+              <div key={categoryIndex}>
+                {category.category && (
+                  <div className="ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase">
+                    {categoryLabelMap[category.category] ?? category.category}
+                  </div>
+                )}
+                {category.items.map((item) => {
+                  const isCurrent = item.current;
+                  const baseClasses =
+                    "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
+                  const activeClasses =
+                    "bg-primary-600 dark:bg-primary-800 text-white";
+                  const inactiveClasses =
+                    "hover:bg-white/5 hover:text-primary dark:hover:text-white";
 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    aria-current={isCurrent ? "page" : undefined}
-                    className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses}`}
-                    onClick={onClose}
-                  >
-                    {item.label ?? item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-          <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
-
-          <div className="ml-3 text-xs text-light-gray-300 dark:text-gray-300">
-            {t("management")}
-          </div>
-          <Link
-            href="/playlist"
-            key="playlist"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={onClose}
-          >
-            {t("playlist")}
-          </Link>
-
-          <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
-
-          {isInstallable && !isInstalled && (
-            <>
-              <div
-                key="install-pwa"
-                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                onClick={() => {
-                  promptInstall();
-                  onClose();
-                }}
-              >
-                <MdInstallMobile className="mr-2 inline text-xl" />
-                {t("installApp")}
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      aria-current={isCurrent ? "page" : undefined}
+                      className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses}`}
+                      onClick={onClose}
+                    >
+                      {item.label ?? item.name}
+                    </Link>
+                  );
+                })}
               </div>
-              <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
-            </>
-          )}
+            ))}
+            <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
 
-          <Link
-            href="#"
-            key="about"
-            className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-            onClick={() => {
-              setShowAcknowledgment(true);
-              onClose();
-            }}
-          >
-            {t("about")}
-          </Link>
-          <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
+            <div className="ml-3 text-xs text-light-gray-300 dark:text-gray-300">
+              {t("management")}
+            </div>
+            <Link
+              href="/playlist"
+              key="playlist"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={onClose}
+            >
+              {t("playlist")}
+            </Link>
 
-          <div
-            className={`block w-[calc(100%-1.5rem)] relative ${
-              isShortViewport
-                ? "md:static"
-                : "md:absolute md:bottom-6 md:left-3"
-            }`}
-          >
+            <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
+
+            {isInstallable && !isInstalled && (
+              <>
+                <div
+                  key="install-pwa"
+                  className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                  onClick={() => {
+                    promptInstall();
+                    onClose();
+                  }}
+                >
+                  <MdInstallMobile className="mr-2 inline text-xl" />
+                  {t("installApp")}
+                </div>
+                <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
+              </>
+            )}
+
+            <Link
+              href="#"
+              key="about"
+              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              onClick={() => {
+                setShowAcknowledgment(true);
+                onClose();
+              }}
+            >
+              {t("about")}
+            </Link>
+            <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
+          </div>
+
+          <div className="flex-shrink-0 w-[calc(100%-1.5rem)] pb-3">
             <Link
               href="https://www.youtube.com/@AZKi"
               target="_blank"
