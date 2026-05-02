@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.2](https://github.com/mitsugogo/azki-song-db/compare/v2.4.1...v2.4.2) (2026-05-02)
+
+
+### Bug Fixes
+
+* fix Mantine 9.0 breaking changes - rename gutter to gap on Grid, remove deprecated MantineProvider props ([e2d8ff1](https://github.com/mitsugogo/azki-song-db/commit/e2d8ff1cb7e15d160916ffbf4374317c34c4c863))
+* メニューが隠れてしまうバグを修正 fixed [#351](https://github.com/mitsugogo/azki-song-db/issues/351) ([11ff7f9](https://github.com/mitsugogo/azki-song-db/commit/11ff7f9e2ae174df035e13396a3e8b927f130dca))
+
 ### [2.4.1](https://github.com/mitsugogo/azki-song-db/compare/v2.4.0...v2.4.1) (2026-04-16)
 
 
