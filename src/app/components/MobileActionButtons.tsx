@@ -134,7 +134,7 @@ export default function MobileActionButtons({
 
   return (
     <div>
-      <Grid grow gutter={{ base: 5 }}>
+      <Grid grow gap={{ base: 5 }}>
         <Grid.Col span={4}>{renderSongModeButton(allSongModeItem)}</Grid.Col>
         <Grid.Col span={4}>
           {renderSongModeButton(originalSongModeItem)}
@@ -143,7 +143,7 @@ export default function MobileActionButtons({
           {renderSongModeButton(karaokeSongModeItem)}
         </Grid.Col>
       </Grid>
-      <Grid grow gutter={{ base: 5 }} className="mt-1">
+      <Grid grow gap={{ base: 5 }} className="mt-1">
         <Grid.Col span={12}>
           <Menu width={180} position="bottom-start" withArrow>
             <Menu.Target>
@@ -201,7 +201,7 @@ export default function MobileActionButtons({
           </Menu>
         </Grid.Col>
       </Grid>
-      <Grid grow gutter={{ base: 5 }} className="mt-1">
+      <Grid grow gap={{ base: 5 }} className="mt-1">
         <Grid.Col span={6}>
           <Button
             onClick={() => onSurprise()}
