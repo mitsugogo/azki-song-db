@@ -26,7 +26,8 @@
     "mapSubtitle": "AZKiさんの左手の情報はこちら",
     "mapTitle": "AZKi聖地マップ",
     "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。",
-    "whereMyAzkichiBegan": "あなたのあずきちはどこから？"
+    "whereMyAzkichiBegan": "あなたのあずきちはどこから？",
+    "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？"
   },
   "SearchInput": {
     "search": "検索",
@@ -252,7 +253,10 @@
       "myBest9Description": "AZKiの好きな曲をシェアしましょう",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
-      "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して、Xでシェアしやすい縦長画像を生成できます"
+      "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して画像を生成できます",
+      "whereMyRobocosanBeganTitleWithSite": "あなたのロボ子さんはどこから？ | {siteName}",
+      "whereMyRobocosanBeganOgTitle": "あなたのロボ子さんはどこから？",
+      "whereMyRobocosanBeganDescription": "名前、アイコン、年表を入力して画像を生成できます"
     },
     "summary": {
       "title": "活動記録",
@@ -295,11 +299,15 @@
       "whereMyAzkichiBegan": {
         "title": "あなたのあずきちはどこから？",
         "description": "名前・アイコン・年表を入力して、履歴書風の縦長画像を生成してシェアできます。"
+      },
+      "whereMyRobocosanBegan": {
+        "title": "あなたのロボ子さんはどこから？",
+        "description": "名前・アイコン・年表を入力して、履歴書風の縦長画像を生成してシェアできます。"
       }
     },
     "whereMyAzkichiBegan": {
       "pageTitle": "あなたのあずきちはどこから？",
-      "lead": "名前、アイコン、任意行数の年表を入力して、SNSでシェアしましょう！",
+      "lead": "名前、アイコン、年表を入力して、SNSでシェアしましょう！",
       "previewTitle": "プレビュー",
       "previewAlt": "あなたのあずきちはどこから？",
       "previewPlaceholder": "ここに生成画像が表示されます",
@@ -314,7 +322,50 @@
         "iconPlaceholder": "ICON",
         "iconHint": "正方形画像を推奨（PNG/JPG）",
         "iconPreviewAlt": "アップロードしたアイコン",
-        "timelineLabel": "年表（有効: {count} / 最大: {max}）",
+        "timelineLabel": "年表（記入済: {count} / 最大: {max}）",
+        "favoriteOriginalSongLabel": "推しオリ曲",
+        "favoriteOriginalSongPlaceholder": "推しオリ曲を選択",
+        "favoriteOriginalSongHint": "年表の下に表示する1曲を選べます（任意）",
+        "favoriteOriginalSongNothingFound": "該当するオリ曲が見つかりません",
+        "yearPlaceholder": "年",
+        "monthPlaceholder": "月",
+        "contentPlaceholder": "内容"
+      },
+      "button": {
+        "uploadIcon": "アイコンを選択",
+        "addRow": "行を追加",
+        "dragRow": "行をドラッグして並び替え",
+        "removeRow": "削除",
+        "generateImage": "画像を生成",
+        "download": "画像をダウンロード",
+        "copyXText": "X投稿文をコピー"
+      },
+      "alerts": {
+        "nameRequired": "名前を入力してください",
+        "atLeastOneRow": "年表を1行以上入力してください",
+        "generateFailed": "画像生成に失敗しました",
+        "iconImageOnly": "画像ファイルを選択してください",
+        "iconReadFailed": "画像の読み込みに失敗しました"
+      }
+    },
+    "whereMyRobocosanBegan": {
+      "pageTitle": "あなたのロボ子さんはどこから？",
+      "lead": "名前、アイコン、年表を入力して、SNSでシェアしましょう！",
+      "previewTitle": "プレビュー",
+      "previewAlt": "あなたのロボ子さんはどこから？",
+      "previewPlaceholder": "ここに生成画像が表示されます",
+      "shareNotice": "・画像をダウンロード または クリップボードにコピーしてSNSに貼り付けてください。",
+      "copyFallbackLabel": "コピーに失敗しました。以下を手動でコピーしてください。",
+      "form": {
+        "nameLabel": "名前",
+        "namePlaceholder": "例: みつごご",
+        "handleLabel": "ハンドルネーム（X ID）",
+        "handlePlaceholder": "例: @mitsugogo",
+        "iconLabel": "アイコン画像",
+        "iconPlaceholder": "ICON",
+        "iconHint": "正方形画像を推奨（PNG/JPG）",
+        "iconPreviewAlt": "アップロードしたアイコン",
+        "timelineLabel": "年表（記入済: {count} / 最大: {max}）",
         "favoriteOriginalSongLabel": "推しオリ曲",
         "favoriteOriginalSongPlaceholder": "推しオリ曲を選択",
         "favoriteOriginalSongHint": "年表の下に表示する1曲を選べます（任意）",
