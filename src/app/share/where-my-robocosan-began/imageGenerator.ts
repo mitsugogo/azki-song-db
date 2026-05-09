@@ -111,11 +111,11 @@ export const buildXPostText = (
   const cleanName = name.trim() || (locale === "ja" ? "名無し" : "Anonymous");
   if (locale === "en") {
     const url = new URL("/en/share/where-my-robocosan-began", baseUrl);
-    return `${cleanName}'s Roboco-san timeline\n${url.toString()}\n#ロボ子さん #AZSongDB`;
+    return `${cleanName}'s Roboco-san timeline\n${url.toString()}\n#私はここからろぼさー #AZSongDB`;
   }
 
   const url = new URL("/share/where-my-robocosan-began", baseUrl);
-  return `${cleanName}の「あなたのロボ子さんはどこから？」\n${url.toString()}\n#ロボ子さん #AZSongDB`;
+  return `${cleanName}の「あなたのロボ子さんはどこから？」\n${url.toString()}\n#私はここからろぼさー #AZSongDB`;
 };
 
 const loadImageElement = (src: string): Promise<HTMLImageElement> => {
