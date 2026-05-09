@@ -1,5 +1,55 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+
+const gotoWatchPage = async (page: Page) => {
+  await page.goto("/watch");
+  await page.waitForLoadState("domcontentloaded");
+  await expect(
+    page.getByRole("button", { name: "Open song list" }),
+  ).toBeVisible({ timeout: 10000 });
+};
+
+const getMobileActionContainer = (page: Page) =>
+  page.locator("div.block.md\\:hidden.mx-2.mt-2").first();
+
+const getMobileActionButtons = (
+  page: Page,
+): {
+  surpriseButton: Locator;
+  modeButton: Locator;
+  playlistButton: Locator;
+} => {
+  const mobileActionContainer = getMobileActionContainer(page);
+
+  return {
+    surpriseButton: mobileActionContainer
+      .locator("button")
+      .filter({ hasText: /^Surprise me$/ })
+      .first(),
+    modeButton: mobileActionContainer
+      .locator("button")
+      .filter({ hasText: /^全曲$/ })
+      .first(),
+    playlistButton: mobileActionContainer
+      .locator("button")
+      .filter({ hasText: /^プレイリスト$/ })
+      .first(),
+  };
+};
+
+const openPlaylistModal = async (page: Page) => {
+  const { playlistButton } = getMobileActionButtons(page);
+
+  await expect(playlistButton).toBeVisible({ timeout: 10000 });
+  await playlistButton.click();
+
+  const playlistModal = page.locator('[role="dialog"]').filter({
+    hasText: "プレイリスト",
+  });
+  await expect(playlistModal).toBeVisible({ timeout: 10000 });
+
+  return playlistModal;
+};
 
 test.describe("Mobile action buttons", () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -10,22 +60,19 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("displays mobile action buttons", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
+    await gotoWatchPage(page);
 
     // Mobile action buttons should be visible
-    const surpriseButton = page.getByRole("button", { name: /Surprise/i });
-    const modeButton = page.getByRole("button", { name: /全曲/ });
-    const playlistButton = page.getByRole("button", { name: /プレイリスト/ });
+    const { surpriseButton, modeButton, playlistButton } =
+      getMobileActionButtons(page);
 
-    await expect(surpriseButton).toBeVisible();
-    await expect(modeButton).toBeVisible();
-    await expect(playlistButton).toBeVisible();
+    await expect(surpriseButton).toBeVisible({ timeout: 10000 });
+    await expect(modeButton).toBeVisible({ timeout: 10000 });
+    await expect(playlistButton).toBeVisible({ timeout: 10000 });
   });
 
   test("surprise button plays random song", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
+    await gotoWatchPage(page);
 
     // Get initial song title
     const initialTitle = await page
@@ -34,11 +81,14 @@ test.describe("Mobile action buttons", () => {
       .textContent();
 
     // Click surprise button
-    const surpriseButton = page.getByRole("button", { name: /Surprise/i });
+    const { surpriseButton } = getMobileActionButtons(page);
+    await expect(surpriseButton).toBeVisible({ timeout: 10000 });
     await surpriseButton.click();
 
-    // Wait for song change
-    await page.waitForTimeout(1000);
+    // UI が更新されるまで待機する
+    await expect(
+      page.locator(".line-clamp-1.text-sm.font-medium.text-white").first(),
+    ).toBeVisible({ timeout: 10000 });
 
     // Song should have changed (or at least the UI should respond)
     // Note: Due to random nature, we just verify the action doesn't break
@@ -49,11 +99,11 @@ test.describe("Mobile action buttons", () => {
 
     // The title should exist (not empty)
     expect(currentTitle).toBeTruthy();
+    expect(initialTitle).toBeTruthy();
   });
 
   test("original songs button filters to original songs", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
+    await gotoWatchPage(page);
 
     // On mobile, scroll to ensure content is loaded
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -88,7 +138,8 @@ test.describe("Mobile action buttons", () => {
     const initialTotal = initialMatch ? parseInt(initialMatch[2]) : 0;
 
     // Click song mode button and choose original songs
-    const modeButton = page.getByRole("button", { name: /全曲/ });
+    const { modeButton } = getMobileActionButtons(page);
+    await expect(modeButton).toBeVisible({ timeout: 10000 });
     await modeButton.click();
     await page.getByRole("menuitem", { name: "オリ曲" }).click();
 
@@ -128,32 +179,8 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("playlist button opens playlist modal", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
-
-    // Scroll to bottom to ensure mobile action buttons are visible
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-
-    // Click playlist button - use role-based selector that works in browser
-    const playlistButton = page.getByRole("button", { name: /プレイリスト/ });
-    await playlistButton.click({ force: true });
-
-    // Wait for modal to appear
-    await page.waitForTimeout(1000);
-
-    // Playlist modal should open - try different selectors
-    let playlistModal;
-    try {
-      playlistModal = page.getByRole("dialog", { name: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    } catch {
-      // Try alternative selector
-      playlistModal = page
-        .locator('[role="dialog"]')
-        .filter({ hasText: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    }
+    await gotoWatchPage(page);
+    const playlistModal = await openPlaylistModal(page);
 
     // Modal should contain some content
     const modalContent = playlistModal
@@ -163,38 +190,14 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("creates a new playlist from mobile", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
-
-    // Scroll to bottom to ensure mobile action buttons are visible
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-
-    // Open playlist modal
-    const playlistButton = page.getByRole("button", { name: /プレイリスト/ });
-    await playlistButton.click({ force: true });
-
-    // Wait for modal to appear
-    await page.waitForTimeout(1000);
-    let playlistModal;
-    try {
-      playlistModal = page.getByRole("dialog", { name: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    } catch {
-      playlistModal = page
-        .locator('[role="dialog"]')
-        .filter({ hasText: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    }
+    await gotoWatchPage(page);
+    const playlistModal = await openPlaylistModal(page);
 
     // Click create playlist button
     const createButton = page.getByRole("button", {
       name: "プレイリストを作成",
     });
-    await createButton.click({ force: true });
-
-    // Wait for create playlist modal to open
-    await page.waitForTimeout(1000);
+    await createButton.click();
 
     // Verify create playlist modal opens
     const createModal = page
@@ -209,8 +212,6 @@ test.describe("Mobile action buttons", () => {
     await expect(nameInput).toBeVisible();
     await nameInput.fill(`モバイルテストプレイリスト-${Date.now()}`);
 
-    // Wait for create button to be enabled - longer wait
-    await page.waitForTimeout(1000);
     const submitButton = createModal.getByRole("button", {
       name: "作成",
       exact: true,
@@ -229,33 +230,12 @@ test.describe("Mobile action buttons", () => {
   });
 
   test("closes playlist modal on mobile", async ({ page }) => {
-    await page.goto("/watch");
-    await page.waitForLoadState("domcontentloaded");
-
-    // Scroll to bottom to ensure mobile action buttons are visible
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-
-    // Open playlist modal
-    const playlistButton = page.getByRole("button", { name: /プレイリスト/ });
-    await playlistButton.click({ force: true });
-
-    // Wait for modal to appear
-    await page.waitForTimeout(1000);
-    let playlistModal;
-    try {
-      playlistModal = page.getByRole("dialog", { name: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    } catch {
-      playlistModal = page
-        .locator('[role="dialog"]')
-        .filter({ hasText: "プレイリスト" });
-      await expect(playlistModal).toBeVisible({ timeout: 5000 });
-    }
+    await gotoWatchPage(page);
+    const playlistModal = await openPlaylistModal(page);
 
     // Close modal
     const closeButton = page.getByRole("button", { name: "閉じる" });
-    await closeButton.click({ force: true });
+    await closeButton.click();
 
     // Verify modal is closed
     await expect(playlistModal).toBeHidden();

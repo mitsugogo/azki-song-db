@@ -3,6 +3,38 @@ import { getLocale, getTranslations } from "next-intl/server";
 import SearchPageClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
+const getSearchSummary = async (locale: string): Promise<string | null> => {
+  try {
+    const response = await fetch(
+      `${baseUrl}/api/songs?hl=${encodeURIComponent(locale)}`,
+      {
+        next: { revalidate: 3600 },
+      },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const songs = (await response.json()) as Array<{ video_id?: string }>;
+    const countSongs = songs.length.toLocaleString(locale);
+    const countVideos = new Set(
+      songs.map((song) => song.video_id).filter(Boolean),
+    ).size.toLocaleString(locale);
+    const tBrowse = await getTranslations({
+      namespace: "SearchBrowse",
+      locale,
+    });
+
+    return tBrowse("summary", {
+      countSongs,
+      countVideos,
+    });
+  } catch {
+    return null;
+  }
+};
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -55,6 +87,7 @@ export async function generateMetadata({
   const locale = await getLocale();
   const tMeta = await getTranslations({ namespace: "Metadata.search", locale });
   const messages = (await import(`../../messages/${locale}.json`)).default;
+  const summary = (await getSearchSummary(locale)) ?? tMeta("description");
 
   const normalizedTab = Object.prototype.hasOwnProperty.call(
     tabLabelKeyMap,
@@ -119,14 +152,10 @@ export async function generateMetadata({
       : tabLabelForTitle
         ? `${tabLabelForTitle} | ${siteConfig.siteName}`
         : `${messages.SearchBrowse?.title ?? "検索"} | ${siteConfig.siteName}`,
-    description:
-      messages.SearchBrowse?.summary ??
-      "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
+    description: summary,
     openGraph: {
       title: ogTitle,
-      description:
-        messages.SearchBrowse?.summary ??
-        "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
+      description: summary,
       url: canonical.toString(),
       type: "website",
       siteName: `${siteConfig.siteName}`,
@@ -143,9 +172,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
-      description:
-        messages.SearchBrowse?.summary ??
-        "AZKiさんの楽曲をタグやアーティスト、曲名などから検索できます",
+      description: summary,
       images: [ogImagePath],
     },
     alternates: {
