@@ -64,6 +64,12 @@ const DescriptionCollapsible = ({
   const isTruncatable = lines.length > 3;
   const collapsedText = lines.slice(0, 3).join("\n");
   const formatedViewCount = formatViewCount(viewCount, locale, t);
+  const formattedUploadDate = isDateString(uploadDate)
+    ? formatDate(uploadDate || "", locale)
+    : uploadDate;
+  const hasMetaInfo = Boolean(
+    formatedViewCount || formattedUploadDate || (tags && tags.length > 0),
+  );
 
   // Mantine hook: 現在のテキスト選択を取得
   const selection = useTextSelection();
@@ -120,11 +126,11 @@ const DescriptionCollapsible = ({
   };
 
   // uploadDateがnew Date()で有効な日付文字列かどうか
-  const isDateString = (s: string | null | undefined) => {
+  function isDateString(s: string | null | undefined) {
     if (!s) return false;
     const d = new Date(s);
     return !isNaN(d.getTime());
-  };
+  }
 
   return (
     <div>
@@ -136,22 +142,23 @@ const DescriptionCollapsible = ({
         className={`cursor-pointer rounded transition-colors p-0`}
         style={{ lineHeight: "1.25rem" }}
       >
-        {formatedViewCount && (
+        {hasMetaInfo && (
           <div
             className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
           >
-            {expanded
-              ? t("views", {
-                  count: Number(viewCount ?? 0).toLocaleString(locale),
-                })
-              : formatedViewCount}{" "}
-            {uploadDate && "・"}{" "}
-            {isDateString(uploadDate)
-              ? formatDate(uploadDate || "", locale)
-              : uploadDate}
+            {formatedViewCount &&
+              (expanded
+                ? t("views", {
+                    count: Number(viewCount ?? 0).toLocaleString(locale),
+                  })
+                : formatedViewCount)}
+            {formatedViewCount && formattedUploadDate && " ・ "}
+            {formattedUploadDate}
             {tags && tags.length > 0 && (
               <>
-                <span className="mr-2"></span>
+                {(formatedViewCount || formattedUploadDate) && (
+                  <span className="mr-2"></span>
+                )}
                 {tags.map((tag) =>
                   expanded ? (
                     <Link
