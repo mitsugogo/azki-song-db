@@ -7,6 +7,8 @@ import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchTermChips from "./SearchTermChips";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
+import { Badge } from "flowbite-react";
+import { FaStar } from "react-icons/fa6";
 
 interface VirtualRow {
   index: number;
@@ -48,6 +50,7 @@ const SearchResultsView = ({
   measureElement,
 }: SearchResultsViewProps) => {
   const t = useTranslations("SearchResults");
+  const tWatchDetail = useTranslations("Watch.nowPlayingSongInfoDetail");
   const locale = useLocale();
   const tHeader = useTranslations("Header");
   const firstStart = virtualRows.length > 0 ? virtualRows[0].start : 0;
@@ -145,11 +148,19 @@ const SearchResultsView = ({
                       href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
                       className="block"
                     >
-                      <div className="w-full aspect-video bg-black">
+                      <div className="relative w-full aspect-video bg-black">
                         <YoutubeThumbnail
                           videoId={song.video_id}
                           alt={song.title}
                         />
+                        {song.is_members_only && (
+                          <div className="absolute right-1.5 top-1.5 z-20">
+                            <Badge className="border-0 bg-emerald-600/95 px-1.5 py-0.5 text-[0.55rem] font-bold tracking-wide text-white shadow-sm dark:bg-emerald-500 dark:text-white">
+                              <FaStar className="inline -mt-0.5" />{" "}
+                              {tWatchDetail("membersOnlyBadge")}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       <div className="p-3 pt-1">
                         <div className="font-medium line-clamp-2 dark:text-gray-100">

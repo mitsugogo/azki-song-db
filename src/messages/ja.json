@@ -112,7 +112,8 @@
       "additionalInfo": "追加情報:",
       "timesSung": "歌った回数:",
       "times": "回",
-      "videosWithSong": "この曲を歌った枠:"
+      "videosWithSong": "この曲を歌った枠:",
+      "membersOnlyBadge": "メンバー限定"
     },
     "createPlaylistModal": {
       "title": "新規プレイリストを作成",
@@ -273,6 +274,47 @@
     "playlist": {
       "title": "プレイリスト",
       "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
+    },
+    "membersOnlyAccess": {
+      "title": "メンバー限定コンテンツ解除 | {siteName}",
+      "description": "所定のパスワードを入力して、メンバー限定シートを含むデータをこの端末で閲覧できるようにします。"
+    }
+  },
+  "MembersOnlyAccess": {
+    "eyebrow": "Hidden Access",
+    "title": "メンバー限定コンテンツの解除",
+    "description": "メンバー限定動画の再生確認が通ると、このブラウザから取得する楽曲データにメンバー限定情報が含まれるようになります。",
+    "notConfigured": "この環境ではメンバー限定コンテンツ解除がまだ設定されていません。",
+    "statusUnlocked": "現在、このブラウザではメンバー限定コンテンツが有効です。",
+    "statusUnlockedHelp": "アンロック後はメンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを含まないように戻したい場合は「ロック」をしてください。",
+    "statusLocked": "現在、このブラウザではメンバー限定コンテンツは無効です。",
+    "statusLockedHelp": "アンロックすると、メンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを表示したい場合は、動画の再生確認が成功した状態でパスワードを入力し、「解除する」を押してください。",
+    "playback": {
+      "title": "メンバー限定動画の再生確認",
+      "description": "下のYouTube埋め込みプレイヤーでメンバー限定動画の再生を試します。再生に成功したブラウザだけ解除できます。",
+      "statusIdle": "再生確認はまだ開始されていません。",
+      "statusChecking": "メンバー限定動画の再生可否を確認中です。",
+      "statusVerified": "メンバー限定動画の再生を確認しました。解除できます。",
+      "statusFailed": "メンバー限定動画の再生を確認できませんでした。YouTube でメンバー権限のある状態か確認してから再試行してください。",
+      "retry": "再確認する"
+    },
+    "passwordLabel": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "submit": "解除する",
+    "submitting": "処理中...",
+    "lock": "ロックする",
+    "errors": {
+      "members_only_access_not_configured": "サーバー側の設定が未完了です。",
+      "invalid_request_body": "送信内容の読み取りに失敗しました。",
+      "password_required": "パスワードを入力してください。",
+      "playback_verification_required": "先にメンバー限定動画の再生確認を完了してください。",
+      "invalid_password": "パスワードが一致しません。",
+      "network_error": "通信に失敗しました。時間をおいて再試行してください。",
+      "unexpected_error": "予期しないエラーが発生しました。"
+    },
+    "notices": {
+      "unlockSuccess": "限定コンテンツを有効化しました。新しく取得する楽曲データにメンバー限定コンテンツが含まれます。",
+      "lockSuccess": "限定コンテンツを無効化しました。"
     }
   },
   "Share": {

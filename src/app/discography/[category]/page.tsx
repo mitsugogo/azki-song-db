@@ -82,7 +82,7 @@ async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
     try {
       const songsUrl = new URL(`/api/songs`, base);
       songsUrl.searchParams.set("hl", locale);
-      const res = await fetch(songsUrl);
+      const res = await fetch(songsUrl, { cache: "no-store" });
       if (res.ok) {
         return (await res.json()) as Song[];
       }
@@ -94,7 +94,7 @@ async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
   try {
     const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
     songsUrl.searchParams.set("hl", locale);
-    const res = await fetch(songsUrl);
+    const res = await fetch(songsUrl, { cache: "no-store" });
     if (res.ok) return (await res.json()) as Song[];
   } catch (e) {
     // ignore

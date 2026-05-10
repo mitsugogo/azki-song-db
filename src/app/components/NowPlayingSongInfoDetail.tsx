@@ -9,6 +9,7 @@ import {
   FaUser,
   FaUsers,
   FaYoutube,
+  FaStar,
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { IoAlbums, IoTime } from "react-icons/io5";
@@ -105,6 +106,12 @@ const NowPlayingSongInfoDetail = ({
                   >
                     {currentSong.title}
                   </Badge>
+                  {currentSong.is_members_only && (
+                    <Badge color="green" radius="sm">
+                      <FaStar className="inline -mt-0.5" />{" "}
+                      {t("membersOnlyBadge")}
+                    </Badge>
+                  )}
                 </dd>
               </div>
             )}

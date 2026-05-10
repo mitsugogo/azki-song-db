@@ -109,7 +109,9 @@ export async function generateMetadata({
 
     const songsUrl = new URL("/api/songs", baseUrl);
     songsUrl.searchParams.set("hl", locale);
-    const songs = await fetch(songsUrl).then((res) => res.json());
+    const songs = await fetch(songsUrl, { cache: "no-store" }).then((res) =>
+      res.json(),
+    );
     const song = songs.find(
       (s: Song) =>
         s.video_id === v &&
@@ -136,7 +138,9 @@ export async function generateMetadata({
   } else if (v) {
     const songsUrl = new URL("/api/songs/", baseUrl);
     songsUrl.searchParams.set("hl", locale);
-    const songs = await fetch(songsUrl).then((res) => res.json());
+    const songs = await fetch(songsUrl, { cache: "no-store" }).then((res) =>
+      res.json(),
+    );
     const filteredSongs = songs.filter((s: Song) => s.video_id === v);
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];
