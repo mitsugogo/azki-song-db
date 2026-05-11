@@ -157,10 +157,16 @@ export default function useMainPlayerControls({
       } catch (_) {}
 
       const currentVideoId = currentSong?.video_id;
+      const requestedStartTime = Number(currentSong?.start ?? startTime ?? 0);
       const shouldRestorePosition =
         currentVideoId === previousVideoId &&
         globalPlayer.currentTime > 0 &&
         !hasRestoredPosition;
+      const shouldSeekToRequestedStart =
+        !shouldRestorePosition &&
+        pendingSeekRef.current === null &&
+        Number.isFinite(requestedStartTime) &&
+        requestedStartTime > 0;
 
       if (shouldRestorePosition) {
         setTimeout(() => {
@@ -170,6 +176,15 @@ export default function useMainPlayerControls({
             setHasRestoredPosition(true);
           }
         }, 500);
+      } else if (shouldSeekToRequestedStart) {
+        setTimeout(() => {
+          const player = event.target;
+          if (player && typeof player.seekTo === "function") {
+            player.seekTo(requestedStartTime, true);
+            setPlayerCurrentTime(requestedStartTime);
+            globalPlayer.setCurrentTime(requestedStartTime);
+          }
+        }, 100);
       } else if (currentVideoId !== previousVideoId) {
         setHasRestoredPosition(false);
       }
@@ -193,6 +208,8 @@ export default function useMainPlayerControls({
       updatePlayerSnapshot,
       applyPersistedVolume,
       currentSong?.video_id,
+      currentSong?.start,
+      startTime,
       previousVideoId,
       globalPlayer.currentTime,
       hasRestoredPosition,

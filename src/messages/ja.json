@@ -88,7 +88,8 @@
       "collapse": "折りたたむ",
       "subscribers": "チャンネル登録者 {count}",
       "otherChannels": "他 {count} チャンネル",
-      "lastUpdated": "最終更新: {date}"
+      "lastUpdated": "最終更新: {date}",
+      "membersOnly": "メンバー限定"
     },
     "nowPlayingSongInfoDetail": {
       "title": "タイトル:",
@@ -283,7 +284,7 @@
   "MembersOnlyAccess": {
     "eyebrow": "Hidden Access",
     "title": "メンバー限定コンテンツの解除",
-    "description": "メンバー限定動画の再生確認が通ると、このブラウザから取得する楽曲データにメンバー限定情報が含まれるようになります。",
+    "description": "メンバー限定動画の再生確認が通ると、このブラウザから取得する楽曲データにメンバー限定情報が含まれるようになります。メンバー限定動画の内容は非公開の可能性があるため、SNSのシェアなどは注意してください。",
     "notConfigured": "この環境ではメンバー限定コンテンツ解除がまだ設定されていません。",
     "statusUnlocked": "現在、このブラウザではメンバー限定コンテンツが有効です。",
     "statusUnlockedHelp": "アンロック後はメンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを含まないように戻したい場合は「ロック」をしてください。",
@@ -291,14 +292,14 @@
     "statusLockedHelp": "アンロックすると、メンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを表示したい場合は、動画の再生確認が成功した状態でパスワードを入力し、「解除する」を押してください。",
     "playback": {
       "title": "メンバー限定動画の再生確認",
-      "description": "下のYouTube埋め込みプレイヤーでメンバー限定動画の再生を試します。再生に成功したブラウザだけ解除できます。",
+      "description": "メンバー限定動画の再生を確認し、メンバーシップに入っているかをチェックします。",
       "statusIdle": "再生確認はまだ開始されていません。",
       "statusChecking": "メンバー限定動画の再生可否を確認中です。",
-      "statusVerified": "メンバー限定動画の再生を確認しました。解除できます。",
+      "statusVerified": "メンバー限定動画の再生を確認できました。解除できます。",
       "statusFailed": "メンバー限定動画の再生を確認できませんでした。YouTube でメンバー権限のある状態か確認してから再試行してください。",
       "retry": "再確認する"
     },
-    "passwordLabel": "パスワード",
+    "passwordLabel": "解除パスワード",
     "passwordPlaceholder": "パスワードを入力",
     "submit": "解除する",
     "submitting": "処理中...",
@@ -1082,6 +1083,8 @@
     "qrAlt": "{target}のQRコード",
     "qrTrademark": "QRコードは株式会社デンソーウェーブの登録商標です",
     "copied": "コピーしました！",
-    "close": "閉じる"
+    "close": "閉じる",
+    "membersOnlyAlert": "メンバー限定動画です。非公開の場合があるため、SNS等へのシェアには注意してください。",
+    "membersOnlyAlertTitle": "メンバー限定動画"
   }
 }

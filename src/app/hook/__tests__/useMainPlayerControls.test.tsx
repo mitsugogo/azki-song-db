@@ -596,6 +596,31 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.seekTo).toHaveBeenCalledWith(50, true);
   });
 
+  it("異なる動画の開始位置はready後に補正シークされる", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledWith(10, true);
+    expect(mockGlobalPlayer.setCurrentTime).toHaveBeenCalledWith(10);
+  });
+
   it("isPlayingがtrueの場合、時間更新のインターバルが実行される", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

@@ -14,7 +14,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTextSelection } from "@mantine/hooks";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { Link } from "@/i18n/navigation";
-import { FaPlus, FaThumbsUp, FaUsers } from "react-icons/fa6";
+import { FaPlus, FaStar, FaThumbsUp, FaUsers } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
 import React, { use, useEffect, useMemo, useState, useRef } from "react";
@@ -647,6 +647,19 @@ const NowPlayingSongInfo = ({
                     hashtagPlatform: "self",
                   })}
                 </h2>
+                {currentSong.is_members_only && (
+                  <div className="members-only-badge">
+                    <Badge
+                      color="green"
+                      size="sm"
+                      leftSection={<FaStar />}
+                      radius="sm"
+                      variant="light"
+                    >
+                      {t("membersOnly")}
+                    </Badge>
+                  </div>
+                )}
               </div>
             </div>
 

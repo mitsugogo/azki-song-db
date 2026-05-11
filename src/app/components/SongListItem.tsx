@@ -4,8 +4,7 @@ import React from "react";
 import { Song } from "../types/song";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import MilestoneBadge from "./MilestoneBadge";
-import { Badge } from "flowbite-react";
-import { Indicator } from "@mantine/core";
+import { Indicator, Badge } from "@mantine/core";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { Link } from "@/i18n/navigation";
@@ -106,14 +105,6 @@ const SongListItem = React.memo(
                   />
                 </div>
               </Indicator>
-              {song.is_members_only && (
-                <div className="absolute right-1.5 top-1.5 z-20">
-                  <Badge className="border-0 bg-emerald-600/95 px-1.5 py-0.5 text-[0.55rem] font-bold tracking-wide text-white shadow-sm dark:bg-emerald-500 dark:text-white">
-                    <FaStar className="inline -mt-0.5" />{" "}
-                    {t("membersOnlyBadge")}
-                  </Badge>
-                </div>
-              )}
               {song.milestones && song.milestones.length > 0 && (
                 <div className="absolute top-0 left-0 z-20 text-xs truncate">
                   <div>
@@ -126,6 +117,20 @@ const SongListItem = React.memo(
               <div
                 className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white`}
               >
+                {song.is_members_only && (
+                  <div className="text-xs">
+                    <Badge
+                      color="green"
+                      size="xs"
+                      radius="xs"
+                      className="text-[0.5rem]"
+                      variant="light"
+                    >
+                      <FaStar className="inline -mt-0.5" />{" "}
+                      {t("membersOnlyBadge")}
+                    </Badge>
+                  </div>
+                )}
                 <span
                   className={`${
                     isHide
@@ -159,7 +164,12 @@ const SongListItem = React.memo(
                 </span>
                 {song.live_call && (
                   <span className="text-xs">
-                    <Badge className="inline text-[0.5rem] bg-cyan-500 dark:bg-cyan-700 text-white dark:text-white">
+                    <Badge
+                      color="cyan"
+                      size="xs"
+                      className="text-[0.5rem]"
+                      variant="light"
+                    >
                       {t("callBadge")}
                     </Badge>
                   </span>

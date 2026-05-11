@@ -88,7 +88,8 @@
       "collapse": "Show less",
       "subscribers": "{count} subscribers",
       "otherChannels": "{count} more channels",
-      "lastUpdated": "Last updated: {date}"
+      "lastUpdated": "Last updated: {date}",
+      "membersOnly": "Members only"
     },
     "nowPlayingSongInfoDetail": {
       "title": "Title:",
@@ -284,7 +285,7 @@
   "MembersOnlyAccess": {
     "eyebrow": "Hidden Access",
     "title": "Unlock members-only data",
-    "description": "Once the members-only video playback check succeeds, song data fetched in this browser will include members-only information.",
+    "description": "Once the members-only video playback check succeeds, song data fetched in this browser will include members-only information. Members-only videos may become private, so please be careful when sharing them on social media.",
     "notConfigured": "Members-only access has not been configured in this environment yet.",
     "statusUnlocked": "Members-only data is currently enabled in this browser.",
     "statusUnlockedHelp": "After unlocking, members-only content will also be included. If you want to go back to hiding members-only content, press \"Lock\".",
@@ -292,7 +293,7 @@
     "statusLockedHelp": "After unlocking, members-only content will also be included. To view members-only content, complete the playback check, enter the password, and press \"Unlock\".",
     "playback": {
       "title": "Members-only video playback check",
-      "description": "The embedded YouTube player below attempts to play a members-only video. Only browsers that can actually play it can be unlocked.",
+      "description": "Checks whether a members-only video can be played to confirm that the current YouTube session has an active membership.",
       "statusIdle": "The playback check has not started yet.",
       "statusChecking": "Checking whether the members-only video can be played.",
       "statusVerified": "Members-only video playback was confirmed. You can now unlock access.",
@@ -1084,6 +1085,8 @@
     "qrAlt": "QR code for {target}",
     "qrTrademark": "QR Code is a registered trademark of DENSO WAVE INCORPORATED in Japan and in other countries.",
     "copied": "Copied",
-    "close": "Close"
+    "close": "Close",
+    "membersOnlyAlert": "This is a member-only video. \nPlease be careful when sharing on SNS, etc. as it may be private.",
+    "membersOnlyAlertTitle": "Members only video"
   }
 }
