@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks", "react-icons"],
+    esmExternals: "loose",
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
