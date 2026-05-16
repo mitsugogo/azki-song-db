@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
+import "@swc/helpers/esm/_interop_require_default.js";
+import "@swc/helpers/esm/_interop_require_wildcard.js";
 import { routing } from "./i18n/routing";
 
 // 固定の許可オリジン
