@@ -44,7 +44,7 @@
     "@mui/icons-material": "^9.0.0",
     "@mui/material": "^9.0.0",
     "@mui/styled-engine-sc": "^9.0.0",
-    "@swc/helpers": "^0.5.19",
+    "@swc/helpers": "^0.5.21",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
     "@tiptap/extension-link": "^3.22.4",
@@ -103,7 +103,7 @@
     "cookie": "^0.7.1",
     "path-to-regexp": "^6.2.3",
     "serialize-javascript": "^7.0.3",
-    "@swc/helpers": "^0.5.19",
+    "@swc/helpers": "^0.5.21",
     "glob": "^9.3.0",
     "rimraf": "^4.0.0"
   }
