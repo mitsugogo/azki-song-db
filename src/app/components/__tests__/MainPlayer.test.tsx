@@ -71,6 +71,22 @@ const originalSong: Song = {
 
 const allSongs: Song[] = [coverSong, originalSong];
 
+const sharedVideoFirstSong: Song = {
+  ...coverSong,
+  video_id: "shared-video",
+  start: 0,
+  end: 120,
+  title: "Shared Video First Song",
+};
+
+const sharedVideoLaterSong: Song = {
+  ...originalSong,
+  video_id: "shared-video",
+  start: 480,
+  end: 720,
+  title: "Shared Video Later Song",
+};
+
 const searchState = {
   songs: allSongs,
   setSongs: vi.fn<(songs: Song[]) => void>(),
@@ -97,6 +113,7 @@ const controlsState = {
   playRandomSong: vi.fn(),
   handlePlayerOnReady: vi.fn(),
   handlePlayerStateChange: vi.fn(),
+  handlePlayerError: vi.fn(),
   setPreviousAndNextSongs: vi.fn(),
   setHasRestoredPosition: vi.fn(),
   setPreviousVideoId: vi.fn(),
@@ -247,6 +264,25 @@ describe("MainPlayer", () => {
     await waitFor(() => {
       expect(searchState.setSearchTerm).toHaveBeenCalledWith("");
       expect(searchState.setSongs).toHaveBeenCalledWith(allSongs);
+    });
+  });
+
+  it("URLのtに一致する曲がなくても開始秒を維持して再生する", async () => {
+    window.history.replaceState({}, "", "/watch?v=shared-video&t=387s");
+
+    searchState.songs = [sharedVideoFirstSong, sharedVideoLaterSong];
+    controlsState.currentSong = null;
+    controlsState.videoId = "";
+    controlsState.startTime = 0;
+
+    render(<MainPlayer />);
+
+    await waitFor(() => {
+      expect(controlsState.changeCurrentSong).toHaveBeenCalledWith(
+        null,
+        "shared-video",
+        387,
+      );
     });
   });
 });

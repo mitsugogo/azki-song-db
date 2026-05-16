@@ -10,7 +10,6 @@ import {
 import { Song } from "../types/song";
 import { useTranslations } from "next-intl";
 import SongsList from "./SongList";
-import { Button } from "@mantine/core";
 import {
   LuArrowDownWideNarrow,
   LuArrowUpWideNarrow,
@@ -19,7 +18,7 @@ import {
 } from "react-icons/lu";
 import { LuSparkles } from "react-icons/lu";
 import {
-  Button as MantineButton,
+  Button,
   Menu,
   Grid,
   Modal,
@@ -630,13 +629,13 @@ export default function SearchAndSongList({
           {playlists.length === 0 && favorites.length === 0 ? (
             <>
               <div>{t("createPlaylistLead")}</div>
-              <MantineButton
+              <Button
                 onClick={() => setOpenCreatePlaylistModal(true)}
                 className="mt-2"
               >
                 <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
                 {t("createPlaylist")}
-              </MantineButton>
+              </Button>
             </>
           ) : (
             <>
@@ -703,7 +702,7 @@ export default function SearchAndSongList({
                         >
                           {({ copied, copy }) => (
                             <Tooltip withArrow label={t("copyPlaylistUrl")}>
-                              <MantineButton
+                              <Button
                                 onClick={copy}
                                 color={`${copied ? "green" : "gray"}`}
                                 size="xs"
@@ -713,7 +712,7 @@ export default function SearchAndSongList({
                                 ) : (
                                   <MdContentCopy className="inline w-5 h-5" />
                                 )}
-                              </MantineButton>
+                              </Button>
                             </Tooltip>
                           )}
                         </CopyButton>
@@ -756,7 +755,7 @@ export default function SearchAndSongList({
                     >
                       {({ copied, copy }) => (
                         <Tooltip withArrow label={t("copyPlaylistUrl")}>
-                          <MantineButton
+                          <Button
                             onClick={copy}
                             color={`${copied ? "green" : "gray"}`}
                             size="xs"
@@ -766,7 +765,7 @@ export default function SearchAndSongList({
                             ) : (
                               <MdContentCopy className="inline w-5 h-5" />
                             )}
-                          </MantineButton>
+                          </Button>
                         </Tooltip>
                       )}
                     </CopyButton>
@@ -775,7 +774,7 @@ export default function SearchAndSongList({
               </ScrollArea>
 
               <div className="border-t border-light-gray-300 dark:border-gray-600 mt-2">
-                <MantineButton
+                <Button
                   className="mt-2"
                   color={"gray"}
                   w={"100%"}
@@ -785,19 +784,19 @@ export default function SearchAndSongList({
                   }
                 >
                   {t("disablePlaylistMode")}
-                </MantineButton>
+                </Button>
               </div>
             </>
           )}
         </Modal.Body>
-        <MantineButton
+        <Button
           variant="filled"
           color="dark"
           className="ml-3"
           onClick={() => setShowPlaylistSelector(false)}
         >
           {t("close")}
-        </MantineButton>
+        </Button>
       </Modal>
 
       <CreatePlaylistModal

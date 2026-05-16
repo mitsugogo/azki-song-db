@@ -55,6 +55,7 @@ type PlayerSectionProps = {
   handleStateChange: (
     event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
   ) => void;
+  handlePlayerError?: (event: YouTubeEvent<number>) => void;
   changeCurrentSong: (
     song: Song | null,
     videoId?: string,
@@ -93,6 +94,7 @@ export default function PlayerSection({
   timedLiveCallText,
   handlePlayerOnReady,
   handleStateChange,
+  handlePlayerError,
   changeCurrentSong,
   playRandomSong,
   setSongs,
@@ -185,6 +187,11 @@ export default function PlayerSection({
                 }
                 onStateChange={
                   handleStateChange as (event: YouTubeEvent<any>) => void
+                }
+                onError={
+                  handlePlayerError as
+                    | ((event: YouTubeEvent<any>) => void)
+                    | undefined
                 }
               />
             )}

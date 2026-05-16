@@ -35,6 +35,9 @@ export default function useMainPlayerControls({
   const playerRefVideoIdRef = useRef<string | null>(null);
   const lastPlayerReadyAtRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
+  const initialStartSeekRef = useRef<number | null>(null);
+  const initialStartSeekRetryCountRef = useRef(0);
+  const membersOnlyReloadAttemptedSongKeyRef = useRef<string | null>(null);
   // seek-in-flight tracking
   const seekInFlightRef = useRef<number | null>(null);
   const [seekInFlight, setSeekInFlight] = useState<number | null>(null);
@@ -61,6 +64,7 @@ export default function useMainPlayerControls({
     timedLiveCallText,
     setHideFutureSongs,
     changeCurrentSong,
+    resetPlayer,
     playRandomSong,
     handlePlayerOnReady: originalHandlePlayerOnReady,
     handleStateChange: originalHandleStateChange,
@@ -137,13 +141,24 @@ export default function useMainPlayerControls({
    */
   const handlePlayerOnReady = useCallback(
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
-      originalHandlePlayerOnReady(event);
-      playerRef.current = event.target;
-
       const videoIdFromPlayer =
         typeof event.target.getVideoData === "function"
           ? (event.target.getVideoData()?.video_id ?? null)
           : null;
+      const expectedVideoId =
+        currentSong?.video_id ?? latestVideoIdRef.current ?? videoId ?? null;
+
+      if (
+        videoIdFromPlayer &&
+        expectedVideoId &&
+        videoIdFromPlayer !== expectedVideoId
+      ) {
+        return;
+      }
+
+      originalHandlePlayerOnReady(event);
+      playerRef.current = event.target;
+
       playerRefVideoIdRef.current =
         videoIdFromPlayer ??
         currentSong?.video_id ??
@@ -157,7 +172,9 @@ export default function useMainPlayerControls({
       } catch (_) {}
 
       const currentVideoId = currentSong?.video_id;
-      const requestedStartTime = Number(currentSong?.start ?? startTime ?? 0);
+      const readyVideoId =
+        currentVideoId ?? latestVideoIdRef.current ?? videoId ?? null;
+      const requestedStartTime = Number(startTime ?? currentSong?.start ?? 0);
       const shouldRestorePosition =
         currentVideoId === previousVideoId &&
         globalPlayer.currentTime > 0 &&
@@ -168,21 +185,48 @@ export default function useMainPlayerControls({
         Number.isFinite(requestedStartTime) &&
         requestedStartTime > 0;
 
+      if (shouldSeekToRequestedStart) {
+        initialStartSeekRef.current = requestedStartTime;
+        initialStartSeekRetryCountRef.current = 0;
+      } else if (!shouldRestorePosition) {
+        initialStartSeekRef.current = null;
+        initialStartSeekRetryCountRef.current = 0;
+      }
+
       if (shouldRestorePosition) {
         setTimeout(() => {
-          const player = event.target;
+          const player = playerRef.current;
+          const activeVideoId =
+            playerRefVideoIdRef.current ??
+            (typeof player?.getVideoData === "function"
+              ? (player.getVideoData()?.video_id ?? null)
+              : null);
+          if (!player || activeVideoId !== readyVideoId) {
+            return;
+          }
           if (player && typeof player.seekTo === "function") {
             player.seekTo(globalPlayer.currentTime, true);
             setHasRestoredPosition(true);
+            initialStartSeekRef.current = null;
+            initialStartSeekRetryCountRef.current = 0;
           }
         }, 500);
       } else if (shouldSeekToRequestedStart) {
         setTimeout(() => {
-          const player = event.target;
+          const player = playerRef.current;
+          const activeVideoId =
+            playerRefVideoIdRef.current ??
+            (typeof player?.getVideoData === "function"
+              ? (player.getVideoData()?.video_id ?? null)
+              : null);
+          if (!player || activeVideoId !== readyVideoId) {
+            return;
+          }
           if (player && typeof player.seekTo === "function") {
             player.seekTo(requestedStartTime, true);
             setPlayerCurrentTime(requestedStartTime);
             globalPlayer.setCurrentTime(requestedStartTime);
+            initialStartSeekRetryCountRef.current += 1;
           }
         }, 100);
       } else if (currentVideoId !== previousVideoId) {
@@ -210,6 +254,7 @@ export default function useMainPlayerControls({
       currentSong?.video_id,
       currentSong?.start,
       startTime,
+      videoId,
       previousVideoId,
       globalPlayer.currentTime,
       hasRestoredPosition,
@@ -223,8 +268,65 @@ export default function useMainPlayerControls({
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
       originalHandleStateChange(event);
       updatePlayerSnapshot(event.target);
+
+      const requestedStartTime = initialStartSeekRef.current;
+      if (
+        requestedStartTime !== null &&
+        Number.isFinite(requestedStartTime) &&
+        requestedStartTime > 0
+      ) {
+        const currentTime =
+          typeof event.target.getCurrentTime === "function"
+            ? event.target.getCurrentTime()
+            : NaN;
+
+        if (
+          typeof currentTime === "number" &&
+          Number.isFinite(currentTime) &&
+          currentTime >= requestedStartTime - 1
+        ) {
+          initialStartSeekRef.current = null;
+          initialStartSeekRetryCountRef.current = 0;
+        } else if (
+          initialStartSeekRetryCountRef.current < 2 &&
+          typeof event.target.seekTo === "function"
+        ) {
+          event.target.seekTo(requestedStartTime, true);
+          setPlayerCurrentTime(requestedStartTime);
+          globalPlayer.setCurrentTime(requestedStartTime);
+          initialStartSeekRetryCountRef.current += 1;
+        }
+      }
     },
-    [originalHandleStateChange, updatePlayerSnapshot],
+    [globalPlayer, originalHandleStateChange, updatePlayerSnapshot],
+  );
+
+  const handlePlayerError = useCallback(
+    (event: YouTubeEvent<number>) => {
+      const errorCode = Number(event.data);
+      const currentSongKey = currentSong
+        ? `${currentSong.video_id}-${currentSong.start}`
+        : null;
+
+      if (
+        !currentSong?.is_members_only ||
+        !currentSongKey ||
+        (errorCode !== 101 && errorCode !== 150) ||
+        membersOnlyReloadAttemptedSongKeyRef.current === currentSongKey
+      ) {
+        return;
+      }
+
+      membersOnlyReloadAttemptedSongKeyRef.current = currentSongKey;
+      playerRef.current = null;
+      playerRefVideoIdRef.current = null;
+      setIsPlayerReady(false);
+      pendingSeekRef.current = null;
+      initialStartSeekRef.current = null;
+      initialStartSeekRetryCountRef.current = 0;
+      resetPlayer();
+    },
+    [currentSong, resetPlayer],
   );
 
   const changeVolume = useCallback(
@@ -452,9 +554,15 @@ export default function useMainPlayerControls({
 
   useEffect(() => {
     if (!currentSong) {
+      membersOnlyReloadAttemptedSongKeyRef.current = null;
       globalPlayer.setCurrentSong(null);
       setPreviousVideoId(null);
       return;
+    }
+
+    const currentSongKey = `${currentSong.video_id}-${currentSong.start}`;
+    if (membersOnlyReloadAttemptedSongKeyRef.current !== currentSongKey) {
+      membersOnlyReloadAttemptedSongKeyRef.current = null;
     }
 
     const currentVideoId = currentSong.video_id;
@@ -514,6 +622,8 @@ export default function useMainPlayerControls({
       playerRefVideoIdRef.current = null;
       setIsPlayerReady(false);
       pendingSeekRef.current = null;
+      initialStartSeekRef.current = null;
+      initialStartSeekRetryCountRef.current = 0;
     } else {
       // もし getVideoDataが利用できないためにクリアを遅延していた場合、マイクロタスクをスケジュールして、何も設定されなければ playerRefVideoIdRef を再確認してクリアする
       const recentlyReady =
@@ -527,6 +637,8 @@ export default function useMainPlayerControls({
               playerRefVideoIdRef.current = null;
               setIsPlayerReady(false);
               pendingSeekRef.current = null;
+              initialStartSeekRef.current = null;
+              initialStartSeekRetryCountRef.current = 0;
             }
           } catch (_) {}
         }, 0);
@@ -615,6 +727,7 @@ export default function useMainPlayerControls({
     playRandomSong,
     handlePlayerOnReady,
     handlePlayerStateChange,
+    handlePlayerError,
     setPreviousAndNextSongs,
     hasRestoredPosition,
     setHasRestoredPosition,

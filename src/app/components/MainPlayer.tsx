@@ -52,6 +52,7 @@ export default function MainPlayer() {
     playRandomSong,
     handlePlayerOnReady,
     handlePlayerStateChange,
+    handlePlayerError,
     setPreviousAndNextSongs,
     setHasRestoredPosition,
     setPreviousVideoId,
@@ -167,10 +168,15 @@ export default function MainPlayer() {
       );
       // videoIdとstartTimeを直指定で再生する場合
       if (song) {
-        changeCurrentSong(song);
+        changeCurrentSong(song, videoId, startTime);
         return;
       }
       if (!song) {
+        if (startTime > 0) {
+          changeCurrentSong(null, videoId, startTime);
+          return;
+        }
+
         // videoIdのみで曲を検索して再生する場合（startTimeは無視）
         const songByVideoId = songs.find((s) => s.video_id === videoId);
         if (songByVideoId) {
@@ -285,6 +291,7 @@ export default function MainPlayer() {
           searchSongs={searchSongs}
           handlePlayerOnReady={handlePlayerOnReady}
           handleStateChange={handlePlayerStateChange}
+          handlePlayerError={handlePlayerError}
           changeCurrentSong={changeCurrentSong}
           playRandomSong={playRandomSong}
           setSongsToCurrentVideo={setSongsToCurrentVideo}

@@ -11,6 +11,7 @@ interface YouTubePlayerProps {
   showNativeControls?: boolean;
   onReady: (event: YouTubeEvent<any>) => void;
   onStateChange: (event: YouTubeEvent<any>) => void;
+  onError?: (event: YouTubeEvent<any>) => void;
 }
 
 function YouTubePlayerComponent({
@@ -19,6 +20,7 @@ function YouTubePlayerComponent({
   showNativeControls,
   onReady,
   onStateChange,
+  onError,
 }: YouTubePlayerProps) {
   const showControls =
     typeof showNativeControls === "boolean" ? showNativeControls : true;
@@ -54,6 +56,7 @@ function YouTubePlayerComponent({
       opts={opts}
       onStateChange={onStateChange}
       onReady={onReady}
+      onError={onError}
     />
   );
 }
