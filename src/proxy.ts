@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
-import createMiddleware from "next-intl/middleware";
 
 // 固定の許可オリジン
 const allowedOrigins = [
@@ -38,12 +37,6 @@ function isAllowedOrigin(origin: string): boolean {
   if (vercelPreviewPattern.test(origin)) return true;
   return false;
 }
-
-export const middleware = createMiddleware({
-  locales: routing.locales,
-  defaultLocale: routing.defaultLocale,
-  localeDetection: false,
-});
 
 export function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/api")) {

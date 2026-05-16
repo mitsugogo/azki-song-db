@@ -41,6 +41,7 @@
     "@mui/icons-material": "^9.0.0",
     "@mui/material": "^9.0.0",
     "@mui/styled-engine-sc": "^9.0.0",
+    "@swc/helpers": "^0.5.19",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
     "@tiptap/extension-link": "^3.22.4",
