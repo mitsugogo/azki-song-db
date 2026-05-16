@@ -729,7 +729,7 @@
     "breadcrumb": "Anniversaries",
     "title": "Anniversaries",
     "description": "A list of anniversaries related to AZKi.",
-    "featuredTitle": "Closest Anniversary",
+    "featuredTitle": "next anniversary",
     "countdownFormat": "remains: {days}d {hours}h {minutes}m {seconds}s",
     "countdownFinished": "Any moment now",
     "loading": "Loading anniversaries...",
