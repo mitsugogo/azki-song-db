@@ -174,8 +174,7 @@ export default async function CategoryOrLegacyRedirect({
 }: {
   params: Promise<{ category: string }>;
 }) {
-  const headerStore = await headers();
-  const locale = headerStore.get("x-locale") ?? "ja";
+  const locale = await getLocale();
   const resolved = await params;
   const possibleSlug = decodeURIComponent(resolved.category || "");
   const normalizedCategory = normalizeCategorySlug(possibleSlug);
