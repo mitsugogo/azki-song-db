@@ -21,10 +21,13 @@ vi.mock("@/app/components/AnalyticsWrapper", () => ({
 }));
 
 vi.mock("@mantine/core", () => ({
+  createTheme: (value: any) => value,
   Breadcrumbs: ({ children }: any) => <div>{children}</div>,
+  Alert: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock("flowbite-react", () => ({
+  createTheme: (value: any) => value,
   ThemeProvider: ({ children }: any) => <>{children}</>,
 }));
 
