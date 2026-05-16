@@ -13,12 +13,24 @@ import LanguageSwitcher from "./components/LanguageSwitcher";
 import ThemeToggle from "./components/ThemeToggle";
 import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { siteConfig } from "./config/siteConfig";
+import useAnniversaries from "./hook/useAnniversaries";
+import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
+import {
+  buildMilestoneSearchHref,
+  computeNextIsoForAnniversary,
+  formatAnniversaryName,
+  getDaysUntil,
+  getFeaturedAnniversaries,
+  getTodayTimelineMilestones,
+  isAnniversaryToday,
+} from "./lib/highlights";
 import { flowbiteTheme } from "./theme";
 import { ThemeProvider } from "flowbite-react";
-import { LuSearch, LuSparkles } from "react-icons/lu";
+import { LuArrowRight, LuSearch, LuSparkles } from "react-icons/lu";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Song } from "./types/song";
 
@@ -95,9 +107,15 @@ export default function ClientTop() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
+  const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
+    useAnniversaries();
+  const { items: externalMilestones, isLoading: isMilestonesLoading } =
+    useMilestones();
   const t = useTranslations("Home");
   const tHeader = useTranslations("Header");
   const tDrawer = useTranslations("DrawerMenu");
+  const tAnniversaries = useTranslations("Anniversaries");
+  const tSummary = useTranslations("Summary");
   const [searchValue, setSearchValue] = useState<string[]>([]);
 
   useEffect(() => {
@@ -122,6 +140,24 @@ export default function ClientTop() {
     () => groupRecentUpdates(allSongs, 3),
     [allSongs],
   );
+
+  const featuredAnniversaries = useMemo(
+    () => getFeaturedAnniversaries(anniversaryItems),
+    [anniversaryItems],
+  );
+
+  const todayMilestones = useMemo(
+    () => getTodayTimelineMilestones(allSongs, externalMilestones),
+    [allSongs, externalMilestones],
+  );
+
+  const hasFeaturedAnniversaryToday = useMemo(() => {
+    if (featuredAnniversaries.length === 0) {
+      return false;
+    }
+
+    return isAnniversaryToday(featuredAnniversaries[0]);
+  }, [featuredAnniversaries]);
 
   const songsUpdatedLabel = useMemo(() => {
     if (!songsFetchedAt) {
@@ -263,6 +299,187 @@ export default function ClientTop() {
               </div>
             </section>
 
+            <section className="pb-12 sm:pb-14">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                        {t("anniversariesTitle")}
+                      </h2>
+                    </div>
+                    <Link
+                      href="/anniversaries"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                    >
+                      {t("viewAnniversaries")}
+                      <LuArrowRight className="shrink-0" />
+                    </Link>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {isAnniversariesLoading ? (
+                      Array.from({ length: 1 }).map((_, index) => (
+                        <div
+                          key={`anniversary-skeleton-${index}`}
+                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          aria-hidden="true"
+                        >
+                          <Skeleton height={16} radius="sm" />
+                          <Skeleton height={12} radius="sm" className="mt-2" />
+                          <Skeleton
+                            height={12}
+                            width="55%"
+                            radius="sm"
+                            className="mt-2"
+                          />
+                        </div>
+                      ))
+                    ) : featuredAnniversaries.length > 0 ? (
+                      featuredAnniversaries.map((item, index) => {
+                        const nextIso = computeNextIsoForAnniversary(item);
+                        const daysUntil = nextIso
+                          ? getDaysUntil(nextIso)
+                          : null;
+
+                        return (
+                          <div
+                            key={`${item.name}-${index}`}
+                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                  {formatAnniversaryName(item, locale)}
+                                </p>
+                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                  {nextIso ? formatDate(nextIso, locale) : "-"}
+                                </p>
+                                {daysUntil !== null ? (
+                                  <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
+                                    {daysUntil === 0
+                                      ? tAnniversaries("featuredTodayTitle")
+                                      : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
+                                  </p>
+                                ) : null}
+                                {item.note ? (
+                                  <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                    {item.note}
+                                  </p>
+                                ) : null}
+                              </div>
+                              {item.url ? (
+                                <Link
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
+                                >
+                                  <FaExternalLinkAlt className="text-[0.65rem]" />
+                                  URL
+                                </Link>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                        {tAnniversaries("empty")}
+                      </p>
+                    )}
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                        {tSummary("todayMilestonesTitle")}
+                      </h2>
+                    </div>
+                    <Link
+                      href="/summary"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                    >
+                      {t("viewSummary")}
+                      <LuArrowRight className="shrink-0" />
+                    </Link>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {isLoading || isMilestonesLoading ? (
+                      Array.from({ length: 1 }).map((_, index) => (
+                        <div
+                          key={`milestone-skeleton-${index}`}
+                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          aria-hidden="true"
+                        >
+                          <Skeleton height={12} width="25%" radius="sm" />
+                          <Skeleton height={16} radius="sm" className="mt-2" />
+                          <Skeleton
+                            height={12}
+                            width="65%"
+                            radius="sm"
+                            className="mt-2"
+                          />
+                        </div>
+                      ))
+                    ) : todayMilestones.length > 0 ? (
+                      todayMilestones.slice(0, 1).map((milestone, index) => {
+                        const milestoneContent = milestone.is_external ? (
+                          milestone.url ? (
+                            <Link
+                              href={milestone.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                            >
+                              {milestone.text}
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {milestone.text}
+                            </span>
+                          )
+                        ) : (
+                          <Link
+                            href={buildMilestoneSearchHref(milestone.text)}
+                            className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                          >
+                            {milestone.text}
+                          </Link>
+                        );
+
+                        return (
+                          <div
+                            key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
+                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          >
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatDate(milestone.date, locale)}
+                            </p>
+                            <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+                              {milestoneContent}
+                              {milestone.note ? (
+                                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                  {milestone.note}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                        {t("todayMilestonesEmpty")}
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            </section>
+
             <section className="pb-10">
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
@@ -357,7 +574,9 @@ export default function ClientTop() {
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
                             {formatDate(update.date, locale)}{" "}
                             <span className="pl-3 text-gray-100">
-                              {update.count}曲追加
+                              {t("recentUpdatesAddedCount", {
+                                count: update.count,
+                              })}
                             </span>
                           </p>
                           <div className="mt-2 flex items-center gap-2">
