@@ -503,6 +503,7 @@
   "Playlist": {
     "title": "プレイリスト",
     "manageTitle": "プレイリストの管理",
+    "favoritesName": "お気に入り",
     "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト",
     "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
     "aria": {

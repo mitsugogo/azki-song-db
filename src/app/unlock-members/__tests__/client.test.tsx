@@ -26,11 +26,6 @@ vi.mock("@mantine/core", () => ({
   Alert: ({ children }: any) => <div>{children}</div>,
 }));
 
-vi.mock("flowbite-react", () => ({
-  createTheme: (value: any) => value,
-  ThemeProvider: ({ children }: any) => <>{children}</>,
-}));
-
 vi.mock("react-youtube", () => ({
   __esModule: true,
   default: (props: any) => {

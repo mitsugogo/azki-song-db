@@ -3,8 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "flowbite-react";
-import { Badge, Drawer, Modal, Tooltip } from "@mantine/core";
+import { Badge, Button, Drawer, Modal, Tooltip } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
@@ -212,7 +211,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             <hr className="my-6 border border-light-gray-200 dark:border-gray-600 md:hidden" />
           </div>
 
-          <div className="flex-shrink-0 w-[calc(100%-1.5rem)] pb-3">
+          <div className="shrink-0 w-[calc(100%-1.5rem)] pb-3">
             <Link
               href="https://www.youtube.com/@AZKi"
               target="_blank"
@@ -340,7 +339,8 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
         <Acknowledgment />
         <div className="mt-4 flex justify-end">
           <Button
-            className="bg-primary hover:bg-primary text-white transition text-sm cursor-pointer"
+            className="transition text-sm cursor-pointer"
+            color="pink"
             onClick={() => setShowAcknowledgment(false)}
           >
             {t("close")}

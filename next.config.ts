@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 const createNextIntlPlugin = require("next-intl/plugin");
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -21,7 +20,6 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks", "react-icons"],
-    esmExternals: "loose",
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
@@ -51,6 +49,4 @@ const withPWA = require("next-pwa")({
 
 const withVercelToolbar = require("@vercel/toolbar/plugins/next")();
 
-export default withVercelToolbar(
-  withNextIntl(withFlowbiteReact(withPWA(nextConfig))),
-);
+export default withVercelToolbar(withNextIntl(withPWA(nextConfig)));

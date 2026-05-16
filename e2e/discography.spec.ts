@@ -2,6 +2,17 @@ import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 import { getCachedSongs } from "./test-utils";
 
+const waitForDiscographyTabs = async (
+  page: Parameters<typeof test>[0]["page"],
+) => {
+  await expect(page.getByRole("heading", { name: /Discography/i })).toBeVisible(
+    {
+      timeout: 10000,
+    },
+  );
+  await expect(page.getByRole("tab").first()).toBeVisible({ timeout: 10000 });
+};
+
 function getDiscographyCategory(song: any) {
   const tags = song?.tags ?? [];
   if (
@@ -75,11 +86,7 @@ test.describe("Discography page", () => {
       waitUntil: "domcontentloaded",
     });
 
-    // Wait for loading overlay to disappear
-    await page.waitForSelector(".mantine-LoadingOverlay-root", {
-      state: "hidden",
-      timeout: 10000,
-    });
+    await waitForDiscographyTabs(page);
 
     const tabs = page.getByRole("tab");
     const tabCount = await tabs.count();
@@ -102,10 +109,7 @@ test.describe("Discography page", () => {
     // Use query param which is resilient to routing changes
     await page.goto("/discography/covers", { waitUntil: "domcontentloaded" });
 
-    await page.waitForSelector(".mantine-LoadingOverlay-root", {
-      state: "hidden",
-      timeout: 10000,
-    });
+    await waitForDiscographyTabs(page);
 
     const tabs = page.getByRole("tab");
     const tabCount = await tabs.count();

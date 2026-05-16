@@ -1,10 +1,9 @@
 "use client";
 
 import { Breadcrumbs } from "@mantine/core";
-import { ThemeProvider } from "flowbite-react";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
-import { breadcrumbClasses, flowbiteTheme } from "@/app/theme";
+import { breadcrumbClasses } from "@/app/theme";
 import { Header } from "@/app/components/Header";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
@@ -12,11 +11,8 @@ import { useTranslations } from "next-intl";
 
 /** 共有ページ */
 export default function ShareIndexClient() {
-  const t = useTranslations("Share");
-  const dm = useTranslations("DrawerMenu");
-
   return (
-    <ThemeProvider theme={flowbiteTheme}>
+    <>
       <div className="flex flex-col h-dvh">
         <Header />
         <div className="flex flex-col grow md:flex-row overflow-y-hidden w-full">
@@ -25,7 +21,7 @@ export default function ShareIndexClient() {
         <Footer />
       </div>
       <AnalyticsWrapper />
-    </ThemeProvider>
+    </>
   );
 }
 

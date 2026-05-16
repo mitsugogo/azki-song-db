@@ -1,26 +1,28 @@
 import fs from "fs";
 import path from "path";
 
-export function getCachedSongs() {
-  const cachePath = path.join(__dirname, ".cache", "songs.json");
-  if (fs.existsSync(cachePath)) {
-    return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+function readCachedArray(fileName: string) {
+  const cachePath = path.join(__dirname, ".cache", fileName);
+  if (!fs.existsSync(cachePath)) {
+    return [];
   }
-  return [];
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function getCachedSongs() {
+  return readCachedArray("songs.json");
 }
 
 export function getCachedChannels() {
-  const cachePath = path.join(__dirname, ".cache", "channels.json");
-  if (fs.existsSync(cachePath)) {
-    return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-  }
-  return [];
+  return readCachedArray("channels.json");
 }
 
 export function getCachedMilestones() {
-  const cachePath = path.join(__dirname, ".cache", "milestones.json");
-  if (fs.existsSync(cachePath)) {
-    return JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-  }
-  return [];
+  return readCachedArray("milestones.json");
 }

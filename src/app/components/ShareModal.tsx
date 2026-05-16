@@ -4,7 +4,6 @@ import { Song } from "../types/song";
 import { Modal, TextInput, Button, Divider, Alert } from "@mantine/core";
 import { HiClipboardCopy } from "react-icons/hi";
 import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { Label } from "flowbite-react";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/i18n/routing";
@@ -88,10 +87,10 @@ export default function ShareModal({
 
         {/* YouTube URL */}
         <div>
-          <Label>
+          <div className="mb-1 text-sm font-medium">
             <FaYoutube className="inline" />
             &nbsp;{t("youtubeUrl")}
-          </Label>
+          </div>
           <div className="relative">
             <TextInput className="w-full" value={youtubeUrl} readOnly />
             <button
@@ -139,10 +138,10 @@ export default function ShareModal({
         </div>
         {/* AZKi Song Database URL */}
         <div className="mt-4">
-          <Label>
+          <div className="mb-1 text-sm font-medium">
             <FaDatabase className="inline" />
             &nbsp;{siteConfig.siteName}
-          </Label>
+          </div>
           <div className="relative">
             <TextInput
               className="w-full"

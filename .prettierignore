@@ -1,2 +1,3 @@
 # Ignore markdown files
 *.md
+.flowbite-react/

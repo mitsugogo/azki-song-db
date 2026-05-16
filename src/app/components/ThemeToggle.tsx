@@ -10,7 +10,7 @@ const ThemeToggle = ({ className }: { className?: string }) => {
   const t = useTranslations("ThemeToggle");
   const [mounted, setMounted] = useState(false);
 
-  // MantineのカラースキームからFlowbiteのモードを決定
+  // Mantineのカラースキームに合わせてTailwindのdarkクラスを同期する
   useEffect(() => {
     if (colorScheme === "auto" && isSystemDark) {
       document.documentElement.classList.add("dark");

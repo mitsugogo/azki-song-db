@@ -27,8 +27,6 @@ import {
   getTodayTimelineMilestones,
   isAnniversaryToday,
 } from "./lib/highlights";
-import { flowbiteTheme } from "./theme";
-import { ThemeProvider } from "flowbite-react";
 import { LuArrowRight, LuSearch, LuSparkles } from "react-icons/lu";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
@@ -180,531 +178,522 @@ export default function ClientTop() {
   };
 
   return (
-    <ThemeProvider theme={flowbiteTheme}>
-      <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
-        <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
-          <header
-            className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
-              isScrolled
-                ? "bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/70"
-                : "border-transparent bg-transparent"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <Burger
-                  opened={drawerOpened}
-                  onClick={toggleDrawer}
-                  aria-label="Toggle navigation"
-                />
-                <Link
-                  href={`/`}
-                  className="inline-block truncate text-base font-semibold tracking-[0.12em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"
-                >
-                  {siteConfig.siteNameUpper}
-                </Link>
-              </div>
+    <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
+      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
+        <header
+          className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+            isScrolled
+              ? "bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/70"
+              : "border-transparent bg-transparent"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <Burger
+                opened={drawerOpened}
+                onClick={toggleDrawer}
+                aria-label="Toggle navigation"
+              />
+              <Link
+                href={`/`}
+                className="inline-block truncate text-base font-semibold tracking-[0.12em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"
+              >
+                {siteConfig.siteNameUpper}
+              </Link>
+            </div>
 
-              <div className="flex shrink-0 items-center justify-end sm:gap-2">
-                <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
-                  <Link href={`/search`} className="hover:text-primary-500">
-                    <LuSearch />
-                  </Link>
+            <div className="flex shrink-0 items-center justify-end sm:gap-2">
+              <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
+                <Link href={`/search`} className="hover:text-primary-500">
+                  <LuSearch />
+                </Link>
+                <Link href={`/discography`} className="hover:text-primary-500">
+                  {tDrawer("discography")}
+                </Link>
+                <Link href={`/summary`} className="hover:text-primary-500">
+                  {tDrawer("activity")}
+                </Link>
+                <Link
+                  href={`/anniversaries`}
+                  className="hover:text-primary-500"
+                >
+                  {tDrawer("anniversaries")}
+                </Link>
+                <Link href={`/statistics`} className="hover:text-primary-500">
+                  {tDrawer("statistics")}
+                </Link>
+              </nav>
+              <LanguageSwitcher />
+              <ThemeToggle className="hover:text-primary-500 dark:hover:text-white dark:hover:bg-primary-800" />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex flex-1 flex-col">
+          <section className="flex min-h-[48dvh] flex-col items-center justify-center py-10 text-center sm:py-16">
+            <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/70 dark:text-pink-200/70">
+              {t("brand")}
+            </p>
+            <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+              {t("heroLine1")}
+              <br />
+              <span className="hidden md:inline">{t("heroLine2")}</span>
+              <span className="inline md:hidden">{t("heroLine2_short")}</span>
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
+              {t("description")}
+            </p>
+
+            <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
+              <SearchInput
+                allSongs={allSongs}
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+                placeholder={tHeader("searchPlaceholder")}
+                className="[&_input]:h-12 [&_input]:text-base"
+              />
+              <div className="mt-4 flex items-center justify-center gap-3 flex-row">
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    t("searching")
+                  ) : (
+                    <>
+                      <LuSearch className="mr-1 inline" />
+                      {t("searchButton")}
+                    </>
+                  )}
+                </button>
+                <Tooltip
+                  withArrow
+                  arrowSize={8}
+                  position="bottom"
+                  transitionProps={{ transition: "fade", duration: 300 }}
+                  label={
+                    <>
+                      <LuSparkles className="mr-1 inline" />
+                      {t("surpriseTooltip")}
+                    </>
+                  }
+                >
                   <Link
-                    href={`/discography`}
-                    className="hover:text-primary-500"
+                    href={`/watch`}
+                    className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
+                    aria-label={t("aria.randomPlay")}
                   >
-                    {tDrawer("discography")}
+                    <LuSparkles className="mr-1 inline" />
+                    {t("surpriseMe")}
                   </Link>
-                  <Link href={`/summary`} className="hover:text-primary-500">
-                    {tDrawer("activity")}
-                  </Link>
-                  <Link
-                    href={`/anniversaries`}
-                    className="hover:text-primary-500"
-                  >
-                    {tDrawer("anniversaries")}
-                  </Link>
-                  <Link href={`/statistics`} className="hover:text-primary-500">
-                    {tDrawer("statistics")}
-                  </Link>
-                </nav>
-                <LanguageSwitcher />
-                <ThemeToggle className="hover:text-primary-500 dark:hover:text-white dark:hover:bg-primary-800" />
+                </Tooltip>
               </div>
             </div>
-          </header>
+          </section>
 
-          <main className="flex flex-1 flex-col">
-            <section className="flex min-h-[48dvh] flex-col items-center justify-center py-10 text-center sm:py-16">
-              <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/70 dark:text-pink-200/70">
-                {t("brand")}
-              </p>
-              <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-                {t("heroLine1")}
-                <br />
-                <span className="hidden md:inline">{t("heroLine2")}</span>
-                <span className="inline md:hidden">{t("heroLine2_short")}</span>
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
-                {t("description")}
-              </p>
-
-              <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
-                <SearchInput
-                  allSongs={allSongs}
-                  searchValue={searchValue}
-                  onSearchChange={setSearchValue}
-                  placeholder={tHeader("searchPlaceholder")}
-                  className="[&_input]:h-12 [&_input]:text-base"
-                />
-                <div className="mt-4 flex items-center justify-center gap-3 flex-row">
-                  <button
-                    type="button"
-                    onClick={handleSearch}
-                    className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                    disabled={isPending}
-                  >
-                    {isPending ? (
-                      t("searching")
-                    ) : (
-                      <>
-                        <LuSearch className="mr-1 inline" />
-                        {t("searchButton")}
-                      </>
-                    )}
-                  </button>
-                  <Tooltip
-                    withArrow
-                    arrowSize={8}
-                    position="bottom"
-                    transitionProps={{ transition: "fade", duration: 300 }}
-                    label={
-                      <>
-                        <LuSparkles className="mr-1 inline" />
-                        {t("surpriseTooltip")}
-                      </>
-                    }
-                  >
-                    <Link
-                      href={`/watch`}
-                      className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
-                      aria-label={t("aria.randomPlay")}
-                    >
-                      <LuSparkles className="mr-1 inline" />
-                      {t("surpriseMe")}
-                    </Link>
-                  </Tooltip>
-                </div>
+          <section className="pb-10">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                  {t("recommendedLabel")}
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                  {t("recommendedTitle")}
+                </h2>
               </div>
-            </section>
+            </div>
 
-            <section className="pb-10">
-              <div className="mb-5 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    {t("recommendedLabel")}
-                  </p>
-                  <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    {t("recommendedTitle")}
-                  </h2>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {isLoading
-                  ? Array.from({ length: RECOMMENDED_SKELETON_COUNT }).map(
-                      (_, index) => (
-                        <div
-                          key={`recommended-skeleton-${index}`}
-                          className="overflow-hidden rounded-xl border border-white/70 bg-white/85 p-0 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/50 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
-                          aria-hidden="true"
-                        >
-                          <Skeleton height="100%" className="aspect-video" />
-                          <div className="space-y-2 p-3">
-                            <Skeleton height={16} radius="sm" />
-                            <Skeleton height={12} width="70%" radius="sm" />
-                            <div className="flex items-center justify-between gap-2 pt-1">
-                              <Skeleton height={10} width="28%" radius="sm" />
-                              <Skeleton height={10} width="42%" radius="sm" />
-                            </div>
-                          </div>
-                        </div>
-                      ),
-                    )
-                  : recommendedSongs.map((song) => (
-                      <Link
-                        key={`${song.video_id}-${song.start}-${song.title}`}
-                        href={buildWatchHref({
-                          videoId: song.video_id,
-                          start: song.start,
-                        })}
-                        className="group overflow-hidden rounded-xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] hover-lift-animation hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {isLoading
+                ? Array.from({ length: RECOMMENDED_SKELETON_COUNT }).map(
+                    (_, index) => (
+                      <div
+                        key={`recommended-skeleton-${index}`}
+                        className="overflow-hidden rounded-xl border border-white/70 bg-white/85 p-0 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/50 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
+                        aria-hidden="true"
                       >
-                        <div className="relative aspect-video overflow-hidden bg-black">
-                          <YoutubeThumbnail
-                            videoId={song.video_id}
-                            alt={song.title}
-                            imageClassName="transition duration-500"
-                          />
-                        </div>
+                        <Skeleton height="100%" className="aspect-video" />
                         <div className="space-y-2 p-3">
-                          <div className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
-                            {song.title}
-                          </div>
-                          <div className="line-clamp-1 text-xs text-gray-600 dark:text-gray-200">
-                            {song.artist}
-                          </div>
-                          <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
-                            <span>{song.year}</span>
-                            <span>{formatDate(song.broadcast_at, locale)}</span>
+                          <Skeleton height={16} radius="sm" />
+                          <Skeleton height={12} width="70%" radius="sm" />
+                          <div className="flex items-center justify-between gap-2 pt-1">
+                            <Skeleton height={10} width="28%" radius="sm" />
+                            <Skeleton height={10} width="42%" radius="sm" />
                           </div>
                         </div>
-                      </Link>
-                    ))}
-              </div>
-
-              <div className="mt-16 space-y-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    {t("timelineLabel")}
-                  </p>
-                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    {t("timelineTitle")}
-                  </h3>
-                </div>
-                <section>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                            {t("anniversariesTitle")}
-                          </h2>
-                        </div>
-                        <Link
-                          href="/anniversaries"
-                          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                        >
-                          {t("viewAnniversaries")}
-                          <LuArrowRight className="shrink-0" />
-                        </Link>
                       </div>
+                    ),
+                  )
+                : recommendedSongs.map((song) => (
+                    <Link
+                      key={`${song.video_id}-${song.start}-${song.title}`}
+                      href={buildWatchHref({
+                        videoId: song.video_id,
+                        start: song.start,
+                      })}
+                      className="group overflow-hidden rounded-xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] hover-lift-animation hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                    >
+                      <div className="relative aspect-video overflow-hidden bg-black">
+                        <YoutubeThumbnail
+                          videoId={song.video_id}
+                          alt={song.title}
+                          imageClassName="transition duration-500"
+                        />
+                      </div>
+                      <div className="space-y-2 p-3">
+                        <div className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+                          {song.title}
+                        </div>
+                        <div className="line-clamp-1 text-xs text-gray-600 dark:text-gray-200">
+                          {song.artist}
+                        </div>
+                        <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
+                          <span>{song.year}</span>
+                          <span>{formatDate(song.broadcast_at, locale)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+            </div>
 
-                      <div className="mt-4 space-y-3">
-                        {isAnniversariesLoading ? (
-                          Array.from({ length: 1 }).map((_, index) => (
+            <div className="mt-16 space-y-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                  {t("timelineLabel")}
+                </p>
+                <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                  {t("timelineTitle")}
+                </h3>
+              </div>
+              <section>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                          {t("anniversariesTitle")}
+                        </h2>
+                      </div>
+                      <Link
+                        href="/anniversaries"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                      >
+                        {t("viewAnniversaries")}
+                        <LuArrowRight className="shrink-0" />
+                      </Link>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {isAnniversariesLoading ? (
+                        Array.from({ length: 1 }).map((_, index) => (
+                          <div
+                            key={`anniversary-skeleton-${index}`}
+                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                            aria-hidden="true"
+                          >
+                            <Skeleton height={16} radius="sm" />
+                            <Skeleton
+                              height={12}
+                              radius="sm"
+                              className="mt-2"
+                            />
+                            <Skeleton
+                              height={12}
+                              width="55%"
+                              radius="sm"
+                              className="mt-2"
+                            />
+                          </div>
+                        ))
+                      ) : featuredAnniversaries.length > 0 ? (
+                        featuredAnniversaries.map((item, index) => {
+                          const nextIso = computeNextIsoForAnniversary(item);
+                          const daysUntil = nextIso
+                            ? getDaysUntil(nextIso)
+                            : null;
+
+                          return (
                             <div
-                              key={`anniversary-skeleton-${index}`}
+                              key={`${item.name}-${index}`}
                               className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                              aria-hidden="true"
                             >
-                              <Skeleton height={16} radius="sm" />
-                              <Skeleton
-                                height={12}
-                                radius="sm"
-                                className="mt-2"
-                              />
-                              <Skeleton
-                                height={12}
-                                width="55%"
-                                radius="sm"
-                                className="mt-2"
-                              />
-                            </div>
-                          ))
-                        ) : featuredAnniversaries.length > 0 ? (
-                          featuredAnniversaries.map((item, index) => {
-                            const nextIso = computeNextIsoForAnniversary(item);
-                            const daysUntil = nextIso
-                              ? getDaysUntil(nextIso)
-                              : null;
-
-                            return (
-                              <div
-                                key={`${item.name}-${index}`}
-                                className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                              >
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-                                      {formatAnniversaryName(item, locale)}
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                    {formatAnniversaryName(item, locale)}
+                                  </p>
+                                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                    {nextIso
+                                      ? formatDate(nextIso, locale)
+                                      : "-"}
+                                  </p>
+                                  {daysUntil !== null ? (
+                                    <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
+                                      {daysUntil === 0
+                                        ? tAnniversaries("featuredTodayTitle")
+                                        : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
                                     </p>
-                                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                      {nextIso
-                                        ? formatDate(nextIso, locale)
-                                        : "-"}
+                                  ) : null}
+                                  {item.note ? (
+                                    <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                      {item.note}
                                     </p>
-                                    {daysUntil !== null ? (
-                                      <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
-                                        {daysUntil === 0
-                                          ? tAnniversaries("featuredTodayTitle")
-                                          : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
-                                      </p>
-                                    ) : null}
-                                    {item.note ? (
-                                      <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-                                        {item.note}
-                                      </p>
-                                    ) : null}
-                                  </div>
-                                  {item.url ? (
-                                    <Link
-                                      href={item.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
-                                    >
-                                      <FaExternalLinkAlt className="text-[0.65rem]" />
-                                      URL
-                                    </Link>
                                   ) : null}
                                 </div>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-                            {tAnniversaries("empty")}
-                          </p>
-                        )}
-                      </div>
-                    </section>
-
-                    <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                            {tSummary("todayMilestonesTitle")}
-                          </h2>
-                        </div>
-                        <Link
-                          href="/summary"
-                          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                        >
-                          {t("viewSummary")}
-                          <LuArrowRight className="shrink-0" />
-                        </Link>
-                      </div>
-
-                      <div className="mt-4 space-y-3">
-                        {isLoading || isMilestonesLoading ? (
-                          Array.from({ length: 1 }).map((_, index) => (
-                            <div
-                              key={`milestone-skeleton-${index}`}
-                              className="rounded-xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                              aria-hidden="true"
-                            >
-                              <Skeleton height={12} width="25%" radius="sm" />
-                              <Skeleton
-                                height={16}
-                                radius="sm"
-                                className="mt-2"
-                              />
-                              <Skeleton
-                                height={12}
-                                width="65%"
-                                radius="sm"
-                                className="mt-2"
-                              />
-                            </div>
-                          ))
-                        ) : todayMilestones.length > 0 ? (
-                          todayMilestones
-                            .slice(0, 1)
-                            .map((milestone, index) => {
-                              const milestoneContent = milestone.is_external ? (
-                                milestone.url ? (
+                                {item.url ? (
                                   <Link
-                                    href={milestone.url}
+                                    href={item.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
                                   >
-                                    {milestone.text}
+                                    <FaExternalLinkAlt className="text-[0.65rem]" />
+                                    URL
                                   </Link>
-                                ) : (
-                                  <span className="font-semibold text-gray-900 dark:text-white">
-                                    {milestone.text}
-                                  </span>
-                                )
-                              ) : (
-                                <Link
-                                  href={buildMilestoneSearchHref(
-                                    milestone.text,
-                                  )}
-                                  className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
-                                >
-                                  {milestone.text}
-                                </Link>
-                              );
-
-                              return (
-                                <div
-                                  key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
-                                  className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                                >
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {formatDate(milestone.date, locale)}
-                                  </p>
-                                  <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
-                                    {milestoneContent}
-                                    {milestone.note ? (
-                                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                                        {milestone.note}
-                                      </span>
-                                    ) : null}
-                                  </div>
-
-                                  {/* 動画 */}
-                                  {milestone?.song && (
-                                    <div className="flex items-center gap-3 mt-1">
-                                      <div className="relative w-21 aspect-video shrink-0 overflow-hidden rounded-md bg-black">
-                                        <YoutubeThumbnail
-                                          videoId={milestone.song.video_id}
-                                          alt={milestone.song.video_title}
-                                        />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                                          <Link
-                                            href={buildWatchHref({
-                                              videoId: milestone.song.video_id,
-                                              start: milestone.song.start,
-                                            })}
-                                            className="text-primary hover:text-primary-600 dark:hover:text-pink-300"
-                                          >
-                                            {milestone.song.video_title}
-                                          </Link>
-                                        </p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-300">
-                                          {formatDate(
-                                            milestone.song.broadcast_at,
-                                            locale,
-                                          )}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })
-                        ) : (
-                          <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-                            {t("todayMilestonesEmpty")}
-                          </p>
-                        )}
-                      </div>
-                    </section>
-                  </div>
-                </section>
-              </div>
-
-              {/* 更新情報セクション */}
-              <div className="mt-16 space-y-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    {t("recentUpdatesLabel")}
-                  </p>
-                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                    {t("recentUpdatesTitle")}
-                  </h3>
-                </div>
-
-                {isLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={`update-skeleton-${i}`} height={60} />
-                    ))}
-                  </div>
-                ) : recentUpdates.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentUpdates.map((update) => {
-                      return (
-                        <Link
-                          key={update.videoId}
-                          href={buildWatchHref({ videoId: update.videoId })}
-                          className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
-                        >
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                            {formatDate(update.date, locale)}{" "}
-                            <span className="pl-3 text-gray-100">
-                              {t("recentUpdatesAddedCount", {
-                                count: update.count,
-                              })}
-                            </span>
-                          </p>
-                          <div className="mt-2 flex items-center gap-2">
-                            <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-black">
-                              <YoutubeThumbnail
-                                videoId={update.videoId}
-                                alt={update.videoTitle}
-                                imageClassName="object-cover"
-                              />
+                                ) : null}
+                              </div>
                             </div>
-                            <p className="min-w-0 text-xs opacity-70 line-clamp-2">
-                              {update.videoTitle}
-                            </p>
+                          );
+                        })
+                      ) : (
+                        <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                          {tAnniversaries("empty")}
+                        </p>
+                      )}
+                    </div>
+                  </section>
+
+                  <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                          {tSummary("todayMilestonesTitle")}
+                        </h2>
+                      </div>
+                      <Link
+                        href="/summary"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                      >
+                        {t("viewSummary")}
+                        <LuArrowRight className="shrink-0" />
+                      </Link>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {isLoading || isMilestonesLoading ? (
+                        Array.from({ length: 1 }).map((_, index) => (
+                          <div
+                            key={`milestone-skeleton-${index}`}
+                            className="rounded-xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                            aria-hidden="true"
+                          >
+                            <Skeleton height={12} width="25%" radius="sm" />
+                            <Skeleton
+                              height={16}
+                              radius="sm"
+                              className="mt-2"
+                            />
+                            <Skeleton
+                              height={12}
+                              width="65%"
+                              radius="sm"
+                              className="mt-2"
+                            />
                           </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {t("noRecentUpdates")}
-                  </p>
-                )}
+                        ))
+                      ) : todayMilestones.length > 0 ? (
+                        todayMilestones.slice(0, 1).map((milestone, index) => {
+                          const milestoneContent = milestone.is_external ? (
+                            milestone.url ? (
+                              <Link
+                                href={milestone.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                              >
+                                {milestone.text}
+                              </Link>
+                            ) : (
+                              <span className="font-semibold text-gray-900 dark:text-white">
+                                {milestone.text}
+                              </span>
+                            )
+                          ) : (
+                            <Link
+                              href={buildMilestoneSearchHref(milestone.text)}
+                              className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                            >
+                              {milestone.text}
+                            </Link>
+                          );
+
+                          return (
+                            <div
+                              key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
+                              className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                            >
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatDate(milestone.date, locale)}
+                              </p>
+                              <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+                                {milestoneContent}
+                                {milestone.note ? (
+                                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                    {milestone.note}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {/* 動画 */}
+                              {milestone?.song && (
+                                <div className="flex items-center gap-3 mt-1">
+                                  <div className="relative w-21 aspect-video shrink-0 overflow-hidden rounded-md bg-black">
+                                    <YoutubeThumbnail
+                                      videoId={milestone.song.video_id}
+                                      alt={milestone.song.video_title}
+                                    />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                                      <Link
+                                        href={buildWatchHref({
+                                          videoId: milestone.song.video_id,
+                                          start: milestone.song.start,
+                                        })}
+                                        className="text-primary hover:text-primary-600 dark:hover:text-pink-300"
+                                      >
+                                        {milestone.song.video_title}
+                                      </Link>
+                                    </p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                                      {formatDate(
+                                        milestone.song.broadcast_at,
+                                        locale,
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                          {t("todayMilestonesEmpty")}
+                        </p>
+                      )}
+                    </div>
+                  </section>
+                </div>
+              </section>
+            </div>
+
+            {/* 更新情報セクション */}
+            <div className="mt-16 space-y-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                  {t("recentUpdatesLabel")}
+                </p>
+                <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                  {t("recentUpdatesTitle")}
+                </h3>
               </div>
 
-              {/* リンク集 */}
-              <div className="mt-24 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Link
-                  href={siteConfig.channelUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-red-600 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
-                >
-                  <FaYoutube className="mr-2" />
-                  {siteConfig.channelName}
-                </Link>
-                <Link
-                  href={siteConfig.xUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-gray-900 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-                >
-                  <FaXTwitter className="mr-2" />
-                  {siteConfig.xName}
-                </Link>
-                <Link
-                  href="https://hololive.hololivepro.com/talents/azki/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
-                >
-                  {t("hololiveOfficial")}
-                </Link>
-              </div>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={`update-skeleton-${i}`} height={60} />
+                  ))}
+                </div>
+              ) : recentUpdates.length > 0 ? (
+                <div className="space-y-4">
+                  {recentUpdates.map((update) => {
+                    return (
+                      <Link
+                        key={update.videoId}
+                        href={buildWatchHref({ videoId: update.videoId })}
+                        className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                      >
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {formatDate(update.date, locale)}{" "}
+                          <span className="pl-3 text-gray-100">
+                            {t("recentUpdatesAddedCount", {
+                              count: update.count,
+                            })}
+                          </span>
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-black">
+                            <YoutubeThumbnail
+                              videoId={update.videoId}
+                              alt={update.videoTitle}
+                              imageClassName="object-cover"
+                            />
+                          </div>
+                          <p className="min-w-0 text-xs opacity-70 line-clamp-2">
+                            {update.videoTitle}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t("noRecentUpdates")}
+                </p>
+              )}
+            </div>
 
-              <p className="mt-4 text-center text-xs text-gray-500/80 dark:text-gray-100/80">
-                {isLoading
-                  ? t("statsLoading")
-                  : t("stats", {
-                      count: allSongs.length.toLocaleString(),
-                      date: songsUpdatedLabel
-                        ? t("lastUpdated", { date: songsUpdatedLabel })
-                        : "",
-                    })}
-              </p>
-            </section>
-          </main>
+            {/* リンク集 */}
+            <div className="mt-24 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href={siteConfig.channelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-64 items-center justify-center rounded-full bg-red-600 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
+              >
+                <FaYoutube className="mr-2" />
+                {siteConfig.channelName}
+              </Link>
+              <Link
+                href={siteConfig.xUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-64 items-center justify-center rounded-full bg-gray-900 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+              >
+                <FaXTwitter className="mr-2" />
+                {siteConfig.xName}
+              </Link>
+              <Link
+                href="https://hololive.hololivepro.com/talents/azki/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-64 items-center justify-center rounded-full bg-cyan-600 hover:bg-cyan-500 hover-lift-animation px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-900/15 transition dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
+              >
+                {t("hololiveOfficial")}
+              </Link>
+            </div>
 
-          <Footer />
-        </div>
-        <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
-        <AnalyticsWrapper />
+            <p className="mt-4 text-center text-xs text-gray-500/80 dark:text-gray-100/80">
+              {isLoading
+                ? t("statsLoading")
+                : t("stats", {
+                    count: allSongs.length.toLocaleString(),
+                    date: songsUpdatedLabel
+                      ? t("lastUpdated", { date: songsUpdatedLabel })
+                      : "",
+                  })}
+            </p>
+          </section>
+        </main>
+
+        <Footer />
       </div>
-    </ThemeProvider>
+      <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
+      <AnalyticsWrapper />
+    </div>
   );
 }

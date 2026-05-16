@@ -5,10 +5,6 @@
 @import "tailwindcss/utilities.css";
 
 @import "overlayscrollbars/overlayscrollbars.css";
-@plugin "flowbite-react/plugin/tailwindcss";
-@plugin "flowbite/plugin";
-@source "../../.flowbite-react/class-list.json";
-@source "../node_modules/flowbite";
 
 @theme {
   --color-primary-50: #fdf2f7;
@@ -83,11 +79,6 @@
 
 /* 折りたたみモード */
 @custom-variant foldable (&:where(.foldable, .foldable *));
-
-/* Flowbiteのツールチップが背後の操作を妨げないようにする */
-[data-testid="flowbite-tooltip"] {
-  pointer-events: none;
-}
 
 :root {
   --font-sans:
