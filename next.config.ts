@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   /* config options here */
   distDir: process.env.NEXT_PLW ? ".next-playwright" : ".next",
+  outputFileTracingIncludes: {
+    "/*": ["node_modules/@swc/helpers/**/*"],
+  },
   images: {
     remotePatterns: [
       {

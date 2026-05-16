@@ -2,6 +2,9 @@
   "name": "azki-song-app",
   "version": "2.4.5",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "node --max-old-space-size=4092 ./node_modules/next/dist/bin/next dev --turbopack",
     "build": "node scripts/pre-build.js && next build",
