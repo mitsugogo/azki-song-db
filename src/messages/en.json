@@ -168,6 +168,8 @@
     "viewAnniversaries": "See anniversaries",
     "viewSummary": "See activity",
     "todayMilestonesEmpty": "Nothing happened on this day",
+    "timelineLabel": "Timeline",
+    "timelineTitle": "Anniversaries & Events",
     "recentUpdatesLabel": "Recent Updates",
     "recentUpdatesTitle": "Updates",
     "recentUpdatesAddedCount": "{count} songs added",

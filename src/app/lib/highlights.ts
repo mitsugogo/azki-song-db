@@ -11,6 +11,8 @@ export type MilestoneHighlightItem = {
   content: string;
   note?: string;
   url?: string;
+  is_external?: boolean;
+  song?: Song;
 };
 
 export type TimelineMilestoneHighlight = {
@@ -19,6 +21,7 @@ export type TimelineMilestoneHighlight = {
   note: string;
   url: string;
   is_external: boolean;
+  song?: Song;
 };
 
 export const parseToJstDayStart = (input: string) => {
@@ -294,6 +297,7 @@ export const buildTimelineMilestones = (
         note: "",
         url: "",
         is_external: false,
+        song: song,
       })),
     );
 
@@ -309,17 +313,26 @@ export const buildTimelineMilestones = (
       .values(),
   );
 
-  const apiMilestones: TimelineMilestoneHighlight[] = (externalMilestones || [])
-    .map((milestone) => ({
-      date: milestone.date ? new Date(milestone.date) : null,
-      text: milestone.content?.trim() || "",
-      note: milestone.note || "",
-      url: milestone.url || "",
-      is_external: true,
-    }))
-    .filter((milestone): milestone is TimelineMilestoneHighlight =>
-      Boolean(milestone.date && milestone.text),
-    );
+  const apiMilestones: TimelineMilestoneHighlight[] = (
+    externalMilestones || []
+  ).flatMap((milestone) => {
+    const date = milestone.date ? new Date(milestone.date) : null;
+    const text = milestone.content?.trim() || "";
+    if (!date || Number.isNaN(date.getTime()) || !text) {
+      return [];
+    }
+
+    return [
+      {
+        date,
+        text,
+        note: milestone.note || "",
+        url: milestone.url || "",
+        is_external: true,
+        song: milestone.song,
+      },
+    ];
+  });
 
   const songByText = new Map(
     dedupedSongMilestones.map(
@@ -387,6 +400,7 @@ export const buildTimelineMilestones = (
       note: previous.note || milestone.note,
       url: previous.url || milestone.url,
       is_external: previous.is_external || milestone.is_external,
+      song: previous.song || milestone.song,
     });
   }
 

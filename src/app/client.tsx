@@ -299,187 +299,6 @@ export default function ClientTop() {
               </div>
             </section>
 
-            <section className="pb-12 sm:pb-14">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                        {t("anniversariesTitle")}
-                      </h2>
-                    </div>
-                    <Link
-                      href="/anniversaries"
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                    >
-                      {t("viewAnniversaries")}
-                      <LuArrowRight className="shrink-0" />
-                    </Link>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    {isAnniversariesLoading ? (
-                      Array.from({ length: 1 }).map((_, index) => (
-                        <div
-                          key={`anniversary-skeleton-${index}`}
-                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                          aria-hidden="true"
-                        >
-                          <Skeleton height={16} radius="sm" />
-                          <Skeleton height={12} radius="sm" className="mt-2" />
-                          <Skeleton
-                            height={12}
-                            width="55%"
-                            radius="sm"
-                            className="mt-2"
-                          />
-                        </div>
-                      ))
-                    ) : featuredAnniversaries.length > 0 ? (
-                      featuredAnniversaries.map((item, index) => {
-                        const nextIso = computeNextIsoForAnniversary(item);
-                        const daysUntil = nextIso
-                          ? getDaysUntil(nextIso)
-                          : null;
-
-                        return (
-                          <div
-                            key={`${item.name}-${index}`}
-                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-                                  {formatAnniversaryName(item, locale)}
-                                </p>
-                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                  {nextIso ? formatDate(nextIso, locale) : "-"}
-                                </p>
-                                {daysUntil !== null ? (
-                                  <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
-                                    {daysUntil === 0
-                                      ? tAnniversaries("featuredTodayTitle")
-                                      : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
-                                  </p>
-                                ) : null}
-                                {item.note ? (
-                                  <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-                                    {item.note}
-                                  </p>
-                                ) : null}
-                              </div>
-                              {item.url ? (
-                                <Link
-                                  href={item.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
-                                >
-                                  <FaExternalLinkAlt className="text-[0.65rem]" />
-                                  URL
-                                </Link>
-                              ) : null}
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-                        {tAnniversaries("empty")}
-                      </p>
-                    )}
-                  </div>
-                </section>
-
-                <section className="rounded-3xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
-                        {tSummary("todayMilestonesTitle")}
-                      </h2>
-                    </div>
-                    <Link
-                      href="/summary"
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                    >
-                      {t("viewSummary")}
-                      <LuArrowRight className="shrink-0" />
-                    </Link>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    {isLoading || isMilestonesLoading ? (
-                      Array.from({ length: 1 }).map((_, index) => (
-                        <div
-                          key={`milestone-skeleton-${index}`}
-                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                          aria-hidden="true"
-                        >
-                          <Skeleton height={12} width="25%" radius="sm" />
-                          <Skeleton height={16} radius="sm" className="mt-2" />
-                          <Skeleton
-                            height={12}
-                            width="65%"
-                            radius="sm"
-                            className="mt-2"
-                          />
-                        </div>
-                      ))
-                    ) : todayMilestones.length > 0 ? (
-                      todayMilestones.slice(0, 1).map((milestone, index) => {
-                        const milestoneContent = milestone.is_external ? (
-                          milestone.url ? (
-                            <Link
-                              href={milestone.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
-                            >
-                              {milestone.text}
-                            </Link>
-                          ) : (
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {milestone.text}
-                            </span>
-                          )
-                        ) : (
-                          <Link
-                            href={buildMilestoneSearchHref(milestone.text)}
-                            className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
-                          >
-                            {milestone.text}
-                          </Link>
-                        );
-
-                        return (
-                          <div
-                            key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
-                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
-                          >
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {formatDate(milestone.date, locale)}
-                            </p>
-                            <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
-                              {milestoneContent}
-                              {milestone.note ? (
-                                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                                  {milestone.note}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-                        {t("todayMilestonesEmpty")}
-                      </p>
-                    )}
-                  </div>
-                </section>
-              </div>
-            </section>
-
             <section className="pb-10">
               <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
@@ -498,7 +317,7 @@ export default function ClientTop() {
                       (_, index) => (
                         <div
                           key={`recommended-skeleton-${index}`}
-                          className="overflow-hidden rounded-3xl border border-white/70 bg-white/85 p-0 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/50 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
+                          className="overflow-hidden rounded-xl border border-white/70 bg-white/85 p-0 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/50 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
                           aria-hidden="true"
                         >
                           <Skeleton height="100%" className="aspect-video" />
@@ -520,7 +339,7 @@ export default function ClientTop() {
                           videoId: song.video_id,
                           start: song.start,
                         })}
-                        className="group overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] hover-lift-animation hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                        className="group overflow-hidden rounded-xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] hover-lift-animation hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                       >
                         <div className="relative aspect-video overflow-hidden bg-black">
                           <YoutubeThumbnail
@@ -543,6 +362,242 @@ export default function ClientTop() {
                         </div>
                       </Link>
                     ))}
+              </div>
+
+              <div className="mt-16 space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                    {t("timelineLabel")}
+                  </p>
+                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    {t("timelineTitle")}
+                  </h3>
+                </div>
+                <section>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                            {t("anniversariesTitle")}
+                          </h2>
+                        </div>
+                        <Link
+                          href="/anniversaries"
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                        >
+                          {t("viewAnniversaries")}
+                          <LuArrowRight className="shrink-0" />
+                        </Link>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {isAnniversariesLoading ? (
+                          Array.from({ length: 1 }).map((_, index) => (
+                            <div
+                              key={`anniversary-skeleton-${index}`}
+                              className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                              aria-hidden="true"
+                            >
+                              <Skeleton height={16} radius="sm" />
+                              <Skeleton
+                                height={12}
+                                radius="sm"
+                                className="mt-2"
+                              />
+                              <Skeleton
+                                height={12}
+                                width="55%"
+                                radius="sm"
+                                className="mt-2"
+                              />
+                            </div>
+                          ))
+                        ) : featuredAnniversaries.length > 0 ? (
+                          featuredAnniversaries.map((item, index) => {
+                            const nextIso = computeNextIsoForAnniversary(item);
+                            const daysUntil = nextIso
+                              ? getDaysUntil(nextIso)
+                              : null;
+
+                            return (
+                              <div
+                                key={`${item.name}-${index}`}
+                                className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                      {formatAnniversaryName(item, locale)}
+                                    </p>
+                                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                      {nextIso
+                                        ? formatDate(nextIso, locale)
+                                        : "-"}
+                                    </p>
+                                    {daysUntil !== null ? (
+                                      <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
+                                        {daysUntil === 0
+                                          ? tAnniversaries("featuredTodayTitle")
+                                          : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
+                                      </p>
+                                    ) : null}
+                                    {item.note ? (
+                                      <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {item.note}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                  {item.url ? (
+                                    <Link
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
+                                    >
+                                      <FaExternalLinkAlt className="text-[0.65rem]" />
+                                      URL
+                                    </Link>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                            {tAnniversaries("empty")}
+                          </p>
+                        )}
+                      </div>
+                    </section>
+
+                    <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                            {tSummary("todayMilestonesTitle")}
+                          </h2>
+                        </div>
+                        <Link
+                          href="/summary"
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                        >
+                          {t("viewSummary")}
+                          <LuArrowRight className="shrink-0" />
+                        </Link>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {isLoading || isMilestonesLoading ? (
+                          Array.from({ length: 1 }).map((_, index) => (
+                            <div
+                              key={`milestone-skeleton-${index}`}
+                              className="rounded-xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                              aria-hidden="true"
+                            >
+                              <Skeleton height={12} width="25%" radius="sm" />
+                              <Skeleton
+                                height={16}
+                                radius="sm"
+                                className="mt-2"
+                              />
+                              <Skeleton
+                                height={12}
+                                width="65%"
+                                radius="sm"
+                                className="mt-2"
+                              />
+                            </div>
+                          ))
+                        ) : todayMilestones.length > 0 ? (
+                          todayMilestones
+                            .slice(0, 1)
+                            .map((milestone, index) => {
+                              const milestoneContent = milestone.is_external ? (
+                                milestone.url ? (
+                                  <Link
+                                    href={milestone.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                                  >
+                                    {milestone.text}
+                                  </Link>
+                                ) : (
+                                  <span className="font-semibold text-gray-900 dark:text-white">
+                                    {milestone.text}
+                                  </span>
+                                )
+                              ) : (
+                                <Link
+                                  href={buildMilestoneSearchHref(
+                                    milestone.text,
+                                  )}
+                                  className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                                >
+                                  {milestone.text}
+                                </Link>
+                              );
+
+                              return (
+                                <div
+                                  key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
+                                  className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                                >
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {formatDate(milestone.date, locale)}
+                                  </p>
+                                  <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+                                    {milestoneContent}
+                                    {milestone.note ? (
+                                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {milestone.note}
+                                      </span>
+                                    ) : null}
+                                  </div>
+
+                                  {/* 動画 */}
+                                  {milestone?.song && (
+                                    <div className="flex items-center gap-3 mt-1">
+                                      <div className="relative w-21 aspect-video shrink-0 overflow-hidden rounded-md bg-black">
+                                        <YoutubeThumbnail
+                                          videoId={milestone.song.video_id}
+                                          alt={milestone.song.video_title}
+                                        />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                                          <Link
+                                            href={buildWatchHref({
+                                              videoId: milestone.song.video_id,
+                                              start: milestone.song.start,
+                                            })}
+                                            className="text-primary hover:text-primary-600 dark:hover:text-pink-300"
+                                          >
+                                            {milestone.song.video_title}
+                                          </Link>
+                                        </p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                                          {formatDate(
+                                            milestone.song.broadcast_at,
+                                            locale,
+                                          )}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                        ) : (
+                          <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                            {t("todayMilestonesEmpty")}
+                          </p>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </section>
               </div>
 
               {/* 更新情報セクション */}

@@ -168,6 +168,8 @@
     "viewAnniversaries": "記念日へ",
     "viewSummary": "活動記録へ",
     "todayMilestonesEmpty": "今日は該当するできごとがありません",
+    "timelineLabel": "Timeline",
+    "timelineTitle": "記念日 & できごと",
     "recentUpdatesLabel": "Updates",
     "recentUpdatesTitle": "更新情報",
     "recentUpdatesAddedCount": "{count}曲追加",
