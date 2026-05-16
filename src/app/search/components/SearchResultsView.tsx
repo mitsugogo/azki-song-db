@@ -7,7 +7,7 @@ import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchTermChips from "./SearchTermChips";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
-import { Badge } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import { FaStar } from "react-icons/fa6";
 
 interface VirtualRow {
@@ -153,16 +153,21 @@ const SearchResultsView = ({
                           videoId={song.video_id}
                           alt={song.title}
                         />
+                      </div>
+                      <div className="p-3 pt-1">
                         {song.is_members_only && (
-                          <div className="absolute right-1.5 top-1.5 z-20">
-                            <Badge className="border-0 bg-emerald-600/95 px-1.5 py-0.5 text-[0.55rem] font-bold tracking-wide text-white shadow-sm dark:bg-emerald-500 dark:text-white">
-                              <FaStar className="inline -mt-0.5" />{" "}
+                          <div className="inline-block">
+                            <Badge
+                              size="xs"
+                              color="green"
+                              radius="xs"
+                              variant="light"
+                              leftSection={<FaStar />}
+                            >
                               {tWatchDetail("membersOnlyBadge")}
                             </Badge>
                           </div>
                         )}
-                      </div>
-                      <div className="p-3 pt-1">
                         <div className="font-medium line-clamp-2 dark:text-gray-100">
                           {song.title}
                         </div>
