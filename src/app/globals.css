@@ -277,4 +277,14 @@ body {
       @apply -translate-y-1 border-primary/30 bg-white/95 shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-pink-300/30 dark:bg-gray-900/85;
     }
   }
+
+  /* シャドウのみ拡大 */
+  .hover-shadow-md {
+    @apply transition;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hover-shadow-md:hover {
+      @apply border-primary/30 bg-white/95 shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-pink-300/30 dark:bg-gray-900/85;
+    }
+  }
 }

@@ -1,8 +1,9 @@
 import { Link } from "@/i18n/navigation";
-import { Button } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
 import {
   FaChartSimple,
   FaMusic,
+  FaStar,
   FaTag,
   FaUser,
   FaUsers,
@@ -232,6 +233,19 @@ const SearchBrowseView = ({
                           />
                         </div>
                         <div className="p-3">
+                          {song.is_members_only && (
+                            <div>
+                              <Badge
+                                size="xs"
+                                color="green"
+                                radius="xs"
+                                variant="light"
+                                leftSection={<FaStar />}
+                              >
+                                {t("membersOnlyBadge")}
+                              </Badge>
+                            </div>
+                          )}
                           <div className="font-medium line-clamp-2">
                             {song.title}
                           </div>

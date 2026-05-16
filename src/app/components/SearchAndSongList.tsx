@@ -289,7 +289,7 @@ export default function SearchAndSongList({
           className={`px-3 py-1 h-8 w-full cursor-pointer rounded transition shadow-md ring-0 focus:ring-0 ${sizeClassName} ${
             isActive
               ? `text-white shadow-gray-400/20 dark:shadow-none ${buttonClassName}`
-              : "bg-light-gray-200 hover:bg-light-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white"
+              : "bg-light-gray-300 hover:bg-light-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white"
           }`}
           justify="space-between"
           fullWidth
@@ -333,7 +333,7 @@ export default function SearchAndSongList({
             className={
               isOtherModeActive
                 ? currentSongModeButtonClassName
-                : `px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-500 ${sizeClassName}`
+                : `px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-300 hover:bg-light-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 ${sizeClassName}`
             }
             leftSection={
               currentOtherSongModeItem ? (

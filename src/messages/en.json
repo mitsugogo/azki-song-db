@@ -2,7 +2,8 @@
   "Header": {
     "toggleNavigation": "Toggle navigation",
     "searchPlaceholder": "Search by title, artist, tags",
-    "languageSwitcher": "Language switcher"
+    "languageSwitcher": "Language switcher",
+    "membersOnlyBadge": "Members only"
   },
   "DrawerMenu": {
     "title": "Menu",
@@ -114,7 +115,8 @@
       "timesSung": "Times sung:",
       "times": "times",
       "videosWithSong": "Streams where this song was sung:",
-      "membersOnlyBadge": "Members only"
+      "membersOnlyBadge": "Members only",
+      "membersOnly": "Members only"
     },
     "createPlaylistModal": {
       "title": "Create a new playlist",
@@ -543,6 +545,7 @@
     "summary": "Search songs. Collected {countSongs} songs across {countVideos} videos.",
     "seeMore": "» See more",
     "noResults": "No matching songs",
+    "membersOnlyBadge": "Members only",
     "filters": {
       "category": "Category",
       "title": "Title",

@@ -24,6 +24,7 @@ export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
   const locale = await getLocale();
+  const requestHeaders = await headers();
   const tMeta = await getTranslations({ namespace: "Metadata.watch", locale });
   const params = await searchParams;
   const q = getParamValue(params.q);
@@ -41,6 +42,19 @@ export async function generateMetadata({
   let ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
   ogImageUrl.searchParams.set("subtitle", ogSubtitle);
+
+  const fetchSongs = async () => {
+    const songsUrl = new URL("/api/songs", baseUrl);
+    songsUrl.searchParams.set("hl", locale);
+    songsUrl.searchParams.set("includeMembersOnly", "true");
+
+    return fetch(songsUrl, {
+      cache: "no-store",
+      headers: {
+        cookie: requestHeaders.get("cookie") ?? "",
+      },
+    }).then((res) => res.json());
+  };
 
   if (q) {
     const isOriginalSongsMode = q === "sololive2025" || q === "original-songs";
@@ -107,11 +121,7 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("t", t);
     ogImageUrl.searchParams.set("hl", locale);
 
-    const songsUrl = new URL("/api/songs", baseUrl);
-    songsUrl.searchParams.set("hl", locale);
-    const songs = await fetch(songsUrl, { cache: "no-store" }).then((res) =>
-      res.json(),
-    );
+    const songs = await fetchSongs();
     const song = songs.find(
       (s: Song) =>
         s.video_id === v &&
@@ -136,11 +146,7 @@ export async function generateMetadata({
       });
     }
   } else if (v) {
-    const songsUrl = new URL("/api/songs/", baseUrl);
-    songsUrl.searchParams.set("hl", locale);
-    const songs = await fetch(songsUrl, { cache: "no-store" }).then((res) =>
-      res.json(),
-    );
+    const songs = await fetchSongs();
     const filteredSongs = songs.filter((s: Song) => s.video_id === v);
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];

@@ -106,12 +106,6 @@ const NowPlayingSongInfoDetail = ({
                   >
                     {currentSong.title}
                   </Badge>
-                  {currentSong.is_members_only && (
-                    <Badge color="green" radius="sm">
-                      <FaStar className="inline -mt-0.5" />{" "}
-                      {t("membersOnlyBadge")}
-                    </Badge>
-                  )}
                 </dd>
               </div>
             )}
@@ -834,6 +828,17 @@ const NowPlayingSongInfoDetail = ({
                         >
                           {song.video_title}
                         </Link>
+                        {song.is_members_only && (
+                          <Badge
+                            color="green"
+                            size="xs"
+                            radius="sm"
+                            leftSection={<FaStar />}
+                            variant="light"
+                          >
+                            {t("membersOnly")}
+                          </Badge>
+                        )}
                         <Badge
                           color="gray"
                           size="xs"

@@ -9,6 +9,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { Link } from "@/i18n/navigation";
 import { FaStar } from "react-icons/fa6";
+import { color } from "motion/react";
 
 interface SongListItemProps {
   song: Song;
@@ -49,7 +50,7 @@ const SongListItem = React.memo(
           className={`relative cursor-pointer transition flex lg:block dark:text-gray-50 rounded-xl ${
             isSelected
               ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200 shadow-md"
-              : "card-glassmorphism hover-lift-shadow"
+              : "card-glassmorphism hover-shadow-md"
           }`}
           onClick={() => {
             try {
@@ -105,20 +106,36 @@ const SongListItem = React.memo(
                   />
                 </div>
               </Indicator>
-              {song.milestones && song.milestones.length > 0 && (
-                <div className="absolute top-0 left-0 z-20 text-xs truncate">
-                  <div>
-                    <MilestoneBadge song={song} outClassName="mb-1.5" />
-                  </div>
-                </div>
-              )}
+
+              <div className="absolute top-0 left-0 z-20 text-xs truncate">
+                {song.milestones && song.milestones.length > 0 && (
+                  <MilestoneBadge
+                    song={song}
+                    badgeOptions={{ size: "xs", radius: "xs" }}
+                  />
+                )}
+                {song.is_members_only && (
+                  <span className="text-xs lg:hidden">
+                    <Badge
+                      color="green"
+                      size="xs"
+                      radius="xs"
+                      className="text-[0.5rem]"
+                      variant="light"
+                      leftSection={<FaStar />}
+                    >
+                      {t("membersOnlyBadge")}
+                    </Badge>
+                  </span>
+                )}
+              </div>
             </div>
             <div className="w-full space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
               <div
-                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white`}
+                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white break-all`}
               >
                 {song.is_members_only && (
-                  <div className="text-xs">
+                  <div className="text-xs hidden lg:block">
                     <Badge
                       color="green"
                       size="xs"

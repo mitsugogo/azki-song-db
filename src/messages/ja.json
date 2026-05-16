@@ -2,7 +2,8 @@
   "Header": {
     "toggleNavigation": "ナビゲーションを開く",
     "searchPlaceholder": "曲名、アーティスト、タグなどで検索",
-    "languageSwitcher": "言語切替"
+    "languageSwitcher": "言語切替",
+    "membersOnlyBadge": "メンバー限定"
   },
   "DrawerMenu": {
     "title": "メニュー",
@@ -114,7 +115,8 @@
       "timesSung": "歌った回数:",
       "times": "回",
       "videosWithSong": "この曲を歌った枠:",
-      "membersOnlyBadge": "メンバー限定"
+      "membersOnlyBadge": "メンバー限定",
+      "membersOnly": "メンバー限定"
     },
     "createPlaylistModal": {
       "title": "新規プレイリストを作成",
@@ -541,6 +543,7 @@
     "summary": "楽曲を検索できます。全{countSongs}曲、{countVideos}動画を収録。",
     "seeMore": "» もっと見る",
     "noResults": "該当する曲がありません",
+    "membersOnlyBadge": "メンバー限定",
     "filters": {
       "category": "カテゴリー",
       "title": "曲名",

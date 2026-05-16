@@ -15,6 +15,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const isEnglish = hl.startsWith("en");
+    const includeMembersOnlyRequested =
+      searchParams.get("includeMembersOnly") === "true";
     const cookieHeader = request.headers.get("cookie") ?? "";
     const cookieMap = new Map(
       cookieHeader
@@ -30,9 +32,9 @@ export async function GET(request: Request) {
           ];
         }),
     );
-    const includeMembersOnlySongs = hasMembersOnlyAccess(
-      cookieMap.get(membersOnlyAccessCookieName),
-    );
+    const includeMembersOnlySongs =
+      includeMembersOnlyRequested &&
+      hasMembersOnlyAccess(cookieMap.get(membersOnlyAccessCookieName));
 
     const sheets = google.sheets({
       version: "v4",
