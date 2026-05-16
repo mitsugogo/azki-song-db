@@ -16,7 +16,7 @@ test.describe("Language switcher", () => {
     await page.waitForLoadState("domcontentloaded");
 
     await expect(
-      page.getByRole("textbox", { name: searchInputNamePattern }),
+      page.getByRole("combobox", { name: searchInputNamePattern }),
     ).toBeVisible();
 
     const langGroup = page.getByRole("group", {
@@ -27,7 +27,7 @@ test.describe("Language switcher", () => {
     await expect(page).toHaveURL(/\/en(\/|$)/);
 
     await expect(
-      page.getByRole("textbox", { name: searchInputNamePattern }),
+      page.getByRole("combobox", { name: searchInputNamePattern }),
     ).toBeVisible();
   });
 
@@ -39,7 +39,7 @@ test.describe("Language switcher", () => {
     await page.waitForLoadState("domcontentloaded");
 
     await expect(
-      page.getByRole("textbox", { name: searchInputNamePattern }),
+      page.getByRole("combobox", { name: searchInputNamePattern }),
     ).toBeVisible();
   });
 });

@@ -95,7 +95,7 @@ test.describe("Search page", () => {
     const initialTotal = initialMatch ? parseInt(initialMatch[2]) : 0;
 
     // Enter search term (TagsInput accepts typing)
-    const searchInput = page.getByRole("textbox", {
+    const searchInput = page.getByRole("combobox", {
       name: searchInputNamePattern,
     });
     await searchInput.click();
@@ -134,7 +134,7 @@ test.describe("Search page", () => {
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     // Enter search term
-    const searchInput = page.getByRole("textbox", {
+    const searchInput = page.getByRole("combobox", {
       name: searchInputNamePattern,
     });
     await searchInput.click();
@@ -267,7 +267,7 @@ test.describe("Search page", () => {
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     // OR検索を入力
-    const searchInput = page.getByRole("textbox", {
+    const searchInput = page.getByRole("combobox", {
       name: searchInputNamePattern,
     });
     await searchInput.click();
@@ -291,7 +291,7 @@ test.describe("Search page", () => {
     await page.waitForSelector("text=/\\d+曲\\/\\d+曲/", { timeout: 10000 });
 
     // 完全一致検索を入力
-    const searchInput = page.getByRole("textbox", {
+    const searchInput = page.getByRole("combobox", {
       name: searchInputNamePattern,
     });
     await searchInput.click();

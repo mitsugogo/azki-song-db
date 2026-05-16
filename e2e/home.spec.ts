@@ -44,7 +44,7 @@ test.describe("Home page", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const query = firstSong?.title ?? "春よ、来い";
-    const searchInput = page.getByRole("textbox", {
+    const searchInput = page.getByRole("combobox", {
       name: "曲名、アーティスト、タグなどで検索",
     });
     await searchInput.fill(query);
