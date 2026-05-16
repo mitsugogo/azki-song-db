@@ -1,21 +1,18 @@
-import { Link } from "@/i18n/navigation";
-import { Badge, Button } from "@mantine/core";
+import { Button } from "@mantine/core";
 import {
   FaChartSimple,
   FaMusic,
-  FaStar,
   FaTag,
   FaUser,
   FaUsers,
 } from "react-icons/fa6";
-import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
-import { useTranslations, useLocale } from "next-intl";
-import { formatDate } from "../../lib/formatDate";
+import SearchSongCard from "./SearchSongCard";
+import { useTranslations } from "next-intl";
 import {
   FilterMode,
   SearchBrowseSortMode,
@@ -56,7 +53,6 @@ const SearchBrowseView = ({
   filterModeData,
 }: SearchBrowseViewProps) => {
   const t = useTranslations("SearchBrowse");
-  const locale = useLocale();
   const tHeader = useTranslations("Header");
   const isSortableMode = [
     "title",
@@ -218,48 +214,12 @@ const SearchBrowseView = ({
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 grid-rows-2 gap-4">
                   {category.songs.map((song) => (
-                    <article
+                    <SearchSongCard
                       key={`${song.video_id}-${song.start}-${song.title}`}
-                      className="card-glassmorphism hover-lift-shadow overflow-hidden"
-                    >
-                      <Link
-                        href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}`}
-                        className="block"
-                      >
-                        <div className="w-full aspect-video bg-black">
-                          <YoutubeThumbnail
-                            videoId={song.video_id}
-                            alt={song.title}
-                          />
-                        </div>
-                        <div className="p-3">
-                          {song.is_members_only && (
-                            <div>
-                              <Badge
-                                size="xs"
-                                color="green"
-                                radius="xs"
-                                variant="light"
-                                leftSection={<FaStar />}
-                              >
-                                {t("membersOnlyBadge")}
-                              </Badge>
-                            </div>
-                          )}
-                          <div className="font-medium line-clamp-2">
-                            {song.title}
-                          </div>
-                          {song.artist && (
-                            <div className="text-sm text-gray-700 dark:text-light-gray-400 line-clamp-1">
-                              {song.artist}
-                            </div>
-                          )}
-                          <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                            {formatDate(song.broadcast_at, locale)}
-                          </div>
-                        </div>
-                      </Link>
-                    </article>
+                      song={song}
+                      href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}`}
+                      membersOnlyBadgeLabel={t("membersOnlyBadge")}
+                    />
                   ))}
                 </div>
               )}

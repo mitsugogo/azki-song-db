@@ -1,14 +1,10 @@
-import { Link } from "@/i18n/navigation";
-import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Song } from "../../types/song";
 import SearchBreadcrumb from "./SearchBreadcrumb";
 import SearchQueryInputSection from "./SearchQueryInputSection";
+import SearchSongCard from "./SearchSongCard";
 import SearchTermChips from "./SearchTermChips";
-import { useTranslations, useLocale } from "next-intl";
-import { formatDate } from "../../lib/formatDate";
-import { Badge } from "@mantine/core";
-import { FaStar } from "react-icons/fa6";
+import { useTranslations } from "next-intl";
 
 interface VirtualRow {
   index: number;
@@ -51,7 +47,6 @@ const SearchResultsView = ({
 }: SearchResultsViewProps) => {
   const t = useTranslations("SearchResults");
   const tWatchDetail = useTranslations("Watch.nowPlayingSongInfoDetail");
-  const locale = useLocale();
   const tHeader = useTranslations("Header");
   const firstStart = virtualRows.length > 0 ? virtualRows[0].start : 0;
   const lastEnd =
@@ -143,45 +138,12 @@ const SearchResultsView = ({
                     boxSizing: "border-box",
                   }}
                 >
-                  <article className="card-glassmorphism hover-lift-shadow overflow-hidden h-full">
-                    <Link
-                      href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
-                      className="block"
-                    >
-                      <div className="relative w-full aspect-video bg-black">
-                        <YoutubeThumbnail
-                          videoId={song.video_id}
-                          alt={song.title}
-                        />
-                      </div>
-                      <div className="p-3 pt-1">
-                        {song.is_members_only && (
-                          <div className="inline-block">
-                            <Badge
-                              size="xs"
-                              color="green"
-                              radius="xs"
-                              variant="light"
-                              leftSection={<FaStar />}
-                            >
-                              {tWatchDetail("membersOnlyBadge")}
-                            </Badge>
-                          </div>
-                        )}
-                        <div className="font-medium line-clamp-2 dark:text-gray-100">
-                          {song.title}
-                        </div>
-                        {song.artist && (
-                          <div className="text-sm text-gray-300 dark:text-gray-200 line-clamp-1">
-                            {song.artist}
-                          </div>
-                        )}
-                        <div className="text-xs text-gray-200 dark:text-gray-300 mt-1">
-                          {formatDate(song.broadcast_at, locale)}
-                        </div>
-                      </div>
-                    </Link>
-                  </article>
+                  <SearchSongCard
+                    song={song}
+                    href={`/watch?v=${song.video_id}${song.start ? `&t=${song.start}` : ""}&q=${encodeURIComponent(searchTerm)}`}
+                    membersOnlyBadgeLabel={tWatchDetail("membersOnlyBadge")}
+                    articleClassName="h-full"
+                  />
                 </li>
               );
             });
