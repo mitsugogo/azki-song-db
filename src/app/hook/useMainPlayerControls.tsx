@@ -173,11 +173,15 @@ export default function useMainPlayerControls({
         /Android/i.test(userAgent) &&
         /Chrome/i.test(userAgent) &&
         /Safari/i.test(userAgent);
+      const isDesktopChrome =
+        /Chrome/i.test(userAgent) &&
+        /Safari/i.test(userAgent) &&
+        !/Android|CriOS|Edg|OPR|OPiOS|FxiOS|Firefox/i.test(userAgent);
       const isSafari =
         /Safari/i.test(userAgent) &&
         !/Chrome|Chromium|CriOS|Edg|OPR|OPiOS|FxiOS|Firefox/i.test(userAgent);
 
-      if (!isAndroidChrome && !isSafari) {
+      if (!isAndroidChrome && !isDesktopChrome && !isSafari) {
         return false;
       }
 
