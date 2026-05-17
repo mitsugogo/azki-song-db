@@ -150,8 +150,8 @@ export default function useMainPlayerControls({
   );
 
   /**
-   * Android Chromeで限定動画のローディングに1回目は失敗するので
-   * onReady 後に loadVideoById で同一動画を再読込する
+   * 限定動画のローディングに1回目は失敗するので
+   * 一部ブラウザでは onReady 後に loadVideoById で同一動画を再読込する
    */
   const retryMembersOnlyLoadVideoById = useCallback(
     (
@@ -169,7 +169,15 @@ export default function useMainPlayerControls({
       }
 
       const userAgent = navigator.userAgent || "";
-      if (!/Android/i.test(userAgent) || !/Chrome/i.test(userAgent)) {
+      const isAndroidChrome =
+        /Android/i.test(userAgent) &&
+        /Chrome/i.test(userAgent) &&
+        /Safari/i.test(userAgent);
+      const isSafari =
+        /Safari/i.test(userAgent) &&
+        !/Chrome|Chromium|CriOS|Edg|OPR|OPiOS|FxiOS|Firefox/i.test(userAgent);
+
+      if (!isAndroidChrome && !isSafari) {
         return false;
       }
 
