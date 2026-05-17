@@ -38,6 +38,10 @@ export default function useMainPlayerControls({
   const initialStartSeekRef = useRef<number | null>(null);
   const initialStartSeekRetryCountRef = useRef(0);
   const membersOnlyReloadAttemptedSongKeyRef = useRef<string | null>(null);
+  const membersOnlyLoadVideoByIdAttemptedSongKeyRef = useRef<string | null>(
+    null,
+  );
+  const membersOnlyRecoveryTimeoutRef = useRef<number | null>(null);
   const zeroStartSeekRetryAttemptedSongKeyRef = useRef<string | null>(null);
   // seek-in-flight tracking
   const seekInFlightRef = useRef<number | null>(null);
@@ -47,6 +51,8 @@ export default function useMainPlayerControls({
   const [playerDuration, setPlayerDuration] = useState(0);
   const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
   const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
+  const [isMembersOnlyPlayerRecovering, setIsMembersOnlyPlayerRecovering] =
+    useState(false);
   const [previousVideoId, setPreviousVideoId] = useState<string | null>(null);
   const previousVideoIdRef = useRef<string | null>(null);
 
@@ -75,6 +81,12 @@ export default function useMainPlayerControls({
   // keep a mutable ref with the latest videoId so callbacks can read it
   const latestVideoIdRef = useRef<string | null>(videoId ?? null);
   latestVideoIdRef.current = videoId ?? null;
+  const currentSongKeyRef = useRef<string | null>(
+    currentSong ? `${currentSong.video_id}-${currentSong.start}` : null,
+  );
+  currentSongKeyRef.current = currentSong
+    ? `${currentSong.video_id}-${currentSong.start}`
+    : null;
   // track previous videoId across renders so effects can reason about transitions
   previousVideoIdRef.current = previousVideoId;
 
@@ -138,6 +150,92 @@ export default function useMainPlayerControls({
   );
 
   /**
+   * Android Chromeで限定動画のローディングに1回目は失敗するので
+   * onReady 後に loadVideoById で同一動画を再読込する
+   */
+  const retryMembersOnlyLoadVideoById = useCallback(
+    (
+      playerInstance: any,
+      songKey: string,
+      targetVideoId: string,
+      requestedStartTime: number,
+    ) => {
+      if (!currentSong?.is_members_only) {
+        return false;
+      }
+
+      if (typeof navigator === "undefined") {
+        return false;
+      }
+
+      const userAgent = navigator.userAgent || "";
+      if (!/Android/i.test(userAgent) || !/Chrome/i.test(userAgent)) {
+        return false;
+      }
+
+      if (
+        membersOnlyLoadVideoByIdAttemptedSongKeyRef.current === songKey ||
+        !playerInstance ||
+        (typeof playerInstance.loadVideoById !== "function" &&
+          typeof playerInstance.cueVideoById !== "function")
+      ) {
+        return false;
+      }
+
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = songKey;
+      setIsMembersOnlyPlayerRecovering(true);
+      if (membersOnlyRecoveryTimeoutRef.current !== null) {
+        window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+      }
+      membersOnlyRecoveryTimeoutRef.current = window.setTimeout(() => {
+        if (currentSongKeyRef.current === songKey) {
+          setIsMembersOnlyPlayerRecovering(false);
+        }
+        membersOnlyRecoveryTimeoutRef.current = null;
+      }, 6000);
+
+      setTimeout(() => {
+        const activePlayer = playerRef.current;
+        if (!activePlayer || currentSongKeyRef.current !== songKey) {
+          return;
+        }
+
+        const activeVideoId =
+          playerRefVideoIdRef.current ??
+          (typeof activePlayer.getVideoData === "function"
+            ? (activePlayer.getVideoData()?.video_id ?? null)
+            : null);
+        if (activeVideoId && activeVideoId !== targetVideoId) {
+          return;
+        }
+
+        const targetSeconds = Math.max(requestedStartTime, 0);
+
+        try {
+          const loadOptions = {
+            videoId: targetVideoId,
+            startSeconds: targetSeconds,
+          };
+
+          if (typeof activePlayer.loadVideoById === "function") {
+            activePlayer.loadVideoById(loadOptions);
+          } else if (typeof activePlayer.cueVideoById === "function") {
+            activePlayer.cueVideoById(loadOptions);
+          }
+
+          setPlayerCurrentTime(targetSeconds);
+          globalPlayer.setCurrentTime(targetSeconds);
+        } catch (_) {
+          membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
+        }
+      }, 250);
+
+      return true;
+    },
+    [currentSong?.is_members_only, globalPlayer],
+  );
+
+  /**
    * プレイヤーが準備できたとき
    */
   const handlePlayerOnReady = useCallback(
@@ -176,6 +274,9 @@ export default function useMainPlayerControls({
       const readyVideoId =
         currentVideoId ?? latestVideoIdRef.current ?? videoId ?? null;
       const requestedStartTime = Number(startTime ?? currentSong?.start ?? 0);
+      const currentSongKey = currentSong
+        ? `${currentSong.video_id}-${currentSong.start}`
+        : null;
       const shouldRestorePosition =
         currentVideoId === previousVideoId &&
         globalPlayer.currentTime > 0 &&
@@ -186,7 +287,20 @@ export default function useMainPlayerControls({
         Number.isFinite(requestedStartTime) &&
         requestedStartTime > 0;
 
-      if (shouldSeekToRequestedStart) {
+      // 上の workaround が有効なケースでは、従来の初期 seek と競合すると
+      // 0:00 へ落ちたりプレイヤーがチカつくため、初期位置合わせは loadVideoById 側に一本化する。
+      let shouldUseLoadVideoByIdWorkaround = false;
+
+      if (currentSongKey && readyVideoId) {
+        shouldUseLoadVideoByIdWorkaround = retryMembersOnlyLoadVideoById(
+          event.target,
+          currentSongKey,
+          readyVideoId,
+          requestedStartTime,
+        );
+      }
+
+      if (shouldSeekToRequestedStart && !shouldUseLoadVideoByIdWorkaround) {
         initialStartSeekRef.current = requestedStartTime;
         initialStartSeekRetryCountRef.current = 0;
       } else if (!shouldRestorePosition) {
@@ -212,7 +326,10 @@ export default function useMainPlayerControls({
             initialStartSeekRetryCountRef.current = 0;
           }
         }, 500);
-      } else if (shouldSeekToRequestedStart) {
+      } else if (
+        shouldSeekToRequestedStart &&
+        !shouldUseLoadVideoByIdWorkaround
+      ) {
         setTimeout(() => {
           const player = playerRef.current;
           const activeVideoId =
@@ -289,6 +406,18 @@ export default function useMainPlayerControls({
           Number.isFinite(currentTime) &&
           currentTime >= requestedStartTime - 1
         ) {
+          setIsMembersOnlyPlayerRecovering(false);
+          if (membersOnlyRecoveryTimeoutRef.current !== null) {
+            window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+            membersOnlyRecoveryTimeoutRef.current = null;
+          }
+        }
+
+        if (
+          typeof currentTime === "number" &&
+          Number.isFinite(currentTime) &&
+          currentTime >= requestedStartTime - 1
+        ) {
           initialStartSeekRef.current = null;
           initialStartSeekRetryCountRef.current = 0;
           zeroStartSeekRetryAttemptedSongKeyRef.current = null;
@@ -338,6 +467,14 @@ export default function useMainPlayerControls({
           initialStartSeekRetryCountRef.current += 1;
         }
       }
+
+      if (event.data === 1) {
+        setIsMembersOnlyPlayerRecovering(false);
+        if (membersOnlyRecoveryTimeoutRef.current !== null) {
+          window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+          membersOnlyRecoveryTimeoutRef.current = null;
+        }
+      }
     },
     [
       currentSong,
@@ -354,16 +491,25 @@ export default function useMainPlayerControls({
         ? `${currentSong.video_id}-${currentSong.start}`
         : null;
 
-      if (
-        !currentSong?.is_members_only ||
-        !currentSongKey ||
-        (errorCode !== 101 && errorCode !== 150) ||
-        membersOnlyReloadAttemptedSongKeyRef.current === currentSongKey
-      ) {
+      if (!currentSong?.is_members_only || !currentSongKey) {
+        return;
+      }
+
+      if (errorCode !== 101 && errorCode !== 150) {
+        return;
+      }
+
+      if (membersOnlyReloadAttemptedSongKeyRef.current === currentSongKey) {
         return;
       }
 
       membersOnlyReloadAttemptedSongKeyRef.current = currentSongKey;
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
+      setIsMembersOnlyPlayerRecovering(false);
+      if (membersOnlyRecoveryTimeoutRef.current !== null) {
+        window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+        membersOnlyRecoveryTimeoutRef.current = null;
+      }
       playerRef.current = null;
       playerRefVideoIdRef.current = null;
       setIsPlayerReady(false);
@@ -602,7 +748,13 @@ export default function useMainPlayerControls({
   useEffect(() => {
     if (!currentSong) {
       membersOnlyReloadAttemptedSongKeyRef.current = null;
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
       zeroStartSeekRetryAttemptedSongKeyRef.current = null;
+      setIsMembersOnlyPlayerRecovering(false);
+      if (membersOnlyRecoveryTimeoutRef.current !== null) {
+        window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+        membersOnlyRecoveryTimeoutRef.current = null;
+      }
       globalPlayer.setCurrentSong(null);
       setPreviousVideoId(null);
       return;
@@ -611,6 +763,11 @@ export default function useMainPlayerControls({
     const currentSongKey = `${currentSong.video_id}-${currentSong.start}`;
     if (membersOnlyReloadAttemptedSongKeyRef.current !== currentSongKey) {
       membersOnlyReloadAttemptedSongKeyRef.current = null;
+    }
+    if (
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current !== currentSongKey
+    ) {
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
     }
     if (zeroStartSeekRetryAttemptedSongKeyRef.current !== currentSongKey) {
       zeroStartSeekRetryAttemptedSongKeyRef.current = null;
@@ -671,6 +828,12 @@ export default function useMainPlayerControls({
     if (shouldClear) {
       playerRef.current = null;
       playerRefVideoIdRef.current = null;
+      membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
+      setIsMembersOnlyPlayerRecovering(false);
+      if (membersOnlyRecoveryTimeoutRef.current !== null) {
+        window.clearTimeout(membersOnlyRecoveryTimeoutRef.current);
+        membersOnlyRecoveryTimeoutRef.current = null;
+      }
       setIsPlayerReady(false);
       pendingSeekRef.current = null;
       initialStartSeekRef.current = null;
@@ -767,6 +930,7 @@ export default function useMainPlayerControls({
     previousSong,
     nextSong,
     isPlaying,
+    isMembersOnlyPlayerRecovering,
     playerKey,
     hideFutureSongs,
     videoId,

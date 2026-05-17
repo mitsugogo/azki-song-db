@@ -39,6 +39,7 @@ export default function MainPlayer() {
     previousSong,
     nextSong,
     isPlaying,
+    isMembersOnlyPlayerRecovering,
     playerKey,
     hideFutureSongs,
     videoId,
@@ -287,6 +288,7 @@ export default function MainPlayer() {
           videoData={videoData}
           videoInfo={videoInfo}
           timedLiveCallText={timedLiveCallText ?? ""}
+          isMembersOnlyPlayerRecovering={isMembersOnlyPlayerRecovering}
           setSongs={setSongs}
           searchSongs={searchSongs}
           handlePlayerOnReady={handlePlayerOnReady}

@@ -25,6 +25,8 @@ const createMockPlayer = (videoId = "vid1", title = "Song 1") => ({
   getDuration: vi.fn(() => 100),
   getVideoData: vi.fn(() => ({ video_id: videoId, title })),
   seekTo: vi.fn(),
+  loadVideoById: vi.fn(),
+  cueVideoById: vi.fn(),
   playVideo: vi.fn(),
   pauseVideo: vi.fn(),
   setVolume: vi.fn(),
@@ -86,6 +88,11 @@ describe("useMainPlayerControls", () => {
 
   beforeEach(() => {
     mockGlobalPlayer = createMockGlobalPlayer();
+    Object.defineProperty(window.navigator, "userAgent", {
+      value:
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) jsdom/24.0.0 Safari/537.36",
+      configurable: true,
+    });
     // localStorageをモック
     vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
       if (key === "player-volume") return "100";
@@ -171,6 +178,40 @@ describe("useMainPlayerControls", () => {
     });
 
     expect(result.current.playerKey).toBe(playerKeyBeforeError + 1);
+  });
+
+  it("Android Chrome のメンバー限定動画は onReady 後に loadVideoById で同一動画を再読込する", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      value:
+        "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+      configurable: true,
+    });
+
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: [mockSongs[0], membersOnlySong],
+        allSongs: [mockSongs[0], membersOnlySong],
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    act(() => {
+      result.current.changeCurrentSong(membersOnlySong);
+    });
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    expect(mockPlayer.loadVideoById).toHaveBeenCalledWith({
+      videoId: "vid2",
+      startSeconds: 10,
+    });
+    expect(mockPlayer.seekTo).not.toHaveBeenCalled();
   });
 
   it("メンバー限定以外の動画ではエラー150でも再作成しない", () => {

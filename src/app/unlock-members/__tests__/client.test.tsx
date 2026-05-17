@@ -8,6 +8,31 @@ const youtubeHandlers = {
   onError: null as ((event: any) => void) | null,
 };
 
+const defaultUserAgent = window.navigator.userAgent;
+const defaultVendor = window.navigator.vendor;
+const defaultMaxTouchPoints = window.navigator.maxTouchPoints;
+
+function setNavigatorValue(key: string, value: unknown) {
+  Object.defineProperty(window.navigator, key, {
+    configurable: true,
+    value,
+  });
+}
+
+function setSafariNavigator({
+  userAgent,
+  vendor,
+  maxTouchPoints,
+}: {
+  userAgent: string;
+  vendor: string;
+  maxTouchPoints: number;
+}) {
+  setNavigatorValue("userAgent", userAgent);
+  setNavigatorValue("vendor", vendor);
+  setNavigatorValue("maxTouchPoints", maxTouchPoints);
+}
+
 vi.mock("@/app/components/Header", () => ({
   Header: () => <div>header</div>,
 }));
@@ -57,6 +82,11 @@ describe("UnlockMembersClient", () => {
     youtubeHandlers.onReady = null;
     youtubeHandlers.onStateChange = null;
     youtubeHandlers.onError = null;
+    setSafariNavigator({
+      userAgent: defaultUserAgent,
+      vendor: defaultVendor,
+      maxTouchPoints: defaultMaxTouchPoints,
+    });
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
@@ -66,6 +96,11 @@ describe("UnlockMembersClient", () => {
   });
 
   afterEach(() => {
+    setSafariNavigator({
+      userAgent: defaultUserAgent,
+      vendor: defaultVendor,
+      maxTouchPoints: defaultMaxTouchPoints,
+    });
     vi.restoreAllMocks();
   });
 
@@ -130,5 +165,37 @@ describe("UnlockMembersClient", () => {
       expect(screen.getAllByTestId("alert-icon").length).toBeGreaterThan(0);
       expect(screen.getByText("playback.statusFailed")).toBeInTheDocument();
     });
+  });
+
+  it("iOS Safari ではサイト越えトラッキング設定の案内を表示する", () => {
+    setSafariNavigator({
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+      vendor: "Apple Computer, Inc.",
+      maxTouchPoints: 5,
+    });
+
+    render(<UnlockMembersClient initialUnlocked={false} isConfigured />);
+
+    expect(screen.getByText("playback.safariNoticeTitle")).toBeInTheDocument();
+    expect(
+      screen.getByText("playback.safariNoticeStepsIos"),
+    ).toBeInTheDocument();
+  });
+
+  it("macOS Safari ではSafari設定の案内を表示する", () => {
+    setSafariNavigator({
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+      vendor: "Apple Computer, Inc.",
+      maxTouchPoints: 0,
+    });
+
+    render(<UnlockMembersClient initialUnlocked={false} isConfigured />);
+
+    expect(screen.getByText("playback.safariNoticeTitle")).toBeInTheDocument();
+    expect(
+      screen.getByText("playback.safariNoticeStepsMac"),
+    ).toBeInTheDocument();
   });
 });
