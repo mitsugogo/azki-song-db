@@ -29,6 +29,34 @@ type PlaybackStatus = "idle" | "checking" | "verified" | "failed";
 const playbackProbeVideoId = "EPA8xHQr3AY";
 const playbackVerificationTimeoutMs = 10000;
 
+function getSafariEnvironment() {
+  if (typeof navigator === "undefined") {
+    return {
+      isSafari: false,
+      isIosSafari: false,
+      isMacSafari: false,
+    };
+  }
+
+  const userAgent = navigator.userAgent || "";
+  const vendor = navigator.vendor || "";
+  const isSafariBrowser =
+    /Safari/i.test(userAgent) &&
+    !/(Chrome|Chromium|CriOS|EdgiOS|Edg|OPR|OPiOS|Firefox|FxiOS|Android)/i.test(
+      userAgent,
+    ) &&
+    /Apple/i.test(vendor);
+  const isIosLike =
+    /iP(ad|hone|od)/i.test(userAgent) ||
+    (/Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1);
+
+  return {
+    isSafari: isSafariBrowser,
+    isIosSafari: isSafariBrowser && isIosLike,
+    isMacSafari: isSafariBrowser && !isIosLike,
+  };
+}
+
 export default function UnlockMembersClient({
   initialUnlocked,
   isConfigured,
@@ -53,6 +81,11 @@ export default function UnlockMembersClient({
 function UnlockMembersContent({ initialUnlocked, isConfigured }: Props) {
   const t = useTranslations("MembersOnlyAccess");
   const dm = useTranslations("DrawerMenu");
+  const [safariEnvironment, setSafariEnvironment] = useState(() => ({
+    isSafari: false,
+    isIosSafari: false,
+    isMacSafari: false,
+  }));
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(initialUnlocked);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,6 +96,12 @@ function UnlockMembersContent({ initialUnlocked, isConfigured }: Props) {
   );
   const [playbackAttempt, setPlaybackAttempt] = useState(0);
   const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setSafariEnvironment(getSafariEnvironment());
+  }, []);
+
+  const { isSafari, isIosSafari, isMacSafari } = safariEnvironment;
 
   useEffect(() => {
     if (timeoutRef.current !== null) {
@@ -287,6 +326,26 @@ function UnlockMembersContent({ initialUnlocked, isConfigured }: Props) {
                     <p className="max-w-3xl text-sm leading-6 text-gray-600 dark:text-gray-300">
                       {t("playback.description")}
                     </p>
+                    {isSafari ? (
+                      <Alert
+                        color="amber"
+                        radius="md"
+                        variant="light"
+                        title={t("playback.safariNoticeTitle")}
+                        className="max-w-3xl"
+                      >
+                        <p className="text-sm leading-6">
+                          {t("playback.safariNoticeDescription")}
+                        </p>
+                        <p className="mt-2 text-sm leading-6">
+                          {isIosSafari
+                            ? t("playback.safariNoticeStepsIos")
+                            : isMacSafari
+                              ? t("playback.safariNoticeStepsMac")
+                              : t("playback.safariNoticeStepsGeneric")}
+                        </p>
+                      </Alert>
+                    ) : null}
                     <Alert
                       aria-live="polite"
                       color={playbackStatusAlertColor}

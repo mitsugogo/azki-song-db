@@ -304,6 +304,11 @@
     "playback": {
       "title": "メンバー限定動画の再生確認",
       "description": "メンバー限定動画の再生を確認し、メンバーシップに入っているかをチェックします。メンバーに入っているのに再生できない場合は、事前にYouTubeでログインする必要があります。",
+      "safariNoticeTitle": "Safari では設定変更が必要な場合があります",
+      "safariNoticeDescription": "Safari のサイト越えトラッキング防止が有効だと、YouTube の埋め込みプレイヤーでメンバー限定の再生確認に失敗することがあります。",
+      "safariNoticeStepsIos": "iPhone / iPad では「設定 > アプリ > Safari > サイト越えトラッキングを防ぐ」を OFF にしてから再確認してください。",
+      "safariNoticeStepsMac": "Mac では「Safari の設定 > プライバシー > サイト越えトラッキングを防ぐ」を OFF にしてから再確認してください。",
+      "safariNoticeStepsGeneric": "Safari のサイト越えトラッキング防止を OFF にしてから再確認してください。",
       "statusIdle": "再生確認はまだ開始されていません。",
       "statusChecking": "メンバー限定動画の再生可否を確認中です。",
       "statusVerified": "メンバー限定動画の再生を確認できました。解除できます。",
