@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.3](https://github.com/mitsugogo/azki-song-db/compare/v2.5.2...v2.5.3) (2026-05-17)
+
+
+### Bug Fixes
+
+* Safariの再生安定化 ([f2dd619](https://github.com/mitsugogo/azki-song-db/commit/f2dd619c50b7c76beb79ce4c30fd9c8be9c91ae8))
+* Safariの表示崩れ修正 ([fc8ae95](https://github.com/mitsugogo/azki-song-db/commit/fc8ae9523e84151e9891dc4604e69ffa4c052136))
+
 ### [2.5.2](https://github.com/mitsugogo/azki-song-db/compare/v2.5.1...v2.5.2) (2026-05-17)
 
 
