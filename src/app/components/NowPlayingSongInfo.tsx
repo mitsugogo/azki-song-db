@@ -268,7 +268,7 @@ const MainChannelInfo = ({
                     href={c.channelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-auto sm:basis-50 md:basis-65"
+                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 basis-auto sm:basis-50 md:basis-65"
                     title={`${c.name ?? ""}`}
                   >
                     <Avatar
