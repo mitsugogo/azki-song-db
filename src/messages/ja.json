@@ -189,7 +189,7 @@
     },
     "watch": {
       "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
-      "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、videoIDでコンテンツを表示します。",
+      "description": "楽曲の視聴・検索ページです",
       "ogSubtitle": "視聴ページ - {siteName}",
       "ogAlt": "{siteName} - 視聴ページ",
       "mode": {
@@ -263,7 +263,7 @@
       "myBest9OgTitle": "究極の9曲ジェネレーター",
       "myBest9OgWithTopic": "お題:「{title}」",
       "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
-      "myBest9Description": "AZKiの好きな曲をシェアしましょう",
+      "myBest9Description": "AZKiさんの好きな曲をシェアしましょう",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
       "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して画像を生成できます",
@@ -303,7 +303,7 @@
     "statusLockedHelp": "アンロックすると、メンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを表示したい場合は、動画の再生確認が成功した状態でパスワードを入力し、「解除する」を押してください。",
     "playback": {
       "title": "メンバー限定動画の再生確認",
-      "description": "メンバー限定動画の再生を確認し、メンバーシップに入っているかをチェックします。",
+      "description": "メンバー限定動画の再生を確認し、メンバーシップに入っているかをチェックします。メンバーに入っているのに再生できない場合は、事前にYouTubeでログインする必要があります。",
       "statusIdle": "再生確認はまだ開始されていません。",
       "statusChecking": "メンバー限定動画の再生可否を確認中です。",
       "statusVerified": "メンバー限定動画の再生を確認できました。解除できます。",
@@ -312,6 +312,7 @@
     },
     "passwordLabel": "解除パスワード",
     "passwordPlaceholder": "パスワードを入力",
+    "passwordDescription": "メンバー限定コンテンツを解除するためのパスワードを入力してください。",
     "submit": "解除する",
     "submitting": "処理中...",
     "lock": "ロックする",

@@ -23,7 +23,19 @@ vi.mock("@/app/components/AnalyticsWrapper", () => ({
 vi.mock("@mantine/core", () => ({
   createTheme: (value: any) => value,
   Breadcrumbs: ({ children }: any) => <div>{children}</div>,
-  Alert: ({ children }: any) => <div>{children}</div>,
+  Alert: ({ children, title, color, icon }: any) => (
+    <div data-color={color}>
+      {icon ? <div data-testid="alert-icon">{icon}</div> : null}
+      {title ? <div>{title}</div> : null}
+      {children}
+    </div>
+  ),
+  TextInput: ({ label, id, ...props }: any) => (
+    <div>
+      {label ? <label htmlFor={id}>{label}</label> : null}
+      <input id={id} {...props} />
+    </div>
+  ),
 }));
 
 vi.mock("react-youtube", () => ({
@@ -112,6 +124,7 @@ describe("UnlockMembersClient", () => {
     youtubeHandlers.onError?.({ data: 150 });
 
     await waitFor(() => {
+      expect(screen.getAllByTestId("alert-icon").length).toBeGreaterThan(0);
       expect(screen.getByText("playback.statusFailed")).toBeInTheDocument();
     });
   });

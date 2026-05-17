@@ -296,7 +296,7 @@
   },
   "MembersOnlyAccess": {
     "eyebrow": "Hidden Access",
-    "title": "Unlock members-only data",
+    "title": "Unlock members-only videos",
     "description": "Once the members-only video playback check succeeds, song data fetched in this browser will include members-only information. Members-only videos may become private, so please be careful when sharing them on social media.",
     "notConfigured": "Members-only access has not been configured in this environment yet.",
     "statusUnlocked": "Members-only data is currently enabled in this browser.",
@@ -313,6 +313,7 @@
       "retry": "Retry check"
     },
     "passwordLabel": "Password",
+    "passwordDescription": "Enter the password to unlock members-only data.",
     "passwordPlaceholder": "Enter password",
     "submit": "Unlock",
     "submitting": "Submitting...",
