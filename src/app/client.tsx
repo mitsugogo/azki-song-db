@@ -203,7 +203,7 @@ export default function ClientTop() {
             </div>
 
             <div className="flex shrink-0 items-center justify-end sm:gap-2">
-              <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-300 sm:flex">
+              <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
                 <Link href={`/search`} className="hover:text-primary-500">
                   <LuSearch />
                 </Link>
@@ -223,7 +223,7 @@ export default function ClientTop() {
                   {tDrawer("statistics")}
                 </Link>
               </nav>
-              <LanguageSwitcher />
+              <LanguageSwitcher variant="light" />
               <ThemeToggle className="hover:text-primary-500 dark:hover:text-white dark:hover:bg-primary-800" />
             </div>
           </div>
