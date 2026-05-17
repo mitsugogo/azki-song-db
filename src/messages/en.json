@@ -73,6 +73,7 @@
     "songMode": {
       "all": "All Songs",
       "original": "Originals",
+      "selectMode": "Select Mode",
       "other": "Other",
       "cover": "Covers",
       "collaboration": "Collabs / Guest Songs",

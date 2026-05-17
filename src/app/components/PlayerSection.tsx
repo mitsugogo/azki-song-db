@@ -12,12 +12,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
-import MobileActionButtons from "./MobileActionButtons";
+import SongModeControls from "./SongModeControls";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { getSongMode } from "./songModeMenu";
-import { useTranslations } from "next-intl";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -256,11 +255,12 @@ export default function PlayerSection({
         )}
 
         <div className="block md:hidden mx-2 mt-2">
-          <MobileActionButtons
+          <SongModeControls
             onSurprise={() => playRandomSong?.(songs)}
             onSelectSongMode={(mode) => setSearchTerm?.(mode)}
             currentSongMode={currentSongMode}
             onPlaylist={() => setShowPlaylistSelector?.(true)}
+            variant="mobile"
           />
         </div>
 

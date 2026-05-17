@@ -73,6 +73,7 @@
     "songMode": {
       "all": "全曲",
       "original": "オリ曲",
+      "selectMode": "モード選択",
       "other": "その他",
       "cover": "カバー曲",
       "collaboration": "ユニット・ゲスト参加曲",
