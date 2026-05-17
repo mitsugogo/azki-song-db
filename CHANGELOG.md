@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.2](https://github.com/mitsugogo/azki-song-db/compare/v2.5.1...v2.5.2) (2026-05-17)
+
+
+### Bug Fixes
+
+* Android Chromeの限定動画ローディングを改善 ([f3c770f](https://github.com/mitsugogo/azki-song-db/commit/f3c770fbbfc0b169eb72a987fb9b02137bb9a350))
+* Safariでのローディング改善 ([471006c](https://github.com/mitsugogo/azki-song-db/commit/471006c6ca93a649b35ce156f6aacb0c1e24eea2))
+
 ### [2.5.1](https://github.com/mitsugogo/azki-song-db/compare/v2.5.0...v2.5.1) (2026-05-17)
 
 ## [2.5.0](https://github.com/mitsugogo/azki-song-db/compare/v2.4.5...v2.5.0) (2026-05-17)
