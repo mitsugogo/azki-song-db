@@ -826,7 +826,8 @@
         "topLabel": "Top item",
         "countUnit": "times"
       },
-      "viewStats": "stats"
+      "viewStats": "stats",
+      "viewOnApp": "Play"
     },
     "table": {
       "searchPlaceholder": "Search...",

@@ -817,7 +817,8 @@
         "topLabel": "最多項目",
         "countUnit": "回"
       },
-      "viewStats": "stats"
+      "viewStats": "stats",
+      "viewOnApp": "再生"
     },
     "table": {
       "searchPlaceholder": "検索...",
