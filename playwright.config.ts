@@ -27,7 +27,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: 3, // sheetsAPIのレートリミットを考慮して並行数を制限
+  workers: 2, // sheetsAPIのレートリミットを考慮して並行数を制限
   timeout: 30000,
   reporter: [["html", { open: "never" }], ["list"], ["github"]],
   globalSetup: require.resolve("./e2e/global-setup.ts"),
