@@ -8,7 +8,6 @@ import { useLocale } from "next-intl";
 interface YouTubePlayerProps {
   video_id?: string;
   startTime?: number;
-  skipInitialStart?: boolean;
   showNativeControls?: boolean;
   onReady: (event: YouTubeEvent<any>) => void;
   onStateChange: (event: YouTubeEvent<any>) => void;
@@ -18,7 +17,6 @@ interface YouTubePlayerProps {
 function YouTubePlayerComponent({
   video_id,
   startTime,
-  skipInitialStart,
   showNativeControls,
   onReady,
   onStateChange,
@@ -30,21 +28,6 @@ function YouTubePlayerComponent({
   const locale = useLocale();
 
   const opts: Options = useMemo(() => {
-    const playerVars: NonNullable<Options["playerVars"]> = {
-      enablejsapi: 1,
-      autoplay: 1,
-      playsinline: 1,
-      controls: showControls ? 1 : 0,
-      rel: 0, // 再生終了後に同じチャンネルの動画を表示
-      hl: locale || "ja", // 動画のUI
-      origin:
-        typeof window !== "undefined" ? window.location.origin : undefined,
-    };
-
-    if (!skipInitialStart && typeof startTime === "number") {
-      playerVars.start = startTime;
-    }
-
     return {
       width: "100%",
       height: "100%",
@@ -52,9 +35,19 @@ function YouTubePlayerComponent({
        * YouTube Player API のパラメータ設定
        * @see https://developers.google.com/youtube/player_parameters
        */
-      playerVars,
+      playerVars: {
+        enablejsapi: 1,
+        autoplay: 1,
+        playsinline: 1,
+        controls: showControls ? 1 : 0,
+        start: startTime,
+        rel: 0, // 再生終了後に同じチャンネルの動画を表示
+        hl: locale || "ja", // 動画のUI
+        origin:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      },
     } as Options;
-  }, [video_id, startTime, skipInitialStart, showNativeControls, locale]);
+  }, [video_id, startTime, showNativeControls, locale]);
 
   return (
     <YouTube
@@ -75,7 +68,6 @@ const YouTubePlayer = React.memo(
     return (
       prevProps.video_id === nextProps.video_id &&
       prevProps.startTime === nextProps.startTime &&
-      prevProps.skipInitialStart === nextProps.skipInitialStart &&
       prevProps.showNativeControls === nextProps.showNativeControls
       // onStateChange は比較しない
     );

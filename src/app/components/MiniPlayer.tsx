@@ -489,7 +489,6 @@ export default function MiniPlayer() {
               key={`mini-player-${playerKey}`}
               video_id={playingSong.video_id}
               startTime={Number(playingSong.start)}
-              skipInitialStart={playingSong.is_members_only}
               onReady={handlePlayerOnReady}
               onStateChange={handleStateChange}
             />

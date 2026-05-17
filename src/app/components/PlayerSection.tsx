@@ -181,7 +181,6 @@ export default function PlayerSection({
                 key={`youtube-player-${playerKey}-${currentSong?.video_id ?? "none"}`}
                 video_id={videoId}
                 startTime={startTime}
-                skipInitialStart={currentSong?.is_members_only}
                 onReady={
                   handlePlayerOnReady as (event: YouTubeEvent<any>) => void
                 }
