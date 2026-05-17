@@ -5,7 +5,7 @@ import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { YouTubeEvent } from "react-youtube";
 import { FaInfoCircle } from "react-icons/fa";
-import { Tooltip } from "@mantine/core";
+import { LoadingOverlay, Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
 import PlayerControlsBar from "./PlayerControlsBar";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -40,6 +40,7 @@ type PlayerSectionProps = {
   songs: Song[];
   searchTerm: string;
   isPlaying: boolean;
+  isMembersOnlyPlayerRecovering: boolean;
   playerKey: number;
   hideFutureSongs: boolean;
   videoId?: string;
@@ -83,6 +84,7 @@ export default function PlayerSection({
   songs,
   searchTerm,
   isPlaying,
+  isMembersOnlyPlayerRecovering,
   playerKey,
   hideFutureSongs,
   videoId,
@@ -175,6 +177,12 @@ export default function PlayerSection({
       >
         {/* YouTube Player */}
         <div className="relative aspect-video w-full bg-black shadow-md dark:shadow-none">
+          <LoadingOverlay
+            visible={isMembersOnlyPlayerRecovering}
+            zIndex={20}
+            loaderProps={{ color: "pink", type: "bars" }}
+            overlayProps={{ blur: 2, backgroundOpacity: 0.35 }}
+          />
           <div className="absolute top-0 left-0 w-full h-full">
             {currentSong && (
               <YouTubePlayer
