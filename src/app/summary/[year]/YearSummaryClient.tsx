@@ -9,11 +9,12 @@ import {
   Input,
   InputClearButton,
   List,
+  SegmentedControl,
   Text,
 } from "@mantine/core";
 import useSearch from "../../hook/useSearch";
 import { HiSearch } from "react-icons/hi";
-import { FaPlay, FaYoutube } from "react-icons/fa6";
+import { FaPlay, FaUsers, FaYoutube } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import useMilestones from "../../hook/useMilestones";
@@ -23,6 +24,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import SummarySongCard from "./SummarySongCard";
+import { getCollabUnitName } from "@/app/config/collabUnits";
 
 type Props = {
   initialSongs: Song[];
@@ -887,11 +889,38 @@ export default function YearSummaryClient({
                 showArtist={true}
                 bottomContent={
                   <Text size="xs" c="dimmed" className="mt-1 line-clamp-2">
-                    with{" "}
-                    {s.sings
-                      .filter((x) => x.trim() !== siteConfig.talentName)
-                      .map((x) => x.trim())
-                      .join("、")}
+                    {(() => {
+                      const unitName = getCollabUnitName(s.sings, locale);
+
+                      return (
+                        <>
+                          <span className="font-medium">
+                            {unitName ? (
+                              <>
+                                <Badge
+                                  color="blue"
+                                  size="xs"
+                                  radius="sm"
+                                  leftSection={<FaUsers />}
+                                >
+                                  {unitName}
+                                </Badge>
+                              </>
+                            ) : (
+                              <>
+                                with{" "}
+                                {s.sings
+                                  .filter(
+                                    (x) => x.trim() !== siteConfig.talentName,
+                                  )
+                                  .map((x) => x.trim())
+                                  .join("、")}
+                              </>
+                            )}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </Text>
                 }
               />
@@ -905,30 +934,20 @@ export default function YearSummaryClient({
           <h2 className="text-lg font-semibold">
             {t("videosTitle", { year: displayYear })}
           </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setVideoViewMode("grid")}
-              className={`px-2 py-1 rounded text-sm ${
-                mounted && videoViewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700"
-              }`}
-            >
-              {t("viewModeTile")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setVideoViewMode("list")}
-              className={`px-2 py-1 rounded text-sm ${
-                mounted && videoViewMode === "list"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700"
-              }`}
-            >
-              {t("viewModeList")}
-            </button>
-          </div>
+          <SegmentedControl
+            color="pink"
+            value={mounted ? videoViewMode : "list"}
+            onChange={(value) => {
+              if (value === "grid" || value === "list") {
+                setVideoViewMode(value);
+              }
+            }}
+            data={[
+              { label: t("viewModeTile"), value: "grid" },
+              { label: t("viewModeList"), value: "list" },
+            ]}
+            size="sm"
+          />
         </div>
 
         <form onSubmit={handleSearchSubmit} className="mb-4">
@@ -1028,7 +1047,7 @@ export default function YearSummaryClient({
                         }) => (
                           <div
                             key={`v-${v.id}`}
-                            className="border rounded p-2 bg-white dark:bg-gray-800 card-glassmorphism hover-lift-shadow"
+                            className="border rounded p-2 bg-white dark:bg-gray-800 card-glassmorphism hover-shadow-md"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -1096,7 +1115,7 @@ export default function YearSummaryClient({
                               </div>
                             </div>
                             <List
-                              className="mt-2 ml-3 pl-4 list-decimal"
+                              className="mt-2 ml-3 pl-4 list-disc"
                               type="ordered"
                               start={1}
                               size="sm"
@@ -1107,7 +1126,7 @@ export default function YearSummaryClient({
                                     href={`/watch?v=${v.id}${
                                       s.start ? `&t=${s.start}` : ""
                                     }&q=year:${displayYear}`}
-                                    className="hover:underline hover:text-primary dark:hover:text-primary-300"
+                                    className="hover:text-primary dark:hover:text-primary-300"
                                   >
                                     {s.title}
                                     {s.artist && (
