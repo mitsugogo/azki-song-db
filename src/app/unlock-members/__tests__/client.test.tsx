@@ -36,6 +36,9 @@ vi.mock("@mantine/core", () => ({
       <input id={id} {...props} />
     </div>
   ),
+  Button: ({ children, ...props }: any) => (
+    <button {...props}>{children}</button>
+  ),
 }));
 
 vi.mock("react-youtube", () => ({
