@@ -54,6 +54,7 @@
   "Watch": {
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
+      "surpriseTooltip": "ランダムで楽曲を再生します",
       "playlist": "プレイリスト",
       "songList": "楽曲一覧",
       "songsUnit": "曲",

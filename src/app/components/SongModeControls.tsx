@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Grid, Menu } from "@mantine/core";
+import { Button, Grid, Menu, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { LuChevronDown, LuSparkles } from "react-icons/lu";
 import usePlaylists from "../hook/usePlaylists";
@@ -213,23 +213,25 @@ export default function SongModeControls({
       </Grid>
       <Grid grow gap={{ base: 5 }} className={rowMarginClassName}>
         <Grid.Col span={6}>
-          <Button
-            onClick={onSurprise}
-            leftSection={variant === "mobile" ? <LuSparkles /> : undefined}
-            rightSection={variant === "mobile" ? <span /> : undefined}
-            fullWidth={variant === "mobile"}
-            justify={variant === "mobile" ? "space-between" : undefined}
-            className={`px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0 ${
-              variant === "mobile" ? "text-xs" : ""
-            }`}
-          >
-            <span className={textClassName}>
-              {variant === "desktop" ? (
-                <LuSparkles className="mr-1 inline" />
-              ) : null}
-              {t("randomOtherSong")}
-            </span>
-          </Button>
+          <Tooltip label={t("surpriseTooltip")} withArrow position="bottom">
+            <Button
+              onClick={onSurprise}
+              leftSection={variant === "mobile" ? <LuSparkles /> : undefined}
+              rightSection={variant === "mobile" ? <span /> : undefined}
+              fullWidth={variant === "mobile"}
+              justify={variant === "mobile" ? "space-between" : undefined}
+              className={`px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0 ${
+                variant === "mobile" ? "text-xs" : ""
+              }`}
+            >
+              <span className={textClassName}>
+                {variant === "desktop" ? (
+                  <LuSparkles className="mr-1 inline" />
+                ) : null}
+                {t("randomOtherSong")}
+              </span>
+            </Button>
+          </Tooltip>
         </Grid.Col>
         <Grid.Col span={6}>
           <Button

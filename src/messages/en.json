@@ -54,6 +54,7 @@
   "Watch": {
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
+      "surpriseTooltip": "Play songs randomly",
       "playlist": "Playlist",
       "songList": "Songs",
       "songsUnit": "songs",
@@ -81,7 +82,8 @@
       "collabKaraoke": "Collab Karaoke",
       "shorts": "Song Intro Shorts",
       "groupMode": "Mode",
-      "groupTheme": "Theme"
+      "groupTheme": "Theme",
+      "surpriseTooltip": "Play songs randomly"
     },
     "nowPlayingSongInfo": {
       "views": "{count} views",
