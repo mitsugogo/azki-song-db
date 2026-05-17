@@ -114,7 +114,7 @@ export const collabUnits: CollabUnit[] = [
   },
   {
     members: ["AZKi", "ロボ子さん"],
-    unitName: "ロボあず",
+    unitName: "ろぼあず",
     hl: {
       en: { unitName: "RoboAZ", members: ["AZKi", "Robocosan"] },
     },
