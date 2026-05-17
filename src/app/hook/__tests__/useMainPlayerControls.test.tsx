@@ -90,7 +90,7 @@ describe("useMainPlayerControls", () => {
     mockGlobalPlayer = createMockGlobalPlayer();
     Object.defineProperty(window.navigator, "userAgent", {
       value:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:138.0) Gecko/20100101 Firefox/138.0",
       configurable: true,
     });
     // localStorageをモック
@@ -184,6 +184,40 @@ describe("useMainPlayerControls", () => {
     Object.defineProperty(window.navigator, "userAgent", {
       value:
         "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+      configurable: true,
+    });
+
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: [mockSongs[0], membersOnlySong],
+        allSongs: [mockSongs[0], membersOnlySong],
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    act(() => {
+      result.current.changeCurrentSong(membersOnlySong);
+    });
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    expect(mockPlayer.loadVideoById).toHaveBeenCalledWith({
+      videoId: "vid2",
+      startSeconds: 10,
+    });
+    expect(mockPlayer.seekTo).not.toHaveBeenCalled();
+  });
+
+  it("PC版 Chrome のメンバー限定動画は onReady 後に loadVideoById で同一動画を再読込する", () => {
+    Object.defineProperty(window.navigator, "userAgent", {
+      value:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
       configurable: true,
     });
 
