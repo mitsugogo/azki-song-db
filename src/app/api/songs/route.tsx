@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
+import { songsMembersOnlyQueryParamKey } from "../../lib/songsApi";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import {
   hasMembersOnlyAccess,
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const isEnglish = hl.startsWith("en");
     const includeMembersOnlyRequested =
-      searchParams.get("includeMembersOnly") === "true";
+      searchParams.get(songsMembersOnlyQueryParamKey) === "true";
     const cookieHeader = request.headers.get("cookie") ?? "";
     const cookieMap = new Map(
       cookieHeader

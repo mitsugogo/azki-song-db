@@ -9,6 +9,7 @@ import {
 import { useLocale } from "next-intl";
 import { Song } from "../types/song";
 import { fetchJsonDedup } from "../lib/fetchDedup";
+import { songsMembersOnlyQueryParamKey } from "../lib/songsApi";
 
 type UseSongsOptions = {
   includeMembersOnly?: boolean;
@@ -47,7 +48,7 @@ const buildSongsApiUrl = (locale: string, includeMembersOnly: boolean) => {
   });
 
   if (includeMembersOnly) {
-    searchParams.set("includeMembersOnly", "true");
+    searchParams.set(songsMembersOnlyQueryParamKey, "true");
   }
 
   return `/api/songs?${searchParams.toString()}`;

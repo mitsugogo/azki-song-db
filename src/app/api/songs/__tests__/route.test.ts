@@ -26,6 +26,7 @@ import {
   isMembersOnlySongSheetTitle,
   membersOnlySongRanges,
 } from "@/app/lib/membersOnlyAccess";
+import { songsMembersOnlyQueryParamKey } from "@/app/lib/songsApi";
 
 const originalSpreadsheetId = process.env.SPREADSHEET_ID;
 const originalApiKey = process.env.GOOGLE_API_KEY;
@@ -65,11 +66,14 @@ describe("songs route", () => {
   it("正しいCookieがあるとメン限シートを取得する", async () => {
     const token = createMembersOnlyAccessToken();
     const response = await GET(
-      new Request("http://localhost/api/songs?hl=ja&includeMembersOnly=true", {
-        headers: {
-          cookie: `azki_members_only_access=${encodeURIComponent(token ?? "")}`,
+      new Request(
+        `http://localhost/api/songs?hl=ja&${songsMembersOnlyQueryParamKey}=true`,
+        {
+          headers: {
+            cookie: `azki_members_only_access=${encodeURIComponent(token ?? "")}`,
+          },
         },
-      }),
+      ),
     );
 
     expect(response.status).toBe(200);
@@ -85,6 +89,25 @@ describe("songs route", () => {
     const token = createMembersOnlyAccessToken();
     const response = await GET(
       new Request("http://localhost/api/songs?hl=ja", {
+        headers: {
+          cookie: `azki_members_only_access=${encodeURIComponent(token ?? "")}`,
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(getMock).toHaveBeenCalledTimes(1);
+
+    const args = getMock.mock.calls[0]?.[0];
+    expect(args?.ranges).not.toEqual(
+      expect.arrayContaining([...membersOnlySongRanges]),
+    );
+  });
+
+  it("旧クエリキーではメン限シートを取得しない", async () => {
+    const token = createMembersOnlyAccessToken();
+    const response = await GET(
+      new Request("http://localhost/api/songs?hl=ja&includeMembersOnly=true", {
         headers: {
           cookie: `azki_members_only_access=${encodeURIComponent(token ?? "")}`,
         },

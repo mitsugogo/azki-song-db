@@ -8,6 +8,7 @@ import { Playlist } from "../hook/usePlaylists";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
+import { songsMembersOnlyQueryParamKey } from "@/app/lib/songsApi";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -46,7 +47,7 @@ export async function generateMetadata({
   const fetchSongs = async () => {
     const songsUrl = new URL("/api/songs", baseUrl);
     songsUrl.searchParams.set("hl", locale);
-    songsUrl.searchParams.set("includeMembersOnly", "true");
+    songsUrl.searchParams.set(songsMembersOnlyQueryParamKey, "true");
 
     return fetch(songsUrl, {
       cache: "no-store",
