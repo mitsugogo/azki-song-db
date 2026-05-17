@@ -19,10 +19,10 @@ test.describe("Language switcher", () => {
       page.getByRole("combobox", { name: searchInputNamePattern }),
     ).toBeVisible();
 
-    const langGroup = page.getByRole("group", {
+    const langGroup = page.getByRole("radiogroup", {
       name: /言語切替|Language switcher/i,
     });
-    await langGroup.getByRole("button", { name: "EN" }).click();
+    await langGroup.getByText("EN", { exact: true }).click();
 
     await expect(page).toHaveURL(/\/en(\/|$)/);
 
