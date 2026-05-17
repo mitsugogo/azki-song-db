@@ -9,6 +9,7 @@ import useAnniversaries from "../hook/useAnniversaries";
 import { formatDate } from "../lib/formatDate";
 import { breadcrumbClasses } from "../theme";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { FaYoutube } from "react-icons/fa6";
 
 const dayInMs = 24 * 60 * 60 * 1000;
 const hourInMs = 60 * 60 * 1000;
@@ -76,6 +77,17 @@ const getDaysUntil = (nextDateAt: string, nowMsArg?: number) => {
   const todayStartUtcMs = Date.UTC(year, month, day, 0, 0, 0) - jstOffsetMs;
   const diffDays = Math.ceil((target.getTime() - todayStartUtcMs) / dayInMs);
   return Math.max(0, diffDays);
+};
+
+const isYoutubeUrl = (url?: string | null) => {
+  if (!url) return false;
+
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname === "youtu.be" || hostname.endsWith("youtube.com");
+  } catch {
+    return false;
+  }
 };
 
 export default function AnniversariesPageClient() {
@@ -184,6 +196,50 @@ export default function AnniversariesPageClient() {
     return nextItems;
   }, [nowMs, sortedItems]);
 
+  const anniversaryRows = useMemo(() => {
+    return sortedItems.map((item) => {
+      let nextDate = "-";
+      let daysUntil: number | null = null;
+
+      const nextIso = computeNextIsoForItem(item, nowMs);
+      if (nextIso) {
+        const target = parseToJstDayStart(nextIso);
+        if (target) {
+          const monthDay = new Date(target.getTime() + jstOffsetMs);
+          const jstNow = new Date(nowMs + jstOffsetMs);
+          const isMonthDayToday =
+            monthDay.getUTCMonth() === jstNow.getUTCMonth() &&
+            monthDay.getUTCDate() === jstNow.getUTCDate();
+
+          if (isMonthDayToday) {
+            const year = jstNow.getUTCFullYear();
+            const month = String(monthDay.getUTCMonth() + 1).padStart(2, "0");
+            const day = String(monthDay.getUTCDate()).padStart(2, "0");
+            nextDate = formatDate(`${year}-${month}-${day}`, locale);
+            daysUntil = 0;
+          } else {
+            nextDate = formatDate(nextIso, locale);
+            daysUntil = getDaysUntil(nextIso, nowMs);
+          }
+        } else {
+          nextDate = formatDate(nextIso, locale);
+          daysUntil = getDaysUntil(nextIso, nowMs);
+        }
+      }
+
+      return {
+        item,
+        nextDate,
+        nextIso,
+        daysUntil,
+        firstDate: item.first_date_at
+          ? formatDate(item.first_date_at, locale)
+          : "-",
+        formattedName: formatWithAnniversary(item),
+      };
+    });
+  }, [locale, nowMs, sortedItems]);
+
   const getItemIsToday = (item: any) => {
     const target = parseToJstDayStart(computeNextIsoForItem(item, nowMs));
     if (!target) return false;
@@ -218,7 +274,7 @@ export default function AnniversariesPageClient() {
     return t("countdownFormat", { days, hours, minutes, seconds });
   };
 
-  const getYearFromDate = (dateStr?: string | null) => {
+  function getYearFromDate(dateStr?: string | null) {
     if (!dateStr) return null;
     const dateOnlyMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (dateOnlyMatch) return Number(dateOnlyMatch[1]);
@@ -226,7 +282,7 @@ export default function AnniversariesPageClient() {
     if (Number.isNaN(parsed.getTime())) return null;
     const jst = new Date(parsed.getTime() + jstOffsetMs);
     return jst.getUTCFullYear();
-  };
+  }
 
   // first_date_at(date) を基準に次回日付を JST で計算（当日だけは当年を返す）
   function computeNextIsoForItem(item: any, nowMsArg?: number) {
@@ -275,7 +331,7 @@ export default function AnniversariesPageClient() {
     return "";
   }
 
-  const formatWithAnniversary = (item: any) => {
+  function formatWithAnniversary(item: any) {
     const template = item.name || "";
     if (!template) return "";
 
@@ -310,11 +366,14 @@ export default function AnniversariesPageClient() {
     }
 
     return result;
-  };
+  }
 
   const hasFeaturedToday =
     featuredAnniversaries.length > 0 &&
     getItemIsToday(featuredAnniversaries[0]);
+
+  const mobileValueClass =
+    "mt-1 text-sm font-semibold leading-snug text-gray-900 dark:text-gray-100";
 
   return (
     <div className="grow p-2 lg:p-6 lg:pb-10">
@@ -331,7 +390,7 @@ export default function AnniversariesPageClient() {
         </Link>
       </Breadcrumbs>
 
-      <div className="px-3 py-2">
+      <div className="mx-2 mb-3">
         <h1 className="font-extrabold text-2xl">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
           {t("description")}
@@ -344,9 +403,9 @@ export default function AnniversariesPageClient() {
           return (
             <section
               key={`${item.name}-${index}`}
-              className="mx-2 mb-2 rounded-xl border border-primary-300/40 bg-primary-50/70 p-4 shadow-sm dark:border-pink-200/20 dark:bg-gray-900/50"
+              className="mx-2 mb-3 rounded-3xl border border-primary-300/30 bg-white/90 p-4 shadow-[0_20px_60px_rgba(190,24,93,0.12)] dark:border-pink-200/20 dark:bg-gray-900/75 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
             >
-              <p className="text-xs font-semibold tracking-wide text-primary-700 dark:text-pink-200">
+              <p className="text-xs font-semibold uppercase text-primary-700 dark:text-pink-200">
                 {hasFeaturedToday
                   ? t("featuredTodayTitle")
                   : t("featuredTitle")}
@@ -377,104 +436,105 @@ export default function AnniversariesPageClient() {
         </p>
       ) : (
         <>
-          <div className="p-2 md:hidden">
-            <table className="w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
-              {sortedItems.map((item, index) => {
-                let nextDate: string;
-                let daysUntil: number | null;
-                // compute next occurrence client-side
-                const itemNextIso = computeNextIsoForItem(item, nowMs);
-                if (itemNextIso) {
-                  const target = parseToJstDayStart(itemNextIso);
-                  if (target) {
-                    const md = new Date(target.getTime() + jstOffsetMs);
-                    const jstNow = new Date(nowMs + jstOffsetMs);
-                    const isMonthDayToday =
-                      md.getUTCMonth() === jstNow.getUTCMonth() &&
-                      md.getUTCDate() === jstNow.getUTCDate();
-                    if (isMonthDayToday) {
-                      const y = jstNow.getUTCFullYear();
-                      const m = String(md.getUTCMonth() + 1).padStart(2, "0");
-                      const d = String(md.getUTCDate()).padStart(2, "0");
-                      nextDate = formatDate(`${y}-${m}-${d}`, locale);
-                      daysUntil = 0;
-                    } else {
-                      nextDate = formatDate(itemNextIso, locale);
-                      daysUntil = getDaysUntil(itemNextIso);
-                    }
-                  } else {
-                    nextDate = formatDate(itemNextIso, locale);
-                    daysUntil = getDaysUntil(itemNextIso);
-                  }
-                } else {
-                  nextDate = "-";
-                  daysUntil = null;
-                }
-                const firstDate = item.first_date_at
-                  ? formatDate(item.first_date_at, locale)
-                  : "-";
+          <div className="space-y-3 p-2 md:hidden">
+            {anniversaryRows.map(
+              (
+                { item, daysUntil, firstDate, formattedName, nextDate },
+                index,
+              ) => (
+                <article
+                  key={`${item.name}-${index}`}
+                  className="card-glassmorphism overflow-hidden border border-primary/10 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="mt-1 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
+                        {formattedName}
+                      </h3>
+                    </div>
+                  </div>
 
-                return (
-                  <tbody key={`${item.name}-${index}`}>
-                    <tr className="border-t border-light-gray-200/60 text-gray-800 dark:border-white/10 dark:text-gray-100">
-                      <th className="w-20 px-3 pt-3 pb-1 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-primary-50/70 p-3 dark:bg-primary-900/20">
+                      <p className="text-[11px] font-semibold uppercase text-primary-700 dark:text-pink-200">
                         {t("nextDateLabel")}
-                      </th>
-                      <td className="px-3 pt-3 pb-1 whitespace-nowrap">
-                        {nextDate}
-                      </td>
-                      <th className="w-16 px-3 pt-3 pb-1 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
-                        {t("anniversaryNameLabel")}
-                      </th>
-                      <td className="px-3 pt-3 pb-1 font-semibold">
-                        {formatWithAnniversary(item)}
-                      </td>
-                    </tr>
-                    <tr className="text-gray-800 dark:text-gray-100">
-                      <th className="w-20 px-3 pt-1 pb-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
-                        {t("firstDateLabel")}
-                      </th>
-                      <td className="px-3 pt-1 pb-3 whitespace-nowrap">
-                        {firstDate}
-                      </td>
-                      <th className="w-16 px-3 pt-1 pb-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
+                      </p>
+                      <p className={mobileValueClass}>{nextDate}</p>
+                    </div>
+
+                    <div className="rounded-2xl bg-primary-50/70 p-3 dark:bg-primary-900/20">
+                      <p className="text-[11px] font-semibold uppercase text-primary-700 dark:text-pink-200">
                         {t("daysUntilLabel")}
-                      </th>
-                      <td className="px-3 pt-1 pb-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
+                      </p>
+                      <p
+                        className={`${mobileValueClass} text-primary-700 dark:text-pink-200`}
+                      >
                         {daysUntil !== null
                           ? daysUntil === 0
                             ? "-"
                             : t("daysUntil", { days: daysUntil })
                           : "-"}
-                      </td>
-                    </tr>
-                    {(item.note || item.url) && (
-                      <tr className="border-b border-light-gray-200/60 text-gray-700 dark:border-white/10 dark:text-gray-300">
-                        <th className="px-3 pb-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">
-                          {item.note ? t("noteLabel") : t("linkLabel")}
-                        </th>
-                        <td className="px-3 pb-3" colSpan={3}>
-                          {item.note || ""}
-                          {item.url && (
-                            <>
-                              {item.note ? " " : ""}
-                              <Link
+                      </p>
+                    </div>
+
+                    <div className="col-span-2 rounded-2xl border border-gray-100/80 bg-white/70 p-3 dark:border-white/10 dark:bg-gray-950/20">
+                      <p className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">
+                        {t("firstDateLabel")}
+                      </p>
+                      <p className={mobileValueClass}>{firstDate}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 space-y-3 border-t border-gray-100 pt-3 dark:border-white/10">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">
+                        {t("noteLabel")}
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                        {item.note || "-"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">
+                        {t("linkLabel")}
+                      </p>
+                      <div className="mt-2">
+                        {item.url ? (
+                          (() => {
+                            const isYoutube = isYoutubeUrl(item.url);
+
+                            return (
+                              <Badge
+                                component={Link}
+                                size="lg"
+                                radius="xl"
+                                color={isYoutube ? "red" : "pink"}
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="font-medium text-primary-700 underline-offset-4 hover:underline dark:text-pink-200"
+                                className="cursor-pointer"
                               >
-                                {t("openLink")}
-                              </Link>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                );
-              })}
-            </table>
+                                {isYoutube ? (
+                                  <FaYoutube className="mr-1 inline h-3 w-3" />
+                                ) : (
+                                  <FaExternalLinkAlt className="mr-1 inline h-2 w-2" />
+                                )}
+                                {isYoutube ? "YouTube" : t("openLink")}
+                              </Badge>
+                            );
+                          })()
+                        ) : (
+                          <p className="text-sm text-gray-700 dark:text-gray-300">
+                            -
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ),
+            )}
           </div>
 
           <div className="hidden overflow-x-auto p-2 md:block">
@@ -492,88 +552,66 @@ export default function AnniversariesPageClient() {
                 </tr>
               </thead>
               <tbody>
-                {sortedItems.map((item, index) => {
-                  let nextDate: string;
-                  let daysUntil: number | null;
-                  // compute next occurrence client-side
-                  const itemNextIso = computeNextIsoForItem(item, nowMs);
-                  if (itemNextIso) {
-                    const target = parseToJstDayStart(itemNextIso);
-                    if (target) {
-                      const md = new Date(target.getTime() + jstOffsetMs);
-                      const jstNow = new Date(nowMs + jstOffsetMs);
-                      const isMonthDayToday =
-                        md.getUTCMonth() === jstNow.getUTCMonth() &&
-                        md.getUTCDate() === jstNow.getUTCDate();
-                      if (isMonthDayToday) {
-                        const y = jstNow.getUTCFullYear();
-                        const m = String(md.getUTCMonth() + 1).padStart(2, "0");
-                        const d = String(md.getUTCDate()).padStart(2, "0");
-                        nextDate = formatDate(`${y}-${m}-${d}`, locale);
-                        daysUntil = 0;
-                      } else {
-                        nextDate = formatDate(itemNextIso, locale);
-                        daysUntil = getDaysUntil(itemNextIso);
-                      }
-                    } else {
-                      nextDate = formatDate(itemNextIso, locale);
-                      daysUntil = getDaysUntil(itemNextIso);
-                    }
-                  } else {
-                    nextDate = "-";
-                    daysUntil = null;
-                  }
-                  const firstDate = item.first_date_at
-                    ? formatDate(item.first_date_at, locale)
-                    : "-";
+                {anniversaryRows.map(
+                  (
+                    { item, daysUntil, firstDate, formattedName, nextDate },
+                    index,
+                  ) => {
+                    return (
+                      <tr
+                        key={`${item.name}-${index}`}
+                        className="border-t border-light-gray-200/60 align-top text-gray-800 dark:border-white/10 dark:text-gray-100"
+                      >
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          {nextDate}
+                        </td>
+                        <td className="px-3 py-3 font-semibold whitespace-nowrap">
+                          {formattedName}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          {firstDate}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
+                          {daysUntil !== null
+                            ? daysUntil === 0
+                              ? "-"
+                              : t("daysUntil", { days: daysUntil })
+                            : "-"}
+                        </td>
+                        <td className="px-3 py-3 text-gray-600 dark:text-gray-300">
+                          {item.note || "-"}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          {item.url
+                            ? (() => {
+                                const isYoutube = isYoutubeUrl(item.url);
 
-                  return (
-                    <tr
-                      key={`${item.name}-${index}`}
-                      className="border-t border-light-gray-200/60 align-top text-gray-800 dark:border-white/10 dark:text-gray-100"
-                    >
-                      <td className="px-3 py-3 whitespace-nowrap">
-                        {nextDate}
-                      </td>
-                      <td className="px-3 py-3 font-semibold whitespace-nowrap">
-                        {formatWithAnniversary(item)}
-                      </td>
-                      <td className="px-3 py-3 whitespace-nowrap">
-                        {firstDate}
-                      </td>
-                      <td className="px-3 py-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
-                        {daysUntil !== null
-                          ? daysUntil === 0
-                            ? "-"
-                            : t("daysUntil", { days: daysUntil })
-                          : "-"}
-                      </td>
-                      <td className="px-3 py-3 text-gray-600 dark:text-gray-300">
-                        {item.note || "-"}
-                      </td>
-                      <td className="px-3 py-3 whitespace-nowrap">
-                        {item.url ? (
-                          <Badge
-                            component={Link}
-                            variant="variant"
-                            size="sm"
-                            radius="sm"
-                            color="pink"
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="whitespace-nowrap cursor-pointer inline-block"
-                          >
-                            <FaExternalLinkAlt className="w-2 h-2 inline mr-1" />
-                            {t("openLink")}
-                          </Badge>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                                return (
+                                  <Badge
+                                    component={Link}
+                                    size="sm"
+                                    radius="sm"
+                                    color={isYoutube ? "red" : "pink"}
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="whitespace-nowrap cursor-pointer inline-block"
+                                  >
+                                    {isYoutube ? (
+                                      <FaYoutube className="mr-1 inline h-3 w-3" />
+                                    ) : (
+                                      <FaExternalLinkAlt className="mr-1 inline h-2 w-2" />
+                                    )}
+                                    {isYoutube ? "YouTube" : t("openLink")}
+                                  </Badge>
+                                );
+                              })()
+                            : "-"}
+                        </td>
+                      </tr>
+                    );
+                  },
+                )}
               </tbody>
             </table>
           </div>

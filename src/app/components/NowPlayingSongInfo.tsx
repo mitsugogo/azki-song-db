@@ -14,7 +14,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTextSelection } from "@mantine/hooks";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { Link } from "@/i18n/navigation";
-import { FaPlus, FaThumbsUp, FaUsers } from "react-icons/fa6";
+import { FaPlus, FaStar, FaThumbsUp, FaUsers } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
 import React, { use, useEffect, useMemo, useState, useRef } from "react";
@@ -64,6 +64,12 @@ const DescriptionCollapsible = ({
   const isTruncatable = lines.length > 3;
   const collapsedText = lines.slice(0, 3).join("\n");
   const formatedViewCount = formatViewCount(viewCount, locale, t);
+  const formattedUploadDate = isDateString(uploadDate)
+    ? formatDate(uploadDate || "", locale)
+    : uploadDate;
+  const hasMetaInfo = Boolean(
+    formatedViewCount || formattedUploadDate || (tags && tags.length > 0),
+  );
 
   // Mantine hook: 現在のテキスト選択を取得
   const selection = useTextSelection();
@@ -120,11 +126,11 @@ const DescriptionCollapsible = ({
   };
 
   // uploadDateがnew Date()で有効な日付文字列かどうか
-  const isDateString = (s: string | null | undefined) => {
+  function isDateString(s: string | null | undefined) {
     if (!s) return false;
     const d = new Date(s);
     return !isNaN(d.getTime());
-  };
+  }
 
   return (
     <div>
@@ -136,22 +142,23 @@ const DescriptionCollapsible = ({
         className={`cursor-pointer rounded transition-colors p-0`}
         style={{ lineHeight: "1.25rem" }}
       >
-        {formatedViewCount && (
+        {hasMetaInfo && (
           <div
             className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
           >
-            {expanded
-              ? t("views", {
-                  count: Number(viewCount ?? 0).toLocaleString(locale),
-                })
-              : formatedViewCount}{" "}
-            {uploadDate && "・"}{" "}
-            {isDateString(uploadDate)
-              ? formatDate(uploadDate || "", locale)
-              : uploadDate}
+            {formatedViewCount &&
+              (expanded
+                ? t("views", {
+                    count: Number(viewCount ?? 0).toLocaleString(locale),
+                  })
+                : formatedViewCount)}
+            {formatedViewCount && formattedUploadDate && " ・ "}
+            {formattedUploadDate}
             {tags && tags.length > 0 && (
               <>
-                <span className="mr-2"></span>
+                {(formatedViewCount || formattedUploadDate) && (
+                  <span className="mr-2"></span>
+                )}
                 {tags.map((tag) =>
                   expanded ? (
                     <Link
@@ -261,7 +268,7 @@ const MainChannelInfo = ({
                     href={c.channelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 hover:bg-gray-50/30 dark:hover:bg-gray-800/60 basis-auto sm:basis-50 md:basis-65"
+                    className="flex items-center gap-1 min-w-0 rounded-md px-1 py-0.5 basis-auto sm:basis-50 md:basis-65"
                     title={`${c.name ?? ""}`}
                   >
                     <Avatar
@@ -640,6 +647,19 @@ const NowPlayingSongInfo = ({
                     hashtagPlatform: "self",
                   })}
                 </h2>
+                {currentSong.is_members_only && (
+                  <div className="members-only-badge">
+                    <Badge
+                      color="green"
+                      size="sm"
+                      leftSection={<FaStar />}
+                      radius="sm"
+                      variant="light"
+                    >
+                      {t("membersOnly")}
+                    </Badge>
+                  </div>
+                )}
               </div>
             </div>
 

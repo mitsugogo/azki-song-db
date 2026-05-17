@@ -40,10 +40,6 @@ vi.mock("@mantine/core", () => {
   };
 });
 
-vi.mock("flowbite-react", () => ({
-  createTheme: (value: any) => value,
-}));
-
 vi.mock("@mantine/hooks", () => ({
   useSelection: () => [
     [],

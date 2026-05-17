@@ -8,7 +8,7 @@ const getSearchSummary = async (locale: string): Promise<string | null> => {
     const response = await fetch(
       `${baseUrl}/api/songs?hl=${encodeURIComponent(locale)}`,
       {
-        next: { revalidate: 3600 },
+        cache: "no-store",
       },
     );
 

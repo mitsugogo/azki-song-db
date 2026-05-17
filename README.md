@@ -111,6 +111,8 @@ The following environment variables are used in the project:
 | `GOOGLE_API_KEY`       | Google Sheets API key for reading data from Google Sheets |
 | `SPREADSHEET_ID`       | Google Sheets ID for reading data from Google Sheets       |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API key for reading YouTube video information |
+| `MEMBERS_ONLY_SONGS_PASSWORD` | Shared password used to unlock the members-only song sheets |
+| `MEMBERS_ONLY_COOKIE_SECRET` | Secret used to sign the unlock cookie for members-only sheets |
 | `PUBLIC_BASE_URL`      | Base URL for the production environment                    |
 
 Please set these environment variables in your `.env.local` file or in your production environment.

@@ -56,4 +56,20 @@ describe("YouTubePlayer", () => {
     const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
     expect(opts.playerVars.start).toBe(5);
   });
+
+  it("skipInitialStartがtrueなら初回埋め込みでstartパラメータを付けない", () => {
+    const { container } = render(
+      <YouTubePlayer
+        video_id="membersOnlyVid"
+        startTime={120}
+        skipInitialStart
+        onReady={() => {}}
+        onStateChange={() => {}}
+      />,
+    );
+
+    const div = container.querySelector("div[data-videoid]")!;
+    const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
+    expect(opts.playerVars.start).toBeUndefined();
+  });
 });

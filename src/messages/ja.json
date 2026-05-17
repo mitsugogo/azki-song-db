@@ -2,7 +2,8 @@
   "Header": {
     "toggleNavigation": "ナビゲーションを開く",
     "searchPlaceholder": "曲名、アーティスト、タグなどで検索",
-    "languageSwitcher": "言語切替"
+    "languageSwitcher": "言語切替",
+    "membersOnlyBadge": "メンバー限定"
   },
   "DrawerMenu": {
     "title": "メニュー",
@@ -53,6 +54,7 @@
   "Watch": {
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
+      "surpriseTooltip": "ランダムで楽曲を再生します",
       "playlist": "プレイリスト",
       "songList": "楽曲一覧",
       "songsUnit": "曲",
@@ -72,6 +74,7 @@
     "songMode": {
       "all": "全曲",
       "original": "オリ曲",
+      "selectMode": "モード選択",
       "other": "その他",
       "cover": "カバー曲",
       "collaboration": "ユニット・ゲスト参加曲",
@@ -88,7 +91,8 @@
       "collapse": "折りたたむ",
       "subscribers": "チャンネル登録者 {count}",
       "otherChannels": "他 {count} チャンネル",
-      "lastUpdated": "最終更新: {date}"
+      "lastUpdated": "最終更新: {date}",
+      "membersOnly": "メンバー限定"
     },
     "nowPlayingSongInfoDetail": {
       "title": "タイトル:",
@@ -112,7 +116,9 @@
       "additionalInfo": "追加情報:",
       "timesSung": "歌った回数:",
       "times": "回",
-      "videosWithSong": "この曲を歌った枠:"
+      "videosWithSong": "この曲を歌った枠:",
+      "membersOnlyBadge": "メンバー限定",
+      "membersOnly": "メンバー限定"
     },
     "createPlaylistModal": {
       "title": "新規プレイリストを作成",
@@ -160,8 +166,15 @@
     "surpriseMe": "Surprise me",
     "recommendedLabel": "RECOMMENDED",
     "recommendedTitle": "おすすめ楽曲",
+    "anniversariesTitle": "記念日",
+    "viewAnniversaries": "記念日へ",
+    "viewSummary": "活動記録へ",
+    "todayMilestonesEmpty": "今日は該当するできごとがありません",
+    "timelineLabel": "Timeline",
+    "timelineTitle": "記念日 & できごと",
     "recentUpdatesLabel": "Updates",
     "recentUpdatesTitle": "更新情報",
+    "recentUpdatesAddedCount": "{count}曲追加",
     "noRecentUpdates": "更新情報はありません",
     "hololiveOfficial": "ホロライブ公式",
     "statsLoading": "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中",
@@ -176,7 +189,7 @@
     },
     "watch": {
       "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
-      "description": "楽曲の視聴・検索ページです。曲名やプレイリスト、videoIDでコンテンツを表示します。",
+      "description": "楽曲の視聴・検索ページです",
       "ogSubtitle": "視聴ページ - {siteName}",
       "ogAlt": "{siteName} - 視聴ページ",
       "mode": {
@@ -250,7 +263,7 @@
       "myBest9OgTitle": "究極の9曲ジェネレーター",
       "myBest9OgWithTopic": "お題:「{title}」",
       "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
-      "myBest9Description": "AZKiの好きな曲をシェアしましょう",
+      "myBest9Description": "AZKiさんの好きな曲をシェアしましょう",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
       "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して画像を生成できます",
@@ -273,6 +286,48 @@
     "playlist": {
       "title": "プレイリスト",
       "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
+    },
+    "membersOnlyAccess": {
+      "title": "メンバー限定コンテンツ解除 | {siteName}",
+      "description": "所定のパスワードを入力して、メンバー限定シートを含むデータをこの端末で閲覧できるようにします。"
+    }
+  },
+  "MembersOnlyAccess": {
+    "eyebrow": "Hidden Access",
+    "title": "メンバー限定コンテンツの解除",
+    "description": "メンバー限定動画の再生確認が通ると、このブラウザから取得する楽曲データにメンバー限定情報が含まれるようになります。メンバー限定動画の内容は非公開の可能性があるため、SNSのシェアなどは注意してください。",
+    "notConfigured": "この環境ではメンバー限定コンテンツ解除がまだ設定されていません。",
+    "statusUnlocked": "現在、このブラウザではメンバー限定コンテンツが有効です。",
+    "statusUnlockedHelp": "アンロック後はメンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを含まないように戻したい場合は「ロック」をしてください。",
+    "statusLocked": "現在、このブラウザではメンバー限定コンテンツは無効です。",
+    "statusLockedHelp": "アンロックすると、メンバー限定コンテンツも含まれるようになります。メンバー限定コンテンツを表示したい場合は、動画の再生確認が成功した状態でパスワードを入力し、「解除する」を押してください。",
+    "playback": {
+      "title": "メンバー限定動画の再生確認",
+      "description": "メンバー限定動画の再生を確認し、メンバーシップに入っているかをチェックします。メンバーに入っているのに再生できない場合は、事前にYouTubeでログインする必要があります。",
+      "statusIdle": "再生確認はまだ開始されていません。",
+      "statusChecking": "メンバー限定動画の再生可否を確認中です。",
+      "statusVerified": "メンバー限定動画の再生を確認できました。解除できます。",
+      "statusFailed": "メンバー限定動画の再生を確認できませんでした。YouTube でメンバー権限のある状態か確認してから再試行してください。",
+      "retry": "再確認する"
+    },
+    "passwordLabel": "解除パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "passwordDescription": "メンバー限定コンテンツを解除するためのパスワードを入力してください。",
+    "submit": "解除する",
+    "submitting": "処理中...",
+    "lock": "ロックする",
+    "errors": {
+      "members_only_access_not_configured": "サーバー側の設定が未完了です。",
+      "invalid_request_body": "送信内容の読み取りに失敗しました。",
+      "password_required": "パスワードを入力してください。",
+      "playback_verification_required": "先にメンバー限定動画の再生確認を完了してください。",
+      "invalid_password": "パスワードが一致しません。",
+      "network_error": "通信に失敗しました。時間をおいて再試行してください。",
+      "unexpected_error": "予期しないエラーが発生しました。"
+    },
+    "notices": {
+      "unlockSuccess": "限定コンテンツを有効化しました。新しく取得する楽曲データにメンバー限定コンテンツが含まれます。",
+      "lockSuccess": "限定コンテンツを無効化しました。"
     }
   },
   "Share": {
@@ -451,6 +506,7 @@
   "Playlist": {
     "title": "プレイリスト",
     "manageTitle": "プレイリストの管理",
+    "favoritesName": "お気に入り",
     "ogSubtitle": "{count}曲の楽曲をまとめたプレイリスト",
     "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
     "aria": {
@@ -498,6 +554,7 @@
     "summary": "楽曲を検索できます。全{countSongs}曲、{countVideos}動画を収録。",
     "seeMore": "» もっと見る",
     "noResults": "該当する曲がありません",
+    "membersOnlyBadge": "メンバー限定",
     "filters": {
       "category": "カテゴリー",
       "title": "曲名",
@@ -669,7 +726,7 @@
     "breadcrumb": "記念日",
     "title": "記念日",
     "description": "AZKiさんに縁がある記念日をまとめました。",
-    "featuredTitle": "もっとも近い記念日",
+    "featuredTitle": "次の記念日",
     "featuredTodayTitle": "記念日🎉",
     "countdownFormat": "あと {days}日 {hours}時間 {minutes}分 {seconds}秒",
     "countdownFinished": "まもなくです",
@@ -760,7 +817,8 @@
         "topLabel": "最多項目",
         "countUnit": "回"
       },
-      "viewStats": "stats"
+      "viewStats": "stats",
+      "viewOnApp": "再生"
     },
     "table": {
       "searchPlaceholder": "検索...",
@@ -886,6 +944,7 @@
     "viewModeTile": "タイル",
     "viewModeList": "リスト",
     "searchPlaceholder": "検索ワードを入力",
+    "searchInAppLabel": "再生",
     "clearButtonLabel": "クリア",
     "noData": "データがありません。",
     "routes": {
@@ -1040,6 +1099,8 @@
     "qrAlt": "{target}のQRコード",
     "qrTrademark": "QRコードは株式会社デンソーウェーブの登録商標です",
     "copied": "コピーしました！",
-    "close": "閉じる"
+    "close": "閉じる",
+    "membersOnlyAlert": "メンバー限定動画です。非公開の場合があるため、SNS等へのシェアには注意してください。",
+    "membersOnlyAlertTitle": "メンバー限定動画"
   }
 }

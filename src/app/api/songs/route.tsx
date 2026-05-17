@@ -1,7 +1,14 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
+import { songsMembersOnlyQueryParamKey } from "../../lib/songsApi";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
+import {
+  hasMembersOnlyAccess,
+  isMembersOnlySongSheetTitle,
+  membersOnlyAccessCookieName,
+  membersOnlySongRanges,
+} from "@/app/lib/membersOnlyAccess";
 import { Song } from "@/app/types/song";
 
 export async function GET(request: Request) {
@@ -9,6 +16,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const isEnglish = hl.startsWith("en");
+    const includeMembersOnlyRequested =
+      searchParams.get(songsMembersOnlyQueryParamKey) === "true";
+    const cookieHeader = request.headers.get("cookie") ?? "";
+    const cookieMap = new Map(
+      cookieHeader
+        .split(";")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .map((part) => {
+          const separatorIndex = part.indexOf("=");
+          if (separatorIndex === -1) return [part, ""];
+          return [
+            part.slice(0, separatorIndex),
+            decodeURIComponent(part.slice(separatorIndex + 1)),
+          ];
+        }),
+    );
+    const includeMembersOnlySongs =
+      includeMembersOnlyRequested &&
+      hasMembersOnlyAccess(cookieMap.get(membersOnlyAccessCookieName));
 
     const sheets = google.sheets({
       version: "v4",
@@ -16,7 +43,7 @@ export async function GET(request: Request) {
     });
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
-    const ranges = [
+    const publicRanges = [
       // 翻訳用マップ
       "artists!A:B",
       "song_titles!A:C",
@@ -34,6 +61,9 @@ export async function GET(request: Request) {
       "ゲスト・fesなど!A:M",
       "特殊!A:R",
     ];
+    const ranges = includeMembersOnlySongs
+      ? [...publicRanges, ...membersOnlySongRanges]
+      : publicRanges;
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
@@ -194,6 +224,7 @@ export async function GET(request: Request) {
 
       const sheetTitle = (sheet.properties?.title || "").toLowerCase();
       if (sheetTitle === "artists" || sheetTitle === "song_titles") return; // 翻訳シートはスキップ
+      const isMembersOnlySong = isMembersOnlySongSheetTitle(sheetTitle);
 
       sheetRows.slice(1).forEach((row) => {
         const vals = row.values || [];
@@ -316,6 +347,7 @@ export async function GET(request: Request) {
           video_title: getStr("video"),
           video_uri: videoUri,
           video_id: videoId,
+          is_members_only: isMembersOnlySong,
           start: parseTimeFromNumberValue(getNum("start")),
           end: parseTimeFromNumberValue(getNum("end")),
           broadcast_at: broadcastAt,
@@ -429,13 +461,13 @@ export async function GET(request: Request) {
           }),
       {
         headers: {
-          "Cache-Control":
-            "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+          "Cache-Control": "private, no-store, max-age=0, must-revalidate",
           "Vercel-Cache-Tag": buildVercelCacheTagHeader([
             cacheTags.coreDataset,
             cacheTags.songs,
             cacheTags.songsList,
           ]),
+          Vary: "Cookie",
           "x-data-updated": now.toISOString(),
           "Last-Modified": now.toUTCString(),
         },

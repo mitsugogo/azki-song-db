@@ -38,6 +38,7 @@ export interface Song {
   video_title: string;
   video_uri: string;
   video_id: string;
+  is_members_only?: boolean;
   start: number;
   end: number;
   broadcast_at: string;

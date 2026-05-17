@@ -1,5 +1,3 @@
-import { ThemeProvider } from "flowbite-react";
-import { flowbiteTheme } from "../../theme";
 import { siteConfig } from "@/app/config/siteConfig";
 
 // titleタグ
@@ -12,9 +10,5 @@ export default function StatsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <ThemeProvider theme={flowbiteTheme}>{children}</ThemeProvider>
-    </>
-  );
+  return <>{children}</>;
 }

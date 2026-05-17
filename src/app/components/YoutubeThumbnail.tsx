@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@mantine/core";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface YoutubeThumbnailProps {
   videoId: string;
@@ -22,6 +22,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   const { imageUrl, handleError, isExhausted } =
     useYoutubeThumbnailFallback(videoId);
   const [loading, setLoading] = useState(true);
+  const imageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     // videoId が変わったら読み込み状態をリセットする
@@ -33,6 +34,23 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
       setLoading(false);
     }
   }, [isExhausted]);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image || !image.complete || isExhausted) {
+      return;
+    }
+
+    if (
+      image.naturalWidth === 0 ||
+      (image.naturalWidth === 120 && image.naturalHeight === 90)
+    ) {
+      handleError();
+      return;
+    }
+
+    setLoading(false);
+  }, [imageUrl, handleError, isExhausted]);
 
   const handleOnLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     // 画像の幅を確認して、0または120(YouTubeがサムネがないときに返す幅)になった場合は、フォールバックを試す
@@ -60,6 +78,7 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
       >
         <img
           key={videoId}
+          ref={imageRef}
           src={imageUrl}
           alt={alt}
           className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""}`}

@@ -116,6 +116,7 @@ export async function GET(req: NextRequest) {
     // 曲データを取得
     const songs = await fetch(
       `${origin}/api/songs?hl=${encodeURIComponent(hl)}`,
+      { cache: "no-store" },
     )
       .then((res) => res.json())
       .catch(() => []);

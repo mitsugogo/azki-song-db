@@ -3,10 +3,18 @@
 import { useMemo, useEffect, useState, FormEvent } from "react";
 import { Song } from "../../types/song";
 import { Link } from "@/i18n/navigation";
-import { Badge, Button, Input, InputClearButton } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Input,
+  InputClearButton,
+  List,
+  SegmentedControl,
+  Text,
+} from "@mantine/core";
 import useSearch from "../../hook/useSearch";
 import { HiSearch } from "react-icons/hi";
-import { FaPlay } from "react-icons/fa6";
+import { FaPlay, FaUsers, FaYoutube } from "react-icons/fa6";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import useMilestones from "../../hook/useMilestones";
@@ -15,6 +23,8 @@ import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import SummarySongCard from "./SummarySongCard";
+import { getCollabUnitName } from "@/app/config/collabUnits";
 
 type Props = {
   initialSongs: Song[];
@@ -290,8 +300,8 @@ export default function YearSummaryClient({
   const collaborativeSongs = useMemo(() => {
     return (songsFiltered || [])
       .filter((s) => {
-        const singers = s.sing.split("、").map((x) => x.trim());
-        return singers.length >= 2;
+        const singers = s.sings.map((x) => x.trim());
+        return singers.length >= 2 && singers.includes(siteConfig.talentName);
       })
       .sort((a, b) => {
         return (
@@ -305,7 +315,7 @@ export default function YearSummaryClient({
   const collabCountsBySinger = useMemo(() => {
     const counts: Record<string, number> = {};
     (collaborativeSongs || []).forEach((s) => {
-      const singers = s.sing.split("、").map((x) => x.trim());
+      const singers = s.sings.map((x) => x.trim());
       singers.forEach((singer) => {
         counts[singer] = (counts[singer] || 0) + 1;
       });
@@ -325,6 +335,7 @@ export default function YearSummaryClient({
     type YearMilestone = {
       broadcast_at: string;
       milestone: string;
+      note?: string;
       is_external: boolean;
       url: string;
     };
@@ -364,6 +375,7 @@ export default function YearSummaryClient({
           : existing.broadcast_at,
         is_external: existing.is_external || candidate.is_external,
         url: existing.url || candidate.url,
+        note: existing.note || candidate.note,
       });
     };
 
@@ -403,6 +415,7 @@ export default function YearSummaryClient({
         milestone,
         is_external: true,
         url: m.url || "",
+        note: m.note || "",
       });
     });
 
@@ -422,76 +435,81 @@ export default function YearSummaryClient({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <Link
+          href={`/?q=year:${displayYear}`}
+          className="border rounded p-4 card-glassmorphism hover-lift-shadow"
+        >
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             {t("yearCards.recordedSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}`}>
-              {(fetchedInitialSongs ?? initialSongs).length}
-            </Link>
+            {(fetchedInitialSongs ?? initialSongs).length}
           </div>
-        </div>
-        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
+        </Link>
+        <Link
+          href={`/?q=year:${displayYear}|tag:歌枠`}
+          className="border rounded p-4 card-glassmorphism hover-lift-shadow"
+        >
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             {t("yearCards.sungInStreamsLabel")}
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:歌枠`}>
-              {
-                (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("歌枠"),
-                ).length
-              }
-            </Link>
+            {
+              (fetchedInitialSongs ?? initialSongs).filter((s) =>
+                s.tags.includes("歌枠"),
+              ).length
+            }
           </div>
-        </div>
-        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
+        </Link>
+        <Link
+          href={`/?q=year:${displayYear}|tag:ゲスト出演`}
+          className="border rounded p-4 card-glassmorphism hover-lift-shadow"
+        >
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             {t("yearCards.guestSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:ゲスト出演`}>
-              {
-                (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  s.tags.includes("ゲスト出演"),
-                ).length
-              }
-            </Link>
+            {
+              (fetchedInitialSongs ?? initialSongs).filter((s) =>
+                s.tags.includes("ゲスト出演"),
+              ).length
+            }
           </div>
-        </div>
+        </Link>
 
-        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
+        <Link
+          href={`/?q=year:${displayYear}|original-songs`}
+          className="border rounded p-4 card-glassmorphism hover-lift-shadow"
+        >
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             {t("yearCards.originalSongsLabel")}
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|original-songs`}>
-              {
-                new Set(
-                  (fetchedInitialSongs ?? initialSongs)
-                    .filter((s) => isPossibleOriginalSong(s))
-                    .map((s) => s.title),
-                ).size
-              }
-            </Link>
+            {
+              new Set(
+                (fetchedInitialSongs ?? initialSongs)
+                  .filter((s) => isPossibleOriginalSong(s))
+                  .map((s) => s.title),
+              ).size
+            }
           </div>
-        </div>
-        <div className="border rounded p-4 card-glassmorphism hover-lift-shadow">
+        </Link>
+        <Link
+          href={`/?q=year:${displayYear}|tag:カバー曲`}
+          className="border rounded p-4 card-glassmorphism hover-lift-shadow"
+        >
           <div className="text-sm text-gray-700 dark:text-light-gray-400">
             {t("yearCards.coversLabel")}
           </div>
           <div className="text-2xl font-bold">
-            <Link href={`/?q=year:${displayYear}|tag:カバー曲`}>
-              {
-                (fetchedInitialSongs ?? initialSongs).filter((s) =>
-                  isCoverSong(s),
-                ).length
-              }
-            </Link>
+            {
+              (fetchedInitialSongs ?? initialSongs).filter((s) =>
+                isCoverSong(s),
+              ).length
+            }
           </div>
-        </div>
+        </Link>
       </div>
 
       {displayYear && displayYearMilestones.length > 0 ? (
@@ -499,7 +517,7 @@ export default function YearSummaryClient({
           <h2 className="text-xl font-semibold mb-4">{t("milestonesTitle")}</h2>
           <ul className="space-y-2 list-disc ml-6">
             {displayYearMilestones.map((milestone, index) => (
-              <li key={index}>
+              <li key={index} className="text-sm">
                 <div className="font-medium">
                   {milestone.is_external ? (
                     milestone.url ? (
@@ -511,6 +529,10 @@ export default function YearSummaryClient({
 
                           return (
                             <>
+                              <Text component="span" color="gray" size="sm">
+                                {formatDate(milestone.broadcast_at, locale)}
+                                &nbsp;-&nbsp;
+                              </Text>
                               <Link
                                 href={normalizedUrl}
                                 className="hover:underline text-primary dark:text-primary-600"
@@ -519,37 +541,53 @@ export default function YearSummaryClient({
                               >
                                 {milestone.milestone}
                               </Link>
+
                               <Badge
                                 component="a"
                                 href={normalizedUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                color="gray"
+                                color="pink"
                                 radius="sm"
                                 className="ml-2 cursor-pointer"
+                                variant="light"
+                                leftSection={<FaExternalLinkAlt />}
                               >
-                                <FaExternalLinkAlt className="inline -mt-1 mr-0.5" />{" "}
                                 URL
                               </Badge>
+                              {milestone.note && (
+                                <Text c="dimmed" component="span" size="xs">
+                                  <br />
+                                  &nbsp;{milestone.note}
+                                </Text>
+                              )}
                             </>
                           );
                         })()}
                       </>
                     ) : (
-                      <span>{milestone.milestone}</span>
+                      <>
+                        <Text component="span" color="gray" size="sm">
+                          {formatDate(milestone.broadcast_at, locale)}
+                          &nbsp;-&nbsp;
+                        </Text>
+                        <span>{milestone.milestone}</span>
+                      </>
                     )
                   ) : (
-                    <Link
-                      href={buildMilestoneSearchHref(milestone.milestone)}
-                      className="hover:underline text-primary dark:text-primary-600"
-                    >
-                      {milestone.milestone}
-                    </Link>
+                    <>
+                      <Text component="span" color="gray" size="sm">
+                        {formatDate(milestone.broadcast_at, locale)}
+                        &nbsp;-&nbsp;
+                      </Text>
+                      <Link
+                        href={buildMilestoneSearchHref(milestone.milestone)}
+                        className="hover:underline text-primary dark:text-primary-600"
+                      >
+                        {milestone.milestone}
+                      </Link>
+                    </>
                   )}
-                  <span className="text-sm text-gray-700 dark:text-light-gray-400">
-                    &nbsp;-&nbsp;
-                    {formatDate(milestone.broadcast_at, locale)}
-                  </span>
                 </div>
               </li>
             ))}
@@ -800,7 +838,7 @@ export default function YearSummaryClient({
               {t("coverLabel")}
             </Link>
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4">
             {(songsFiltered || [])
               .filter((s) =>
                 (s.tags || []).some(
@@ -818,32 +856,14 @@ export default function YearSummaryClient({
                   new Date(b.broadcast_at).getTime(),
               )
               .map((g, i) => (
-                <article
+                <SummarySongCard
                   key={`${g.video_id || i}-special-${i}`}
-                  className="card-glassmorphism hover-lift-shadow overflow-hidden"
-                >
-                  <Link
-                    href={`/watch?v=${g.video_id || ""}${
-                      g.start ? `&t=${g.start}` : ""
-                    }&q=year:${displayYear}`}
-                    className="block"
-                  >
-                    <div className="w-full aspect-video bg-black">
-                      <YoutubeThumbnail videoId={g.video_id} alt={g.title} />
-                    </div>
-                    <div className="p-3">
-                      <div className="font-medium line-clamp-2">{g.title}</div>
-                      {g.artist && (
-                        <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                          {g.artist}
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                        {formatDate(g.broadcast_at, locale)}
-                      </div>
-                    </div>
-                  </Link>
-                </article>
+                  song={g}
+                  href={`/watch?v=${g.video_id || ""}${
+                    g.start ? `&t=${g.start}` : ""
+                  }&q=year:${displayYear}`}
+                  locale={locale}
+                />
               ))}
           </div>
         </section>
@@ -857,34 +877,53 @@ export default function YearSummaryClient({
               count: (collaborativeSongs || []).length,
             })}
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4">
             {(collaborativeSongs || []).map((s, index) => (
-              <article
+              <SummarySongCard
                 key={`${s.video_id || ""}-collab-${s.start || ""}-${index}`}
-                className="card-glassmorphism hover-lift-shadow overflow-hidden"
-              >
-                <Link
-                  href={`/watch?v=${s.video_id || ""}${
-                    s.start ? `&t=${s.start}` : ""
-                  }&q=year:${displayYear}`}
-                >
-                  <div className="w-full aspect-video bg-black">
-                    <YoutubeThumbnail videoId={s.video_id} alt={s.title} />
-                  </div>
-                  <div className="p-3">
-                    <div className="font-medium line-clamp-2">{s.title}</div>
-                    <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                      {s.artist}
-                    </div>
-                    <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1 line-clamp-1">
-                      {s.sing}
-                    </div>
-                    <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                      {formatDate(s.broadcast_at, locale)}
-                    </div>
-                  </div>
-                </Link>
-              </article>
+                song={s}
+                href={`/watch?v=${s.video_id || ""}${
+                  s.start ? `&t=${s.start}` : ""
+                }&q=year:${displayYear}`}
+                locale={locale}
+                showArtist={true}
+                bottomContent={
+                  <Text size="xs" c="dimmed" className="mt-1 line-clamp-2">
+                    {(() => {
+                      const unitName = getCollabUnitName(s.sings, locale);
+
+                      return (
+                        <>
+                          <span className="font-medium">
+                            {unitName ? (
+                              <>
+                                <Badge
+                                  color="blue"
+                                  size="xs"
+                                  radius="sm"
+                                  leftSection={<FaUsers />}
+                                >
+                                  {unitName}
+                                </Badge>
+                              </>
+                            ) : (
+                              <>
+                                with{" "}
+                                {s.sings
+                                  .filter(
+                                    (x) => x.trim() !== siteConfig.talentName,
+                                  )
+                                  .map((x) => x.trim())
+                                  .join("、")}
+                              </>
+                            )}
+                          </span>
+                        </>
+                      );
+                    })()}
+                  </Text>
+                }
+              />
             ))}
           </div>
         </section>
@@ -895,30 +934,20 @@ export default function YearSummaryClient({
           <h2 className="text-lg font-semibold">
             {t("videosTitle", { year: displayYear })}
           </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setVideoViewMode("grid")}
-              className={`px-2 py-1 rounded text-sm ${
-                mounted && videoViewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700"
-              }`}
-            >
-              {t("viewModeTile")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setVideoViewMode("list")}
-              className={`px-2 py-1 rounded text-sm ${
-                mounted && videoViewMode === "list"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700"
-              }`}
-            >
-              {t("viewModeList")}
-            </button>
-          </div>
+          <SegmentedControl
+            color="pink"
+            value={mounted ? videoViewMode : "list"}
+            onChange={(value) => {
+              if (value === "grid" || value === "list") {
+                setVideoViewMode(value);
+              }
+            }}
+            data={[
+              { label: t("viewModeTile"), value: "grid" },
+              { label: t("viewModeList"), value: "list" },
+            ]}
+            size="sm"
+          />
         </div>
 
         <form onSubmit={handleSearchSubmit} className="mb-4">
@@ -959,48 +988,26 @@ export default function YearSummaryClient({
                   {formatMonthLabel(month)} ({monthSongs.length})
                 </h3>
                 {mounted && videoViewMode === "grid" ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4">
                     {monthSongs.map((g, i) => (
-                      <article
+                      <SummarySongCard
                         key={`${g.video_id || i}-${i}`}
-                        className="card-glassmorphism hover-lift-shadow overflow-hidden"
-                      >
-                        <Link
-                          href={`/watch?v=${g.video_id || ""}${
-                            g.start ? `&t=${g.start}` : ""
-                          }&q=year:${displayYear}`}
-                          className="block"
-                        >
-                          <div className="w-full aspect-video bg-black">
-                            <YoutubeThumbnail
-                              videoId={g.video_id}
-                              alt={g.title}
-                            />
-                          </div>
-                          <div className="p-3">
-                            <div className="font-medium line-clamp-2">
-                              {g.title}
+                        song={g}
+                        href={`/watch?v=${g.video_id || ""}${
+                          g.start ? `&t=${g.start}` : ""
+                        }&q=year:${displayYear}`}
+                        locale={locale}
+                        bottomContent={
+                          g.milestones &&
+                          g.milestones.map((milestone, idx) => (
+                            <div key={idx}>
+                              <Badge color="pink" variant="sm">
+                                {milestone}
+                              </Badge>
                             </div>
-                            {g.artist && (
-                              <div className="text-sm text-gray-700 dark:text-light-gray-400">
-                                {g.artist}
-                              </div>
-                            )}
-                            <div className="text-xs text-gray-700 dark:text-light-gray-400 mt-1">
-                              {formatDate(g.broadcast_at, locale)}
-                            </div>
-
-                            {g.milestones &&
-                              g.milestones.map((milestone, idx) => (
-                                <div key={idx}>
-                                  <Badge color="pink" variant="sm">
-                                    {milestone}
-                                  </Badge>
-                                </div>
-                              ))}
-                          </div>
-                        </Link>
-                      </article>
+                          ))
+                        }
+                      />
                     ))}
                   </div>
                 ) : (
@@ -1040,7 +1047,7 @@ export default function YearSummaryClient({
                         }) => (
                           <div
                             key={`v-${v.id}`}
-                            className="border rounded p-2 bg-white dark:bg-gray-800 card-glassmorphism hover-lift-shadow"
+                            className="border rounded p-2 bg-white dark:bg-gray-800 card-glassmorphism hover-shadow-md"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -1060,42 +1067,77 @@ export default function YearSummaryClient({
                                     />
                                   </Link>
                                 )}
-                                <Link
-                                  href={
-                                    v.uri ||
-                                    `https://www.youtube.com/watch?v=${v.id}`
-                                  }
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="font-medium hover:underline"
-                                >
-                                  {v.title}
-                                  <span className="text-sm text-gray-700 dark:text-light-gray-400">
-                                    <br />
+                                <div className="font-medium">
+                                  <Text component="span" size="lg" fw={500}>
+                                    {v.title}
+                                  </Text>
+                                  <div className="inline-block">
+                                    <Badge
+                                      color="red"
+                                      radius="sm"
+                                      variant="light"
+                                      component="a"
+                                      href={
+                                        v.uri ||
+                                        `https://www.youtube.com/watch?v=${v.id}`
+                                      }
+                                      target="_blank"
+                                      leftSection={<FaYoutube />}
+                                      className="ml-2 cursor-pointer"
+                                    >
+                                      YouTube
+                                    </Badge>
+                                    <Badge
+                                      color="pink"
+                                      radius="sm"
+                                      variant="light"
+                                      component="a"
+                                      href={`/watch?v=${v.id}&q=year:${displayYear}`}
+                                      target="_blank"
+                                      leftSection={<FaPlay />}
+                                      className="ml-2 cursor-pointer"
+                                    >
+                                      {t("searchInAppLabel")}
+                                    </Badge>
+                                  </div>
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    className="mt-1 line-clamp-2"
+                                  >
                                     {formatDate(v.broadcast_at, locale)}
-                                  </span>
-                                </Link>
+                                  </Text>
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-700 dark:text-light-gray-400">
+                              <div className="text-sm text-gray-700 dark:text-light-gray-400 whitespace-nowrap">
                                 {v.songs.length}
                                 {t("songsSuffix")}
                               </div>
                             </div>
-                            <ul className="mt-2 ml-3 pl-4 list-disc">
+                            <List
+                              className="mt-2 ml-3 pl-4 list-disc"
+                              type="ordered"
+                              start={1}
+                              size="sm"
+                            >
                               {v.songs.map((s: Song, idx: number) => (
-                                <li key={`${v.id}-${idx}`} className="text-sm">
+                                <List.Item key={`${v.id}-${idx}`}>
                                   <Link
                                     href={`/watch?v=${v.id}${
                                       s.start ? `&t=${s.start}` : ""
                                     }&q=year:${displayYear}`}
-                                    className="hover:underline"
+                                    className="hover:text-primary dark:hover:text-primary-300"
                                   >
                                     {s.title}
                                     {s.artist && (
-                                      <span className="text-xs text-gray-500 dark:text-gray-300">
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        component="span"
+                                      >
                                         {" "}
                                         - {s.artist}
-                                      </span>
+                                      </Text>
                                     )}
                                     {s.milestones &&
                                       s.milestones.map((milestone, mIdx) => (
@@ -1109,9 +1151,9 @@ export default function YearSummaryClient({
                                         </Badge>
                                       ))}
                                   </Link>
-                                </li>
+                                </List.Item>
                               ))}
-                            </ul>
+                            </List>
                           </div>
                         ),
                       );

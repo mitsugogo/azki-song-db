@@ -12,6 +12,7 @@ import Link from "next/link";
 import { isOriginalSong } from "../config/filters";
 import { Song } from "../types/song";
 import { getDiscographyLink } from "../lib/song";
+import { FaPlayCircle } from "react-icons/fa";
 
 export type SongCountOverviewProps = {
   items: StatisticsItem[];
@@ -331,6 +332,21 @@ export default function SongCountOverview({
                           >
                             {t("viewStats")}
                           </Badge>
+                          <Badge
+                            color="pink"
+                            component={Link}
+                            href={
+                              getDiscographyLink(item.song) ||
+                              "/watch?v=" + item.videoId
+                            }
+                            leftSection={<FaPlayCircle />}
+                            radius="xs"
+                            size="xs"
+                            variant="light"
+                            className="cursor-pointer"
+                          >
+                            {t("viewOnApp")}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -434,6 +450,21 @@ export default function SongCountOverview({
                             className="cursor-pointer"
                           >
                             {t("viewStats")}
+                          </Badge>
+                          <Badge
+                            color="pink"
+                            component={Link}
+                            href={
+                              getDiscographyLink(item.song) ||
+                              "/watch?v=" + item.videoId
+                            }
+                            leftSection={<FaPlayCircle />}
+                            radius="xs"
+                            size="xs"
+                            variant="light"
+                            className="cursor-pointer"
+                          >
+                            {t("viewOnApp")}
                           </Badge>
                         </div>
                       </div>

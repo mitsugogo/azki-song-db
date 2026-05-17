@@ -1,17 +1,17 @@
+import { headers } from "next/headers";
 import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { headers } from "next/headers";
 import { routing } from "./routing";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
-  const headerStore = await headers();
-  const headerLocale = headerStore.get("x-locale");
+  const requestHeaders = await headers();
+  const localeFromHeader = requestHeaders.get("x-locale");
 
   const locale = hasLocale(routing.locales, requested)
     ? requested
-    : hasLocale(routing.locales, headerLocale)
-      ? headerLocale
+    : hasLocale(routing.locales, localeFromHeader)
+      ? localeFromHeader
       : routing.defaultLocale;
 
   return {

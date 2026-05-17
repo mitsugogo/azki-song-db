@@ -1,8 +1,6 @@
-import { ThemeProvider } from "flowbite-react";
 import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
-import { flowbiteTheme } from "../theme";
 import { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -19,16 +17,14 @@ export default function AnniversariesLayout({
 }) {
   return (
     <>
-      <ThemeProvider theme={flowbiteTheme}>
-        <div className="flex flex-col h-dvh">
-          <Header />
-          <div className="flex flex-col grow md:flex-row overflow-y-auto w-full">
-            {children}
-          </div>
-          <Footer />
+      <div className="flex flex-col h-dvh">
+        <Header />
+        <div className="flex flex-col grow md:flex-row overflow-y-auto w-full">
+          {children}
         </div>
-        <AnalyticsWrapper />
-      </ThemeProvider>
+        <Footer />
+      </div>
+      <AnalyticsWrapper />
     </>
   );
 }

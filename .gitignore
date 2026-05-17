@@ -62,3 +62,4 @@ next-env.d.ts
 .github/for_copilot/*
 
 public/build-info.json
+.flowbite-react/

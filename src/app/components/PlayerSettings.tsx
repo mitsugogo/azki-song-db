@@ -1,6 +1,6 @@
 import { Menu, MenuItem, ScrollArea, Switch, Tooltip } from "@mantine/core";
 import { useClickOutside } from "@mantine/hooks";
-import { Button } from "flowbite-react";
+import { Button } from "@mantine/core";
 import { useState } from "react";
 import { FaMinus, FaPlus, FaRegStar, FaShare, FaStar } from "react-icons/fa6";
 import usePlaylists, { Playlist } from "../hook/usePlaylists";

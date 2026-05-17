@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "../../i18n/routing";
-import { Menu } from "@mantine/core";
+import { Menu, SegmentedControl } from "@mantine/core";
 import { FaGlobe } from "react-icons/fa6";
 
 const options: Array<{
@@ -16,9 +16,13 @@ const options: Array<{
 
 type Props = {
   compact?: boolean;
+  variant?: "light" | "basic";
 };
 
-export default function LanguageSwitcher({ compact = false }: Props) {
+export default function LanguageSwitcher({
+  variant = "basic",
+  compact = false,
+}: Props) {
   const pathname = usePathname() ?? "/";
   const locale = useLocale();
   const t = useTranslations("Header");
@@ -50,7 +54,7 @@ export default function LanguageSwitcher({ compact = false }: Props) {
 
   if (compact) {
     return (
-      <Menu withinPortal>
+      <Menu withinPortal withArrow>
         <Menu.Target>
           <button
             type="button"
@@ -83,30 +87,28 @@ export default function LanguageSwitcher({ compact = false }: Props) {
   }
 
   return (
-    <div
-      className="ml-2 inline-flex items-center overflow-hidden rounded-md border border-white/25"
-      role="group"
+    <SegmentedControl
       aria-label={t("languageSwitcher")}
       title={t("languageSwitcher")}
-    >
-      {options.map((option) => {
-        const selected = option.value === locale;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={selected}
-            className={`px-2 py-1 text-xs font-semibold tracking-wide transition-colors cursor-pointer ${
-              selected
-                ? "bg-white text-primary"
-                : "bg-transparent text-white hover:bg-primary-600 dark:hover:bg-primary-800"
-            }`}
-            onClick={() => handleSwitchLocale(option.value)}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
+      className="ml-2"
+      radius="md"
+      size="xs"
+      value={locale}
+      onChange={handleSwitchLocale}
+      data={options}
+      classNames={{
+        root:
+          "border p-0.5 " +
+          (variant === "basic"
+            ? "border-white/25 bg-transparent hover:text-white dark:hover:bg-pink-800/40"
+            : "border-pink-200/30 bg-gray-100/30 dark:bg-transparent"),
+        indicator: "bg-white",
+        label:
+          "px-2 py-1 text-xs font-semibold tracking-wide transition-colors cursor-pointer " +
+          (variant === "basic"
+            ? "text-white/90 hover:text-white dark:text-white data-[active=true]:text-primary"
+            : "data-[active=true]:text-primary dark:hover:text-primary dark:hover:text-primary-300 dark:data-[active=true]:text-primary-700"),
+      }}
+    />
   );
 }

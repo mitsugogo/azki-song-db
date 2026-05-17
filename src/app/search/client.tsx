@@ -66,7 +66,7 @@ const getInitialFilterMode = (): FilterMode => {
 };
 
 const SearchPageClient = () => {
-  const { allSongs, isLoading } = useSongs();
+  const { allSongs, isLoading } = useSongs({ includeMembersOnly: true });
   const [windowWidth, setWindowWidth] = useState(0);
   const [searchValue, setSearchValue] = useState<string[]>([]);
   const [filterMode, setFilterMode] =

@@ -77,6 +77,8 @@ npm run test:e2e:headed
 | `GOOGLE_API_KEY` | Google Sheets API（データ読み取り）|
 | `SPREADSHEET_ID` | 使用するスプレッドシートの ID |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API（動画メタデータ取得）|
+| `MEMBERS_ONLY_SONGS_PASSWORD` | メン限シート解除に使う共通パスワード |
+| `MEMBERS_ONLY_COOKIE_SECRET` | メン限シート解除Cookieの署名用シークレット |
 | `PUBLIC_BASE_URL` | 本番環境のベース URL |
 
 `.env.local` にこれらを設定してください。

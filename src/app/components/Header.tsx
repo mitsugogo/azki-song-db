@@ -144,7 +144,7 @@ export function Header() {
               <Link
                 href={siteConfig.channelUrl}
                 target="_blank"
-                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-200 bg-primary-700 hover:bg-primary-600 dark:bg-primary-900/30 dark:hover:bg-primary-800 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
+                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-100 bg-primary-700 hover:bg-primary-600 dark:bg-transparent dark:hover:bg-primary-900 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
               >
                 <FaYoutube className="mr-1" />
                 {siteConfig.channelName}
