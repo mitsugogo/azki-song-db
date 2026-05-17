@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/mitsugogo/azki-song-db/compare/v2.4.5...v2.5.0) (2026-05-17)
+
+
+### Features
+
+* 記念日系をTOPに表示 ([35ccfff](https://github.com/mitsugogo/azki-song-db/commit/35ccfff13a993335c03bb902d9b23477ca722065))
+* 隠し機能 ([840f122](https://github.com/mitsugogo/azki-song-db/commit/840f1220687e5270b3b27d55bff9a84c833294c1))
+
+
+### Bug Fixes
+
+* add middleware trace fix script and update build process ([592dfdb](https://github.com/mitsugogo/azki-song-db/commit/592dfdb40a8e4dffa6341770cca43e8f01a3ad70))
+* Discographyの年区切り判定バグ修正 ([df3d7cb](https://github.com/mitsugogo/azki-song-db/commit/df3d7cbe2345f145a63695f4e0801d132bbb72cc))
+* enable loose ESM externals in experimental settings ([292b06a](https://github.com/mitsugogo/azki-song-db/commit/292b06a1508686f33887b7267f43bd7d137b65fd))
+* update outputFileTracingIncludes in next.config and add engines field in package.json ([84d60c2](https://github.com/mitsugogo/azki-song-db/commit/84d60c24712f0d8d196f6cb2369cf8636a547ecd))
+* ユニット名称修正 ([20be2fa](https://github.com/mitsugogo/azki-song-db/commit/20be2fae2cfe389f56e6e022a84796421fafa91f))
+* 再生不良の時に一度だけシークを試みるように ([e6190a4](https://github.com/mitsugogo/azki-song-db/commit/e6190a417a8814f761838d592cd22317f07e0950))
+* 再生数が取れない動画にも対応 ([4804a60](https://github.com/mitsugogo/azki-song-db/commit/4804a603b1077d914d8616745763f3b5b2ef1295))
+* 動画再生に失敗した場合に1回だけplayerをリロードする ([61e53ef](https://github.com/mitsugogo/azki-song-db/commit/61e53ef339a1c6e31903aeebaa8a941922276a8c))
+* 同一ページ内に同じ動画があったときにサムネイルが表示されないバグを修正 ([0b5e019](https://github.com/mitsugogo/azki-song-db/commit/0b5e019db77f17827f0857a54e7b47d899855a74))
+* 英語ページが開かなくなっていたのを修正 ([e9682b4](https://github.com/mitsugogo/azki-song-db/commit/e9682b4c3994d2f34f25e94483f93edbeebbe02a))
+* 隠し機能の表示ロジック調整 ([e738050](https://github.com/mitsugogo/azki-song-db/commit/e7380508b76082fc4ce914b82814baa2f43f73c4))
+
 ### [2.4.5](https://github.com/mitsugogo/azki-song-db/compare/v2.4.4...v2.4.5) (2026-05-09)
 
 ### [2.4.4](https://github.com/mitsugogo/azki-song-db/compare/v2.4.3...v2.4.4) (2026-05-06)
