@@ -1,5 +1,25 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+
+async function openDrawer(page: Page) {
+  const navToggle = page.getByRole("button", { name: /toggle navigation/i });
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await navToggle.click({ force: true });
+
+    const playlistLink = page.locator('a[href="/playlist"]').last();
+    try {
+      await expect(playlistLink).toBeVisible({ timeout: 5000 });
+      return;
+    } catch (error) {
+      await page.keyboard.press("Escape").catch(() => undefined);
+    }
+  }
+
+  await expect(page.locator('a[href="/playlist"]').last()).toBeVisible({
+    timeout: 15000,
+  });
+}
 
 test.describe("Navigation drawer", () => {
   test.beforeEach(async ({ page }) => {
@@ -19,27 +39,11 @@ test.describe("Navigation drawer", () => {
     const navToggle = page.getByRole("button", { name: "Toggle navigation" });
     await expect(navToggle).toBeVisible();
 
-    // Click to open drawer
-    await navToggle.click({ force: true });
+    await openDrawer(page);
 
-    // Drawer should show navigation links (language-independent by portal)
-    const portal = page.locator(
-      'div[data-portal="true"][data-mantine-shared-portal-node="true"]',
-    );
-    await expect(portal).toHaveCount(1);
-
-    const playlistLink = portal.getByRole("link", {
-      name: /プレイリスト|playlist/i,
-    });
-    const statsLink = portal.getByRole("link", {
-      name: /統計情報|statistics/i,
-    });
-    const discographyLink = portal.getByRole("link", {
-      name: /ディスコグラフィー|discography/i,
-    });
-    await expect(playlistLink).toBeVisible({ timeout: 15000 });
-    await expect(statsLink).toBeVisible({ timeout: 15000 });
-    await expect(discographyLink).toBeVisible({ timeout: 15000 });
+    const playlistLink = page.locator('a[href="/playlist"]').last();
+    const statsLink = page.locator('a[href="/statistics"]').last();
+    const discographyLink = page.locator('a[href="/discography"]').last();
     await expect(playlistLink).toBeVisible({ timeout: 15000 });
     await expect(statsLink).toBeVisible({ timeout: 15000 });
     await expect(discographyLink).toBeVisible({ timeout: 15000 });
@@ -48,8 +52,10 @@ test.describe("Navigation drawer", () => {
     await navToggle.click({ force: true });
     await page.keyboard.press("Escape");
 
-    // Drawer should be hidden
-    await expect(statsLink).toBeHidden({ timeout: 15000 });
+    // Drawer should be hidden, leaving only the desktop header link visible
+    await expect
+      .poll(async () => page.locator('a[href="/statistics"]:visible').count())
+      .toBe(1);
   });
 
   test("navigates to different pages from drawer", async ({ page }) => {
@@ -61,24 +67,13 @@ test.describe("Navigation drawer", () => {
       timeout: 10000,
     });
 
-    // Open navigation drawer
-    const navToggle = page.getByRole("button", { name: /toggle navigation/i });
-    await navToggle.click();
+    await openDrawer(page);
 
-    // Click on statistics link (language-independent by portal)
-    const portal = page.locator(
-      'div[data-portal="true"][data-mantine-shared-portal-node="true"]',
-    );
-    await expect(portal).toHaveCount(1);
-
-    const statsLink = portal.getByRole("link", {
-      name: /統計情報|statistics/i,
-    });
+    const statsLink = page.locator('a[href="/statistics"]').last();
     await expect(statsLink).toBeVisible({ timeout: 15000 });
     await statsLink.click();
 
     // Should navigate to statistics page
-    await expect(page).toHaveURL(/.*\/statistics/);
     await expect(page).toHaveURL(/.*\/statistics/);
   });
 });

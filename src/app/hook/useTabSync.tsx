@@ -1,8 +1,11 @@
 import { useEffect, Dispatch, SetStateAction, RefObject } from "react";
-import { TabsRef } from "flowbite-react";
+
+type TabControllerRef = {
+  setActiveTab: (tabIndex: number) => void;
+};
 
 export function useTabSync(
-  tabsRef: RefObject<TabsRef | null>,
+  tabsRef: RefObject<TabControllerRef | null>,
   setActiveTab: Dispatch<SetStateAction<number>>,
 ) {
   // URLクエリパラメータからタブを初期化

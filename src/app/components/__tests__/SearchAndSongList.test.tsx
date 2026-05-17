@@ -62,9 +62,9 @@ vi.mock("../CreatePlaylistModal", () => ({
   default: () => null,
 }));
 
-vi.mock("../MobileActionButtons", () => ({
+vi.mock("../SongModeControls", () => ({
   __esModule: true,
-  default: () => <div data-testid="mobile-action-buttons" />,
+  default: () => <div data-testid="song-mode-controls" />,
 }));
 
 vi.mock("../../loading", () => ({

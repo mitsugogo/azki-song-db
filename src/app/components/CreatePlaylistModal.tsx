@@ -1,5 +1,4 @@
-import { Input, Modal } from "@mantine/core";
-import { Button } from "flowbite-react";
+import { Button, Input, Modal } from "@mantine/core";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import usePlaylists from "../hook/usePlaylists";

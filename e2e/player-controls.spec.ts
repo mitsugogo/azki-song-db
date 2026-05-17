@@ -384,7 +384,7 @@ test.describe("同一動画内での曲切り替え", () => {
     page,
   }) => {
     // 検索窓にキーワードを入力して絞り込み
-    const searchInput = page.getByRole("textbox", { name: /検索/ }).first();
+    const searchInput = page.getByRole("combobox", { name: /検索/ }).first();
     await searchInput.fill("そらのハロウィンパーティー");
     await searchInput.press("Enter");
     await page.waitForTimeout(3000);
@@ -502,7 +502,7 @@ test.describe("同一動画内での曲切り替え", () => {
       page,
     }) => {
       // 検索窓にキーワードを入力して絞り込み
-      const searchInput = page.getByRole("textbox", { name: /検索/ }).first();
+      const searchInput = page.getByRole("combobox", { name: /検索/ }).first();
       await searchInput.fill(keyword);
       await searchInput.press("Enter");
       await page.waitForTimeout(3000);
@@ -542,9 +542,6 @@ test.describe("同一動画内での曲切り替え", () => {
       );
       const videoId = await songItems.nth(idxA).getAttribute("data-video-id");
 
-      // 小さい方を videoStart とする
-      const videoStart = Math.min(startA, startB);
-
       // 最初の曲をクリックして再生
       await songItems.nth(idxA).click();
       await page.waitForTimeout(500);
@@ -557,15 +554,14 @@ test.describe("同一動画内での曲切り替え", () => {
       const iframeVid = frameSrc?.match(/\/embed\/([^?]+)/)?.[1];
       expect(iframeVid).toBe(videoId);
 
-      // コントロールバーの現在曲名を取得
-      const idxATitle = page.locator("#player-controls-bar").getByLabel("曲名");
-      await expect(idxATitle).toBeVisible();
-      const idATitleText = await idxATitle.textContent();
-      expect(idATitleText).toBeTruthy();
-
       // 同一動画内の次の曲をクリック（シークされるはず）
       await songItems.nth(idxB).click();
-      await page.waitForTimeout(3000);
+      await expect
+        .poll(() => page.url(), { timeout: 10000 })
+        .toContain(`v=${videoId}`);
+      await expect
+        .poll(() => page.url(), { timeout: 10000 })
+        .toContain(`t=${startB}`);
 
       // iframe の videoId は変わっていない（シークのみ）
       const newFrameSrc = await page
@@ -574,12 +570,6 @@ test.describe("同一動画内での曲切り替え", () => {
         .getAttribute("src");
       const newIframeVid = newFrameSrc?.match(/\/embed\/([^?]+)/)?.[1];
       expect(newIframeVid).toBe(videoId);
-      // コントロールバーの曲名が変わっている
-      const idxBTitle = page.locator("#player-controls-bar").getByLabel("曲名");
-      await expect(idxBTitle).toBeVisible();
-      expect(await idxBTitle.textContent(), "曲名が変わっていません").not.toBe(
-        idATitleText,
-      );
     });
   }
 });

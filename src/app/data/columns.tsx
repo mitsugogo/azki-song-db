@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@mantine/core";
 import { Song } from "../types/song";
-import { Badge } from "flowbite-react";
 import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
 type TFuncLike = (key: string, values?: Record<string, any>) => string;
@@ -25,7 +25,7 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
           href={`/search?q=${queryKey}:${encodeURIComponent(item)}`}
           className="hover:underline text-primary dark:text-primary-300 mr-2"
         >
-          <Badge color="info" size="xs" className="inline-block">
+          <Badge color="blue" size="xs" className="inline-block">
             {item}
           </Badge>
         </Link>
@@ -117,7 +117,7 @@ export const getColumns = (
             href={`/search?q=sing:${encodeURIComponent(title)}`}
             className="hover:underline text-primary dark:text-primary-300 mr-2"
           >
-            <Badge color="info" size="xs" className="inline-block">
+            <Badge color="blue" size="xs" className="inline-block">
               {title}
             </Badge>
           </Link>
@@ -164,7 +164,7 @@ export const getColumns = (
     header: t("table.album_is_compilation"),
     cell: (info) =>
       info.getValue<boolean>() ? (
-        <Badge color="info" size="xs">
+        <Badge color="blue" size="xs">
           {t("table.album_is_compilation")}
         </Badge>
       ) : (

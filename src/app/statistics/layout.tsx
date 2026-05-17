@@ -1,8 +1,6 @@
-import { ThemeProvider } from "flowbite-react";
 import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
-import { flowbiteTheme } from "../theme";
 import { siteConfig } from "../config/siteConfig";
 import { Viewport } from "next";
 
@@ -25,14 +23,12 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <ThemeProvider theme={flowbiteTheme}>
-        <div className="flex flex-col h-dvh">
-          <Header />
-          <div>{children}</div>
-          <Footer />
-        </div>
-        <AnalyticsWrapper />
-      </ThemeProvider>
+      <div className="flex flex-col h-dvh">
+        <Header />
+        <div>{children}</div>
+        <Footer />
+      </div>
+      <AnalyticsWrapper />
     </>
   );
 }

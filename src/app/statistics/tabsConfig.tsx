@@ -1,6 +1,6 @@
 /* eslint @typescript-eslint/no-explicit-any: off */
 import { Link } from "@/i18n/navigation";
-import { Badge } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import { HiMusicNote, HiUserCircle, HiPlay, HiTag } from "react-icons/hi";
 import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
 import { ColumnDef } from "@tanstack/react-table";

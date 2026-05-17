@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "flowbite-react";
+import { Badge } from "@mantine/core";
 import { FaStar } from "react-icons/fa6";
 import { Song } from "../types/song";
 
@@ -8,6 +8,8 @@ interface MilestoneBadgeProps {
   song: Song;
   inline?: boolean;
   outClassName?: string;
+  badgeClassName?: string;
+  badgeOptions?: React.ComponentProps<typeof Badge>;
   onClick?: (event: React.MouseEvent, song: Song, milestone?: string) => void;
 }
 
@@ -18,6 +20,8 @@ export default function MilestoneBadge({
   song,
   inline,
   outClassName,
+  badgeClassName,
+  badgeOptions,
   onClick,
 }: MilestoneBadgeProps) {
   if (!song.milestones) return null;
@@ -40,14 +44,15 @@ export default function MilestoneBadge({
           key={index}
         >
           <Badge
+            color="pink"
+            leftSection={<FaStar />}
             className={
-              `bg-primary-600 hover:bg-primary-500 dark:bg-primary-800 dark:hover:bg-primary-700 text-white dark:text-white inline px-1.5 rounded` +
-              (onClick ? " cursor-pointer" : "")
+              (onClick ? " cursor-pointer" : "") +
+              (badgeClassName ? ` ${badgeClassName}` : "")
             }
             onClick={(event) => handleOnClick(event, song, milestone)}
+            {...badgeOptions}
           >
-            <FaStar className="inline relative" style={{ top: -1 }} />
-            &nbsp;
             {milestone}
           </Badge>
         </div>

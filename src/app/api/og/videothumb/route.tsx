@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const video_id = v;
     const songs = await fetch(
       `${baseUrl}/api/songs?hl=${encodeURIComponent(hl)}`,
+      { cache: "no-store" },
     )
       .then((res) => res.json())
       .catch(() => []);

@@ -15,9 +15,9 @@ import {
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
 import useSongs from "../hook/useSongs";
-import { TextInput } from "flowbite-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
+import { TextInput } from "@mantine/core";
 import {
   OverlayScrollbarsComponent,
   OverlayScrollbarsComponentRef,
@@ -119,8 +119,8 @@ export default function ClientTable() {
         <p className="mb-4 px-3">{t("description")}</p>
         <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
           <TextInput
-            icon={HiSearch}
             placeholder={t("searchPlaceholder")}
+            leftSection={<HiSearch />}
             onChange={(e) => setFilterQuery(e.target.value)}
           />
           <OverlayScrollbarsComponent
@@ -139,7 +139,7 @@ export default function ClientTable() {
                       {headerGroup.headers.map((header) => (
                         <div
                           key={header.id}
-                          className="relative px-6 py-3 min-w-0 flex-shrink-0"
+                          className="relative px-6 py-3 min-w-0 shrink-0"
                           style={{
                             width: header.getSize(),
                           }}
@@ -213,7 +213,7 @@ export default function ClientTable() {
                         {row.getVisibleCells().map((cell) => (
                           <div
                             key={cell.id}
-                            className="px-6 py-2 min-w-0 flex-shrink-0"
+                            className="px-6 py-2 min-w-0 shrink-0"
                             style={{
                               width: cell.column.getSize(),
                             }}

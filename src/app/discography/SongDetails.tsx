@@ -2,14 +2,6 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "@/i18n/navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-} from "flowbite-react";
 import { Badge } from "@mantine/core";
 import { BsPlayCircle } from "react-icons/bs";
 import { FaYoutube, FaDatabase } from "react-icons/fa6";
@@ -286,34 +278,35 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           </p>
 
           <div className="mt-4 overflow-y-auto max-h-62.5">
-            <Table striped hoverable border={3}>
-              <TableHead className="sticky top-0">
-                <TableRow>
-                  <TableHeadCell className="px-2 py-1"></TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+            <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+              <thead className="sticky top-0 text-xs uppercase text-gray-700 dark:text-gray-400">
+                <tr>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700"></th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.songName")}
-                  </TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                  </th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.artist")}
-                  </TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                  </th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.lyricist")}
-                  </TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                  </th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.composer")}
-                  </TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                  </th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.arranger")}
-                  </TableHeadCell>
-                  <TableHeadCell className="px-2 py-1 dark:text-light-gray-500">
+                  </th>
+                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
                     {t("table.videoDate")}
-                  </TableHeadCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {videos.map((s, index) => (
-                  <TableRow
+                  <tr
                     key={index}
+                    className="border-b odd:bg-white even:bg-gray-50/50 hover:bg-gray-50/50 dark:border-gray-700 dark:odd:bg-gray-800 dark:even:bg-gray-700 dark:hover:bg-gray-600"
                     onMouseEnter={() => {
                       if (!song.isAlbum) {
                         setHoveredVideo(s.video_id);
@@ -325,15 +318,15 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       }
                     }}
                   >
-                    <TableCell className="px-2 py-1 dark:text-light-gray-500">
+                    <td className="px-2 py-1 dark:text-light-gray-500">
                       <Link
                         href={`${s.tags.includes("カバー曲") ? `/watch?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}` : ""}` : `/watch?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
                         className=" hover:text-primary-600 dark:hover:text-white"
                       >
                         <BsPlayCircle size={24} />
                       </Link>
-                    </TableCell>
-                    <TableCell className="px-2 py-1">
+                    </td>
+                    <td className="px-2 py-1">
                       <Link
                         href={`/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
                           s.slugv2 ?? encodeURIComponent(s.video_id)
@@ -342,16 +335,16 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       >
                         {s.title}
                       </Link>
-                    </TableCell>
-                    <TableCell className="px-2 py-1">
+                    </td>
+                    <td className="px-2 py-1">
                       <Link
                         href={`/?q=artist:${s.artist}`}
                         className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
                       >
                         {s.artist}
                       </Link>
-                    </TableCell>
-                    <TableCell className="px-2 py-1">
+                    </td>
+                    <td className="px-2 py-1">
                       {s.lyricist &&
                         s.lyricist
                           .split("、")
@@ -366,8 +359,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </TableCell>
-                    <TableCell className="px-2 py-1">
+                    </td>
+                    <td className="px-2 py-1">
                       {s.composer &&
                         s.composer
                           .split("、")
@@ -382,8 +375,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </TableCell>
-                    <TableCell className="px-2 py-1">
+                    </td>
+                    <td className="px-2 py-1">
                       {s.arranger &&
                         s.arranger
                           .split("、")
@@ -398,14 +391,14 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </TableCell>
-                    <TableCell className="px-2 py-1 dark:text-light-gray-500">
+                    </td>
+                    <td className="px-2 py-1 dark:text-light-gray-500">
                       {formatDate(s.broadcast_at, locale)}
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link

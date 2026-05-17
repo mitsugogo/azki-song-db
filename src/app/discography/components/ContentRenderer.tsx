@@ -3,6 +3,7 @@ import SongItem from "../SongItem";
 import SongDetails from "../SongDetails";
 import YearGroup from "./YearGroup";
 import { getGridCols } from "../utils/gridHelpers";
+import { getDiscographyRepresentativeYear } from "../utils/representativeDate";
 import { useTranslations } from "next-intl";
 
 interface ContentRendererProps {
@@ -35,15 +36,8 @@ export default function ContentRenderer({
   // 年ごとに区切るオプション
   if (groupByYear) {
     const getYear = (s: StatisticsItem) => {
-      const dateStr = groupByAlbum
-        ? (s.firstVideo.album_release_at ?? s.firstVideo.broadcast_at)
-        : s.firstVideo.broadcast_at;
-      const d = new Date(dateStr);
-      return isNaN(d.getFullYear())
-        ? t
-          ? t("unknownYear")
-          : "Unknown"
-        : String(d.getFullYear());
+      const year = getDiscographyRepresentativeYear(s.firstVideo, groupByAlbum);
+      return year === null ? t("unknownYear") : String(year);
     };
 
     // 年ごとにグループ化（降順）

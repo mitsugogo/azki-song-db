@@ -1,10 +1,13 @@
 "use client";
 
 import { Song } from "../types/song";
-import { Modal, TextInput, Button, Divider } from "@mantine/core";
-import { HiClipboardCopy } from "react-icons/hi";
+import { Modal, TextInput, Button, Divider, Alert } from "@mantine/core";
+import {
+  HiClipboardCopy,
+  HiExclamation,
+  HiInformationCircle,
+} from "react-icons/hi";
 import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
-import { Label } from "flowbite-react";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/i18n/routing";
@@ -74,12 +77,25 @@ export default function ShareModal({
     >
       <div className="">
         <p className="mb-4">{t("description")}</p>
+
+        {/* メンバー限定動画の場合は注意 */}
+        {currentSong?.is_members_only && (
+          <Alert
+            className="mb-4"
+            color="red"
+            title={t("membersOnlyAlertTitle")}
+            icon={<HiExclamation />}
+          >
+            {t("membersOnlyAlert")}
+          </Alert>
+        )}
+
         {/* YouTube URL */}
         <div>
-          <Label>
-            <FaYoutube className="inline" />
+          <div className="mb-1 text-sm font-medium">
+            <FaYoutube className="inline" color="red" />
             &nbsp;{t("youtubeUrl")}
-          </Label>
+          </div>
           <div className="relative">
             <TextInput className="w-full" value={youtubeUrl} readOnly />
             <button
@@ -127,10 +143,9 @@ export default function ShareModal({
         </div>
         {/* AZKi Song Database URL */}
         <div className="mt-4">
-          <Label>
-            <FaDatabase className="inline" />
-            &nbsp;{siteConfig.siteName}
-          </Label>
+          <div className="mb-1 text-sm font-medium">
+            ⚒️&nbsp;{siteConfig.siteName}
+          </div>
           <div className="relative">
             <TextInput
               className="w-full"

@@ -12,7 +12,7 @@ import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
-import { TextInput } from "flowbite-react";
+import { TextInput } from "@mantine/core";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { Link } from "@/i18n/navigation";

@@ -1,40 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { Grid, Menu, Button } from "@mantine/core";
+import { Button, Grid, Menu, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import { LuChevronDown, LuSparkles } from "react-icons/lu";
 import usePlaylists from "../hook/usePlaylists";
 import {
-  getSongModeIcon,
   getSongMode,
   getSongModeGroupLabels,
+  getSongModeIcon,
   getSongModeItemLabel,
+  getSongModeTriggerButtonClassName,
   SONG_MODE_MENU_ITEMS,
   type SongMode,
   type SongModeGroup,
   type SongModeMenuItem,
 } from "./songModeMenu";
 
-type Props = {
-  onSurprise: () => void;
-  onSelectSongMode: (mode: SongMode) => void;
+type SongModeControlsProps = {
   currentSongMode: SongMode;
-  songModeMenuItems?: SongModeMenuItem[];
+  onSelectSongMode: (mode: SongMode) => void;
+  onSurprise: () => void;
   onPlaylist: () => void;
+  variant?: "desktop" | "mobile";
+  sizeClassName?: string;
+  songModeMenuItems?: SongModeMenuItem[];
 };
 
-export default function MobileActionButtons({
-  onSurprise,
-  onSelectSongMode,
+export default function SongModeControls({
   currentSongMode,
-  songModeMenuItems = SONG_MODE_MENU_ITEMS,
+  onSelectSongMode,
+  onSurprise,
   onPlaylist,
-}: Props) {
+  variant = "desktop",
+  sizeClassName,
+  songModeMenuItems = SONG_MODE_MENU_ITEMS,
+}: SongModeControlsProps) {
   const t = useTranslations("Watch.searchAndSongList");
   const tSongMode = useTranslations("Watch.songMode");
-  const [isSongModeMenuOpen, setIsSongModeMenuOpen] = useState(false);
   const { isNowPlayingPlaylist } = usePlaylists();
+  const [isSongModeMenuOpen, setIsSongModeMenuOpen] = useState(false);
+  const textClassName =
+    sizeClassName ?? (variant === "mobile" ? "text-xs" : "text-sm");
+  const rowMarginClassName = variant === "mobile" ? "mt-1" : "mt-2";
+  const inactiveButtonClassName =
+    variant === "mobile"
+      ? "bg-light-gray-200 hover:bg-light-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white"
+      : "bg-light-gray-300 hover:bg-light-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white";
+  const inactiveOtherButtonClassName =
+    variant === "mobile"
+      ? "px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-500"
+      : `px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-300 hover:bg-light-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 ${textClassName}`;
   const allSongModeItem =
     songModeMenuItems.find((item) => item.mode === "") ?? songModeMenuItems[0];
   const originalSongModeItem =
@@ -44,10 +60,7 @@ export default function MobileActionButtons({
     songModeMenuItems.find((item) => item.mode === "tag:歌枠") ??
     songModeMenuItems[0];
   const otherSongModeMenuItems = songModeMenuItems.filter(
-    (item) =>
-      item.mode !== "" &&
-      item.mode !== "original-songs" &&
-      item.mode !== "tag:歌枠",
+    (item) => item.mode !== "" && item.mode !== "original-songs",
   );
   const songModeGroupedItems = {
     mode: otherSongModeMenuItems.filter((item) => item.group === "mode"),
@@ -55,17 +68,30 @@ export default function MobileActionButtons({
   } as const;
   const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
   const isOtherModeActive =
-    currentSongMode !== "" &&
-    currentSongMode !== "original-songs" &&
-    currentSongMode !== "tag:歌枠";
+    currentSongMode !== "" && currentSongMode !== "original-songs";
   const currentOtherSongModeItem = isOtherModeActive
     ? otherSongModeMenuItems.find(
         (item) => item.mode === getSongMode(currentSongMode),
       )
     : undefined;
-  const otherButtonClassName = isOtherModeActive
-    ? `px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 ${currentOtherSongModeItem?.buttonClassName}`
-    : "px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 bg-light-gray-200 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-500";
+
+  const renderSongModeMenuItems = () =>
+    songModeMenuItems.map((item) => {
+      const SongModeIcon = item.icon;
+
+      return (
+        <Menu.Item
+          key={item.mode || "all-songs"}
+          leftSection={<SongModeIcon className="w-4 h-4" />}
+          onClick={() => {
+            onSelectSongMode(item.mode);
+            setIsSongModeMenuOpen(false);
+          }}
+        >
+          {getSongModeItemLabel(item, tSongMode)}
+        </Menu.Item>
+      );
+    });
 
   const renderSongModeButton = (item: SongModeMenuItem) => {
     const isActive = currentSongMode === item.mode;
@@ -86,13 +112,15 @@ export default function MobileActionButtons({
         rightSection={<span />}
         justify="space-between"
         fullWidth
-        className={`px-3 py-1 h-8 w-full cursor-pointer rounded transition shadow-md ring-0 focus:ring-0 text-xs ${
+        className={`px-3 py-1 h-8 w-full cursor-pointer rounded transition shadow-md ring-0 focus:ring-0 ${textClassName} ${
           isActive
             ? `text-white shadow-gray-400/20 dark:shadow-none ${item.buttonClassName}`
-            : "bg-light-gray-200 hover:bg-light-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-foreground dark:text-white"
+            : inactiveButtonClassName
         }`}
       >
-        <span className="text-xs">{getSongModeItemLabel(item, tSongMode)}</span>
+        <span className={textClassName}>
+          {getSongModeItemLabel(item, tSongMode)}
+        </span>
       </Button>
     );
 
@@ -110,45 +138,27 @@ export default function MobileActionButtons({
         withArrow
       >
         <Menu.Target>{button}</Menu.Target>
-        <Menu.Dropdown>
-          {songModeMenuItems.map((menuItem) => {
-            const ModeIcon = menuItem.icon;
-
-            return (
-              <Menu.Item
-                key={menuItem.mode || "all-songs"}
-                leftSection={<ModeIcon className="w-4 h-4" />}
-                onClick={() => {
-                  onSelectSongMode(menuItem.mode);
-                  setIsSongModeMenuOpen(false);
-                }}
-              >
-                {getSongModeItemLabel(menuItem, tSongMode)}
-              </Menu.Item>
-            );
-          })}
-        </Menu.Dropdown>
+        <Menu.Dropdown>{renderSongModeMenuItems()}</Menu.Dropdown>
       </Menu>
     );
   };
 
   return (
     <div>
-      <Grid grow gap={{ base: 5 }}>
-        <Grid.Col span={4}>{renderSongModeButton(allSongModeItem)}</Grid.Col>
-        <Grid.Col span={4}>
+      <Grid grow gap={{ base: 5 }} className={rowMarginClassName}>
+        <Grid.Col span={3}>{renderSongModeButton(allSongModeItem)}</Grid.Col>
+        <Grid.Col span={3}>
           {renderSongModeButton(originalSongModeItem)}
         </Grid.Col>
-        <Grid.Col span={4}>
-          {renderSongModeButton(karaokeSongModeItem)}
-        </Grid.Col>
-      </Grid>
-      <Grid grow gap={{ base: 5 }} className="mt-1">
-        <Grid.Col span={12}>
+        <Grid.Col span={3}>
           <Menu width={180} position="bottom-start" withArrow>
             <Menu.Target>
               <Button
-                className={`${otherButtonClassName} text-xs`}
+                className={
+                  isOtherModeActive
+                    ? `${getSongModeTriggerButtonClassName(currentSongMode)} ${variant === "mobile" ? "text-xs" : textClassName}`
+                    : inactiveOtherButtonClassName
+                }
                 leftSection={
                   currentOtherSongModeItem ? (
                     <currentOtherSongModeItem.icon className="w-4 h-4" />
@@ -162,7 +172,7 @@ export default function MobileActionButtons({
               >
                 {currentOtherSongModeItem
                   ? getSongModeItemLabel(currentOtherSongModeItem, tSongMode)
-                  : tSongMode("other")}
+                  : tSongMode("selectMode")}
               </Button>
             </Menu.Target>
 
@@ -201,29 +211,36 @@ export default function MobileActionButtons({
           </Menu>
         </Grid.Col>
       </Grid>
-      <Grid grow gap={{ base: 5 }} className="mt-1">
+      <Grid grow gap={{ base: 5 }} className={rowMarginClassName}>
         <Grid.Col span={6}>
-          <Button
-            onClick={() => onSurprise()}
-            leftSection={<LuSparkles />}
-            rightSection={<span />}
-            fullWidth
-            justify="space-between"
-            className="px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0"
-          >
-            <span className="text-xs">Surprise me</span>
-          </Button>
+          <Tooltip label={t("surpriseTooltip")} withArrow position="bottom">
+            <Button
+              onClick={onSurprise}
+              leftSection={variant === "mobile" ? <LuSparkles /> : undefined}
+              rightSection={variant === "mobile" ? <span /> : undefined}
+              fullWidth={variant === "mobile"}
+              justify={variant === "mobile" ? "space-between" : undefined}
+              className={`px-3 py-1 h-8 w-full bg-primary hover:bg-primary-600 dark:bg-primary-900 cursor-pointer text-white rounded transition shadow-md shadow-black/20 dark:shadow-none ring-0 focus:ring-0 ${
+                variant === "mobile" ? "text-xs" : ""
+              }`}
+            >
+              <span className={textClassName}>
+                {variant === "desktop" ? (
+                  <LuSparkles className="mr-1 inline" />
+                ) : null}
+                {t("randomOtherSong")}
+              </span>
+            </Button>
+          </Tooltip>
         </Grid.Col>
         <Grid.Col span={6}>
           <Button
-            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 text-xs  ${
+            className={`px-3 py-1 h-8 w-full cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0 ${textClassName} ${
               isNowPlayingPlaylist()
                 ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
                 : "bg-light-gray-500 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
             }`}
-            onClick={() => {
-              onPlaylist();
-            }}
+            onClick={onPlaylist}
           >
             {t("playlist")}
           </Button>

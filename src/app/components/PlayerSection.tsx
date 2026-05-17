@@ -12,12 +12,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
-import MobileActionButtons from "./MobileActionButtons";
+import SongModeControls from "./SongModeControls";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { getSongMode } from "./songModeMenu";
-import { useTranslations } from "next-intl";
 
 type DesktopPlayerControls = {
   isReady: boolean;
@@ -55,6 +54,7 @@ type PlayerSectionProps = {
   handleStateChange: (
     event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
   ) => void;
+  handlePlayerError?: (event: YouTubeEvent<number>) => void;
   changeCurrentSong: (
     song: Song | null,
     videoId?: string,
@@ -93,6 +93,7 @@ export default function PlayerSection({
   timedLiveCallText,
   handlePlayerOnReady,
   handleStateChange,
+  handlePlayerError,
   changeCurrentSong,
   playRandomSong,
   setSongs,
@@ -180,11 +181,17 @@ export default function PlayerSection({
                 key={`youtube-player-${playerKey}-${currentSong?.video_id ?? "none"}`}
                 video_id={videoId}
                 startTime={startTime}
+                skipInitialStart={currentSong?.is_members_only}
                 onReady={
                   handlePlayerOnReady as (event: YouTubeEvent<any>) => void
                 }
                 onStateChange={
                   handleStateChange as (event: YouTubeEvent<any>) => void
+                }
+                onError={
+                  handlePlayerError as
+                    | ((event: YouTubeEvent<any>) => void)
+                    | undefined
                 }
               />
             )}
@@ -249,11 +256,12 @@ export default function PlayerSection({
         )}
 
         <div className="block md:hidden mx-2 mt-2">
-          <MobileActionButtons
+          <SongModeControls
             onSurprise={() => playRandomSong?.(songs)}
             onSelectSongMode={(mode) => setSearchTerm?.(mode)}
             currentSongMode={currentSongMode}
             onPlaylist={() => setShowPlaylistSelector?.(true)}
+            variant="mobile"
           />
         </div>
 

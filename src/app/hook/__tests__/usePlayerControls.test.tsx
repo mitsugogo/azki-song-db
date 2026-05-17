@@ -849,7 +849,7 @@ describe("usePlayerControls", () => {
   });
 
   describe("handlePlayerOnReady", () => {
-    it("再生開始が行われ、既存の URL パラメータは保持される", () => {
+    it("既存の URL パラメータを保持する", () => {
       (window as any).location.href = "http://localhost/watch?v=vid1&t=120";
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
       const player = createMockPlayer();
@@ -862,8 +862,8 @@ describe("usePlayerControls", () => {
         result.current.handlePlayerOnReady({ target: player } as any);
       });
 
-      expect(player.playVideo).toHaveBeenCalled();
-      expect(result.current.isPlaying).toBe(true);
+      expect(player.playVideo).not.toHaveBeenCalled();
+      expect(result.current.isPlaying).toBe(false);
 
       // 既存パラメータは保持されるため、replaceState は呼ばれない
       expect((window.history.replaceState as any).mock.calls.length).toBe(0);

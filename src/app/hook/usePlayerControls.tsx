@@ -756,9 +756,6 @@ const usePlayerControls = (
         videoDataRef.current = fetchedVideoData;
       }
 
-      player.playVideo();
-      setIsPlaying(true);
-
       // 再生開始時は URL の既存パラメータを変更しない（外部から渡された v/t を保持）
     },
     [],
@@ -781,6 +778,7 @@ const usePlayerControls = (
     timedLiveCallText,
     setHideFutureSongs,
     changeCurrentSong,
+    resetPlayer,
     playRandomSong,
     handlePlayerOnReady,
     handleStateChange,

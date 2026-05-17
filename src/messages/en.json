@@ -2,7 +2,8 @@
   "Header": {
     "toggleNavigation": "Toggle navigation",
     "searchPlaceholder": "Search by title, artist, tags",
-    "languageSwitcher": "Language switcher"
+    "languageSwitcher": "Language switcher",
+    "membersOnlyBadge": "Members only"
   },
   "DrawerMenu": {
     "title": "Menu",
@@ -53,6 +54,7 @@
   "Watch": {
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
+      "surpriseTooltip": "Play songs randomly",
       "playlist": "Playlist",
       "songList": "Songs",
       "songsUnit": "songs",
@@ -72,6 +74,7 @@
     "songMode": {
       "all": "All Songs",
       "original": "Originals",
+      "selectMode": "Select Mode",
       "other": "Other",
       "cover": "Covers",
       "collaboration": "Collabs / Guest Songs",
@@ -79,7 +82,8 @@
       "collabKaraoke": "Collab Karaoke",
       "shorts": "Song Intro Shorts",
       "groupMode": "Mode",
-      "groupTheme": "Theme"
+      "groupTheme": "Theme",
+      "surpriseTooltip": "Play songs randomly"
     },
     "nowPlayingSongInfo": {
       "views": "{count} views",
@@ -88,7 +92,8 @@
       "collapse": "Show less",
       "subscribers": "{count} subscribers",
       "otherChannels": "{count} more channels",
-      "lastUpdated": "Last updated: {date}"
+      "lastUpdated": "Last updated: {date}",
+      "membersOnly": "Members only"
     },
     "nowPlayingSongInfoDetail": {
       "title": "Title:",
@@ -112,7 +117,9 @@
       "additionalInfo": "Additional info:",
       "timesSung": "Times sung:",
       "times": "times",
-      "videosWithSong": "Streams where this song was sung:"
+      "videosWithSong": "Streams where this song was sung:",
+      "membersOnlyBadge": "Members only",
+      "membersOnly": "Members only"
     },
     "createPlaylistModal": {
       "title": "Create a new playlist",
@@ -160,8 +167,15 @@
     "surpriseMe": "Surprise me",
     "recommendedLabel": "Recommended",
     "recommendedTitle": "Recommended songs",
+    "anniversariesTitle": "Anniversaries",
+    "viewAnniversaries": "See anniversaries",
+    "viewSummary": "See activity",
+    "todayMilestonesEmpty": "Nothing happened on this day",
+    "timelineLabel": "Timeline",
+    "timelineTitle": "Anniversaries & Events",
     "recentUpdatesLabel": "Recent Updates",
     "recentUpdatesTitle": "Updates",
+    "recentUpdatesAddedCount": "{count} songs added",
     "noRecentUpdates": "No recent updates",
     "hololiveOfficial": "Hololive official",
     "statsLoading": "Total songs: loading / Last updated: loading",
@@ -274,6 +288,48 @@
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"
+    },
+    "membersOnlyAccess": {
+      "title": "Unlock Members-only Data | {siteName}",
+      "description": "Enter the shared password to enable member-only sheet data on this device."
+    }
+  },
+  "MembersOnlyAccess": {
+    "eyebrow": "Hidden Access",
+    "title": "Unlock members-only videos",
+    "description": "Once the members-only video playback check succeeds, song data fetched in this browser will include members-only information. Members-only videos may become private, so please be careful when sharing them on social media.",
+    "notConfigured": "Members-only access has not been configured in this environment yet.",
+    "statusUnlocked": "Members-only data is currently enabled in this browser.",
+    "statusUnlockedHelp": "After unlocking, members-only content will also be included. If you want to go back to hiding members-only content, press \"Lock\".",
+    "statusLocked": "Members-only data is currently disabled in this browser.",
+    "statusLockedHelp": "After unlocking, members-only content will also be included. To view members-only content, complete the playback check, enter the password, and press \"Unlock\".",
+    "playback": {
+      "title": "Members-only video playback check",
+      "description": "Checks whether a members-only video can be played to confirm that the current YouTube session has an active membership.",
+      "statusIdle": "The playback check has not started yet.",
+      "statusChecking": "Checking whether the members-only video can be played.",
+      "statusVerified": "Members-only video playback was confirmed. You can now unlock access.",
+      "statusFailed": "Playback could not be confirmed. Make sure this browser is signed in to YouTube with an eligible membership, then try again.",
+      "retry": "Retry check"
+    },
+    "passwordLabel": "Password",
+    "passwordDescription": "Enter the password to unlock members-only data.",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Unlock",
+    "submitting": "Submitting...",
+    "lock": "Lock",
+    "errors": {
+      "members_only_access_not_configured": "The server-side configuration is incomplete.",
+      "invalid_request_body": "The request body could not be read.",
+      "password_required": "Please enter the password.",
+      "playback_verification_required": "Please complete the members-only video playback check first.",
+      "invalid_password": "The password does not match.",
+      "network_error": "The request failed. Please try again later.",
+      "unexpected_error": "An unexpected error occurred."
+    },
+    "notices": {
+      "unlockSuccess": "Members-only data has been enabled. Newly fetched song data will now include the members-only sheets.",
+      "lockSuccess": "Members-only data has been disabled."
     }
   },
   "Share": {
@@ -500,6 +556,7 @@
     "summary": "Search songs. Collected {countSongs} songs across {countVideos} videos.",
     "seeMore": "» See more",
     "noResults": "No matching songs",
+    "membersOnlyBadge": "Members only",
     "filters": {
       "category": "Category",
       "title": "Title",
@@ -678,7 +735,7 @@
     "breadcrumb": "Anniversaries",
     "title": "Anniversaries",
     "description": "A list of anniversaries related to AZKi.",
-    "featuredTitle": "Closest Anniversary",
+    "featuredTitle": "next anniversary",
     "countdownFormat": "remains: {days}d {hours}h {minutes}m {seconds}s",
     "countdownFinished": "Any moment now",
     "loading": "Loading anniversaries...",
@@ -769,7 +826,8 @@
         "topLabel": "Top item",
         "countUnit": "times"
       },
-      "viewStats": "stats"
+      "viewStats": "stats",
+      "viewOnApp": "Play"
     },
     "table": {
       "searchPlaceholder": "Search...",
@@ -895,6 +953,7 @@
     "viewModeTile": "Tile",
     "viewModeList": "List",
     "searchPlaceholder": "Enter search term",
+    "searchInAppLabel": "Play",
     "clearButtonLabel": "Clear",
     "noData": "No data",
     "routes": {
@@ -1042,6 +1101,8 @@
     "qrAlt": "QR code for {target}",
     "qrTrademark": "QR Code is a registered trademark of DENSO WAVE INCORPORATED in Japan and in other countries.",
     "copied": "Copied",
-    "close": "Close"
+    "close": "Close",
+    "membersOnlyAlert": "This is a member-only video. \nPlease be careful when sharing on SNS, etc. as it may be private.",
+    "membersOnlyAlertTitle": "Members only video"
   }
 }
