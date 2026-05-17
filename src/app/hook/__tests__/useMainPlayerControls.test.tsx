@@ -738,6 +738,84 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
   });
 
+  it("0:00から再生開始した場合の補正シークは1回だけ試みる", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: [mockSongs[0], membersOnlySong],
+        allSongs: [mockSongs[0], membersOnlySong],
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+
+    act(() => {
+      result.current.changeCurrentSong(membersOnlySong);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
+    expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
+  });
+
+  it("通常動画では0:00から再生開始しても追加の補正シークを行わない", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(1);
+  });
+
   it("explicitな開始秒がある場合はcurrentSong.startより優先して補正シークされる", () => {
     const sameVideoSongs: Song[] = [
       mockSongs[0],

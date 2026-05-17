@@ -38,6 +38,7 @@ export default function useMainPlayerControls({
   const initialStartSeekRef = useRef<number | null>(null);
   const initialStartSeekRetryCountRef = useRef(0);
   const membersOnlyReloadAttemptedSongKeyRef = useRef<string | null>(null);
+  const zeroStartSeekRetryAttemptedSongKeyRef = useRef<string | null>(null);
   // seek-in-flight tracking
   const seekInFlightRef = useRef<number | null>(null);
   const [seekInFlight, setSeekInFlight] = useState<number | null>(null);
@@ -270,6 +271,9 @@ export default function useMainPlayerControls({
       updatePlayerSnapshot(event.target);
 
       const requestedStartTime = initialStartSeekRef.current;
+      const currentSongKey = currentSong
+        ? `${currentSong.video_id}-${currentSong.start}`
+        : null;
       if (
         requestedStartTime !== null &&
         Number.isFinite(requestedStartTime) &&
@@ -287,8 +291,45 @@ export default function useMainPlayerControls({
         ) {
           initialStartSeekRef.current = null;
           initialStartSeekRetryCountRef.current = 0;
+          zeroStartSeekRetryAttemptedSongKeyRef.current = null;
+        } else if (
+          currentSong?.is_members_only &&
+          event.data === 1 &&
+          typeof currentTime === "number" &&
+          Number.isFinite(currentTime) &&
+          currentTime <= 1 &&
+          currentSongKey &&
+          zeroStartSeekRetryAttemptedSongKeyRef.current !== currentSongKey &&
+          typeof event.target.seekTo === "function"
+        ) {
+          zeroStartSeekRetryAttemptedSongKeyRef.current = currentSongKey;
+          setTimeout(() => {
+            try {
+              const latestCurrentTime =
+                typeof event.target.getCurrentTime === "function"
+                  ? event.target.getCurrentTime()
+                  : NaN;
+              if (
+                typeof latestCurrentTime === "number" &&
+                Number.isFinite(latestCurrentTime) &&
+                latestCurrentTime > 1
+              ) {
+                return;
+              }
+              event.target.seekTo(requestedStartTime, true);
+              setPlayerCurrentTime(requestedStartTime);
+              globalPlayer.setCurrentTime(requestedStartTime);
+              initialStartSeekRetryCountRef.current += 1;
+            } catch (_) {}
+          }, 250);
         } else if (
           initialStartSeekRetryCountRef.current < 2 &&
+          !(
+            event.data === 1 &&
+            typeof currentTime === "number" &&
+            Number.isFinite(currentTime) &&
+            currentTime <= 1
+          ) &&
           typeof event.target.seekTo === "function"
         ) {
           event.target.seekTo(requestedStartTime, true);
@@ -298,7 +339,12 @@ export default function useMainPlayerControls({
         }
       }
     },
-    [globalPlayer, originalHandleStateChange, updatePlayerSnapshot],
+    [
+      currentSong,
+      globalPlayer,
+      originalHandleStateChange,
+      updatePlayerSnapshot,
+    ],
   );
 
   const handlePlayerError = useCallback(
@@ -324,6 +370,7 @@ export default function useMainPlayerControls({
       pendingSeekRef.current = null;
       initialStartSeekRef.current = null;
       initialStartSeekRetryCountRef.current = 0;
+      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
       resetPlayer();
     },
     [currentSong, resetPlayer],
@@ -555,6 +602,7 @@ export default function useMainPlayerControls({
   useEffect(() => {
     if (!currentSong) {
       membersOnlyReloadAttemptedSongKeyRef.current = null;
+      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
       globalPlayer.setCurrentSong(null);
       setPreviousVideoId(null);
       return;
@@ -563,6 +611,9 @@ export default function useMainPlayerControls({
     const currentSongKey = `${currentSong.video_id}-${currentSong.start}`;
     if (membersOnlyReloadAttemptedSongKeyRef.current !== currentSongKey) {
       membersOnlyReloadAttemptedSongKeyRef.current = null;
+    }
+    if (zeroStartSeekRetryAttemptedSongKeyRef.current !== currentSongKey) {
+      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
     }
 
     const currentVideoId = currentSong.video_id;
@@ -624,6 +675,7 @@ export default function useMainPlayerControls({
       pendingSeekRef.current = null;
       initialStartSeekRef.current = null;
       initialStartSeekRetryCountRef.current = 0;
+      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
     } else {
       // もし getVideoDataが利用できないためにクリアを遅延していた場合、マイクロタスクをスケジュールして、何も設定されなければ playerRefVideoIdRef を再確認してクリアする
       const recentlyReady =
@@ -639,6 +691,7 @@ export default function useMainPlayerControls({
               pendingSeekRef.current = null;
               initialStartSeekRef.current = null;
               initialStartSeekRetryCountRef.current = 0;
+              zeroStartSeekRetryAttemptedSongKeyRef.current = null;
             }
           } catch (_) {}
         }, 0);
