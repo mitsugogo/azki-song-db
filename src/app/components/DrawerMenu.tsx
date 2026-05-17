@@ -3,11 +3,18 @@
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Drawer, Modal, Tooltip } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Divider,
+  Drawer,
+  Modal,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
-import { MdInstallMobile } from "react-icons/md";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import Acknowledgment from "./Acknowledgment";
 import { pageList } from "../pagelists";
@@ -137,14 +144,18 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
             {navigation.map((category, categoryIndex) => (
               <div key={categoryIndex}>
                 {category.category && (
-                  <div className="ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase">
+                  <Text
+                    c="dimmed"
+                    size="xs"
+                    className="ml-3 mt-6 mb-2 font-semibold uppercase"
+                  >
                     {categoryLabelMap[category.category] ?? category.category}
-                  </div>
+                  </Text>
                 )}
                 {category.items.map((item) => {
                   const isCurrent = item.current;
                   const baseClasses =
-                    "block rounded-md px-3 py-2 text-base font-medium cursor-pointer";
+                    "block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer";
                   const activeClasses =
                     "bg-primary-600 dark:bg-primary-800 text-white";
                   const inactiveClasses =
@@ -164,43 +175,39 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 })}
               </div>
             ))}
-            <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
 
-            <div className="ml-3 text-xs text-light-gray-300 dark:text-gray-300">
+            <div className="ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase">
               {t("management")}
             </div>
             <Link
               href="/playlist"
               key="playlist"
-              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              className="block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
               onClick={onClose}
             >
               {t("playlist")}
             </Link>
 
-            <hr className="my-6 border border-light-gray-100 dark:border-gray-600" />
-
             {isInstallable && !isInstalled && (
               <>
                 <div
                   key="install-pwa"
-                  className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                  className="block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
                   onClick={() => {
                     promptInstall();
                     onClose();
                   }}
                 >
-                  <MdInstallMobile className="mr-2 inline text-xl" />
                   {t("installApp")}
                 </div>
-                <hr className="my-6 border border-light-gray-200 dark:border-gray-600" />
+                <Divider my="md" />
               </>
             )}
 
             <Link
               href="#"
               key="about"
-              className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+              className="block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
               onClick={() => {
                 setShowAcknowledgment(true);
                 onClose();
@@ -219,7 +226,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
               onClick={onClose}
             >
               AZKi Channel
-              <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+              <LiaExternalLinkAltSolid className="ml-3 -mt-1 inline text-right" />
             </Link>
 
             <Tooltip
@@ -239,7 +246,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                   2025.11.19 (Wed.) - PIA ARENA MM
                 </div>{" "}
                 AZKi SOLO LiVE 2025 &quot;Departure&quot;
-                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+                <LiaExternalLinkAltSolid className="ml-3 -mt-1 inline text-right" />
               </Link>
             </Tooltip>
 
@@ -261,11 +268,11 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 </div>{" "}
                 <FaMapMarkerAlt className="mr-1 inline text-xl" />
                 {t("mapTitle")}
-                <LiaExternalLinkAltSolid className="ml-3 inline text-right" />
+                <LiaExternalLinkAltSolid className="ml-3 -mt-1 inline text-right" />
               </Link>
             </Tooltip>
 
-            <hr className="my-2 border border-light-gray-200 dark:border-gray-600 w-full" />
+            <Divider my="sm" />
 
             <div className="text-xs text-gray-400 dark:text-light-gray-500 pl-3 mb-1">
               {buildDate && songsFetchedAt && (
@@ -319,9 +326,20 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                 size="xs"
                 component={Link}
                 target="_blank"
+                href="https://x.com/mitsugogo"
+              >
+                <FaXTwitter />
+              </Badge>
+              <Badge
+                color="gray"
+                variant="transparent"
+                className="cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
+                size="xs"
+                component={Link}
+                target="_blank"
                 href="https://github.com/mitsugogo/azki-song-db"
               >
-                <FaXTwitter className="" />
+                <FaGithub />
               </Badge>
             </div>
           </div>
