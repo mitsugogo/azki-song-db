@@ -131,9 +131,7 @@ const SongListItem = React.memo(
               </div>
             </div>
             <div className="w-full space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
-              <div
-                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white break-all`}
-              >
+              <div>
                 {song.is_members_only && (
                   <div className="text-xs hidden lg:block">
                     <Badge
@@ -148,6 +146,10 @@ const SongListItem = React.memo(
                     </Badge>
                   </div>
                 )}
+              </div>
+              <div
+                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white break-all`}
+              >
                 <span
                   className={`${
                     isHide
