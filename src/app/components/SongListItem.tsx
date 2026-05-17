@@ -49,7 +49,7 @@ const SongListItem = React.memo(
           ref={ref}
           className={`relative cursor-pointer transition flex lg:block dark:text-gray-50 rounded-xl ${
             isSelected
-              ? "bg-primary-300 hover:bg-primary-400 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-600/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200 shadow-md"
+              ? "bg-primary-200 hover:bg-primary-300 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-800/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200 shadow-md"
               : "card-glassmorphism hover-shadow-md"
           }`}
           onClick={() => {
