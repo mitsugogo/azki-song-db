@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.4](https://github.com/mitsugogo/azki-song-db/compare/v2.5.3...v2.5.4) (2026-05-17)
+
+
+### Bug Fixes
+
+* PC Chromeの再生安定化 ([1b9bbd5](https://github.com/mitsugogo/azki-song-db/commit/1b9bbd50dc09eb5643f468a549fa9a3536eadb04))
+
 ### [2.5.3](https://github.com/mitsugogo/azki-song-db/compare/v2.5.2...v2.5.3) (2026-05-17)
 
 
