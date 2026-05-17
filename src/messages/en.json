@@ -952,6 +952,7 @@
     "viewModeTile": "Tile",
     "viewModeList": "List",
     "searchPlaceholder": "Enter search term",
+    "searchInAppLabel": "Play",
     "clearButtonLabel": "Clear",
     "noData": "No data",
     "routes": {

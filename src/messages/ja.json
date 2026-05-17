@@ -943,6 +943,7 @@
     "viewModeTile": "タイル",
     "viewModeList": "リスト",
     "searchPlaceholder": "検索ワードを入力",
+    "searchInAppLabel": "再生",
     "clearButtonLabel": "クリア",
     "noData": "データがありません。",
     "routes": {

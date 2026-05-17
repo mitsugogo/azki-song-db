@@ -2,7 +2,11 @@
 
 import { Song } from "../types/song";
 import { Modal, TextInput, Button, Divider, Alert } from "@mantine/core";
-import { HiClipboardCopy } from "react-icons/hi";
+import {
+  HiClipboardCopy,
+  HiExclamation,
+  HiInformationCircle,
+} from "react-icons/hi";
 import { FaDatabase, FaShare, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -78,8 +82,9 @@ export default function ShareModal({
         {currentSong?.is_members_only && (
           <Alert
             className="mb-4"
-            color="yellow"
+            color="red"
             title={t("membersOnlyAlertTitle")}
+            icon={<HiExclamation />}
           >
             {t("membersOnlyAlert")}
           </Alert>
@@ -88,7 +93,7 @@ export default function ShareModal({
         {/* YouTube URL */}
         <div>
           <div className="mb-1 text-sm font-medium">
-            <FaYoutube className="inline" />
+            <FaYoutube className="inline" color="red" />
             &nbsp;{t("youtubeUrl")}
           </div>
           <div className="relative">
@@ -139,8 +144,7 @@ export default function ShareModal({
         {/* AZKi Song Database URL */}
         <div className="mt-4">
           <div className="mb-1 text-sm font-medium">
-            <FaDatabase className="inline" />
-            &nbsp;{siteConfig.siteName}
+            ⚒️&nbsp;{siteConfig.siteName}
           </div>
           <div className="relative">
             <TextInput
