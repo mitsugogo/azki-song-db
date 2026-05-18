@@ -60,7 +60,10 @@ describe("songs route", () => {
     expect(args?.ranges).not.toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
     );
-    expect(response.headers.get("vary")).toBe("Cookie");
+    expect(response.headers.get("cache-control")).toBe(
+      "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+    );
+    expect(response.headers.get("vary")).toBeNull();
   });
 
   it("正しいCookieがあるとメン限シートを取得する", async () => {
@@ -83,6 +86,10 @@ describe("songs route", () => {
     expect(args?.ranges).toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
     );
+    expect(response.headers.get("cache-control")).toBe(
+      "private, no-store, max-age=0, must-revalidate",
+    );
+    expect(response.headers.get("vary")).toBe("Cookie");
   });
 
   it("正しいCookieがあっても明示指定なしではメン限シートを取得しない", async () => {
@@ -102,6 +109,10 @@ describe("songs route", () => {
     expect(args?.ranges).not.toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
     );
+    expect(response.headers.get("cache-control")).toBe(
+      "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+    );
+    expect(response.headers.get("vary")).toBeNull();
   });
 
   it("旧クエリキーではメン限シートを取得しない", async () => {
@@ -121,6 +132,27 @@ describe("songs route", () => {
     expect(args?.ranges).not.toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
     );
+    expect(response.headers.get("cache-control")).toBe(
+      "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+    );
+    expect(response.headers.get("vary")).toBeNull();
+  });
+
+  it("メン限クエリ指定時にCookieがなければ公開URLへリダイレクトする", async () => {
+    const response = await GET(
+      new Request(
+        `http://localhost/api/songs?hl=ja&${songsMembersOnlyQueryParamKey}=true`,
+      ),
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/api/songs?hl=ja",
+    );
+    expect(response.headers.get("cache-control")).toBe(
+      "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+    );
+    expect(getMock).not.toHaveBeenCalled();
   });
 
   it("メン限シート由来の楽曲にフラグを付与する", async () => {

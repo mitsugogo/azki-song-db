@@ -11,9 +11,14 @@ import {
 } from "@/app/lib/membersOnlyAccess";
 import { Song } from "@/app/types/song";
 
+const publicCacheControl =
+  "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300";
+const privateCacheControl = "private, no-store, max-age=0, must-revalidate";
+
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
+    const requestUrl = new URL(request.url);
+    const { searchParams } = requestUrl;
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const isEnglish = hl.startsWith("en");
     const includeMembersOnlyRequested =
@@ -36,6 +41,18 @@ export async function GET(request: Request) {
     const includeMembersOnlySongs =
       includeMembersOnlyRequested &&
       hasMembersOnlyAccess(cookieMap.get(membersOnlyAccessCookieName));
+
+    if (includeMembersOnlyRequested && !includeMembersOnlySongs) {
+      const redirectUrl = new URL(requestUrl);
+      redirectUrl.searchParams.delete(songsMembersOnlyQueryParamKey);
+
+      return NextResponse.redirect(redirectUrl, {
+        status: 307,
+        headers: {
+          "Cache-Control": publicCacheControl,
+        },
+      });
+    }
 
     const sheets = google.sheets({
       version: "v4",
@@ -380,6 +397,24 @@ export async function GET(request: Request) {
     });
 
     const now = new Date();
+    const responseHeaders: Record<string, string> = {
+      "Cache-Control": includeMembersOnlyRequested
+        ? privateCacheControl
+        : publicCacheControl,
+      "Vercel-Cache-Tag": buildVercelCacheTagHeader([
+        cacheTags.coreDataset,
+        cacheTags.songs,
+        cacheTags.songsList,
+      ]),
+      "x-data-updated": now.toISOString(),
+      "Last-Modified": now.toUTCString(),
+    };
+
+    // Cookie の有無でレスポンスが変わるのはメン限クエリ指定時のみ。
+    if (includeMembersOnlyRequested) {
+      responseHeaders.Vary = "Cookie";
+    }
+
     return NextResponse.json(
       // 日本語以外の場合、取得が終わったsongsから英語が既に設定されているものがあればそれで上書きして返却する
       !isEnglish
@@ -460,17 +495,7 @@ export async function GET(request: Request) {
             };
           }),
       {
-        headers: {
-          "Cache-Control": "private, no-store, max-age=0, must-revalidate",
-          "Vercel-Cache-Tag": buildVercelCacheTagHeader([
-            cacheTags.coreDataset,
-            cacheTags.songs,
-            cacheTags.songsList,
-          ]),
-          Vary: "Cookie",
-          "x-data-updated": now.toISOString(),
-          "Last-Modified": now.toUTCString(),
-        },
+        headers: responseHeaders,
       },
     );
   } catch (error) {
