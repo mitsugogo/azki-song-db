@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.5](https://github.com/mitsugogo/azki-song-db/compare/v2.5.4...v2.5.5) (2026-05-18)
+
+
+### Bug Fixes
+
+* 一部動画で配信日と異なる日付が表示されていたのを修正 ([c37a55c](https://github.com/mitsugogo/azki-song-db/commit/c37a55cccdc4bfc136cdac867b55b10548386a53))
+
 ### [2.5.4](https://github.com/mitsugogo/azki-song-db/compare/v2.5.3...v2.5.4) (2026-05-17)
 
 
