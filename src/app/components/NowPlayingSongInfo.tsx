@@ -19,6 +19,7 @@ import { FaPlay } from "react-icons/fa";
 import { renderLinkedText } from "../lib/textLinkify";
 import React, { use, useEffect, useMemo, useState, useRef } from "react";
 import { formatDate } from "../lib/formatDate";
+import { resolveVideoMetaDate } from "../lib/videoMetaDate";
 import useChannels from "../hook/useChannels";
 import { ChannelEntry } from "../types/api/yt/channels";
 import { getCollabUnitName } from "../config/collabUnits";
@@ -888,7 +889,7 @@ const NowPlayingSongInfo = ({
                   <DescriptionCollapsible
                     text={videoInfo.snippet.localized.description}
                     viewCount={videoInfo.statistics?.viewCount}
-                    uploadDate={videoInfo.snippet.publishedAt}
+                    uploadDate={resolveVideoMetaDate(videoInfo)}
                     tags={displayTags}
                     locale={locale}
                   />
