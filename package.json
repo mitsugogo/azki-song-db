@@ -90,7 +90,7 @@
     "eslint": "^10",
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.1.1",
-    "postcss": "8.5.14",
+    "postcss": "8.5.15",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "tailwindcss": "^4.1.13",
