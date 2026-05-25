@@ -23,11 +23,21 @@ jobs:
           fetch-depth: 0
           ref: main
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Configure Git User
         run: |
@@ -38,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx standard-version
+          pnpm exec standard-version
           git push origin main
           git push --tags
 
