@@ -43,6 +43,11 @@ Please copy the sample sheet and use it as a reference for your own sheet. The s
 
 https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSasY8/edit?usp=sharing
 
+## Requirements
+
+- Node.js: 24.x
+- pnpm: required for dependency installation and script execution
+
 ## Development
 
 The development environment is set up using the following steps:

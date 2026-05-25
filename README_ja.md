@@ -42,6 +42,11 @@ YouTube の楽曲リンクや楽曲情報（タイトル、アーティスト、
 コピーしてご利用ください。
 https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSasY8/edit?usp=sharing
 
+## 動作要件
+
+- Node.js: 24.x
+- pnpm: 依存関係のインストールと各種スクリプトの実行に必要
+
 ## 開発
 
 1. リポジトリをクローン: `git clone`
