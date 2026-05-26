@@ -100,12 +100,5 @@
     "tailwindcss": "^4.1.13",
     "typescript": "^6",
     "vitest": "^4.0.18"
-  },
-  "overrides": {
-    "cookie": "^0.7.1",
-    "path-to-regexp": "^6.2.3",
-    "serialize-javascript": "^7.0.3",
-    "glob": "^9.3.0",
-    "rimraf": "^4.0.0"
   }
 }
