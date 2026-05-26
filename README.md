@@ -43,13 +43,18 @@ Please copy the sample sheet and use it as a reference for your own sheet. The s
 
 https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSasY8/edit?usp=sharing
 
+## Requirements
+
+- Node.js: 24.x
+- pnpm: required for dependency installation and script execution
+
 ## Development
 
 The development environment is set up using the following steps:
 
 1. Clone the repository using `git clone`
-2. Install the dependencies using `npm install`
-3. Start the development server using `npm run dev`
+2. Install the dependencies using `pnpm install`
+3. Start the development server using `pnpm dev`
 4. Open the web page at `http://localhost:3000`
 
 ## Testing
@@ -62,17 +67,17 @@ Unit tests are written for React hooks and components using Vitest and React Tes
 
 **Run all unit tests:**
 ```bash
-npm test
+pnpm test
 ```
 
 **Run tests in watch mode:**
 ```bash
-npm run test:watch
+pnpm test:watch
 ```
 
 **Run tests with coverage:**
 ```bash
-npm run test:coverage
+pnpm test:coverage
 ```
 
 **Test files location:**
@@ -85,17 +90,17 @@ E2E tests are written using Playwright to test the application from a user's per
 
 **Run all E2E tests:**
 ```bash
-npm run test:e2e
+pnpm test:e2e
 ```
 
 **Run E2E tests in UI mode:**
 ```bash
-npm run test:e2e:ui
+pnpm test:e2e:ui
 ```
 
 **Run E2E tests in headed mode:**
 ```bash
-npm run test:e2e:headed
+pnpm test:e2e:headed
 ```
 
 **Test files location:**

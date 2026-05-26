@@ -38,7 +38,7 @@ export default defineConfig({
     actionTimeout: 15000,
   },
   webServer: {
-    command: `npm run dev -- --hostname ${HOST} --port ${PORT}`,
+    command: `pnpm dev -- --hostname ${HOST} --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: true,
     timeout: 180_000,

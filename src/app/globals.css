@@ -4,7 +4,7 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
 
-@import "overlayscrollbars/overlayscrollbars.css";
+@import "overlayscrollbars/styles/overlayscrollbars.css";
 
 @theme {
   --color-primary-50: #fdf2f7;
