@@ -29,6 +29,9 @@ jobs:
           version: 11.3.0
           run_install: false
 
+      - name: Setup Takumi Guard Registry
+        uses: flatt-security/setup-takumi-guard-npm@v1
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
