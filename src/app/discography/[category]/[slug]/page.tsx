@@ -50,7 +50,17 @@ async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
 }
 
 export async function generateStaticParams() {
-  const songs: Song[] = await fetchSongsFromApi();
+  let songs: Song[] = [];
+
+  try {
+    songs = await fetchSongsFromApi();
+  } catch (error) {
+    console.warn(
+      "Skipping static param generation for discography song pages during build.",
+      error,
+    );
+    return [];
+  }
 
   // 各楽曲についてカテゴリを決定し、カテゴリ+スラグの組合せで静的パスを生成する
   const paramSet = new Set<string>();

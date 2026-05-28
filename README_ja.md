@@ -42,11 +42,16 @@ YouTube の楽曲リンクや楽曲情報（タイトル、アーティスト、
 コピーしてご利用ください。
 https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSasY8/edit?usp=sharing
 
+## 動作要件
+
+- Node.js: 24.x
+- pnpm: 依存関係のインストールと各種スクリプトの実行に必要
+
 ## 開発
 
 1. リポジトリをクローン: `git clone`
-2. 依存関係をインストール: `npm install`
-3. 開発サーバーを起動: `npm run dev`
+2. 依存関係をインストール: `pnpm install`
+3. 開発サーバーを起動: `pnpm dev`
 4. ブラウザで `http://localhost:3000` を開く
 
 ## テスト
@@ -56,17 +61,17 @@ https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSa
 ### 単体テスト（Vitest）
 
 ```bash
-npm test
-npm run test:watch
-npm run test:coverage
+pnpm test
+pnpm test:watch
+pnpm test:coverage
 ```
 
 ### E2E テスト（Playwright）
 
 ```bash
-npm run test:e2e
-npm run test:e2e:ui
-npm run test:e2e:headed
+pnpm test:e2e
+pnpm test:e2e:ui
+pnpm test:e2e:headed
 ```
 
 
