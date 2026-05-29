@@ -87,6 +87,10 @@
     "nowPlayingSongInfo": {
       "views": "{count} 回視聴",
       "collapsedViews": "{count}万 回視聴",
+      "currentViewers": "{count} 人が視聴中",
+      "collapsedCurrentViewers": "{count}万人が視聴中",
+      "premieresAt": "{date}にプレミア公開",
+      "premieringNow": "プレミア公開中",
       "showMore": "続きを表示",
       "collapse": "折りたたむ",
       "subscribers": "チャンネル登録者 {count}",

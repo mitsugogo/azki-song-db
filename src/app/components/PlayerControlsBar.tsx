@@ -100,6 +100,7 @@ type Props = {
   nextDisabled?: boolean;
   formattedCurrentTime: string;
   formattedDuration: string;
+  timeDisplayMode?: "default" | "hidden" | "elapsed-only";
   displaySongTitle: string;
   displaySongArtist: string;
   onOpenShareModal: () => void;
@@ -144,6 +145,7 @@ export default function PlayerControlsBar({
   nextDisabled,
   formattedCurrentTime,
   formattedDuration,
+  timeDisplayMode = "default",
   displaySongTitle,
   displaySongArtist,
   onOpenShareModal,
@@ -710,13 +712,17 @@ export default function PlayerControlsBar({
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-center gap-0.5 lg:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
-            <span>{formattedCurrentTime}</span>
-            <div className="flex items-end lg:items-center gap-1 lg:gap-2">
-              <span className="text-white/50">/</span>
-              <span className="text-white/70">{formattedDuration}</span>
+          {timeDisplayMode !== "hidden" && (
+            <div className="flex flex-col lg:flex-row lg:items-center gap-0.5 lg:gap-2 text-[13px] font-medium tabular-nums text-white/90 select-none leading-tight">
+              <span>{formattedCurrentTime}</span>
+              {timeDisplayMode === "default" && (
+                <div className="flex items-end lg:items-center gap-1 lg:gap-2">
+                  <span className="text-white/50">/</span>
+                  <span className="text-white/70">{formattedDuration}</span>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           <div className="min-w-0 flex-1 border-l border-white/10 pl-3">
             <div

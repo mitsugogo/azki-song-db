@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import PlayerSection from "../PlayerSection";
 import { MantineProvider } from "@mantine/core";
 import type { Song } from "../../types/song";
+import type { YouTubeApiVideoResult } from "../../types/api/yt/video";
 
 // Polyfill matchMedia for Mantine internals in the test environment
 if (typeof window !== "undefined" && !window.matchMedia) {
@@ -190,6 +191,90 @@ describe("PlayerSection", () => {
     );
 
     expect(queryByTestId("youtube")).toBeNull();
+  });
+
+  it("プレミア公開予定ではコントロールバーに時間非表示モードを渡す", () => {
+    const upcomingVideoInfo = {
+      snippet: {
+        liveBroadcastContent: "upcoming",
+      },
+      lastFetchedAt: new Date().toISOString(),
+    } as YouTubeApiVideoResult;
+
+    const { getByTestId } = renderWithWrapper(
+      <PlayerSection
+        currentSong={baseSong}
+        previousSong={null}
+        nextSong={null}
+        allSongs={[baseSong]}
+        songs={[baseSong]}
+        searchTerm=""
+        isPlaying={false}
+        playerKey={1}
+        hideFutureSongs={false}
+        videoInfo={upcomingVideoInfo}
+        handlePlayerOnReady={() => {}}
+        handleStateChange={() => {}}
+        changeCurrentSong={() => {}}
+        playRandomSong={() => {}}
+        setSongsToCurrentVideo={() => {}}
+        setSongs={() => {}}
+        searchSongs={() => []}
+        setOpenShareModal={() => {}}
+        setSearchTerm={() => {}}
+        setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
+      />,
+    );
+
+    const props = JSON.parse(
+      getByTestId("player-controls").getAttribute("data-props") ?? "{}",
+    );
+
+    expect(props.timeDisplayMode).toBe("hidden");
+  });
+
+  it("配信中ではコントロールバーに経過秒数モードを渡す", () => {
+    const liveVideoInfo = {
+      snippet: {
+        liveBroadcastContent: "live",
+      },
+      lastFetchedAt: new Date().toISOString(),
+    } as YouTubeApiVideoResult;
+
+    const { getByTestId } = renderWithWrapper(
+      <PlayerSection
+        currentSong={baseSong}
+        previousSong={null}
+        nextSong={null}
+        allSongs={[baseSong]}
+        songs={[baseSong]}
+        searchTerm=""
+        isPlaying={false}
+        playerKey={1}
+        hideFutureSongs={false}
+        videoInfo={liveVideoInfo}
+        handlePlayerOnReady={() => {}}
+        handleStateChange={() => {}}
+        changeCurrentSong={() => {}}
+        playRandomSong={() => {}}
+        setSongsToCurrentVideo={() => {}}
+        setSongs={() => {}}
+        searchSongs={() => []}
+        setOpenShareModal={() => {}}
+        setSearchTerm={() => {}}
+        setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
+      />,
+    );
+
+    const props = JSON.parse(
+      getByTestId("player-controls").getAttribute("data-props") ?? "{}",
+    );
+
+    expect(props.timeDisplayMode).toBe("elapsed-only");
   });
 
   it("renders timedLiveCallText and updates when prop changes", () => {

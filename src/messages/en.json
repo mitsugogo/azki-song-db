@@ -88,6 +88,10 @@
     "nowPlayingSongInfo": {
       "views": "{count} views",
       "collapsedViews": "{count}0K views",
+      "currentViewers": "{count} watching now",
+      "collapsedCurrentViewers": "{count}0K watching now",
+      "premieresAt": "Premieres on {date}",
+      "premieringNow": "Premiering now",
       "showMore": "Show more",
       "collapse": "Show less",
       "subscribers": "{count} subscribers",
