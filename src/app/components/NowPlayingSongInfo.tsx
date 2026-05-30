@@ -846,6 +846,7 @@ const NowPlayingSongInfo = ({
                               : [];
                           const remaining =
                             (dedupedChannels?.length ?? 0) - shown.length;
+                          const previewAvatarCount = Math.min(4, remaining);
 
                           // この組み合わせにユニット名があるか
                           const unitName = getCollabUnitName(
@@ -903,8 +904,7 @@ const NowPlayingSongInfo = ({
                                         {dedupedChannels
                                           .slice(
                                             shown.length,
-                                            shown.length +
-                                              Math.min(3, remaining),
+                                            shown.length + previewAvatarCount,
                                           )
                                           .map((ch) => (
                                             <Tooltip
@@ -938,14 +938,14 @@ const NowPlayingSongInfo = ({
                                               />
                                             </Tooltip>
                                           ))}
-                                        {remaining > 3 && (
+                                        {remaining > previewAvatarCount && (
                                           <Avatar
                                             radius="xl"
                                             size={28}
                                             color="gray"
                                             top={4}
                                           >
-                                            +{remaining - 3}
+                                            +{remaining - previewAvatarCount}
                                           </Avatar>
                                         )}
                                       </AvatarGroup>
