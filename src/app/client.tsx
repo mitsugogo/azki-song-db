@@ -2,7 +2,16 @@
 
 import { Link, useRouter } from "../i18n/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Burger, Skeleton, Tooltip } from "@mantine/core";
+import {
+  Burger,
+  Button,
+  CopyButton,
+  Notification,
+  Skeleton,
+  Text,
+  Tooltip,
+  Transition,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
@@ -12,7 +21,8 @@ import Footer from "./components/Footer";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import ThemeToggle from "./components/ThemeToggle";
 import YoutubeThumbnail from "./components/YoutubeThumbnail";
-import { siteConfig } from "./config/siteConfig";
+import { SONG_MODE_MENU_ITEMS } from "./components/songModeMenu";
+import { baseUrl, siteConfig } from "./config/siteConfig";
 import useAnniversaries from "./hook/useAnniversaries";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
@@ -27,13 +37,33 @@ import {
   getTodayTimelineMilestones,
   isAnniversaryToday,
 } from "./lib/highlights";
-import { LuArrowRight, LuSearch, LuSparkles } from "react-icons/lu";
+import {
+  LuArrowRight,
+  LuSearch,
+  LuSparkles,
+  LuCopy,
+  LuCopyCheck,
+} from "react-icons/lu";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Song } from "./types/song";
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
+const SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME =
+  "px-3 py-1 h-9 cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0";
+const ORIGINAL_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const COVER_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "cover-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const COLLABORATION_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "collaboration-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const KARAOKE_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "tag:歌枠") ??
+  SONG_MODE_MENU_ITEMS[0];
 
 function pickRecommendedSongs<T>(items: Song[], count: number) {
   if (items.length <= count) {
@@ -115,6 +145,13 @@ export default function ClientTop() {
   const tAnniversaries = useTranslations("Anniversaries");
   const tSummary = useTranslations("Summary");
   const [searchValue, setSearchValue] = useState<string[]>([]);
+  const [copiedNotificationType, setCopiedNotificationType] = useState<
+    "original" | "cover" | "collaboration" | "karaoke"
+  >("original");
+  const [copiedNotificationVisible, setCopiedNotificationVisible] =
+    useState(false);
+  const [copiedNotificationSequence, setCopiedNotificationSequence] =
+    useState(0);
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -128,6 +165,20 @@ export default function ClientTop() {
       window.removeEventListener("scroll", updateHeaderState);
     };
   }, []);
+
+  useEffect(() => {
+    if (!copiedNotificationVisible) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setCopiedNotificationVisible(false);
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [copiedNotificationVisible, copiedNotificationSequence]);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
@@ -170,11 +221,39 @@ export default function ClientTop() {
     return formatDate(date, locale);
   }, [songsFetchedAt]);
 
+  const originalSongsShareUrl = useMemo(
+    () => new URL("/watch?q=original-songs", baseUrl).toString(),
+    [],
+  );
+
+  const coverSongsShareUrl = useMemo(
+    () => new URL("/watch?q=cover-songs", baseUrl).toString(),
+    [],
+  );
+
+  const collaborationSongsShareUrl = useMemo(
+    () => new URL("/watch?q=collaboration-songs", baseUrl).toString(),
+    [],
+  );
+
+  const karaokeSongsShareUrl = useMemo(
+    () => new URL("/watch?q=tag:%E6%AD%8C%E6%9E%A0", baseUrl).toString(),
+    [],
+  );
+
   const handleSearch = () => {
     const query = searchValue.join("|").trim();
     startTransition(() => {
       router.push(query ? `/search?q=${encodeURIComponent(query)}` : `/search`);
     });
+  };
+
+  const showCopiedNotification = (
+    type: "original" | "cover" | "collaboration" | "karaoke",
+  ) => {
+    setCopiedNotificationType(type);
+    setCopiedNotificationVisible(true);
+    setCopiedNotificationSequence((current) => current + 1);
   };
 
   return (
@@ -289,6 +368,159 @@ export default function ClientTop() {
                     {t("surpriseMe")}
                   </Link>
                 </Tooltip>
+              </div>
+
+              <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
+
+              <div className="flex items-left justify-center gap-3">
+                <Text size="sm" color="dimmed">
+                  {/* 楽曲モードで再生 */}
+                  {t("songMode")}
+                </Text>
+              </div>
+
+              <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+                {/* オリジナル楽曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=original-songs"
+                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME} ${ORIGINAL_SONG_MODE_ITEM.buttonClassName}`}
+                    leftSection={
+                      <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("originalSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={originalSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Button
+                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME} ${ORIGINAL_SONG_MODE_ITEM.buttonClassName}`}
+                        onClick={() => {
+                          copy();
+                          showCopiedNotification("original");
+                        }}
+                      >
+                        {copied ? (
+                          <>
+                            <LuCopyCheck className="mr-1 inline" />
+                          </>
+                        ) : (
+                          <LuCopy className="mr-1 inline" />
+                        )}
+                      </Button>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* カバー楽曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=cover-songs"
+                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    color="gray"
+                    leftSection={
+                      <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("coverSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={coverSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Button
+                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                        color="gray"
+                        onClick={() => {
+                          copy();
+                          showCopiedNotification("cover");
+                        }}
+                      >
+                        {copied ? (
+                          <>
+                            <LuCopyCheck className="mr-1 inline" />
+                          </>
+                        ) : (
+                          <LuCopy className="mr-1 inline" />
+                        )}
+                      </Button>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* ユニット・ゲスト参加曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=collaboration-songs"
+                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    color="gray"
+                    leftSection={
+                      <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("collaborationSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={collaborationSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Button
+                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                        color="gray"
+                        onClick={() => {
+                          copy();
+                          showCopiedNotification("collaboration");
+                        }}
+                      >
+                        {copied ? (
+                          <>
+                            <LuCopyCheck className="mr-1 inline" />
+                          </>
+                        ) : (
+                          <LuCopy className="mr-1 inline" />
+                        )}
+                      </Button>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* 歌枠 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=tag:歌枠"
+                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    color="gray"
+                    leftSection={
+                      <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("karaokeSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={karaokeSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Button
+                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                        color="gray"
+                        onClick={() => {
+                          copy();
+                          showCopiedNotification("karaoke");
+                        }}
+                      >
+                        {copied ? (
+                          <>
+                            <LuCopyCheck className="mr-1 inline" />
+                          </>
+                        ) : (
+                          <LuCopy className="mr-1 inline" />
+                        )}
+                      </Button>
+                    )}
+                  </CopyButton>
+                </Button.Group>
               </div>
             </div>
           </section>
@@ -698,6 +930,36 @@ export default function ClientTop() {
       </div>
       <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
       <AnalyticsWrapper />
+
+      <Transition
+        mounted={copiedNotificationVisible}
+        transition="slide-left"
+        duration={220}
+        timingFunction="ease"
+      >
+        {(styles) => (
+          <div
+            className="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm"
+            style={styles}
+          >
+            <Notification
+              title={t("copied")}
+              color="green"
+              withCloseButton
+              closeButtonProps={{ "aria-label": t("close") }}
+              onClose={() => setCopiedNotificationVisible(false)}
+            >
+              {copiedNotificationType === "cover"
+                ? t("coverSongsLinkCopied")
+                : copiedNotificationType === "collaboration"
+                  ? t("collaborationSongsLinkCopied")
+                  : copiedNotificationType === "karaoke"
+                    ? t("karaokeSongsLinkCopied")
+                    : t("originalSongsLinkCopied")}
+            </Notification>
+          </div>
+        )}
+      </Transition>
     </div>
   );
 }
