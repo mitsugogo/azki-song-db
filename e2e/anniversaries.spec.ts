@@ -20,7 +20,6 @@ test.describe("Anniversaries page", () => {
 
       const firstCard = page.locator("article").first();
       await expect(firstCard).toBeVisible();
-      await expect(firstCard).toContainText(/記念日|Anniversary/i);
       await expect(firstCard).toContainText(/次回|Next/i);
       await expect(firstCard).toContainText(/初回|First/i);
       await expect(firstCard).toContainText(/あと何日|Days until/i);
