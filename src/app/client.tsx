@@ -3,9 +3,11 @@
 import { Link, useRouter } from "../i18n/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  Badge,
   Burger,
   Button,
   CopyButton,
+  Alert,
   Notification,
   Skeleton,
   Text,
@@ -24,6 +26,7 @@ import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { SONG_MODE_MENU_ITEMS } from "./components/songModeMenu";
 import { baseUrl, siteConfig } from "./config/siteConfig";
 import useAnniversaries from "./hook/useAnniversaries";
+import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
 import { buildWatchHref } from "./lib/watchUrl";
@@ -31,11 +34,14 @@ import { formatDate } from "./lib/formatDate";
 import {
   buildMilestoneSearchHref,
   computeNextIsoForAnniversary,
+  getFeaturedEvents,
   formatAnniversaryName,
   getDaysUntil,
   getFeaturedAnniversaries,
   getTodayTimelineMilestones,
+  isEventActive,
   isAnniversaryToday,
+  parseToJstDayStart,
 } from "./lib/highlights";
 import {
   LuArrowRight,
@@ -44,6 +50,7 @@ import {
   LuCopy,
   LuCopyCheck,
 } from "react-icons/lu";
+import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Song } from "./types/song";
@@ -135,6 +142,8 @@ export default function ClientTop() {
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
+  const { items: eventItems, isLoading: isEventsLoading } = useEvents();
+  const [isShowOngoingEventsAlert, setOngoingEventsAlert] = useState(true);
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
   const t = useTranslations("Home");
@@ -193,6 +202,16 @@ export default function ClientTop() {
     [anniversaryItems],
   );
 
+  const featuredEvents = useMemo(
+    () => getFeaturedEvents(eventItems, 3),
+    [eventItems],
+  );
+
+  const ongoingEvents = useMemo(
+    () => eventItems.filter((item) => isEventActive(item)),
+    [eventItems],
+  );
+
   const todayMilestones = useMemo(
     () => getTodayTimelineMilestones(allSongs, externalMilestones),
     [allSongs, externalMilestones],
@@ -244,6 +263,26 @@ export default function ClientTop() {
     startTransition(() => {
       router.push(query ? `/search?q=${encodeURIComponent(query)}` : `/search`);
     });
+  };
+
+  const formatEventRange = (startAt: string, endAt: string) => {
+    const startLabel = formatDate(startAt, locale);
+    if (!endAt) {
+      return startLabel;
+    }
+
+    const startDate = parseToJstDayStart(startAt);
+    const endDate = parseToJstDayStart(endAt);
+    if (!startDate || !endDate) {
+      return startLabel;
+    }
+
+    if (startDate.getTime() === endDate.getTime()) {
+      return startLabel;
+    }
+
+    const separator = locale === "ja" ? "〜" : " - ";
+    return `${startLabel}${separator}${formatDate(endAt, locale)}`;
   };
 
   const showCopiedNotification = (
@@ -555,6 +594,40 @@ export default function ClientTop() {
                 </Button.Group>
               </div>
             </div>
+
+            {/* 開催中のイベント */}
+            {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
+              <Notification
+                icon={<IoInformationSharp />}
+                title={t("eventOngoing") + ": " + ongoingEvents[0].content}
+                className="w-full text-left shadow-lg max-w-3xl mt-3"
+                color="pink"
+                withCloseButton
+                onClose={() => {
+                  setOngoingEventsAlert(false);
+                }}
+              >
+                <div className="space-y-2">
+                  {ongoingEvents[0].note ? (
+                    <Text size="sm" c="dimmed">
+                      {ongoingEvents[0].note}
+
+                      {ongoingEvents[0].url ? (
+                        <Link
+                          href={ongoingEvents[0].url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                        >
+                          <FaExternalLinkAlt className="text-[0.75rem]" />
+                          URL
+                        </Link>
+                      ) : null}
+                    </Text>
+                  ) : null}
+                </div>
+              </Notification>
+            )}
           </section>
 
           <section className="pb-10">
@@ -622,6 +695,133 @@ export default function ClientTop() {
                   ))}
             </div>
 
+            {featuredEvents.length > 0 && (
+              <div className="mt-16 space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                    Events
+                  </p>
+                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    {t("eventsTitle")}
+                  </h3>
+                </div>
+                <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                  <div className="mt-4 space-y-3">
+                    {isEventsLoading ? (
+                      Array.from({ length: 3 }).map((_, index) => (
+                        <div
+                          key={`event-skeleton-${index}`}
+                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          aria-hidden="true"
+                        >
+                          <Skeleton height={12} width="30%" radius="sm" />
+                          <Skeleton height={16} radius="sm" className="mt-2" />
+                          <Skeleton
+                            height={12}
+                            width="65%"
+                            radius="sm"
+                            className="mt-2"
+                          />
+                        </div>
+                      ))
+                    ) : featuredEvents.length > 0 ? (
+                      featuredEvents.map((event, index) => {
+                        const active = isEventActive(event);
+                        const daysUntilEvent = getDaysUntil(
+                          active
+                            ? event.end_at || event.start_at
+                            : event.start_at,
+                        );
+                        return (
+                          <div
+                            key={`${event.start_at}-${event.content}-${index}`}
+                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-1">
+                                  {active ? (
+                                    <>
+                                      <Badge
+                                        color="pink"
+                                        size="md"
+                                        radius="lg"
+                                        className="mr-1"
+                                      >
+                                        {t("eventOngoing")}
+                                      </Badge>
+                                      {daysUntilEvent !== null ? (
+                                        <Badge
+                                          color="pink"
+                                          size="md"
+                                          radius="lg"
+                                          variant="outline"
+                                        >
+                                          {tAnniversaries("daysUntil", {
+                                            days: daysUntilEvent,
+                                          })}
+                                        </Badge>
+                                      ) : null}
+                                    </>
+                                  ) : daysUntilEvent !== null ? (
+                                    <Badge
+                                      color="pink"
+                                      size="md"
+                                      radius="lg"
+                                      variant="outline"
+                                    >
+                                      {tAnniversaries("daysUntil", {
+                                        days: daysUntilEvent,
+                                      })}
+                                    </Badge>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Text size="xs" c="dimmed">
+                                    {formatEventRange(
+                                      event.start_at,
+                                      event.end_at,
+                                    )}
+                                  </Text>
+                                </div>
+                                <p className="mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                  {event.content}
+                                </p>
+                                {event.note ? (
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    className="mt-1 whitespace-pre-line"
+                                  >
+                                    {event.note}
+                                  </Text>
+                                ) : null}
+                              </div>
+                              {event.url ? (
+                                <Link
+                                  href={event.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
+                                >
+                                  <FaExternalLinkAlt className="text-[0.65rem]" />
+                                  URL
+                                </Link>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                        {t("eventsEmpty")}
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            )}
+
             <div className="mt-16 space-y-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
@@ -685,21 +885,30 @@ export default function ClientTop() {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Text size="xs" c="dimmed">
+                                      {nextIso
+                                        ? formatDate(nextIso, locale)
+                                        : "-"}
+                                    </Text>
+                                    {daysUntil !== null ? (
+                                      <Badge
+                                        color="pink"
+                                        size="md"
+                                        radius="lg"
+                                        variant="outline"
+                                      >
+                                        {daysUntil === 0
+                                          ? tAnniversaries("featuredTodayTitle")
+                                          : tAnniversaries("daysUntil", {
+                                              days: daysUntil,
+                                            })}
+                                      </Badge>
+                                    ) : null}
+                                  </div>
+                                  <p className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                     {formatAnniversaryName(item, locale)}
                                   </p>
-                                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                    {nextIso
-                                      ? formatDate(nextIso, locale)
-                                      : "-"}
-                                  </p>
-                                  {daysUntil !== null ? (
-                                    <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
-                                      {daysUntil === 0
-                                        ? tAnniversaries("featuredTodayTitle")
-                                        : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
-                                    </p>
-                                  ) : null}
                                   {item.note ? (
                                     <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
                                       {item.note}
@@ -805,17 +1014,21 @@ export default function ClientTop() {
                                     key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
                                     className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
                                   >
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <Text size="xs" c="dimmed">
                                       {formatDate(milestone.date, locale)}
-                                    </p>
-                                    <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+                                    </Text>
+                                    <div className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                       {milestoneContent}
-                                      {milestone.note ? (
-                                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                                          {milestone.note}
-                                        </span>
-                                      ) : null}
                                     </div>
+                                    {milestone.note ? (
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        className="mt-1 whitespace-pre-line"
+                                      >
+                                        {milestone.note}
+                                      </Text>
+                                    ) : null}
 
                                     {/* 動画 */}
                                     {milestone?.song && (
