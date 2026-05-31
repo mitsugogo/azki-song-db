@@ -245,8 +245,26 @@ describe("SearchAndSongList", () => {
     );
 
     await waitFor(() => {
+      expect(baseProps.setSongs).toHaveBeenCalledWith([newCover, oldCover]);
+      expect(baseProps.changeCurrentSong).toHaveBeenCalledWith(newCover);
+
       const orders = screen.getAllByTestId("songs-list-order");
       expect(orders[0]).toHaveTextContent("New Cover|Old Cover");
+      expect(
+        screen.getAllByRole("button", { name: "sortDescending" }).length,
+      ).toBeGreaterThan(0);
+    });
+
+    rerender(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, newCover, oldOriginal, oldCover]}
+        searchTerm=""
+      />,
+    );
+
+    await waitFor(() => {
+      expect(baseProps.changeCurrentSong).toHaveBeenCalledTimes(2);
       expect(
         screen.getAllByRole("button", { name: "sortDescending" }).length,
       ).toBeGreaterThan(0);

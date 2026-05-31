@@ -55,6 +55,34 @@ type SearchAndSongListPropsExt = {
   isTheaterMode?: boolean;
 };
 
+const sortSongsByBroadcastOrder = (
+  songs: Song[],
+  sortOrder: "asc" | "desc",
+) => {
+  const order = sortOrder === "asc" ? 1 : -1;
+
+  return [...songs].sort((leftSong, rightSong) => {
+    const leftDate = new Date(leftSong.broadcast_at || "").getTime();
+    const rightDate = new Date(rightSong.broadcast_at || "").getTime();
+
+    const normalizedLeftDate = Number.isNaN(leftDate) ? 0 : leftDate;
+    const normalizedRightDate = Number.isNaN(rightDate) ? 0 : rightDate;
+
+    if (normalizedLeftDate !== normalizedRightDate) {
+      return (normalizedLeftDate - normalizedRightDate) * order;
+    }
+
+    const leftOrder = leftSong.source_order ?? Number.MAX_SAFE_INTEGER;
+    const rightOrder = rightSong.source_order ?? Number.MAX_SAFE_INTEGER;
+
+    if (leftOrder !== rightOrder) {
+      return leftOrder - rightOrder;
+    }
+
+    return leftSong.title.localeCompare(rightSong.title) * order;
+  });
+};
+
 export default function SearchAndSongList({
   songs,
   allSongs,
@@ -83,28 +111,7 @@ export default function SearchAndSongList({
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
   const sortedSongs = useMemo(() => {
-    const order = sortOrder === "asc" ? 1 : -1;
-
-    return [...songs].sort((leftSong, rightSong) => {
-      const leftDate = new Date(leftSong.broadcast_at || "").getTime();
-      const rightDate = new Date(rightSong.broadcast_at || "").getTime();
-
-      const normalizedLeftDate = Number.isNaN(leftDate) ? 0 : leftDate;
-      const normalizedRightDate = Number.isNaN(rightDate) ? 0 : rightDate;
-
-      if (normalizedLeftDate !== normalizedRightDate) {
-        return (normalizedLeftDate - normalizedRightDate) * order;
-      }
-
-      const leftOrder = leftSong.source_order ?? Number.MAX_SAFE_INTEGER;
-      const rightOrder = rightSong.source_order ?? Number.MAX_SAFE_INTEGER;
-
-      if (leftOrder !== rightOrder) {
-        return leftOrder - rightOrder;
-      }
-
-      return leftSong.title.localeCompare(rightSong.title) * order;
-    });
+    return sortSongsByBroadcastOrder(songs, sortOrder);
   }, [songs, sortOrder]);
 
   const { playlists, encodePlaylistUrlParam } = usePlaylists();
@@ -165,24 +172,24 @@ export default function SearchAndSongList({
       return;
     }
 
-    if (
-      previousSongMode === "original-songs" &&
-      currentSongMode !== "original-songs"
-    ) {
-      setSortOrder("desc");
+    const nextSortOrder = currentSongMode === "original-songs" ? "asc" : "desc";
+
+    if (currentSongMode === "") {
+      setSortOrder(nextSortOrder);
       return;
     }
 
-    if (currentSongMode !== "original-songs") {
-      return;
-    }
+    const filteredSongs = searchSongs(allSongs, currentSongMode);
+    const sortedModeSongs = sortSongsByBroadcastOrder(
+      filteredSongs,
+      nextSortOrder,
+    );
 
-    const originalModeSongs = searchSongs(allSongs, "original-songs");
-    setSortOrder("asc");
-    setSongs(originalModeSongs);
+    setSortOrder(nextSortOrder);
+    setSongs(sortedModeSongs);
 
-    if (originalModeSongs.length > 0) {
-      changeCurrentSong(originalModeSongs[0]);
+    if (sortedModeSongs.length > 0) {
+      changeCurrentSong(sortedModeSongs[0]);
     }
   }, [allSongs, changeCurrentSong, currentSongMode, searchSongs, setSongs]);
 

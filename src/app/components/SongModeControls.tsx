@@ -2,7 +2,7 @@
 
 import { Button, Menu, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { LuChevronDown } from "react-icons/lu";
+import { LuChevronDown, LuSparkles } from "react-icons/lu";
 import usePlaylists from "../hook/usePlaylists";
 import {
   getSongModeGroupLabels,
@@ -124,7 +124,10 @@ export default function SongModeControls({
             onClick={onSurprise}
             className={`${buttonBaseClassName} min-w-0 flex-1 bg-primary hover:bg-primary-600 dark:bg-primary-900 text-white shadow-black/20 dark:shadow-none ${textClassName}`}
           >
-            <span className="truncate">{t("randomOtherSong")}</span>
+            <>
+              <LuSparkles className="mr-1" />
+              <span className="truncate">{t("randomOtherSong")}</span>
+            </>
           </Button>
         </Tooltip>
 
