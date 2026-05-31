@@ -65,7 +65,8 @@ export default function SongModeControls({
         <Menu.Target>
           <Button
             aria-label={`${tSongMode("selectMode")}: ${getSongModeItemLabel(currentSongModeItem, tSongMode)}`}
-            className={`${buttonBaseClassName} w-full min-w-0 text-white shadow-gray-400/20 dark:shadow-none ${currentSongModeItem.buttonClassName} ${textClassName}`}
+            className={`${buttonBaseClassName} w-full min-w-0 shadow-gray-400/20 dark:shadow-none ${textClassName}`}
+            color={currentSongModeItem.color}
             leftSection={<CurrentSongModeIcon className="h-4 w-4" />}
             rightSection={<LuChevronDown className="h-4 w-4" />}
             justify="space-between"
