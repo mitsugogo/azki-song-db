@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/mitsugogo/azki-song-db/compare/v2.5.7...v2.6.0) (2026-05-31)
+
+
+### Features
+
+* イベント機能 ([ba54140](https://github.com/mitsugogo/azki-song-db/commit/ba54140f0b16e2ced21e5431c361c4f8407d46f9))
+* プレミア公開に対応 ([544366d](https://github.com/mitsugogo/azki-song-db/commit/544366d14df7b00b869ae83a273be839700009e2))
+
+
+### Bug Fixes
+
+* アイマスがhandle判定されてしまうバグを修正 ([35d6bef](https://github.com/mitsugogo/azki-song-db/commit/35d6bef2735f4199fbf56828b0c5886602a21de3))
+* コラボチャンネルがあと1枠ならそのまま表示するように調整（0期生全部でない問題） ([c9430b5](https://github.com/mitsugogo/azki-song-db/commit/c9430b52f3ea7cfb311148b56e6e10e360288ce8))
+
 ### [2.5.7](https://github.com/mitsugogo/azki-song-db/compare/v2.5.6...v2.5.7) (2026-05-28)
 
 ### [2.5.6](https://github.com/mitsugogo/azki-song-db/compare/v2.5.5...v2.5.6) (2026-05-19)
