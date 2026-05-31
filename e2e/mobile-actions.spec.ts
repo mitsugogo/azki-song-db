@@ -27,8 +27,7 @@ const getMobileActionButtons = (
       .filter({ hasText: /^Surprise me$/ })
       .first(),
     modeButton: mobileActionContainer
-      .locator("button")
-      .filter({ hasText: /^全曲$/ })
+      .getByRole("button", { name: /^モード選択: 全曲$/ })
       .first(),
     playlistButton: mobileActionContainer
       .locator("button")

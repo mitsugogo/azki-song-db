@@ -18,6 +18,18 @@ import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { getSongMode } from "./songModeMenu";
 
+const resolveTimeDisplayMode = (
+  liveBroadcastContent?: string | null,
+): "default" | "hidden" | "elapsed-only" => {
+  if (liveBroadcastContent === "upcoming") {
+    return "hidden";
+  }
+  if (liveBroadcastContent === "live") {
+    return "elapsed-only";
+  }
+  return "default";
+};
+
 type DesktopPlayerControls = {
   isReady: boolean;
   play: () => void;
@@ -130,6 +142,9 @@ export default function PlayerSection({
     return `${song.title}::${song.artist}`;
   }, []);
   const currentSongMode = getSongMode(searchTerm);
+  const timeDisplayMode = resolveTimeDisplayMode(
+    videoInfo?.snippet?.liveBroadcastContent,
+  );
 
   const hasNextInVideo = useMemo(() => {
     if (!currentSong) return false;
@@ -239,6 +254,7 @@ export default function PlayerSection({
             nextDisabled={!nextSong}
             formattedCurrentTime={controlBar.formattedCurrentTime}
             formattedDuration={controlBar.formattedDuration}
+            timeDisplayMode={timeDisplayMode}
             displaySongTitle={controlBar.displaySongTitle}
             displaySongArtist={controlBar.displaySongArtist}
             onOpenShareModal={() => setOpenShareModal(true)}

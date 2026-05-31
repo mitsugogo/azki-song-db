@@ -11,6 +11,8 @@ const DEFAULT_LINK_CLASS = "text-primary hover:underline dark:text-primary-300";
 const DEFAULT_TIMESTAMP_CLASS =
   "timestamp-link text-primary hover:underline dark:text-primary-300";
 
+const HANDLE_PREFIX_CHAR_PATTERN = /[\p{L}\p{N}_]/u;
+
 export type LinkifyTextOptions = {
   linkClassName?: string;
   includeLineBreaks?: boolean;
@@ -80,6 +82,12 @@ export const renderLinkedText = (
         nodes.push(match[2]);
       } else if (match[3]) {
         const handle = match[3]; // includes leading @
+        const previousChar = matchIndex > 0 ? line[matchIndex - 1] : "";
+        if (previousChar && HANDLE_PREFIX_CHAR_PATTERN.test(previousChar)) {
+          nodes.push(handle);
+          lastIndex = matchIndex + match[0].length;
+          continue;
+        }
         const url = `https://www.youtube.com/${handle}`;
         nodes.push(
           <a

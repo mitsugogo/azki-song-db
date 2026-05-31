@@ -2,7 +2,18 @@
 
 import { Link, useRouter } from "../i18n/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Burger, Skeleton, Tooltip } from "@mantine/core";
+import {
+  Badge,
+  Burger,
+  Button,
+  CopyButton,
+  Alert,
+  Notification,
+  Skeleton,
+  Text,
+  Tooltip,
+  Transition,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
@@ -12,8 +23,10 @@ import Footer from "./components/Footer";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import ThemeToggle from "./components/ThemeToggle";
 import YoutubeThumbnail from "./components/YoutubeThumbnail";
-import { siteConfig } from "./config/siteConfig";
+import { SONG_MODE_MENU_ITEMS } from "./components/songModeMenu";
+import { baseUrl, siteConfig } from "./config/siteConfig";
 import useAnniversaries from "./hook/useAnniversaries";
+import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
 import { buildWatchHref } from "./lib/watchUrl";
@@ -21,19 +34,42 @@ import { formatDate } from "./lib/formatDate";
 import {
   buildMilestoneSearchHref,
   computeNextIsoForAnniversary,
+  getFeaturedEvents,
   formatAnniversaryName,
   getDaysUntil,
   getFeaturedAnniversaries,
   getTodayTimelineMilestones,
+  isEventActive,
   isAnniversaryToday,
+  parseToJstDayStart,
 } from "./lib/highlights";
-import { LuArrowRight, LuSearch, LuSparkles } from "react-icons/lu";
+import {
+  LuArrowRight,
+  LuSearch,
+  LuSparkles,
+  LuCopy,
+  LuCopyCheck,
+} from "react-icons/lu";
+import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { BsGeoAlt } from "react-icons/bs";
 import { Song } from "./types/song";
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
+const ORIGINAL_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const COVER_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "cover-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const COLLABORATION_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "collaboration-songs") ??
+  SONG_MODE_MENU_ITEMS[0];
+const KARAOKE_SONG_MODE_ITEM =
+  SONG_MODE_MENU_ITEMS.find((item) => item.mode === "tag:歌枠") ??
+  SONG_MODE_MENU_ITEMS[0];
 
 function pickRecommendedSongs<T>(items: Song[], count: number) {
   if (items.length <= count) {
@@ -107,6 +143,8 @@ export default function ClientTop() {
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
+  const { items: eventItems, isLoading: isEventsLoading } = useEvents();
+  const [isShowOngoingEventsAlert, setOngoingEventsAlert] = useState(true);
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
   const t = useTranslations("Home");
@@ -115,6 +153,13 @@ export default function ClientTop() {
   const tAnniversaries = useTranslations("Anniversaries");
   const tSummary = useTranslations("Summary");
   const [searchValue, setSearchValue] = useState<string[]>([]);
+  const [copiedNotificationType, setCopiedNotificationType] = useState<
+    "original" | "cover" | "collaboration" | "karaoke"
+  >("original");
+  const [copiedNotificationVisible, setCopiedNotificationVisible] =
+    useState(false);
+  const [copiedNotificationSequence, setCopiedNotificationSequence] =
+    useState(0);
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -129,6 +174,20 @@ export default function ClientTop() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!copiedNotificationVisible) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setCopiedNotificationVisible(false);
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [copiedNotificationVisible, copiedNotificationSequence]);
+
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
     [allSongs],
@@ -142,6 +201,16 @@ export default function ClientTop() {
   const featuredAnniversaries = useMemo(
     () => getFeaturedAnniversaries(anniversaryItems),
     [anniversaryItems],
+  );
+
+  const featuredEvents = useMemo(
+    () => getFeaturedEvents(eventItems, 3),
+    [eventItems],
+  );
+
+  const ongoingEvents = useMemo(
+    () => eventItems.filter((item) => isEventActive(item)),
+    [eventItems],
   );
 
   const todayMilestones = useMemo(
@@ -170,11 +239,59 @@ export default function ClientTop() {
     return formatDate(date, locale);
   }, [songsFetchedAt]);
 
+  const originalSongsShareUrl = useMemo(
+    () => new URL("/watch?q=original-songs", baseUrl).toString(),
+    [],
+  );
+
+  const coverSongsShareUrl = useMemo(
+    () => new URL("/watch?q=cover-songs", baseUrl).toString(),
+    [],
+  );
+
+  const collaborationSongsShareUrl = useMemo(
+    () => new URL("/watch?q=collaboration-songs", baseUrl).toString(),
+    [],
+  );
+
+  const karaokeSongsShareUrl = useMemo(
+    () => new URL("/watch?q=tag:%E6%AD%8C%E6%9E%A0", baseUrl).toString(),
+    [],
+  );
+
   const handleSearch = () => {
     const query = searchValue.join("|").trim();
     startTransition(() => {
       router.push(query ? `/search?q=${encodeURIComponent(query)}` : `/search`);
     });
+  };
+
+  const formatEventRange = (startAt: string, endAt: string) => {
+    const startLabel = formatDate(startAt, locale);
+    if (!endAt) {
+      return startLabel;
+    }
+
+    const startDate = parseToJstDayStart(startAt);
+    const endDate = parseToJstDayStart(endAt);
+    if (!startDate || !endDate) {
+      return startLabel;
+    }
+
+    if (startDate.getTime() === endDate.getTime()) {
+      return startLabel;
+    }
+
+    const separator = locale === "ja" ? "〜" : " - ";
+    return `${startLabel}${separator}${formatDate(endAt, locale)}`;
+  };
+
+  const showCopiedNotification = (
+    type: "original" | "cover" | "collaboration" | "karaoke",
+  ) => {
+    setCopiedNotificationType(type);
+    setCopiedNotificationVisible(true);
+    setCopiedNotificationSequence((current) => current + 1);
   };
 
   return (
@@ -290,7 +407,230 @@ export default function ClientTop() {
                   </Link>
                 </Tooltip>
               </div>
+
+              <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
+
+              <div className="flex items-left justify-center gap-3">
+                <Text size="sm" color="dimmed">
+                  {/* 楽曲モードで再生 */}
+                  {t("songMode")}
+                </Text>
+              </div>
+
+              <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+                {/* オリジナル楽曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=original-songs"
+                    className={`min-w-0 flex-1`}
+                    leftSection={
+                      <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                    color="tan"
+                    variant="light"
+                  >
+                    {t("originalSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={originalSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
+                      >
+                        <Button
+                          className={`shrink-0`}
+                          color="tan"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("original");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* カバー楽曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=cover-songs"
+                    className={`min-w-0 flex-1`}
+                    color="gray"
+                    variant="light"
+                    leftSection={
+                      <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("coverSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={coverSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
+                      >
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("cover");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* ユニット・ゲスト参加曲 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=collaboration-songs"
+                    className={`min-w-0 flex-1`}
+                    color="gray"
+                    variant="light"
+                    leftSection={
+                      <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("collaborationSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={collaborationSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
+                      >
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("collaboration");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+
+                {/* 歌枠 */}
+                <Button.Group className="w-full">
+                  <Button
+                    component={Link}
+                    href="/watch?q=tag:歌枠"
+                    className={`min-w-0 flex-1`}
+                    color="gray"
+                    variant="light"
+                    leftSection={
+                      <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                    }
+                  >
+                    {t("karaokeSongs")}
+                  </Button>
+                  {/* link copy button */}
+                  <CopyButton value={karaokeSongsShareUrl}>
+                    {({ copied, copy }) => (
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
+                      >
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("karaoke");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </Button.Group>
+              </div>
             </div>
+
+            {/* 開催中のイベント */}
+            {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
+              <Notification
+                icon={<IoInformationSharp />}
+                title={t("eventOngoingTitle", {
+                  title: ongoingEvents[0].content,
+                })}
+                className="w-full text-left shadow-lg max-w-3xl mt-3"
+                color="pink"
+                withCloseButton
+                onClose={() => {
+                  setOngoingEventsAlert(false);
+                }}
+              >
+                <div className="space-y-2">
+                  {ongoingEvents[0].note ? (
+                    <Text size="sm" c="dimmed">
+                      {ongoingEvents[0].note}
+
+                      {ongoingEvents[0].url ? (
+                        <Link
+                          href={ongoingEvents[0].url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                        >
+                          <FaExternalLinkAlt className="text-[0.75rem]" />
+                          {t("linkLabel")}
+                        </Link>
+                      ) : null}
+                    </Text>
+                  ) : null}
+                </div>
+              </Notification>
+            )}
           </section>
 
           <section className="pb-10">
@@ -358,6 +698,140 @@ export default function ClientTop() {
                   ))}
             </div>
 
+            {featuredEvents.length > 0 && (
+              <div className="mt-16 space-y-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                    {t("eventsTitle")}
+                  </p>
+                  <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    {t("eventsTitle")}
+                  </h3>
+                </div>
+                <section className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
+                  <div className="mt-4 space-y-3">
+                    {isEventsLoading ? (
+                      Array.from({ length: 3 }).map((_, index) => (
+                        <div
+                          key={`event-skeleton-${index}`}
+                          className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          aria-hidden="true"
+                        >
+                          <Skeleton height={12} width="30%" radius="sm" />
+                          <Skeleton height={16} radius="sm" className="mt-2" />
+                          <Skeleton
+                            height={12}
+                            width="65%"
+                            radius="sm"
+                            className="mt-2"
+                          />
+                        </div>
+                      ))
+                    ) : featuredEvents.length > 0 ? (
+                      featuredEvents.map((event, index) => {
+                        const active = isEventActive(event);
+                        const daysUntilEvent = getDaysUntil(
+                          active
+                            ? event.end_at || event.start_at
+                            : event.start_at,
+                        );
+                        return (
+                          <div
+                            key={`${event.start_at}-${event.content}-${index}`}
+                            className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-1">
+                                  {active ? (
+                                    <>
+                                      <Badge
+                                        color="pink"
+                                        size="md"
+                                        radius="lg"
+                                        className="mr-1"
+                                      >
+                                        {t("eventOngoing")}
+                                      </Badge>
+                                      {daysUntilEvent !== null ? (
+                                        <Badge
+                                          color="pink"
+                                          size="md"
+                                          radius="lg"
+                                          variant="outline"
+                                        >
+                                          {tAnniversaries("daysUntil", {
+                                            days: daysUntilEvent,
+                                          })}
+                                        </Badge>
+                                      ) : null}
+                                    </>
+                                  ) : daysUntilEvent !== null ? (
+                                    <Badge
+                                      color="pink"
+                                      size="md"
+                                      radius="lg"
+                                      variant="outline"
+                                    >
+                                      {tAnniversaries("daysUntil", {
+                                        days: daysUntilEvent,
+                                      })}
+                                    </Badge>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Text size="xs" c="dimmed">
+                                    {event.place ? (
+                                      <>
+                                        <BsGeoAlt className="mr-1 inline" />
+                                        {event.place}
+                                        <span className="mx-1">|</span>
+                                      </>
+                                    ) : null}
+                                    {formatEventRange(
+                                      event.start_at,
+                                      event.end_at,
+                                    )}
+                                  </Text>
+                                </div>
+                                <p className="mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                  {event.content}
+                                </p>
+                                {event.note ? (
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    className="mt-1 whitespace-pre-line"
+                                  >
+                                    {event.note}
+                                  </Text>
+                                ) : null}
+                              </div>
+                              {event.url ? (
+                                <Link
+                                  href={event.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
+                                >
+                                  <FaExternalLinkAlt className="text-[0.65rem]" />
+                                  {t("linkLabel")}
+                                </Link>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                        {t("eventsEmpty")}
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            )}
+
             <div className="mt-16 space-y-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
@@ -421,21 +895,30 @@ export default function ClientTop() {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Text size="xs" c="dimmed">
+                                      {nextIso
+                                        ? formatDate(nextIso, locale)
+                                        : "-"}
+                                    </Text>
+                                    {daysUntil !== null ? (
+                                      <Badge
+                                        color="pink"
+                                        size="md"
+                                        radius="lg"
+                                        variant="outline"
+                                      >
+                                        {daysUntil === 0
+                                          ? tAnniversaries("featuredTodayTitle")
+                                          : tAnniversaries("daysUntil", {
+                                              days: daysUntil,
+                                            })}
+                                      </Badge>
+                                    ) : null}
+                                  </div>
+                                  <p className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                     {formatAnniversaryName(item, locale)}
                                   </p>
-                                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                    {nextIso
-                                      ? formatDate(nextIso, locale)
-                                      : "-"}
-                                  </p>
-                                  {daysUntil !== null ? (
-                                    <p className="mt-1 text-xs font-semibold text-primary dark:text-pink-200">
-                                      {daysUntil === 0
-                                        ? tAnniversaries("featuredTodayTitle")
-                                        : `${daysUntil}${locale === "ja" ? "日後" : " days"}`}
-                                    </p>
-                                  ) : null}
                                   {item.note ? (
                                     <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
                                       {item.note}
@@ -450,7 +933,7 @@ export default function ClientTop() {
                                     className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
                                   >
                                     <FaExternalLinkAlt className="text-[0.65rem]" />
-                                    URL
+                                    {t("linkLabel")}
                                   </Link>
                                 ) : null}
                               </div>
@@ -541,17 +1024,21 @@ export default function ClientTop() {
                                     key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
                                     className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
                                   >
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <Text size="xs" c="dimmed">
                                       {formatDate(milestone.date, locale)}
-                                    </p>
-                                    <div className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+                                    </Text>
+                                    <div className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                       {milestoneContent}
-                                      {milestone.note ? (
-                                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                                          {milestone.note}
-                                        </span>
-                                      ) : null}
                                     </div>
+                                    {milestone.note ? (
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        className="mt-1 whitespace-pre-line"
+                                      >
+                                        {milestone.note}
+                                      </Text>
+                                    ) : null}
 
                                     {/* 動画 */}
                                     {milestone?.song && (
@@ -698,6 +1185,36 @@ export default function ClientTop() {
       </div>
       <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
       <AnalyticsWrapper />
+
+      <Transition
+        mounted={copiedNotificationVisible}
+        transition="slide-left"
+        duration={220}
+        timingFunction="ease"
+      >
+        {(styles) => (
+          <div
+            className="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm"
+            style={styles}
+          >
+            <Notification
+              title={t("copied")}
+              color="green"
+              withCloseButton
+              closeButtonProps={{ "aria-label": t("close") }}
+              onClose={() => setCopiedNotificationVisible(false)}
+            >
+              {copiedNotificationType === "cover"
+                ? t("coverSongsLinkCopied")
+                : copiedNotificationType === "collaboration"
+                  ? t("collaborationSongsLinkCopied")
+                  : copiedNotificationType === "karaoke"
+                    ? t("karaokeSongsLinkCopied")
+                    : t("originalSongsLinkCopied")}
+            </Notification>
+          </div>
+        )}
+      </Transition>
     </div>
   );
 }

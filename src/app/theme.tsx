@@ -7,6 +7,20 @@ import { createTheme, Badge } from "@mantine/core";
 export const theme = createTheme({
   primaryColor: "pink",
   cursorType: "pointer",
+  colors: {
+    tan: [
+      "#faf7f2",
+      "#f4eee0",
+      "#e8dac0",
+      "#d8c199",
+      "#cba877",
+      "#bc8c53",
+      "#af7947",
+      "#91603d",
+      "#764f36",
+      "#60422e",
+    ],
+  },
   components: {
     Badge: {
       defaultProps: {

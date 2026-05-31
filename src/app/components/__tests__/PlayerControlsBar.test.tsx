@@ -287,6 +287,28 @@ describe("PlayerControlsBar", () => {
     expect(onSeekStart).toHaveBeenCalled();
   });
 
+  it("プレミア公開前は時間表示を出さない", () => {
+    const { queryByText } = renderComponent({
+      timeDisplayMode: "hidden",
+      formattedCurrentTime: "0:00",
+      formattedDuration: "1:40",
+    });
+
+    expect(queryByText("0:00")).toBeNull();
+    expect(queryByText("1:40")).toBeNull();
+  });
+
+  it("配信中は経過秒数だけ表示する", () => {
+    const { getByText, queryByText } = renderComponent({
+      timeDisplayMode: "elapsed-only",
+      formattedCurrentTime: "12:34",
+      formattedDuration: "--:--",
+    });
+
+    expect(getByText("12:34")).toBeTruthy();
+    expect(queryByText("--:--")).toBeNull();
+  });
+
   it("hover tooltip and highlight align (absolute time mode)", () => {
     const songsInVideo = [
       { ...baseSong, start: 10, title: "Song A" },

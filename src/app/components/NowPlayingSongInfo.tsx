@@ -27,10 +27,19 @@ import { getYoutubeVisibleHashtagBodies } from "../lib/hashtag";
 
 type DescriptionCollapsibleProps = {
   text: string;
-  viewCount?: string | number | null;
-  uploadDate?: string | null;
+  collapsedAudienceLabel?: string;
+  expandedAudienceLabel?: string;
+  metaDateLabel?: string | null;
   tags?: string[];
   locale: string;
+};
+
+type AudienceMetric = {
+  count: number | null;
+  collapsedLabel: string;
+  expandedLabel: string;
+  inlineLabel: string;
+  isCurrentViewers: boolean;
 };
 
 type MergedChannelInfo = {
@@ -53,8 +62,9 @@ type MergedChannelInfo = {
  */
 const DescriptionCollapsible = ({
   text,
-  viewCount,
-  uploadDate,
+  collapsedAudienceLabel,
+  expandedAudienceLabel,
+  metaDateLabel,
   tags,
   locale,
 }: DescriptionCollapsibleProps) => {
@@ -64,12 +74,9 @@ const DescriptionCollapsible = ({
   const lines = text.split(/\r\n|\n/);
   const isTruncatable = lines.length > 3;
   const collapsedText = lines.slice(0, 3).join("\n");
-  const formatedViewCount = formatViewCount(viewCount, locale, t);
-  const formattedUploadDate = isDateString(uploadDate)
-    ? formatDate(uploadDate || "", locale)
-    : uploadDate;
+  const formattedAudienceLabel = collapsedAudienceLabel ?? "";
   const hasMetaInfo = Boolean(
-    formatedViewCount || formattedUploadDate || (tags && tags.length > 0),
+    formattedAudienceLabel || metaDateLabel || (tags && tags.length > 0),
   );
 
   // Mantine hook: 現在のテキスト選択を取得
@@ -126,13 +133,6 @@ const DescriptionCollapsible = ({
     setExpanded((v) => !v);
   };
 
-  // uploadDateがnew Date()で有効な日付文字列かどうか
-  function isDateString(s: string | null | undefined) {
-    if (!s) return false;
-    const d = new Date(s);
-    return !isNaN(d.getTime());
-  }
-
   return (
     <div>
       <div
@@ -147,17 +147,15 @@ const DescriptionCollapsible = ({
           <div
             className={`font-semibold text-muted-foreground mr-2 mb-1 ${expanded ? "" : "line-clamp-1"}`}
           >
-            {formatedViewCount &&
+            {formattedAudienceLabel &&
               (expanded
-                ? t("views", {
-                    count: Number(viewCount ?? 0).toLocaleString(locale),
-                  })
-                : formatedViewCount)}
-            {formatedViewCount && formattedUploadDate && " ・ "}
-            {formattedUploadDate}
+                ? (expandedAudienceLabel ?? formattedAudienceLabel)
+                : formattedAudienceLabel)}
+            {formattedAudienceLabel && metaDateLabel && " ・ "}
+            {metaDateLabel}
             {tags && tags.length > 0 && (
               <>
-                {(formatedViewCount || formattedUploadDate) && (
+                {(formattedAudienceLabel || metaDateLabel) && (
                   <span className="mr-2"></span>
                 )}
                 {tags.map((tag) =>
@@ -437,6 +435,137 @@ function formatViewCount(
   return t("views", { count: Math.round(value).toLocaleString(locale) });
 }
 
+function formatCurrentViewerCount(
+  count: string | number | null | undefined,
+  locale: string,
+  t: (key: string, values?: any) => string,
+) {
+  if (count == null) return "";
+  const value = typeof count === "string" ? Number(count) : count;
+  if (!Number.isFinite(value)) return "";
+  if (locale === "ja") {
+    if (value < 10_000) {
+      return t("currentViewers", {
+        count: Math.round(value).toLocaleString(locale),
+      });
+    }
+    const man = Math.floor(value / 10_000);
+    return t("collapsedCurrentViewers", { count: man.toLocaleString(locale) });
+  }
+  return t("currentViewers", {
+    count: Math.round(value).toLocaleString(locale),
+  });
+}
+
+function isPremiereInProgress(
+  liveBroadcastContent: string | null | undefined,
+  scheduledStartTime: string | null | undefined,
+  actualStartTime: string | null | undefined,
+) {
+  return Boolean(
+    liveBroadcastContent === "live" && scheduledStartTime && actualStartTime,
+  );
+}
+
+function resolveAudienceMetric(
+  viewCount: string | number | null | undefined,
+  concurrentViewers: string | number | null | undefined,
+  liveBroadcastContent: string | null | undefined,
+  scheduledStartTime: string | null | undefined,
+  actualStartTime: string | null | undefined,
+  locale: string,
+  t: (key: string, values?: any) => string,
+): AudienceMetric {
+  if (liveBroadcastContent === "upcoming") {
+    return {
+      count: null,
+      collapsedLabel: "",
+      expandedLabel: "",
+      inlineLabel: "",
+      isCurrentViewers: false,
+    };
+  }
+
+  const parsedConcurrentViewers =
+    typeof concurrentViewers === "string"
+      ? Number(concurrentViewers)
+      : concurrentViewers;
+  const hasCurrentViewers = Number.isFinite(parsedConcurrentViewers);
+  const premiereInProgress = isPremiereInProgress(
+    liveBroadcastContent,
+    scheduledStartTime,
+    actualStartTime,
+  );
+
+  if (liveBroadcastContent === "live" && hasCurrentViewers) {
+    const count = Math.round(parsedConcurrentViewers as number);
+    return {
+      count,
+      collapsedLabel: formatCurrentViewerCount(count, locale, t),
+      expandedLabel: t("currentViewers", {
+        count: count.toLocaleString(locale),
+      }),
+      inlineLabel: count.toLocaleString(locale),
+      isCurrentViewers: true,
+    };
+  }
+
+  if (premiereInProgress) {
+    return {
+      count: null,
+      collapsedLabel: t("premieringNow"),
+      expandedLabel: t("premieringNow"),
+      inlineLabel: t("premieringNow"),
+      isCurrentViewers: false,
+    };
+  }
+
+  const parsedViewCount =
+    typeof viewCount === "string" ? Number(viewCount) : viewCount;
+  const hasViewCount = Number.isFinite(parsedViewCount);
+
+  if (!hasViewCount) {
+    return {
+      count: null,
+      collapsedLabel: "",
+      expandedLabel: "",
+      inlineLabel: "",
+      isCurrentViewers: false,
+    };
+  }
+
+  const count = Math.round(parsedViewCount as number);
+  return {
+    count,
+    collapsedLabel: formatViewCount(count, locale, t),
+    expandedLabel: t("views", {
+      count: count.toLocaleString(locale),
+    }),
+    inlineLabel: count.toLocaleString(locale),
+    isCurrentViewers: false,
+  };
+}
+
+function resolveMetaDateLabel(
+  videoInfo: YouTubeApiVideoResult | null | undefined,
+  locale: string,
+  t: (key: string, values?: any) => string,
+) {
+  const liveBroadcastContent = videoInfo?.snippet?.liveBroadcastContent;
+  const scheduledStartTime =
+    videoInfo?.liveStreamingDetails?.scheduledStartTime;
+
+  if (liveBroadcastContent === "upcoming" && scheduledStartTime) {
+    return t("premieresAt", {
+      date: formatDate(scheduledStartTime, locale),
+    });
+  }
+
+  const resolvedDate = resolveVideoMetaDate(videoInfo);
+  if (!resolvedDate) return null;
+  return formatDate(resolvedDate, locale);
+}
+
 interface NowPlayingSongInfoProps {
   currentSong: Song | null;
   allSongs: Song[];
@@ -626,6 +755,33 @@ const NowPlayingSongInfo = ({
     [resolvedVideoTitle, resolvedDescription],
   );
 
+  const audienceMetric = useMemo(
+    () =>
+      resolveAudienceMetric(
+        videoInfo?.statistics?.viewCount,
+        videoInfo?.liveStreamingDetails?.concurrentViewers,
+        videoInfo?.snippet?.liveBroadcastContent,
+        videoInfo?.liveStreamingDetails?.scheduledStartTime,
+        videoInfo?.liveStreamingDetails?.actualStartTime,
+        locale,
+        t,
+      ),
+    [
+      locale,
+      t,
+      videoInfo?.liveStreamingDetails?.actualStartTime,
+      videoInfo?.liveStreamingDetails?.concurrentViewers,
+      videoInfo?.liveStreamingDetails?.scheduledStartTime,
+      videoInfo?.snippet?.liveBroadcastContent,
+      videoInfo?.statistics?.viewCount,
+    ],
+  );
+
+  const metaDateLabel = useMemo(
+    () => resolveMetaDateLabel(videoInfo, locale, t),
+    [locale, t, videoInfo],
+  );
+
   return (
     <>
       <div className="flex mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
@@ -690,6 +846,7 @@ const NowPlayingSongInfo = ({
                               : [];
                           const remaining =
                             (dedupedChannels?.length ?? 0) - shown.length;
+                          const previewAvatarCount = Math.min(4, remaining);
 
                           // この組み合わせにユニット名があるか
                           const unitName = getCollabUnitName(
@@ -747,8 +904,7 @@ const NowPlayingSongInfo = ({
                                         {dedupedChannels
                                           .slice(
                                             shown.length,
-                                            shown.length +
-                                              Math.min(3, remaining),
+                                            shown.length + previewAvatarCount,
                                           )
                                           .map((ch) => (
                                             <Tooltip
@@ -782,14 +938,14 @@ const NowPlayingSongInfo = ({
                                               />
                                             </Tooltip>
                                           ))}
-                                        {remaining > 3 && (
+                                        {remaining > previewAvatarCount && (
                                           <Avatar
                                             radius="xl"
                                             size={28}
                                             color="gray"
                                             top={4}
                                           >
-                                            +{remaining - 3}
+                                            +{remaining - previewAvatarCount}
                                           </Avatar>
                                         )}
                                       </AvatarGroup>
@@ -846,14 +1002,18 @@ const NowPlayingSongInfo = ({
                           withArrow
                         >
                           <div className="cursor-pointer">
-                            {videoInfo.statistics?.viewCount != null && (
-                              <div className="text-xs text-muted-foreground flex items-center truncate">
-                                <FaPlay className="inline mr-1" />
-                                {Number(
-                                  videoInfo.statistics?.viewCount ?? 0,
-                                ).toLocaleString()}
-                              </div>
-                            )}
+                            {audienceMetric.inlineLabel &&
+                              videoInfo?.snippet?.liveBroadcastContent !==
+                                "upcoming" && (
+                                <div className="text-xs text-muted-foreground flex items-center truncate">
+                                  {audienceMetric.isCurrentViewers ? (
+                                    <FaUsers className="inline mr-1" />
+                                  ) : (
+                                    <FaPlay className="inline mr-1" />
+                                  )}
+                                  {audienceMetric.inlineLabel}
+                                </div>
+                              )}
 
                             {videoInfo.statistics?.likeCount != null && (
                               <div className="text-xs text-muted-foreground flex items-center truncate">
@@ -888,8 +1048,9 @@ const NowPlayingSongInfo = ({
                 >
                   <DescriptionCollapsible
                     text={videoInfo.snippet.localized.description}
-                    viewCount={videoInfo.statistics?.viewCount}
-                    uploadDate={resolveVideoMetaDate(videoInfo)}
+                    collapsedAudienceLabel={audienceMetric.collapsedLabel}
+                    expandedAudienceLabel={audienceMetric.expandedLabel}
+                    metaDateLabel={metaDateLabel}
                     tags={displayTags}
                     locale={locale}
                   />

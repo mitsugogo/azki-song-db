@@ -175,7 +175,7 @@ test.describe("Player Control Bar", () => {
 
     // 「オリ曲」モードに切り替えて /watch 内で絞り込む
     const modeButton = page
-      .getByRole("button", { name: /全曲|オリ曲/ })
+      .getByRole("button", { name: /^モード選択: 全曲$/ })
       .first();
     await modeButton.click();
     await page.getByRole("menuitem", { name: "オリ曲" }).click();

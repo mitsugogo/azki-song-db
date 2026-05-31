@@ -8,6 +8,19 @@ type FetchVideoOutcome = {
   notFound: boolean;
 };
 
+const DEFAULT_CACHE_CONTROL =
+  "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300";
+const DYNAMIC_CACHE_CONTROL =
+  "public, max-age=0, must-revalidate, s-maxage=30, stale-while-revalidate=5";
+
+function resolveCacheControl(result: YouTubeApiVideoResult) {
+  const liveBroadcastContent = result.snippet?.liveBroadcastContent;
+  if (liveBroadcastContent === "upcoming" || liveBroadcastContent === "live") {
+    return DYNAMIC_CACHE_CONTROL;
+  }
+  return DEFAULT_CACHE_CONTROL;
+}
+
 const fetchFromYouTubeDataApi = async (
   videoId: string,
   hl: string,
@@ -76,8 +89,7 @@ export async function GET(
   if (result.result) {
     return NextResponse.json(result.result, {
       headers: {
-        "Cache-Control":
-          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+        "Cache-Control": resolveCacheControl(result.result),
         "Vercel-Cache-Tag": buildVercelCacheTagHeader([
           cacheTags.ytVideo,
           `yt:video:${video_id}`,

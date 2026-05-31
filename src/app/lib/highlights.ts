@@ -1,4 +1,5 @@
 import { AnniversaryItem } from "../types/anniversaryItem";
+import { EventItem } from "../types/eventItem";
 import { Song } from "../types/song";
 
 const dayInMs = 24 * 60 * 60 * 1000;
@@ -442,4 +443,89 @@ export const getTodayTimelineMilestones = (
       toJstMonthDayKey(milestone.date) ===
       toJstMonthDayKey(nowArg ?? new Date()),
   );
+};
+
+const resolveEventStart = (item: EventItem) =>
+  parseToJstDayStart(item.start_at);
+
+const resolveEventEnd = (item: EventItem) =>
+  parseToJstDayStart(item.end_at || item.start_at);
+
+const getTodayJstDayStart = (nowMsArg?: number) => {
+  const nowMs = typeof nowMsArg === "number" ? nowMsArg : Date.now();
+  const jstNowMs = nowMs + jstOffsetMs;
+  const jstNow = new Date(jstNowMs);
+  const year = jstNow.getUTCFullYear();
+  const month = jstNow.getUTCMonth();
+  const day = jstNow.getUTCDate();
+  return new Date(Date.UTC(year, month, day, 0, 0, 0) - jstOffsetMs);
+};
+
+export const isEventActive = (item: EventItem, nowMsArg?: number) => {
+  const start = resolveEventStart(item);
+  const end = resolveEventEnd(item);
+  const today = getTodayJstDayStart(nowMsArg);
+
+  if (!start || !end) {
+    return false;
+  }
+
+  return start.getTime() <= today.getTime() && today.getTime() <= end.getTime();
+};
+
+export const getFeaturedEvents = (
+  items: EventItem[],
+  limit: number = 3,
+  nowMsArg?: number,
+) => {
+  const today = getTodayJstDayStart(nowMsArg).getTime();
+
+  return items
+    .flatMap((item) => {
+      const start = resolveEventStart(item);
+      const end = resolveEventEnd(item);
+      if (!start || !end || !item.content) {
+        return [];
+      }
+
+      const startMs = start.getTime();
+      const endMs = end.getTime();
+      const active = startMs <= today && today <= endMs;
+      const upcoming = startMs > today;
+
+      if (!active && !upcoming) {
+        return [];
+      }
+
+      return [
+        {
+          ...item,
+          start_at: start.toISOString(),
+          end_at: end.toISOString(),
+          is_active: active,
+        },
+      ];
+    })
+    .sort((a, b) => {
+      if (a.is_active !== b.is_active) {
+        return a.is_active ? -1 : 1;
+      }
+
+      if (a.is_active && b.is_active) {
+        const endDiff =
+          new Date(a.end_at).getTime() - new Date(b.end_at).getTime();
+        if (endDiff !== 0) {
+          return endDiff;
+        }
+      }
+
+      const startDiff =
+        new Date(a.start_at).getTime() - new Date(b.start_at).getTime();
+      if (startDiff !== 0) {
+        return startDiff;
+      }
+
+      return a.content.localeCompare(b.content);
+    })
+    .slice(0, limit);
 };

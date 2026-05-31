@@ -26,3 +26,7 @@ export function getCachedChannels() {
 export function getCachedMilestones() {
   return readCachedArray("milestones.json");
 }
+
+export function getCachedEvents() {
+  return readCachedArray("events.json");
+}

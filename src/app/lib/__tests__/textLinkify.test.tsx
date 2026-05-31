@@ -126,4 +126,14 @@ describe("textLinkify - ハッシュタグ検出", () => {
     );
     expect(container.textContent).toContain("】Glitter of Love");
   });
+
+  it("単語中の@はYouTubeハンドルとしてリンク化しない", () => {
+    const input = "THE IDOLM@STAR CINDERELLA GIRLS!!";
+    const nodes = renderLinkedText(input, { hashtagPlatform: "youtube" });
+    const { container } = render(<>{nodes}</>);
+
+    expect(screen.queryByText("@STAR")).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
+    expect(container).toHaveTextContent(input);
+  });
 });
