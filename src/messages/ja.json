@@ -168,7 +168,7 @@
       "randomPlay": "ランダム再生"
     },
     "surpriseMe": "Surprise me",
-    "songMode": "楽曲モードを指定して再生",
+    "songMode": "または、楽曲モードを指定して再生",
     "originalSongs": "オリジナル楽曲",
     "coverSongs": "カバー楽曲",
     "collaborationSongs": "ユニット・ゲスト参加曲",
@@ -179,6 +179,7 @@
     "coverSongsLinkCopied": "カバー楽曲モードのリンクをクリップボードにコピーしました",
     "collaborationSongsLinkCopied": "ユニット・ゲスト参加曲モードのリンクをクリップボードにコピーしました",
     "karaokeSongsLinkCopied": "歌枠モードのリンクをクリップボードにコピーしました",
+    "shareLinkTooltip": "布教用のリンクをコピー",
     "recommendedLabel": "RECOMMENDED",
     "recommendedTitle": "おすすめ楽曲",
     "anniversariesTitle": "記念日",

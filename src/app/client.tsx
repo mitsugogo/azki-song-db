@@ -50,8 +50,6 @@ import { Song } from "./types/song";
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
-const SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME =
-  "px-3 py-1 h-9 cursor-pointer text-white rounded transition shadow-md shadow-gray-400/20 dark:shadow-none ring-0 focus:ring-0";
 const ORIGINAL_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
   SONG_MODE_MENU_ITEMS[0];
@@ -385,31 +383,41 @@ export default function ClientTop() {
                   <Button
                     component={Link}
                     href="/watch?q=original-songs"
-                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME} ${ORIGINAL_SONG_MODE_ITEM.buttonClassName}`}
+                    className={`min-w-0 flex-1`}
                     leftSection={
                       <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
                     }
+                    color="tan"
+                    variant="light"
                   >
                     {t("originalSongs")}
                   </Button>
                   {/* link copy button */}
                   <CopyButton value={originalSongsShareUrl}>
                     {({ copied, copy }) => (
-                      <Button
-                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME} ${ORIGINAL_SONG_MODE_ITEM.buttonClassName}`}
-                        onClick={() => {
-                          copy();
-                          showCopiedNotification("original");
-                        }}
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
                       >
-                        {copied ? (
-                          <>
-                            <LuCopyCheck className="mr-1 inline" />
-                          </>
-                        ) : (
-                          <LuCopy className="mr-1 inline" />
-                        )}
-                      </Button>
+                        <Button
+                          className={`shrink-0`}
+                          color="tan"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("original");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
                     )}
                   </CopyButton>
                 </Button.Group>
@@ -419,8 +427,9 @@ export default function ClientTop() {
                   <Button
                     component={Link}
                     href="/watch?q=cover-songs"
-                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    className={`min-w-0 flex-1`}
                     color="gray"
+                    variant="light"
                     leftSection={
                       <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
                     }
@@ -430,22 +439,29 @@ export default function ClientTop() {
                   {/* link copy button */}
                   <CopyButton value={coverSongsShareUrl}>
                     {({ copied, copy }) => (
-                      <Button
-                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
-                        color="gray"
-                        onClick={() => {
-                          copy();
-                          showCopiedNotification("cover");
-                        }}
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
                       >
-                        {copied ? (
-                          <>
-                            <LuCopyCheck className="mr-1 inline" />
-                          </>
-                        ) : (
-                          <LuCopy className="mr-1 inline" />
-                        )}
-                      </Button>
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("cover");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
                     )}
                   </CopyButton>
                 </Button.Group>
@@ -455,8 +471,9 @@ export default function ClientTop() {
                   <Button
                     component={Link}
                     href="/watch?q=collaboration-songs"
-                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    className={`min-w-0 flex-1`}
                     color="gray"
+                    variant="light"
                     leftSection={
                       <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
                     }
@@ -466,22 +483,29 @@ export default function ClientTop() {
                   {/* link copy button */}
                   <CopyButton value={collaborationSongsShareUrl}>
                     {({ copied, copy }) => (
-                      <Button
-                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
-                        color="gray"
-                        onClick={() => {
-                          copy();
-                          showCopiedNotification("collaboration");
-                        }}
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
                       >
-                        {copied ? (
-                          <>
-                            <LuCopyCheck className="mr-1 inline" />
-                          </>
-                        ) : (
-                          <LuCopy className="mr-1 inline" />
-                        )}
-                      </Button>
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("collaboration");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
                     )}
                   </CopyButton>
                 </Button.Group>
@@ -491,8 +515,9 @@ export default function ClientTop() {
                   <Button
                     component={Link}
                     href="/watch?q=tag:歌枠"
-                    className={`min-w-0 flex-1 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
+                    className={`min-w-0 flex-1`}
                     color="gray"
+                    variant="light"
                     leftSection={
                       <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
                     }
@@ -502,22 +527,29 @@ export default function ClientTop() {
                   {/* link copy button */}
                   <CopyButton value={karaokeSongsShareUrl}>
                     {({ copied, copy }) => (
-                      <Button
-                        className={`shrink-0 ${SONG_MODE_LINK_BUTTON_BASE_CLASS_NAME}`}
-                        color="gray"
-                        onClick={() => {
-                          copy();
-                          showCopiedNotification("karaoke");
-                        }}
+                      <Tooltip
+                        withArrow
+                        arrowSize={8}
+                        label={t("shareLinkTooltip")}
                       >
-                        {copied ? (
-                          <>
-                            <LuCopyCheck className="mr-1 inline" />
-                          </>
-                        ) : (
-                          <LuCopy className="mr-1 inline" />
-                        )}
-                      </Button>
+                        <Button
+                          className={`shrink-0`}
+                          color="gray"
+                          variant="light"
+                          onClick={() => {
+                            copy();
+                            showCopiedNotification("karaoke");
+                          }}
+                        >
+                          {copied ? (
+                            <>
+                              <LuCopyCheck className="mr-1 inline" />
+                            </>
+                          ) : (
+                            <LuCopy className="mr-1 inline" />
+                          )}
+                        </Button>
+                      </Tooltip>
                     )}
                   </CopyButton>
                 </Button.Group>
