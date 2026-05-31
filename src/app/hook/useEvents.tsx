@@ -60,6 +60,7 @@ const useEvents = () => {
             start_at: item?.start_at || "",
             end_at: item?.end_at || "",
             content: item?.content || "",
+            place: item?.place || "",
             note: item?.note || "",
             url: item?.url || "",
           }))

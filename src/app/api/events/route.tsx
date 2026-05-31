@@ -10,6 +10,8 @@ type HeaderKey =
   | "end"
   | "content"
   | "content_en"
+  | "place"
+  | "place_en"
   | "note"
   | "note_en"
   | "url";
@@ -29,6 +31,11 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
   { key: "start", aliases: ["start", "startdate", "開始", "開始日"] },
   { key: "end", aliases: ["end", "enddate", "終了", "終了日"] },
   { key: "content", aliases: ["内容", "content"] },
+  { key: "place", aliases: ["場所", "place"] },
+  {
+    key: "place_en",
+    aliases: ["場所en", "場所_en", "placeen", "place(en)", "place_en"],
+  },
   {
     key: "content_en",
     aliases: ["内容en", "内容_en", "contenten", "content(en)", "content_en"],
@@ -103,7 +110,7 @@ export async function GET(request: Request) {
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: ["events!A:H"],
+      ranges: ["events!A:J"],
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -119,6 +126,8 @@ export async function GET(request: Request) {
       end: -1,
       content: -1,
       content_en: -1,
+      place: -1,
+      place_en: -1,
       note: -1,
       note_en: -1,
       url: -1,
@@ -177,10 +186,13 @@ export async function GET(request: Request) {
 
       const content = getString("content");
       const contentEn = getString("content_en");
+      const place = getString("place");
+      const placeEn = getString("place_en");
       const note = getString("note");
       const noteEn = getString("note_en");
       const localizedContent =
         locale === "en" && contentEn ? contentEn : content;
+      const localizedPlace = locale === "en" && placeEn ? placeEn : place;
       const localizedNote = locale === "en" && noteEn ? noteEn : note;
       const url = getLink("url");
 
@@ -192,6 +204,7 @@ export async function GET(request: Request) {
         start_at: startAt,
         end_at: endAt,
         content: localizedContent,
+        place: localizedPlace,
         note: localizedNote,
         url,
       });

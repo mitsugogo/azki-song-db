@@ -53,6 +53,7 @@ import {
 import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { BsGeoAlt } from "react-icons/bs";
 import { Song } from "./types/song";
 
 const RECOMMENDED_SONG_COUNT = 20;
@@ -599,7 +600,9 @@ export default function ClientTop() {
             {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
               <Notification
                 icon={<IoInformationSharp />}
-                title={t("eventOngoing") + ": " + ongoingEvents[0].content}
+                title={t("eventOngoingTitle", {
+                  title: ongoingEvents[0].content,
+                })}
                 className="w-full text-left shadow-lg max-w-3xl mt-3"
                 color="pink"
                 withCloseButton
@@ -620,7 +623,7 @@ export default function ClientTop() {
                           className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
                         >
                           <FaExternalLinkAlt className="text-[0.75rem]" />
-                          URL
+                          {t("linkLabel")}
                         </Link>
                       ) : null}
                     </Text>
@@ -699,7 +702,7 @@ export default function ClientTop() {
               <div className="mt-16 space-y-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    Events
+                    {t("eventsTitle")}
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                     {t("eventsTitle")}
@@ -778,6 +781,13 @@ export default function ClientTop() {
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <Text size="xs" c="dimmed">
+                                    {event.place ? (
+                                      <>
+                                        <BsGeoAlt className="mr-1 inline" />
+                                        {event.place}
+                                        <span className="mx-1">|</span>
+                                      </>
+                                    ) : null}
                                     {formatEventRange(
                                       event.start_at,
                                       event.end_at,
@@ -805,7 +815,7 @@ export default function ClientTop() {
                                   className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
                                 >
                                   <FaExternalLinkAlt className="text-[0.65rem]" />
-                                  URL
+                                  {t("linkLabel")}
                                 </Link>
                               ) : null}
                             </div>
@@ -923,7 +933,7 @@ export default function ClientTop() {
                                     className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 px-3 py-1 text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100"
                                   >
                                     <FaExternalLinkAlt className="text-[0.65rem]" />
-                                    URL
+                                    {t("linkLabel")}
                                   </Link>
                                 ) : null}
                               </div>
