@@ -64,7 +64,7 @@ test.describe("Song mode transition", () => {
 
   test("カバー曲モードに切り替えても全曲へ戻らない", async ({ page }) => {
     const modeButton = page
-      .getByRole("button", { name: /全曲|カバー曲/ })
+      .getByRole("button", { name: /^モード選択: 全曲$/ })
       .first();
     await expect(modeButton).toBeVisible();
 
