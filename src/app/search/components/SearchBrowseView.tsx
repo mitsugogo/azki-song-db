@@ -7,6 +7,7 @@ import {
   FaUsers,
 } from "react-icons/fa6";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
+import { pageClasses } from "../../theme";
 import { Song } from "../../types/song";
 import FilterModeGrid from "./FilterModeGrid";
 import SearchBreadcrumb from "./SearchBreadcrumb";
@@ -64,13 +65,13 @@ const SearchBrowseView = ({
   ].includes(filterMode);
 
   return (
-    <div className="grow overflow-auto pb-24 lg:p-6 lg:pb-8">
+    <div className="grow overflow-auto px-4 py-5 pb-24 sm:px-6 lg:p-6 lg:pb-8">
       <SearchBreadcrumb />
 
       <div>
-        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
-        <div className="p-3">
-          <p className="text-sm text-gray-600 dark:text-light-gray-400">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <div>
+          <p className={pageClasses.description}>
             {t("summary", {
               countSongs: allSongs.length.toLocaleString(),
               countVideos: Array.from(new Set(allSongs.map((s) => s.video_id)))
@@ -88,7 +89,7 @@ const SearchBrowseView = ({
         placeholder={tHeader("searchPlaceholder")}
       />
 
-      <div className="px-3 mb-6">
+      <div className="mb-6">
         <div className="flex flex-wrap gap-2">
           <Button
             variant={filterMode === "categories" ? "filled" : "light"}
@@ -188,7 +189,7 @@ const SearchBrowseView = ({
       </div>
 
       {filterModeData.filterMode === "categories" ? (
-        <div className="p-3">
+        <div>
           {categorySongs.map((category) => (
             <section key={category.value} className="mb-8">
               <div className="mb-4 flex items-center justify-between">

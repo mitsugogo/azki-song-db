@@ -15,6 +15,7 @@ import historyHelper from "../lib/history";
 import { buildViewMilestoneInfo } from "../lib/viewMilestone";
 import { StatisticsItem } from "../types/statisticsItem";
 import { getTabsConfig } from "./tabsConfig";
+import { pageClasses } from "../theme";
 
 export default function StatisticsPage() {
   const t = useTranslations("Statistics");
@@ -267,10 +268,10 @@ export default function StatisticsPage() {
 
   return (
     <div className="grow">
-      <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
+      <h1 className={pageClasses.heading}>{t("title")}</h1>
 
       <Tabs value={activeTab} onChange={handleTabChange} variant="default">
-        <div className="md:hidden px-3 pb-2">
+        <div className="pb-2 md:hidden">
           <Select
             aria-label={t("selectTabAriaLabel")}
             value={activeTab}

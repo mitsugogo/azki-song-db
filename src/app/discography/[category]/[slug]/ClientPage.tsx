@@ -22,6 +22,7 @@ import ViewStat from "./viewStat";
 import { getCollabUnitName } from "@/app/config/collabUnits";
 import DiscographyBreadcrumbs from "../../components/DiscographyBreadcrumbs";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
+import { pageClasses } from "@/app/theme";
 
 export default function ClientPage({
   category,
@@ -38,7 +39,7 @@ export default function ClientPage({
 
   if (isLoading) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <LoadingOverlay visible={true} />
       </div>
     );
@@ -54,7 +55,7 @@ export default function ClientPage({
 
   if (!matched || matched.length === 0) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
         <p className="text-sm text-gray-600">{t("notFoundDescription")}</p>
       </div>
@@ -73,7 +74,7 @@ export default function ClientPage({
 
   if (!song) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <h1 className="text-2xl font-bold">楽曲が見つかりません</h1>
       </div>
     );
@@ -112,7 +113,7 @@ export default function ClientPage({
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="p-6 w-full mx-auto h-full overflow-y-auto">
+    <div className={`${pageClasses.shell} h-full w-full mx-auto`}>
       <DiscographyBreadcrumbs
         items={[
           {

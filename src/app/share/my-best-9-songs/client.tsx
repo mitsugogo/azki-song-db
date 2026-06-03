@@ -31,7 +31,7 @@ import {
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import useSongs from "../../hook/useSongs";
 import { HiChevronRight, HiHome, HiSearch } from "react-icons/hi";
-import { breadcrumbClasses } from "@/app/theme";
+import { breadcrumbClasses, pageClasses } from "@/app/theme";
 import { Link, getPathname } from "@/i18n/navigation";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { FaPlay } from "react-icons/fa6";
@@ -468,7 +468,7 @@ export default function MyBestNineSongsPage() {
   };
 
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -484,18 +484,14 @@ export default function MyBestNineSongsPage() {
       </Breadcrumbs>
 
       <div>
-        <h1 className="font-extrabold text-2xl p-3">
-          {t("myBest9.pageTitle")}
-        </h1>
-        <div className="p-3">
-          <p className="text-sm text-gray-600 dark:text-light-gray-400">
-            {t("myBest9.lead")}
-          </p>
+        <h1 className={pageClasses.heading}>{t("myBest9.pageTitle")}</h1>
+        <div>
+          <p className={pageClasses.description}>{t("myBest9.lead")}</p>
         </div>
       </div>
 
       {/* メインコンテンツ */}
-      <div className="px-3 pb-4">
+      <div className="pb-4">
         <Grid gap="lg">
           {/* 左側：入力フォーム */}
           <Grid.Col span={{ base: 12, md: 4 }}>

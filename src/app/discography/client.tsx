@@ -6,7 +6,7 @@ import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { useDiscographyData } from "./hooks/useDiscographyData";
@@ -144,7 +144,7 @@ export default function DiscographyClient({
 
   return (
     <>
-      <div className="grow lg:p-6 overflow-auto">
+      <div className={pageClasses.shell}>
         <Breadcrumbs
           aria-label="Breadcrumb"
           className={breadcrumbClasses.root}
@@ -158,8 +158,8 @@ export default function DiscographyClient({
           </Link>
         </Breadcrumbs>
 
-        <h1 className="font-extrabold text-2xl p-3 pl-0 mb-2">{t("title")}</h1>
-        <p className="mb-6 text-sm text-muted-foreground">{t("description")}</p>
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <p className={pageClasses.description}>{t("description")}</p>
 
         <DiscographyControls
           groupByAlbum={groupByAlbum}

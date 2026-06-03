@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Breadcrumbs, Button } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../../theme";
+import { breadcrumbClasses, pageClasses } from "../../theme";
 import YearSummaryClient from "./YearSummaryClient";
 import { useTranslations } from "next-intl";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
@@ -52,32 +52,27 @@ export default function SummaryYearClient(props: {
   }, []);
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="grow p-2 lg:p-6 pb-6 overflow-auto"
-    >
-      <div className="mb-4">
-        <Breadcrumbs
-          aria-label="Breadcrumb"
-          className={breadcrumbClasses.root}
-          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+    <div ref={scrollContainerRef} className={pageClasses.shell}>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <FaHome className="inline mr-1" /> {t("homeLabel")}
+        </Link>
+        <Link href="/summary" className={breadcrumbClasses.link}>
+          {t("page.title")}
+        </Link>
+        <Link
+          href={`/summary/${rawYearParam}`}
+          className={breadcrumbClasses.link}
         >
-          <Link href="/" className={breadcrumbClasses.link}>
-            <FaHome className="inline mr-1" /> {t("homeLabel")}
-          </Link>
-          <Link href="/summary" className={breadcrumbClasses.link}>
-            {t("page.title")}
-          </Link>
-          <Link
-            href={`/summary/${rawYearParam}`}
-            className={breadcrumbClasses.link}
-          >
-            {displayYearServer
-              ? `${displayYearServer}${t("yearSuffix")}`
-              : t("page.title")}
-          </Link>
-        </Breadcrumbs>
-      </div>
+          {displayYearServer
+            ? `${displayYearServer}${t("yearSuffix")}`
+            : t("page.title")}
+        </Link>
+      </Breadcrumbs>
 
       <div ref={stickyTriggerRef} className="h-px w-full" aria-hidden="true" />
 
@@ -124,7 +119,7 @@ export default function SummaryYearClient(props: {
         </div>
 
         <div className="flex items-center justify-between">
-          <h1 className="font-extrabold text-2xl">
+          <h1 className={pageClasses.heading}>
             {displayYearServer
               ? `${displayYearServer}${t("yearSuffix")}`
               : t("page.title")}

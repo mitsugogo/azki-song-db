@@ -3,7 +3,7 @@
 import { Breadcrumbs } from "@mantine/core";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
-import { breadcrumbClasses } from "@/app/theme";
+import { breadcrumbClasses, pageClasses } from "@/app/theme";
 import { Header } from "@/app/components/Header";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
@@ -30,7 +30,7 @@ function ShareIndexContent() {
   const dm = useTranslations("DrawerMenu");
 
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -42,14 +42,12 @@ function ShareIndexContent() {
         <span className={breadcrumbClasses.link}>{t("index.title")}</span>
       </Breadcrumbs>
 
-      <div className="p-3">
-        <h1 className="font-extrabold text-2xl mb-1">{t("index.title")}</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {t("index.description")}
-        </p>
+      <div>
+        <h1 className={pageClasses.heading}>{t("index.title")}</h1>
+        <p className={pageClasses.description}>{t("index.description")}</p>
       </div>
 
-      <div className="px-3 pb-6">
+      <div className="pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
           {(() => {
             const features = [
