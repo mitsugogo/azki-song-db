@@ -22,6 +22,7 @@ export type SongCountOverviewProps = {
   countUnit: string;
   showMilestoneHighlights?: boolean;
   showTopTile?: boolean;
+  className?: string;
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -29,6 +30,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 function toDisplayedMilestoneDate(date: Date): Date {
   // 集計日ベースの値を表示用に1日前へ補正する
   return new Date(date.getTime() - DAY_MS);
+}
+
+function toDisplayedEstimateDate(date: Date): Date {
+  // 見込み日は予測された到達日そのものを表示する
+  return date;
 }
 
 type MilestoneHighlight = {
@@ -93,6 +99,7 @@ export default function SongCountOverview({
   countUnit,
   showMilestoneHighlights = false,
   showTopTile = true,
+  className = "pt-3 lg:pt-4",
 }: SongCountOverviewProps) {
   const t = useTranslations("Statistics.overview");
   const locale = useLocale();
@@ -193,7 +200,7 @@ export default function SongCountOverview({
   if (items.length === 0) return null;
 
   return (
-    <section className="pt-3 lg:pt-4">
+    <section className={className}>
       {!showMilestoneHighlights && (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-white/50 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:border-primary/30 hover:shadow-[0_12px_32px_rgba(190,24,93,0.12)] dark:hover:shadow-[0_12px_32px_rgba(190,24,93,0.1)] transition duration-300">
@@ -434,7 +441,7 @@ export default function SongCountOverview({
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
                             {t("estimatedAchievementSentense", {
                               date: formatDate(
-                                toDisplayedMilestoneDate(item.date),
+                                toDisplayedEstimateDate(item.date),
                                 locale,
                               ),
                             })}

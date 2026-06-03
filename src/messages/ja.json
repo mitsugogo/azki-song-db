@@ -198,6 +198,8 @@
     "recentUpdatesTitle": "更新情報",
     "recentUpdatesAddedCount": "{count}曲追加",
     "noRecentUpdates": "更新情報はありません",
+    "viewMilestonesLabel": "Views",
+    "viewMilestonesTitle": "再生数",
     "hololiveOfficial": "ホロライブ公式",
     "statsLoading": "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中",
     "stats": "収録楽曲数: {count}曲{date}",

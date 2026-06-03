@@ -29,6 +29,9 @@ import useAnniversaries from "./hook/useAnniversaries";
 import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
+import { useStatistics } from "./hook/useStatistics";
+import useStatViewCounts from "./hook/useStatViewCounts";
+import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
 import {
@@ -43,6 +46,7 @@ import {
   isAnniversaryToday,
   parseToJstDayStart,
 } from "./lib/highlights";
+import { buildViewMilestoneInfo } from "./lib/viewMilestone";
 import {
   LuArrowRight,
   LuSearch,
@@ -54,7 +58,8 @@ import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { BsGeoAlt } from "react-icons/bs";
-import { Song } from "./types/song";
+import type { Song } from "./types/song";
+import type { StatisticsItem } from "./types/statisticsItem";
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
@@ -148,6 +153,7 @@ export default function ClientTop() {
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
   const t = useTranslations("Home");
+  const tStatistics = useTranslations("Statistics");
   const tHeader = useTranslations("Header");
   const tDrawer = useTranslations("DrawerMenu");
   const tAnniversaries = useTranslations("Anniversaries");
@@ -217,6 +223,65 @@ export default function ClientTop() {
     () => getTodayTimelineMilestones(allSongs, externalMilestones),
     [allSongs, externalMilestones],
   );
+
+  const statistics = useStatistics({
+    songs: allSongs,
+  });
+
+  const viewLabelVideoIds = useMemo(
+    () =>
+      [
+        ...statistics.originalSongCountsByReleaseDate,
+        ...statistics.coverSongCountsByReleaseDate,
+      ]
+        .map(
+          (item) =>
+            item.song?.video_id ||
+            item.firstVideo?.video_id ||
+            item.lastVideo?.video_id,
+        )
+        .filter(Boolean),
+    [
+      statistics.originalSongCountsByReleaseDate,
+      statistics.coverSongCountsByReleaseDate,
+    ],
+  );
+
+  const { data: viewStatisticsByVideoId } =
+    useStatViewCounts(viewLabelVideoIds);
+
+  const milestoneStatistics = useMemo(() => {
+    const attachMilestone = (items: StatisticsItem[]) =>
+      items.map((item) => {
+        const statVideoId =
+          item.song?.video_id ||
+          item.firstVideo?.video_id ||
+          item.lastVideo?.video_id ||
+          "";
+        const history = viewStatisticsByVideoId[statVideoId] || [];
+        const latestHistoryViewCount =
+          history[history.length - 1]?.viewCount ?? 0;
+        const songViewCount = Number(item.song?.view_count ?? 0);
+        const effectiveViewCount =
+          songViewCount > 0 ? songViewCount : latestHistoryViewCount;
+
+        return {
+          ...item,
+          statVideoId,
+          effectiveViewCount,
+          viewMilestone: buildViewMilestoneInfo(effectiveViewCount, history),
+        };
+      });
+
+    return {
+      originalSongCountsByReleaseDate: attachMilestone(
+        statistics.originalSongCountsByReleaseDate,
+      ),
+      coverSongCountsByReleaseDate: attachMilestone(
+        statistics.coverSongCountsByReleaseDate,
+      ),
+    };
+  }, [statistics, viewStatisticsByVideoId]);
 
   const hasFeaturedAnniversaryToday = useMemo(() => {
     if (featuredAnniversaries.length === 0) {
@@ -698,11 +763,53 @@ export default function ClientTop() {
                   ))}
             </div>
 
+            {!isLoading && (
+              <section className="mt-16">
+                <div className="mb-5 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                      {t("viewMilestonesLabel")}
+                    </p>
+                    <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                      {t("viewMilestonesTitle")}
+                    </h2>
+                  </div>
+                  <Link
+                    href="/statistics?tab=originalSongCountsByReleaseDate"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                  >
+                    {tDrawer("statistics")}
+                    <LuArrowRight className="shrink-0" />
+                  </Link>
+                </div>
+
+                <SongCountOverview
+                  items={[
+                    ...milestoneStatistics.originalSongCountsByReleaseDate,
+                    ...milestoneStatistics.coverSongCountsByReleaseDate,
+                  ]}
+                  primaryLabel={tStatistics(
+                    "overview.originalSongCountsByReleaseDate.primaryLabel",
+                  )}
+                  totalCountLabel={tStatistics(
+                    "overview.originalSongCountsByReleaseDate.totalCountLabel",
+                  )}
+                  topLabel=""
+                  countUnit={tStatistics(
+                    "overview.originalSongCountsByReleaseDate.countUnit",
+                  )}
+                  showMilestoneHighlights
+                  showTopTile={false}
+                  className="pt-0"
+                />
+              </section>
+            )}
+
             {featuredEvents.length > 0 && (
               <div className="mt-16 space-y-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    {t("eventsTitle")}
+                    EVENTS
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                     {t("eventsTitle")}
