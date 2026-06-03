@@ -199,6 +199,8 @@
     "recentUpdatesTitle": "Updates",
     "recentUpdatesAddedCount": "{count} songs added",
     "noRecentUpdates": "No recent updates",
+    "viewMilestonesLabel": "Views",
+    "viewMilestonesTitle": "View milestones and estimates",
     "hololiveOfficial": "Hololive official",
     "statsLoading": "Total songs: loading / Last updated: loading",
     "stats": "Total songs: {count} songs{date}",
