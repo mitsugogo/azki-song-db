@@ -1,9 +1,10 @@
 import { LoadingOverlay } from "@mantine/core";
 import SearchBreadcrumb from "./SearchBreadcrumb";
+import { pageClasses } from "../../theme";
 
 const SearchLoadingView = () => {
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto relative">
+    <div className={`${pageClasses.shellFlushBottom} relative`}>
       <SearchBreadcrumb />
       <LoadingOverlay
         visible={true}

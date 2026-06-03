@@ -3,6 +3,7 @@ import SearchTermChips from "./SearchTermChips";
 import { useTranslations } from "next-intl";
 import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchBreadcrumb from "./SearchBreadcrumb";
+import { pageClasses } from "../../theme";
 
 interface SearchNoResultsViewProps {
   allSongs: Song[];
@@ -21,12 +22,12 @@ const SearchNoResultsView = ({
 }: SearchNoResultsViewProps) => {
   const t = useTranslations("SearchBrowse");
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className={pageClasses.shellFlushBottom}>
       <SearchBreadcrumb />
 
       <div className="mb-4">
-        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
-        <div className="px-3 pb-3">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <div className="pb-3">
           <SearchTermChips terms={searchTokens} />
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {t("noResults")}

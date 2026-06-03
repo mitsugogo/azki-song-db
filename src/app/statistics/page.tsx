@@ -5,6 +5,7 @@ import { metadata } from "../layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { getTranslations, getLocale } from "next-intl/server";
 import StatisticsBreadcrumb from "./StatisticsBreadcrumb";
+import { pageClasses } from "../theme";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -49,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   return (
-    <div className="grow p-2 lg:p-6 lg:pb-10">
+    <div className={pageClasses.shell}>
       <StatisticsBreadcrumb />
       <StatisticsPage />
     </div>

@@ -17,7 +17,7 @@ import { Link } from "@/i18n/navigation";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
 import { Header } from "@/app/components/Header";
-import { breadcrumbClasses } from "@/app/theme";
+import { breadcrumbClasses, pageClasses } from "@/app/theme";
 
 type Props = {
   initialUnlocked: boolean;
@@ -267,7 +267,7 @@ function UnlockMembersContent({ initialUnlocked, isConfigured }: Props) {
     ) : undefined;
 
   return (
-    <div className="grow min-h-0 overflow-y-auto overflow-x-hidden p-2 lg:p-6 lg:pb-10">
+    <div className={`${pageClasses.shell} min-h-0 overflow-x-hidden`}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -279,9 +279,9 @@ function UnlockMembersContent({ initialUnlocked, isConfigured }: Props) {
         <span className={breadcrumbClasses.link}>{t("title")}</span>
       </Breadcrumbs>
 
-      <div className="px-3 pb-6">
-        <h1 className="mb-2 text-2xl font-extrabold">{t("title")}</h1>
-        <p className="text-sm leading-7">{t("description")}</p>
+      <div className="pb-6">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <p className={pageClasses.description}>{t("description")}</p>
 
         <div className="mt-5 space-y-4">
           {!isConfigured ? (

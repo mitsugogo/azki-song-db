@@ -12,7 +12,7 @@ import {
   Table,
 } from "@mantine/core";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
 import { Link } from "@/i18n/navigation";
@@ -80,7 +80,7 @@ export default function PlaylistPage() {
   // Mantine Breadcrumbs を利用
 
   return (
-    <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -94,7 +94,7 @@ export default function PlaylistPage() {
         </Link>
       </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
+      <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
 
       <CreatePlaylistModal
         onenModal={openCreatePlaylistModal}
@@ -130,7 +130,7 @@ export default function PlaylistPage() {
       </div>
 
       {/* モバイル用カードリスト（デフォルト表示） */}
-      <div className="mt-6 p-2 space-y-4 lg:hidden">
+      <div className="mt-6 space-y-4 lg:hidden">
         {allPlaylists.map((playlist) => {
           const isFavorites = playlist.id === "system-favorites";
           return (
