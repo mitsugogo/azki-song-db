@@ -52,6 +52,7 @@ type PlayerSectionProps = {
   songs: Song[];
   searchTerm: string;
   isPlaying: boolean;
+  currentSongPlayCount?: number;
   isMembersOnlyPlayerRecovering: boolean;
   playerKey: number;
   hideFutureSongs: boolean;
@@ -96,6 +97,7 @@ export default function PlayerSection({
   songs,
   searchTerm,
   isPlaying,
+  currentSongPlayCount = 0,
   isMembersOnlyPlayerRecovering,
   playerKey,
   hideFutureSongs,
@@ -348,6 +350,7 @@ export default function PlayerSection({
         {showNowPlayingInfo && (
           <NowPlayingSongInfo
             currentSong={currentSong}
+            currentSongPlayCount={currentSongPlayCount}
             allSongs={allSongs}
             searchTerm={searchTerm}
             isPlaying={isPlaying}

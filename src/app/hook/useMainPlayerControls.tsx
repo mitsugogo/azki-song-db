@@ -58,6 +58,7 @@ export default function useMainPlayerControls({
 
   const {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,
@@ -939,6 +940,7 @@ export default function useMainPlayerControls({
 
   return {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,

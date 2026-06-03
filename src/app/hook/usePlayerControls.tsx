@@ -5,6 +5,9 @@ import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { GlobalPlayerContextType } from "./useGlobalPlayer";
 import type { YouTubeVideoData } from "../types/youtube";
 import useYoutubeVideoInfo from "./useYoutubeVideoInfo";
+import useSongPlayCounts, {
+  isSongPlayCountThresholdMet,
+} from "./useSongPlayCounts";
 import { siteConfig } from "../config/siteConfig";
 import historyHelper from "../lib/history";
 import { WATCH_PATH, normalizeWatchTimeParam } from "../lib/watchUrl";
@@ -25,6 +28,14 @@ const detectAndPrefixLocale = (path: string) => {
 // YouTubePlayer に getVideoData メソッドを追加した拡張型
 type YouTubePlayerWithVideoData = YouTubePlayer & {
   getVideoData: () => YouTubeVideoData;
+};
+
+type SongPlayCountSession = {
+  videoId: string;
+  songStart: number;
+  playedSeconds: number;
+  lastObservedTime: number | null;
+  counted: boolean;
 };
 
 /**
@@ -85,6 +96,8 @@ const usePlayerControls = (
   >([]);
   const timedMessagesRef = useRef(timedMessages);
   const defaultDocumentTitleRef = useRef(siteConfig.siteName);
+  const playCountSessionRef = useRef<SongPlayCountSession | null>(null);
+  const { incrementPlayCount, getPlayCountForSong } = useSongPlayCounts();
 
   // songs配列とnextSongの最新値をrefで保持
   const songsRef = useRef(songs);
@@ -98,6 +111,10 @@ const usePlayerControls = (
       options?: { skipSeek?: boolean },
     ) => void
   >(() => {});
+
+  const resetSongPlayCountSession = useCallback(() => {
+    playCountSessionRef.current = null;
+  }, []);
 
   // === ref同期 ===
   useEffect(() => {
@@ -324,6 +341,8 @@ const usePlayerControls = (
         return;
       }
 
+      resetSongPlayCountSession();
+
       // ライブコール場所を秒数に変換しながらパース
       setTimedLiveCallText(null);
       if (song.live_call) {
@@ -409,6 +428,7 @@ const usePlayerControls = (
       currentSong,
       sortedAllSongs,
       parseLiveCallMessages,
+      resetSongPlayCountSession,
     ],
   );
 
@@ -434,6 +454,102 @@ const usePlayerControls = (
       );
     },
     [allSongs],
+  );
+
+  const getSongChapterEnd = useCallback(
+    (song: Song, fallbackDuration = 0) => {
+      const songStart = Number(song.start);
+      const explicitEnd = Number(song.end ?? 0);
+      if (explicitEnd > songStart) {
+        return explicitEnd;
+      }
+
+      const list = songsByVideo.get(song.video_id);
+      if (list) {
+        const currentIndex = list.findIndex(
+          (item) =>
+            item.video_id === song.video_id && item.start === song.start,
+        );
+        const nextSong = currentIndex >= 0 ? list[currentIndex + 1] : null;
+        if (nextSong && Number(nextSong.start) > songStart) {
+          return Number(nextSong.start);
+        }
+      }
+
+      return fallbackDuration > songStart ? fallbackDuration : songStart;
+    },
+    [songsByVideo],
+  );
+
+  const pauseSongPlayCountSession = useCallback(() => {
+    if (!playCountSessionRef.current) return;
+    playCountSessionRef.current = {
+      ...playCountSessionRef.current,
+      lastObservedTime: null,
+    };
+  }, []);
+
+  const trackSongPlayCountProgress = useCallback(
+    (
+      song: Song,
+      currentTime: number,
+      player: YouTubePlayerWithVideoData,
+    ) => {
+      const songStart = Number(song.start);
+      const session = playCountSessionRef.current;
+      const isSameSession =
+        !!session &&
+        session.videoId === song.video_id &&
+        session.songStart === songStart;
+
+      if (!isSameSession) {
+        playCountSessionRef.current = {
+          videoId: song.video_id,
+          songStart,
+          playedSeconds: 0,
+          lastObservedTime: currentTime,
+          counted: false,
+        };
+        return;
+      }
+
+      const previousObservedTime = session.lastObservedTime;
+      session.lastObservedTime = currentTime;
+
+      if (previousObservedTime === null) {
+        return;
+      }
+
+      const delta = currentTime - previousObservedTime;
+      if (!Number.isFinite(delta) || delta <= 0 || delta > 2) {
+        return;
+      }
+
+      session.playedSeconds += delta;
+
+      if (session.counted) {
+        return;
+      }
+
+      const fallbackDuration =
+        typeof player.getDuration === "function"
+          ? Number(player.getDuration())
+          : 0;
+      const chapterDuration = Math.max(
+        0,
+        getSongChapterEnd(song, fallbackDuration) - songStart,
+      );
+
+      if (
+        !isSongPlayCountThresholdMet(session.playedSeconds, chapterDuration)
+      ) {
+        return;
+      }
+
+      session.counted = true;
+      incrementPlayCount(song);
+    },
+    [getSongChapterEnd, incrementPlayCount],
   );
 
   const getNextSongInVideo = useCallback(
@@ -493,6 +609,7 @@ const usePlayerControls = (
 
       if (youtubeVideoIdRef.current !== videoId) {
         clearMonitorInterval();
+        resetSongPlayCountSession();
         // 動画IDが変わったら youtubeVideoIdRef を更新
         if (videoId) {
           youtubeVideoIdRef.current = videoId;
@@ -553,6 +670,13 @@ const usePlayerControls = (
             currentVideoId,
             currentTime,
           );
+
+          if (foundSong) {
+            trackSongPlayCountProgress(foundSong, currentTime, player);
+          } else {
+            resetSongPlayCountSession();
+          }
+
           const currentSongForNext =
             currentSongRef.current ?? foundSong ?? null;
           const nextSongInVideo = getNextSongInVideo(currentSongForNext);
@@ -665,6 +789,7 @@ const usePlayerControls = (
 
       const handleEndedState = () => {
         clearMonitorInterval();
+        resetSongPlayCountSession();
         const nextSongInVideo = getNextSongInVideo(currentSongRef.current);
         // ended 時はまず同一動画内の次曲を探し、なければ filtered songs の次、最後に全体の先頭を再生
         let autoNextSong: Song | null = null;
@@ -705,6 +830,7 @@ const usePlayerControls = (
         case YouTube.PlayerState.PAUSED:
         case YouTube.PlayerState.BUFFERING:
           clearMonitorInterval();
+          pauseSongPlayCountSession();
           setIsPlaying(false);
           break;
         case YouTube.PlayerState.PLAYING:
@@ -726,6 +852,9 @@ const usePlayerControls = (
       getNextSongInVideo,
       isSameSong,
       isSongInList,
+      pauseSongPlayCountSession,
+      resetSongPlayCountSession,
+      trackSongPlayCountProgress,
     ],
   );
 
@@ -763,6 +892,7 @@ const usePlayerControls = (
 
   return {
     currentSong,
+    currentSongPlayCount: getPlayCountForSong(currentSong),
     setCurrentSong,
     currentSongRef,
     previousSong,
