@@ -36,6 +36,7 @@ export default function MainPlayer() {
 
   const {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,
@@ -303,6 +304,7 @@ export default function MainPlayer() {
           setOpenSongListOverlay={setIsSongListOverlayOpen}
           setShowPlaylistSelector={setShowPlaylistSelector}
           isPlaying={isPlaying}
+          currentSongPlayCount={currentSongPlayCount}
           playerKey={playerKey}
           hideFutureSongs={hideFutureSongs}
           playerControls={playerControls}
@@ -343,6 +345,7 @@ export default function MainPlayer() {
             <div className="hidden md:block md:w-2/3 xl:w-9/12 pr-0 lg:pr-3 foldable:w-full">
               <NowPlayingSongInfo
                 currentSong={currentSong}
+                currentSongPlayCount={currentSongPlayCount}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}
