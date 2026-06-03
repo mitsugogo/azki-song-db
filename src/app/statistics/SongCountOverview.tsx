@@ -288,10 +288,10 @@ export default function SongCountOverview({
                             href={`https://www.youtube.com/watch?v=${item.videoId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 leading-none font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
+                            className="inline-flex items-center gap-1.5 leading-tight font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
                           >
                             <FaYoutube className="h-3.5 w-3.5 shrink-0 align-middle" />
-                            <span className="truncate">
+                            <span className="truncate leading-5">
                               {item.title} - {item.artist}
                             </span>
                           </a>
@@ -402,10 +402,10 @@ export default function SongCountOverview({
                             href={`https://www.youtube.com/watch?v=${item.videoId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 leading-none font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
+                            className="inline-flex items-center gap-1.5 leading-tight font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
                           >
                             <FaYoutube className="h-3.5 w-3.5 shrink-0 align-middle" />
-                            <span className="truncate">
+                            <span className="truncate leading-5">
                               {item.title}
                               {item.artist ? ` - ${item.artist}` : ""}
                             </span>
