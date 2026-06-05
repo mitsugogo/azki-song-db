@@ -14,7 +14,7 @@ import {
   Tooltip,
   Transition,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useIntersection } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
@@ -152,6 +152,11 @@ export default function ClientTop() {
   const [isShowOngoingEventsAlert, setOngoingEventsAlert] = useState(true);
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
+  const { ref: viewMilestonesRef, entry: viewMilestonesEntry } =
+    useIntersection<HTMLElement>({
+      rootMargin: "320px 0px",
+      threshold: 0,
+    });
   const t = useTranslations("Home");
   const tStatistics = useTranslations("Statistics");
   const tHeader = useTranslations("Header");
@@ -166,6 +171,8 @@ export default function ClientTop() {
     useState(false);
   const [copiedNotificationSequence, setCopiedNotificationSequence] =
     useState(0);
+  const [shouldLoadViewStatistics, setShouldLoadViewStatistics] =
+    useState(false);
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -193,6 +200,12 @@ export default function ClientTop() {
       window.clearTimeout(timerId);
     };
   }, [copiedNotificationVisible, copiedNotificationSequence]);
+
+  useEffect(() => {
+    if (viewMilestonesEntry?.isIntersecting) {
+      setShouldLoadViewStatistics(true);
+    }
+  }, [viewMilestonesEntry?.isIntersecting]);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
@@ -247,8 +260,8 @@ export default function ClientTop() {
     ],
   );
 
-  const { data: viewStatisticsByVideoId } =
-    useStatViewCounts(viewLabelVideoIds);
+  const { data: viewStatisticsByVideoId, loading: isViewStatisticsLoading } =
+    useStatViewCounts(viewLabelVideoIds, "7d", shouldLoadViewStatistics);
 
   const milestoneStatistics = useMemo(() => {
     const attachMilestone = (items: StatisticsItem[]) =>
@@ -764,7 +777,7 @@ export default function ClientTop() {
             </div>
 
             {!isLoading && (
-              <section className="mt-16">
+              <section ref={viewMilestonesRef} className="mt-16">
                 <div className="mb-5 flex items-end justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
@@ -783,25 +796,63 @@ export default function ClientTop() {
                   </Link>
                 </div>
 
-                <SongCountOverview
-                  items={[
-                    ...milestoneStatistics.originalSongCountsByReleaseDate,
-                    ...milestoneStatistics.coverSongCountsByReleaseDate,
-                  ]}
-                  primaryLabel={tStatistics(
-                    "overview.originalSongCountsByReleaseDate.primaryLabel",
-                  )}
-                  totalCountLabel={tStatistics(
-                    "overview.originalSongCountsByReleaseDate.totalCountLabel",
-                  )}
-                  topLabel=""
-                  countUnit={tStatistics(
-                    "overview.originalSongCountsByReleaseDate.countUnit",
-                  )}
-                  showMilestoneHighlights
-                  showTopTile={false}
-                  className="pt-0"
-                />
+                {!shouldLoadViewStatistics || isViewStatisticsLoading ? (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {Array.from({ length: 2 }).map((_, index) => (
+                      <div
+                        key={`view-milestone-skeleton-${index}`}
+                        className="rounded-2xl border border-white/50 bg-white/80 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-gray-900/40 dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+                        aria-hidden="true"
+                      >
+                        <Skeleton height={14} width="35%" radius="sm" />
+                        <div className="mt-3 space-y-3">
+                          {Array.from({ length: 3 }).map((__, itemIndex) => (
+                            <div
+                              key={`view-milestone-skeleton-row-${index}-${itemIndex}`}
+                              className="flex items-start gap-2"
+                            >
+                              <Skeleton
+                                height={36}
+                                width={64}
+                                radius="sm"
+                                className="shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <Skeleton height={14} radius="sm" />
+                                <Skeleton
+                                  height={12}
+                                  width="70%"
+                                  radius="sm"
+                                  className="mt-2"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <SongCountOverview
+                    items={[
+                      ...milestoneStatistics.originalSongCountsByReleaseDate,
+                      ...milestoneStatistics.coverSongCountsByReleaseDate,
+                    ]}
+                    primaryLabel={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.primaryLabel",
+                    )}
+                    totalCountLabel={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.totalCountLabel",
+                    )}
+                    topLabel=""
+                    countUnit={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.countUnit",
+                    )}
+                    showMilestoneHighlights
+                    showTopTile={false}
+                    className="pt-0"
+                  />
+                )}
               </section>
             )}
 
