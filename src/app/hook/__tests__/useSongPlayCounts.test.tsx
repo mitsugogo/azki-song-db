@@ -75,9 +75,9 @@ describe("useSongPlayCounts", () => {
       "2026-06-03T01:00:00.000Z",
     );
 
-    expect(
-      secondState.records[getSongPlayCountKey(baseSong)]?.playCount,
-    ).toBe(2);
+    expect(secondState.records[getSongPlayCountKey(baseSong)]?.playCount).toBe(
+      2,
+    );
   });
 
   it("壊れた保存値があっても空状態にフォールバックできる", () => {
@@ -90,10 +90,7 @@ describe("useSongPlayCounts", () => {
     const { result } = renderHook(() => useSongPlayCounts());
 
     act(() => {
-      result.current.incrementPlayCount(
-        baseSong,
-        "2026-06-03T00:00:00.000Z",
-      );
+      result.current.incrementPlayCount(baseSong, "2026-06-03T00:00:00.000Z");
     });
 
     await waitFor(() => {
@@ -118,10 +115,7 @@ describe("useSongPlayCounts", () => {
     expect(result.current.getPlayCountForSong(baseSong)).toBe(0);
 
     act(() => {
-      result.current.incrementPlayCount(
-        baseSong,
-        "2026-06-03T00:00:00.000Z",
-      );
+      result.current.incrementPlayCount(baseSong, "2026-06-03T00:00:00.000Z");
     });
 
     await waitFor(() => {

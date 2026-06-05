@@ -490,11 +490,7 @@ const usePlayerControls = (
   }, []);
 
   const trackSongPlayCountProgress = useCallback(
-    (
-      song: Song,
-      currentTime: number,
-      player: YouTubePlayerWithVideoData,
-    ) => {
+    (song: Song, currentTime: number, player: YouTubePlayerWithVideoData) => {
       const songStart = Number(song.start);
       const session = playCountSessionRef.current;
       const isSameSession =
