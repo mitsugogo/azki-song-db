@@ -11,7 +11,7 @@ import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
 import YoutubeThumbnail from "./YoutubeThumbnail";
-import { WATCH_PATH, isWatchPagePath } from "../lib/watchUrl";
+import { buildWatchHref, isWatchPagePath } from "../lib/watchUrl";
 
 type Position = {
   x: number;
@@ -397,16 +397,33 @@ export default function MiniPlayer() {
 
   const handleMaximize = useCallback(() => {
     maximizePlayer();
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.pathname = WATCH_PATH;
-      const target =
-        url.pathname + (url.search ? `?${url.searchParams.toString()}` : "");
-      router.push(target);
-    } else {
-      router.push(WATCH_PATH);
+
+    const fallbackStart = Number(currentSong?.start ?? 0);
+    const targetTime =
+      Number.isFinite(currentTime) && currentTime > 0
+        ? currentTime
+        : Number.isFinite(fallbackStart)
+          ? fallbackStart
+          : 0;
+
+    if (targetTime > 0) {
+      setCurrentTime(targetTime);
     }
-  }, [maximizePlayer, router]);
+
+    router.push(
+      buildWatchHref({
+        videoId: currentSong?.video_id,
+        start: targetTime,
+      }),
+    );
+  }, [
+    currentSong?.start,
+    currentSong?.video_id,
+    currentTime,
+    maximizePlayer,
+    router,
+    setCurrentTime,
+  ]);
 
   // watch ページではミニプレイヤーを表示しない
   if (isWatchPage || !isMinimized || !currentSong) {

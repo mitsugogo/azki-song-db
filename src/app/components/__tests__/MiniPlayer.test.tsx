@@ -2,6 +2,10 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const { pushMock } = vi.hoisted(() => ({
+  pushMock: vi.fn(),
+}));
+
 // Mocks
 vi.mock("../YouTubePlayer", () => ({
   default: (props: any) => <div data-testid="yt-player" />,
@@ -34,9 +38,9 @@ vi.mock("../../hook/useGlobalPlayer", () => ({
 vi.mock("../../hook/useSongs", () => ({ default: () => ({ allSongs: [] }) }));
 
 let pathnameValue = "/";
-vi.mock("next/navigation", () => ({
+vi.mock("@/i18n/navigation", () => ({
   usePathname: () => pathnameValue,
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: pushMock }),
 }));
 
 vi.mock("@mantine/hooks", () => ({ useLocalStorage: () => [null, vi.fn()] }));
@@ -69,6 +73,7 @@ const sampleSong = {
 describe("MiniPlayer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    pathnameValue = "/";
   });
 
   it("returns null on home page", () => {
@@ -94,7 +99,7 @@ describe("MiniPlayer", () => {
       currentSong: sampleSong,
       isPlaying: false,
       isMinimized: true,
-      currentTime: 0,
+      currentTime: 42.8,
       setIsPlaying,
       setCurrentTime: vi.fn(),
       maximizePlayer,
@@ -112,6 +117,8 @@ describe("MiniPlayer", () => {
     const maxBtn = getByTitle("プレイヤーを最大化");
     fireEvent.click(maxBtn);
     expect(maximizePlayer).toHaveBeenCalled();
+    expect(globalPlayerMockValue.setCurrentTime).toHaveBeenCalledWith(42.8);
+    expect(pushMock).toHaveBeenCalledWith("/watch?v=v1&t=42s");
 
     // close button
     const closeBtn = getByTitle("閉じる");
