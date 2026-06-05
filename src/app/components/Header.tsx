@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { FaYoutube } from "react-icons/fa6";
 import { Burger } from "@mantine/core";
@@ -9,7 +11,6 @@ import ThemeToggle from "./ThemeToggle";
 import FoldableToggle from "./FoldableToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
 import useSongs from "../hook/useSongs";
-import useSearch from "../hook/useSearch";
 import SearchInput from "./SearchInput";
 import DrawerMenu from "./DrawerMenu";
 import { siteConfig } from "@/app/config/siteConfig";
@@ -18,11 +19,17 @@ import { routing } from "../../i18n/routing";
 export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
-  const { allSongs, songsFetchedAt } = useSongs();
-  const { searchTerm, setSearchTerm } = useSearch(allSongs);
+  const { allSongs } = useSongs();
+  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
   const t = useTranslations("Header");
   const router = useRouter();
   const pathname = usePathname() ?? "/";
+  const searchQuery = searchParams?.get("q") ?? "";
+
+  useEffect(() => {
+    setSearchTerm(searchQuery);
+  }, [searchQuery]);
 
   const normalizeLocalizedPath = (path: string) => {
     const segments = path.split("/").filter(Boolean);
@@ -73,6 +80,7 @@ export function Header() {
                     }
                     onSearchChange={(values: string[]) => {
                       const query = values.join("|");
+                      setSearchTerm(query);
 
                       // 現在のパスを取得
                       const currentPath =
@@ -82,11 +90,26 @@ export function Header() {
                       const normalizedPath =
                         normalizeLocalizedPath(currentPath);
 
-                      // 再生ページと検索ページ以外では、検索ページに遷移
+                      // 再生ページと検索ページ以外では、検索時だけ検索ページに遷移
                       if (
                         normalizedPath !== "/watch" &&
                         normalizedPath !== "/search"
                       ) {
+                        if (!query) {
+                          if (typeof window !== "undefined") {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete("q");
+                            const searchString = url.searchParams.toString();
+                            const target = searchString
+                              ? `${normalizedPath}?${searchString}`
+                              : normalizedPath;
+                            router.push(target);
+                          } else {
+                            router.push(normalizedPath);
+                          }
+                          return;
+                        }
+
                         // 他のページから検索ページへ遷移する際は、既存の v/t 等を保持して遷移する
                         const searchPath = "/search";
 
