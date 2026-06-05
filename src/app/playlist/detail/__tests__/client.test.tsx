@@ -87,6 +87,10 @@ vi.mock("../../../theme", () => ({
     separator: "separator",
     link: "link",
   },
+  pageClasses: {
+    shellFlushBottom: "shellFlushBottom",
+    heading: "heading",
+  },
 }));
 
 vi.mock("@dnd-kit/core", () => ({

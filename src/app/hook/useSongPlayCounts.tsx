@@ -52,6 +52,9 @@ export const isSongPlayCountThresholdMet = (
   return playedSeconds >= chapterDuration * 0.7;
 };
 
+const isRecordLike = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object";
+
 export const deserializeSongPlayCountState = (
   value: string | null | undefined,
 ): SongPlayCountState => {
@@ -60,21 +63,20 @@ export const deserializeSongPlayCountState = (
   }
 
   try {
-    const parsed = JSON.parse(value);
+    const parsed = JSON.parse(value) as unknown;
     const recordsSource =
-      parsed && typeof parsed === "object" && parsed.records
+      isRecordLike(parsed) && isRecordLike(parsed.records)
         ? parsed.records
         : {};
 
     const records = Object.fromEntries(
       Object.entries(recordsSource).flatMap(([key, record]) => {
-        if (!record || typeof record !== "object") {
+        if (!isRecordLike(record)) {
           return [];
         }
 
         const title = typeof record.title === "string" ? record.title : "";
-        const artist =
-          typeof record.artist === "string" ? record.artist : "";
+        const artist = typeof record.artist === "string" ? record.artist : "";
         const playCountValue = Number(record.playCount ?? 0);
         const lastPlayedAt =
           typeof record.lastPlayedAt === "string" ? record.lastPlayedAt : "";
@@ -129,16 +131,19 @@ export const incrementSongPlayCountState = (
 };
 
 export default function useSongPlayCounts() {
-  const [playCountState, setPlayCountState] = useLocalStorage<SongPlayCountState>({
-    key: SONG_PLAY_COUNTS_STORAGE_KEY,
-    defaultValue: createEmptySongPlayCountState(),
-    serialize: JSON.stringify,
-    deserialize: deserializeSongPlayCountState,
-  });
+  const [playCountState, setPlayCountState] =
+    useLocalStorage<SongPlayCountState>({
+      key: SONG_PLAY_COUNTS_STORAGE_KEY,
+      defaultValue: createEmptySongPlayCountState(),
+      serialize: JSON.stringify,
+      deserialize: deserializeSongPlayCountState,
+    });
 
   const incrementPlayCount = useCallback(
     (song: Song, playedAt = new Date().toISOString()) => {
-      setPlayCountState((prev) => incrementSongPlayCountState(prev, song, playedAt));
+      setPlayCountState((prev) =>
+        incrementSongPlayCountState(prev, song, playedAt),
+      );
     },
     [setPlayCountState],
   );

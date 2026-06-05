@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 
+const eventDate = (daysFromToday: number) => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + daysFromToday);
+  return date.toISOString();
+};
+
 test.describe("Home events", () => {
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
@@ -15,36 +22,36 @@ test.describe("Home events", () => {
         contentType: "application/json",
         body: JSON.stringify([
           {
-            start_at: "2026-05-30T15:00:00.000Z",
-            end_at: "2026-06-02T15:00:00.000Z",
+            start_at: eventDate(-1),
+            end_at: eventDate(1),
             content: "進行中イベント",
             note: "開催中の表示確認",
             url: "https://example.com/ongoing",
           },
           {
-            start_at: "2026-06-18T15:00:00.000Z",
-            end_at: "2026-06-20T15:00:00.000Z",
+            start_at: eventDate(3),
+            end_at: eventDate(5),
             content: "次のイベント",
             note: "未来イベント1",
             url: "",
           },
           {
-            start_at: "2026-06-30T15:00:00.000Z",
+            start_at: eventDate(7),
             end_at: "",
             content: "単日イベント",
             note: "未来イベント2",
             url: "",
           },
           {
-            start_at: "2026-07-10T15:00:00.000Z",
+            start_at: eventDate(14),
             end_at: "",
             content: "4件目のイベント",
             note: "最大3件確認用",
             url: "",
           },
           {
-            start_at: "2026-05-01T15:00:00.000Z",
-            end_at: "2026-05-03T15:00:00.000Z",
+            start_at: eventDate(-14),
+            end_at: eventDate(-7),
             content: "過去イベント",
             note: "表示されない",
             url: "",
@@ -64,7 +71,9 @@ test.describe("Home events", () => {
     await expect(eventsHeading).toBeVisible();
     await expect(anniversariesHeading).toBeVisible();
 
-    const eventsBox = page.locator("section").filter({ has: eventsHeading });
+    const eventsBox = eventsHeading.locator(
+      "xpath=../following-sibling::section",
+    );
     await expect(eventsBox.getByText("進行中イベント")).toBeVisible();
     await expect(eventsBox.getByText("次のイベント")).toBeVisible();
     await expect(eventsBox.getByText("単日イベント")).toBeVisible();
@@ -75,15 +84,13 @@ test.describe("Home events", () => {
     await expect(eventsBox.getByText("過去イベント")).toHaveCount(0);
 
     const isEventsBeforeAnniversaries = await page.evaluate(() => {
-      const headingByText = (tagName: string, text: string) =>
-        Array.from(document.querySelectorAll(tagName)).find(
+      const headingByText = (text: string) =>
+        Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6")).find(
           (element) => element.textContent?.trim() === text,
         );
 
-      const eventsSection = headingByText("h2", "イベント")?.closest("section");
-      const anniversariesSection = headingByText("h2", "記念日")?.closest(
-        "section",
-      );
+      const eventsSection = headingByText("イベント");
+      const anniversariesSection = headingByText("記念日");
 
       if (!eventsSection || !anniversariesSection) {
         return false;
