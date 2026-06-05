@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
-import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { siteConfig } from "@/app/config/siteConfig";
 import { formatDate } from "@/app/lib/formatDate";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 
 export const runtime = "edge";
 
@@ -19,13 +20,8 @@ export async function GET(req: NextRequest) {
     const height = searchParams.get("h") || "630";
 
     const video_id = v;
-    const songs = await fetch(
-      `${baseUrl}/api/songs?hl=${encodeURIComponent(hl)}`,
-      { cache: "no-store" },
-    )
-      .then((res) => res.json())
-      .catch(() => []);
-    const song: Song = songs.find((s: Song) => s.video_id === video_id);
+    const songs = await fetchSongsFromApiCached({ locale: hl }).catch(() => []);
+    const song = songs.find((s: Song) => s.video_id === video_id);
     const songsByVideoId = songs.filter((s: Song) => s.video_id === video_id);
     if (!song) {
       return new Response("Song not found", { status: 404 });

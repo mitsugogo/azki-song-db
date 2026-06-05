@@ -1,7 +1,34 @@
 import fs from "fs";
 import path from "path";
 
+const cacheFiles = ["songs.json", "channels.json", "milestones.json"];
+const cacheMaxAgeMs = Number(
+  process.env.PLAYWRIGHT_API_CACHE_TTL_MS ?? 24 * 60 * 60 * 1000,
+);
+
+const isCacheFresh = (cacheDir: string, fileName: string) => {
+  const cachePath = path.join(cacheDir, fileName);
+  if (!fs.existsSync(cachePath)) return false;
+
+  const stat = fs.statSync(cachePath);
+  return Date.now() - stat.mtimeMs < cacheMaxAgeMs;
+};
+
 async function globalSetup() {
+  const cacheDir = path.join(__dirname, ".cache");
+  const shouldRefreshCache = process.env.E2E_REFRESH_API_CACHE === "true";
+  const hasUsableCache = cacheFiles.every((fileName) =>
+    fs.existsSync(path.join(cacheDir, fileName)),
+  );
+
+  if (
+    !shouldRefreshCache &&
+    cacheFiles.every((fileName) => isCacheFresh(cacheDir, fileName))
+  ) {
+    console.log("Using cached E2E API fixtures.");
+    return;
+  }
+
   try {
     // 環境変数や Playwright の baseURL を考慮して絶対URLを作成する
     const host = process.env.HOST ?? "127.0.0.1";
@@ -42,7 +69,6 @@ async function globalSetup() {
     const milestonesData = await milestonesResponse.json();
 
     // キャッシュディレクトリを作成
-    const cacheDir = path.join(__dirname, ".cache");
     if (!fs.existsSync(cacheDir)) {
       fs.mkdirSync(cacheDir, { recursive: true });
     }
@@ -61,6 +87,13 @@ async function globalSetup() {
       JSON.stringify(milestonesData),
     );
   } catch (err) {
+    if (hasUsableCache) {
+      console.warn("globalSetup API refresh failed; using cached fixtures.", {
+        err: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
+
     console.error("globalSetup failed", {
       err: err instanceof Error ? err.message : String(err),
       PLAYWRIGHT_BASE_URL: process.env.PLAYWRIGHT_BASE_URL,

@@ -2,21 +2,11 @@ import { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import SearchPageClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 
 const getSearchSummary = async (locale: string): Promise<string | null> => {
   try {
-    const response = await fetch(
-      `${baseUrl}/api/songs?hl=${encodeURIComponent(locale)}`,
-      {
-        cache: "no-store",
-      },
-    );
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const songs = (await response.json()) as Array<{ video_id?: string }>;
+    const songs = await fetchSongsFromApiCached({ locale });
     const countSongs = songs.length.toLocaleString(locale);
     const countVideos = new Set(
       songs.map((song) => song.video_id).filter(Boolean),
