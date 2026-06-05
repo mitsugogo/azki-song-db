@@ -45,9 +45,9 @@ test.describe("Search page", () => {
     await page.goto("/search?tag=tag%3A%E3%82%AA%E3%83%AA%E6%9B%B2");
 
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(300);
-
-    expect(page.url()).not.toContain("tag=");
+    await expect
+      .poll(() => page.url(), { timeout: 10000 })
+      .not.toContain("tag=");
   });
 
   test("selects browse tab from tab query parameter", async ({ page }) => {

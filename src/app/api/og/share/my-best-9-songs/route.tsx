@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig } from "@/app/config/siteConfig";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 
 export const runtime = "edge";
 
@@ -114,12 +115,10 @@ export async function GET(req: NextRequest) {
     }
 
     // 曲データを取得
-    const songs = await fetch(
-      `${origin}/api/songs?hl=${encodeURIComponent(hl)}`,
-      { cache: "no-store" },
-    )
-      .then((res) => res.json())
-      .catch(() => []);
+    const songs = await fetchSongsFromApiCached({
+      locale: hl,
+      baseUrlOverride: origin,
+    }).catch(() => []);
 
     // 厳選した曲を取得
     const selectedSongs = selection.songs

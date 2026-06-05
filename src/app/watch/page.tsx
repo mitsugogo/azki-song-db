@@ -8,7 +8,7 @@ import { Playlist } from "../hook/usePlaylists";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
-import { songsMembersOnlyQueryParamKey } from "@/app/lib/songsApi";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -45,16 +45,13 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("subtitle", ogSubtitle);
 
   const fetchSongs = async () => {
-    const songsUrl = new URL("/api/songs", baseUrl);
-    songsUrl.searchParams.set("hl", locale);
-    songsUrl.searchParams.set(songsMembersOnlyQueryParamKey, "true");
+    const cookie = requestHeaders.get("cookie") ?? "";
 
-    return fetch(songsUrl, {
-      cache: "no-store",
-      headers: {
-        cookie: requestHeaders.get("cookie") ?? "",
-      },
-    }).then((res) => res.json());
+    return fetchSongsFromApiCached({
+      locale,
+      includeMembersOnly: Boolean(cookie),
+      cookie,
+    });
   };
 
   if (q) {

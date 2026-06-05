@@ -9,51 +9,14 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import ClientPage from "./ClientPage";
-
-async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
-  const candidates = [
-    process.env.NEXT_PUBLIC_BASE_URL,
-    process.env.PUBLIC_BASE_URL,
-    process.env.NEXT_PUBLIC_BASE_URL ??
-      (process.env.NODE_ENV === "development"
-        ? `http://127.0.0.1:${process.env.PORT ?? 3001}`
-        : undefined),
-  ].filter(Boolean) as string[];
-
-  for (const base of candidates) {
-    try {
-      const songsUrl = new URL(`/api/songs`, base);
-      songsUrl.searchParams.set("hl", locale);
-      const res = await fetch(songsUrl, { cache: "no-store" });
-      if (res.ok) {
-        return (await res.json()) as Song[];
-      }
-    } catch (e) {
-      // 一時的な失敗は次の候補へフォールバック
-    }
-  }
-
-  // 最後の手段として production を試す
-  try {
-    const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
-    songsUrl.searchParams.set("hl", locale);
-    const res = await fetch(songsUrl, { cache: "no-store" });
-    if (res.ok) {
-      return (await res.json()) as Song[];
-    }
-  } catch (e) {
-    // ignore
-  }
-
-  throw new Error("Failed to fetch songs from any known base URL");
-}
 
 export async function generateStaticParams() {
   let songs: Song[] = [];
 
   try {
-    songs = await fetchSongsFromApi();
+    songs = await fetchSongsFromApiCached();
   } catch (error) {
     console.warn(
       "Skipping static param generation for discography song pages during build.",
@@ -99,7 +62,7 @@ export async function generateMetadata({
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "Discography", locale });
   const resolved = await params;
-  const songs: Song[] = await fetchSongsFromApi(locale);
+  const songs: Song[] = await fetchSongsFromApiCached({ locale });
   const slug = decodeURIComponent(resolved.slug || "");
 
   const originals = songs.filter(

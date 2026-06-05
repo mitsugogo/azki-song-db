@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
+import { getCachedSongs } from "./test-utils";
 
 test.describe("Filtered TOP iframe updates", () => {
   test.describe.configure({ mode: "serial" });
@@ -12,8 +13,7 @@ test.describe("Filtered TOP iframe updates", () => {
     page,
   }) => {
     // Skip if there are no milestones in the API data
-    const res = await page.request.get("/api/songs");
-    const songs: any[] = await res.json();
+    const songs: any[] = getCachedSongs();
     const milestones = songs
       .flatMap((s: any) => s.milestones || [])
       .filter((m: string, i: number, arr: string[]) => arr.indexOf(m) === i);
