@@ -18,6 +18,50 @@ interface SearchInputProps {
   className?: string;
 }
 
+const searchOptionsFilter: NonNullable<TagsInputProps["filter"]> = ({
+  options,
+  search,
+  limit,
+}) => {
+  const normalizedSearch = search.trim().toLowerCase();
+  const result: ReturnType<NonNullable<TagsInputProps["filter"]>> = [];
+  let remaining = limit;
+
+  for (const option of options) {
+    if (remaining <= 0) {
+      break;
+    }
+
+    if ("items" in option) {
+      const items = [];
+
+      for (const item of option.items) {
+        if (remaining <= 0) {
+          break;
+        }
+
+        if (item.label.toLowerCase().includes(normalizedSearch)) {
+          items.push(item);
+          remaining -= 1;
+        }
+      }
+
+      if (items.length > 0) {
+        result.push({ group: option.group, items });
+      }
+
+      continue;
+    }
+
+    if (option.label.toLowerCase().includes(normalizedSearch)) {
+      result.push(option);
+      remaining -= 1;
+    }
+  }
+
+  return result;
+};
+
 export default function SearchInput({
   allSongs,
   searchValue,
@@ -219,6 +263,7 @@ export default function SearchInput({
       maxDropdownHeight={200}
       value={searchValue}
       onChange={onSearchChange}
+      filter={searchOptionsFilter}
       limit={15}
       splitChars={["|"]}
       comboboxProps={{

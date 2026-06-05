@@ -2,7 +2,8 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { pushMock } = vi.hoisted(() => ({
+const { pathnameMock, pushMock } = vi.hoisted(() => ({
+  pathnameMock: vi.fn(),
   pushMock: vi.fn(),
 }));
 
@@ -17,7 +18,8 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
-  usePathname: () => "/ja/watch",
+  usePathname: () => pathnameMock(),
+  useSearchParams: () => new URLSearchParams(window.location.search),
 }));
 
 vi.mock("next-intl", () => ({
@@ -69,14 +71,6 @@ vi.mock("../../hook/useSongs", () => ({
   default: () => ({ allSongs: [], songsFetchedAt: null }),
 }));
 
-vi.mock("../../hook/useSearch", () => ({
-  __esModule: true,
-  default: () => ({
-    searchTerm: "artist:supercell",
-    setSearchTerm: vi.fn(),
-  }),
-}));
-
 vi.mock("../SearchInput", () => ({
   __esModule: true,
   default: ({
@@ -91,6 +85,7 @@ import { Header } from "../Header";
 describe("Header", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    pathnameMock.mockReturnValue("/ja/watch");
     global.__mockNextRouter = {
       push: pushMock,
       replace: vi.fn(),
@@ -117,5 +112,19 @@ describe("Header", () => {
     expect(target).toContain("v=JUgZ8feAFcE");
     expect(target).toContain("t=2215s");
     expect(target).not.toContain("q=");
+  });
+
+  it("discographyページで検索バーをクリアしたときはsearchに遷移せずqのみ削除する", () => {
+    pathnameMock.mockReturnValue("/ja/discography");
+    window.history.pushState({}, "", "/discography?q=artist%3Asupercell");
+
+    render(<Header />);
+
+    fireEvent.click(screen.getByRole("button", { name: "clear-search" }));
+
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    const target = pushMock.mock.calls[0]?.[0] as string;
+    expect(target.startsWith("/search")).toBe(false);
+    expect(target).toBe("/discography");
   });
 });
