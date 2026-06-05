@@ -18,7 +18,11 @@ type StatisticsResponse = {
   statistics: Record<string, ViewStat[]>;
 };
 
-const useStatViewCounts = (videoIds: string[], period: Period = "7d") => {
+const useStatViewCounts = (
+  videoIds: string[],
+  period: Period = "7d",
+  enabled: boolean = true,
+) => {
   const [data, setData] = useState<Record<string, ViewStat[]>>({});
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +32,11 @@ const useStatViewCounts = (videoIds: string[], period: Period = "7d") => {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     if (normalizedIds.length === 0) {
       setData({});
       setLoading(false);
@@ -67,7 +76,7 @@ const useStatViewCounts = (videoIds: string[], period: Period = "7d") => {
     return () => {
       mounted = false;
     };
-  }, [normalizedIds]);
+  }, [enabled, normalizedIds, period]);
 
   return {
     data,
