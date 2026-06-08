@@ -1,10 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { GlobalPlayerProvider } from "../hook/useGlobalPlayer";
 import PageTransitionHandler from "./PageTransitionHandler";
 import { LoadingProvider, useLoading } from "../context/LoadingContext";
 import Loading from "../loading";
+import { SharedYouTubePlayerProvider } from "./SharedYouTubePlayer";
 
 // MiniPlayerを遅延読み込みし、初期レンダリングを高速化
 import MiniPlayer from "./MiniPlayer";
@@ -16,12 +16,14 @@ export default function ClientProviders({
 }) {
   return (
     <GlobalPlayerProvider>
-      <LoadingProvider>
-        {children}
-        <MiniPlayer />
-        <PageTransitionHandler />
-        <LoadingOverlayIfNeeded />
-      </LoadingProvider>
+      <SharedYouTubePlayerProvider>
+        <LoadingProvider>
+          {children}
+          <MiniPlayer />
+          <PageTransitionHandler />
+          <LoadingOverlayIfNeeded />
+        </LoadingProvider>
+      </SharedYouTubePlayerProvider>
     </GlobalPlayerProvider>
   );
 }

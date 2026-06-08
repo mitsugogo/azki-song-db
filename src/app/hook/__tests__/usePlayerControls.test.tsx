@@ -611,6 +611,7 @@ describe("usePlayerControls", () => {
 
       // 曲情報が更新される
       expect(result.current.currentSong?.title).toBe("Song B");
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(100);
       // seekToがsong.startの値で呼ばれる
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(100);
     });
@@ -663,6 +664,7 @@ describe("usePlayerControls", () => {
 
       // 曲情報は更新される
       expect(result.current.currentSong?.title).toBe("Song B");
+      expect(mockGlobalPlayer.setCurrentTime).not.toHaveBeenCalled();
       // seekToは呼ばれない
       expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
     });
@@ -685,6 +687,7 @@ describe("usePlayerControls", () => {
       });
 
       // 渡されたexplicitStartTimeでseekToが呼ばれる
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(150);
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(150);
     });
 
@@ -704,6 +707,7 @@ describe("usePlayerControls", () => {
       });
 
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(50);
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(50);
     });
 
     it("異なる動画への切り替え時はseekToではなくvideoIdとstartTimeがセットされる", () => {
@@ -765,6 +769,7 @@ describe("usePlayerControls", () => {
 
       // seekToは呼ばれない（動画の再読み込みになる）
       expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(50);
       // videoIdとstartTimeが新しい値にセットされる
       expect(result.current.videoId).toBe("differentVid");
       expect(result.current.startTime).toBe(50);

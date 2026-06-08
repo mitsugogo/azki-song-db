@@ -38,6 +38,11 @@ type SongPlayCountSession = {
   counted: boolean;
 };
 
+const normalizePlaybackSeconds = (value: unknown) => {
+  const seconds = Number(value);
+  return Number.isFinite(seconds) ? Math.max(seconds, 0) : 0;
+};
+
 /**
  * プレイヤーの再生ロジックを管理するカスタムフック
  *
@@ -98,6 +103,8 @@ const usePlayerControls = (
   const defaultDocumentTitleRef = useRef(siteConfig.siteName);
   const playCountSessionRef = useRef<SongPlayCountSession | null>(null);
   const { incrementPlayCount, getPlayCountForSong } = useSongPlayCounts();
+  const setGlobalCurrentTime = globalPlayer.setCurrentTime;
+  const seekGlobalPlayerTo = globalPlayer.seekTo;
 
   // songs配列とnextSongの最新値をrefで保持
   const songsRef = useRef(songs);
@@ -314,8 +321,9 @@ const usePlayerControls = (
       const targetVideoId = explicitVideoId ?? song?.video_id;
       if (!targetVideoId) return;
 
-      const targetStartTime =
-        explicitStartTime ?? (song ? Number(song.start) : 0);
+      const targetStartTime = normalizePlaybackSeconds(
+        explicitStartTime ?? song?.start ?? 0,
+      );
 
       // 曲が指定されていない場合、videoIdとstartTimeからsongを特定
       if (!song && targetVideoId) {
@@ -342,6 +350,10 @@ const usePlayerControls = (
       }
 
       resetSongPlayCountSession();
+
+      if (!options?.skipSeek) {
+        setGlobalCurrentTime(targetStartTime);
+      }
 
       // ライブコール場所を秒数に変換しながらパース
       setTimedLiveCallText(null);
@@ -387,7 +399,7 @@ const usePlayerControls = (
             typeof explicitStartTime === "number"
               ? explicitStartTime
               : Number(song.start);
-          globalPlayer.seekTo(seekTime);
+          seekGlobalPlayerTo(normalizePlaybackSeconds(seekTime));
         }
         return;
       }
@@ -429,6 +441,8 @@ const usePlayerControls = (
       sortedAllSongs,
       parseLiveCallMessages,
       resetSongPlayCountSession,
+      setGlobalCurrentTime,
+      seekGlobalPlayerTo,
     ],
   );
 

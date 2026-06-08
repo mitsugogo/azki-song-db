@@ -5,13 +5,16 @@ import useSongs from "../hook/useSongs";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useLocalStorage } from "@mantine/hooks";
-import YouTubePlayer from "./YouTubePlayer";
 import { applyPersistedVolumeToPlayer } from "../hook/usePlayerVolume";
 import { YouTubeEvent } from "react-youtube";
 import { FaTimes, FaExpand } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import { buildWatchHref, isWatchPagePath } from "../lib/watchUrl";
+import {
+  SharedYouTubePlayerSlot,
+  useSharedYouTubePlayerSource,
+} from "./SharedYouTubePlayer";
 
 type Position = {
   x: number;
@@ -20,6 +23,18 @@ type Position = {
 
 const SNAP_DISTANCE = 50; // スナップ距離（ピクセル）
 const STORAGE_KEY = "mini-player-position";
+
+const getInitialPlaybackStartTime = (
+  currentTime: number,
+  songStart: unknown,
+) => {
+  if (Number.isFinite(currentTime) && currentTime > 0) {
+    return currentTime;
+  }
+
+  const start = Number(songStart);
+  return Number.isFinite(start) && start > 0 ? start : 0;
+};
 
 export default function MiniPlayer() {
   const {
@@ -36,9 +51,7 @@ export default function MiniPlayer() {
   const { allSongs } = useSongs();
   const pathname = usePathname();
   const router = useRouter();
-  const [playerKey, setPlayerKey] = useState(0);
   const playerRef = useRef<any>(null);
-  const [hasRestoredTime, setHasRestoredTime] = useState(false);
   const [storedPosition, setStoredPosition] = useLocalStorage<Position | null>({
     key: STORAGE_KEY,
     defaultValue: null,
@@ -46,6 +59,9 @@ export default function MiniPlayer() {
 
   // 再生中の動画情報を保持（動画が変わったときだけ更新）
   const [playingSong, setPlayingSong] = useState(currentSong);
+  const [initialStartTime, setInitialStartTime] = useState(() =>
+    getInitialPlaybackStartTime(currentTime, currentSong?.start),
+  );
   const lastVideoIdRef = useRef<string | null>(null);
   const lastPathnameRef = useRef<string>(pathname);
 
@@ -297,15 +313,16 @@ export default function MiniPlayer() {
       const videoIdChanged = currentSong.video_id !== lastVideoIdRef.current;
 
       if (videoIdChanged) {
-        setPlayerKey((prev) => prev + 1);
-        setHasRestoredTime(false);
         setPlayingSong(currentSong);
+        setInitialStartTime(
+          getInitialPlaybackStartTime(currentTime, currentSong.start),
+        );
         lastVideoIdRef.current = currentSong.video_id;
       }
 
       lastPathnameRef.current = pathname;
     }
-  }, [pathname, isWatchPage, currentSong?.video_id]);
+  }, [pathname, isWatchPage, currentSong?.video_id, currentTime]);
 
   // 同じ動画内で曲の開始位置だけが変わった場合も、即座にプレビュー位置へ移動する
   useEffect(() => {
@@ -316,7 +333,27 @@ export default function MiniPlayer() {
     const targetSeconds = Number(currentSong.start);
     if (Number.isNaN(targetSeconds)) return;
 
+    const previousStartSeconds = Number(playingSong.start);
+    const playerTime =
+      playerRef.current &&
+      typeof playerRef.current.getCurrentTime === "function"
+        ? Number(playerRef.current.getCurrentTime())
+        : NaN;
+    const observedTime = Number.isFinite(playerTime)
+      ? playerTime
+      : Number(currentTime);
+    const isPlaybackProgression =
+      Number.isFinite(previousStartSeconds) &&
+      targetSeconds > previousStartSeconds &&
+      Number.isFinite(observedTime) &&
+      observedTime >= targetSeconds - 1;
+
+    if (isPlaybackProgression) {
+      return;
+    }
+
     setPlayingSong(currentSong);
+    setInitialStartTime(targetSeconds);
     setCurrentTime(targetSeconds);
 
     if (playerRef.current && typeof playerRef.current.seekTo === "function") {
@@ -325,38 +362,33 @@ export default function MiniPlayer() {
         playerRef.current.playVideo();
       }
     }
-  }, [currentSong, playingSong, isPlaying, setCurrentTime]);
+  }, [currentSong, playingSong, isPlaying, setCurrentTime, currentTime]);
 
-  const handlePlayerOnReady = (event: YouTubeEvent<number>) => {
-    playerRef.current = event.target;
-    try {
-      applyPersistedVolumeToPlayer(event.target);
-    } catch (_) {}
-    // 保存された再生位置から開始
-    if (currentTime > 0 && !hasRestoredTime) {
-      setTimeout(() => {
-        if (event.target && typeof event.target.seekTo === "function") {
-          event.target.seekTo(currentTime, true);
-          setHasRestoredTime(true);
-          if (isPlaying) {
-            event.target.playVideo();
-          }
-        }
-      }, 300);
-    } else if (isPlaying) {
-      event.target.playVideo();
-    }
-  };
+  const handlePlayerOnReady = useCallback(
+    (event: YouTubeEvent<number>) => {
+      playerRef.current = event.target;
+      try {
+        applyPersistedVolumeToPlayer(event.target);
+      } catch (_) {}
+      if (isPlaying) {
+        event.target.playVideo();
+      }
+    },
+    [isPlaying],
+  );
 
-  const handleStateChange = (event: YouTubeEvent<number>) => {
-    const state = event.data;
-    // YouTube PlayerState: -1=未開始, 0=終了, 1=再生中, 2=一時停止, 3=バッファリング, 5=頭出し済み
-    if (state === 1) {
-      setIsPlaying(true);
-    } else if (state === 2 || state === 0) {
-      setIsPlaying(false);
-    }
-  };
+  const handleStateChange = useCallback(
+    (event: YouTubeEvent<number>) => {
+      const state = event.data;
+      // YouTube PlayerState: -1=未開始, 0=終了, 1=再生中, 2=一時停止, 3=バッファリング, 5=頭出し済み
+      if (state === 1) {
+        setIsPlaying(true);
+      } else if (state === 2 || state === 0) {
+        setIsPlaying(false);
+      }
+    },
+    [setIsPlaying],
+  );
 
   // 再生位置を定期的に保存と曲の更新
   useEffect(() => {
@@ -399,12 +431,19 @@ export default function MiniPlayer() {
     maximizePlayer();
 
     const fallbackStart = Number(currentSong?.start ?? 0);
+    const playerTime =
+      playerRef.current &&
+      typeof playerRef.current.getCurrentTime === "function"
+        ? Number(playerRef.current.getCurrentTime())
+        : NaN;
     const targetTime =
-      Number.isFinite(currentTime) && currentTime > 0
-        ? currentTime
-        : Number.isFinite(fallbackStart)
-          ? fallbackStart
-          : 0;
+      Number.isFinite(playerTime) && playerTime > 0
+        ? playerTime
+        : Number.isFinite(currentTime) && currentTime > 0
+          ? currentTime
+          : Number.isFinite(fallbackStart)
+            ? fallbackStart
+            : 0;
 
     if (targetTime > 0) {
       setCurrentTime(targetTime);
@@ -424,6 +463,30 @@ export default function MiniPlayer() {
     router,
     setCurrentTime,
   ]);
+
+  const isSharedPlayerActive = Boolean(
+    !isWatchPage && isMinimized && currentSong && playingSong,
+  );
+  const sharedPlayerSource = useMemo(
+    () => ({
+      sourceId: "mini",
+      active: isSharedPlayerActive,
+      videoId: playingSong?.video_id,
+      startTime: initialStartTime,
+      zIndex: 60,
+      onReady: handlePlayerOnReady,
+      onStateChange: handleStateChange,
+    }),
+    [
+      isSharedPlayerActive,
+      playingSong?.video_id,
+      initialStartTime,
+      handlePlayerOnReady,
+      handleStateChange,
+    ],
+  );
+
+  useSharedYouTubePlayerSource(sharedPlayerSource);
 
   // watch ページではミニプレイヤーを表示しない
   if (isWatchPage || !isMinimized || !currentSong) {
@@ -501,15 +564,11 @@ export default function MiniPlayer() {
 
         {/* プレイヤー */}
         <div className="relative aspect-video w-full bg-black">
-          {playingSong && (
-            <YouTubePlayer
-              key={`mini-player-${playerKey}`}
-              video_id={playingSong.video_id}
-              startTime={Number(playingSong.start)}
-              onReady={handlePlayerOnReady}
-              onStateChange={handleStateChange}
-            />
-          )}
+          <SharedYouTubePlayerSlot
+            sourceId="mini"
+            active={isSharedPlayerActive}
+            className="h-full w-full"
+          />
         </div>
       </motion.div>
     </AnimatePresence>
