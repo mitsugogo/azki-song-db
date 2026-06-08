@@ -61,7 +61,13 @@ export default function SongModeControls({
 
   return (
     <div className={`flex flex-col gap-1.25 ${rowMarginClassName}`}>
-      <Menu withinPortal={false} width={220} position="bottom-start" withArrow>
+      <Menu
+        withinPortal={false}
+        width={220}
+        position="bottom-end"
+        withArrow
+        shadow="md"
+      >
         <Menu.Target>
           <Button
             aria-label={`${tSongMode("selectMode")}: ${getSongModeItemLabel(currentSongModeItem, tSongMode)}`}
