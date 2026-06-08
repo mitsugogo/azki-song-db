@@ -25,7 +25,9 @@ type SharedYouTubePlayerSource = {
   onError?: (event: YouTubeEvent<any>) => void;
 };
 
-type ActiveSource = Omit<SharedYouTubePlayerSource, "active">;
+type ActiveSource = Omit<SharedYouTubePlayerSource, "active" | "videoId"> & {
+  videoId: string;
+};
 
 type ActiveSlot = {
   sourceId: string;
@@ -77,8 +79,8 @@ export function SharedYouTubePlayerProvider({
       return;
     }
 
-    const { active: _active, ...nextSource } = source;
-    setActiveSource(nextSource);
+    const { active: _active, videoId, ...sourceWithoutActive } = source;
+    setActiveSource({ ...sourceWithoutActive, videoId });
   }, []);
 
   const clearSource = useCallback((sourceId: string) => {
