@@ -59,6 +59,7 @@ export default function MainPlayer() {
     setHasRestoredPosition,
     setPreviousVideoId,
     playerControls,
+    syncCurrentTimeFromPlayer,
   } = useMainPlayerControls({
     songs,
     allSongs,
@@ -75,6 +76,7 @@ export default function MainPlayer() {
     const previousPathname = previousPathnameRef.current;
 
     if (!isWatchPage && isWatchPagePath(previousPathname) && currentSong) {
+      syncCurrentTimeFromPlayer();
       globalPlayer.setIsMinimized(true);
     } else if (isWatchPage) {
       globalPlayer.maximizePlayer();
@@ -108,7 +110,13 @@ export default function MainPlayer() {
     }
 
     previousPathnameRef.current = pathname;
-  }, [pathname, currentSong, globalPlayer, changeCurrentSong]);
+  }, [
+    pathname,
+    currentSong,
+    globalPlayer,
+    changeCurrentSong,
+    syncCurrentTimeFromPlayer,
+  ]);
 
   useEffect(() => {
     if (!currentSong) return;

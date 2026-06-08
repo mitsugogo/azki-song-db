@@ -1,6 +1,5 @@
 import { Song } from "../types/song";
 import type { YouTubeVideoData } from "../types/youtube";
-import YouTubePlayer from "./YouTubePlayer";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { YouTubeEvent } from "react-youtube";
@@ -17,6 +16,10 @@ import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
 import { renderLinkedText } from "../lib/textLinkify";
 import { YouTubeApiVideoResult } from "../types/api/yt/video";
 import { getSongMode } from "./songModeMenu";
+import {
+  SharedYouTubePlayerSlot,
+  useSharedYouTubePlayerSource,
+} from "./SharedYouTubePlayer";
 
 const resolveTimeDisplayMode = (
   liveBroadcastContent?: string | null,
@@ -147,6 +150,32 @@ export default function PlayerSection({
   const timeDisplayMode = resolveTimeDisplayMode(
     videoInfo?.snippet?.liveBroadcastContent,
   );
+  const sharedVideoId = videoId || currentSong?.video_id;
+  const isSharedPlayerActive = Boolean(currentSong && sharedVideoId);
+
+  const sharedPlayerSource = useMemo(
+    () => ({
+      sourceId: "main",
+      active: isSharedPlayerActive,
+      videoId: sharedVideoId,
+      startTime,
+      onReady: handlePlayerOnReady as (event: YouTubeEvent<any>) => void,
+      onStateChange: handleStateChange as (event: YouTubeEvent<any>) => void,
+      onError: handlePlayerError as
+        | ((event: YouTubeEvent<any>) => void)
+        | undefined,
+    }),
+    [
+      isSharedPlayerActive,
+      sharedVideoId,
+      startTime,
+      handlePlayerOnReady,
+      handleStateChange,
+      handlePlayerError,
+    ],
+  );
+
+  useSharedYouTubePlayerSource(sharedPlayerSource);
 
   const hasNextInVideo = useMemo(() => {
     if (!currentSong) return false;
@@ -201,24 +230,11 @@ export default function PlayerSection({
             overlayProps={{ blur: 2, backgroundOpacity: 0.35 }}
           />
           <div className="absolute top-0 left-0 w-full h-full">
-            {currentSong && (
-              <YouTubePlayer
-                key={`youtube-player-${playerKey}-${currentSong?.video_id ?? "none"}`}
-                video_id={videoId}
-                startTime={startTime}
-                onReady={
-                  handlePlayerOnReady as (event: YouTubeEvent<any>) => void
-                }
-                onStateChange={
-                  handleStateChange as (event: YouTubeEvent<any>) => void
-                }
-                onError={
-                  handlePlayerError as
-                    | ((event: YouTubeEvent<any>) => void)
-                    | undefined
-                }
-              />
-            )}
+            <SharedYouTubePlayerSlot
+              sourceId="main"
+              active={isSharedPlayerActive}
+              className="h-full w-full"
+            />
           </div>
         </div>
 

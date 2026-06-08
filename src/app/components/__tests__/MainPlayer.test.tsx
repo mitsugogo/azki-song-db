@@ -117,6 +117,7 @@ const controlsState = {
   setPreviousAndNextSongs: vi.fn(),
   setHasRestoredPosition: vi.fn(),
   setPreviousVideoId: vi.fn(),
+  syncCurrentTimeFromPlayer: vi.fn(),
   playerControls: {
     isReady: true,
     play: vi.fn(),

@@ -517,6 +517,55 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.pauseVideo).toHaveBeenCalled();
   });
 
+  it("unmount時にプレイヤー実体の最新再生位置を保存する", () => {
+    const { result, unmount } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+    mockPlayer.getCurrentTime.mockReturnValue(37);
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    unmount();
+
+    expect(mockGlobalPlayer.setCurrentTime).toHaveBeenCalledWith(37);
+  });
+
+  it("unmount時に破棄中のプレイヤーが0秒を返しても直前の再生位置を保持する", () => {
+    const { result, unmount } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer();
+    mockPlayer.getCurrentTime.mockReturnValue(37);
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+      } as any);
+    });
+
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+
+    unmount();
+
+    expect(mockGlobalPlayer.setCurrentTime).toHaveBeenCalledWith(37);
+    expect(mockGlobalPlayer.setCurrentTime).not.toHaveBeenCalledWith(0);
+  });
+
   it("シーク機能が機能する", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({
