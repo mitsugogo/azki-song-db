@@ -303,6 +303,18 @@ export async function GET(request: Request) {
           ? albumEn || getStr("album")
           : getStr("album");
 
+        const albumListUri = getLink("album");
+        const albumId = (() => {
+          if (!albumListUri) return "";
+
+          try {
+            const parsedUrl = new URL(albumListUri);
+            return parsedUrl.searchParams.get("list") || "";
+          } catch {
+            return albumListUri.match(/[?&]list=([a-zA-Z0-9_-]+)/)?.[1] || "";
+          }
+        })();
+
         // 組み合わせてユニークな文字列にする
         const uniqKey =
           videoId + "_" + parseTimeFromNumberValue(getNum("start"));
@@ -361,6 +373,7 @@ export async function GET(request: Request) {
             ? convertToDate(getNum("album_release_at"))
             : "",
           album_is_compilation: getBool("album_is_compilation"),
+          album_id: albumId,
           video_title: getStr("video"),
           video_uri: videoUri,
           video_id: videoId,

@@ -16,6 +16,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { siteConfig } from "@/app/config/siteConfig";
 import { pageClasses } from "@/app/theme";
+import { getAlbumPlaylistUrl } from "../utils/albumLinks";
 
 function resolveSongCategory(
   song: Song,
@@ -111,11 +112,7 @@ export default function AlbumClient({
     .map((song) => new Date(song.broadcast_at).getTime())
     .filter((ts) => !Number.isNaN(ts))
     .sort((a, b) => b - a)[0];
-  const playlistUrl = leadSong.album_list_uri
-    ? leadSong.album_list_uri.startsWith("http")
-      ? leadSong.album_list_uri
-      : `https://www.youtube.com/playlist?list=${encodeURIComponent(leadSong.album_list_uri)}`
-    : null;
+  const playlistUrl = getAlbumPlaylistUrl(leadSong);
   const categoryBreadcrumb = getCategoryBreadcrumb(leadSong);
 
   return (
