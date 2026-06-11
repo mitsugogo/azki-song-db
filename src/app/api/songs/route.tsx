@@ -62,8 +62,8 @@ export async function GET(request: Request) {
 
     const publicRanges = [
       // 翻訳用マップ
-      "artists!A:B",
-      "song_titles!A:C",
+      "artists!A:C",
+      "song_titles!A:D",
 
       // データ
       "歌枠2021以前!A:L",
@@ -119,8 +119,16 @@ export async function GET(request: Request) {
     const HEADER_SCHEMA = [
       { key: "title", aliases: ["曲名", "title"] },
       { key: "title_en", aliases: ["曲名_en", "title_en"] },
+      {
+        key: "title_aliases",
+        aliases: ["検索別名", "aliases", "title_aliases"],
+      },
       { key: "artist", aliases: ["アーティスト", "artist"] },
       { key: "artist_en", aliases: ["アーティスト_en", "artist_en"] },
+      {
+        key: "artist_aliases",
+        aliases: ["検索別名", "aliases", "artist_aliases"],
+      },
       { key: "sing", aliases: ["歌った人", "sing"] },
       { key: "video", aliases: ["動画", "video", "video_uri"] },
       { key: "start", aliases: ["start", "開始", "開始時刻"] },
@@ -149,8 +157,26 @@ export async function GET(request: Request) {
     // 翻訳用マップ（英語時のみ使用）
     const artistsMap: Record<string, string> = {};
     const titlesMap: Record<string, string> = {};
+    const artistAliasesMap: Record<string, string[]> = {};
+    const titleAliasesMap: Record<string, string[]> = {};
 
     const sheetsArr = response.data.sheets || [];
+
+    const splitSearchAliases = (value: string): string[] => {
+      const aliases = value
+        .split(/[,、]/)
+        .map((alias) => alias.trim())
+        .filter(Boolean);
+      return [...new Set(aliases)];
+    };
+
+    const getAliasesForNames = (names: string[]) => {
+      return [
+        ...new Set(
+          names.flatMap((name) => artistAliasesMap[normalize(name)] ?? []),
+        ),
+      ];
+    };
 
     // 翻訳用シートのみを先に処理してマップを作成
     sheetsArr.forEach((sheet) => {
@@ -186,7 +212,16 @@ export async function GET(request: Request) {
                 vals[colMap["artist_en"]].formattedValue ||
                 ""
               : "") || "";
+          const aliases =
+            (colMap["artist_aliases"] !== -1 && vals[colMap["artist_aliases"]]
+              ? vals[colMap["artist_aliases"]].userEnteredValue?.stringValue ||
+                vals[colMap["artist_aliases"]].formattedValue ||
+                ""
+              : "") || "";
           if (ja) artistsMap[normalize(ja)] = en || "";
+          if (ja && aliases) {
+            artistAliasesMap[normalize(ja)] = splitSearchAliases(aliases);
+          }
         });
       }
 
@@ -211,9 +246,18 @@ export async function GET(request: Request) {
                 vals[colMap["title_en"]].formattedValue ||
                 ""
               : "") || "";
+          const aliases =
+            (colMap["title_aliases"] !== -1 && vals[colMap["title_aliases"]]
+              ? vals[colMap["title_aliases"]].userEnteredValue?.stringValue ||
+                vals[colMap["title_aliases"]].formattedValue ||
+                ""
+              : "") || "";
           if (title && artist) {
             const key = `${normalize(title)}|${normalize(artist)}`;
             titlesMap[key] = titleEn || "";
+            if (aliases) {
+              titleAliasesMap[key] = splitSearchAliases(aliases);
+            }
           }
         });
       }
@@ -297,6 +341,16 @@ export async function GET(request: Request) {
         const artistJa = getStr("artist");
         const artistEn = getStr("artist_en");
         const localizedArtist = isEnglish ? artistEn || artistJa : artistJa;
+        const artistJaNames = artistJa
+          .split(/[,,、]/)
+          .map((a) => a.trim())
+          .filter(Boolean);
+        const singJa = getStr("sing");
+        const singJaNames = singJa
+          .split(/[,,、]/)
+          .map((s) => s.trim())
+          .filter((s) => s !== "");
+        const titleAliasKey = `${normalize(titleValue)}|${normalize(artistJa)}`;
 
         const albumEn = getStr("album_en");
         const localizedAlbum = isEnglish
@@ -322,15 +376,18 @@ export async function GET(request: Request) {
         songs.push({
           source_order: sourceOrder++,
           title: localizedTitle,
+          title_aliases: titleAliasesMap[titleAliasKey] ?? [],
           slug: slugify(titleValue) || videoId,
           slugv2: slugifyV2(uniqKey),
           artist: localizedArtist,
+          artist_aliases: getAliasesForNames(artistJaNames),
           artists: localizedArtist
             .split(/[,,、]/)
             .map((a) => a.trim())
             .filter(Boolean),
-          sing: getStr("sing"),
-          sings: getStr("sing")
+          sing: singJa,
+          sing_aliases: getAliasesForNames(singJaNames),
+          sings: singJa
             .split(/[,,、]/)
             .map((s) => s.trim())
             .filter((s) => s !== ""),

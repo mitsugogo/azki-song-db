@@ -4,10 +4,13 @@ export interface Song {
   source_order?: number;
   title: string;
   title_en?: string;
+  title_aliases?: string[];
   artist: string;
   artist_en?: string;
+  artist_aliases?: string[];
   artists?: string[];
   artists_en?: string[];
+  sing_aliases?: string[];
   hl: {
     ja: {
       title: string;
