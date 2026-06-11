@@ -57,6 +57,9 @@ describe("songs route", () => {
     expect(getMock).toHaveBeenCalledTimes(1);
 
     const args = getMock.mock.calls[0]?.[0];
+    expect(args?.ranges).toEqual(
+      expect.arrayContaining(["artists!A:C", "song_titles!A:D"]),
+    );
     expect(args?.ranges).not.toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
     );
@@ -247,6 +250,121 @@ describe("songs route", () => {
           is_members_only: false,
         }),
       ]),
+    );
+  });
+
+  it("アーティスト・曲名の検索別名をレスポンスに含める", async () => {
+    getMock.mockResolvedValue({
+      data: {
+        sheets: [
+          {
+            properties: { title: "artists" },
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [
+                      { formattedValue: "アーティスト" },
+                      { formattedValue: "アーティスト_en" },
+                      { formattedValue: "検索別名" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "AZKi" },
+                      { formattedValue: "AZKi" },
+                      { formattedValue: "あずき、あずき" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "星街すいせい" },
+                      { formattedValue: "Hoshimachi Suisei" },
+                      { formattedValue: "ほしまち,すいせい" },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            properties: { title: "song_titles" },
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [
+                      { formattedValue: "title" },
+                      { formattedValue: "artist" },
+                      { formattedValue: "title_en" },
+                      { formattedValue: "検索別名" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "afterglow" },
+                      { formattedValue: "AZKi" },
+                      { formattedValue: "afterglow" },
+                      { formattedValue: "あふたー,アフター、あふたー" },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            properties: { title: "歌枠2025" },
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [
+                      { formattedValue: "ID" },
+                      { formattedValue: "有効" },
+                      { formattedValue: "曲名" },
+                      { formattedValue: "アーティスト" },
+                      { formattedValue: "歌った人" },
+                      { formattedValue: "動画" },
+                      { formattedValue: "開始" },
+                      { formattedValue: "配信日" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "1" },
+                      { userEnteredValue: { boolValue: true } },
+                      { formattedValue: "afterglow" },
+                      { formattedValue: "AZKi" },
+                      { formattedValue: "AZKi、星街すいせい" },
+                      {
+                        formattedValue: "https://youtu.be/abcdefghijk",
+                        hyperlink: "https://youtu.be/abcdefghijk",
+                      },
+                      { userEnteredValue: { numberValue: 0 } },
+                      { userEnteredValue: { numberValue: 45658 } },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const response = await GET(new Request("http://localhost/api/songs?hl=ja"));
+    const songs = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(songs[0]).toEqual(
+      expect.objectContaining({
+        title: "afterglow",
+        title_aliases: ["あふたー", "アフター"],
+        artist: "AZKi",
+        artist_aliases: ["あずき"],
+        sing: "AZKi、星街すいせい",
+        sing_aliases: ["あずき", "ほしまち", "すいせい"],
+      }),
     );
   });
 });

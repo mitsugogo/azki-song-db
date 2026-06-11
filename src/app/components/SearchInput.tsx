@@ -18,49 +18,60 @@ interface SearchInputProps {
   className?: string;
 }
 
-const searchOptionsFilter: NonNullable<TagsInputProps["filter"]> = ({
-  options,
-  search,
-  limit,
-}) => {
-  const normalizedSearch = search.trim().toLowerCase();
-  const result: ReturnType<NonNullable<TagsInputProps["filter"]>> = [];
-  let remaining = limit;
+const normalizeSearchText = (value: string) =>
+  value.normalize("NFKC").trim().toLowerCase();
 
-  for (const option of options) {
-    if (remaining <= 0) {
-      break;
-    }
+const splitSearchAliases = (aliases?: string[]) =>
+  (aliases ?? []).map((alias) => alias.trim()).filter(Boolean);
 
-    if ("items" in option) {
-      const items = [];
+const createAliasAwareFilter =
+  (
+    searchTextByValue: Map<string, string>,
+  ): NonNullable<TagsInputProps["filter"]> =>
+  ({ options, search, limit }) => {
+    const normalizedSearch = normalizeSearchText(search);
+    const result: ReturnType<NonNullable<TagsInputProps["filter"]>> = [];
+    let remaining = limit;
 
-      for (const item of option.items) {
-        if (remaining <= 0) {
-          break;
-        }
+    const matches = (value: string, label: string) => {
+      const indexedText = searchTextByValue.get(value) ?? label;
+      return normalizeSearchText(indexedText).includes(normalizedSearch);
+    };
 
-        if (item.label.toLowerCase().includes(normalizedSearch)) {
-          items.push(item);
-          remaining -= 1;
-        }
+    for (const option of options) {
+      if (remaining <= 0) {
+        break;
       }
 
-      if (items.length > 0) {
-        result.push({ group: option.group, items });
+      if ("items" in option) {
+        const items = [];
+
+        for (const item of option.items) {
+          if (remaining <= 0) {
+            break;
+          }
+
+          if (matches(item.value, item.label)) {
+            items.push(item);
+            remaining -= 1;
+          }
+        }
+
+        if (items.length > 0) {
+          result.push({ group: option.group, items });
+        }
+
+        continue;
       }
 
-      continue;
+      if (matches(option.value, option.label)) {
+        result.push(option);
+        remaining -= 1;
+      }
     }
 
-    if (option.label.toLowerCase().includes(normalizedSearch)) {
-      result.push(option);
-      remaining -= 1;
-    }
-  }
-
-  return result;
-};
+    return result;
+  };
 
 export default function SearchInput({
   allSongs,
@@ -75,150 +86,241 @@ export default function SearchInput({
 
   const resolvedPlaceholder = placeholder ?? t("search");
 
-  const searchData = useMemo(() => {
-    const availableTags = Array.from(
-      new Set(allSongs.flatMap((song) => song.tags)),
-    ).filter((tag) => tag !== "");
+  const { searchData, optionSearchTextByValue, canonicalValueByAlias } =
+    useMemo(() => {
+      const optionSearchTextByValue = new Map<string, string>();
+      const canonicalValueByAlias = new Map<string, string>();
 
-    const availableMilestones = Array.from(
-      new Set(allSongs.flatMap((song) => song.milestones || [])),
-    ).filter((milestone) => milestone !== "");
+      const registerSearchOption = (
+        prefix: string,
+        canonicalValue: string,
+        aliases: string[] = [],
+      ) => {
+        const value = `${prefix}${canonicalValue}`;
+        const searchText = [value, canonicalValue, ...aliases]
+          .filter(Boolean)
+          .join(" ");
 
-    const availableArtists = Array.from(
-      new Set([
-        ...allSongs.map((song) => song.artist),
-        ...(isEnglish
-          ? allSongs.flatMap((song) =>
-              (song.artist_en ?? "")
-                .split(/[,、]/)
-                .map((artist) => artist.trim())
-                .filter(Boolean),
-            )
-          : []),
-      ]),
-    ).filter((artist) => artist !== "");
-
-    const availableSingers = Array.from(
-      new Set(
-        allSongs.flatMap((song) =>
-          song.sings.map((s) => s.trim()).filter((s) => s !== ""),
-        ),
-      ),
-    );
-
-    const availableTitles = Array.from(
-      new Set([
-        ...allSongs.map((song) => song.title),
-        ...(isEnglish
-          ? allSongs
-              .map((song) => song.title ?? "")
-              .filter((title) => title !== "")
-          : []),
-      ]),
-    ).filter((title) => title !== "");
-
-    const availableLyricists = Array.from(
-      new Set(
-        allSongs.flatMap((song) =>
-          song.lyricist
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
-        ),
-      ),
-    );
-
-    const availableComposers = Array.from(
-      new Set(
-        allSongs.flatMap((song) =>
-          song.composer
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
-        ),
-      ),
-    );
-    const availableArrangers = Array.from(
-      new Set(
-        allSongs.flatMap((song) =>
-          song.arranger
-            .split("、")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
-        ),
-      ),
-    );
-
-    // ユニット（コラボ通称）のリスト作成
-    const availableUnits = collabUnits
-      .filter((unit) => {
-        // 実際にそのユニットの曲が存在するかチェック
-        return allSongs.some((song) => {
-          if (song.sing === "") return false;
-          const singers = song.hl?.ja?.sings || song.sings;
-          if (singers.length !== unit.members.length) return false;
-          const sortedSingers = normalizeMemberNames(singers);
-          const sortedUnitMembers = normalizeMemberNames(unit.members);
-          return sortedUnitMembers.every((m, i) => m === sortedSingers[i]);
+        optionSearchTextByValue.set(value, searchText);
+        aliases.forEach((alias) => {
+          canonicalValueByAlias.set(
+            normalizeSearchText(`${prefix}${alias}`),
+            value,
+          );
         });
-      })
-      .map((unit) => {
-        // ロケールに応じて英語表記があれば英語を優先、なければ通称を返す
-        if (isEnglish && unit.hl && unit.hl.en) return unit.hl.en.unitName;
-        return unit.unitName;
-      })
-      .filter((v, i, arr) => arr.indexOf(v) === i); // 重複排除
 
-    return [
-      {
-        group: t("groupArtist"),
-        items: availableArtists.map((artist) => `artist:${artist}`),
-      },
-      {
-        group: t("groupSinger"),
-        items: availableSingers.map((singer) => `sing:${singer}`),
-      },
-      {
-        group: t("groupUnit"),
-        items: availableUnits.map((unit) => `unit:${unit}`),
-      },
-      {
-        group: t("groupTitle"),
-        items: availableTitles.map((title) => `title:${title}`),
-      },
-      {
-        group: t("groupLyricist"),
-        items: availableLyricists.map((lyricist) => `lyricist:${lyricist}`),
-      },
-      {
-        group: t("groupComposer"),
-        items: availableComposers.map((composer) => `composer:${composer}`),
-      },
-      {
-        group: t("groupArranger"),
-        items: availableArrangers.map((arranger) => `arranger:${arranger}`),
-      },
-      {
-        group: t("groupTag"),
-        items: availableTags.map((tag) => `tag:${tag}`),
-      },
-      {
-        group: t("groupMilestone"),
-        items: availableMilestones.map((milestone) => `milestone:${milestone}`),
-      },
-      {
-        group: t("groupYear"),
-        items: Array.from(new Set(allSongs.map((song) => song.year)))
-          .filter((year): year is number => year !== undefined)
-          .sort((a, b) => b - a)
-          .map((year) => `year:${year}`),
-      },
-      {
-        group: t("groupSeason"),
-        items: ["season:春", "season:夏", "season:秋", "season:冬"],
-      },
-    ];
-  }, [allSongs, isEnglish, t]);
+        return value;
+      };
+
+      const availableTags = Array.from(
+        new Set(allSongs.flatMap((song) => song.tags)),
+      ).filter((tag) => tag !== "");
+
+      const availableMilestones = Array.from(
+        new Set(allSongs.flatMap((song) => song.milestones || [])),
+      ).filter((milestone) => milestone !== "");
+
+      const artistAliasesByName = new Map<string, Set<string>>();
+      const addAliases = (name: string, aliases: string[] = []) => {
+        if (!name) return;
+        const aliasSet = artistAliasesByName.get(name) ?? new Set<string>();
+        splitSearchAliases(aliases).forEach((alias) => aliasSet.add(alias));
+        artistAliasesByName.set(name, aliasSet);
+      };
+
+      allSongs.forEach((song) => {
+        addAliases(song.artist, song.artist_aliases);
+        song.artists?.forEach((artist) =>
+          addAliases(artist, song.artist_aliases),
+        );
+
+        if (isEnglish) {
+          (song.artist_en ?? "")
+            .split(/[,、]/)
+            .map((artist) => artist.trim())
+            .filter(Boolean)
+            .forEach((artist) => addAliases(artist, song.artist_aliases));
+        }
+      });
+
+      const availableArtists = Array.from(artistAliasesByName.keys()).filter(
+        (artist) => artist !== "",
+      );
+
+      const singerAliasesByName = new Map<string, Set<string>>();
+      allSongs.forEach((song) => {
+        song.sings
+          .map((s) => s.trim())
+          .filter((s) => s !== "")
+          .forEach((singer) => {
+            const aliasSet =
+              singerAliasesByName.get(singer) ?? new Set<string>();
+            splitSearchAliases(song.sing_aliases).forEach((alias) =>
+              aliasSet.add(alias),
+            );
+            singerAliasesByName.set(singer, aliasSet);
+          });
+      });
+
+      const availableSingers = Array.from(singerAliasesByName.keys());
+
+      const titleAliasesByName = new Map<string, Set<string>>();
+      allSongs.forEach((song) => {
+        const title = song.title;
+        if (!title) return;
+        const aliasSet = titleAliasesByName.get(title) ?? new Set<string>();
+        splitSearchAliases(song.title_aliases).forEach((alias) =>
+          aliasSet.add(alias),
+        );
+        titleAliasesByName.set(title, aliasSet);
+      });
+
+      const availableTitles = Array.from(titleAliasesByName.keys()).filter(
+        (title) => title !== "",
+      );
+
+      const availableLyricists = Array.from(
+        new Set(
+          allSongs.flatMap((song) =>
+            song.lyricist
+              .split("、")
+              .map((s) => s.trim())
+              .filter((s) => s !== ""),
+          ),
+        ),
+      );
+
+      const availableComposers = Array.from(
+        new Set(
+          allSongs.flatMap((song) =>
+            song.composer
+              .split("、")
+              .map((s) => s.trim())
+              .filter((s) => s !== ""),
+          ),
+        ),
+      );
+      const availableArrangers = Array.from(
+        new Set(
+          allSongs.flatMap((song) =>
+            song.arranger
+              .split("、")
+              .map((s) => s.trim())
+              .filter((s) => s !== ""),
+          ),
+        ),
+      );
+
+      // ユニット（コラボ通称）のリスト作成
+      const availableUnits = collabUnits
+        .filter((unit) => {
+          // 実際にそのユニットの曲が存在するかチェック
+          return allSongs.some((song) => {
+            if (song.sing === "") return false;
+            const singers = song.hl?.ja?.sings || song.sings;
+            if (singers.length !== unit.members.length) return false;
+            const sortedSingers = normalizeMemberNames(singers);
+            const sortedUnitMembers = normalizeMemberNames(unit.members);
+            return sortedUnitMembers.every((m, i) => m === sortedSingers[i]);
+          });
+        })
+        .map((unit) => {
+          // ロケールに応じて英語表記があれば英語を優先、なければ通称を返す
+          if (isEnglish && unit.hl && unit.hl.en) return unit.hl.en.unitName;
+          return unit.unitName;
+        })
+        .filter((v, i, arr) => arr.indexOf(v) === i); // 重複排除
+
+      const data = [
+        {
+          group: t("groupArtist"),
+          items: availableArtists.map((artist) =>
+            registerSearchOption(
+              "artist:",
+              artist,
+              Array.from(artistAliasesByName.get(artist) ?? []),
+            ),
+          ),
+        },
+        {
+          group: t("groupSinger"),
+          items: availableSingers.map((singer) =>
+            registerSearchOption(
+              "sing:",
+              singer,
+              Array.from(singerAliasesByName.get(singer) ?? []),
+            ),
+          ),
+        },
+        {
+          group: t("groupUnit"),
+          items: availableUnits.map((unit) => `unit:${unit}`),
+        },
+        {
+          group: t("groupTitle"),
+          items: availableTitles.map((title) =>
+            registerSearchOption(
+              "title:",
+              title,
+              Array.from(titleAliasesByName.get(title) ?? []),
+            ),
+          ),
+        },
+        {
+          group: t("groupLyricist"),
+          items: availableLyricists.map((lyricist) => `lyricist:${lyricist}`),
+        },
+        {
+          group: t("groupComposer"),
+          items: availableComposers.map((composer) => `composer:${composer}`),
+        },
+        {
+          group: t("groupArranger"),
+          items: availableArrangers.map((arranger) => `arranger:${arranger}`),
+        },
+        {
+          group: t("groupTag"),
+          items: availableTags.map((tag) => `tag:${tag}`),
+        },
+        {
+          group: t("groupMilestone"),
+          items: availableMilestones.map(
+            (milestone) => `milestone:${milestone}`,
+          ),
+        },
+        {
+          group: t("groupYear"),
+          items: Array.from(new Set(allSongs.map((song) => song.year)))
+            .filter((year): year is number => year !== undefined)
+            .sort((a, b) => b - a)
+            .map((year) => `year:${year}`),
+        },
+        {
+          group: t("groupSeason"),
+          items: ["season:春", "season:夏", "season:秋", "season:冬"],
+        },
+      ];
+
+      return {
+        searchData: data,
+        optionSearchTextByValue,
+        canonicalValueByAlias,
+      };
+    }, [allSongs, isEnglish, t]);
+
+  const aliasAwareFilter = useMemo(
+    () => createAliasAwareFilter(optionSearchTextByValue),
+    [optionSearchTextByValue],
+  );
+
+  const handleSearchChange = (values: string[]) => {
+    onSearchChange(
+      values.map(
+        (value) =>
+          canonicalValueByAlias.get(normalizeSearchText(value)) ?? value,
+      ),
+    );
+  };
 
   const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
     option,
@@ -262,8 +364,8 @@ export default function SearchInput({
       renderOption={renderMultiSelectOption}
       maxDropdownHeight={200}
       value={searchValue}
-      onChange={onSearchChange}
-      filter={searchOptionsFilter}
+      onChange={handleSearchChange}
+      filter={aliasAwareFilter}
       limit={15}
       splitChars={["|"]}
       comboboxProps={{
