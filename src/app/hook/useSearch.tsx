@@ -188,16 +188,12 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
             equalsOrIncludes(s.title, v) ||
             someEqualsOrIncludes(s.title_aliases ?? [], v) ||
             (locale === "en" &&
-              (s.title_en
-                ? equalsOrIncludes(s.title_en, v)
-                : false)),
+              (s.title_en ? equalsOrIncludes(s.title_en, v) : false)),
           "artist:": (s, v) =>
             equalsOrIncludes(s.artist, v) ||
             someEqualsOrIncludes(s.artist_aliases ?? [], v) ||
             (locale === "en" &&
-              (s.artist_en
-                ? equalsOrIncludes(s.artist_en, v)
-                : false)),
+              (s.artist_en ? equalsOrIncludes(s.artist_en, v) : false)),
           "album:": (s, v) => equalsOrIncludes(s.album.toLowerCase(), v),
           "sing:": (s, v) =>
             s.sing
@@ -307,9 +303,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
           equalsOrIncludes(song.artist, word) ||
           someEqualsOrIncludes(song.artist_aliases ?? [], word) ||
           (locale === "en" &&
-            (song.title_en
-              ? equalsOrIncludes(song.title_en, word)
-              : false)) ||
+            (song.title_en ? equalsOrIncludes(song.title_en, word) : false)) ||
           (locale === "en" &&
             (song.artist_en
               ? equalsOrIncludes(song.artist_en, word)
