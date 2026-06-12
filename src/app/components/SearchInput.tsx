@@ -1,7 +1,26 @@
-import { TagsInput, TagsInputProps, Group, Text } from "@mantine/core";
+import {
+  TagsInput,
+  TagsInputProps,
+  Group,
+  Pill,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import { useMemo } from "react";
 import { HiSearch } from "react-icons/hi";
-import { FaMusic, FaUser, FaTag, FaUsers, FaCalendar } from "react-icons/fa6";
+import {
+  FaCalendar,
+  FaFilePen,
+  FaGuitar,
+  FaLeaf,
+  FaMicrophone,
+  FaMusic,
+  FaPenNib,
+  FaStar,
+  FaTag,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa6";
 import { useLocale, useTranslations } from "next-intl";
 import { Song } from "../types/song";
 import {
@@ -23,6 +42,25 @@ const normalizeSearchText = (value: string) =>
 
 const splitSearchAliases = (aliases?: string[]) =>
   (aliases ?? []).map((alias) => alias.trim()).filter(Boolean);
+
+const searchPrefixes = [
+  "title:",
+  "artist:",
+  "sing:",
+  "unit:",
+  "tag:",
+  "lyricist:",
+  "composer:",
+  "arranger:",
+  "year:",
+  "milestone:",
+  "season:",
+] as const;
+
+const removeSearchPrefix = (value: string) => {
+  const prefix = searchPrefixes.find((item) => value.startsWith(item));
+  return prefix ? value.slice(prefix.length) : value;
+};
 
 const createAliasAwareFilter =
   (
@@ -322,6 +360,44 @@ export default function SearchInput({
     );
   };
 
+  const getSearchPrefixMeta = (value: string) => {
+    if (value.startsWith("title:")) {
+      return { icon: <FaMusic aria-hidden />, label: t("groupTitle") };
+    }
+    if (value.startsWith("artist:")) {
+      return { icon: <FaUser aria-hidden />, label: t("groupArtist") };
+    }
+    if (value.startsWith("sing:")) {
+      return { icon: <FaMicrophone aria-hidden />, label: t("groupSinger") };
+    }
+    if (value.startsWith("unit:")) {
+      return { icon: <FaUsers aria-hidden />, label: t("groupUnit") };
+    }
+    if (value.startsWith("tag:")) {
+      return { icon: <FaTag aria-hidden />, label: t("groupTag") };
+    }
+    if (value.startsWith("milestone:")) {
+      return { icon: <FaStar aria-hidden />, label: t("groupMilestone") };
+    }
+    if (value.startsWith("year:")) {
+      return { icon: <FaCalendar aria-hidden />, label: t("groupYear") };
+    }
+    if (value.startsWith("season:")) {
+      return { icon: <FaLeaf aria-hidden />, label: t("groupSeason") };
+    }
+    if (value.startsWith("lyricist:")) {
+      return { icon: <FaPenNib aria-hidden />, label: t("groupLyricist") };
+    }
+    if (value.startsWith("composer:")) {
+      return { icon: <FaGuitar aria-hidden />, label: t("groupComposer") };
+    }
+    if (value.startsWith("arranger:")) {
+      return { icon: <FaFilePen aria-hidden />, label: t("groupArranger") };
+    }
+
+    return null;
+  };
+
   const renderMultiSelectOption: TagsInputProps["renderOption"] = ({
     option,
   }) => (
@@ -333,28 +409,64 @@ export default function SearchInput({
       {option.value.includes("tag:") && <FaTag />}
       {option.value.includes("milestone:") && "★"}
       {option.value.includes("year:") && <FaCalendar />}
-      {option.value.includes("season:") && "季節:"}
-      {option.value.includes("lyricist:") && "作詞:"}
-      {option.value.includes("composer:") && "作曲:"}
-      {option.value.includes("arranger:") && "編曲:"}
+      {option.value.includes("season:") && (
+        <span aria-label={t("groupSeason")} role="img">
+          <FaLeaf aria-hidden />
+        </span>
+      )}
+      {option.value.includes("lyricist:") && (
+        <span aria-label={t("groupLyricist")} role="img">
+          <FaPenNib aria-hidden />
+        </span>
+      )}
+      {option.value.includes("composer:") && (
+        <span aria-label={t("groupComposer")} role="img">
+          <FaGuitar aria-hidden />
+        </span>
+      )}
+      {option.value.includes("arranger:") && (
+        <span aria-label={t("groupArranger")} role="img">
+          <FaFilePen aria-hidden />
+        </span>
+      )}
       <div>
-        <Text size="sm">
-          {option.value
-            .replace("title:", "")
-            .replace("artist:", "")
-            .replace("sing:", "")
-            .replace("unit:", "")
-            .replace("tag:", "")
-            .replace("lyricist:", "")
-            .replace("composer:", "")
-            .replace("arranger:", "")
-            .replace("year:", "")
-            .replace("milestone:", "")
-            .replace("season:", "")}
-        </Text>
+        <Text size="sm">{removeSearchPrefix(option.value)}</Text>
       </div>
     </Group>
   );
+
+  const renderSelectedPill: TagsInputProps["renderPill"] = ({
+    value,
+    onRemove,
+    disabled,
+    reorderProps,
+  }) => {
+    const itemValue = String(value ?? "");
+    const label = removeSearchPrefix(itemValue);
+    const prefixMeta = getSearchPrefixMeta(itemValue);
+
+    return (
+      <Pill
+        withRemoveButton={!disabled}
+        onRemove={onRemove}
+        disabled={disabled}
+        {...reorderProps}
+      >
+        {prefixMeta ? (
+          <Group component="span" gap={4} wrap="nowrap">
+            <Tooltip label={prefixMeta.label} withArrow>
+              <span aria-label={prefixMeta.label} role="img">
+                {prefixMeta.icon}
+              </span>
+            </Tooltip>
+            <span>{label}</span>
+          </Group>
+        ) : (
+          itemValue
+        )}
+      </Pill>
+    );
+  };
 
   return (
     <TagsInput
@@ -362,6 +474,7 @@ export default function SearchInput({
       leftSection={<HiSearch />}
       data={searchData}
       renderOption={renderMultiSelectOption}
+      renderPill={renderSelectedPill}
       maxDropdownHeight={200}
       value={searchValue}
       onChange={handleSearchChange}

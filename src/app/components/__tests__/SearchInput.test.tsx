@@ -42,12 +42,16 @@ const createSong = (overrides: Partial<Song>): Song =>
     ...overrides,
   }) as Song;
 
-const renderSearchInput = (allSongs: Song[], onSearchChange = vi.fn()) => {
+const renderSearchInput = (
+  allSongs: Song[],
+  onSearchChange = vi.fn(),
+  searchValue: string[] = [],
+) => {
   render(
     <MantineProvider>
       <SearchInput
         allSongs={allSongs}
-        searchValue={[]}
+        searchValue={searchValue}
         onSearchChange={onSearchChange}
         placeholder="search"
       />
@@ -135,6 +139,71 @@ describe("SearchInput", () => {
 
     await waitFor(() => {
       expect(onSearchChange).toHaveBeenCalledWith(["title:♡桃色片思い♡"]);
+    });
+  });
+
+  it("選択済みのprefix検索タグはprefixをアイコン表示にする", () => {
+    const searchValues = [
+      "title:afterglow",
+      "artist:AZKi",
+      "sing:歌った人",
+      "unit:ユニット名",
+      "tag:タグ名",
+      "milestone:100万再生",
+      "year:2025",
+      "season:春",
+      "lyricist:作詞者",
+      "composer:作曲者",
+      "arranger:編曲者",
+    ];
+
+    renderSearchInput([createSong({})], vi.fn(), searchValues);
+
+    [
+      ["曲名", "afterglow"],
+      ["アーティスト", "AZKi"],
+      ["歌った人", "歌った人"],
+      ["ユニット", "ユニット名"],
+      ["タグ", "タグ名"],
+      ["マイルストーン", "100万再生"],
+      ["配信年", "2025"],
+      ["季節", "春"],
+      ["作詞", "作詞者"],
+      ["作曲", "作曲者"],
+      ["編曲", "編曲者"],
+    ].forEach(([iconLabel, text]) => {
+      expect(
+        screen.getByRole("img", { name: iconLabel }).parentElement,
+      ).toHaveTextContent(text);
+    });
+
+    expect(screen.getByRole("img", { name: "曲名" }).innerHTML).not.toBe(
+      screen.getByRole("img", { name: "作曲" }).innerHTML,
+    );
+
+    searchValues.forEach((value) => {
+      expect(screen.queryByText(value)).not.toBeInTheDocument();
+    });
+  });
+
+  it("季節・作詞・作曲・編曲の検索候補はprefixラベルをアイコン表示にする", () => {
+    renderSearchInput([
+      createSong({
+        lyricist: "作詞者",
+        composer: "作曲者",
+        arranger: "編曲者",
+      }),
+    ]);
+
+    ["季節", "作詞", "作曲", "編曲"].forEach((iconLabel) => {
+      expect(
+        screen.getAllByLabelText(iconLabel, { selector: '[role="img"]' })
+          .length,
+      ).toBeGreaterThan(0);
+    });
+
+    ["季節:", "作詞:", "作曲:", "編曲:"].forEach((label) => {
+      expect(screen.queryByText(label)).not.toBeInTheDocument();
     });
   });
 });
