@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/mitsugogo/azki-song-db/compare/v2.6.0...v2.7.0) (2026-06-13)
+
+
+### Features
+
+* TOP背景にMV再生 ([cd0f5eb](https://github.com/mitsugogo/azki-song-db/commit/cd0f5ebc7e026678a1b796169a0224e513109e37))
+* あいまい検索 ([e373399](https://github.com/mitsugogo/azki-song-db/commit/e373399bfd848f2be9d4195c80cefacf50c6210e))
+* ローカル再生数カウント追加 ([31a6045](https://github.com/mitsugogo/azki-song-db/commit/31a6045ad4e7c8bc7ce84715031d86c9cf7ef49f))
+
+
+### Bug Fixes
+
+* TagsInputの段落ちを修正 ([ac4039a](https://github.com/mitsugogo/azki-song-db/commit/ac4039a590f60eb93174e7ba5449626d2f1848c1))
+* ミニプレイヤーから復帰したときに再生位置が保持されなかったのを修正 ([eccdac3](https://github.com/mitsugogo/azki-song-db/commit/eccdac316d5da1eb9202ba337e0e3097e3b99b46))
+* 検索時の動作が重かったのを修正 ([e049a43](https://github.com/mitsugogo/azki-song-db/commit/e049a4338f2db754d69a2b15db529fac332ffe60))
+* 楽曲情報取得を最適化 ([7c1d30b](https://github.com/mitsugogo/azki-song-db/commit/7c1d30b04ed870be6ba64c658bb28c2ce80a298c))
+* 楽曲詳細ページの翻訳漏れ ([aa66c4c](https://github.com/mitsugogo/azki-song-db/commit/aa66c4cec6c05ba62b12f0ce5d92caf3431268e9))
+
 ## [2.6.0](https://github.com/mitsugogo/azki-song-db/compare/v2.5.7...v2.6.0) (2026-05-31)
 
 
