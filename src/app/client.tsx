@@ -556,7 +556,7 @@ export default function ClientTop() {
               <Link
                 href={heroBackgroundVideoUrl}
                 target="_blank"
-                className="absolute right-3 top-1 z-20 inline-flex max-w-38 items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-primary/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:right-6 sm:top-5 sm:max-w-[calc(100vw-2rem)] sm:px-3 sm:py-1.5 sm:text-xs"
+                className="absolute right-3 top-1 z-20 inline-flex max-w-[calc(100vw-2rem)] text-nowrap items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-primary/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:right-6 sm:top-5 sm:max-w-[calc(100vw-2rem)] sm:px-3 sm:py-1.5 sm:text-xs"
                 title={heroBackgroundSong.video_title}
               >
                 <Text
@@ -569,7 +569,12 @@ export default function ClientTop() {
                 <Text size="xs" fw={500} truncate="end">
                   {heroBackgroundSong.title}
                 </Text>
-                <Text c="dimmed" size="xs">
+                <Text
+                  c="dimmed"
+                  size="xs"
+                  className="hidden sm:inline"
+                  component="span"
+                >
                   {heroBackgroundSong.broadcast_at
                     ? `- ${formatDate(heroBackgroundSong.broadcast_at, locale)}`
                     : null}
