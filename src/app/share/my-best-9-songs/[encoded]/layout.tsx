@@ -29,7 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await getLocale();
   const tMeta = await getTranslations({ namespace: "Metadata.share", locale });
 
-  let pageTitle = tMeta("myBest9Title") ?? "好きな曲9選";
+  let pageTitle =
+    tMeta("myBest9Title", { siteName: siteConfig.siteName }) ?? "好きな曲9選";
   let description =
     tMeta("myBest9Description") ?? "AZKiの好きな曲をシェアしています";
   let ogTitle = tMeta("myBest9OgTitle") ?? "好きな曲9選";
