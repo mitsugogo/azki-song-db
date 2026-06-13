@@ -162,6 +162,7 @@
     "heroLine2": "Virtual DiVA AZKiの軌跡",
     "heroLine2_short": "VDiVA AZKiの軌跡",
     "description": "ホロライブ所属のVirtual DiVA AZKiさんのオリジナル楽曲、カバー楽曲、歌枠などをまとめた非公式の楽曲データベースサイトです。",
+    "heroWatchFromBeginning": "アプリ内プレイヤーで最初から再生",
     "searchButton": "検索する",
     "searching": "検索中...",
     "surpriseTooltip": "ランダムに楽曲を再生開始します",

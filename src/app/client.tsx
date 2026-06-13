@@ -58,6 +58,7 @@ import {
   LuSparkles,
   LuCopy,
   LuCopyCheck,
+  LuVolumeX,
 } from "react-icons/lu";
 import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
@@ -77,6 +78,10 @@ const zenMaruGothic = Zen_Maru_Gothic({
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
+
+// 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
+const HERO_BACKGROUND_RECENT_DAYS = 30;
+const HERO_BACKGROUND_RECENT_WEIGHT = 10;
 const ORIGINAL_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
   SONG_MODE_MENU_ITEMS[0];
@@ -125,7 +130,32 @@ function pickHeroBackgroundSong(items: Song[]) {
     return null;
   }
 
-  return candidates[Math.floor(Math.random() * candidates.length)];
+  const recentThreshold =
+    Date.now() - HERO_BACKGROUND_RECENT_DAYS * 24 * 60 * 60 * 1000;
+  const weightedCandidates = candidates.map((song) => {
+    const broadcastTime = new Date(song.broadcast_at).getTime();
+    const isRecent =
+      Number.isFinite(broadcastTime) && broadcastTime >= recentThreshold;
+
+    return {
+      song,
+      weight: isRecent ? HERO_BACKGROUND_RECENT_WEIGHT : 1,
+    };
+  });
+  const totalWeight = weightedCandidates.reduce(
+    (sum, candidate) => sum + candidate.weight,
+    0,
+  );
+  let randomWeight = Math.random() * totalWeight;
+
+  for (const candidate of weightedCandidates) {
+    randomWeight -= candidate.weight;
+    if (randomWeight < 0) {
+      return candidate.song;
+    }
+  }
+
+  return weightedCandidates.at(-1)?.song ?? null;
 }
 
 function buildHeroBackgroundVideoUrl(song: Song) {
@@ -400,6 +430,14 @@ export default function ClientTop() {
     () =>
       heroBackgroundSong
         ? buildHeroBackgroundVideoUrl(heroBackgroundSong)
+        : null,
+    [heroBackgroundSong],
+  );
+
+  const heroBackgroundWatchHref = useMemo(
+    () =>
+      heroBackgroundSong
+        ? buildWatchHref({ videoId: heroBackgroundSong.video_id })
         : null,
     [heroBackgroundSong],
   );
@@ -702,34 +740,46 @@ export default function ClientTop() {
               }}
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-56 bg-linear-to-b from-transparent via-[#fffafc]/70 to-transparent dark:via-[#111827]/70 sm:h-72" />
-            {heroBackgroundSong && heroBackgroundVideoUrl ? (
-              <Link
-                href={heroBackgroundVideoUrl}
-                target="_blank"
-                className="absolute right-3 top-1 z-20 inline-flex max-w-[calc(100vw-2rem)] text-nowrap items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-primary/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:right-6 sm:top-5 sm:max-w-[calc(100vw-2rem)] sm:px-3 sm:py-1.5 sm:text-xs"
-                title={heroBackgroundSong.video_title}
-              >
-                <Text
-                  size="sm"
-                  c="red"
-                  className="mt-0.5 mr-1 shrink-0 dark:text-white!"
+            {heroBackgroundSong &&
+            heroBackgroundVideoUrl &&
+            heroBackgroundWatchHref ? (
+              <div className="absolute right-3 top-1 z-20 flex max-w-[calc(100vw-2rem)] items-center gap-1.5 sm:right-6 sm:top-5">
+                <Link
+                  href={heroBackgroundVideoUrl}
+                  target="_blank"
+                  className="inline-flex min-w-0 text-nowrap items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:px-3 sm:py-1.5 sm:text-xs"
+                  title={heroBackgroundSong.video_title}
                 >
-                  <FaYoutube />
-                </Text>
-                <Text size="xs" fw={500} truncate="end">
-                  {heroBackgroundSong.title}
-                </Text>
-                <Text
-                  c="dimmed"
-                  size="xs"
-                  className="ml-1 hidden sm:inline"
-                  component="span"
+                  <Text
+                    size="sm"
+                    c="red"
+                    className="mt-0.5 mr-1 shrink-0 dark:text-white!"
+                  >
+                    <FaYoutube />
+                  </Text>
+                  <Text size="xs" fw={500} truncate="end">
+                    {heroBackgroundSong.title}
+                  </Text>
+                  <Text
+                    c="dimmed"
+                    size="xs"
+                    className="ml-1 hidden sm:inline"
+                    component="span"
+                  >
+                    {heroBackgroundSong.broadcast_at
+                      ? formatDate(heroBackgroundSong.broadcast_at, locale)
+                      : null}
+                  </Text>
+                </Link>
+                <Link
+                  href={heroBackgroundWatchHref}
+                  aria-label={t("heroWatchFromBeginning")}
+                  title={t("heroWatchFromBeginning")}
+                  className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:size-8"
                 >
-                  {heroBackgroundSong.broadcast_at
-                    ? formatDate(heroBackgroundSong.broadcast_at, locale)
-                    : null}
-                </Text>
-              </Link>
+                  <LuVolumeX className="text-sm sm:text-base" />
+                </Link>
+              </div>
             ) : null}
             <div className="relative z-10 flex w-full flex-col items-center px-4 sm:px-6 lg:px-8 select-none">
               <div className="relative flex max-w-5xl flex-col items-center px-2 py-2 before:pointer-events-none before:absolute before:-inset-x-5 before:-inset-y-3 before:-z-10 before:rounded-4xl before:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.78),rgba(255,255,255,0.42)_58%,transparent_78%)] before:blur-xl dark:before:bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.58),rgba(15,23,42,0.3)_58%,transparent_78%)] sm:before:-inset-x-10 sm:before:-inset-y-5">
