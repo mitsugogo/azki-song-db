@@ -753,7 +753,7 @@ export default function ClientTop() {
                 </p>
               </div>
 
-              <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
+              <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/60 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
                 <SearchInput
                   allSongs={allSongs}
                   searchValue={searchValue}
@@ -1604,7 +1604,11 @@ export default function ClientTop() {
                               imageClassName="object-cover"
                             />
                           </div>
-                          <Text size="sm" className="min-w-0 line-clamp-2">
+                          <Text
+                            size="sm"
+                            className="min-w-0 line-clamp-2"
+                            component="div"
+                          >
                             {update.videoTitle}
                             {singerAvatars.length > 0 ? (
                               <Avatar.Group className="ml-2 mt-1" spacing="xxs">
