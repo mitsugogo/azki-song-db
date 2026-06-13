@@ -1,13 +1,13 @@
 "use client";
 
 import { Link, useRouter } from "../i18n/navigation";
+import { Zen_Maru_Gothic } from "next/font/google";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Badge,
   Burger,
   Button,
   CopyButton,
-  Alert,
   Notification,
   Skeleton,
   Text,
@@ -16,6 +16,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useIntersection } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
+import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
 import SearchInput from "./components/SearchInput";
@@ -31,6 +32,7 @@ import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
 import { useStatistics } from "./hook/useStatistics";
 import useStatViewCounts from "./hook/useStatViewCounts";
+import { isCoverSong, isOriginalSong } from "./config/filters";
 import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
@@ -60,6 +62,15 @@ import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { BsGeoAlt } from "react-icons/bs";
 import type { Song } from "./types/song";
 import type { StatisticsItem } from "./types/statisticsItem";
+import { PiMusicNoteFill } from "react-icons/pi";
+
+const zenMaruGothic = Zen_Maru_Gothic({
+  subsets: ["latin"],
+  display: "swap",
+  weight: "700",
+  preload: true,
+  adjustFontFallback: false,
+});
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
@@ -91,6 +102,34 @@ function pickRecommendedSongs<T>(items: Song[], count: number) {
   }
 
   return pool.slice(0, count);
+}
+
+function pickHeroBackgroundSong(items: Song[]) {
+  const candidates = items.filter(
+    // オリジナル楽曲のMVのみ
+    (song) =>
+      song.video_id &&
+      song.tags.some((tag) => tag.includes("MV")) &&
+      isOriginalSong(song),
+  );
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function buildHeroBackgroundVideoUrl(song: Song) {
+  const fallbackUrl = `https://www.youtube.com/watch?v=${song.video_id}`;
+  const baseVideoUrl = song.video_uri || fallbackUrl;
+
+  if (Number(song.start) <= 0) {
+    return baseVideoUrl;
+  }
+
+  const separator = baseVideoUrl.includes("?") ? "&" : "?";
+  return `${baseVideoUrl}${separator}`;
 }
 
 // video_id基準で楽曲をグループ化し、直近3件を取得
@@ -173,6 +212,8 @@ export default function ClientTop() {
     useState(0);
   const [shouldLoadViewStatistics, setShouldLoadViewStatistics] =
     useState(false);
+  const [isHeroBackgroundUnavailable, setHeroBackgroundUnavailable] =
+    useState(false);
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -216,6 +257,45 @@ export default function ClientTop() {
     () => groupRecentUpdates(allSongs, 3),
     [allSongs],
   );
+
+  const heroBackgroundSong = useMemo(
+    () => pickHeroBackgroundSong(allSongs),
+    [allSongs],
+  );
+
+  const heroBackgroundVideoUrl = useMemo(
+    () =>
+      heroBackgroundSong
+        ? buildHeroBackgroundVideoUrl(heroBackgroundSong)
+        : null,
+    [heroBackgroundSong],
+  );
+
+  const heroBackgroundOptions = useMemo<YouTubeProps["opts"]>(
+    () => ({
+      width: "100%",
+      height: "100%",
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        enablejsapi: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        loop: 1,
+        playlist: heroBackgroundSong?.video_id,
+        playsinline: 1,
+        rel: 0,
+        origin:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      },
+    }),
+    [heroBackgroundSong?.video_id],
+  );
+
+  useEffect(() => {
+    setHeroBackgroundUnavailable(false);
+  }, [heroBackgroundSong?.video_id]);
 
   const featuredAnniversaries = useMemo(
     () => getFeaturedAnniversaries(anniversaryItems),
@@ -372,9 +452,22 @@ export default function ClientTop() {
     setCopiedNotificationSequence((current) => current + 1);
   };
 
+  const handleHeroBackgroundReady = (event: YouTubeEvent) => {
+    try {
+      event.target.mute();
+      event.target.playVideo();
+    } catch {
+      setHeroBackgroundUnavailable(true);
+    }
+  };
+
+  const handleHeroBackgroundError = () => {
+    setHeroBackgroundUnavailable(true);
+  };
+
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
-      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 sm:px-6 lg:px-8">
         <header
           className={`sticky top-0 z-40 -mx-4 isolate px-4 py-4 transition-colors duration-200 before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:transition-colors before:duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
             isScrolled
@@ -397,7 +490,7 @@ export default function ClientTop() {
               </Link>
             </div>
 
-            <div className="flex shrink-0 items-center justify-end sm:gap-2">
+            <div className={`flex shrink-0 items-center justify-end sm:gap-2`}>
               <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
                 <Link href={`/search`} className="hover:text-primary-500">
                   <LuSearch />
@@ -425,293 +518,359 @@ export default function ClientTop() {
         </header>
 
         <main className="flex flex-1 flex-col">
-          <section className="flex min-h-[48dvh] flex-col items-center justify-center py-10 text-center sm:py-16">
-            <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/70 dark:text-pink-200/70">
-              {t("brand")}
-            </p>
-            <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-              {t("heroLine1")}
-              <br />
-              <span className="hidden md:inline">{t("heroLine2")}</span>
-              <span className="inline md:hidden">{t("heroLine2_short")}</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
-              {t("description")}
-            </p>
-
-            <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
-              <SearchInput
-                allSongs={allSongs}
-                searchValue={searchValue}
-                onSearchChange={setSearchValue}
-                placeholder={tHeader("searchPlaceholder")}
-                className="[&_input]:h-12 [&_input]:text-base"
-              />
-              <div className="mt-4 flex items-center justify-center gap-3 flex-row">
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                  disabled={isPending}
-                >
-                  {isPending ? (
-                    t("searching")
-                  ) : (
-                    <>
-                      <LuSearch className="mr-1 inline" />
-                      {t("searchButton")}
-                    </>
-                  )}
-                </button>
-                <Tooltip
-                  withArrow
-                  arrowSize={8}
-                  position="bottom"
-                  transitionProps={{ transition: "fade", duration: 300 }}
-                  label={
-                    <>
-                      <LuSparkles className="mr-1 inline" />
-                      {t("surpriseTooltip")}
-                    </>
-                  }
-                >
-                  <Link
-                    href={`/watch`}
-                    className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
-                    aria-label={t("aria.randomPlay")}
-                  >
-                    <LuSparkles className="mr-1 inline" />
-                    {t("surpriseMe")}
-                  </Link>
-                </Tooltip>
-              </div>
-
-              <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
-
-              <div className="flex items-left justify-center gap-3">
-                <Text size="sm" color="dimmed">
-                  {/* 楽曲モードで再生 */}
-                  {t("songMode")}
-                </Text>
-              </div>
-
-              <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                {/* オリジナル楽曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=original-songs"
-                    className={`min-w-0 flex-1`}
-                    leftSection={
-                      <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                    color="tan"
-                    variant="light"
-                  >
-                    {t("originalSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={originalSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="tan"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("original");
-                          }}
-                        >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
-
-                {/* カバー楽曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=cover-songs"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("coverSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={coverSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("cover");
-                          }}
-                        >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
-
-                {/* ユニット・ゲスト参加曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=collaboration-songs"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("collaborationSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={collaborationSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("collaboration");
-                          }}
-                        >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
-
-                {/* 歌枠 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=tag:歌枠"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("karaokeSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={karaokeSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("karaoke");
-                          }}
-                        >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
-              </div>
-            </div>
-
-            {/* 開催中のイベント */}
-            {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
-              <Notification
-                icon={<IoInformationSharp />}
-                title={t("eventOngoingTitle", {
-                  title: ongoingEvents[0].content,
-                })}
-                className="w-full text-left shadow-lg max-w-3xl mt-3"
-                color="pink"
-                withCloseButton
-                onClose={() => {
-                  setOngoingEventsAlert(false);
+          <section className="relative left-1/2 isolate flex min-h-[48dvh] w-screen -translate-x-1/2 flex-col items-center justify-center overflow-hidden py-10 text-center sm:py-16">
+            {heroBackgroundSong && !isHeroBackgroundUnavailable ? (
+              <div
+                className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+                style={{
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 0%, black 50%, rgba(0, 0, 0, 0.62) 64%, rgba(0, 0, 0, 0.18) 76%, transparent 88%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(to bottom, black 0%, black 50%, rgba(0, 0, 0, 0.62) 64%, rgba(0, 0, 0, 0.18) 76%, transparent 88%, transparent 100%)",
                 }}
+                aria-hidden="true"
               >
-                <div className="space-y-2">
-                  {ongoingEvents[0].note ? (
-                    <Text size="sm" c="dimmed">
-                      {ongoingEvents[0].note}
+                <YouTube
+                  videoId={heroBackgroundSong.video_id}
+                  opts={heroBackgroundOptions}
+                  className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-full min-w-[177.78dvh] -translate-x-1/2 -translate-y-1/2"
+                  iframeClassName="h-full w-full"
+                  title=""
+                  onReady={handleHeroBackgroundReady}
+                  onError={handleHeroBackgroundError}
+                />
+              </div>
+            ) : null}
+            <div
+              className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.72),rgba(255,255,255,0.42)_42%,rgba(253,242,248,0.9)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.42),rgba(15,23,42,0.72)_50%,rgba(15,23,42,0.94)_100%)]"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.5) 80%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.5) 80%, transparent 100%)",
+              }}
+            />
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-1 h-24 bg-linear-to-b from-[#fffafc] via-[#fffafc]/70 to-transparent dark:from-[#111827] dark:via-[#111827]/70" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-56 bg-linear-to-b from-transparent via-[#fffafc]/70 to-transparent dark:via-[#111827]/70 sm:h-72" />
+            {heroBackgroundSong && heroBackgroundVideoUrl ? (
+              <Link
+                href={heroBackgroundVideoUrl}
+                target="_blank"
+                className="absolute right-3 top-1 z-20 inline-flex max-w-38 items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-primary/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:right-6 sm:top-5 sm:max-w-[calc(100vw-2rem)] sm:px-3 sm:py-1.5 sm:text-xs"
+                title={heroBackgroundSong.video_title}
+              >
+                <Text
+                  size="sm"
+                  c="red"
+                  className="mt-0.5 mr-1 shrink-0 dark:text-white!"
+                >
+                  <FaYoutube />
+                </Text>
+                <Text size="xs" fw={500} truncate="end">
+                  {heroBackgroundSong.title}
+                </Text>
+                <Text c="dimmed" size="xs">
+                  {heroBackgroundSong.broadcast_at
+                    ? `- ${formatDate(heroBackgroundSong.broadcast_at, locale)}`
+                    : null}
+                </Text>
+              </Link>
+            ) : null}
+            <div className="relative z-10 flex w-full flex-col items-center px-4 sm:px-6 lg:px-8 select-none">
+              <div className="relative flex max-w-5xl flex-col items-center px-2 py-2 before:pointer-events-none before:absolute before:-inset-x-5 before:-inset-y-3 before:-z-10 before:rounded-4xl before:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.78),rgba(255,255,255,0.42)_58%,transparent_78%)] before:blur-xl dark:before:bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.58),rgba(15,23,42,0.3)_58%,transparent_78%)] sm:before:-inset-x-10 sm:before:-inset-y-5">
+                <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/65 drop-shadow-[0_1px_12px_rgba(255,255,255,0.9)] dark:text-pink-200/75 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.55)]">
+                  {t("brand")}
+                </p>
+                <h1
+                  className={`${zenMaruGothic.className} max-w-4xl text-balance text-4xl font-bold italic leading-tight text-light-gray-750/85 drop-shadow-[0_2px_18px_rgba(255,255,255,0.75)] dark:text-white/90 dark:drop-shadow-[0_2px_18px_rgba(0,0,0,0.65)] sm:text-5xl lg:text-6xl`}
+                  style={{ fontStyle: "italic" }}
+                >
+                  {t("heroLine1")}
+                  <br />
+                  <span className="hidden md:inline">{t("heroLine2")}</span>
+                  <span className="inline md:hidden">
+                    {t("heroLine2_short")}
+                  </span>
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm font-medium text-gray-800/80 drop-shadow-[0_1px_12px_rgba(255,255,255,0.85)] dark:text-gray-100/80 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] sm:text-base">
+                  {t("description")}
+                </p>
+              </div>
 
-                      {ongoingEvents[0].url ? (
-                        <Link
-                          href={ongoingEvents[0].url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                        >
-                          <FaExternalLinkAlt className="text-[0.75rem]" />
-                          {t("linkLabel")}
-                        </Link>
-                      ) : null}
-                    </Text>
-                  ) : null}
+              <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
+                <SearchInput
+                  allSongs={allSongs}
+                  searchValue={searchValue}
+                  onSearchChange={setSearchValue}
+                  placeholder={tHeader("searchPlaceholder")}
+                  className="[&_input]:h-12 [&_input]:text-base"
+                />
+                <div className="mt-4 flex items-center justify-center gap-3 flex-row">
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      t("searching")
+                    ) : (
+                      <>
+                        <LuSearch className="mr-1 inline" />
+                        {t("searchButton")}
+                      </>
+                    )}
+                  </button>
+                  <Tooltip
+                    withArrow
+                    arrowSize={8}
+                    position="bottom"
+                    transitionProps={{ transition: "fade", duration: 300 }}
+                    label={
+                      <>
+                        <LuSparkles className="mr-1 inline" />
+                        {t("surpriseTooltip")}
+                      </>
+                    }
+                  >
+                    <Link
+                      href={`/watch`}
+                      className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
+                      aria-label={t("aria.randomPlay")}
+                    >
+                      <LuSparkles className="mr-1 inline" />
+                      {t("surpriseMe")}
+                    </Link>
+                  </Tooltip>
                 </div>
-              </Notification>
-            )}
+
+                <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
+
+                <div className="flex items-left justify-center gap-3">
+                  <Text size="sm" color="dimmed">
+                    {/* 楽曲モードで再生 */}
+                    {t("songMode")}
+                  </Text>
+                </div>
+
+                <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+                  {/* オリジナル楽曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=original-songs"
+                      className={`min-w-0 flex-1`}
+                      leftSection={
+                        <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                      color="tan"
+                      variant="light"
+                    >
+                      {t("originalSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={originalSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
+                        >
+                          <Button
+                            className={`shrink-0`}
+                            color="tan"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("original");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
+
+                  {/* カバー楽曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=cover-songs"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("coverSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={coverSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
+                        >
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("cover");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
+
+                  {/* ユニット・ゲスト参加曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=collaboration-songs"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("collaborationSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={collaborationSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
+                        >
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("collaboration");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
+
+                  {/* 歌枠 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=tag:歌枠"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("karaokeSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={karaokeSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
+                        >
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("karaoke");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
+                </div>
+              </div>
+
+              {/* 開催中のイベント */}
+              {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
+                <Notification
+                  icon={<IoInformationSharp />}
+                  title={t("eventOngoingTitle", {
+                    title: ongoingEvents[0].content,
+                  })}
+                  className="w-full text-left shadow-lg max-w-3xl mt-3"
+                  color="pink"
+                  withCloseButton
+                  onClose={() => {
+                    setOngoingEventsAlert(false);
+                  }}
+                >
+                  <div className="space-y-2">
+                    {ongoingEvents[0].note ? (
+                      <Text size="sm" c="dimmed">
+                        {ongoingEvents[0].note}
+
+                        {ongoingEvents[0].url ? (
+                          <Link
+                            href={ongoingEvents[0].url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                          >
+                            <FaExternalLinkAlt className="text-[0.75rem]" />
+                            {t("linkLabel")}
+                          </Link>
+                        ) : null}
+                      </Text>
+                    ) : null}
+                  </div>
+                </Notification>
+              )}
+            </div>
           </section>
 
-          <section className="pb-10">
+          <section className="pt-8 pb-10 sm:pt-10">
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
@@ -767,7 +926,7 @@ export default function ClientTop() {
                         <div className="line-clamp-1 text-xs text-gray-600 dark:text-gray-200">
                           {song.artist}
                         </div>
-                        <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-300">
                           <span>{song.year}</span>
                           <span>{formatDate(song.broadcast_at, locale)}</span>
                         </div>
