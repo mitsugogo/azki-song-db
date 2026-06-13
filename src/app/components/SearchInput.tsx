@@ -2,10 +2,12 @@ import {
   TagsInput,
   TagsInputProps,
   Group,
+  OverflowList,
   Pill,
   Text,
   Tooltip,
 } from "@mantine/core";
+import type { PillReorderProps } from "@mantine/core";
 import { useMemo } from "react";
 import { HiSearch } from "react-icons/hi";
 import {
@@ -437,16 +439,97 @@ export default function SearchInput({
 
   const renderSelectedPill: TagsInputProps["renderPill"] = ({
     value,
-    onRemove,
     disabled,
     reorderProps,
   }) => {
     const itemValue = String(value ?? "");
-    const label = removeSearchPrefix(itemValue);
-    const prefixMeta = getSearchPrefixMeta(itemValue);
+
+    if (itemValue !== searchValue[0]) {
+      return null;
+    }
+
+    const removeValueAtIndex = (indexToRemove: number) => {
+      handleSearchChange(
+        searchValue.filter((_, index) => index !== indexToRemove),
+      );
+    };
+    const useCompactOverflow = searchValue.length > 3;
+    const overflowItems = useCompactOverflow
+      ? [
+          { startIndex: 0, values: searchValue.slice(0, 2) },
+          ...searchValue.slice(2).map((item, index) => ({
+            startIndex: index + 2,
+            values: [item],
+          })),
+        ]
+      : [{ startIndex: 0, values: searchValue }];
+
+    return (
+      <OverflowList
+        data={overflowItems}
+        gap={4}
+        maxRows={1}
+        style={{
+          flex: useCompactOverflow ? "1 1 auto" : "0 1 auto",
+          maxWidth: useCompactOverflow ? "max(0px, calc(100% - 2rem))" : "100%",
+          minWidth: 0,
+        }}
+        renderItem={(item) =>
+          item.values.length > 1 ? (
+            <Group component="span" gap={4} wrap="nowrap">
+              {item.values.map((itemValue, index) =>
+                renderSearchPill({
+                  disabled,
+                  onRemove: () => removeValueAtIndex(item.startIndex + index),
+                  reorderProps:
+                    item.startIndex + index === 0 ? reorderProps : undefined,
+                  value: itemValue,
+                }),
+              )}
+            </Group>
+          ) : (
+            renderSearchPill({
+              disabled,
+              onRemove: () => removeValueAtIndex(item.startIndex),
+              reorderProps: item.startIndex === 0 ? reorderProps : undefined,
+              value: item.values[0],
+            })
+          )
+        }
+        renderOverflow={(items) => {
+          const hiddenValues = items.flatMap((item) => item.values);
+
+          return (
+            <Tooltip
+              label={hiddenValues.map(removeSearchPrefix).join(", ")}
+              multiline
+              withArrow
+            >
+              <Pill>+{hiddenValues.length}</Pill>
+            </Tooltip>
+          );
+        }}
+      />
+    );
+  };
+
+  const renderSearchPill = ({
+    value,
+    onRemove,
+    disabled,
+    reorderProps,
+  }: {
+    value: string;
+    onRemove: () => void;
+    disabled: boolean | undefined;
+    reorderProps?: PillReorderProps;
+  }) => {
+    const label = removeSearchPrefix(value);
+    const prefixMeta = getSearchPrefixMeta(value);
 
     return (
       <Pill
+        key={value}
         withRemoveButton={!disabled}
         onRemove={onRemove}
         disabled={disabled}
@@ -462,7 +545,7 @@ export default function SearchInput({
             <span>{label}</span>
           </Group>
         ) : (
-          itemValue
+          value
         )}
       </Pill>
     );
@@ -487,6 +570,12 @@ export default function SearchInput({
       }}
       clearable
       className={className}
+      styles={{
+        inputField:
+          searchValue.length > 3
+            ? { flex: "0 1 2rem", minWidth: "2rem" }
+            : undefined,
+      }}
       acceptValueOnBlur
     />
   );
