@@ -2,6 +2,14 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig } from "@/app/config/siteConfig";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import {
+  fetchOgFonts,
+  normalizeOgText,
+  ogColors,
+  ogFontFamily,
+  ogImageHeaders,
+} from "../../ogDesign";
 
 export const runtime = "edge";
 
@@ -26,13 +34,15 @@ const normalizeStart = (value: unknown): string | null => {
   return withoutSuffix;
 };
 
-const fallbackOgImage = () =>
-  new ImageResponse(
+const fallbackOgImage = async () => {
+  const fonts = await fetchOgFonts("好きな曲9選 AZKi Song Database");
+
+  return new ImageResponse(
     <div
       style={{
-        backgroundColor: "#fdf7fb",
+        backgroundColor: ogColors.background,
         backgroundImage:
-          "linear-gradient(135deg, #ffffff 0%, #fff6fb 44%, #edf9ff 100%)",
+          "linear-gradient(135deg, #fffafc 0%, #fdf2f7 46%, #eef8ff 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -40,8 +50,8 @@ const fallbackOgImage = () =>
         alignItems: "center",
         justifyContent: "center",
         padding: "60px",
-        fontFamily: "serif",
-        color: "#8c1748",
+        fontFamily: ogFontFamily,
+        color: ogColors.primaryDeep,
         fontSize: 48,
         fontWeight: "bold",
         textAlign: "center",
@@ -51,7 +61,7 @@ const fallbackOgImage = () =>
         style={{
           marginBottom: "20px",
           display: "flex",
-          color: "#5ba7e8",
+          color: ogColors.cyan,
         }}
       >
         ♪
@@ -60,7 +70,7 @@ const fallbackOgImage = () =>
       <div
         style={{
           fontSize: 24,
-          color: "#c2185b",
+          color: ogColors.primary,
           marginTop: "20px",
           display: "flex",
         }}
@@ -71,12 +81,11 @@ const fallbackOgImage = () =>
     {
       width: 1200,
       height: 630,
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
-      },
+      fonts,
+      headers: ogImageHeaders,
     },
   );
+};
 
 export async function GET(req: NextRequest) {
   try {
@@ -87,7 +96,7 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return fallbackOgImage();
+      return await fallbackOgImage();
     }
 
     const width = searchParams.get("w") || "1200";
@@ -110,16 +119,14 @@ export async function GET(req: NextRequest) {
       : null;
 
     if (!selection) {
-      return fallbackOgImage();
+      return await fallbackOgImage();
     }
 
     // 曲データを取得
-    const songs = await fetch(
-      `${origin}/api/songs?hl=${encodeURIComponent(hl)}`,
-      { cache: "no-store" },
-    )
-      .then((res) => res.json())
-      .catch(() => []);
+    const songs = await fetchSongsFromApiCached({
+      locale: hl,
+      baseUrlOverride: origin,
+    }).catch(() => []);
 
     // 厳選した曲を取得
     const selectedSongs = selection.songs
@@ -150,9 +157,9 @@ export async function GET(req: NextRequest) {
       .filter((s: Song | undefined) => s !== undefined)
       .slice(0, 9) as Song[];
 
-    const titleText = selection.title.trim() || "好きな曲9選";
+    const titleText = normalizeOgText(selection.title.trim() || "好きな曲9選");
     const authorText = selection.author?.trim()
-      ? `by ${selection.author.trim()}`
+      ? normalizeOgText(`by ${selection.author.trim()}`)
       : "";
 
     const ogSongCards: OgSongCard[] = selectedSongs.map((song) => {
@@ -163,8 +170,8 @@ export async function GET(req: NextRequest) {
       }
       return {
         url: url,
-        title: song.title,
-        artist: song.artist,
+        title: normalizeOgText(song.title),
+        artist: normalizeOgText(song.artist),
       };
     });
 
@@ -185,39 +192,14 @@ export async function GET(req: NextRequest) {
       .map((card) => `${card.title}${card.artist}`)
       .join("")}...…,:・`;
 
-    // フォント取得
-    const notoSansRegular = await fetch(
-      "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&text=" +
-        encodeURIComponent(fontTextSeed),
-    )
-      .then((res) => res.text())
-      .then((css) => {
-        const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
-        )?.[1];
-        if (!url) throw new Error("Font not found");
-        return fetch(url).then((res) => res.arrayBuffer());
-      });
-
-    const notoSansBold = await fetch(
-      "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=" +
-        encodeURIComponent(fontTextSeed),
-    )
-      .then((res) => res.text())
-      .then((css) => {
-        const url = css.match(
-          /src: url\((.+)\) format\('(opentype|truetype)'\)/,
-        )?.[1];
-        if (!url) throw new Error("Font not found");
-        return fetch(url).then((res) => res.arrayBuffer());
-      });
+    const fonts = await fetchOgFonts(fontTextSeed);
 
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: "#fdf7fb",
+          backgroundColor: ogColors.background,
           backgroundImage:
-            "linear-gradient(135deg, #ffffff 0%, #fff6fb 44%, #edf9ff 100%)",
+            "linear-gradient(135deg, #fffafc 0%, #fdf2f7 46%, #eef8ff 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -225,7 +207,7 @@ export async function GET(req: NextRequest) {
           alignItems: "center",
           justifyContent: "flex-start",
           padding: "24px 24px 8px",
-          fontFamily: "Noto Sans JP",
+          fontFamily: ogFontFamily,
           position: "relative",
           overflow: "hidden",
         }}
@@ -238,7 +220,7 @@ export async function GET(req: NextRequest) {
             display: "flex",
             opacity: 0.96,
             backgroundImage:
-              "radial-gradient(560px 320px at 12% 92%, rgba(59, 130, 246, 0.12), transparent 62%), linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.14) 28%, rgba(255, 255, 255, 0) 56%)",
+              "radial-gradient(circle at center, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.46) 42%, rgba(253, 242, 248, 0.92) 100%)",
           }}
         />
 
@@ -260,9 +242,9 @@ export async function GET(req: NextRequest) {
               display: "flex",
               fontSize: 52,
               fontWeight: 700,
-              color: "#8c1748",
+              color: ogColors.primaryDeep,
               marginBottom: "6px",
-              letterSpacing: "-0.02em",
+              letterSpacing: 0,
             }}
           >
             {titleText}
@@ -271,7 +253,7 @@ export async function GET(req: NextRequest) {
             style={{
               display: authorText ? "flex" : "none",
               fontSize: 28,
-              color: "#9d3d68",
+              color: ogColors.muted,
               fontWeight: 400,
             }}
           >
@@ -319,7 +301,7 @@ export async function GET(req: NextRequest) {
                       : "rgba(255, 240, 247, 0.9)",
                     borderRadius: "6px",
                     overflow: "hidden",
-                    border: "1px solid rgba(244, 52, 139, 0.12)",
+                    border: `1px solid ${ogColors.line}`,
                   }}
                 >
                   {card.url ? (
@@ -392,7 +374,7 @@ export async function GET(req: NextRequest) {
             bottom: "4px",
             display: "flex",
             fontSize: 18,
-            color: "#9d3d68",
+            color: ogColors.muted,
             fontWeight: 400,
             letterSpacing: "0.05em",
           }}
@@ -403,30 +385,14 @@ export async function GET(req: NextRequest) {
       {
         width: parseInt(width, 10),
         height: parseInt(height, 10),
-        fonts: [
-          {
-            name: "Noto Sans JP",
-            data: notoSansRegular,
-            style: "normal",
-            weight: 400,
-          },
-          {
-            name: "Noto Sans JP",
-            data: notoSansBold,
-            style: "normal",
-            weight: 700,
-          },
-        ],
-        headers: {
-          "Content-Type": "image/png",
-          "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
-        },
+        fonts,
+        headers: ogImageHeaders,
       },
     );
   } catch (e) {
     if (e instanceof Error) {
       console.error("Failed to generate OG image:", e.message);
     }
-    return fallbackOgImage();
+    return await fallbackOgImage();
   }
 }

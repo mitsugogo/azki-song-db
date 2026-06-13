@@ -568,6 +568,7 @@ function resolveMetaDateLabel(
 
 interface NowPlayingSongInfoProps {
   currentSong: Song | null;
+  currentSongPlayCount?: number;
   allSongs: Song[];
   searchTerm: string;
   isPlaying: boolean;
@@ -590,6 +591,7 @@ interface NowPlayingSongInfoProps {
  */
 const NowPlayingSongInfo = ({
   currentSong,
+  currentSongPlayCount = 0,
   allSongs,
   searchTerm,
   isPlaying,
@@ -1061,6 +1063,7 @@ const NowPlayingSongInfo = ({
             <div>
               <NowPlayingSongInfoDetail
                 currentSong={currentSong}
+                currentSongPlayCount={currentSongPlayCount}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}

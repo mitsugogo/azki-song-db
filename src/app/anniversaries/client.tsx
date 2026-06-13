@@ -7,7 +7,7 @@ import { HiChevronRight, HiHome } from "react-icons/hi";
 import { useLocale, useTranslations } from "next-intl";
 import useAnniversaries from "../hook/useAnniversaries";
 import { formatDate } from "../lib/formatDate";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa6";
 
@@ -376,7 +376,7 @@ export default function AnniversariesPageClient() {
     "mt-1 text-sm font-semibold leading-snug text-gray-900 dark:text-gray-100";
 
   return (
-    <div className="grow p-2 lg:p-6 lg:pb-10">
+    <div className={pageClasses.shell}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -390,11 +390,9 @@ export default function AnniversariesPageClient() {
         </Link>
       </Breadcrumbs>
 
-      <div className="mx-2 mb-3">
-        <h1 className="font-extrabold text-2xl">{t("title")}</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          {t("description")}
-        </p>
+      <div>
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <p className={pageClasses.description}>{t("description")}</p>
       </div>
 
       {featuredAnniversaries.length > 0 &&
@@ -403,7 +401,7 @@ export default function AnniversariesPageClient() {
           return (
             <section
               key={`${item.name}-${index}`}
-              className="mx-2 mb-3 rounded-3xl border border-primary-300/30 bg-white/90 p-4 shadow-[0_20px_60px_rgba(190,24,93,0.12)] dark:border-pink-200/20 dark:bg-gray-900/75 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+              className="mb-3 rounded-3xl border border-primary-300/30 bg-white/90 p-4 shadow-[0_20px_60px_rgba(190,24,93,0.12)] dark:border-pink-200/20 dark:bg-gray-900/75 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
             >
               <p className="text-xs font-semibold uppercase text-primary-700 dark:text-pink-200">
                 {hasFeaturedToday
@@ -436,7 +434,7 @@ export default function AnniversariesPageClient() {
         </p>
       ) : (
         <>
-          <div className="space-y-3 p-2 md:hidden">
+          <div className="space-y-3 md:hidden">
             {anniversaryRows.map(
               (
                 { item, daysUntil, firstDate, formattedName, nextDate },
@@ -537,7 +535,7 @@ export default function AnniversariesPageClient() {
             )}
           </div>
 
-          <div className="hidden overflow-x-auto p-2 md:block">
+          <div className="hidden overflow-x-auto md:block">
             <table className="min-w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
               <thead className="bg-light-gray-100/70 dark:bg-gray-800/60">
                 <tr className="text-left text-xs font-semibold text-gray-700 dark:text-gray-200">

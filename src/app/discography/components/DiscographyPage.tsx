@@ -7,7 +7,7 @@ import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
 import { Breadcrumbs } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
-import { breadcrumbClasses } from "../../theme";
+import { breadcrumbClasses, pageClasses } from "../../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { useTranslations } from "next-intl";
@@ -150,7 +150,7 @@ export default function DiscographyPage({
 
   return (
     <>
-      <div className="grow lg:p-6 overflow-auto">
+      <div className={pageClasses.shell}>
         <Breadcrumbs
           aria-label="Breadcrumb"
           className={breadcrumbClasses.root}
@@ -204,8 +204,8 @@ export default function DiscographyPage({
           })()}
         </Breadcrumbs>
 
-        <h1 className="font-extrabold text-2xl p-3 mb-2">{t("title")}</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <p className={pageClasses.description}>
           {activeTab === 0
             ? t("tabDescriptions.originals")
             : activeTab === 1

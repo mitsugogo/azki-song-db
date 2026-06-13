@@ -5,6 +5,7 @@ import SearchQueryInputSection from "./SearchQueryInputSection";
 import SearchSongCard from "./SearchSongCard";
 import SearchTermChips from "./SearchTermChips";
 import { useTranslations } from "next-intl";
+import { pageClasses } from "../../theme";
 
 interface VirtualRow {
   index: number;
@@ -55,7 +56,7 @@ const SearchResultsView = ({
   return (
     <div
       ref={parentRef}
-      className="grow lg:p-6 lg:pb-0 overflow-y-auto overflow-x-hidden"
+      className="grow overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 lg:p-6 lg:pb-0"
       style={{ scrollbarGutter: "stable" }}
     >
       <SearchBreadcrumb
@@ -63,8 +64,8 @@ const SearchResultsView = ({
       />
 
       <div className="mb-4">
-        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
-        <div className="px-3 pb-3">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <div className="pb-3">
           <SearchTermChips terms={searchTokens} />
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {t("foundCount", { count: filteredSongs.length })}
@@ -80,7 +81,7 @@ const SearchResultsView = ({
         placeholder={tHeader("searchPlaceholder")}
       />
 
-      <div className="p-3">
+      <div>
         <div style={{ height: `${firstStart}px` }} />
 
         <ul

@@ -35,7 +35,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../../theme";
+import { breadcrumbClasses, pageClasses } from "../../theme";
 import useSongs from "../../hook/useSongs";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { LuPlay } from "react-icons/lu";
@@ -339,8 +339,8 @@ export default function PlaylistDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="grow lg:p-6 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
+      <div className={pageClasses.shellFlushBottom}>
+        <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
         <Loading />
       </div>
     );
@@ -348,9 +348,9 @@ export default function PlaylistDetailPage() {
 
   if (!playlist) {
     return (
-      <div className="grow lg:p-6 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
-        <div className="p-3">
+      <div className={pageClasses.shellFlushBottom}>
+        <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
+        <div>
           <p>{t("detail.notFound")}</p>
         </div>
       </div>
@@ -358,7 +358,7 @@ export default function PlaylistDetailPage() {
   }
 
   return (
-    <div className="grow pt-3 p-1 lg:p-6 lg:pb-0">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -378,7 +378,7 @@ export default function PlaylistDetailPage() {
         </span>
       </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3 pl-0">{t("manageTitle")}</h1>
+      <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
 
       <div className="flex justify-between items-center mb-3 sm:flex-row sm:items-baseline">
         <h2 className="hidden lg:flex font-semibold">

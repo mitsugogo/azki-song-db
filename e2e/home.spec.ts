@@ -21,7 +21,7 @@ test.describe("Home page", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: /音楽で辿る、\s*(Virtual DiVAの記録|Virtual DiVA AZKiの軌跡)。|AZKiの歌を探して、\s*そのまま聴く。/,
+        name: /音楽でたどる\s*Virtual DiVA AZKiの軌跡|AZKiの歌を探して、\s*そのまま聴く。/,
       }),
     ).toBeVisible();
     await expect(
@@ -33,7 +33,7 @@ test.describe("Home page", () => {
     await expect(page.getByText("おすすめ楽曲")).toBeVisible();
     await expect(page.locator('a[href*="/watch?v="]').first()).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "AZKi Channel" }),
+      page.locator('a[href="https://www.youtube.com/@AZKi"]'),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "AZKi_VDiVA" })).toBeVisible();
     await expect(page.getByText(/収録楽曲数:/)).toBeVisible();
@@ -49,6 +49,7 @@ test.describe("Home page", () => {
     });
     await searchInput.fill(query);
     await searchInput.press("Enter");
+    await searchInput.press("Escape");
     await page.getByRole("button", { name: "検索する" }).click();
 
     await expect(page).toHaveURL(/\/search\?q=/);

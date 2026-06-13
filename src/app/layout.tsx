@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Geist, Geist_Mono } from "next/font/google";
 import "@mantine/core/styles.css";
+import "@mantine/charts/styles.css";
+import "@mantine/notifications/styles.css";
 import "@mantine/spotlight/styles.css";
 import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";

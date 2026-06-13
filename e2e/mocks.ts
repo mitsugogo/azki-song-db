@@ -7,7 +7,7 @@ import {
 
 export const setupApiMocks = async (page: any) => {
   // Mock the songs API with cached data
-  await page.route("**/api/songs", async (route: any) => {
+  await page.route("**/api/songs**", async (route: any) => {
     const songs = getCachedSongs();
     await route.fulfill({
       status: 200,
@@ -16,7 +16,7 @@ export const setupApiMocks = async (page: any) => {
     });
   });
 
-  await page.route("**/api/milestones", async (route: any) => {
+  await page.route("**/api/milestones**", async (route: any) => {
     const milestones = getCachedMilestones();
     await route.fulfill({
       status: 200,
@@ -35,7 +35,7 @@ export const setupApiMocks = async (page: any) => {
   });
 
   // Mock the Google Sheets API to avoid rate limits
-  await page.route("**/api/yt/channels", async (route: any) => {
+  await page.route("**/api/yt/channels**", async (route: any) => {
     const channels = getCachedChannels();
     await route.fulfill({
       status: 200,

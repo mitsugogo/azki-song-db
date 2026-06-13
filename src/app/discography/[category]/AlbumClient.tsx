@@ -15,6 +15,8 @@ import DiscographyBreadcrumbs from "../components/DiscographyBreadcrumbs";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { siteConfig } from "@/app/config/siteConfig";
+import { pageClasses } from "@/app/theme";
+import { getAlbumPlaylistUrl } from "../utils/albumLinks";
 
 function resolveSongCategory(
   song: Song,
@@ -87,7 +89,7 @@ export default function AlbumClient({
 
   if (isLoading) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <LoadingOverlay visible={true} />
       </div>
     );
@@ -95,7 +97,7 @@ export default function AlbumClient({
 
   if (albumSongs.length === 0) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <h1 className="text-2xl font-bold">
           {tAlbum("notFoundTitle", { site: siteConfig.siteName })}
         </h1>
@@ -110,15 +112,11 @@ export default function AlbumClient({
     .map((song) => new Date(song.broadcast_at).getTime())
     .filter((ts) => !Number.isNaN(ts))
     .sort((a, b) => b - a)[0];
-  const playlistUrl = leadSong.album_list_uri
-    ? leadSong.album_list_uri.startsWith("http")
-      ? leadSong.album_list_uri
-      : `https://www.youtube.com/playlist?list=${encodeURIComponent(leadSong.album_list_uri)}`
-    : null;
+  const playlistUrl = getAlbumPlaylistUrl(leadSong);
   const categoryBreadcrumb = getCategoryBreadcrumb(leadSong);
 
   return (
-    <div className="grow min-h-0 w-full mx-auto overflow-auto p-6">
+    <div className={`${pageClasses.shell} min-h-0 w-full mx-auto`}>
       <DiscographyBreadcrumbs
         items={[
           {

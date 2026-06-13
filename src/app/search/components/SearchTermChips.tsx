@@ -1,5 +1,15 @@
-import { FaMusic, FaUser, FaTag, FaUsers } from "react-icons/fa6";
-import { FaCalendar } from "react-icons/fa";
+import {
+  FaCalendar,
+  FaFilePen,
+  FaGuitar,
+  FaLeaf,
+  FaMusic,
+  FaPenNib,
+  FaStar,
+  FaTag,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa6";
 
 interface SearchTermChipsProps {
   terms: string[];
@@ -28,14 +38,23 @@ const SearchTermChips = ({ terms }: SearchTermChipsProps) => {
           icon = <FaMusic className="mr-1" />;
           label = term.replace("title:", "");
         } else if (term.startsWith("milestone:")) {
-          icon = <span className="mr-1">⭐</span>;
+          icon = <FaStar className="mr-1" />;
           label = term.replace("milestone:", "");
         } else if (term.startsWith("year:")) {
           icon = <FaCalendar className="mr-1" />;
           label = term.replace("year:", "");
         } else if (term.startsWith("season:")) {
-          icon = <span className="mr-1">🌸</span>;
+          icon = <FaLeaf className="mr-1" />;
           label = term.replace("season:", "");
+        } else if (term.startsWith("lyricist:")) {
+          icon = <FaPenNib className="mr-1" />;
+          label = term.replace("lyricist:", "");
+        } else if (term.startsWith("composer:")) {
+          icon = <FaGuitar className="mr-1" />;
+          label = term.replace("composer:", "");
+        } else if (term.startsWith("arranger:")) {
+          icon = <FaFilePen className="mr-1" />;
+          label = term.replace("arranger:", "");
         }
 
         return (

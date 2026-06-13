@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Breadcrumbs } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 import SummaryTopClient from "./client";
 import { useTranslations } from "next-intl";
 
@@ -40,29 +40,27 @@ export default function SummaryPageClient() {
   });
 
   return (
-    <div className="grow lg:p-6 lg:pb-0">
-      <div className="mb-4">
-        <Breadcrumbs
-          aria-label="Breadcrumb"
-          className={breadcrumbClasses.root}
-          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-        >
-          <Link href="/" className={breadcrumbClasses.link}>
-            <FaHome className="inline mr-1" /> {t("homeLabel")}
-          </Link>
-          <Link href="/summary" className={breadcrumbClasses.link}>
-            {t("page.title")}
-          </Link>
-        </Breadcrumbs>
-      </div>
+    <div className={pageClasses.shellFlushBottom}>
+      <Breadcrumbs
+        aria-label="Breadcrumb"
+        className={breadcrumbClasses.root}
+        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+      >
+        <Link href="/" className={breadcrumbClasses.link}>
+          <FaHome className="inline mr-1" /> {t("homeLabel")}
+        </Link>
+        <Link href="/summary" className={breadcrumbClasses.link}>
+          {t("page.title")}
+        </Link>
+      </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3">{t("page.title")}</h1>
+      <h1 className={pageClasses.heading}>{t("page.title")}</h1>
 
-      <div className="p-3">
-        <p className="text-sm text-light-gray-400 mb-4">
+      <div>
+        <p className="mb-4 text-sm leading-6 text-gray-600 dark:text-gray-300">
           {t("page.description")}
         </p>
-        <p className="text-sm text-light-gray-400 mb-4">
+        <p className="mb-4 text-sm leading-6 text-gray-600 dark:text-gray-300">
           {t("page.activityDays", {
             days: activityDays,
             duration: avtivityDurationStr,

@@ -25,6 +25,7 @@ describe("usePageTransition", () => {
     vi.clearAllMocks();
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: null,
+      isPlaying: false,
       minimizePlayer: mockMinimizePlayer,
     });
   });
@@ -40,6 +41,7 @@ describe("usePageTransition", () => {
   it("watchから別のページに遷移するとミニプレイヤー化される", () => {
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: mockCurrentSong,
+      isPlaying: true,
       minimizePlayer: mockMinimizePlayer,
     });
 
@@ -55,6 +57,7 @@ describe("usePageTransition", () => {
   it("watch以外からの遷移ではミニプレイヤー化されない", () => {
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: mockCurrentSong,
+      isPlaying: true,
       minimizePlayer: mockMinimizePlayer,
     });
 
@@ -70,6 +73,7 @@ describe("usePageTransition", () => {
   it("currentSongがnullの場合はミニプレイヤー化されない", () => {
     (useGlobalPlayer as Mock).mockReturnValue({
       currentSong: null,
+      isPlaying: false,
       minimizePlayer: mockMinimizePlayer,
     });
 
@@ -80,5 +84,21 @@ describe("usePageTransition", () => {
     rerender();
 
     expect(mockMinimizePlayer).not.toHaveBeenCalled();
+  });
+
+  it("watchで一時停止中に別のページへ遷移してもミニプレイヤー化される", () => {
+    (useGlobalPlayer as Mock).mockReturnValue({
+      currentSong: mockCurrentSong,
+      isPlaying: false,
+      minimizePlayer: mockMinimizePlayer,
+    });
+
+    (usePathname as Mock).mockReturnValue("/watch");
+    const { rerender } = renderHook(() => usePageTransition());
+
+    (usePathname as Mock).mockReturnValue("/search");
+    rerender();
+
+    expect(mockMinimizePlayer).toHaveBeenCalledTimes(1);
   });
 });

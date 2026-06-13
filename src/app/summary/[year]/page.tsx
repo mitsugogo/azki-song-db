@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { metadata } from "../../layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { getLocale, getTranslations } from "next-intl/server";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 
 type Props = {
   params: Promise<{ year: string }>;
@@ -9,10 +10,7 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${baseUrl}/api/songs?hl=ja`, {
-      cache: "no-store",
-    });
-    const songs = (await res.json()) as any[];
+    const songs = await fetchSongsFromApiCached();
     const years = Array.from(
       new Set(songs.map((s) => Number(s.year)).filter((y) => !Number.isNaN(y))),
     ).sort((a, b) => b - a);
@@ -123,13 +121,7 @@ export default async function Page({ params }: Props) {
     }
   }
   // Fetch songs
-  const res = await fetch(
-    `${baseUrl}/api/songs?hl=${encodeURIComponent(locale)}`,
-    {
-      cache: "no-store",
-    },
-  );
-  const songs = (await res.json()) as any[];
+  const songs = await fetchSongsFromApiCached({ locale });
 
   const songsOfYear = Number.isNaN(yearNum)
     ? []

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CreatePlaylistModal from "../components/CreatePlaylistModal";
 import { MdPlaylistAdd } from "react-icons/md";
 import {
@@ -8,17 +8,17 @@ import {
   Button,
   Checkbox,
   CopyButton,
-  Notification,
   Table,
 } from "@mantine/core";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 import usePlaylists from "../hook/usePlaylists";
 import useFavorites from "../hook/useFavorites";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
+import { showAppNotification } from "@/app/lib/notifications";
 
 export default function PlaylistPage() {
   const t = useTranslations("Playlist");
@@ -37,27 +37,6 @@ export default function PlaylistPage() {
 
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
-  // Modal
-  const [showDeletePlaylistToast, setShowDeletePlaylistToast] = useState(false);
-  const [showCopylinkToast, setShowCopylinkToast] = useState(false);
-
-  // showになってから3秒たったらトーストを消す
-  useEffect(() => {
-    if (showDeletePlaylistToast) {
-      setTimeout(() => {
-        setShowDeletePlaylistToast(false);
-      }, 3000);
-    }
-  }, [showDeletePlaylistToast]);
-
-  useEffect(() => {
-    if (showCopylinkToast) {
-      setTimeout(() => {
-        setShowCopylinkToast(false);
-      }, 3000);
-    }
-  }, [showCopylinkToast]);
 
   const { playlists, deletePlaylist, encodePlaylistUrlParam, getMaxLimit } =
     usePlaylists();
@@ -80,7 +59,7 @@ export default function PlaylistPage() {
   // Mantine Breadcrumbs を利用
 
   return (
-    <div className="flex-grow p-2 pt-5 lg:p-6 lg:pb-0">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -94,7 +73,7 @@ export default function PlaylistPage() {
         </Link>
       </Breadcrumbs>
 
-      <h1 className="font-extrabold text-2xl p-3">{t("manageTitle")}</h1>
+      <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
 
       <CreatePlaylistModal
         onenModal={openCreatePlaylistModal}
@@ -123,6 +102,12 @@ export default function PlaylistPage() {
               deletePlaylist(playlist);
             });
             setSelectedRows([]);
+            showAppNotification({
+              title: t("deletedTitle"),
+              message: t("deletedTitle"),
+              type: "success",
+              icon: <FaCheck />,
+            });
           }}
         >
           {t("deleteSelected")}
@@ -130,7 +115,7 @@ export default function PlaylistPage() {
       </div>
 
       {/* モバイル用カードリスト（デフォルト表示） */}
-      <div className="mt-6 p-2 space-y-4 lg:hidden">
+      <div className="mt-6 space-y-4 lg:hidden">
         {allPlaylists.map((playlist) => {
           const isFavorites = playlist.id === "system-favorites";
           return (
@@ -213,7 +198,12 @@ export default function PlaylistPage() {
                         color={copied ? "teal" : "blue"}
                         onClick={() => {
                           copy();
-                          setShowCopylinkToast(true);
+                          showAppNotification({
+                            title: t("urlCopiedTitle"),
+                            message: t("urlCopiedTitle"),
+                            type: "success",
+                            icon: <FaCheck />,
+                          });
                         }}
                       >
                         {copied ? t("copied") : t("copyUrl")}
@@ -348,7 +338,12 @@ export default function PlaylistPage() {
                             color={copied ? "teal" : "blue"}
                             onClick={() => {
                               copy();
-                              setShowCopylinkToast(true);
+                              showAppNotification({
+                                title: t("urlCopiedTitle"),
+                                message: t("urlCopiedTitle"),
+                                type: "success",
+                                icon: <FaCheck />,
+                              });
                             }}
                           >
                             {copied ? t("copied") : t("copyUrl")}
@@ -363,30 +358,6 @@ export default function PlaylistPage() {
           </Table.Tbody>
         </Table>
       </div>
-
-      {showDeletePlaylistToast && (
-        <div className="fixed top-[80px] right-4">
-          <Notification
-            title={t("deletedTitle")}
-            icon={<FaCheck />}
-            color="green"
-            onClose={() => setShowDeletePlaylistToast(false)}
-            withCloseButton
-          />
-        </div>
-      )}
-
-      {showCopylinkToast && (
-        <div className="fixed top-[80px] right-4">
-          <Notification
-            title={t("urlCopiedTitle")}
-            icon={<FaCheck />}
-            color="green"
-            onClose={() => setShowCopylinkToast(false)}
-            withCloseButton
-          />
-        </div>
-      )}
     </div>
   );
 }

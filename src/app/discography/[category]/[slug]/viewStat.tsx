@@ -2,17 +2,9 @@
 
 import useStatViewCount from "@/app/hook/useStatViewCount";
 import { buildLatestAchievedViewMilestoneInfo } from "@/app/lib/viewMilestone";
-import { Skeleton } from "@mantine/core";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
-import { useEffect, useMemo, useState } from "react";
+import { AreaChart, getFilteredChartTooltipPayload } from "@mantine/charts";
+import { Paper, Skeleton, Text } from "@mantine/core";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../../lib/formatDate";
 
@@ -200,6 +192,66 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     return new Intl.NumberFormat().format(n);
   };
 
+  const getNiceExtent = (
+    vals: number[],
+    startZero: boolean,
+  ): [number, number] => {
+    if (!vals || vals.length === 0) return [0, 1];
+
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+
+    if (startZero) {
+      if (max === 0) return [0, 1];
+
+      const range = max;
+      let step = Math.pow(10, Math.floor(Math.log10(range || 1)));
+      const candidates = [1, 2, 5, 10];
+      let found = false;
+      for (let mult = 1; mult <= 1000000 && !found; mult *= 10) {
+        for (const c of candidates) {
+          const s = step * c * mult;
+          const ticks = range / s;
+          if (ticks <= 10) {
+            step = s;
+            found = true;
+            break;
+          }
+        }
+      }
+      const niceMax = Math.ceil(max / step) * step;
+      return [0, niceMax];
+    }
+
+    if (min === max) {
+      if (min === 0) return [0, 1];
+      const mag = Math.pow(10, Math.floor(Math.log10(Math.abs(min))));
+      const step = mag;
+      return [Math.floor(min - step), Math.ceil(max + step)];
+    }
+
+    const range = max - min;
+    const step = Math.pow(10, Math.floor(Math.log10(range)));
+    const candidates = [1, 2, 5, 10];
+    let chosen = step;
+    for (let mult = 1; mult <= 1000000; mult *= 10) {
+      let done = false;
+      for (const c of candidates) {
+        const s = step * c * mult;
+        const ticks = range / s;
+        if (ticks <= 10) {
+          chosen = s;
+          done = true;
+          break;
+        }
+      }
+      if (done) break;
+    }
+    const niceMin = Math.floor(min / chosen) * chosen;
+    const niceMax = Math.ceil(max / chosen) * chosen;
+    return [niceMin, niceMax];
+  };
+
   const ChartSkeleton = () => (
     <div className="w-full h-64 rounded-md border border-gray-200 dark:border-gray-700 p-3">
       <div className="flex items-baseline justify-between mb-3">
@@ -231,121 +283,115 @@ export default function ViewStat({ videoId }: { videoId: string }) {
     startFromZero?: boolean;
     milestone?: {
       isoDate: string;
+      date: string;
       label: string;
       dateLabel: string;
     };
-  }) => (
-    <div className={`w-full h-64 ${containerClassName ?? ""}`}>
-      <div className="flex items-baseline justify-between mb-1">
-        <div className="text-sm">{name}</div>
-        <div className="text-sm">
-          {(() => {
-            const latest = data[data.length - 1] ?? null;
-            if (!latest) return "";
-            const headerDiffKey = diffKey ?? dataKey.replace(/Count$/, "Diff");
-            const headerPctKey =
-              pctKey ?? headerDiffKey.replace(/Diff$/, "PctDiff");
-            const diff = (latest as any)[headerDiffKey] as number | 0;
-            const pct = (latest as any)[headerPctKey] as number | null;
-            if (
-              (diff === null || diff === undefined) &&
-              (pct === null || pct === undefined)
-            )
-              return t("stats.yesterdayPctNone");
-            const sign =
-              diff == null ? "" : diff > 0 ? "+" : diff < 0 ? "-" : "";
-            const diffText =
-              diff === null || diff === undefined
-                ? (t("stats.yesterdayDiffNone") as string)
-                : `${sign}${formatNumber(Math.abs(diff))}`;
-            return `${t("stats.yesterdayDiffLabel")} : ${diffText}`;
-          })()}
-        </div>
-      </div>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={data}
-          margin={{ top: 6, right: 12, left: 0, bottom: 6 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-          <YAxis
-            allowDecimals={false}
-            width={80}
-            tick={{ fontSize: 12 }}
-            tickFormatter={(v) => {
-              return formatNumber(Number(v));
-            }}
-            tickMargin={8}
-            // domain はキリの良い数字に丸める
-            domain={(() => {
-              const values = data.map((d: any) => Number(d[dataKey] ?? 0));
-              // helper: compute nice step and extent
-              const niceExtent = (vals: number[], startZero: boolean) => {
-                if (!vals || vals.length === 0) return [0, 1];
-                const min = Math.min(...vals);
-                const max = Math.max(...vals);
-                if (startZero) {
-                  if (max === 0) return [0, 1];
-                  // compute step based on max
-                  let range = max;
-                  let step = Math.pow(10, Math.floor(Math.log10(range || 1)));
-                  const candidates = [1, 2, 5, 10];
-                  let found = false;
-                  for (let mult = 1; mult <= 1000000 && !found; mult *= 10) {
-                    for (const c of candidates) {
-                      const s = step * c * mult;
-                      const ticks = range / s;
-                      if (ticks <= 10) {
-                        step = s;
-                        found = true;
-                        break;
-                      }
-                    }
-                  }
-                  const niceMax = Math.ceil(max / step) * step;
-                  return [0, niceMax];
-                }
-                if (min === max) {
-                  if (min === 0) return [0, 1];
-                  const mag = Math.pow(
-                    10,
-                    Math.floor(Math.log10(Math.abs(min))),
-                  );
-                  const step = mag;
-                  return [Math.floor(min - step), Math.ceil(max + step)];
-                }
-                const range = max - min;
-                let step = Math.pow(10, Math.floor(Math.log10(range)));
-                const candidates = [1, 2, 5, 10];
-                let chosen = step;
-                for (let mult = 1; mult <= 1000000; mult *= 10) {
-                  let done = false;
-                  for (const c of candidates) {
-                    const s = step * c * mult;
-                    const ticks = range / s;
-                    if (ticks <= 10) {
-                      chosen = s;
-                      done = true;
-                      break;
-                    }
-                  }
-                  if (done) break;
-                }
-                const niceMin = Math.floor(min / chosen) * chosen;
-                const niceMax = Math.ceil(max / chosen) * chosen;
-                return [niceMin, niceMax];
-              };
+  }) => {
+    const values = data.map((d: any) => Number(d[dataKey] ?? 0));
+    const [nmin, nmax] = getNiceExtent(values, sfz);
+    const xAxisTicks = (() => {
+      if (data.length <= 2) {
+        return data.map((d: any) => d.date);
+      }
 
-              const [nmin, nmax] = niceExtent(values, sfz);
-              return [nmin, nmax];
+      const targetTickCount = 7;
+      const tickCount = Math.min(targetTickCount, data.length);
+      const indexSet = new Set<number>();
+
+      for (let i = 0; i < tickCount; i += 1) {
+        const idx = Math.round((i * (data.length - 1)) / (tickCount - 1));
+        indexSet.add(idx);
+      }
+
+      return Array.from(indexSet)
+        .sort((a, b) => a - b)
+        .map((idx) => data[idx]?.date)
+        .filter((d): d is string => Boolean(d));
+    })();
+
+    const chartStyle = {
+      "--chart-text-color": isDarkMode ? "#d1d5db" : "#374151",
+      "--chart-grid-color": isDarkMode
+        ? "rgba(209, 213, 219, 0.25)"
+        : "rgba(55, 65, 81, 0.2)",
+    } as CSSProperties;
+    const axisTickFill = isDarkMode ? "#d1d5db" : "#374151";
+
+    return (
+      <div className={`w-full h-64 ${containerClassName ?? ""}`}>
+        <div className="flex items-baseline justify-between mb-1">
+          <div className="text-sm">{name}</div>
+          <div className="text-sm">
+            {(() => {
+              const latest = data[data.length - 1] ?? null;
+              if (!latest) return "";
+              const headerDiffKey =
+                diffKey ?? dataKey.replace(/Count$/, "Diff");
+              const headerPctKey =
+                pctKey ?? headerDiffKey.replace(/Diff$/, "PctDiff");
+              const diff = (latest as any)[headerDiffKey] as number | 0;
+              const pct = (latest as any)[headerPctKey] as number | null;
+              if (
+                (diff === null || diff === undefined) &&
+                (pct === null || pct === undefined)
+              )
+                return t("stats.yesterdayPctNone");
+              const sign =
+                diff == null ? "" : diff > 0 ? "+" : diff < 0 ? "-" : "";
+              const diffText =
+                diff === null || diff === undefined
+                  ? (t("stats.yesterdayDiffNone") as string)
+                  : `${sign}${formatNumber(Math.abs(diff))}`;
+              return `${t("stats.yesterdayDiffLabel")} : ${diffText}`;
             })()}
-          />
-          <Tooltip
-            // カスタムツールチップ: 値と前日差分・前日比(%)を表示
-            content={({ active, payload, label }: any) => {
-              if (!active || !payload || !payload.length) return null;
-              const value = payload[0].value as number;
+          </div>
+        </div>
+
+        <AreaChart
+          style={chartStyle}
+          h={220}
+          data={data}
+          dataKey="date"
+          curveType="monotone"
+          strokeDasharray="3 3"
+          series={[{ name: dataKey, label: name, color }]}
+          valueFormatter={(value) => formatNumber(value)}
+          fillOpacity={0.2}
+          yAxisProps={{
+            allowDecimals: false,
+            width: 80,
+            tick: { fontSize: 12, fill: axisTickFill },
+            tickMargin: 8,
+            domain: [nmin, nmax],
+          }}
+          xAxisProps={{
+            tick: { fontSize: 12, fill: axisTickFill },
+            ticks: xAxisTicks,
+            interval: 0,
+            padding: { left: 8, right: 24 },
+          }}
+          areaChartProps={{
+            margin: { top: 6, right: 22, left: 2, bottom: 6 },
+          }}
+          referenceLines={
+            milestone
+              ? [
+                  {
+                    x: milestone.date,
+                    label: milestone.label,
+                    color,
+                    strokeDasharray: "4 4",
+                  },
+                ]
+              : undefined
+          }
+          tooltipProps={{
+            content: ({ label, payload }: any) => {
+              const filteredPayload = getFilteredChartTooltipPayload(payload);
+              if (!filteredPayload || filteredPayload.length === 0) return null;
+
+              const currentValue = Number(filteredPayload[0]?.value ?? 0);
               const idx = data.findIndex((d: any) => d.date === label);
               const diff =
                 diffKey && idx >= 0 ? (data[idx] as any)[diffKey] : null;
@@ -361,130 +407,40 @@ export default function ViewStat({ videoId }: { videoId: string }) {
                 pct === null || pct === undefined
                   ? "—"
                   : `${sign}${Number(Math.abs(pct)).toFixed(2)}%`;
+
               return (
-                <div className="bg-white dark:bg-gray-800 p-2 border border-gray-300 dark:border-gray-600 rounded-md">
-                  <div style={{ fontSize: 12, color: "#666", marginBottom: 6 }}>
-                    {label}
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>
-                    {formatNumber(value)}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color:
-                        diff === null
-                          ? "#666"
-                          : diff > 0
-                            ? "#16a34a"
-                            : diff < 0
-                              ? "#dc2626"
-                              : "#666",
-                    }}
+                <Paper px="sm" py="xs" withBorder shadow="sm">
+                  <Text size="xs" c="dimmed" mb={4}>
+                    {String(label ?? "")}
+                  </Text>
+                  <Text size="sm" fw={700}>
+                    {formatNumber(currentValue)}
+                  </Text>
+                  <Text
+                    size="xs"
+                    c={
+                      diff == null
+                        ? "dimmed"
+                        : diff > 0
+                          ? "green"
+                          : diff < 0
+                            ? "red"
+                            : "dimmed"
+                    }
                   >
                     {t("stats.yesterdayDiffLabel")} : {diffText}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#666" }}>
+                  </Text>
+                  <Text size="xs" c="dimmed">
                     {t("stats.yesterdayPctLabel")} : {pctText}
-                  </div>
-                </div>
+                  </Text>
+                </Paper>
               );
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey={dataKey}
-            stroke={color}
-            dot={(props: any) => {
-              if (!milestone || !props?.payload?.isoDate) {
-                return false;
-              }
-
-              const isMilestonePoint = isSameLocalDate(
-                props.payload.isoDate,
-                milestone.isoDate,
-              );
-
-              if (!isMilestonePoint) {
-                return false;
-              }
-
-              const bubbleWidth = 130;
-              const bubbleHeight = 40;
-              const isNearRightEdge = props.index >= data.length - 2;
-              const isNearLeftEdge = props.index <= 1;
-              const isNearTopEdge = props.cy <= bubbleHeight + 18;
-
-              const bubbleX = isNearRightEdge
-                ? props.cx - bubbleWidth - 12
-                : isNearLeftEdge
-                  ? props.cx + 12
-                  : props.cx - bubbleWidth / 2;
-              const bubbleCenterX = bubbleX + bubbleWidth / 2;
-              const bubbleY = isNearTopEdge
-                ? props.cy + 14
-                : props.cy - bubbleHeight - 14;
-              const pointerPath = isNearTopEdge
-                ? `M ${props.cx - 6} ${bubbleY} L ${props.cx + 6} ${bubbleY} L ${props.cx} ${props.cy + 6} Z`
-                : `M ${props.cx - 6} ${bubbleY + bubbleHeight} L ${props.cx + 6} ${bubbleY + bubbleHeight} L ${props.cx} ${props.cy - 6} Z`;
-              const bubbleFill = isDarkMode ? "#1f2937" : "#ffffff";
-              const bubbleText = isDarkMode ? "#f3f4f6" : "#111827";
-              const bubbleSubText = isDarkMode ? "#d1d5db" : "#4b5563";
-              const dotStroke = isDarkMode ? "#111827" : "#ffffff";
-
-              return (
-                <g>
-                  <circle
-                    cx={props.cx}
-                    cy={props.cy}
-                    r={5}
-                    fill={color}
-                    stroke={dotStroke}
-                    strokeWidth={2}
-                  />
-                  <rect
-                    x={bubbleX}
-                    y={bubbleY}
-                    width={bubbleWidth}
-                    height={bubbleHeight}
-                    rx={8}
-                    ry={8}
-                    fill={bubbleFill}
-                    stroke={color}
-                    strokeWidth={1.5}
-                  />
-                  <path
-                    d={pointerPath}
-                    fill={bubbleFill}
-                    stroke={color}
-                    strokeWidth={1.5}
-                  />
-                  <text
-                    x={bubbleCenterX}
-                    y={bubbleY + 15}
-                    textAnchor="middle"
-                    fontSize={11}
-                    fill={bubbleText}
-                  >
-                    {milestone.label}
-                  </text>
-                  <text
-                    x={bubbleCenterX}
-                    y={bubbleY + 30}
-                    textAnchor="middle"
-                    fontSize={10}
-                    fill={bubbleSubText}
-                  >
-                    {milestone.dateLabel}
-                  </text>
-                </g>
-              );
-            }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+            },
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -563,6 +519,7 @@ export default function ViewStat({ videoId }: { videoId: string }) {
                 milestoneDisplay && milestoneDisplay.isInCurrentPeriod
                   ? {
                       isoDate: milestoneDisplay.isoDate,
+                      date: milestoneDisplay.date,
                       label: milestoneDisplay.targetLabel,
                       dateLabel: milestoneDisplay.achievedDateLabel,
                     }

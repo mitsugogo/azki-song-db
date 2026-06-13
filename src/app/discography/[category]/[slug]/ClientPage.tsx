@@ -12,16 +12,13 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../../lib/formatDate";
 import { renderLinkedText } from "../../../lib/textLinkify";
-import {
-  isCollaborationSong,
-  isCoverSong,
-  isPossibleOriginalSong,
-} from "../../../config/filters";
+import { isCoverSong } from "../../../config/filters";
 import useSongs from "../../../hook/useSongs";
 import ViewStat from "./viewStat";
 import { getCollabUnitName } from "@/app/config/collabUnits";
 import DiscographyBreadcrumbs from "../../components/DiscographyBreadcrumbs";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
+import { pageClasses } from "@/app/theme";
 
 export default function ClientPage({
   category,
@@ -32,13 +29,12 @@ export default function ClientPage({
 }) {
   const t = useTranslations("Discography");
   const locale = useLocale();
-  const tLabels = useTranslations("labels");
   const { allSongs, isLoading } = useSongs();
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
 
   if (isLoading) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <LoadingOverlay visible={true} />
       </div>
     );
@@ -54,7 +50,7 @@ export default function ClientPage({
 
   if (!matched || matched.length === 0) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
+      <div className={pageClasses.shell}>
         <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
         <p className="text-sm text-gray-600">{t("notFoundDescription")}</p>
       </div>
@@ -73,8 +69,8 @@ export default function ClientPage({
 
   if (!song) {
     return (
-      <div className="p-6 w-full 2xl:max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold">楽曲が見つかりません</h1>
+      <div className={pageClasses.shell}>
+        <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
       </div>
     );
   }
@@ -101,18 +97,20 @@ export default function ClientPage({
       song.title &&
       s.title === song.title &&
       s.video_id &&
-      s.video_id !== song.video_id,
+      s.video_id !== song.video_id &&
+      s.tags?.some((t) => t.includes("歌枠")),
   );
 
   const unitName = getCollabUnitName(song.sing.split("、"));
 
   const isCover = isCoverSong(song);
+  const singerSeparator = locale.startsWith("ja") ? "、" : ", ";
 
   // 現在のページのURL
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="p-6 w-full mx-auto h-full overflow-y-auto">
+    <div className={`${pageClasses.shell} h-full w-full mx-auto`}>
       <DiscographyBreadcrumbs
         items={[
           {
@@ -192,7 +190,7 @@ export default function ClientPage({
 
           {song.lyricist && (
             <p className="text-sm">
-              作詞:{" "}
+              {t("table.lyricist")}:{" "}
               <Link
                 href={`/search?q=lyricist:${encodeURIComponent(song.lyricist)}`}
                 className="hover:underline text-primary dark:text-primary-300"
@@ -203,7 +201,7 @@ export default function ClientPage({
           )}
           {song.composer && (
             <p className="text-sm">
-              作曲:{" "}
+              {t("table.composer")}:{" "}
               <Link
                 href={`/search?q=composer:${encodeURIComponent(song.composer)}`}
                 className="hover:underline text-primary dark:text-primary-300"
@@ -214,7 +212,7 @@ export default function ClientPage({
           )}
           {song.arranger && (
             <p className="text-sm">
-              編曲:{" "}
+              {t("table.arranger")}:{" "}
               <Link
                 href={`/search?q=arranger:${encodeURIComponent(song.arranger)}`}
                 className="hover:underline text-primary dark:text-primary-300"
@@ -225,7 +223,7 @@ export default function ClientPage({
           )}
           {song.sing && song.sing.length > 1 && (
             <p className="text-sm">
-              歌:{" "}
+              {t("labels.sing")}:{" "}
               {song.sing.split("、").map((s, idx) => (
                 <span key={idx}>
                   <Link
@@ -234,7 +232,7 @@ export default function ClientPage({
                   >
                     {s}
                   </Link>
-                  {idx < song.sing.split("、").length - 1 && "、"}
+                  {idx < song.sing.split("、").length - 1 && singerSeparator}
                 </span>
               ))}
               {unitName && (
@@ -256,12 +254,14 @@ export default function ClientPage({
           )}
           {song.album_release_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-              発売日: {formatDate(song.album_release_at, "ja")}
+              {t("labels.releaseDate")}{" "}
+              {formatDate(song.album_release_at, locale)}
             </p>
           )}
           {!song.album_release_at && song.broadcast_at && (
             <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-              配信日: {formatDate(song.broadcast_at, "ja")}
+              {t("labels.publishedDate")}{" "}
+              {formatDate(song.broadcast_at, locale)}
             </p>
           )}
 
@@ -371,13 +371,14 @@ export default function ClientPage({
                               className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
                             >
                               <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                              YouTube
+                              {t("buttons.watchOnYouTube")}
                             </a>
                             <Link
                               href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
                               className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                             >
-                              <FaPlay className="inline mr-1 -mt-1" /> 再生
+                              <FaPlay className="inline mr-1 -mt-1" />{" "}
+                              {t("buttons.play")}
                             </Link>
                           </div>
                         </div>
@@ -420,7 +421,8 @@ export default function ClientPage({
                         <div className="text-sm flex-1">
                           <div className="font-medium">{s.video_title}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {formatDate(s.broadcast_at, locale)} 配信
+                            {t("labels.publishedDate")}{" "}
+                            {formatDate(s.broadcast_at, locale)}
                           </div>
                           <div className="mt-2 space-x-2">
                             <a
@@ -430,13 +432,14 @@ export default function ClientPage({
                               className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
                             >
                               <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                              YouTube
+                              {t("buttons.watchOnYouTube")}
                             </a>
                             <Link
                               href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
                               className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
                             >
-                              <FaPlay className="inline mr-1 -mt-1" /> 再生
+                              <FaPlay className="inline mr-1 -mt-1" />{" "}
+                              {t("buttons.play")}
                             </Link>
                           </div>
                         </div>

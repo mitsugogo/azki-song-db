@@ -22,11 +22,14 @@ type SearchToken = {
   isExact: boolean;
 };
 
+const normalizeSearchText = (value: string) =>
+  value.normalize("NFKC").trim().toLowerCase();
+
 const isWrappedWithQuotes = (value: string) =>
   value.length >= 2 && value.startsWith('"') && value.endsWith('"');
 
 const parseSearchToken = (value: string): SearchToken | null => {
-  const normalized = value.trim().toLowerCase();
+  const normalized = normalizeSearchText(value);
   if (!normalized) return null;
 
   const prefixSeparatorIndex = normalized.indexOf(":");
@@ -162,31 +165,43 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   const filterCallback = useCallback(
     (word: string, isExact = false) =>
       (song: Song) => {
-        const equalsOrIncludes = (source: string, target: string) =>
-          isExact ? source === target : source.includes(target);
+        const equalsOrIncludes = (source: string, target: string) => {
+          const normalizedSource = normalizeSearchText(source);
+          const normalizedTarget = normalizeSearchText(target);
+          return isExact
+            ? normalizedSource === normalizedTarget
+            : normalizedSource.includes(normalizedTarget);
+        };
+
+        const someEqualsOrIncludes = (
+          sources: Array<string | undefined>,
+          target: string,
+        ) =>
+          sources.some((source) =>
+            source ? equalsOrIncludes(source, target) : false,
+          );
 
         const prefixSearches: {
           [key: string]: (song: Song, value: string) => boolean;
         } = {
           "title:": (s, v) =>
-            equalsOrIncludes(s.title.toLowerCase(), v) ||
+            equalsOrIncludes(s.title, v) ||
+            someEqualsOrIncludes(s.title_aliases ?? [], v) ||
             (locale === "en" &&
-              (s.title_en
-                ? equalsOrIncludes(s.title_en.toLowerCase(), v)
-                : false)),
+              (s.title_en ? equalsOrIncludes(s.title_en, v) : false)),
           "artist:": (s, v) =>
-            equalsOrIncludes(s.artist.toLowerCase(), v) ||
+            equalsOrIncludes(s.artist, v) ||
+            someEqualsOrIncludes(s.artist_aliases ?? [], v) ||
             (locale === "en" &&
-              (s.artist_en
-                ? equalsOrIncludes(s.artist_en.toLowerCase(), v)
-                : false)),
+              (s.artist_en ? equalsOrIncludes(s.artist_en, v) : false)),
           "album:": (s, v) => equalsOrIncludes(s.album.toLowerCase(), v),
           "sing:": (s, v) =>
             s.sing
               .toLowerCase()
               .split("、")
               .map((sing) => sing.trim())
-              .some((sing) => equalsOrIncludes(sing, v)),
+              .some((sing) => equalsOrIncludes(sing, v)) ||
+            someEqualsOrIncludes(s.sing_aliases ?? [], v),
           "lyricist:": (s, v) => equalsOrIncludes(s.lyricist.toLowerCase(), v),
           "composer:": (s, v) => equalsOrIncludes(s.composer.toLowerCase(), v),
           "arranger:": (s, v) => equalsOrIncludes(s.arranger.toLowerCase(), v),
@@ -283,15 +298,15 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
 
         // プレフィックスがない場合は全文検索
         return (
-          equalsOrIncludes(song.title.toLowerCase(), word) ||
-          equalsOrIncludes(song.artist.toLowerCase(), word) ||
+          equalsOrIncludes(song.title, word) ||
+          someEqualsOrIncludes(song.title_aliases ?? [], word) ||
+          equalsOrIncludes(song.artist, word) ||
+          someEqualsOrIncludes(song.artist_aliases ?? [], word) ||
           (locale === "en" &&
-            (song.title_en
-              ? equalsOrIncludes(song.title_en.toLowerCase(), word)
-              : false)) ||
+            (song.title_en ? equalsOrIncludes(song.title_en, word) : false)) ||
           (locale === "en" &&
             (song.artist_en
-              ? equalsOrIncludes(song.artist_en.toLowerCase(), word)
+              ? equalsOrIncludes(song.artist_en, word)
               : false)) ||
           equalsOrIncludes(song.album.toLowerCase(), word) ||
           song.sing
@@ -299,6 +314,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
             .split("、")
             .map((sing) => sing.trim())
             .some((sing) => equalsOrIncludes(sing, word)) ||
+          someEqualsOrIncludes(song.sing_aliases ?? [], word) ||
           song.tags
             .join(",")
             .toLowerCase()
