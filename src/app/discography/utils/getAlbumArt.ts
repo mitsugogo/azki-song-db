@@ -1,4 +1,4 @@
-function toPlaylistUrl(playlistIdOrUrl: string): string {
+export function toPlaylistUrl(playlistIdOrUrl: string): string {
   if (playlistIdOrUrl.startsWith("http")) {
     return playlistIdOrUrl;
   }

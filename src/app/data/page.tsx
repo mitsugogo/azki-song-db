@@ -4,7 +4,7 @@ import ClientTable from "./client";
 import Loading from "../loading";
 import { Link } from "@/i18n/navigation";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses } from "../theme";
+import { breadcrumbClasses, pageClasses } from "../theme";
 
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 
@@ -60,7 +60,7 @@ export default async function DataPage() {
   const messages = (await import(`../../messages/${locale}.json`)).default;
 
   return (
-    <div className="grow lg:p-6 lg:pb-0">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}

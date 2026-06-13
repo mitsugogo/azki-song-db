@@ -32,6 +32,8 @@ export default function useMainPlayerControls({
   globalPlayer,
 }: UseMainPlayerControlsOptions) {
   const playerRef = useRef<any>(null);
+  const globalPlayerRef = useRef(globalPlayer);
+  const lastKnownCurrentTimeRef = useRef(0);
   const playerRefVideoIdRef = useRef<string | null>(null);
   const lastPlayerReadyAtRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
@@ -58,6 +60,7 @@ export default function useMainPlayerControls({
 
   const {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,
@@ -89,6 +92,7 @@ export default function useMainPlayerControls({
     : null;
   // track previous videoId across renders so effects can reason about transitions
   previousVideoIdRef.current = previousVideoId;
+  globalPlayerRef.current = globalPlayer;
 
   const [playerVolume, setPlayerVolume] = useLocalStorage<number>({
     key: "player-volume",
@@ -113,8 +117,34 @@ export default function useMainPlayerControls({
     if (typeof playerInstance.getCurrentTime === "function") {
       const currentTime = playerInstance.getCurrentTime();
       if (Number.isFinite(currentTime)) {
+        lastKnownCurrentTimeRef.current = currentTime;
         setPlayerCurrentTime(currentTime);
       }
+    }
+  }, []);
+
+  const syncCurrentTimeFromPlayer = useCallback(() => {
+    const player = playerRef.current;
+    if (!player || typeof player.getCurrentTime !== "function") {
+      return null;
+    }
+
+    try {
+      const currentTime = Number(player.getCurrentTime());
+      if (!Number.isFinite(currentTime)) {
+        return null;
+      }
+
+      const lastKnownTime = lastKnownCurrentTimeRef.current;
+      const nextCurrentTime =
+        currentTime <= 0 && lastKnownTime > 0.25 ? lastKnownTime : currentTime;
+
+      lastKnownCurrentTimeRef.current = nextCurrentTime;
+      setPlayerCurrentTime(nextCurrentTime);
+      globalPlayerRef.current.setCurrentTime(nextCurrentTime);
+      return nextCurrentTime;
+    } catch (_) {
+      return null;
     }
   }, []);
 
@@ -236,6 +266,7 @@ export default function useMainPlayerControls({
           }
 
           setPlayerCurrentTime(targetSeconds);
+          lastKnownCurrentTimeRef.current = targetSeconds;
           globalPlayer.setCurrentTime(targetSeconds);
         } catch (_) {
           membersOnlyLoadVideoByIdAttemptedSongKeyRef.current = null;
@@ -333,6 +364,7 @@ export default function useMainPlayerControls({
           }
           if (player && typeof player.seekTo === "function") {
             player.seekTo(globalPlayer.currentTime, true);
+            lastKnownCurrentTimeRef.current = globalPlayer.currentTime;
             setHasRestoredPosition(true);
             initialStartSeekRef.current = null;
             initialStartSeekRetryCountRef.current = 0;
@@ -354,6 +386,7 @@ export default function useMainPlayerControls({
           }
           if (player && typeof player.seekTo === "function") {
             player.seekTo(requestedStartTime, true);
+            lastKnownCurrentTimeRef.current = requestedStartTime;
             setPlayerCurrentTime(requestedStartTime);
             globalPlayer.setCurrentTime(requestedStartTime);
             initialStartSeekRetryCountRef.current += 1;
@@ -370,6 +403,7 @@ export default function useMainPlayerControls({
           pendingSeekRef.current = null;
           if (typeof event.target.seekTo === "function") {
             event.target.seekTo(s, true);
+            lastKnownCurrentTimeRef.current = s;
             globalPlayer.setCurrentTime(s);
           }
         } catch (err) {
@@ -458,6 +492,7 @@ export default function useMainPlayerControls({
                 return;
               }
               event.target.seekTo(requestedStartTime, true);
+              lastKnownCurrentTimeRef.current = requestedStartTime;
               setPlayerCurrentTime(requestedStartTime);
               globalPlayer.setCurrentTime(requestedStartTime);
               initialStartSeekRetryCountRef.current += 1;
@@ -474,6 +509,7 @@ export default function useMainPlayerControls({
           typeof event.target.seekTo === "function"
         ) {
           event.target.seekTo(requestedStartTime, true);
+          lastKnownCurrentTimeRef.current = requestedStartTime;
           setPlayerCurrentTime(requestedStartTime);
           globalPlayer.setCurrentTime(requestedStartTime);
           initialStartSeekRetryCountRef.current += 1;
@@ -669,6 +705,7 @@ export default function useMainPlayerControls({
 
         // 進行中のシークを更新
         try {
+          lastKnownCurrentTimeRef.current = boundedAbsolute;
           setPlayerCurrentTime(boundedAbsolute);
         } catch (_) {}
         globalPlayer.setCurrentTime(boundedAbsolute);
@@ -724,6 +761,7 @@ export default function useMainPlayerControls({
             seekInFlightRef.current = null;
             setSeekInFlight(null);
             // ensure UI reflects the final settled time
+            lastKnownCurrentTimeRef.current = currentTime;
             setPlayerCurrentTime(currentTime);
             try {
               globalPlayer.setCurrentTime(currentTime);
@@ -732,6 +770,7 @@ export default function useMainPlayerControls({
 
           if (Math.abs(currentTime - lastTime) >= 0.25) {
             lastTime = currentTime;
+            lastKnownCurrentTimeRef.current = currentTime;
             setPlayerCurrentTime(currentTime);
           }
         }
@@ -742,6 +781,12 @@ export default function useMainPlayerControls({
   }, [isPlayerReady, isPlaying]);
 
   useEffect(() => {
+    return () => {
+      syncCurrentTimeFromPlayer();
+    };
+  }, [syncCurrentTimeFromPlayer]);
+
+  useEffect(() => {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
@@ -750,6 +795,7 @@ export default function useMainPlayerControls({
         typeof playerRef.current.getCurrentTime === "function"
       ) {
         const time = playerRef.current.getCurrentTime();
+        lastKnownCurrentTimeRef.current = time;
         globalPlayer.setCurrentTime(time);
       }
     }, 1000);
@@ -790,6 +836,7 @@ export default function useMainPlayerControls({
     if (currentVideoId !== previousVideoId) {
       if (previousVideoId !== null) {
         globalPlayer.setCurrentTime(0);
+        lastKnownCurrentTimeRef.current = 0;
         setHasRestoredPosition(false);
       }
       setPreviousVideoId(currentVideoId);
@@ -906,6 +953,7 @@ export default function useMainPlayerControls({
             }
             playerRef.current.seekTo(newTime, true);
             try {
+              lastKnownCurrentTimeRef.current = newTime;
               globalPlayer.setCurrentTime(newTime);
             } catch (_) {}
           }
@@ -939,6 +987,7 @@ export default function useMainPlayerControls({
 
   return {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,
@@ -963,5 +1012,6 @@ export default function useMainPlayerControls({
     previousVideoId,
     setPreviousVideoId,
     playerControls,
+    syncCurrentTimeFromPlayer,
   } as const;
 }

@@ -4,6 +4,7 @@ import {
   FaBook,
   FaCalendar,
   FaCompactDisc,
+  FaHeadphones,
   FaRepeat,
   FaTag,
   FaUser,
@@ -27,6 +28,7 @@ import { renderLinkedText } from "../lib/textLinkify";
 
 interface NowPlayingSongInfoDetailProps {
   currentSong: Song;
+  currentSongPlayCount?: number;
   allSongs: Song[];
   searchTerm: string;
   isPlaying: boolean;
@@ -41,6 +43,7 @@ interface NowPlayingSongInfoDetailProps {
 
 const NowPlayingSongInfoDetail = ({
   currentSong,
+  currentSongPlayCount = 0,
   allSongs,
   searchTerm,
   isPlaying,
@@ -767,6 +770,20 @@ const NowPlayingSongInfoDetail = ({
             )}
 
             <hr className="my-2 border-gray-300/70" />
+
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">
+              <dt className="text-muted-foreground flex items-start w-full lg:w-48 shrink-0">
+                <span className="inline-flex items-center">
+                  <FaHeadphones className="text-base" />
+                  <span className="ml-1">{t("localPlayCount")}</span>
+                </span>
+              </dt>
+              <dd className="flex flex-wrap gap-1">
+                <Badge radius="sm" color="gray">
+                  {currentSongPlayCount.toLocaleString()} {t("times")}
+                </Badge>
+              </dd>
+            </div>
 
             {/* 歌った回数 */}
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-1">

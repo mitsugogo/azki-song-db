@@ -6,6 +6,10 @@ import { MantineProvider } from "@mantine/core";
 import type { Song } from "../../types/song";
 import type { YouTubeApiVideoResult } from "../../types/api/yt/video";
 
+const { sharedPlayerSourceRef } = vi.hoisted(() => ({
+  sharedPlayerSourceRef: { current: null as any },
+}));
+
 // Polyfill matchMedia for Mantine internals in the test environment
 if (typeof window !== "undefined" && !window.matchMedia) {
   // @ts-ignore
@@ -71,17 +75,17 @@ vi.mock("../../hook/useControlBar", () => ({
 }));
 
 // Mock children components used inside PlayerSection
-vi.mock("../YouTubePlayer", () => ({
-  __esModule: true,
-  default: (props: any) => (
+vi.mock("../SharedYouTubePlayer", () => ({
+  SharedYouTubePlayerSlot: ({ sourceId, active }: any) => (
     <div
-      data-testid="youtube"
-      data-disable-end={props.disableEnd ? "1" : "0"}
-      data-key={props?.key}
-    >
-      {props.song?.title}
-    </div>
+      data-testid="shared-youtube-slot"
+      data-source-id={sourceId}
+      data-active={active ? "1" : "0"}
+    />
   ),
+  useSharedYouTubePlayerSource: (source: any) => {
+    sharedPlayerSourceRef.current = source;
+  },
 }));
 
 vi.mock("../PlayerControlsBar", () => ({
@@ -120,6 +124,7 @@ const baseSong: Song = {
 
 describe("PlayerSection", () => {
   beforeEach(() => {
+    sharedPlayerSourceRef.current = null;
     mockControlBar = {
       ...mockControlBar,
       songsInVideo: [],
@@ -132,7 +137,7 @@ describe("PlayerSection", () => {
       wrapper: ({ children }) => <MantineProvider>{children}</MantineProvider>,
     });
 
-  it("renders YouTubePlayer when currentSong is provided", () => {
+  it("registers the shared YouTube player when currentSong is provided", () => {
     mockControlBar.songsInVideo = [baseSong];
     const { getByTestId } = renderWithWrapper(
       <PlayerSection
@@ -160,11 +165,19 @@ describe("PlayerSection", () => {
       />,
     );
 
-    expect(getByTestId("youtube")).toBeTruthy();
+    expect(getByTestId("shared-youtube-slot")).toHaveAttribute(
+      "data-active",
+      "1",
+    );
+    expect(sharedPlayerSourceRef.current).toMatchObject({
+      sourceId: "main",
+      active: true,
+      videoId: "v1",
+    });
   });
 
-  it("does not render YouTubePlayer when currentSong is null", () => {
-    const { queryByTestId } = renderWithWrapper(
+  it("does not activate the shared YouTube player when currentSong is null", () => {
+    const { getByTestId } = renderWithWrapper(
       <PlayerSection
         currentSong={null}
         previousSong={null}
@@ -190,7 +203,14 @@ describe("PlayerSection", () => {
       />,
     );
 
-    expect(queryByTestId("youtube")).toBeNull();
+    expect(getByTestId("shared-youtube-slot")).toHaveAttribute(
+      "data-active",
+      "0",
+    );
+    expect(sharedPlayerSourceRef.current).toMatchObject({
+      sourceId: "main",
+      active: false,
+    });
   });
 
   it("プレミア公開予定ではコントロールバーに時間非表示モードを渡す", () => {

@@ -1,21 +1,22 @@
 "use client";
 
 import { Link, useRouter } from "../i18n/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { Zen_Maru_Gothic } from "next/font/google";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
+  Avatar,
+  AvatarGroup,
   Badge,
   Burger,
   Button,
   CopyButton,
-  Alert,
-  Notification,
   Skeleton,
   Text,
   Tooltip,
-  Transition,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useIntersection } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
+import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
 import SearchInput from "./components/SearchInput";
@@ -26,11 +27,17 @@ import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { SONG_MODE_MENU_ITEMS } from "./components/songModeMenu";
 import { baseUrl, siteConfig } from "./config/siteConfig";
 import useAnniversaries from "./hook/useAnniversaries";
+import useChannels from "./hook/useChannels";
 import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
+import { useStatistics } from "./hook/useStatistics";
+import useStatViewCounts from "./hook/useStatViewCounts";
+import { isCoverSong, isOriginalSong } from "./config/filters";
+import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
+import { showAppNotification } from "./lib/notifications";
 import {
   buildMilestoneSearchHref,
   computeNextIsoForAnniversary,
@@ -43,21 +50,37 @@ import {
   isAnniversaryToday,
   parseToJstDayStart,
 } from "./lib/highlights";
+import { buildViewMilestoneInfo } from "./lib/viewMilestone";
 import {
   LuArrowRight,
   LuSearch,
   LuSparkles,
   LuCopy,
   LuCopyCheck,
+  LuVolumeX,
 } from "react-icons/lu";
 import { IoInformationSharp } from "react-icons/io5";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { BsGeoAlt } from "react-icons/bs";
-import { Song } from "./types/song";
+import type { Song } from "./types/song";
+import type { StatisticsItem } from "./types/statisticsItem";
+import type { ChannelEntry } from "./types/api/yt/channels";
+
+const zenMaruGothic = Zen_Maru_Gothic({
+  subsets: ["latin"],
+  display: "swap",
+  weight: "700",
+  preload: true,
+  adjustFontFallback: false,
+});
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
+
+// 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
+const HERO_BACKGROUND_RECENT_DAYS = 30;
+const HERO_BACKGROUND_RECENT_WEIGHT = 10;
 const ORIGINAL_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
   SONG_MODE_MENU_ITEMS[0];
@@ -70,6 +93,11 @@ const COLLABORATION_SONG_MODE_ITEM =
 const KARAOKE_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "tag:歌枠") ??
   SONG_MODE_MENU_ITEMS[0];
+
+type BuildInfo = {
+  buildDate?: string;
+  version?: string;
+};
 
 function pickRecommendedSongs<T>(items: Song[], count: number) {
   if (items.length <= count) {
@@ -86,6 +114,88 @@ function pickRecommendedSongs<T>(items: Song[], count: number) {
   }
 
   return pool.slice(0, count);
+}
+
+function pickHeroBackgroundSong(items: Song[]) {
+  const candidates = items.filter(
+    // オリジナル楽曲のMVのみ
+    (song) =>
+      song.video_id &&
+      song.tags.some((tag) => tag.includes("MV")) &&
+      isOriginalSong(song),
+  );
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const recentThreshold =
+    Date.now() - HERO_BACKGROUND_RECENT_DAYS * 24 * 60 * 60 * 1000;
+  const weightedCandidates = candidates.map((song) => {
+    const broadcastTime = new Date(song.broadcast_at).getTime();
+    const isRecent =
+      Number.isFinite(broadcastTime) && broadcastTime >= recentThreshold;
+
+    return {
+      song,
+      weight: isRecent ? HERO_BACKGROUND_RECENT_WEIGHT : 1,
+    };
+  });
+  const totalWeight = weightedCandidates.reduce(
+    (sum, candidate) => sum + candidate.weight,
+    0,
+  );
+  let randomWeight = Math.random() * totalWeight;
+
+  for (const candidate of weightedCandidates) {
+    randomWeight -= candidate.weight;
+    if (randomWeight < 0) {
+      return candidate.song;
+    }
+  }
+
+  return weightedCandidates.at(-1)?.song ?? null;
+}
+
+function buildHeroBackgroundVideoUrl(song: Song) {
+  const fallbackUrl = `https://www.youtube.com/watch?v=${song.video_id}`;
+  const baseVideoUrl = song.video_uri || fallbackUrl;
+
+  if (Number(song.start) <= 0) {
+    return baseVideoUrl;
+  }
+
+  const separator = baseVideoUrl.includes("?") ? "&" : "?";
+  return `${baseVideoUrl}${separator}`;
+}
+
+function getSingerNamesFromSong(song: Song) {
+  const localizedSings = song.hl?.ja?.sings ?? [];
+  if (localizedSings.length > 0) {
+    return localizedSings.map((name) => name.trim()).filter(Boolean);
+  }
+
+  if (song.sings.length > 0) {
+    return song.sings.map((name) => name.trim()).filter(Boolean);
+  }
+
+  return song.sing
+    .split(/[、,]/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+function buildChannelUrl(entry: ChannelEntry) {
+  if (entry.youtubeId) {
+    return `https://www.youtube.com/channel/${entry.youtubeId}`;
+  }
+
+  const handle = (entry.handle ?? "").trim();
+  if (!handle) {
+    return null;
+  }
+
+  return `https://www.youtube.com/${handle.startsWith("@") ? handle : `@${handle}`}`;
 }
 
 // video_id基準で楽曲をグループ化し、直近3件を取得
@@ -141,25 +251,32 @@ export default function ClientTop() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
+  const { channels: channelsRegistry } = useChannels();
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
   const { items: eventItems, isLoading: isEventsLoading } = useEvents();
   const [isShowOngoingEventsAlert, setOngoingEventsAlert] = useState(true);
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
+  const { ref: viewMilestonesRef, entry: viewMilestonesEntry } =
+    useIntersection<HTMLElement>({
+      rootMargin: "320px 0px",
+      threshold: 0,
+    });
   const t = useTranslations("Home");
+  const tStatistics = useTranslations("Statistics");
   const tHeader = useTranslations("Header");
   const tDrawer = useTranslations("DrawerMenu");
   const tAnniversaries = useTranslations("Anniversaries");
   const tSummary = useTranslations("Summary");
   const [searchValue, setSearchValue] = useState<string[]>([]);
-  const [copiedNotificationType, setCopiedNotificationType] = useState<
-    "original" | "cover" | "collaboration" | "karaoke"
-  >("original");
-  const [copiedNotificationVisible, setCopiedNotificationVisible] =
+  const [shouldLoadViewStatistics, setShouldLoadViewStatistics] =
     useState(false);
-  const [copiedNotificationSequence, setCopiedNotificationSequence] =
-    useState(0);
+  const [isHeroBackgroundUnavailable, setHeroBackgroundUnavailable] =
+    useState(false);
+  const ongoingEventNotificationIdRef = useRef<string | null>(null);
+  const [buildDate, setBuildDate] = useState("N/A");
+  const [appVersion, setAppVersion] = useState("N/A");
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -175,18 +292,37 @@ export default function ClientTop() {
   }, []);
 
   useEffect(() => {
-    if (!copiedNotificationVisible) {
-      return;
+    if (viewMilestonesEntry?.isIntersecting) {
+      setShouldLoadViewStatistics(true);
     }
+  }, [viewMilestonesEntry?.isIntersecting]);
 
-    const timerId = window.setTimeout(() => {
-      setCopiedNotificationVisible(false);
-    }, 5000);
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [copiedNotificationVisible, copiedNotificationSequence]);
+  useEffect(() => {
+    fetch("/build-info.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch build info: ${response.status}`);
+        }
+        return response.text().then((text) => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return {};
+          }
+        });
+      })
+      .then((data: BuildInfo) => {
+        setBuildDate(data.buildDate ?? "N/A");
+        setAppVersion(data.version ?? "N/A");
+      })
+      .catch((error) => {
+        console.warn("Failed to fetch build info:", error);
+        if (process.env.NODE_ENV === "development") {
+          setBuildDate(new Date().toISOString());
+          setAppVersion("dev");
+        }
+      });
+  }, []);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
@@ -197,6 +333,119 @@ export default function ClientTop() {
     () => groupRecentUpdates(allSongs, 3),
     [allSongs],
   );
+
+  const channelsBySingerName = useMemo(() => {
+    const map = new Map<string, ChannelEntry>();
+
+    channelsRegistry.forEach((entry) => {
+      const artistName = (entry.artistName ?? "").trim();
+      if (artistName && !map.has(artistName)) {
+        map.set(artistName, entry);
+      }
+
+      const channelName = (entry.channelName ?? "").trim();
+      if (channelName && !map.has(channelName)) {
+        map.set(channelName, entry);
+      }
+    });
+
+    return map;
+  }, [channelsRegistry]);
+
+  const singerAvatarsByVideoId = useMemo(() => {
+    const avatarsByVideoId = new Map<
+      string,
+      Array<{ name: string; iconUrl: string; channelUrl: string | null }>
+    >();
+
+    recentUpdates.forEach((update) => {
+      const avatars: Array<{
+        name: string;
+        iconUrl: string;
+        channelUrl: string | null;
+      }> = [];
+      const seenChannels = new Set<string>();
+
+      update.songs.forEach((song) => {
+        getSingerNamesFromSong(song).forEach((singerName) => {
+          const entry = channelsBySingerName.get(singerName);
+          const iconUrl = (entry?.iconUrl ?? "").trim();
+          if (!iconUrl) {
+            return;
+          }
+
+          const channelUrl = entry ? buildChannelUrl(entry) : null;
+          const channelKey =
+            (entry?.youtubeId ?? "").trim() ||
+            channelUrl ||
+            (entry?.channelName ?? "").trim() ||
+            iconUrl;
+
+          if (seenChannels.has(channelKey)) {
+            return;
+          }
+
+          avatars.push({
+            name: entry?.channelName || entry?.artistName || singerName,
+            iconUrl,
+            channelUrl,
+          });
+          seenChannels.add(channelKey);
+        });
+      });
+
+      avatarsByVideoId.set(update.videoId, avatars);
+    });
+
+    return avatarsByVideoId;
+  }, [recentUpdates, channelsBySingerName]);
+
+  const heroBackgroundSong = useMemo(
+    () => pickHeroBackgroundSong(allSongs),
+    [allSongs],
+  );
+
+  const heroBackgroundVideoUrl = useMemo(
+    () =>
+      heroBackgroundSong
+        ? buildHeroBackgroundVideoUrl(heroBackgroundSong)
+        : null,
+    [heroBackgroundSong],
+  );
+
+  const heroBackgroundWatchHref = useMemo(
+    () =>
+      heroBackgroundSong
+        ? buildWatchHref({ videoId: heroBackgroundSong.video_id })
+        : null,
+    [heroBackgroundSong],
+  );
+
+  const heroBackgroundOptions = useMemo<YouTubeProps["opts"]>(
+    () => ({
+      width: "100%",
+      height: "100%",
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        enablejsapi: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        loop: 1,
+        playlist: heroBackgroundSong?.video_id,
+        playsinline: 1,
+        rel: 0,
+        origin:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      },
+    }),
+    [heroBackgroundSong?.video_id],
+  );
+
+  useEffect(() => {
+    setHeroBackgroundUnavailable(false);
+  }, [heroBackgroundSong?.video_id]);
 
   const featuredAnniversaries = useMemo(
     () => getFeaturedAnniversaries(anniversaryItems),
@@ -218,6 +467,65 @@ export default function ClientTop() {
     [allSongs, externalMilestones],
   );
 
+  const statistics = useStatistics({
+    songs: allSongs,
+  });
+
+  const viewLabelVideoIds = useMemo(
+    () =>
+      [
+        ...statistics.originalSongCountsByReleaseDate,
+        ...statistics.coverSongCountsByReleaseDate,
+      ]
+        .map(
+          (item) =>
+            item.song?.video_id ||
+            item.firstVideo?.video_id ||
+            item.lastVideo?.video_id,
+        )
+        .filter(Boolean),
+    [
+      statistics.originalSongCountsByReleaseDate,
+      statistics.coverSongCountsByReleaseDate,
+    ],
+  );
+
+  const { data: viewStatisticsByVideoId, loading: isViewStatisticsLoading } =
+    useStatViewCounts(viewLabelVideoIds, "7d", shouldLoadViewStatistics);
+
+  const milestoneStatistics = useMemo(() => {
+    const attachMilestone = (items: StatisticsItem[]) =>
+      items.map((item) => {
+        const statVideoId =
+          item.song?.video_id ||
+          item.firstVideo?.video_id ||
+          item.lastVideo?.video_id ||
+          "";
+        const history = viewStatisticsByVideoId[statVideoId] || [];
+        const latestHistoryViewCount =
+          history[history.length - 1]?.viewCount ?? 0;
+        const songViewCount = Number(item.song?.view_count ?? 0);
+        const effectiveViewCount =
+          songViewCount > 0 ? songViewCount : latestHistoryViewCount;
+
+        return {
+          ...item,
+          statVideoId,
+          effectiveViewCount,
+          viewMilestone: buildViewMilestoneInfo(effectiveViewCount, history),
+        };
+      });
+
+    return {
+      originalSongCountsByReleaseDate: attachMilestone(
+        statistics.originalSongCountsByReleaseDate,
+      ),
+      coverSongCountsByReleaseDate: attachMilestone(
+        statistics.coverSongCountsByReleaseDate,
+      ),
+    };
+  }, [statistics, viewStatisticsByVideoId]);
+
   const hasFeaturedAnniversaryToday = useMemo(() => {
     if (featuredAnniversaries.length === 0) {
       return false;
@@ -238,6 +546,24 @@ export default function ClientTop() {
 
     return formatDate(date, locale);
   }, [songsFetchedAt]);
+
+  const buildDateLabel = useMemo(() => {
+    if (!buildDate || buildDate === "N/A") {
+      return null;
+    }
+
+    const date = new Date(buildDate);
+    if (Number.isNaN(date.getTime())) {
+      return buildDate;
+    }
+
+    return formatDate(date, locale);
+  }, [buildDate, locale]);
+
+  const copyrightYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return currentYear <= 2025 ? "2025" : `2025-${currentYear}`;
+  }, []);
 
   const originalSongsShareUrl = useMemo(
     () => new URL("/watch?q=original-songs", baseUrl).toString(),
@@ -289,19 +615,92 @@ export default function ClientTop() {
   const showCopiedNotification = (
     type: "original" | "cover" | "collaboration" | "karaoke",
   ) => {
-    setCopiedNotificationType(type);
-    setCopiedNotificationVisible(true);
-    setCopiedNotificationSequence((current) => current + 1);
+    const message =
+      type === "cover"
+        ? t("coverSongsLinkCopied")
+        : type === "collaboration"
+          ? t("collaborationSongsLinkCopied")
+          : type === "karaoke"
+            ? t("karaokeSongsLinkCopied")
+            : t("originalSongsLinkCopied");
+
+    showAppNotification({
+      title: t("copied"),
+      message,
+      type: "success",
+      autoClose: 5000,
+    });
+  };
+
+  useEffect(() => {
+    if (ongoingEvents.length === 0 || !isShowOngoingEventsAlert) {
+      return;
+    }
+
+    const event = ongoingEvents[0];
+    const notificationId = `ongoing-event-${event.content}`;
+    if (ongoingEventNotificationIdRef.current === notificationId) {
+      return;
+    }
+    ongoingEventNotificationIdRef.current = notificationId;
+
+    showAppNotification({
+      id: notificationId,
+      title: t("eventOngoingTitle", {
+        title: event.content,
+      }),
+      message: event.note ? (
+        <div className="space-y-2">
+          <Text size="sm" c="dimmed">
+            {event.note}
+
+            {event.url ? (
+              <Link
+                href={event.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+              >
+                <FaExternalLinkAlt className="text-[0.75rem]" />
+                {t("linkLabel")}
+              </Link>
+            ) : null}
+          </Text>
+        </div>
+      ) : (
+        event.content
+      ),
+      type: "warning",
+      icon: <IoInformationSharp />,
+      autoClose: false,
+      onClose: () => {
+        setOngoingEventsAlert(false);
+        ongoingEventNotificationIdRef.current = null;
+      },
+    });
+  }, [ongoingEvents, isShowOngoingEventsAlert, t]);
+
+  const handleHeroBackgroundReady = (event: YouTubeEvent) => {
+    try {
+      event.target.mute();
+      event.target.playVideo();
+    } catch {
+      setHeroBackgroundUnavailable(true);
+    }
+  };
+
+  const handleHeroBackgroundError = () => {
+    setHeroBackgroundUnavailable(true);
   };
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
-      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 lg:pt-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 sm:px-6 lg:px-8">
         <header
-          className={`sticky top-0 z-40 -mx-4 px-4 py-4 transition-colors duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+          className={`sticky top-0 z-40 -mx-4 isolate px-4 py-4 transition-colors duration-200 before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:transition-colors before:duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
             isScrolled
-              ? "bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/70 dark:bg-gray-900/70 dark:supports-backdrop-filter:bg-gray-900/70"
-              : "border-transparent bg-transparent"
+              ? "before:bg-white/80 before:backdrop-blur dark:before:bg-gray-900/70"
+              : "border-transparent before:bg-transparent"
           }`}
         >
           <div className="flex items-center justify-between gap-3">
@@ -319,10 +718,11 @@ export default function ClientTop() {
               </Link>
             </div>
 
-            <div className="flex shrink-0 items-center justify-end sm:gap-2">
+            <div className={`flex shrink-0 items-center justify-end sm:gap-2`}>
               <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
                 <Link href={`/search`} className="hover:text-primary-500">
-                  <LuSearch />
+                  <LuSearch className="mr-1 -mt-0.5 inline" />
+                  {tDrawer("search")}
                 </Link>
                 <Link href={`/discography`} className="hover:text-primary-500">
                   {tDrawer("discography")}
@@ -347,293 +747,339 @@ export default function ClientTop() {
         </header>
 
         <main className="flex flex-1 flex-col">
-          <section className="flex min-h-[48dvh] flex-col items-center justify-center py-10 text-center sm:py-16">
-            <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/70 dark:text-pink-200/70">
-              {t("brand")}
-            </p>
-            <h1 className="max-w-4xl text-balance text-4xl font-black leading-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-              {t("heroLine1")}
-              <br />
-              <span className="hidden md:inline">{t("heroLine2")}</span>
-              <span className="inline md:hidden">{t("heroLine2_short")}</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
-              {t("description")}
-            </p>
-
-            <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
-              <SearchInput
-                allSongs={allSongs}
-                searchValue={searchValue}
-                onSearchChange={setSearchValue}
-                placeholder={tHeader("searchPlaceholder")}
-                className="[&_input]:h-12 [&_input]:text-base"
-              />
-              <div className="mt-4 flex items-center justify-center gap-3 flex-row">
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-                  disabled={isPending}
+          <section className="relative left-1/2 isolate flex min-h-[48dvh] w-screen -translate-x-1/2 flex-col items-center justify-center overflow-hidden py-10 text-center sm:py-16">
+            {heroBackgroundSong && !isHeroBackgroundUnavailable ? (
+              <div
+                className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+                style={{
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 0%, black 50%, rgba(0, 0, 0, 0.62) 64%, rgba(0, 0, 0, 0.18) 76%, transparent 88%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(to bottom, black 0%, black 50%, rgba(0, 0, 0, 0.62) 64%, rgba(0, 0, 0, 0.18) 76%, transparent 88%, transparent 100%)",
+                }}
+                aria-hidden="true"
+              >
+                <YouTube
+                  videoId={heroBackgroundSong.video_id}
+                  opts={heroBackgroundOptions}
+                  className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-full min-w-[177.78dvh] -translate-x-1/2 -translate-y-1/2"
+                  iframeClassName="h-full w-full"
+                  title=""
+                  onReady={handleHeroBackgroundReady}
+                  onError={handleHeroBackgroundError}
+                />
+              </div>
+            ) : null}
+            <div
+              className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.72),rgba(255,255,255,0.42)_42%,rgba(253,242,248,0.9)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.42),rgba(15,23,42,0.72)_50%,rgba(15,23,42,0.94)_100%)]"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.5) 80%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.5) 80%, transparent 100%)",
+              }}
+            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-56 bg-linear-to-b from-transparent via-[#fffafc]/70 to-transparent dark:via-[#111827]/70 sm:h-72" />
+            {heroBackgroundSong &&
+            heroBackgroundVideoUrl &&
+            heroBackgroundWatchHref ? (
+              <div className="absolute right-3 top-1 z-20 flex max-w-[calc(100vw-2rem)] items-center gap-1.5 sm:right-6 sm:top-5">
+                <Link
+                  href={heroBackgroundVideoUrl}
+                  target="_blank"
+                  className="inline-flex min-w-0 text-nowrap items-center rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[0.65rem] font-semibold text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:px-3 sm:py-1.5 sm:text-xs"
+                  title={heroBackgroundSong.video_title}
                 >
-                  {isPending ? (
-                    t("searching")
-                  ) : (
-                    <>
-                      <LuSearch className="mr-1 inline" />
-                      {t("searchButton")}
-                    </>
-                  )}
-                </button>
-                <Tooltip
-                  withArrow
-                  arrowSize={8}
-                  position="bottom"
-                  transitionProps={{ transition: "fade", duration: 300 }}
-                  label={
-                    <>
+                  <Text
+                    size="sm"
+                    c="red"
+                    className="mt-0.5 mr-1 shrink-0 dark:text-white!"
+                  >
+                    <FaYoutube />
+                  </Text>
+                  <Text size="xs" fw={500} truncate="end">
+                    {heroBackgroundSong.title}
+                  </Text>
+                  <Text
+                    c="dimmed"
+                    size="xs"
+                    className="ml-1 hidden sm:inline"
+                    component="span"
+                  >
+                    {heroBackgroundSong.broadcast_at
+                      ? formatDate(heroBackgroundSong.broadcast_at, locale)
+                      : null}
+                  </Text>
+                </Link>
+                <Link
+                  href={heroBackgroundWatchHref}
+                  aria-label={t("heroWatchFromBeginning")}
+                  title={t("heroWatchFromBeginning")}
+                  className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:size-8"
+                >
+                  <LuVolumeX className="text-sm sm:text-base" />
+                </Link>
+              </div>
+            ) : null}
+            <div className="relative z-10 flex w-full flex-col items-center px-4 sm:px-6 lg:px-8 select-none">
+              <div className="relative flex max-w-5xl flex-col items-center px-2 py-2 before:pointer-events-none before:absolute before:-inset-x-5 before:-inset-y-3 before:-z-10 before:rounded-4xl before:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.78),rgba(255,255,255,0.42)_58%,transparent_78%)] before:blur-xl dark:before:bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.58),rgba(15,23,42,0.3)_58%,transparent_78%)] sm:before:-inset-x-10 sm:before:-inset-y-5">
+                <p className="mb-3 text-xs font-semibold tracking-[0.35em] text-primary/65 drop-shadow-[0_1px_12px_rgba(255,255,255,0.9)] dark:text-pink-200/75 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.55)]">
+                  {t("brand")}
+                </p>
+                <h1
+                  className={`${zenMaruGothic.className} max-w-4xl text-balance text-4xl font-bold italic leading-tight text-light-gray-750/85 drop-shadow-[0_2px_18px_rgba(255,255,255,0.75)] dark:text-white/90 dark:drop-shadow-[0_2px_18px_rgba(0,0,0,0.65)] sm:text-5xl lg:text-6xl`}
+                  style={{ fontStyle: "italic" }}
+                >
+                  {t("heroLine1")}
+                  <br />
+                  <span className="hidden md:inline">{t("heroLine2")}</span>
+                  <span className="inline md:hidden">
+                    {t("heroLine2_short")}
+                  </span>
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm font-medium text-gray-800/80 drop-shadow-[0_1px_12px_rgba(255,255,255,0.85)] dark:text-gray-100/80 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] sm:text-base">
+                  {t("description")}
+                </p>
+              </div>
+
+              <div className="mt-8 w-full max-w-3xl rounded-4xl border border-white/70 bg-white/60 p-4 shadow-[0_24px_80px_rgba(190,24,93,0.16)] backdrop-blur dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-5">
+                <SearchInput
+                  allSongs={allSongs}
+                  searchValue={searchValue}
+                  onSearchChange={setSearchValue}
+                  placeholder={tHeader("searchPlaceholder")}
+                  className="[&_input]:h-12 [&_input]:text-base"
+                />
+                <div className="mt-4 flex items-center justify-center gap-3 flex-row">
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    className="inline-flex min-w-40 items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.01] hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      t("searching")
+                    ) : (
+                      <>
+                        <LuSearch className="mr-1 inline" />
+                        {t("searchButton")}
+                      </>
+                    )}
+                  </button>
+                  <Tooltip
+                    withArrow
+                    arrowSize={8}
+                    position="bottom"
+                    transitionProps={{ transition: "fade", duration: 300 }}
+                    label={
+                      <>
+                        <LuSparkles className="mr-1 inline" />
+                        {t("surpriseTooltip")}
+                      </>
+                    }
+                  >
+                    <Link
+                      href={`/watch`}
+                      className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
+                      aria-label={t("aria.randomPlay")}
+                    >
                       <LuSparkles className="mr-1 inline" />
-                      {t("surpriseTooltip")}
-                    </>
-                  }
-                >
-                  <Link
-                    href={`/watch`}
-                    className="inline-flex min-w-40 items-center justify-center rounded-full border border-primary/20 bg-white px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 dark:border-pink-200/20 dark:bg-transparent dark:text-pink-100 dark:hover:bg-pink-200/10"
-                    aria-label={t("aria.randomPlay")}
-                  >
-                    <LuSparkles className="mr-1 inline" />
-                    {t("surpriseMe")}
-                  </Link>
-                </Tooltip>
-              </div>
+                      {t("surpriseMe")}
+                    </Link>
+                  </Tooltip>
+                </div>
 
-              <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
+                <hr className="my-3 border-t border-gray-300 dark:border-gray-700" />
 
-              <div className="flex items-left justify-center gap-3">
-                <Text size="sm" color="dimmed">
-                  {/* 楽曲モードで再生 */}
-                  {t("songMode")}
-                </Text>
-              </div>
+                <div className="flex items-left justify-center gap-3">
+                  <Text size="sm" color="dimmed">
+                    {/* 楽曲モードで再生 */}
+                    {t("songMode")}
+                  </Text>
+                </div>
 
-              <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-                {/* オリジナル楽曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=original-songs"
-                    className={`min-w-0 flex-1`}
-                    leftSection={
-                      <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                    color="tan"
-                    variant="light"
-                  >
-                    {t("originalSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={originalSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="tan"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("original");
-                          }}
+                <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+                  {/* オリジナル楽曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=original-songs"
+                      className={`min-w-0 flex-1`}
+                      leftSection={
+                        <ORIGINAL_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                      color="tan"
+                      variant="light"
+                    >
+                      {t("originalSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={originalSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
                         >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
+                          <Button
+                            className={`shrink-0`}
+                            color="tan"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("original");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
 
-                {/* カバー楽曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=cover-songs"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("coverSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={coverSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("cover");
-                          }}
+                  {/* カバー楽曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=cover-songs"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <COVER_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("coverSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={coverSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
                         >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("cover");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
 
-                {/* ユニット・ゲスト参加曲 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=collaboration-songs"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("collaborationSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={collaborationSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("collaboration");
-                          }}
+                  {/* ユニット・ゲスト参加曲 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=collaboration-songs"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <COLLABORATION_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("collaborationSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={collaborationSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
                         >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("collaboration");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
 
-                {/* 歌枠 */}
-                <Button.Group className="w-full">
-                  <Button
-                    component={Link}
-                    href="/watch?q=tag:歌枠"
-                    className={`min-w-0 flex-1`}
-                    color="gray"
-                    variant="light"
-                    leftSection={
-                      <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
-                    }
-                  >
-                    {t("karaokeSongs")}
-                  </Button>
-                  {/* link copy button */}
-                  <CopyButton value={karaokeSongsShareUrl}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        withArrow
-                        arrowSize={8}
-                        label={t("shareLinkTooltip")}
-                      >
-                        <Button
-                          className={`shrink-0`}
-                          color="gray"
-                          variant="light"
-                          onClick={() => {
-                            copy();
-                            showCopiedNotification("karaoke");
-                          }}
+                  {/* 歌枠 */}
+                  <Button.Group className="w-full">
+                    <Button
+                      component={Link}
+                      href="/watch?q=tag:歌枠"
+                      className={`min-w-0 flex-1`}
+                      color="gray"
+                      variant="light"
+                      leftSection={
+                        <KARAOKE_SONG_MODE_ITEM.icon className="w-4 h-4" />
+                      }
+                    >
+                      {t("karaokeSongs")}
+                    </Button>
+                    {/* link copy button */}
+                    <CopyButton value={karaokeSongsShareUrl}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          withArrow
+                          arrowSize={8}
+                          label={t("shareLinkTooltip")}
                         >
-                          {copied ? (
-                            <>
-                              <LuCopyCheck className="mr-1 inline" />
-                            </>
-                          ) : (
-                            <LuCopy className="mr-1 inline" />
-                          )}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                </Button.Group>
+                          <Button
+                            className={`shrink-0`}
+                            color="gray"
+                            variant="light"
+                            onClick={() => {
+                              copy();
+                              showCopiedNotification("karaoke");
+                            }}
+                          >
+                            {copied ? (
+                              <>
+                                <LuCopyCheck className="mr-1 inline" />
+                              </>
+                            ) : (
+                              <LuCopy className="mr-1 inline" />
+                            )}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Button.Group>
+                </div>
               </div>
             </div>
-
-            {/* 開催中のイベント */}
-            {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
-              <Notification
-                icon={<IoInformationSharp />}
-                title={t("eventOngoingTitle", {
-                  title: ongoingEvents[0].content,
-                })}
-                className="w-full text-left shadow-lg max-w-3xl mt-3"
-                color="pink"
-                withCloseButton
-                onClose={() => {
-                  setOngoingEventsAlert(false);
-                }}
-              >
-                <div className="space-y-2">
-                  {ongoingEvents[0].note ? (
-                    <Text size="sm" c="dimmed">
-                      {ongoingEvents[0].note}
-
-                      {ongoingEvents[0].url ? (
-                        <Link
-                          href={ongoingEvents[0].url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                        >
-                          <FaExternalLinkAlt className="text-[0.75rem]" />
-                          {t("linkLabel")}
-                        </Link>
-                      ) : null}
-                    </Text>
-                  ) : null}
-                </div>
-              </Notification>
-            )}
           </section>
 
-          <section className="pb-10">
+          <section className="pt-8 pb-10 sm:pt-10">
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
@@ -689,7 +1135,7 @@ export default function ClientTop() {
                         <div className="line-clamp-1 text-xs text-gray-600 dark:text-gray-200">
                           {song.artist}
                         </div>
-                        <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-300">
                           <span>{song.year}</span>
                           <span>{formatDate(song.broadcast_at, locale)}</span>
                         </div>
@@ -698,11 +1144,91 @@ export default function ClientTop() {
                   ))}
             </div>
 
+            {!isLoading && (
+              <section ref={viewMilestonesRef} className="mt-16">
+                <div className="mb-5 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+                      {t("viewMilestonesLabel")}
+                    </p>
+                    <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                      {t("viewMilestonesTitle")}
+                    </h2>
+                  </div>
+                  <Link
+                    href="/statistics?tab=originalSongCountsByReleaseDate"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+                  >
+                    {tDrawer("statistics")}
+                    <LuArrowRight className="shrink-0" />
+                  </Link>
+                </div>
+
+                {!shouldLoadViewStatistics || isViewStatisticsLoading ? (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {Array.from({ length: 2 }).map((_, index) => (
+                      <div
+                        key={`view-milestone-skeleton-${index}`}
+                        className="rounded-2xl border border-white/50 bg-white/80 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-gray-900/40 dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+                        aria-hidden="true"
+                      >
+                        <Skeleton height={14} width="35%" radius="sm" />
+                        <div className="mt-3 space-y-3">
+                          {Array.from({ length: 3 }).map((__, itemIndex) => (
+                            <div
+                              key={`view-milestone-skeleton-row-${index}-${itemIndex}`}
+                              className="flex items-start gap-2"
+                            >
+                              <Skeleton
+                                height={36}
+                                width={64}
+                                radius="sm"
+                                className="shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <Skeleton height={14} radius="sm" />
+                                <Skeleton
+                                  height={12}
+                                  width="70%"
+                                  radius="sm"
+                                  className="mt-2"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <SongCountOverview
+                    items={[
+                      ...milestoneStatistics.originalSongCountsByReleaseDate,
+                      ...milestoneStatistics.coverSongCountsByReleaseDate,
+                    ]}
+                    primaryLabel={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.primaryLabel",
+                    )}
+                    totalCountLabel={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.totalCountLabel",
+                    )}
+                    topLabel=""
+                    countUnit={tStatistics(
+                      "overview.originalSongCountsByReleaseDate.countUnit",
+                    )}
+                    showMilestoneHighlights
+                    showTopTile={false}
+                    className="pt-0"
+                  />
+                )}
+              </section>
+            )}
+
             {featuredEvents.length > 0 && (
               <div className="mt-16 space-y-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-                    {t("eventsTitle")}
+                    EVENTS
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                     {t("eventsTitle")}
@@ -1101,33 +1627,95 @@ export default function ClientTop() {
               ) : recentUpdates.length > 0 ? (
                 <div className="space-y-4">
                   {recentUpdates.map((update) => {
+                    const singerAvatars =
+                      singerAvatarsByVideoId.get(update.videoId) ?? [];
+
+                    const watchHref = buildWatchHref({
+                      videoId: update.videoId,
+                    });
+
                     return (
-                      <Link
+                      <div
                         key={update.videoId}
-                        href={buildWatchHref({ videoId: update.videoId })}
-                        className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                        className="rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                       >
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                           {formatDate(update.date, locale)}{" "}
-                          <span className="pl-3 text-gray-100">
+                          <Text
+                            size="xs"
+                            c="dimmed"
+                            className="pl-2 text-gray-100"
+                            component="span"
+                          >
                             {t("recentUpdatesAddedCount", {
                               count: update.count,
                             })}
-                          </span>
+                          </Text>
                         </p>
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-black">
+                          <Link
+                            href={watchHref}
+                            className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-black"
+                          >
                             <YoutubeThumbnail
                               videoId={update.videoId}
                               alt={update.videoTitle}
                               imageClassName="object-cover"
                             />
+                          </Link>
+                          <div className="min-w-0">
+                            <Link href={watchHref} className="block">
+                              <Text
+                                size="sm"
+                                className="line-clamp-2"
+                                component="div"
+                              >
+                                {update.videoTitle}
+                              </Text>
+                            </Link>
+                            {singerAvatars.length > 0 ? (
+                              <Avatar.Group className="ml-2 mt-1" spacing="xxs">
+                                {singerAvatars.map((avatar) => {
+                                  const image = (
+                                    <Avatar
+                                      key={`${update.videoId}-${avatar.name}`}
+                                      src={avatar.iconUrl}
+                                      alt={avatar.name}
+                                      radius="xl"
+                                      size="md"
+                                      className="border-2 border-white dark:border-gray-900"
+                                    />
+                                  );
+
+                                  return (
+                                    <Tooltip
+                                      key={`${update.videoId}-${avatar.name}`}
+                                      label={avatar.name}
+                                      withArrow
+                                      arrowSize={8}
+                                    >
+                                      {avatar.channelUrl ? (
+                                        <Link
+                                          href={avatar.channelUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          onClick={(event) =>
+                                            event.stopPropagation()
+                                          }
+                                        >
+                                          {image}
+                                        </Link>
+                                      ) : (
+                                        image
+                                      )}
+                                    </Tooltip>
+                                  );
+                                })}
+                              </Avatar.Group>
+                            ) : null}
                           </div>
-                          <p className="min-w-0 text-xs opacity-70 line-clamp-2">
-                            {update.videoTitle}
-                          </p>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>
@@ -1177,6 +1765,26 @@ export default function ClientTop() {
                       ? t("lastUpdated", { date: songsUpdatedLabel })
                       : "",
                   })}
+              {!isLoading && buildDateLabel && songsUpdatedLabel ? (
+                <>
+                  <br />
+                  Version{" "}
+                  <Link
+                    href={
+                      appVersion === "dev"
+                        ? "https://github.com/mitsugogo/azki-song-db"
+                        : `https://github.com/mitsugogo/azki-song-db/releases/tag/v${appVersion}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium hover:text-primary dark:hover:text-pink-300"
+                  >
+                    {appVersion === "dev" ? "dev" : `v${appVersion}`}
+                  </Link>
+                  <br />
+                  Copylight © {copyrightYears} mitsugogo
+                </>
+              ) : null}
             </p>
           </section>
         </main>
@@ -1185,36 +1793,6 @@ export default function ClientTop() {
       </div>
       <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
       <AnalyticsWrapper />
-
-      <Transition
-        mounted={copiedNotificationVisible}
-        transition="slide-left"
-        duration={220}
-        timingFunction="ease"
-      >
-        {(styles) => (
-          <div
-            className="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm"
-            style={styles}
-          >
-            <Notification
-              title={t("copied")}
-              color="green"
-              withCloseButton
-              closeButtonProps={{ "aria-label": t("close") }}
-              onClose={() => setCopiedNotificationVisible(false)}
-            >
-              {copiedNotificationType === "cover"
-                ? t("coverSongsLinkCopied")
-                : copiedNotificationType === "collaboration"
-                  ? t("collaborationSongsLinkCopied")
-                  : copiedNotificationType === "karaoke"
-                    ? t("karaokeSongsLinkCopied")
-                    : t("originalSongsLinkCopied")}
-            </Notification>
-          </div>
-        )}
-      </Transition>
     </div>
   );
 }

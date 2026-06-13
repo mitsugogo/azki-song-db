@@ -119,6 +119,7 @@
       "callResponseHelp": "Call and response is an optional bonus for extra fun. Enjoying the live comes first, so there is no need to memorize everything.",
       "liveNote": "Live note:",
       "additionalInfo": "Additional info:",
+      "localPlayCount": "Local play count:",
       "timesSung": "Times sung:",
       "times": "times",
       "videosWithSong": "Streams where this song was sung:",
@@ -158,10 +159,11 @@
   },
   "Home": {
     "brand": "AZKi VIRTUAL DiVA",
-    "heroLine1": "A Musical Odyssey:",
-    "heroLine2": "Virtual DiVA AZKi",
+    "heroLine1": "Echoes of DiVA.",
+    "heroLine2": "",
     "heroLine2_short": "Virtual DiVA AZKi",
     "description": "An unofficial song database collecting AZKi's original songs, collabs & covers, and setlists sung on livestreams.",
+    "heroWatchFromBeginning": "Play from the beginning in the app player",
     "searchButton": "Search",
     "searching": "Searching...",
     "surpriseTooltip": "Randomly start playing a song",
@@ -198,6 +200,8 @@
     "recentUpdatesTitle": "Updates",
     "recentUpdatesAddedCount": "{count} songs added",
     "noRecentUpdates": "No recent updates",
+    "viewMilestonesLabel": "Views",
+    "viewMilestonesTitle": "View milestones and estimates",
     "hololiveOfficial": "Hololive official",
     "statsLoading": "Total songs: loading / Last updated: loading",
     "stats": "Total songs: {count} songs{date}",
@@ -687,7 +691,8 @@
     "labels": {
       "publishedDate": "Published date:",
       "releaseDate": "Release date:",
-      "cover": "Cover:"
+      "cover": "Cover:",
+      "sing": "Singers"
     },
     "relatedStreamsTitle": "Streams that sang this song ({count})",
     "tracksCount": "Tracks: {count}",

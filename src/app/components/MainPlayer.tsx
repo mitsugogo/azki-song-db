@@ -17,7 +17,6 @@ import PlayerSection from "./PlayerSection";
 import SearchAndSongList from "./SearchAndSongList";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import ShareModal from "./ShareModal";
-import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
 
 /**
@@ -36,6 +35,7 @@ export default function MainPlayer() {
 
   const {
     currentSong,
+    currentSongPlayCount,
     previousSong,
     nextSong,
     isPlaying,
@@ -58,6 +58,7 @@ export default function MainPlayer() {
     setHasRestoredPosition,
     setPreviousVideoId,
     playerControls,
+    syncCurrentTimeFromPlayer,
   } = useMainPlayerControls({
     songs,
     allSongs,
@@ -74,6 +75,7 @@ export default function MainPlayer() {
     const previousPathname = previousPathnameRef.current;
 
     if (!isWatchPage && isWatchPagePath(previousPathname) && currentSong) {
+      syncCurrentTimeFromPlayer();
       globalPlayer.setIsMinimized(true);
     } else if (isWatchPage) {
       globalPlayer.maximizePlayer();
@@ -107,7 +109,13 @@ export default function MainPlayer() {
     }
 
     previousPathnameRef.current = pathname;
-  }, [pathname, currentSong, globalPlayer, changeCurrentSong]);
+  }, [
+    pathname,
+    currentSong,
+    globalPlayer,
+    changeCurrentSong,
+    syncCurrentTimeFromPlayer,
+  ]);
 
   useEffect(() => {
     if (!currentSong) return;
@@ -224,8 +232,6 @@ export default function MainPlayer() {
   // Mobile song list overlay state
   const [isSongListOverlayOpen, setIsSongListOverlayOpen] = useState(false);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const [openShareModal, setOpenShareModal] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useLocalStorage<boolean>({
     key: "player-theater-mode",
@@ -303,6 +309,7 @@ export default function MainPlayer() {
           setOpenSongListOverlay={setIsSongListOverlayOpen}
           setShowPlaylistSelector={setShowPlaylistSelector}
           isPlaying={isPlaying}
+          currentSongPlayCount={currentSongPlayCount}
           playerKey={playerKey}
           hideFutureSongs={hideFutureSongs}
           playerControls={playerControls}
@@ -343,6 +350,7 @@ export default function MainPlayer() {
             <div className="hidden md:block md:w-2/3 xl:w-9/12 pr-0 lg:pr-3 foldable:w-full">
               <NowPlayingSongInfo
                 currentSong={currentSong}
+                currentSongPlayCount={currentSongPlayCount}
                 allSongs={allSongs}
                 searchTerm={searchTerm}
                 isPlaying={isPlaying}
@@ -379,13 +387,6 @@ export default function MainPlayer() {
           </motion.div>
         )}
       </div>
-
-      {showToast && (
-        <ToastNotification
-          message={toastMessage}
-          onClose={() => setShowToast(false)}
-        />
-      )}
 
       <ShareModal
         openShareModal={openShareModal}

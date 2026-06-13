@@ -45,9 +45,9 @@ test.describe("Search page", () => {
     await page.goto("/search?tag=tag%3A%E3%82%AA%E3%83%AA%E6%9B%B2");
 
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(300);
-
-    expect(page.url()).not.toContain("tag=");
+    await expect
+      .poll(() => page.url(), { timeout: 10000 })
+      .not.toContain("tag=");
   });
 
   test("selects browse tab from tab query parameter", async ({ page }) => {
@@ -109,7 +109,7 @@ test.describe("Search page", () => {
     // Wait for filtering to apply
     await page.waitForTimeout(800);
 
-    await expect(page.getByText("year:2025").first()).toBeVisible();
+    await expect(page.getByText("2025").first()).toBeVisible();
 
     // フィルタが効いていることを件数表示から確認
     const countText = await page
@@ -150,7 +150,7 @@ test.describe("Search page", () => {
     const currentUrl = page.url();
     expect(currentUrl).toContain("q=tag");
     expect(currentUrl).toContain("%E3%82%AA%E3%83%AA%E6%9B%B2"); // URL encoded オリ曲
-    await expect(page.getByText("tag:オリ曲").first()).toBeVisible();
+    await expect(page.getByText("オリ曲").first()).toBeVisible();
   });
 
   test("displays search help popover", async ({ page }) => {

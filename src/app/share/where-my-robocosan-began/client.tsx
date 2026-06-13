@@ -34,7 +34,8 @@ import { MdContentCopy, MdDownload } from "react-icons/md";
 import { FaBars } from "react-icons/fa6";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { breadcrumbClasses } from "@/app/theme";
+import { breadcrumbClasses, pageClasses } from "@/app/theme";
+import { showAppNotification } from "@/app/lib/notifications";
 import robocosanSongs from "./robocosanSongs.json";
 import {
   MAX_TIMELINE_ROWS,
@@ -385,7 +386,10 @@ export default function WhereMyRobocosanBeganClient() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert(t("whereMyRobocosanBegan.alerts.iconImageOnly"));
+      showAppNotification({
+        message: t("whereMyRobocosanBegan.alerts.iconImageOnly"),
+        type: "warning",
+      });
       return;
     }
 
@@ -403,7 +407,10 @@ export default function WhereMyRobocosanBeganClient() {
     }).catch(() => null);
 
     if (!dataUrl) {
-      alert(t("whereMyRobocosanBegan.alerts.iconReadFailed"));
+      showAppNotification({
+        message: t("whereMyRobocosanBegan.alerts.iconReadFailed"),
+        type: "error",
+      });
       return;
     }
 
@@ -456,7 +463,7 @@ export default function WhereMyRobocosanBeganClient() {
         error instanceof Error
           ? error.message
           : t("whereMyRobocosanBegan.alerts.generateFailed");
-      alert(message);
+      showAppNotification({ message, type: "error" });
     } finally {
       setIsGenerating(false);
     }
@@ -493,7 +500,7 @@ export default function WhereMyRobocosanBeganClient() {
   };
 
   return (
-    <div className="grow lg:p-6 lg:pb-0 overflow-auto">
+    <div className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -510,16 +517,16 @@ export default function WhereMyRobocosanBeganClient() {
         </span>
       </Breadcrumbs>
 
-      <div className="p-3">
-        <h1 className="font-extrabold text-2xl mb-1">
+      <div>
+        <h1 className={pageClasses.heading}>
           {t("whereMyRobocosanBegan.pageTitle")}
         </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className={pageClasses.description}>
           {t("whereMyRobocosanBegan.lead")}
         </p>
       </div>
 
-      <div className="px-3 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 pb-6 lg:grid-cols-2">
         <Paper p="lg" radius="md" withBorder>
           <Stack gap="md">
             <TextInput

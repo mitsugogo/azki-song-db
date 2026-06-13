@@ -118,6 +118,7 @@
       "callResponseHelp": "コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！",
       "liveNote": "ライブノート:",
       "additionalInfo": "追加情報:",
+      "localPlayCount": "あなたの再生数:",
       "timesSung": "歌った回数:",
       "times": "回",
       "videosWithSong": "この曲を歌った枠:",
@@ -157,10 +158,11 @@
   },
   "Home": {
     "brand": "AZKi VIRTUAL DiVA",
-    "heroLine1": "　音楽で辿る、",
-    "heroLine2": "　Virtual DiVA AZKiの軌跡。",
-    "heroLine2_short": "　VDiVA AZKiの軌跡。",
-    "description": "AZKiさんのオリジナル楽曲、コラボ・カバー楽曲、歌枠で歌唱したセットリストを収録した、非公式の楽曲データベースです。",
+    "heroLine1": "音楽でたどる",
+    "heroLine2": "Virtual DiVA AZKiの軌跡",
+    "heroLine2_short": "VDiVA AZKiの軌跡",
+    "description": "ホロライブ所属のVirtual DiVA AZKiさんのオリジナル楽曲、カバー楽曲、歌枠などをまとめた非公式の楽曲データベースサイトです。",
+    "heroWatchFromBeginning": "アプリ内プレイヤーで最初から再生",
     "searchButton": "検索する",
     "searching": "検索中...",
     "surpriseTooltip": "ランダムに楽曲を再生開始します",
@@ -197,6 +199,8 @@
     "recentUpdatesTitle": "更新情報",
     "recentUpdatesAddedCount": "{count}曲追加",
     "noRecentUpdates": "更新情報はありません",
+    "viewMilestonesLabel": "Views",
+    "viewMilestonesTitle": "再生数",
     "hololiveOfficial": "ホロライブ公式",
     "statsLoading": "収録楽曲数: 読み込み中 / 最終更新日: 読み込み中",
     "stats": "収録楽曲数: {count}曲{date}",
@@ -680,7 +684,8 @@
     "labels": {
       "publishedDate": "公開日:",
       "releaseDate": "リリース日:",
-      "cover": "カバー:"
+      "cover": "カバー:",
+      "sing": "歌"
     },
     "thumbnailClickTitle": "クリックして拡大",
     "tracksCount": "収録曲数: {count}曲",

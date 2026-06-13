@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   FaPlay,
   FaPause,
@@ -165,15 +166,28 @@ export default function PlayerControlsBar({
 
   // Mobile menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useClickOutside(() => setIsMenuOpen(false));
+  const [mobileMenuNode, setMobileMenuNode] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const menuRef = useClickOutside(
+    () => setIsMenuOpen(false),
+    null,
+    [mobileMenuNode],
+    isMenuOpen,
+  );
 
   // PC menu state (右端に表示するメニュー)
   const [isPcMenuOpen, setIsPcMenuOpen] = useState(false);
-  const pcMenuRef = useClickOutside(() => setIsPcMenuOpen(false));
+  const [pcMenuNode, setPcMenuNode] = useState<HTMLDivElement | null>(null);
+  const pcMenuRef = useClickOutside(
+    () => setIsPcMenuOpen(false),
+    null,
+    [pcMenuNode],
+    isPcMenuOpen,
+  );
 
   // Playlist menu state
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
-  const playlistRef = useClickOutside(() => setShowPlaylistMenu(false));
 
   // Create playlist modal
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
@@ -210,6 +224,17 @@ export default function PlayerControlsBar({
 
   const sliderRootRef = useRef<HTMLDivElement | null>(null);
   const [trackInsets, setTrackInsets] = useState({ left: 0, right: 0 });
+  const getMenuPortalPosition = (anchor: HTMLElement | null) => {
+    if (typeof window === "undefined" || !anchor) {
+      return { right: 16, bottom: 64 };
+    }
+
+    const rect = anchor.getBoundingClientRect();
+    return {
+      right: Math.max(8, window.innerWidth - rect.right),
+      bottom: Math.max(8, window.innerHeight - rect.top + 12),
+    };
+  };
 
   // チャプター計算
   // `displayStart`/`displayEnd` は常に「スライダー上の表示単位」で統一する
@@ -328,7 +353,7 @@ export default function PlayerControlsBar({
   return (
     <div
       id="player-controls-bar"
-      className="flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
+      className="relative z-30 flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
     >
       {/* Progress Bar */}
       <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-2">
@@ -821,114 +846,121 @@ export default function PlayerControlsBar({
                     <FaGear className="text-base" />
                   </button>
 
-                  {isPcMenuOpen && (
-                    <div className="absolute bottom-12 right-0 z-50 bg-white divide-y rounded-lg shadow-lg w-72 divide-gray-200 dark:bg-gray-700 dark:divide-gray-600">
-                      <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-100">
-                        <li>
-                          <div className="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                            <Switch
-                              checked={hideFutureSongs}
-                              onChange={(event) =>
-                                setHideFutureSongs(event.target.checked)
-                              }
-                              color="pink"
-                              label={t("spoilerFreeSetlist")}
-                              className="cursor-pointer w-full"
-                              withThumbIndicator={false}
-                            />
-                          </div>
-                        </li>
-                      </ul>
+                  {isPcMenuOpen &&
+                    typeof document !== "undefined" &&
+                    createPortal(
+                      <div
+                        ref={setPcMenuNode}
+                        className="fixed z-[1000] bg-white divide-y rounded-lg shadow-lg w-72 divide-gray-200 dark:bg-gray-700 dark:divide-gray-600"
+                        style={getMenuPortalPosition(pcMenuRef.current)}
+                      >
+                        <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-100">
+                          <li>
+                            <div className="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                              <Switch
+                                checked={hideFutureSongs}
+                                onChange={(event) =>
+                                  setHideFutureSongs(event.target.checked)
+                                }
+                                color="pink"
+                                label={t("spoilerFreeSetlist")}
+                                className="cursor-pointer w-full"
+                                withThumbIndicator={false}
+                              />
+                            </div>
+                          </li>
+                        </ul>
 
-                      <div className="py-2">
-                        <Menu
-                          width={260}
-                          withArrow
-                          opened={showPlaylistMenu}
-                          withinPortal={false}
-                        >
-                          <Menu.Target>
-                            <button
-                              onClick={() =>
-                                setShowPlaylistMenu(!showPlaylistMenu)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
-                            >
-                              {isInAnyPlaylist(currentSong) ? (
-                                <FaStar className="inline mr-2" />
-                              ) : (
-                                <FaPlus className="inline mr-2" />
+                        <div className="py-2">
+                          <Menu
+                            width={260}
+                            withArrow
+                            opened={showPlaylistMenu}
+                            withinPortal={false}
+                          >
+                            <Menu.Target>
+                              <button
+                                onClick={() =>
+                                  setShowPlaylistMenu(!showPlaylistMenu)
+                                }
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                              >
+                                {isInAnyPlaylist(currentSong) ? (
+                                  <FaStar className="inline mr-2" />
+                                ) : (
+                                  <FaPlus className="inline mr-2" />
+                                )}
+                                {isInAnyPlaylist(currentSong)
+                                  ? t("playlistAdded")
+                                  : t("addToPlaylist")}
+                              </button>
+                            </Menu.Target>
+
+                            <Menu.Dropdown>
+                              <Menu.Label>{t("playlist")}</Menu.Label>
+
+                              {playlists.length === 0 && (
+                                <div className="ml-3 mb-3">
+                                  <span className="text-sm text-gray-300">
+                                    {t("noPlaylists")}
+                                  </span>
+                                </div>
                               )}
-                              {isInAnyPlaylist(currentSong)
-                                ? t("playlistAdded")
-                                : t("addToPlaylist")}
-                            </button>
-                          </Menu.Target>
 
-                          <Menu.Dropdown>
-                            <Menu.Label>{t("playlist")}</Menu.Label>
-
-                            {playlists.length === 0 && (
-                              <div className="ml-3 mb-3">
-                                <span className="text-sm text-gray-300">
-                                  {t("noPlaylists")}
-                                </span>
-                              </div>
-                            )}
-
-                            <ScrollArea mah={200}>
-                              {playlists.map((playlist, index) => (
-                                <MenuItem
-                                  key={index}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    addOrRemovePlaylist(playlist);
-                                    if (playlists.length === 1) {
-                                      setShowPlaylistMenu(false);
-                                      setIsPcMenuOpen(false);
+                              <ScrollArea mah={200}>
+                                {playlists.map((playlist, index) => (
+                                  <MenuItem
+                                    key={index}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      addOrRemovePlaylist(playlist);
+                                      if (playlists.length === 1) {
+                                        setShowPlaylistMenu(false);
+                                        setIsPcMenuOpen(false);
+                                      }
+                                    }}
+                                    leftSection={
+                                      isInPlaylist(playlist, currentSong) ? (
+                                        <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
+                                      ) : (
+                                        <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
+                                      )
                                     }
-                                  }}
-                                  leftSection={
-                                    isInPlaylist(playlist, currentSong) ? (
-                                      <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
-                                    ) : (
-                                      <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
-                                    )
-                                  }
-                                  component="div"
-                                  bg={
-                                    isInPlaylist(playlist, currentSong)
-                                      ? "blue"
-                                      : ""
-                                  }
-                                  color={
-                                    isInPlaylist(playlist, currentSong)
-                                      ? "white"
-                                      : ""
-                                  }
-                                  className="mb-0.5"
-                                >
-                                  {playlist.name}
-                                </MenuItem>
-                              ))}
-                            </ScrollArea>
+                                    component="div"
+                                    bg={
+                                      isInPlaylist(playlist, currentSong)
+                                        ? "blue"
+                                        : ""
+                                    }
+                                    color={
+                                      isInPlaylist(playlist, currentSong)
+                                        ? "white"
+                                        : ""
+                                    }
+                                    className="mb-0.5"
+                                  >
+                                    {playlist.name}
+                                  </MenuItem>
+                                ))}
+                              </ScrollArea>
 
-                            <Menu.Divider />
-                            <MenuItem
-                              onClick={() => {
-                                setShowPlaylistMenu(false);
-                                setIsPcMenuOpen(false);
-                                setOpenCreatePlaylistModal(true);
-                              }}
-                            >
-                              <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                              {t("createNewPlaylist")}
-                            </MenuItem>
-                          </Menu.Dropdown>
-                        </Menu>
-                      </div>
-                    </div>
-                  )}
+                              <Menu.Divider />
+                              <MenuItem
+                                onClick={() => {
+                                  setShowPlaylistMenu(false);
+                                  setIsPcMenuOpen(false);
+                                  setOpenCreatePlaylistModal(true);
+                                }}
+                              >
+                                <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                                {t("createNewPlaylist")}
+                              </MenuItem>
+                            </Menu.Dropdown>
+                          </Menu>
+                        </div>
+                      </div>,
+                      document.body,
+                    )}
                 </div>
               </Tooltip>
             </>
@@ -954,141 +986,150 @@ export default function PlayerControlsBar({
                 </svg>
               </button>
 
-              {isMenuOpen && (
-                <div className="absolute bottom-12 right-0 z-50 bg-white divide-y rounded-lg shadow-lg w-72 divide-gray-200 dark:bg-gray-700 dark:divide-gray-600">
-                  <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-100">
-                    <li>
-                      <div className="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <Switch
-                          checked={hideFutureSongs}
-                          onChange={(event) =>
-                            setHideFutureSongs(event.target.checked)
-                          }
-                          color="pink"
-                          label={t("spoilerFreeSetlist")}
-                          className="cursor-pointer w-full"
-                          withThumbIndicator={false}
-                        />
-                      </div>
-                    </li>
-                  </ul>
-                  <div className="py-2">
-                    <button
-                      onClick={() => {
-                        toggleFavorite(currentSong);
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
-                    >
-                      {isInFavorites(currentSong) ? (
-                        <FaStar className="inline mr-2 text-yellow-400" />
-                      ) : (
-                        <FaRegStar className="inline mr-2" />
-                      )}
-                      {isInFavorites(currentSong)
-                        ? t("removeFromFavorites")
-                        : t("addToFavorites")}
-                    </button>
-                  </div>
-                  <div className="py-2">
-                    <button
-                      onClick={() => {
-                        onOpenShareModal();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
-                    >
-                      <FaShare className="inline mr-2" />
-                      {t("shareCurrentSong")}
-                    </button>
-                  </div>
-                  <div className="py-2">
-                    <Menu
-                      width={260}
-                      withArrow
-                      opened={showPlaylistMenu}
-                      withinPortal={false}
-                    >
-                      <Menu.Target>
-                        <button
-                          onClick={() => setShowPlaylistMenu(!showPlaylistMenu)}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
-                        >
-                          {isInAnyPlaylist(currentSong) ? (
-                            <FaStar className="inline mr-2" />
-                          ) : (
-                            <FaPlus className="inline mr-2" />
-                          )}
-                          {isInAnyPlaylist(currentSong)
-                            ? t("playlistAdded")
-                            : t("addToPlaylist")}
-                        </button>
-                      </Menu.Target>
-
-                      <Menu.Dropdown>
-                        <Menu.Label>{t("playlist")}</Menu.Label>
-
-                        {playlists.length === 0 && (
-                          <div className="ml-3 mb-3">
-                            <span className="text-sm text-gray-300">
-                              {t("noPlaylists")}
-                            </span>
-                          </div>
+              {isMenuOpen &&
+                typeof document !== "undefined" &&
+                createPortal(
+                  <div
+                    ref={setMobileMenuNode}
+                    className="fixed z-[1000] bg-white divide-y rounded-lg shadow-lg w-72 divide-gray-200 dark:bg-gray-700 dark:divide-gray-600"
+                    style={getMenuPortalPosition(menuRef.current)}
+                  >
+                    <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-100">
+                      <li>
+                        <div className="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                          <Switch
+                            checked={hideFutureSongs}
+                            onChange={(event) =>
+                              setHideFutureSongs(event.target.checked)
+                            }
+                            color="pink"
+                            label={t("spoilerFreeSetlist")}
+                            className="cursor-pointer w-full"
+                            withThumbIndicator={false}
+                          />
+                        </div>
+                      </li>
+                    </ul>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          toggleFavorite(currentSong);
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                      >
+                        {isInFavorites(currentSong) ? (
+                          <FaStar className="inline mr-2 text-yellow-400" />
+                        ) : (
+                          <FaRegStar className="inline mr-2" />
                         )}
+                        {isInFavorites(currentSong)
+                          ? t("removeFromFavorites")
+                          : t("addToFavorites")}
+                      </button>
+                    </div>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          onOpenShareModal();
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                      >
+                        <FaShare className="inline mr-2" />
+                        {t("shareCurrentSong")}
+                      </button>
+                    </div>
+                    <div className="py-2">
+                      <Menu
+                        width={260}
+                        withArrow
+                        opened={showPlaylistMenu}
+                        withinPortal={false}
+                      >
+                        <Menu.Target>
+                          <button
+                            onClick={() =>
+                              setShowPlaylistMenu(!showPlaylistMenu)
+                            }
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                          >
+                            {isInAnyPlaylist(currentSong) ? (
+                              <FaStar className="inline mr-2" />
+                            ) : (
+                              <FaPlus className="inline mr-2" />
+                            )}
+                            {isInAnyPlaylist(currentSong)
+                              ? t("playlistAdded")
+                              : t("addToPlaylist")}
+                          </button>
+                        </Menu.Target>
 
-                        <ScrollArea mah={200}>
-                          {playlists.map((playlist, index) => (
-                            <MenuItem
-                              key={index}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                addOrRemovePlaylist(playlist);
-                                if (playlists.length === 1) {
-                                  setShowPlaylistMenu(false);
-                                  setIsMenuOpen(false);
+                        <Menu.Dropdown>
+                          <Menu.Label>{t("playlist")}</Menu.Label>
+
+                          {playlists.length === 0 && (
+                            <div className="ml-3 mb-3">
+                              <span className="text-sm text-gray-300">
+                                {t("noPlaylists")}
+                              </span>
+                            </div>
+                          )}
+
+                          <ScrollArea mah={200}>
+                            {playlists.map((playlist, index) => (
+                              <MenuItem
+                                key={index}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  addOrRemovePlaylist(playlist);
+                                  if (playlists.length === 1) {
+                                    setShowPlaylistMenu(false);
+                                    setIsMenuOpen(false);
+                                  }
+                                }}
+                                leftSection={
+                                  isInPlaylist(playlist, currentSong) ? (
+                                    <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
+                                  ) : (
+                                    <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
+                                  )
                                 }
-                              }}
-                              leftSection={
-                                isInPlaylist(playlist, currentSong) ? (
-                                  <MdPlaylistAddCheck className="mr-2 inline w-5 h-5" />
-                                ) : (
-                                  <MdPlaylistAdd className="mr-2 inline w-5 h-5" />
-                                )
-                              }
-                              component="div"
-                              bg={
-                                isInPlaylist(playlist, currentSong)
-                                  ? "blue"
-                                  : ""
-                              }
-                              color={
-                                isInPlaylist(playlist, currentSong)
-                                  ? "white"
-                                  : ""
-                              }
-                              className="mb-0.5"
-                            >
-                              {playlist.name}
-                            </MenuItem>
-                          ))}
-                        </ScrollArea>
+                                component="div"
+                                bg={
+                                  isInPlaylist(playlist, currentSong)
+                                    ? "blue"
+                                    : ""
+                                }
+                                color={
+                                  isInPlaylist(playlist, currentSong)
+                                    ? "white"
+                                    : ""
+                                }
+                                className="mb-0.5"
+                              >
+                                {playlist.name}
+                              </MenuItem>
+                            ))}
+                          </ScrollArea>
 
-                        <Menu.Divider />
-                        <MenuItem
-                          onClick={() => {
-                            setShowPlaylistMenu(false);
-                            setIsMenuOpen(false);
-                            setOpenCreatePlaylistModal(true);
-                          }}
-                        >
-                          <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
-                          {t("createNewPlaylist")}
-                        </MenuItem>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </div>
-                </div>
-              )}
+                          <Menu.Divider />
+                          <MenuItem
+                            onClick={() => {
+                              setShowPlaylistMenu(false);
+                              setIsMenuOpen(false);
+                              setOpenCreatePlaylistModal(true);
+                            }}
+                          >
+                            <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                            {t("createNewPlaylist")}
+                          </MenuItem>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </div>
+                  </div>,
+                  document.body,
+                )}
             </div>
           )}
         </div>

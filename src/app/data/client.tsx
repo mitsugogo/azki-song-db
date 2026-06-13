@@ -25,6 +25,7 @@ import {
 import { getColumns } from "./columns";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
+import { pageClasses } from "../theme";
 
 export default function ClientTable() {
   const { allSongs, isLoading } = useSongs();
@@ -114,10 +115,10 @@ export default function ClientTable() {
 
   return (
     <>
-      <div className="grow p-0 lg:pb-0">
-        <h1 className="font-extrabold text-2xl p-3">{t("title")}</h1>
-        <p className="mb-4 px-3">{t("description")}</p>
-        <div className="p-2 block space-y-4 dark:border-gray-700 rounded-lg shadow-sm w-full">
+      <div className="grow lg:pb-0">
+        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <p className={pageClasses.description}>{t("description")}</p>
+        <div className="block w-full space-y-4 rounded-lg shadow-sm dark:border-gray-700">
           <TextInput
             placeholder={t("searchPlaceholder")}
             leftSection={<HiSearch />}

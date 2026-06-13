@@ -117,6 +117,7 @@ const controlsState = {
   setPreviousAndNextSongs: vi.fn(),
   setHasRestoredPosition: vi.fn(),
   setPreviousVideoId: vi.fn(),
+  syncCurrentTimeFromPlayer: vi.fn(),
   playerControls: {
     isReady: true,
     play: vi.fn(),
@@ -166,11 +167,6 @@ vi.mock("../NowPlayingSongInfo", () => ({
 vi.mock("../ShareModal", () => ({
   __esModule: true,
   default: () => <div data-testid="share-modal" />,
-}));
-
-vi.mock("../ToastNotification", () => ({
-  __esModule: true,
-  default: () => <div data-testid="toast" />,
 }));
 
 vi.mock("../../loading", () => ({

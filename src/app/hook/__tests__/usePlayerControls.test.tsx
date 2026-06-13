@@ -5,6 +5,10 @@ import usePlayerControls from "../usePlayerControls";
 import type { Song } from "../../types/song";
 import type { GlobalPlayerContextType } from "../useGlobalPlayer";
 import { siteConfig } from "@/app/config/siteConfig";
+import {
+  deserializeSongPlayCountState,
+  SONG_PLAY_COUNTS_STORAGE_KEY,
+} from "../useSongPlayCounts";
 
 // モック用のglobalPlayerを作成
 const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
@@ -22,18 +26,27 @@ const createMockGlobalPlayer = (): GlobalPlayerContextType => ({
   setSeekTo: vi.fn(),
 });
 
-const createMockPlayer = (initialVideoId = "vid1", initialTime = 0) => {
+const createMockPlayer = (
+  initialVideoId = "vid1",
+  initialTime = 0,
+  initialDuration = 0,
+) => {
   let currentTime = initialTime;
   let videoId = initialVideoId;
+  let duration = initialDuration;
   return {
     getVideoData: vi.fn(() => ({ video_id: videoId })),
     getCurrentTime: vi.fn(() => currentTime),
+    getDuration: vi.fn(() => duration),
     playVideo: vi.fn(),
     __setCurrentTime: (time: number) => {
       currentTime = time;
     },
     __setVideoId: (id: string) => {
       videoId = id;
+    },
+    __setDuration: (value: number) => {
+      duration = value;
     },
   };
 };
@@ -598,6 +611,7 @@ describe("usePlayerControls", () => {
 
       // 曲情報が更新される
       expect(result.current.currentSong?.title).toBe("Song B");
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(100);
       // seekToがsong.startの値で呼ばれる
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(100);
     });
@@ -650,6 +664,7 @@ describe("usePlayerControls", () => {
 
       // 曲情報は更新される
       expect(result.current.currentSong?.title).toBe("Song B");
+      expect(mockGlobalPlayer.setCurrentTime).not.toHaveBeenCalled();
       // seekToは呼ばれない
       expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
     });
@@ -672,6 +687,7 @@ describe("usePlayerControls", () => {
       });
 
       // 渡されたexplicitStartTimeでseekToが呼ばれる
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(150);
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(150);
     });
 
@@ -691,6 +707,7 @@ describe("usePlayerControls", () => {
       });
 
       expect(mockGlobalPlayer.seekTo).toHaveBeenCalledWith(50);
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(50);
     });
 
     it("異なる動画への切り替え時はseekToではなくvideoIdとstartTimeがセットされる", () => {
@@ -752,6 +769,7 @@ describe("usePlayerControls", () => {
 
       // seekToは呼ばれない（動画の再読み込みになる）
       expect(mockGlobalPlayer.seekTo).not.toHaveBeenCalled();
+      expect(mockGlobalPlayer.setCurrentTime).toHaveBeenLastCalledWith(50);
       // videoIdとstartTimeが新しい値にセットされる
       expect(result.current.videoId).toBe("differentVid");
       expect(result.current.startTime).toBe(50);
@@ -1123,6 +1141,93 @@ describe("usePlayerControls", () => {
       });
 
       expect(result.current.currentSong?.start).toBe(100);
+    });
+
+    it("チャプターの70%を実視聴したら再生数を1回加算する", async () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "countVid", start: 0, end: 1 },
+      ];
+      const player = createMockPlayer("countVid", 0.2, 1);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+      });
+
+      act(() => {
+        player.__setCurrentTime(0.8);
+        vi.advanceTimersByTime(500);
+      });
+
+      await act(async () => {
+        player.__setCurrentTime(1.0);
+        vi.advanceTimersByTime(500);
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PAUSED,
+        } as any);
+      });
+
+      const persisted = deserializeSongPlayCountState(
+        localStorage.getItem(SONG_PLAY_COUNTS_STORAGE_KEY),
+      );
+
+      expect(result.current.currentSongPlayCount).toBe(1);
+      expect(
+        persisted.records[`${songs[0].title}::${songs[0].artist}`]?.playCount,
+      ).toBe(1);
+    });
+
+    it("早送りだけでは再生数を加算しない", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "seekVid", start: 0, end: 100 },
+      ];
+      const player = createMockPlayer("seekVid", 1, 100);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+      });
+
+      act(() => {
+        player.__setCurrentTime(80);
+        vi.advanceTimersByTime(500);
+      });
+
+      const persisted = deserializeSongPlayCountState(
+        localStorage.getItem(SONG_PLAY_COUNTS_STORAGE_KEY),
+      );
+
+      expect(result.current.currentSongPlayCount).toBe(0);
+      expect(
+        persisted.records[`${songs[0].title}::${songs[0].artist}`],
+      ).toBeUndefined();
     });
   });
 });

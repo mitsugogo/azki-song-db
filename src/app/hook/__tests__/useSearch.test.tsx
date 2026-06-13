@@ -363,6 +363,69 @@ describe("useSearch", () => {
     );
   });
 
+  it("アーティスト・歌唱者・曲名の別名で検索できる", async () => {
+    const songs: Song[] = [
+      {
+        ...mockSongs[1],
+        video_id: "alias1",
+        title: "♡桃色片思い♡",
+        title_aliases: ["ももいろ"],
+        artist: "AZKi",
+        artist_aliases: ["あずき"],
+        sing: "星街すいせい",
+        sings: ["星街すいせい"],
+        sing_aliases: ["ほしまち"],
+      },
+    ];
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("あずき");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs).toHaveLength(1);
+        expect(result.current.songs[0].video_id).toBe("alias1");
+      },
+      { timeout: 1000 },
+    );
+
+    act(() => {
+      result.current.setSearchTerm("title:ももいろ");
+    });
+
+    await waitFor(
+      () => {
+        expect(result.current.songs).toHaveLength(1);
+        expect(result.current.songs[0].title).toBe("♡桃色片思い♡");
+      },
+      { timeout: 1000 },
+    );
+
+    act(() => {
+      result.current.setSearchTerm("artist:あずき");
+    });
+
+    await waitFor(
+      () => {
+        expect(result.current.songs).toHaveLength(1);
+        expect(result.current.songs[0].artist).toBe("AZKi");
+      },
+      { timeout: 1000 },
+    );
+
+    act(() => {
+      result.current.setSearchTerm("sing:ほしまち");
+    });
+
+    await waitFor(
+      () => {
+        expect(result.current.songs).toHaveLength(1);
+        expect(result.current.songs[0].sing).toBe("星街すいせい");
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("アルバム検索が動作する", async () => {
     const { result } = renderHook(() => useSearch(mockSongs));
 

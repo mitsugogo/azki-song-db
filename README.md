@@ -6,36 +6,40 @@
 > 日本語のREADME -> [README_ja.md](./README_ja.md)
 
 
-This is a [Next.js](https://nextjs.org) project that is used to generate a song database for AZKi, a virtual YouTuber.
+This is a [Next.js](https://nextjs.org) project for AZKi Song Database, an unofficial fan site that collects AZKi's original songs, covers, collaboration songs, singing streams, setlists, activity history, anniversaries, and statistics.
 
 [AZKi Song Database](https://azki-song-db.vercel.app/)
 
 ## Features
 
-- Song database with YouTube video links and rich song metadata (title, artist, album, release date, tags, start/end timestamps)
-- Data sourced from Google Sheets via the Google Sheets API (requires `GOOGLE_API_KEY` and `SPREADSHEET_ID`)
-- YouTube metadata integration and embedded YouTube player with start/end time support
-- Instant search overlay with filters (title, artist, tags, song type) and stable locators
-- Song list with pagination and filtering; pages generated with Next.js data fetching
-- Song detail page showing metadata, lyrics/notes and the embedded player
-- Player controls (play/pause/seek, mute persistence) and iframe communication
-- Responsive design for mobile and desktop, plus Dark Mode support
+- Song database with YouTube links, start/end timestamps, credits, albums, tags, milestones, live notes, and call-and-response notes
+- Google Sheets-backed data source with localized title/artist maps for Japanese and English pages
+- Watch page with embedded YouTube playback, song modes, random playback, favorites, local play counts, and localStorage playlists
+- Search page with keyword search, filter categories, exact match, AND/OR search, exclusion search, and advanced search query generation
+- Discography pages for originals, unit/guest songs, covers, albums, related streams, and YouTube view statistics
+- Activity summaries by year, anniversary countdowns, event cards, recent updates, and milestone/view-count overviews
+- Share features including the Cloud Nine song picker and "Where did your AZKi journey begin?" image generator
+- PWA support, responsive mobile/desktop UI, light/dark theme switching, QR code sharing, and Open Graph image routes
 
 
 ## Development Note
 
 [AZKi Song Database Development Note](https://note.com/n_mitsugogo/n/nbdd8a359e307) (JP)
 
-## Data management
+## Data Management
 
-The data is managed using Google Spread Sheets. The table structure is as follows:
+The data is managed using Google Sheets and read through the Google Sheets API. The app uses multiple sheets for song data, translation maps, milestones, anniversaries, events, channel metadata, and view statistics.
+
+Core song sheets follow this structure:
 
 | #   | Enabled | Song Title   | Artist | Vocalist | Video       | start   | end | Release Date | tags (comma-separated) | Notes        | Milestone |
 | --- | ------- | ------------ | ------ | -------- | ----------- | ------- | --- | ------------ | ---------------------- | ------------ | --------- |
 | 1   | TRUE    | Sample Music | Artist | Singer   | Video title | 0:00:00 |     | 2025/08/01   | tagA,tagB              | Any notes... | Debut MV  |
 
-- Video title should include a link to YouTube video using Google Sheets' hyperlink function (e.g. =HYPERLINK("https://www.youtube.com/watch?v=aA1WjJfRQ3Q", "Video title"))
-- For the header row of the spreadsheet, please refer to the code in `api/songs`
+Additional supported columns include `title_en`, `artist_en`, `album`, `album_en`, `album_release_at`, `album_is_compilation`, `lyricist`, `composer`, `arranger`, `live_call`, `live_note`, and `view_count`.
+
+- The `Video` column should include a YouTube link using Google Sheets' hyperlink function, for example `=HYPERLINK("https://www.youtube.com/watch?v=aA1WjJfRQ3Q", "Video title")`
+- For the exact accepted header aliases, see `src/app/api/songs/route.tsx`
 
 ### Sample Sheet
 
@@ -46,20 +50,19 @@ https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSa
 ## Requirements
 
 - Node.js: 24.x
-- pnpm: required for dependency installation and script execution
+- pnpm: 11.x
 
 ## Development
 
-The development environment is set up using the following steps:
-
 1. Clone the repository using `git clone`
 2. Install the dependencies using `pnpm install`
-3. Start the development server using `pnpm dev`
-4. Open the web page at `http://localhost:3000`
+3. Copy `.env.example` to `.env.local` and set the required environment variables
+4. Start the development server using `pnpm dev`
+5. Open the web page at `http://localhost:3000`
 
 ## Testing
 
-This project includes comprehensive test suites using Vitest and Playwright.
+This project includes Vitest unit/component tests and Playwright end-to-end tests.
 
 ### Unit Tests (Vitest)
 
@@ -83,6 +86,7 @@ pnpm test:coverage
 **Test files location:**
 - Hook tests: `src/app/hook/__tests__/*.test.tsx`
 - Component tests: `src/app/components/__tests__/*.test.tsx`
+- API/lib tests: `src/app/**/__tests__/*.test.ts`
 
 ### End-to-End Tests (Playwright)
 
@@ -116,9 +120,11 @@ The following environment variables are used in the project:
 | `GOOGLE_API_KEY`       | Google Sheets API key for reading data from Google Sheets |
 | `SPREADSHEET_ID`       | Google Sheets ID for reading data from Google Sheets       |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API key for reading YouTube video information |
-| `MEMBERS_ONLY_SONGS_PASSWORD` | Shared password used to unlock the members-only song sheets |
-| `MEMBERS_ONLY_COOKIE_SECRET` | Secret used to sign the unlock cookie for members-only sheets |
-| `PUBLIC_BASE_URL`      | Base URL for the production environment                    |
+| `SAVE_SPREADSHEET_ID`  | Google Sheets ID used to save Cloud Nine shared data       |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account email used for writing Cloud Nine shared data |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Service account private key used for writing Cloud Nine shared data |
+| `NEXT_PUBLIC_BASE_URL` | Public base URL used when generating internal and shared URLs |
+| `PUBLIC_BASE_URL`      | Fallback base URL for server-side URL generation           |
 
 Please set these environment variables in your `.env.local` file or in your production environment.
 
@@ -131,23 +137,10 @@ Major data APIs in this project return the `Vercel-Cache-Tag` response header.
 - `/api/yt/channels`: `dataset:core,channels,channels:list`
 - `/api/yt/info`: `yt:info,yt:video`
 - `/api/yt/video/[video_id]`: `yt:video,yt:video:{video_id}`
+- `/api/events`: `dataset:core,events,events:list`
+- `/api/anniversaries`: `dataset:core,milestones,milestones:list`
 - `/api/stat/views`: `stat:views,stat:views:list`
 - `/api/stat/views/[video_id]`: `stat:views,stat:views:single`
-
-### Manual tag purge steps
-
-1. Open your Vercel project `Settings`
-2. Open `Caches`
-3. Click `Purge CDN Cache` in the `CDN Cache` section
-4. Select `Cache Tag`
-5. Enter a tag (for example: `songs`) and purge
-
-### Recommended strategy
-
-- Use `Invalidate` for normal operation (recommended)
-- Use `Delete` only for urgent recovery scenarios (to avoid slower first-hit and cache stampede risk)
-- Keep TTL + `stale-while-revalidate` as default behavior, and use tag `Invalidate` only when immediate freshness is needed
-- Use `dataset:core` when you need to refresh multiple core APIs at once
 
 ## License
 

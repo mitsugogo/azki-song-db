@@ -10,6 +10,7 @@ import {
   isCoverSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
+import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import CategoryClient from "./client";
 
 type AlbumEntry = {
@@ -66,41 +67,6 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
       slug: count === 0 ? baseSlug : `${baseSlug}-${count + 1}`,
     };
   });
-}
-
-async function fetchSongsFromApi(locale = "ja"): Promise<Song[]> {
-  const candidates = [
-    process.env.NEXT_PUBLIC_BASE_URL,
-    process.env.PUBLIC_BASE_URL,
-    process.env.NEXT_PUBLIC_BASE_URL ??
-      (process.env.NODE_ENV === "development"
-        ? `http://127.0.0.1:${process.env.PORT ?? 3001}`
-        : undefined),
-  ].filter(Boolean) as string[];
-
-  for (const base of candidates) {
-    try {
-      const songsUrl = new URL(`/api/songs`, base);
-      songsUrl.searchParams.set("hl", locale);
-      const res = await fetch(songsUrl, { cache: "no-store" });
-      if (res.ok) {
-        return (await res.json()) as Song[];
-      }
-    } catch (e) {
-      // 一時的な失敗は次の候補へ
-    }
-  }
-
-  try {
-    const songsUrl = new URL(`/api/songs`, siteConfig.siteUrl);
-    songsUrl.searchParams.set("hl", locale);
-    const res = await fetch(songsUrl, { cache: "no-store" });
-    if (res.ok) return (await res.json()) as Song[];
-  } catch (e) {
-    // ignore
-  }
-
-  throw new Error("Failed to fetch songs from any known base URL");
 }
 
 export async function generateMetadata({
@@ -183,7 +149,7 @@ export default async function CategoryOrLegacyRedirect({
   if (normalizedCategory) {
     return <CategoryClient category={normalizedCategory} />;
   }
-  const songs: Song[] = await fetchSongsFromApi(locale);
+  const songs: Song[] = await fetchSongsFromApiCached({ locale });
 
   let filteredSongs = songs.filter(
     (s) =>

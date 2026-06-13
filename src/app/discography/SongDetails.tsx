@@ -13,6 +13,7 @@ import slugify from "../lib/slugify";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { normalizeSongTitle } from "./utils/normalizeSongTitle";
+import { getAlbumPlaylistUrl } from "./utils/albumLinks";
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const t = useTranslations("Discography");
@@ -115,6 +116,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const albumPath = song.firstVideo.album
     ? `/discography/album/${encodeURIComponent(slugify(song.firstVideo.album))}`
     : null;
+  const albumPlaylistUrl = getAlbumPlaylistUrl(song.firstVideo);
 
   return (
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
@@ -403,8 +405,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link
               href={
-                song.isAlbum && song.firstVideo.album_list_uri
-                  ? song.firstVideo.album_list_uri
+                song.isAlbum && albumPlaylistUrl
+                  ? albumPlaylistUrl
                   : `https://www.youtube.com/watch?v=${song.firstVideo.video_id}`
               }
               target="_blank"
