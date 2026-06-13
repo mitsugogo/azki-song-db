@@ -44,7 +44,7 @@ export function Header() {
   };
   return (
     <>
-      <header className="relative bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
+      <header className="relative z-30 bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
         <div className="w-full px-2">
           <div className="relative flex h-10 lg:h-16 items-center">
             <div className="absolute inset-y-0 left-0 flex items-center z-10">
