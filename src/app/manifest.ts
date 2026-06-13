@@ -1,0 +1,31 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    theme_color: "#d11c76",
+    background_color: "#fbd5f3",
+    icons: [
+      {
+        purpose: "maskable",
+        sizes: "512x512",
+        src: "/icon512_maskable.png",
+        type: "image/png",
+      },
+      {
+        purpose: "any",
+        sizes: "512x512",
+        src: "/icon512_rounded.png",
+        type: "image/png",
+      },
+    ],
+    display: "standalone",
+    dir: "auto",
+    lang: "ja",
+    name: "AZKi Song Database",
+    short_name: "AZ SongDB",
+    id: "https://azki-song-db.vercel.app/",
+    description: "ホロライブ所属のAZKiさんの歌データベース",
+    start_url: "/",
+    categories: ["music", "entertainment"],
+  };
+}
