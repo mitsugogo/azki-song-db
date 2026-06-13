@@ -87,6 +87,11 @@ const KARAOKE_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "tag:歌枠") ??
   SONG_MODE_MENU_ITEMS[0];
 
+type BuildInfo = {
+  buildDate?: string;
+  version?: string;
+};
+
 function pickRecommendedSongs<T>(items: Song[], count: number) {
   if (items.length <= count) {
     return items;
@@ -214,6 +219,8 @@ export default function ClientTop() {
     useState(false);
   const [isHeroBackgroundUnavailable, setHeroBackgroundUnavailable] =
     useState(false);
+  const [buildDate, setBuildDate] = useState("N/A");
+  const [appVersion, setAppVersion] = useState("N/A");
 
   useEffect(() => {
     const updateHeaderState = () => {
@@ -247,6 +254,33 @@ export default function ClientTop() {
       setShouldLoadViewStatistics(true);
     }
   }, [viewMilestonesEntry?.isIntersecting]);
+
+  useEffect(() => {
+    fetch("/build-info.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch build info: ${response.status}`);
+        }
+        return response.text().then((text) => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return {};
+          }
+        });
+      })
+      .then((data: BuildInfo) => {
+        setBuildDate(data.buildDate ?? "N/A");
+        setAppVersion(data.version ?? "N/A");
+      })
+      .catch((error) => {
+        console.warn("Failed to fetch build info:", error);
+        if (process.env.NODE_ENV === "development") {
+          setBuildDate(new Date().toISOString());
+          setAppVersion("dev");
+        }
+      });
+  }, []);
 
   const recommendedSongs = useMemo(
     () => pickRecommendedSongs(allSongs, RECOMMENDED_SONG_COUNT),
@@ -396,6 +430,24 @@ export default function ClientTop() {
 
     return formatDate(date, locale);
   }, [songsFetchedAt]);
+
+  const buildDateLabel = useMemo(() => {
+    if (!buildDate || buildDate === "N/A") {
+      return null;
+    }
+
+    const date = new Date(buildDate);
+    if (Number.isNaN(date.getTime())) {
+      return buildDate;
+    }
+
+    return formatDate(date, locale);
+  }, [buildDate, locale]);
+
+  const copyrightYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return currentYear <= 2025 ? "2025" : `2025-${currentYear}`;
+  }, []);
 
   const originalSongsShareUrl = useMemo(
     () => new URL("/watch?q=original-songs", baseUrl).toString(),
@@ -1499,6 +1551,26 @@ export default function ClientTop() {
                       ? t("lastUpdated", { date: songsUpdatedLabel })
                       : "",
                   })}
+              {!isLoading && buildDateLabel && songsUpdatedLabel ? (
+                <>
+                  <br />
+                  Version{" "}
+                  <Link
+                    href={
+                      appVersion === "dev"
+                        ? "https://github.com/mitsugogo/azki-song-db"
+                        : `https://github.com/mitsugogo/azki-song-db/releases/tag/v${appVersion}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium hover:text-primary dark:hover:text-pink-300"
+                  >
+                    {appVersion === "dev" ? "dev" : `v${appVersion}`}
+                  </Link>
+                  <br />
+                  Copylight © {copyrightYears} mitsugogo
+                </>
+              ) : null}
             </p>
           </section>
         </main>
