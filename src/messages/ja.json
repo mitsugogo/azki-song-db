@@ -684,7 +684,8 @@
     "labels": {
       "publishedDate": "公開日:",
       "releaseDate": "リリース日:",
-      "cover": "カバー:"
+      "cover": "カバー:",
+      "sing": "歌"
     },
     "thumbnailClickTitle": "クリックして拡大",
     "tracksCount": "収録曲数: {count}曲",

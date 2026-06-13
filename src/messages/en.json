@@ -691,7 +691,8 @@
     "labels": {
       "publishedDate": "Published date:",
       "releaseDate": "Release date:",
-      "cover": "Cover:"
+      "cover": "Cover:",
+      "sing": "Singers"
     },
     "relatedStreamsTitle": "Streams that sang this song ({count})",
     "tracksCount": "Tracks: {count}",
