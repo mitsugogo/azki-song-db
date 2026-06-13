@@ -4,6 +4,8 @@ import { Link, useRouter } from "../i18n/navigation";
 import { Zen_Maru_Gothic } from "next/font/google";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  Avatar,
+  AvatarGroup,
   Badge,
   Burger,
   Button,
@@ -27,6 +29,7 @@ import YoutubeThumbnail from "./components/YoutubeThumbnail";
 import { SONG_MODE_MENU_ITEMS } from "./components/songModeMenu";
 import { baseUrl, siteConfig } from "./config/siteConfig";
 import useAnniversaries from "./hook/useAnniversaries";
+import useChannels from "./hook/useChannels";
 import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
@@ -62,7 +65,7 @@ import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { BsGeoAlt } from "react-icons/bs";
 import type { Song } from "./types/song";
 import type { StatisticsItem } from "./types/statisticsItem";
-import { PiMusicNoteFill } from "react-icons/pi";
+import type { ChannelEntry } from "./types/api/yt/channels";
 
 const zenMaruGothic = Zen_Maru_Gothic({
   subsets: ["latin"],
@@ -137,6 +140,35 @@ function buildHeroBackgroundVideoUrl(song: Song) {
   return `${baseVideoUrl}${separator}`;
 }
 
+function getSingerNamesFromSong(song: Song) {
+  const localizedSings = song.hl?.ja?.sings ?? [];
+  if (localizedSings.length > 0) {
+    return localizedSings.map((name) => name.trim()).filter(Boolean);
+  }
+
+  if (song.sings.length > 0) {
+    return song.sings.map((name) => name.trim()).filter(Boolean);
+  }
+
+  return song.sing
+    .split(/[、,]/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+function buildChannelUrl(entry: ChannelEntry) {
+  if (entry.youtubeId) {
+    return `https://www.youtube.com/channel/${entry.youtubeId}`;
+  }
+
+  const handle = (entry.handle ?? "").trim();
+  if (!handle) {
+    return null;
+  }
+
+  return `https://www.youtube.com/${handle.startsWith("@") ? handle : `@${handle}`}`;
+}
+
 // video_id基準で楽曲をグループ化し、直近3件を取得
 function groupRecentUpdates(items: Song[], limit: number = 3) {
   // broadcast_at と video_id が存在する楽曲のみを対象
@@ -190,6 +222,7 @@ export default function ClientTop() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
+  const { channels: channelsRegistry } = useChannels();
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
   const { items: eventItems, isLoading: isEventsLoading } = useEvents();
@@ -291,6 +324,72 @@ export default function ClientTop() {
     () => groupRecentUpdates(allSongs, 3),
     [allSongs],
   );
+
+  const channelsBySingerName = useMemo(() => {
+    const map = new Map<string, ChannelEntry>();
+
+    channelsRegistry.forEach((entry) => {
+      const artistName = (entry.artistName ?? "").trim();
+      if (artistName && !map.has(artistName)) {
+        map.set(artistName, entry);
+      }
+
+      const channelName = (entry.channelName ?? "").trim();
+      if (channelName && !map.has(channelName)) {
+        map.set(channelName, entry);
+      }
+    });
+
+    return map;
+  }, [channelsRegistry]);
+
+  const singerAvatarsByVideoId = useMemo(() => {
+    const avatarsByVideoId = new Map<
+      string,
+      Array<{ name: string; iconUrl: string; channelUrl: string | null }>
+    >();
+
+    recentUpdates.forEach((update) => {
+      const avatars: Array<{
+        name: string;
+        iconUrl: string;
+        channelUrl: string | null;
+      }> = [];
+      const seenChannels = new Set<string>();
+
+      update.songs.forEach((song) => {
+        getSingerNamesFromSong(song).forEach((singerName) => {
+          const entry = channelsBySingerName.get(singerName);
+          const iconUrl = (entry?.iconUrl ?? "").trim();
+          if (!iconUrl) {
+            return;
+          }
+
+          const channelUrl = entry ? buildChannelUrl(entry) : null;
+          const channelKey =
+            (entry?.youtubeId ?? "").trim() ||
+            channelUrl ||
+            (entry?.channelName ?? "").trim() ||
+            iconUrl;
+
+          if (seenChannels.has(channelKey)) {
+            return;
+          }
+
+          avatars.push({
+            name: entry?.channelName || entry?.artistName || singerName,
+            iconUrl,
+            channelUrl,
+          });
+          seenChannels.add(channelKey);
+        });
+      });
+
+      avatarsByVideoId.set(update.videoId, avatars);
+    });
+
+    return avatarsByVideoId;
+  }, [recentUpdates, channelsBySingerName]);
 
   const heroBackgroundSong = useMemo(
     () => pickHeroBackgroundSong(allSongs),
@@ -1475,6 +1574,9 @@ export default function ClientTop() {
               ) : recentUpdates.length > 0 ? (
                 <div className="space-y-4">
                   {recentUpdates.map((update) => {
+                    const singerAvatars =
+                      singerAvatarsByVideoId.get(update.videoId) ?? [];
+
                     return (
                       <Link
                         key={update.videoId}
@@ -1483,23 +1585,68 @@ export default function ClientTop() {
                       >
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                           {formatDate(update.date, locale)}{" "}
-                          <span className="pl-3 text-gray-100">
+                          <Text
+                            size="xs"
+                            c="dimmed"
+                            className="pl-2 text-gray-100"
+                            component="span"
+                          >
                             {t("recentUpdatesAddedCount", {
                               count: update.count,
                             })}
-                          </span>
+                          </Text>
                         </p>
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded-md bg-black">
+                          <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-black">
                             <YoutubeThumbnail
                               videoId={update.videoId}
                               alt={update.videoTitle}
                               imageClassName="object-cover"
                             />
                           </div>
-                          <p className="min-w-0 text-xs opacity-70 line-clamp-2">
+                          <Text size="sm" className="min-w-0 line-clamp-2">
                             {update.videoTitle}
-                          </p>
+                            {singerAvatars.length > 0 ? (
+                              <Avatar.Group className="ml-2 mt-1" spacing="xxs">
+                                {singerAvatars.map((avatar) => {
+                                  const image = (
+                                    <Avatar
+                                      key={`${update.videoId}-${avatar.name}`}
+                                      src={avatar.iconUrl}
+                                      alt={avatar.name}
+                                      radius="xl"
+                                      size="md"
+                                      className="border-2 border-white dark:border-gray-900"
+                                    />
+                                  );
+
+                                  return (
+                                    <Tooltip
+                                      key={`${update.videoId}-${avatar.name}`}
+                                      label={avatar.name}
+                                      withArrow
+                                      arrowSize={8}
+                                    >
+                                      {avatar.channelUrl ? (
+                                        <Link
+                                          href={avatar.channelUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          onClick={(event) =>
+                                            event.stopPropagation()
+                                          }
+                                        >
+                                          {image}
+                                        </Link>
+                                      ) : (
+                                        image
+                                      )}
+                                    </Tooltip>
+                                  );
+                                })}
+                              </Avatar.Group>
+                            ) : null}
+                          </Text>
                         </div>
                       </Link>
                     );
