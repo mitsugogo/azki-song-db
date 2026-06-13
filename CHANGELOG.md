@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.1](https://github.com/mitsugogo/azki-song-db/compare/v2.7.0...v2.7.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* 視聴ページで動画フレームがヘッダーを貫通するのを修正 ([670a368](https://github.com/mitsugogo/azki-song-db/commit/670a368592695e73831648794ebee4c09b34f9de))
+
 ## [2.7.0](https://github.com/mitsugogo/azki-song-db/compare/v2.6.0...v2.7.0) (2026-06-13)
 
 
