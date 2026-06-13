@@ -103,7 +103,7 @@ export default async function RootLayout({
       className={`${notoSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <head>
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
         <meta name="theme-color" content="#b81e8a" />

@@ -6,6 +6,7 @@ import PageTransitionHandler from "./PageTransitionHandler";
 import { LoadingProvider, useLoading } from "../context/LoadingContext";
 import Loading from "../loading";
 import { SharedYouTubePlayerProvider } from "./SharedYouTubePlayer";
+import ServiceWorkerCleanup from "./ServiceWorkerCleanup";
 
 // MiniPlayerを遅延読み込みし、初期レンダリングを高速化
 import MiniPlayer from "./MiniPlayer";
@@ -24,6 +25,7 @@ export default function ClientProviders({
           <MiniPlayer />
           <PageTransitionHandler />
           <LoadingOverlayIfNeeded />
+          <ServiceWorkerCleanup />
         </LoadingProvider>
       </SharedYouTubePlayerProvider>
     </GlobalPlayerProvider>
