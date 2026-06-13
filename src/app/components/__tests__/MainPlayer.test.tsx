@@ -169,11 +169,6 @@ vi.mock("../ShareModal", () => ({
   default: () => <div data-testid="share-modal" />,
 }));
 
-vi.mock("../ToastNotification", () => ({
-  __esModule: true,
-  default: () => <div data-testid="toast" />,
-}));
-
 vi.mock("../../loading", () => ({
   __esModule: true,
   default: () => <div data-testid="loading" />,

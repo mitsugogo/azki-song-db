@@ -37,6 +37,7 @@ import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "@/app/theme";
 import useSongs from "@/app/hook/useSongs";
 import { isOriginalSong } from "@/app/config/filters";
+import { showAppNotification } from "@/app/lib/notifications";
 import {
   MAX_TIMELINE_ROWS,
   TimelineRowInput,
@@ -436,7 +437,10 @@ export default function WhereMyAzkichiBeganClient() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert(t("whereMyAzkichiBegan.alerts.iconImageOnly"));
+      showAppNotification({
+        message: t("whereMyAzkichiBegan.alerts.iconImageOnly"),
+        type: "warning",
+      });
       return;
     }
 
@@ -454,7 +458,10 @@ export default function WhereMyAzkichiBeganClient() {
     }).catch(() => null);
 
     if (!dataUrl) {
-      alert(t("whereMyAzkichiBegan.alerts.iconReadFailed"));
+      showAppNotification({
+        message: t("whereMyAzkichiBegan.alerts.iconReadFailed"),
+        type: "error",
+      });
       return;
     }
 
@@ -507,7 +514,7 @@ export default function WhereMyAzkichiBeganClient() {
         error instanceof Error
           ? error.message
           : t("whereMyAzkichiBegan.alerts.generateFailed");
-      alert(message);
+      showAppNotification({ message, type: "error" });
     } finally {
       setIsGenerating(false);
     }

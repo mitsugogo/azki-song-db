@@ -17,7 +17,6 @@ import PlayerSection from "./PlayerSection";
 import SearchAndSongList from "./SearchAndSongList";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import ShareModal from "./ShareModal";
-import ToastNotification from "./ToastNotification";
 import Loading from "../loading";
 
 /**
@@ -233,8 +232,6 @@ export default function MainPlayer() {
   // Mobile song list overlay state
   const [isSongListOverlayOpen, setIsSongListOverlayOpen] = useState(false);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const [openShareModal, setOpenShareModal] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useLocalStorage<boolean>({
     key: "player-theater-mode",
@@ -390,13 +387,6 @@ export default function MainPlayer() {
           </motion.div>
         )}
       </div>
-
-      {showToast && (
-        <ToastNotification
-          message={toastMessage}
-          onClose={() => setShowToast(false)}
-        />
-      )}
 
       <ShareModal
         openShareModal={openShareModal}

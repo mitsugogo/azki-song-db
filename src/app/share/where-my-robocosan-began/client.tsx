@@ -35,6 +35,7 @@ import { FaBars } from "react-icons/fa6";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "@/app/theme";
+import { showAppNotification } from "@/app/lib/notifications";
 import robocosanSongs from "./robocosanSongs.json";
 import {
   MAX_TIMELINE_ROWS,
@@ -385,7 +386,10 @@ export default function WhereMyRobocosanBeganClient() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert(t("whereMyRobocosanBegan.alerts.iconImageOnly"));
+      showAppNotification({
+        message: t("whereMyRobocosanBegan.alerts.iconImageOnly"),
+        type: "warning",
+      });
       return;
     }
 
@@ -403,7 +407,10 @@ export default function WhereMyRobocosanBeganClient() {
     }).catch(() => null);
 
     if (!dataUrl) {
-      alert(t("whereMyRobocosanBegan.alerts.iconReadFailed"));
+      showAppNotification({
+        message: t("whereMyRobocosanBegan.alerts.iconReadFailed"),
+        type: "error",
+      });
       return;
     }
 
@@ -456,7 +463,7 @@ export default function WhereMyRobocosanBeganClient() {
         error instanceof Error
           ? error.message
           : t("whereMyRobocosanBegan.alerts.generateFailed");
-      alert(message);
+      showAppNotification({ message, type: "error" });
     } finally {
       setIsGenerating(false);
     }

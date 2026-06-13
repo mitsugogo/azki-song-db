@@ -1,5 +1,6 @@
 "use client";
 
+import { Notifications } from "@mantine/notifications";
 import { GlobalPlayerProvider } from "../hook/useGlobalPlayer";
 import PageTransitionHandler from "./PageTransitionHandler";
 import { LoadingProvider, useLoading } from "../context/LoadingContext";
@@ -18,6 +19,7 @@ export default function ClientProviders({
     <GlobalPlayerProvider>
       <SharedYouTubePlayerProvider>
         <LoadingProvider>
+          <Notifications position="top-right" zIndex={10000} limit={5} />
           {children}
           <MiniPlayer />
           <PageTransitionHandler />

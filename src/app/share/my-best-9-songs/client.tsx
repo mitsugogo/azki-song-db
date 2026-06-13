@@ -35,6 +35,7 @@ import { breadcrumbClasses, pageClasses } from "@/app/theme";
 import { Link, getPathname } from "@/i18n/navigation";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { FaPlay } from "react-icons/fa6";
+import { showAppNotification } from "@/app/lib/notifications";
 
 type SongCategoryFilter =
   | "all"
@@ -341,12 +342,18 @@ export default function MyBestNineSongsPage() {
   // 共有URLを生成
   const handleGenerateUrl = async () => {
     if (!title.trim()) {
-      alert(t("myBest9.alerts.titleRequired"));
+      showAppNotification({
+        message: t("myBest9.alerts.titleRequired"),
+        type: "warning",
+      });
       return;
     }
 
     if (selectedSongs.length === 0) {
-      alert(t("myBest9.alerts.selectAtLeastOne"));
+      showAppNotification({
+        message: t("myBest9.alerts.selectAtLeastOne"),
+        type: "warning",
+      });
       return;
     }
 
@@ -391,7 +398,7 @@ export default function MyBestNineSongsPage() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t("myBest9.alerts.saveFailed");
-      alert(message);
+      showAppNotification({ message, type: "error" });
     } finally {
       setIsSaving(false);
     }

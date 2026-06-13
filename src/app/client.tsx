@@ -2,7 +2,7 @@
 
 import { Link, useRouter } from "../i18n/navigation";
 import { Zen_Maru_Gothic } from "next/font/google";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   Avatar,
   AvatarGroup,
@@ -10,11 +10,9 @@ import {
   Burger,
   Button,
   CopyButton,
-  Notification,
   Skeleton,
   Text,
   Tooltip,
-  Transition,
 } from "@mantine/core";
 import { useDisclosure, useIntersection } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
@@ -39,6 +37,7 @@ import { isCoverSong, isOriginalSong } from "./config/filters";
 import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
+import { showAppNotification } from "./lib/notifications";
 import {
   buildMilestoneSearchHref,
   computeNextIsoForAnniversary,
@@ -271,17 +270,11 @@ export default function ClientTop() {
   const tAnniversaries = useTranslations("Anniversaries");
   const tSummary = useTranslations("Summary");
   const [searchValue, setSearchValue] = useState<string[]>([]);
-  const [copiedNotificationType, setCopiedNotificationType] = useState<
-    "original" | "cover" | "collaboration" | "karaoke"
-  >("original");
-  const [copiedNotificationVisible, setCopiedNotificationVisible] =
-    useState(false);
-  const [copiedNotificationSequence, setCopiedNotificationSequence] =
-    useState(0);
   const [shouldLoadViewStatistics, setShouldLoadViewStatistics] =
     useState(false);
   const [isHeroBackgroundUnavailable, setHeroBackgroundUnavailable] =
     useState(false);
+  const ongoingEventNotificationIdRef = useRef<string | null>(null);
   const [buildDate, setBuildDate] = useState("N/A");
   const [appVersion, setAppVersion] = useState("N/A");
 
@@ -297,20 +290,6 @@ export default function ClientTop() {
       window.removeEventListener("scroll", updateHeaderState);
     };
   }, []);
-
-  useEffect(() => {
-    if (!copiedNotificationVisible) {
-      return;
-    }
-
-    const timerId = window.setTimeout(() => {
-      setCopiedNotificationVisible(false);
-    }, 5000);
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [copiedNotificationVisible, copiedNotificationSequence]);
 
   useEffect(() => {
     if (viewMilestonesEntry?.isIntersecting) {
@@ -636,10 +615,70 @@ export default function ClientTop() {
   const showCopiedNotification = (
     type: "original" | "cover" | "collaboration" | "karaoke",
   ) => {
-    setCopiedNotificationType(type);
-    setCopiedNotificationVisible(true);
-    setCopiedNotificationSequence((current) => current + 1);
+    const message =
+      type === "cover"
+        ? t("coverSongsLinkCopied")
+        : type === "collaboration"
+          ? t("collaborationSongsLinkCopied")
+          : type === "karaoke"
+            ? t("karaokeSongsLinkCopied")
+            : t("originalSongsLinkCopied");
+
+    showAppNotification({
+      title: t("copied"),
+      message,
+      type: "success",
+      autoClose: 5000,
+    });
   };
+
+  useEffect(() => {
+    if (ongoingEvents.length === 0 || !isShowOngoingEventsAlert) {
+      return;
+    }
+
+    const event = ongoingEvents[0];
+    const notificationId = `ongoing-event-${event.content}`;
+    if (ongoingEventNotificationIdRef.current === notificationId) {
+      return;
+    }
+    ongoingEventNotificationIdRef.current = notificationId;
+
+    showAppNotification({
+      id: notificationId,
+      title: t("eventOngoingTitle", {
+        title: event.content,
+      }),
+      message: event.note ? (
+        <div className="space-y-2">
+          <Text size="sm" c="dimmed">
+            {event.note}
+
+            {event.url ? (
+              <Link
+                href={event.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+              >
+                <FaExternalLinkAlt className="text-[0.75rem]" />
+                {t("linkLabel")}
+              </Link>
+            ) : null}
+          </Text>
+        </div>
+      ) : (
+        event.content
+      ),
+      type: "warning",
+      icon: <IoInformationSharp />,
+      autoClose: false,
+      onClose: () => {
+        setOngoingEventsAlert(false);
+        ongoingEventNotificationIdRef.current = null;
+      },
+    });
+  }, [ongoingEvents, isShowOngoingEventsAlert, t]);
 
   const handleHeroBackgroundReady = (event: YouTubeEvent) => {
     try {
@@ -1037,42 +1076,6 @@ export default function ClientTop() {
                   </Button.Group>
                 </div>
               </div>
-
-              {/* 開催中のイベント */}
-              {ongoingEvents.length > 0 && isShowOngoingEventsAlert && (
-                <Notification
-                  icon={<IoInformationSharp />}
-                  title={t("eventOngoingTitle", {
-                    title: ongoingEvents[0].content,
-                  })}
-                  className="w-full text-left shadow-lg max-w-3xl mt-3"
-                  color="pink"
-                  withCloseButton
-                  onClose={() => {
-                    setOngoingEventsAlert(false);
-                  }}
-                >
-                  <div className="space-y-2">
-                    {ongoingEvents[0].note ? (
-                      <Text size="sm" c="dimmed">
-                        {ongoingEvents[0].note}
-
-                        {ongoingEvents[0].url ? (
-                          <Link
-                            href={ongoingEvents[0].url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-                          >
-                            <FaExternalLinkAlt className="text-[0.75rem]" />
-                            {t("linkLabel")}
-                          </Link>
-                        ) : null}
-                      </Text>
-                    ) : null}
-                  </div>
-                </Notification>
-              )}
             </div>
           </section>
 
@@ -1790,36 +1793,6 @@ export default function ClientTop() {
       </div>
       <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
       <AnalyticsWrapper />
-
-      <Transition
-        mounted={copiedNotificationVisible}
-        transition="slide-left"
-        duration={220}
-        timingFunction="ease"
-      >
-        {(styles) => (
-          <div
-            className="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)] sm:max-w-sm"
-            style={styles}
-          >
-            <Notification
-              title={t("copied")}
-              color="green"
-              withCloseButton
-              closeButtonProps={{ "aria-label": t("close") }}
-              onClose={() => setCopiedNotificationVisible(false)}
-            >
-              {copiedNotificationType === "cover"
-                ? t("coverSongsLinkCopied")
-                : copiedNotificationType === "collaboration"
-                  ? t("collaborationSongsLinkCopied")
-                  : copiedNotificationType === "karaoke"
-                    ? t("karaokeSongsLinkCopied")
-                    : t("originalSongsLinkCopied")}
-            </Notification>
-          </div>
-        )}
-      </Transition>
     </div>
   );
 }
