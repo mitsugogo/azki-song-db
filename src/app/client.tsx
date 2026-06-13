@@ -701,7 +701,6 @@ export default function ClientTop() {
                   "linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.5) 80%, transparent 100%)",
               }}
             />
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-1 h-24 bg-linear-to-b from-[#fffafc] via-[#fffafc]/70 to-transparent dark:from-[#111827] dark:via-[#111827]/70" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-56 bg-linear-to-b from-transparent via-[#fffafc]/70 to-transparent dark:via-[#111827]/70 sm:h-72" />
             {heroBackgroundSong && heroBackgroundVideoUrl ? (
               <Link
@@ -723,11 +722,11 @@ export default function ClientTop() {
                 <Text
                   c="dimmed"
                   size="xs"
-                  className="hidden sm:inline"
+                  className="ml-1 hidden sm:inline"
                   component="span"
                 >
                   {heroBackgroundSong.broadcast_at
-                    ? `- ${formatDate(heroBackgroundSong.broadcast_at, locale)}`
+                    ? formatDate(heroBackgroundSong.broadcast_at, locale)
                     : null}
                 </Text>
               </Link>
@@ -1577,11 +1576,14 @@ export default function ClientTop() {
                     const singerAvatars =
                       singerAvatarsByVideoId.get(update.videoId) ?? [];
 
+                    const watchHref = buildWatchHref({
+                      videoId: update.videoId,
+                    });
+
                     return (
-                      <Link
+                      <div
                         key={update.videoId}
-                        href={buildWatchHref({ videoId: update.videoId })}
-                        className="block rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
+                        className="rounded-lg border border-pink-200 bg-white p-4 hover-lift-animation transition hover:border-primary/30 hover:shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)] dark:hover:border-pink-300/30"
                       >
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                           {formatDate(update.date, locale)}{" "}
@@ -1597,19 +1599,26 @@ export default function ClientTop() {
                           </Text>
                         </p>
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-black">
+                          <Link
+                            href={watchHref}
+                            className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-black"
+                          >
                             <YoutubeThumbnail
                               videoId={update.videoId}
                               alt={update.videoTitle}
                               imageClassName="object-cover"
                             />
-                          </div>
-                          <Text
-                            size="sm"
-                            className="min-w-0 line-clamp-2"
-                            component="div"
-                          >
-                            {update.videoTitle}
+                          </Link>
+                          <div className="min-w-0">
+                            <Link href={watchHref} className="block">
+                              <Text
+                                size="sm"
+                                className="line-clamp-2"
+                                component="div"
+                              >
+                                {update.videoTitle}
+                              </Text>
+                            </Link>
                             {singerAvatars.length > 0 ? (
                               <Avatar.Group className="ml-2 mt-1" spacing="xxs">
                                 {singerAvatars.map((avatar) => {
@@ -1650,9 +1659,9 @@ export default function ClientTop() {
                                 })}
                               </Avatar.Group>
                             ) : null}
-                          </Text>
+                          </div>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>
