@@ -590,12 +590,7 @@ export default function MyBestNineSongsPage() {
                       {t("myBest9.generatedUrlTitle")}
                     </Text>
                     <Group grow>
-                      <input
-                        type="text"
-                        readOnly
-                        value={generatedUrl}
-                        className="rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                      />
+                      <TextInput readOnly value={generatedUrl} />
                       <Tooltip
                         label={
                           copied

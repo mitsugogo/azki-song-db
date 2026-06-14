@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
-import { Breadcrumbs } from "@mantine/core";
+import { Breadcrumbs, FloatingIndicator, Tabs } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { useDiscographyData } from "./hooks/useDiscographyData";
 import DiscographyControls from "./components/DiscographyControls";
 import ContentRenderer from "./components/ContentRenderer";
@@ -22,13 +21,10 @@ const TAB_URLS = [
   "/discography/collab",
   "/discography/covers",
 ];
+const TAB_VALUES = ["0", "1", "2", "3"] as const;
 
-const tabClass = ({ selected }: { selected: boolean }) =>
-  `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 focus:ring-0 cursor-pointer ${
-    selected
-      ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-      : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-  }`;
+const discographyTabClass =
+  "relative z-10 shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold leading-5 text-gray-700 transition-colors hover:text-primary data-[active=true]:text-white dark:text-gray-200 dark:hover:text-pink-200 dark:data-[active=true]:text-white md:px-4 md:py-2 md:text-sm";
 
 export default function DiscographyClient({
   initialTab = 0,
@@ -37,15 +33,35 @@ export default function DiscographyClient({
 }) {
   const t = useTranslations("Discography");
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [indicatorTab, setIndicatorTab] = useState(initialTab);
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [groupByYear, setGroupByYear] = useState(false);
   const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
   const [visibleItems, setVisibleItems] = useState<boolean[]>([]);
+  const [tabsRootRef, setTabsRootRef] = useState<HTMLDivElement | null>(null);
+  const [tabRefs, setTabRefs] = useState<
+    Record<string, HTMLButtonElement | null>
+  >({});
+  const tabRefCallbacks = useMemo(
+    () =>
+      Object.fromEntries(
+        TAB_VALUES.map((value) => [
+          value,
+          (node: HTMLButtonElement | null) => {
+            setTabRefs((current) =>
+              current[value] === node ? current : { ...current, [value]: node },
+            );
+          },
+        ]),
+      ) as Record<string, (node: HTMLButtonElement | null) => void>,
+    [],
+  );
 
   const { targetRef } = useScrollIntoView();
   const router = useRouter();
+  const pathname = usePathname();
 
   const {
     loading,
@@ -54,6 +70,13 @@ export default function DiscographyClient({
     unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   } = useDiscographyData(groupByAlbum, onlyOriginalMV);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+    setIndicatorTab(initialTab);
+    setExpandedItem(null);
+    setAnchorToScroll(null);
+  }, [initialTab]);
 
   // アクティブタブのアイテム表示アニメーション
   useEffect(() => {
@@ -125,10 +148,18 @@ export default function DiscographyClient({
   };
 
   const handleTabChange = (index: number) => {
-    setActiveTab(index);
+    const destination = TAB_URLS[index];
+
+    setIndicatorTab(index);
     setExpandedItem(null);
     setAnchorToScroll(null);
-    router.push(TAB_URLS[index]);
+
+    if (destination && pathname !== destination) {
+      router.push(destination);
+      return;
+    }
+
+    setActiveTab(index);
   };
 
   // DiscographyControls の activeTab は旧 3-tab 基準（0 = originals で "オリ曲MVのみ" 表示）
@@ -171,41 +202,69 @@ export default function DiscographyClient({
           onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
         />
 
-        <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-          <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
-            <Tab as="button" className={tabClass}>
+        <Tabs
+          variant="none"
+          value={String(indicatorTab)}
+          onChange={(value) => {
+            if (value !== null) {
+              handleTabChange(Number(value));
+            }
+          }}
+          keepMounted={false}
+        >
+          <Tabs.List
+            ref={setTabsRootRef}
+            className="relative mx-auto mb-4 flex w-fit max-w-full flex-nowrap overflow-x-auto rounded-lg border border-light-gray-200 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-gray-800/80"
+          >
+            <Tabs.Tab
+              value="0"
+              ref={tabRefCallbacks["0"]}
+              className={discographyTabClass}
+            >
               {t("tabs.all", { count: allSongCountsByReleaseDate.length })}
-            </Tab>
-            <Tab as="button" className={tabClass}>
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="1"
+              ref={tabRefCallbacks["1"]}
+              className={discographyTabClass}
+            >
               {t("tabs.originals", {
                 count: originalSongCountsByReleaseDate.length,
               })}
-            </Tab>
-            <Tab as="button" className={tabClass}>
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="2"
+              ref={tabRefCallbacks["2"]}
+              className={discographyTabClass}
+            >
               {t("tabs.unit", { count: unitSongCountsByReleaseDate.length })}
-            </Tab>
-            <Tab as="button" className={tabClass}>
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="3"
+              ref={tabRefCallbacks["3"]}
+              className={discographyTabClass}
+            >
               {t("tabs.covers", { count: coverSongCountsByReleaseDate.length })}
-            </Tab>
-          </TabList>
-          <TabPanels>
-            {tabDataList.map((data, tabIndex) => (
-              <TabPanel key={tabIndex}>
-                <ContentRenderer
-                  data={data}
-                  tabIndex={tabIndex}
-                  groupByAlbum={groupByAlbum}
-                  groupByYear={groupByYear}
-                  expandedItem={expandedItem}
-                  visibleItems={activeTab === tabIndex ? visibleItems : []}
-                  anchorToScroll={anchorToScroll}
-                  targetRef={targetRef}
-                  onItemClick={handleItemClick}
-                />
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </TabGroup>
+            </Tabs.Tab>
+            <FloatingIndicator
+              target={tabRefs[String(indicatorTab)]}
+              parent={tabsRootRef}
+              transitionDuration={220}
+              className="z-0 rounded-md bg-primary-600 shadow-sm dark:bg-primary-500"
+            />
+          </Tabs.List>
+        </Tabs>
+        <ContentRenderer
+          data={tabDataList[activeTab] ?? []}
+          tabIndex={activeTab}
+          groupByAlbum={groupByAlbum}
+          groupByYear={groupByYear}
+          expandedItem={expandedItem}
+          visibleItems={visibleItems}
+          anchorToScroll={anchorToScroll}
+          targetRef={targetRef}
+          onItemClick={handleItemClick}
+        />
         <ScrollToTopButton />
       </div>
     </>

@@ -39,9 +39,6 @@ importers:
       "@fortawesome/react-fontawesome":
         specifier: ^3.3.1
         version: 3.3.1(@fortawesome/fontawesome-svg-core@7.0.0)(react@19.2.6)
-      "@headlessui/react":
-        specifier: ^2.2.10
-        version: 2.2.10(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       "@heroicons/react":
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.6)
@@ -146,7 +143,7 @@ importers:
         version: 16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       next-intl:
         specifier: ^4.12.0
-        version: 4.12.0(@swc/helpers@0.5.21)(next@16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
+        version: 4.12.0(next@16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
       overlayscrollbars:
         specifier: ^2.16.0
         version: 2.16.0
@@ -761,15 +758,6 @@ packages:
       react: ">=16.8.0"
       react-dom: ">=16.8.0"
 
-  "@floating-ui/react@0.26.28":
-    resolution:
-      {
-        integrity: sha512-yORQuuAtVpiRjpMhdc0wJj06b9JFjrYF4qp96j++v2NBpbi6SEGF7donUJ3TMieerQ6qVkAv1tgr7L4r5roTqw==,
-      }
-    peerDependencies:
-      react: ">=16.8.0"
-      react-dom: ">=16.8.0"
-
   "@floating-ui/react@0.27.19":
     resolution:
       {
@@ -853,16 +841,6 @@ packages:
     peerDependencies:
       "@fortawesome/fontawesome-svg-core": ~6 || ~7
       react: ^18.0.0 || ^19.0.0
-
-  "@headlessui/react@2.2.10":
-    resolution:
-      {
-        integrity: sha512-5pVLNK9wlpxTUTy9GpgbX/SdcRh+HBnPktjM2wbiLTH4p+2EPHBO1aoSryUCuKUIItdDWO9ITlhUL8UnUN/oIA==,
-      }
-    engines: { node: ">=10" }
-    peerDependencies:
-      react: ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^18 || ^19 || ^19.0.0-rc
 
   "@heroicons/react@2.2.0":
     resolution:
@@ -1475,7 +1453,6 @@ packages:
     resolution:
       {
         integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==,
-        tarball: https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz,
       }
 
   "@napi-rs/wasm-runtime@1.1.4":
@@ -1779,64 +1756,6 @@ packages:
       {
         integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==,
       }
-
-  "@react-aria/focus@3.21.0":
-    resolution:
-      {
-        integrity: sha512-7NEGtTPsBy52EZ/ToVKCu0HSelE3kq9qeis+2eEq90XSuJOMaDHUQrA7RC2Y89tlEwQB31bud/kKRi9Qme1dkA==,
-      }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  "@react-aria/interactions@3.25.4":
-    resolution:
-      {
-        integrity: sha512-HBQMxgUPHrW8V63u9uGgBymkMfj6vdWbB0GgUJY49K9mBKMsypcHeWkWM6+bF7kxRO728/IK8bWDV6whDbqjHg==,
-      }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  "@react-aria/ssr@3.9.10":
-    resolution:
-      {
-        integrity: sha512-hvTm77Pf+pMBhuBm760Li0BVIO38jv1IBws1xFm1NoL26PU+fe+FMW5+VZWyANR6nYL65joaJKZqOdTQMkO9IQ==,
-      }
-    engines: { node: ">= 12" }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  "@react-aria/utils@3.30.0":
-    resolution:
-      {
-        integrity: sha512-ydA6y5G1+gbem3Va2nczj/0G0W7/jUVo/cbN10WA5IizzWIwMP5qhFr7macgbKfHMkZ+YZC3oXnt2NNre5odKw==,
-      }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  "@react-stately/flags@3.1.2":
-    resolution:
-      {
-        integrity: sha512-2HjFcZx1MyQXoPqcBGALwWWmgFVUk2TuKVIQxCbRq7fPyWXIl6VHcakCLurdtYC2Iks7zizvz0Idv48MQ38DWg==,
-      }
-
-  "@react-stately/utils@3.10.8":
-    resolution:
-      {
-        integrity: sha512-SN3/h7SzRsusVQjQ4v10LaVsDc81jyyR0DD5HnsQitm/I5WDpaSr2nRHtyloPFU48jlql1XX/S04T2DLQM7Y3g==,
-      }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  "@react-types/shared@3.31.0":
-    resolution:
-      {
-        integrity: sha512-ua5U6V66gDcbLZe4P2QeyNgPp4YWD1ymGA6j3n+s8CGExtrCPe64v+g4mvpT8Bnb985R96e4zFT61+m0YCwqMg==,
-      }
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
   "@reduxjs/toolkit@2.9.0":
     resolution:
@@ -2200,12 +2119,6 @@ packages:
     resolution:
       {
         integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==,
-      }
-
-  "@swc/helpers@0.5.21":
-    resolution:
-      {
-        integrity: sha512-jI/VAmtdjB/RnI8GTnokyX7Ug8c+g+ffD6QRLa6XQewtnGyukKkKSk3wLTM3b5cjt1jNh9x0jfVlagdN2gDKQg==,
       }
 
   "@swc/types@0.1.26":
@@ -2769,7 +2682,6 @@ packages:
     resolution:
       {
         integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==,
-        tarball: https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz,
       }
 
   "@tybys/wasm-util@0.10.2":
@@ -5037,7 +4949,6 @@ packages:
     resolution:
       {
         integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==,
-        tarball: https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz,
       }
     engines: { node: ^8.16.0 || ^10.6.0 || >=11.0.0 }
     os: [darwin]
@@ -5046,7 +4957,6 @@ packages:
     resolution:
       {
         integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==,
-        tarball: https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz,
       }
     engines: { node: ^8.16.0 || ^10.6.0 || >=11.0.0 }
     os: [darwin]
@@ -7894,12 +7804,6 @@ packages:
         integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==,
       }
 
-  tabbable@6.2.0:
-    resolution:
-      {
-        integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==,
-      }
-
   tabbable@6.4.0:
     resolution:
       {
@@ -8922,14 +8826,6 @@ snapshots:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
 
-  "@floating-ui/react@0.26.28(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
-    dependencies:
-      "@floating-ui/react-dom": 2.1.8(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@floating-ui/utils": 0.2.11
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-      tabbable: 6.2.0
-
   "@floating-ui/react@0.27.19(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
     dependencies:
       "@floating-ui/react-dom": 2.1.8(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -8972,16 +8868,6 @@ snapshots:
     dependencies:
       "@fortawesome/fontawesome-svg-core": 7.0.0
       react: 19.2.6
-
-  "@headlessui/react@2.2.10(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
-    dependencies:
-      "@floating-ui/react": 0.26.28(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@react-aria/focus": 3.21.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@react-aria/interactions": 3.25.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@tanstack/react-virtual": 3.13.25(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-      use-sync-external-store: 1.5.0(react@19.2.6)
 
   "@heroicons/react@2.2.0(react@19.2.6)":
     dependencies:
@@ -9458,55 +9344,6 @@ snapshots:
 
   "@popperjs/core@2.11.8": {}
 
-  "@react-aria/focus@3.21.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
-    dependencies:
-      "@react-aria/interactions": 3.25.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@react-aria/utils": 3.30.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@react-types/shared": 3.31.0(react@19.2.6)
-      "@swc/helpers": 0.5.21
-      clsx: 2.1.1
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-
-  "@react-aria/interactions@3.25.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
-    dependencies:
-      "@react-aria/ssr": 3.9.10(react@19.2.6)
-      "@react-aria/utils": 3.30.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      "@react-stately/flags": 3.1.2
-      "@react-types/shared": 3.31.0(react@19.2.6)
-      "@swc/helpers": 0.5.21
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-
-  "@react-aria/ssr@3.9.10(react@19.2.6)":
-    dependencies:
-      "@swc/helpers": 0.5.21
-      react: 19.2.6
-
-  "@react-aria/utils@3.30.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)":
-    dependencies:
-      "@react-aria/ssr": 3.9.10(react@19.2.6)
-      "@react-stately/flags": 3.1.2
-      "@react-stately/utils": 3.10.8(react@19.2.6)
-      "@react-types/shared": 3.31.0(react@19.2.6)
-      "@swc/helpers": 0.5.21
-      clsx: 2.1.1
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-
-  "@react-stately/flags@3.1.2":
-    dependencies:
-      "@swc/helpers": 0.5.21
-
-  "@react-stately/utils@3.10.8(react@19.2.6)":
-    dependencies:
-      "@swc/helpers": 0.5.21
-      react: 19.2.6
-
-  "@react-types/shared@3.31.0(react@19.2.6)":
-    dependencies:
-      react: 19.2.6
-
   "@reduxjs/toolkit@2.9.0(react-redux@9.2.0(@types/react@19.2.15)(react@19.2.6)(redux@5.0.1))(react@19.2.6)":
     dependencies:
       "@standard-schema/spec": 1.1.0
@@ -9621,7 +9458,7 @@ snapshots:
   "@swc/core-win32-x64-msvc@1.15.40":
     optional: true
 
-  "@swc/core@1.15.40(@swc/helpers@0.5.21)":
+  "@swc/core@1.15.40":
     dependencies:
       "@swc/counter": 0.1.3
       "@swc/types": 0.1.26
@@ -9638,15 +9475,10 @@ snapshots:
       "@swc/core-win32-arm64-msvc": 1.15.40
       "@swc/core-win32-ia32-msvc": 1.15.40
       "@swc/core-win32-x64-msvc": 1.15.40
-      "@swc/helpers": 0.5.21
 
   "@swc/counter@0.1.3": {}
 
   "@swc/helpers@0.5.15":
-    dependencies:
-      tslib: 2.8.1
-
-  "@swc/helpers@0.5.21":
     dependencies:
       tslib: 2.8.1
 
@@ -12263,11 +12095,11 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.13.0: {}
 
-  next-intl@4.12.0(@swc/helpers@0.5.21)(next@16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@6.0.3):
+  next-intl@4.12.0(next@16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@6.0.3):
     dependencies:
       "@formatjs/intl-localematcher": 0.8.9
       "@parcel/watcher": 2.5.6
-      "@swc/core": 1.15.40(@swc/helpers@0.5.21)
+      "@swc/core": 1.15.40
       icu-minify: 4.13.0
       negotiator: 1.0.0
       next: 16.2.6(@babel/core@7.28.3)(@playwright/test@1.60.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -13225,8 +13057,6 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   symbol-tree@3.2.4: {}
-
-  tabbable@6.2.0: {}
 
   tabbable@6.4.0: {}
 

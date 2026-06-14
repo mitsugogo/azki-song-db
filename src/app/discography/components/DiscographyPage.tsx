@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
-import { Breadcrumbs } from "@mantine/core";
+import { Breadcrumbs, FloatingIndicator, Tabs } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "../../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { useTranslations } from "next-intl";
 
 import { useDiscographyData } from "../hooks/useDiscographyData";
@@ -18,6 +17,10 @@ import { useAlbumNavigation } from "../hooks/useAlbumNavigation";
 import DiscographyControls from "./DiscographyControls";
 import ContentRenderer from "./ContentRenderer";
 import { scrollToAnchor } from "../utils/scrollHelpers";
+
+const TAB_VALUES = ["0", "1", "2"] as const;
+const discographyTabClass =
+  "relative z-10 shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold leading-5 text-gray-700 transition-colors hover:text-primary data-[active=true]:text-white dark:text-gray-200 dark:hover:text-pink-200 dark:data-[active=true]:text-white md:px-4 md:py-2 md:text-sm";
 
 export default function DiscographyPage({
   initialCategory,
@@ -30,6 +33,24 @@ export default function DiscographyPage({
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
   const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
+  const [tabsRootRef, setTabsRootRef] = useState<HTMLDivElement | null>(null);
+  const [tabRefs, setTabRefs] = useState<
+    Record<string, HTMLButtonElement | null>
+  >({});
+  const tabRefCallbacks = useMemo(
+    () =>
+      Object.fromEntries(
+        TAB_VALUES.map((value) => [
+          value,
+          (node: HTMLButtonElement | null) => {
+            setTabRefs((current) =>
+              current[value] === node ? current : { ...current, [value]: node },
+            );
+          },
+        ]),
+      ) as Record<string, (node: HTMLButtonElement | null) => void>,
+    [],
+  );
 
   const { targetRef } = useScrollIntoView();
   const skipClearOnTabChange = useRef(false);
@@ -223,18 +244,24 @@ export default function DiscographyPage({
           onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
         />
 
-        <TabGroup selectedIndex={activeTab} onChange={handleTabChange}>
-          <TabList className="flex space-x-1 rounded-xl bg-gray-50/20 dark:bg-gray-800 p-1 mb-4">
-            <Tab
-              as="button"
-              className={({ selected }) =>
-                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-              }
+        <Tabs
+          variant="none"
+          value={String(activeTab)}
+          onChange={(value) => {
+            if (value !== null) {
+              handleTabChange(Number(value));
+            }
+          }}
+          keepMounted={false}
+        >
+          <Tabs.List
+            ref={setTabsRootRef}
+            className="relative mx-auto mb-4 flex w-fit max-w-full flex-nowrap overflow-x-auto rounded-lg border border-light-gray-200 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-gray-800/80"
+          >
+            <Tabs.Tab
+              value="0"
+              ref={tabRefCallbacks["0"]}
+              className={discographyTabClass}
             >
               {t("tabs.originals", {
                 count: Array.from(
@@ -243,36 +270,30 @@ export default function DiscographyPage({
                   ),
                 ).length,
               })}
-            </Tab>
-            <Tab
-              as="button"
-              className={({ selected }) =>
-                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-              }
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="1"
+              ref={tabRefCallbacks["1"]}
+              className={discographyTabClass}
             >
               {t("tabs.unit", { count: unitSongCountsByReleaseDate.length })}
-            </Tab>
-            <Tab
-              as="button"
-              className={({ selected }) =>
-                `w-full rounded-lg py-1.5 md:py-2.5 text-xs md:text-sm font-medium leading-5 text-gray-700 dark:text-gray-300 ring-0 forcus:ring-0 cursor-pointer
-              ${
-                selected
-                  ? "bg-white text-primary shadow dark:bg-gray-600 dark:text-white"
-                  : "hover:bg-white/12 hover:text-primary dark:hover:bg-gray-600 dark:hover:text-white"
-              }`
-              }
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="2"
+              ref={tabRefCallbacks["2"]}
+              className={discographyTabClass}
             >
               {t("tabs.covers", { count: coverSongCountsByReleaseDate.length })}
-            </Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
+            </Tabs.Tab>
+            <FloatingIndicator
+              target={tabRefs[String(activeTab)]}
+              parent={tabsRootRef}
+              transitionDuration={220}
+              className="z-0 rounded-md bg-primary-600 shadow-sm dark:bg-primary-500"
+            />
+          </Tabs.List>
+          <>
+            <Tabs.Panel value="0">
               <ContentRenderer
                 data={originalSongCountsByReleaseDate}
                 tabIndex={0}
@@ -284,8 +305,8 @@ export default function DiscographyPage({
                 targetRef={targetRef}
                 onItemClick={handleItemClick}
               />
-            </TabPanel>
-            <TabPanel>
+            </Tabs.Panel>
+            <Tabs.Panel value="1">
               <ContentRenderer
                 data={unitSongCountsByReleaseDate}
                 tabIndex={1}
@@ -297,8 +318,8 @@ export default function DiscographyPage({
                 targetRef={targetRef}
                 onItemClick={handleItemClick}
               />
-            </TabPanel>
-            <TabPanel>
+            </Tabs.Panel>
+            <Tabs.Panel value="2">
               <ContentRenderer
                 data={coverSongCountsByReleaseDate}
                 tabIndex={2}
@@ -310,9 +331,9 @@ export default function DiscographyPage({
                 targetRef={targetRef}
                 onItemClick={handleItemClick}
               />
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+            </Tabs.Panel>
+          </>
+        </Tabs>
         <ScrollToTopButton />
       </div>
     </>
