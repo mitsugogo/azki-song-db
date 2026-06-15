@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "@/i18n/navigation";
-import { Badge } from "@mantine/core";
+import { Badge, Table } from "@mantine/core";
 import { BsPlayCircle } from "react-icons/bs";
 import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
@@ -279,36 +279,34 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             {t("tracksCount", { count: videos.length })}
           </p>
 
-          <div className="mt-4 overflow-y-auto max-h-62.5">
-            <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-              <thead className="sticky top-0 text-xs uppercase text-gray-700 dark:text-gray-400">
-                <tr>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700"></th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.songName")}
-                  </th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.artist")}
-                  </th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.lyricist")}
-                  </th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.composer")}
-                  </th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.arranger")}
-                  </th>
-                  <th className="bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500">
-                    {t("table.videoDate")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="mt-4 max-h-62.5 overflow-y-auto">
+            <Table
+              stickyHeader
+              highlightOnHover
+              withRowBorders
+              className="w-full text-left text-sm text-gray-500 dark:text-gray-400"
+              classNames={{
+                thead: "text-xs uppercase text-gray-700 dark:text-gray-400",
+                th: "bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500",
+                td: "px-2 py-1",
+              }}
+            >
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th></Table.Th>
+                  <Table.Th>{t("table.songName")}</Table.Th>
+                  <Table.Th>{t("table.artist")}</Table.Th>
+                  <Table.Th>{t("table.lyricist")}</Table.Th>
+                  <Table.Th>{t("table.composer")}</Table.Th>
+                  <Table.Th>{t("table.arranger")}</Table.Th>
+                  <Table.Th>{t("table.videoDate")}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {videos.map((s, index) => (
-                  <tr
+                  <Table.Tr
                     key={index}
-                    className="border-b odd:bg-white even:bg-gray-50/50 hover:bg-gray-50/50 dark:border-gray-700 dark:odd:bg-gray-800 dark:even:bg-gray-700 dark:hover:bg-gray-600"
+                    className="odd:bg-white even:bg-gray-50/50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
                     onMouseEnter={() => {
                       if (!song.isAlbum) {
                         setHoveredVideo(s.video_id);
@@ -320,15 +318,15 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       }
                     }}
                   >
-                    <td className="px-2 py-1 dark:text-light-gray-500">
+                    <Table.Td className="dark:text-light-gray-500">
                       <Link
                         href={`${s.tags.includes("カバー曲") ? `/watch?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}` : ""}` : `/watch?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
                         className=" hover:text-primary-600 dark:hover:text-white"
                       >
                         <BsPlayCircle size={24} />
                       </Link>
-                    </td>
-                    <td className="px-2 py-1">
+                    </Table.Td>
+                    <Table.Td>
                       <Link
                         href={`/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
                           s.slugv2 ?? encodeURIComponent(s.video_id)
@@ -337,16 +335,16 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                       >
                         {s.title}
                       </Link>
-                    </td>
-                    <td className="px-2 py-1">
+                    </Table.Td>
+                    <Table.Td>
                       <Link
                         href={`/?q=artist:${s.artist}`}
                         className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
                       >
                         {s.artist}
                       </Link>
-                    </td>
-                    <td className="px-2 py-1">
+                    </Table.Td>
+                    <Table.Td>
                       {s.lyricist &&
                         s.lyricist
                           .split("、")
@@ -361,8 +359,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </td>
-                    <td className="px-2 py-1">
+                    </Table.Td>
+                    <Table.Td>
                       {s.composer &&
                         s.composer
                           .split("、")
@@ -377,8 +375,8 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </td>
-                    <td className="px-2 py-1">
+                    </Table.Td>
+                    <Table.Td>
                       {s.arranger &&
                         s.arranger
                           .split("、")
@@ -393,14 +391,14 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                               {i < arr.length - 1 ? "、" : ""}
                             </span>
                           ))}
-                    </td>
-                    <td className="px-2 py-1 dark:text-light-gray-500">
+                    </Table.Td>
+                    <Table.Td className="dark:text-light-gray-500">
                       {formatDate(s.broadcast_at, locale)}
-                    </td>
-                  </tr>
+                    </Table.Td>
+                  </Table.Tr>
                 ))}
-              </tbody>
-            </table>
+              </Table.Tbody>
+            </Table>
           </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link

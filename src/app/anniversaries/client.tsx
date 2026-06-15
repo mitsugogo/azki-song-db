@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Breadcrumbs } from "@mantine/core";
+import { Badge, Breadcrumbs, Table } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { useLocale, useTranslations } from "next-intl";
@@ -535,83 +535,91 @@ export default function AnniversariesPageClient() {
             )}
           </div>
 
-          <div className="hidden overflow-x-auto md:block">
-            <table className="min-w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
-              <thead className="bg-light-gray-100/70 dark:bg-gray-800/60">
-                <tr className="text-left text-xs font-semibold text-gray-700 dark:text-gray-200">
-                  <th className="px-3 py-2">{t("nextDateLabel")}</th>
-                  <th className="px-3 py-2">{t("anniversaryNameLabel")}</th>
-                  <th className="px-3 py-2">{t("firstDateLabel")}</th>
-                  <th className="px-3 py-2">{t("daysUntilLabel")}</th>
-                  <th className="px-3 py-2">{t("noteLabel")}</th>
-                  <th className="px-3 py-2 whitespace-nowrap">
-                    {t("linkLabel")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {anniversaryRows.map(
-                  (
-                    { item, daysUntil, firstDate, formattedName, nextDate },
-                    index,
-                  ) => {
-                    return (
-                      <tr
-                        key={`${item.name}-${index}`}
-                        className="border-t border-light-gray-200/60 align-top text-gray-800 dark:border-white/10 dark:text-gray-100"
-                      >
-                        <td className="px-3 py-3 whitespace-nowrap">
-                          {nextDate}
-                        </td>
-                        <td className="px-3 py-3 font-semibold whitespace-nowrap">
-                          {formattedName}
-                        </td>
-                        <td className="px-3 py-3 whitespace-nowrap">
-                          {firstDate}
-                        </td>
-                        <td className="px-3 py-3 whitespace-nowrap text-primary-700 dark:text-pink-200">
-                          {daysUntil !== null
-                            ? daysUntil === 0
-                              ? "-"
-                              : t("daysUntil", { days: daysUntil })
-                            : "-"}
-                        </td>
-                        <td className="px-3 py-3 text-gray-600 dark:text-gray-300">
-                          {item.note || "-"}
-                        </td>
-                        <td className="px-3 py-3 whitespace-nowrap">
-                          {item.url
-                            ? (() => {
-                                const isYoutube = isYoutubeUrl(item.url);
+          <div className="hidden md:block">
+            <Table.ScrollContainer minWidth={820}>
+              <Table
+                withTableBorder
+                withRowBorders
+                className="rounded-xl border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50"
+                classNames={{
+                  thead: "bg-light-gray-100/70 dark:bg-gray-800/60",
+                  th: "px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200",
+                  td: "px-3 py-3 align-top text-gray-800 dark:text-gray-100",
+                }}
+              >
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>{t("nextDateLabel")}</Table.Th>
+                    <Table.Th>{t("anniversaryNameLabel")}</Table.Th>
+                    <Table.Th>{t("firstDateLabel")}</Table.Th>
+                    <Table.Th>{t("daysUntilLabel")}</Table.Th>
+                    <Table.Th>{t("noteLabel")}</Table.Th>
+                    <Table.Th className="whitespace-nowrap">
+                      {t("linkLabel")}
+                    </Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {anniversaryRows.map(
+                    (
+                      { item, daysUntil, firstDate, formattedName, nextDate },
+                      index,
+                    ) => {
+                      return (
+                        <Table.Tr key={`${item.name}-${index}`}>
+                          <Table.Td className="whitespace-nowrap">
+                            {nextDate}
+                          </Table.Td>
+                          <Table.Td className="whitespace-nowrap font-semibold">
+                            {formattedName}
+                          </Table.Td>
+                          <Table.Td className="whitespace-nowrap">
+                            {firstDate}
+                          </Table.Td>
+                          <Table.Td className="whitespace-nowrap text-primary-700 dark:text-pink-200">
+                            {daysUntil !== null
+                              ? daysUntil === 0
+                                ? "-"
+                                : t("daysUntil", { days: daysUntil })
+                              : "-"}
+                          </Table.Td>
+                          <Table.Td className="text-gray-600 dark:text-gray-300">
+                            {item.note || "-"}
+                          </Table.Td>
+                          <Table.Td className="whitespace-nowrap">
+                            {item.url
+                              ? (() => {
+                                  const isYoutube = isYoutubeUrl(item.url);
 
-                                return (
-                                  <Badge
-                                    component={Link}
-                                    size="sm"
-                                    radius="sm"
-                                    color={isYoutube ? "red" : "pink"}
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="whitespace-nowrap cursor-pointer inline-block"
-                                  >
-                                    {isYoutube ? (
-                                      <FaYoutube className="mr-1 inline h-3 w-3" />
-                                    ) : (
-                                      <FaExternalLinkAlt className="mr-1 inline h-2 w-2" />
-                                    )}
-                                    {isYoutube ? "YouTube" : t("openLink")}
-                                  </Badge>
-                                );
-                              })()
-                            : "-"}
-                        </td>
-                      </tr>
-                    );
-                  },
-                )}
-              </tbody>
-            </table>
+                                  return (
+                                    <Badge
+                                      component={Link}
+                                      size="sm"
+                                      radius="sm"
+                                      color={isYoutube ? "red" : "pink"}
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="whitespace-nowrap cursor-pointer inline-block"
+                                    >
+                                      {isYoutube ? (
+                                        <FaYoutube className="mr-1 inline h-3 w-3" />
+                                      ) : (
+                                        <FaExternalLinkAlt className="mr-1 inline h-2 w-2" />
+                                      )}
+                                      {isYoutube ? "YouTube" : t("openLink")}
+                                    </Badge>
+                                  );
+                                })()
+                              : "-"}
+                          </Table.Td>
+                        </Table.Tr>
+                      );
+                    },
+                  )}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
           </div>
         </>
       )}

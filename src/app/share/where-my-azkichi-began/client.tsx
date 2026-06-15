@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Breadcrumbs,
   Button,
+  FileButton,
   Paper,
   Select,
   Stack,
@@ -267,7 +268,6 @@ export default function WhereMyAzkichiBeganClient() {
   const [copyFallbackText, setCopyFallbackText] = useState("");
   const [isDndMounted, setIsDndMounted] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const rowKeys = useMemo(
     () => rows.map((_, index) => `timeline-row-${index}`),
     [rows],
@@ -432,8 +432,7 @@ export default function WhereMyAzkichiBeganClient() {
     updateDraft({ rows: nextRows });
   };
 
-  const handleIconFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleIconFileChange = async (file: File | null) => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -609,41 +608,38 @@ export default function WhereMyAzkichiBeganClient() {
                 {t("whereMyAzkichiBegan.form.iconLabel")}
               </Text>
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex h-20 w-20 items-center justify-center rounded-full border border-pink-300 bg-pink-50 text-xs text-pink-700 dark:border-pink-700 dark:bg-gray-800 dark:text-pink-300"
-                >
-                  {iconDataUrl ? (
-                    <img
-                      src={iconDataUrl}
-                      alt={t("whereMyAzkichiBegan.form.iconPreviewAlt")}
-                      className="h-full w-full rounded-full object-cover"
-                    />
-                  ) : (
-                    t("whereMyAzkichiBegan.form.iconPlaceholder")
+                <FileButton onChange={handleIconFileChange} accept="image/*">
+                  {(props) => (
+                    <button
+                      type="button"
+                      {...props}
+                      className="inline-flex h-20 w-20 items-center justify-center rounded-full border border-pink-300 bg-pink-50 text-xs text-pink-700 dark:border-pink-700 dark:bg-gray-800 dark:text-pink-300"
+                    >
+                      {iconDataUrl ? (
+                        <img
+                          src={iconDataUrl}
+                          alt={t("whereMyAzkichiBegan.form.iconPreviewAlt")}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        t("whereMyAzkichiBegan.form.iconPlaceholder")
+                      )}
+                    </button>
                   )}
-                </button>
+                </FileButton>
                 <div>
-                  <Button
-                    variant="light"
-                    color="pink"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {t("whereMyAzkichiBegan.button.uploadIcon")}
-                  </Button>
+                  <FileButton onChange={handleIconFileChange} accept="image/*">
+                    {(props) => (
+                      <Button variant="light" color="pink" {...props}>
+                        {t("whereMyAzkichiBegan.button.uploadIcon")}
+                      </Button>
+                    )}
+                  </FileButton>
                   <Text size="xs" c="dimmed" mt={6}>
                     {t("whereMyAzkichiBegan.form.iconHint")}
                   </Text>
                 </div>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleIconFileChange}
-              />
             </div>
 
             <div>
@@ -810,12 +806,7 @@ export default function WhereMyAzkichiBeganClient() {
                 <Text size="xs" c="dimmed" mb={4}>
                   {t("whereMyAzkichiBegan.copyFallbackLabel")}
                 </Text>
-                <textarea
-                  readOnly
-                  value={copyFallbackText}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                  rows={3}
-                />
+                <Textarea readOnly value={copyFallbackText} rows={3} />
               </div>
             ) : null}
           </Stack>
