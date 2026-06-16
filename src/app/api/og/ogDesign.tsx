@@ -26,7 +26,7 @@ export const normalizeOgText = (value: string) => value.replace(/～/g, "〜");
 
 const fetchGoogleFont = async (
   familyBase: string,
-  weight: 400 | 700,
+  weight: 400 | 700 | 900,
   text: string,
 ) => {
   const css = await fetch(
@@ -58,12 +58,15 @@ export const fetchOgFonts = async (textSeed: string) => {
     normalizeOgText(textSeed),
   ].join("");
 
-  const [regular, bold, fallbackRegular, fallbackBold] = await Promise.all([
-    fetchGoogleFont(googleFontBase, 400, seed),
-    fetchGoogleFont(googleFontBase, 700, seed),
-    fetchGoogleFont(googleFallbackFontBase, 400, seed),
-    fetchGoogleFont(googleFallbackFontBase, 700, seed),
-  ]);
+  const [regular, bold, black, fallbackRegular, fallbackBold, fallbackBlack] =
+    await Promise.all([
+      fetchGoogleFont(googleFontBase, 400, seed),
+      fetchGoogleFont(googleFontBase, 700, seed),
+      fetchGoogleFont(googleFontBase, 900, seed),
+      fetchGoogleFont(googleFallbackFontBase, 400, seed),
+      fetchGoogleFont(googleFallbackFontBase, 700, seed),
+      fetchGoogleFont(googleFallbackFontBase, 900, seed),
+    ]);
 
   return [
     {
@@ -79,6 +82,12 @@ export const fetchOgFonts = async (textSeed: string) => {
       weight: 700 as const,
     },
     {
+      name: ogFontFamily,
+      data: black,
+      style: "normal" as const,
+      weight: 900 as const,
+    },
+    {
       name: fallbackFontFamily,
       data: fallbackRegular,
       style: "normal" as const,
@@ -89,6 +98,12 @@ export const fetchOgFonts = async (textSeed: string) => {
       data: fallbackBold,
       style: "normal" as const,
       weight: 700 as const,
+    },
+    {
+      name: fallbackFontFamily,
+      data: fallbackBlack,
+      style: "normal" as const,
+      weight: 900 as const,
     },
   ];
 };

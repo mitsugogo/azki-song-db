@@ -1,16 +1,14 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
+import { FaCalendar } from "react-icons/fa6";
 import { Song } from "@/app/types/song";
 import { formatDate } from "@/app/lib/formatDate";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import {
-  BrandBadge,
   fetchOgFonts,
-  InfoPill,
   normalizeOgText,
   ogColors,
   ogImageHeaders,
-  OgShell,
 } from "../ogDesign";
 
 export const runtime = "edge";
@@ -44,145 +42,247 @@ export async function GET(req: NextRequest) {
     const title = `♪ ${songTitle} - ${artist}`;
     const subTitle = normalizeOgText(`${song.video_title}`);
     const dateText = formatDate(song.broadcast_at, hl);
-    const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;
-
+    const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/maxresdefault.jpg`;
+    const tagsText = song.tags.join(" / ");
     const fonts = await fetchOgFonts(
-      `${title}${subTitle}${song.tags.join("")}${dateText}`,
+      `${songTitle}${artist}${subTitle}${tagsText}${dateText}`,
     );
 
     return new ImageResponse(
-      <OgShell padding="46px 64px">
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: ogColors.background,
+          color: ogColors.ink,
+          fontFamily: '"Noto Sans JP", "Noto Sans", sans-serif',
+        }}
+      >
+        <img
+          src={thumbnailUrl}
+          alt="YouTube Thumbnail"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
         <div
           style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            backgroundColor: "rgba(39, 28, 36, 0.28)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 28,
+            display: "flex",
+            borderRadius: 34,
+            border: "2px solid rgba(255, 255, 255, 0.28)",
+          }}
+        />
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
             display: "flex",
             flexDirection: "column",
-            gap: 0,
-            position: "relative",
-          }}
-        >
-          <BrandBadge label="Song detail" />
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "stretch",
-            gap: 34,
-            position: "relative",
-            padding: 26,
-            borderRadius: 28,
-            backgroundColor: "rgba(255, 255, 255, 0.88)",
-            border: `1px solid ${ogColors.line}`,
-            boxShadow: "0 24px 80px rgba(190, 24, 93, 0.16)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              width: 384,
-              minWidth: 384,
-              height: 246,
-              borderRadius: 22,
-              padding: 7,
-              background:
-                "linear-gradient(135deg, rgba(190, 24, 93, 0.82), rgba(8, 145, 178, 0.78))",
-              boxShadow: "0 16px 34px rgba(49, 34, 58, 0.18)",
-            }}
-          >
-            <img
-              src={thumbnailUrl}
-              alt="YouTube Thumbnail"
-              style={{
-                objectFit: "cover",
-                width: "100%",
-                height: "100%",
-                borderRadius: 17,
-              }}
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              gap: 12,
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                fontSize: 44,
-                fontStyle: "normal",
-                fontWeight: 700,
-                color: ogColors.primaryDeep,
-                lineHeight: 1.18,
-                letterSpacing: 0,
-                lineClamp: '3 "..."',
-              }}
-            >
-              {songTitle}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 28,
-                fontStyle: "normal",
-                color: ogColors.primary,
-                fontWeight: 700,
-                lineHeight: 1.25,
-                lineClamp: '1 "..."',
-              }}
-            >
-              {artist}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 25,
-                fontStyle: "normal",
-                color: ogColors.ink,
-                lineHeight: 1.42,
-                lineClamp: '2 "..."',
-              }}
-            >
-              {subTitle}
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            gap: 24,
-            position: "relative",
+            padding: "42px 54px",
           }}
         >
-          <InfoPill>{song.tags.join(", ")}</InfoPill>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              color: ogColors.primary,
-              fontSize: 22,
-              fontWeight: 700,
-              padding: "10px 16px",
-              borderRadius: 14,
-              backgroundColor: "rgba(255, 255, 255, 0.84)",
-              border: `1px solid ${ogColors.line}`,
+              justifyContent: "space-between",
+              gap: 24,
             }}
           >
-            <div style={{ display: "flex", color: ogColors.cyan }}>Date</div>
-            <div style={{ display: "flex" }}>{dateText}</div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "12px 18px",
+                borderRadius: 18,
+                backgroundColor: "rgba(255, 250, 252, 0.9)",
+                border: `1px solid ${ogColors.line}`,
+                color: ogColors.primaryDeep,
+                fontSize: 22,
+                fontWeight: 700,
+              }}
+            >
+              <div style={{ display: "flex" }}>AZKi Song Database</div>
+              <div
+                style={{
+                  display: "flex",
+                  width: 1,
+                  height: 24,
+                  backgroundColor: ogColors.line,
+                }}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  color: ogColors.primary,
+                  fontSize: 18,
+                }}
+              >
+                Song detail
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                color: ogColors.primaryDeep,
+                fontSize: 22,
+                fontWeight: 700,
+                padding: "12px 18px",
+                borderRadius: 18,
+                backgroundColor: "rgba(255, 250, 252, 0.9)",
+                border: `1px solid ${ogColors.line}`,
+              }}
+            >
+              <div style={{ display: "flex", color: ogColors.primary }}>
+                <FaCalendar size={20} />
+              </div>
+              <div style={{ display: "flex" }}>{dateText}</div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 30,
+              padding: "36px 40px 34px",
+              borderRadius: 34,
+              backgroundColor: "rgba(255, 250, 252, 0.9)",
+              border: "2px solid rgba(255, 255, 255, 0.7)",
+              boxShadow: "0 18px 54px rgba(45, 36, 48, 0.18)",
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 26,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  width: 74,
+                  height: 8,
+                  borderRadius: 999,
+                  backgroundColor: ogColors.primary,
+                }}
+              />
+              <div
+                style={{
+                  display: "block",
+                  lineClamp: 3,
+                  overflow: "hidden",
+                  fontSize: 56,
+                  fontWeight: 900,
+                  color: ogColors.ink,
+                  lineHeight: 1.22,
+                  letterSpacing: -1,
+                  paddingBottom: 6,
+                }}
+              >
+                {songTitle}
+              </div>
+              <div
+                style={{
+                  display: "block",
+                  lineClamp: 1,
+                  overflow: "hidden",
+                  fontSize: 30,
+                  color: ogColors.primaryDeep,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  paddingBottom: 2,
+                }}
+              >
+                {artist}
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 24,
+                paddingTop: 10,
+                borderTop: `1px solid ${ogColors.line}`,
+              }}
+            >
+              <div
+                style={{
+                  display: tagsText ? "flex" : "none",
+                  flex: 1,
+                  minWidth: 0,
+                  maxWidth: "48%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "block",
+                    padding: "10px 16px",
+                    borderRadius: 14,
+                    backgroundColor: "rgba(255, 255, 255, 0.84)",
+                    border: `1px solid ${ogColors.line}`,
+                    color: ogColors.primary,
+                    fontSize: 18,
+                    fontWeight: 700,
+                    lineHeight: 1.35,
+                    maxWidth: "100%",
+                    lineClamp: 2,
+                  }}
+                >
+                  {tagsText}
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "block",
+                  lineClamp: 2,
+                  flex: 1,
+                  minWidth: 0,
+                  maxWidth: "48%",
+                  overflow: "hidden",
+                  textAlign: "right",
+                  color: ogColors.muted,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  lineHeight: 1.35,
+                  paddingBottom: 4,
+                }}
+              >
+                {subTitle}
+              </div>
+            </div>
           </div>
         </div>
-      </OgShell>,
+      </div>,
       {
-        width: parseInt(width),
-        height: parseInt(height),
+        width: Number.parseInt(width, 10),
+        height: Number.parseInt(height, 10),
         fonts,
         headers: ogImageHeaders,
       },
