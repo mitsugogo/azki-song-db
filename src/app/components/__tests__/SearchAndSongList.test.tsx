@@ -1,8 +1,20 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "../../types/song";
 import SearchAndSongList from "../SearchAndSongList";
+
+const playlistActionsMock = vi.hoisted(() => ({
+  playPlaylist: vi.fn(),
+  disablePlaylistMode: vi.fn(),
+  decodePlaylistFromUrl: vi.fn(() => null),
+}));
+
+const playlistsMock = vi.hoisted(() => ({
+  playlists: [] as any[],
+  savePlaylist: vi.fn(),
+  isDuplicate: vi.fn(() => false),
+}));
 
 vi.mock("@mantine/core", () => {
   const Button = ({ children, ...props }: any) => (
@@ -75,9 +87,11 @@ vi.mock("../../loading", () => ({
 vi.mock("../../hook/usePlaylists", () => ({
   __esModule: true,
   default: () => ({
-    playlists: [],
+    playlists: playlistsMock.playlists,
     isNowPlayingPlaylist: () => false,
     encodePlaylistUrlParam: () => "encoded-playlist",
+    savePlaylist: playlistsMock.savePlaylist,
+    isDuplicate: playlistsMock.isDuplicate,
   }),
 }));
 
@@ -91,9 +105,9 @@ vi.mock("../../hook/useFavorites", () => ({
 vi.mock("../../hook/usePlaylistActions", () => ({
   __esModule: true,
   usePlaylistActions: () => ({
-    playPlaylist: vi.fn(),
-    disablePlaylistMode: vi.fn(),
-    decodePlaylistFromUrl: () => null,
+    playPlaylist: playlistActionsMock.playPlaylist,
+    disablePlaylistMode: playlistActionsMock.disablePlaylistMode,
+    decodePlaylistFromUrl: playlistActionsMock.decodePlaylistFromUrl,
   }),
 }));
 
@@ -183,6 +197,9 @@ const baseProps = {
 describe("SearchAndSongList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    playlistsMock.playlists = [];
+    playlistsMock.isDuplicate.mockReturnValue(false);
+    playlistActionsMock.decodePlaylistFromUrl.mockReturnValue(null);
     window.history.replaceState({}, "", "/");
   });
 
@@ -289,6 +306,78 @@ describe("SearchAndSongList", () => {
       expect(
         screen.getAllByRole("button", { name: "sortDescending" })[0],
       ).toBeDisabled();
+    });
+  });
+
+  it("共有プレイリスト再生中は保存済みプレイリストがなくても解除できる", async () => {
+    playlistActionsMock.decodePlaylistFromUrl.mockReturnValue({
+      id: "shared-playlist",
+      name: "Shared Playlist",
+      songs: [
+        { videoId: oldCover.video_id, start: oldCover.start },
+        { videoId: newCover.video_id, start: newCover.start },
+      ],
+    });
+    window.history.replaceState({}, "", "/watch?playlist=encoded-playlist");
+
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[oldCover, newCover]}
+        searchTerm=""
+        showPlaylistSelector={true}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("nowPlayingPlaylist")).toBeInTheDocument();
+    });
+
+    const disableButton = screen.getByRole("button", {
+      name: "disablePlaylistMode",
+    });
+
+    expect(disableButton).toBeInTheDocument();
+    fireEvent.click(disableButton);
+
+    expect(playlistActionsMock.disablePlaylistMode).toHaveBeenCalledTimes(1);
+    expect(baseProps.setShowPlaylistSelector).toHaveBeenCalledWith(false);
+  });
+
+  it("共有プレイリストを自分のプレイリストにコピー保存できる", async () => {
+    playlistActionsMock.decodePlaylistFromUrl.mockReturnValue({
+      id: "shared-playlist",
+      name: "Shared Playlist",
+      songs: [
+        { videoId: oldCover.video_id, start: oldCover.start },
+        { videoId: newCover.video_id, start: newCover.start },
+      ],
+      author: "someone",
+    });
+    window.history.replaceState({}, "", "/watch?playlist=encoded-playlist");
+
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[oldCover, newCover]}
+        searchTerm=""
+        showPlaylistSelector={true}
+      />,
+    );
+
+    const saveCopyButton = await screen.findByRole("button", {
+      name: "savePlaylistCopy",
+    });
+
+    fireEvent.click(saveCopyButton);
+
+    expect(playlistsMock.savePlaylist).toHaveBeenCalledWith({
+      name: "Shared Playlist",
+      songs: [
+        { videoId: oldCover.video_id, start: oldCover.start },
+        { videoId: newCover.video_id, start: newCover.start },
+      ],
+      author: "someone",
     });
   });
 });

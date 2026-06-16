@@ -69,6 +69,9 @@
       "selectPlaylist": "再生するプレイリストを選択してください",
       "favorites": "お気に入り",
       "copyPlaylistUrl": "URLをコピーしてプレイリストをシェアできます",
+      "savePlaylistCopy": "自分のプレイリストにコピーを保存する",
+      "playlistCopyName": "{name} のコピー",
+      "playlistCopyNameWithIndex": "{name} のコピー {index}",
       "disablePlaylistMode": "プレイリスト再生モードを解除"
     },
     "songMode": {

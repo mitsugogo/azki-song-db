@@ -83,6 +83,22 @@ const sortSongsByBroadcastOrder = (
   });
 };
 
+const isSamePlaylistEntries = (
+  leftPlaylist: Playlist,
+  rightPlaylist: Playlist,
+) => {
+  return (
+    leftPlaylist.songs.length === rightPlaylist.songs.length &&
+    leftPlaylist.songs.every((entry, index) => {
+      const rightEntry = rightPlaylist.songs[index];
+      return (
+        entry.videoId === rightEntry?.videoId &&
+        String(entry.start) === String(rightEntry?.start)
+      );
+    })
+  );
+};
+
 export default function SearchAndSongList({
   songs,
   allSongs,
@@ -110,10 +126,19 @@ export default function SearchAndSongList({
   );
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
-  const { playlists, encodePlaylistUrlParam } = usePlaylists();
+  const { playlists, encodePlaylistUrlParam, savePlaylist, isDuplicate } =
+    usePlaylists();
   const { favorites } = useFavorites();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
+  const hasPlaylistChoices = playlists.length > 0 || favorites.length > 0;
+  const isCurrentPlaylistSaved = currentPlaylist
+    ? playlists.some((playlist) =>
+        isSamePlaylistEntries(playlist, currentPlaylist),
+      )
+    : false;
+  const canSaveCurrentPlaylistCopy =
+    currentPlaylist !== null && !isCurrentPlaylistSaved;
   const isPlaylistMode =
     currentPlaylist !== null ||
     (typeof window !== "undefined" &&
@@ -150,6 +175,36 @@ export default function SearchAndSongList({
     setShowPlaylistSelector(false);
     setCurrentPlaylist(null);
   }, [disablePlaylistMode]);
+
+  const handleSaveCurrentPlaylistCopy = useCallback(() => {
+    if (!currentPlaylist) return;
+
+    const baseName = currentPlaylist.name || t("playlist");
+    let copyName = baseName;
+
+    if (isDuplicate(copyName)) {
+      const copiedBaseName = t("playlistCopyName", { name: baseName });
+      copyName = copiedBaseName;
+
+      let copyIndex = 2;
+      while (isDuplicate(copyName)) {
+        copyName = t("playlistCopyNameWithIndex", {
+          name: baseName,
+          index: copyIndex,
+        });
+        copyIndex += 1;
+      }
+    }
+
+    savePlaylist({
+      name: copyName,
+      songs: currentPlaylist.songs.map((entry) => ({
+        videoId: entry.videoId,
+        start: String(entry.start),
+      })),
+      author: currentPlaylist.author,
+    });
+  }, [currentPlaylist, isDuplicate, savePlaylist, t]);
 
   const baseUrl = window.location.origin;
 
@@ -390,7 +445,7 @@ export default function SearchAndSongList({
         title={t("playlist")}
       >
         <Modal.Body>
-          {playlists.length === 0 && favorites.length === 0 ? (
+          {!currentPlaylist && !hasPlaylistChoices ? (
             <>
               <div>{t("createPlaylistLead")}</div>
               <Button
@@ -411,56 +466,124 @@ export default function SearchAndSongList({
                       count: currentPlaylist?.songs.length ?? 0,
                     })}
                   </div>
+                  {canSaveCurrentPlaylistCopy && (
+                    <Button
+                      className="mt-2"
+                      color="green"
+                      w={"100%"}
+                      onClick={handleSaveCurrentPlaylistCopy}
+                      leftSection={
+                        <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
+                      }
+                    >
+                      {t("savePlaylistCopy")}
+                    </Button>
+                  )}
                   <div className="my-3 border-b border-gray-300"></div>
                 </>
               )}
 
-              <div className="mb-2 mx-3 text-sm">{t("selectPlaylist")}</div>
-              <ScrollArea h={400}>
-                {/* お気に入りを最上段に表示 */}
-                {favorites.length > 0 &&
-                  (() => {
-                    const favoritesPlaylist: Playlist = {
-                      id: "system-favorites",
-                      name: t("favorites"),
-                      songs: favorites,
-                      createdAt: new Date().toISOString(),
-                      updatedAt: new Date().toISOString(),
-                    };
-                    const isCurrent =
-                      favoritesPlaylist.id === currentPlaylist?.id;
-                    return (
+              {hasPlaylistChoices ? (
+                <>
+                  <div className="mb-2 mx-3 text-sm">{t("selectPlaylist")}</div>
+                  <ScrollArea h={400}>
+                    {/* お気に入りを最上段に表示 */}
+                    {favorites.length > 0 &&
+                      (() => {
+                        const favoritesPlaylist: Playlist = {
+                          id: "system-favorites",
+                          name: t("favorites"),
+                          songs: favorites,
+                          createdAt: new Date().toISOString(),
+                          updatedAt: new Date().toISOString(),
+                        };
+                        const isCurrent =
+                          favoritesPlaylist.id === currentPlaylist?.id;
+                        return (
+                          <div
+                            key="system-favorites"
+                            className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
+                              isCurrent
+                                ? "bg-yellow-100 dark:bg-yellow-900/30"
+                                : "bg-yellow-50 dark:bg-yellow-900/10"
+                            } border-l-4 border-yellow-400`}
+                          >
+                            <div
+                              className="flex grow items-center rounded cursor-pointer"
+                              onClick={() => {
+                                handlePlayPlaylist(favoritesPlaylist);
+                              }}
+                            >
+                              {isCurrent ? (
+                                <MdPlayArrow className="mr-2 inline w-5 h-5" />
+                              ) : (
+                                <FaStar className="mr-2 inline w-5 h-5 text-yellow-500" />
+                              )}
+                              <span className="font-semibold">
+                                {favoritesPlaylist.name}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
+                                ({favorites.length}
+                                {t("songsUnit")})
+                              </span>
+                            </div>
+
+                            <CopyButton
+                              value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
+                                favoritesPlaylist,
+                              )}`}
+                              timeout={2000}
+                            >
+                              {({ copied, copy }) => (
+                                <Tooltip withArrow label={t("copyPlaylistUrl")}>
+                                  <Button
+                                    onClick={copy}
+                                    color={`${copied ? "green" : "gray"}`}
+                                    size="xs"
+                                  >
+                                    {copied ? (
+                                      <MdCheck className="inline w-5 h-5" />
+                                    ) : (
+                                      <MdContentCopy className="inline w-5 h-5" />
+                                    )}
+                                  </Button>
+                                </Tooltip>
+                              )}
+                            </CopyButton>
+                          </div>
+                        );
+                      })()}
+
+                    {playlists.map((playlist, index) => (
                       <div
-                        key="system-favorites"
+                        key={`${index}-${playlist.id}`}
                         className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
-                          isCurrent
-                            ? "bg-yellow-100 dark:bg-yellow-900/30"
-                            : "bg-yellow-50 dark:bg-yellow-900/10"
-                        } border-l-4 border-yellow-400`}
+                          playlist.id === currentPlaylist?.id
+                            ? "bg-green-100 dark:bg-gray-600"
+                            : ""
+                        }`}
                       >
                         <div
                           className="flex grow items-center rounded cursor-pointer"
                           onClick={() => {
-                            handlePlayPlaylist(favoritesPlaylist);
+                            handlePlayPlaylist(playlist);
                           }}
                         >
-                          {isCurrent ? (
+                          {playlist.id === currentPlaylist?.id ? (
                             <MdPlayArrow className="mr-2 inline w-5 h-5" />
                           ) : (
-                            <FaStar className="mr-2 inline w-5 h-5 text-yellow-500" />
+                            <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
                           )}
-                          <span className="font-semibold">
-                            {favoritesPlaylist.name}
-                          </span>
+                          <span className="font-semibold">{playlist.name}</span>
                           <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
-                            ({favorites.length}
+                            ({playlist.songs.length}
                             {t("songsUnit")})
                           </span>
                         </div>
 
                         <CopyButton
                           value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                            favoritesPlaylist,
+                            playlist,
                           )}`}
                           timeout={2000}
                         >
@@ -481,75 +604,37 @@ export default function SearchAndSongList({
                           )}
                         </CopyButton>
                       </div>
-                    );
-                  })()}
-
-                {playlists.map((playlist, index) => (
-                  <div
-                    key={`${index}-${playlist.id}`}
-                    className={`flex items-center gap-x-1 mb-1 py-2 px-1 ${
-                      playlist.id === currentPlaylist?.id
-                        ? "bg-green-100 dark:bg-gray-600"
-                        : ""
-                    }`}
+                    ))}
+                  </ScrollArea>
+                </>
+              ) : (
+                <>
+                  <div>{t("createPlaylistLead")}</div>
+                  <Button
+                    onClick={() => setOpenCreatePlaylistModal(true)}
+                    className="mt-2"
                   >
-                    <div
-                      className="flex grow items-center rounded cursor-pointer"
-                      onClick={() => {
-                        handlePlayPlaylist(playlist);
-                      }}
-                    >
-                      {playlist.id === currentPlaylist?.id ? (
-                        <MdPlayArrow className="mr-2 inline w-5 h-5" />
-                      ) : (
-                        <MdPlaylistPlay className="mr-2 inline w-5 h-5" />
-                      )}
-                      <span className="font-semibold">{playlist.name}</span>
-                      <span className="ml-2 text-xs text-gray-500 dark:text-light-gray-400">
-                        ({playlist.songs.length}
-                        {t("songsUnit")})
-                      </span>
-                    </div>
+                    <MdOutlineCreateNewFolder className="mr-2 inline w-5 h-5" />
+                    {t("createPlaylist")}
+                  </Button>
+                </>
+              )}
 
-                    <CopyButton
-                      value={`${baseUrl}?playlist=${encodePlaylistUrlParam(
-                        playlist,
-                      )}`}
-                      timeout={2000}
-                    >
-                      {({ copied, copy }) => (
-                        <Tooltip withArrow label={t("copyPlaylistUrl")}>
-                          <Button
-                            onClick={copy}
-                            color={`${copied ? "green" : "gray"}`}
-                            size="xs"
-                          >
-                            {copied ? (
-                              <MdCheck className="inline w-5 h-5" />
-                            ) : (
-                              <MdContentCopy className="inline w-5 h-5" />
-                            )}
-                          </Button>
-                        </Tooltip>
-                      )}
-                    </CopyButton>
-                  </div>
-                ))}
-              </ScrollArea>
-
-              <div className="border-t border-light-gray-300 dark:border-gray-600 mt-2">
-                <Button
-                  className="mt-2"
-                  color={"gray"}
-                  w={"100%"}
-                  onClick={handleDisablePlaylistMode}
-                  leftSection={
-                    <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
-                  }
-                >
-                  {t("disablePlaylistMode")}
-                </Button>
-              </div>
+              {isPlaylistMode && (
+                <div className="border-t border-light-gray-300 dark:border-gray-600 mt-2">
+                  <Button
+                    className="mt-2"
+                    color={"gray"}
+                    w={"100%"}
+                    onClick={handleDisablePlaylistMode}
+                    leftSection={
+                      <MdPlaylistRemove className="mr-2 inline w-5 h-5" />
+                    }
+                  >
+                    {t("disablePlaylistMode")}
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </Modal.Body>
