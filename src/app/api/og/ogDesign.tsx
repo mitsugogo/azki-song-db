@@ -58,21 +58,15 @@ export const fetchOgFonts = async (textSeed: string) => {
     normalizeOgText(textSeed),
   ].join("");
 
-  const [
-    regular,
-    bold,
-    black,
-    fallbackRegular,
-    fallbackBold,
-    fallbackBlack,
-  ] = await Promise.all([
-    fetchGoogleFont(googleFontBase, 400, seed),
-    fetchGoogleFont(googleFontBase, 700, seed),
-    fetchGoogleFont(googleFontBase, 900, seed),
-    fetchGoogleFont(googleFallbackFontBase, 400, seed),
-    fetchGoogleFont(googleFallbackFontBase, 700, seed),
-    fetchGoogleFont(googleFallbackFontBase, 900, seed),
-  ]);
+  const [regular, bold, black, fallbackRegular, fallbackBold, fallbackBlack] =
+    await Promise.all([
+      fetchGoogleFont(googleFontBase, 400, seed),
+      fetchGoogleFont(googleFontBase, 700, seed),
+      fetchGoogleFont(googleFontBase, 900, seed),
+      fetchGoogleFont(googleFallbackFontBase, 400, seed),
+      fetchGoogleFont(googleFallbackFontBase, 700, seed),
+      fetchGoogleFont(googleFallbackFontBase, 900, seed),
+    ]);
 
   return [
     {
