@@ -19,6 +19,7 @@ interface SongListProps {
   hideFutureSongs: boolean;
   changeCurrentSong: (song: Song) => void;
   isInOverlay?: boolean;
+  isPlaylistMode?: boolean;
   onSelectSong?: () => void;
 }
 
@@ -51,6 +52,7 @@ const SongsList = ({
   hideFutureSongs,
   changeCurrentSong,
   isInOverlay = false,
+  isPlaylistMode = false,
   onSelectSong,
 }: SongListProps) => {
   const getSongId = useCallback(
@@ -301,6 +303,7 @@ const SongsList = ({
   const overlayScrollStyle = isInOverlay
     ? { height: "calc(90vh - 88px)", contain: "strict" }
     : { contain: "strict" };
+  const showYearPager = songs.length > 15 && !isPlaylistMode;
 
   return (
     <>
@@ -372,7 +375,7 @@ const SongsList = ({
         </ScrollArea>
 
         {/* 右端の縦型ページャー */}
-        {songs.length > 15 && (
+        {showYearPager && (
           <div className="flex flex-col h-full justify-between pl-2 overflow-hidden">
             <ScrollArea type={"never"}>
               <YearPager

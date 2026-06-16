@@ -312,25 +312,27 @@ export default function SearchAndSongList({
               {t("songsUnit_w/o_en")}/{allSongs.length}
               {t("songsUnit_w/o_en")})
             </p>
-            <button
-              type="button"
-              onClick={() =>
-                setSortOrder((previousOrder) =>
-                  previousOrder === "asc" ? "desc" : "asc",
-                )
-              }
-              disabled={isPlaylistMode}
-              aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
-              className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
-                songs.length > 15 ? "mr-11" : ""
-              }`}
-            >
-              {sortOrder === "asc" ? (
-                <LuArrowUpWideNarrow className="h-4 w-4" />
-              ) : (
-                <LuArrowDownWideNarrow className="h-4 w-4" />
-              )}
-            </button>
+            {!isPlaylistMode && (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setSortOrder((previousOrder) =>
+                    previousOrder === "asc" ? "desc" : "asc",
+                  )
+                }
+                disabled={isPlaylistMode}
+                aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
+                className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground text-gray-300 dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
+                  songs.length > 15 && !isPlaylistMode ? "mr-11" : ""
+                }`}
+              >
+                {sortOrder === "asc" ? (
+                  <LuArrowUpWideNarrow className="h-4 w-4" />
+                ) : (
+                  <LuArrowDownWideNarrow className="h-4 w-4" />
+                )}
+              </Button>
+            )}
           </div>
 
           <div className={isTheaterMode ? "h-[60vh]" : "flex-1 min-h-0"}>
@@ -340,6 +342,7 @@ export default function SearchAndSongList({
                 currentSong={currentSong}
                 changeCurrentSong={changeCurrentSong as any}
                 hideFutureSongs={hideFutureSongs}
+                isPlaylistMode={isPlaylistMode}
               />
             </Suspense>
           </div>
@@ -430,6 +433,7 @@ export default function SearchAndSongList({
                     changeCurrentSong={changeCurrentSong as any}
                     hideFutureSongs={hideFutureSongs}
                     isInOverlay={true}
+                    isPlaylistMode={isPlaylistMode}
                     onSelectSong={() => setIsOverlayOpen?.(false)}
                   />
                 </Suspense>
