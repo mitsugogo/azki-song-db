@@ -110,14 +110,22 @@ export default function SearchAndSongList({
   );
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
 
-  const sortedSongs = useMemo(() => {
-    return sortSongsByBroadcastOrder(songs, sortOrder);
-  }, [songs, sortOrder]);
-
   const { playlists, encodePlaylistUrlParam } = usePlaylists();
   const { favorites } = useFavorites();
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist | null>(null);
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
+  const isPlaylistMode =
+    currentPlaylist !== null ||
+    (typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("playlist"));
+
+  const sortedSongs = useMemo(() => {
+    if (isPlaylistMode) {
+      return songs;
+    }
+
+    return sortSongsByBroadcastOrder(songs, sortOrder);
+  }, [isPlaylistMode, songs, sortOrder]);
 
   const { playPlaylist, disablePlaylistMode, decodePlaylistFromUrl } =
     usePlaylistActions({
@@ -256,6 +264,7 @@ export default function SearchAndSongList({
                   previousOrder === "asc" ? "desc" : "asc",
                 )
               }
+              disabled={isPlaylistMode}
               aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
               className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700 ${
                 songs.length > 15 ? "mr-11" : ""
@@ -345,6 +354,7 @@ export default function SearchAndSongList({
                     previousOrder === "asc" ? "desc" : "asc",
                   )
                 }
+                disabled={isPlaylistMode}
                 aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
                 className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
               >

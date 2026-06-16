@@ -183,6 +183,7 @@ const baseProps = {
 describe("SearchAndSongList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState({}, "", "/");
   });
 
   it("URL直打ちでオリ曲モードを開いたときは初期表示が古い順になる", async () => {
@@ -268,6 +269,26 @@ describe("SearchAndSongList", () => {
       expect(
         screen.getAllByRole("button", { name: "sortDescending" }).length,
       ).toBeGreaterThan(0);
+    });
+  });
+
+  it("プレイリスト再生中は受け取ったプレイリスト順を表示する", async () => {
+    window.history.replaceState({}, "", "/watch?playlist=encoded-playlist");
+
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[oldCover, newCover]}
+        searchTerm=""
+      />,
+    );
+
+    await waitFor(() => {
+      const orders = screen.getAllByTestId("songs-list-order");
+      expect(orders[0]).toHaveTextContent("Old Cover|New Cover");
+      expect(
+        screen.getAllByRole("button", { name: "sortDescending" })[0],
+      ).toBeDisabled();
     });
   });
 });
