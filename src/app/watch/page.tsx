@@ -4,11 +4,14 @@ import { getLocale, getTranslations } from "next-intl/server";
 import WatchPageClient from "./client";
 import { metadata } from "../layout";
 import { Song } from "../types/song";
-import { Playlist } from "../hook/usePlaylists";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import {
+  encodePlaylistOgPayload,
+  tryDecodePlaylistUrlParam,
+} from "@/app/lib/playlistUrl";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -43,6 +46,9 @@ export async function generateMetadata({
   let ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
   ogImageUrl.searchParams.set("subtitle", ogSubtitle);
+  let ogImageWidth = 1200;
+  let ogImageHeight = 630;
+  let twitterCard: "summary" | "summary_large_image" = "summary_large_image";
 
   const fetchSongs = async () => {
     const cookie = requestHeaders.get("cookie") ?? "";
@@ -186,44 +192,27 @@ export async function generateMetadata({
   }
 
   if (playlist) {
-    const decodePlaylistUrlParam = (param: string) => {
-      const binaryString = atob(param);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let index = 0; index < len; index += 1) {
-        bytes[index] = binaryString.charCodeAt(index);
-      }
-      const decoder = new TextDecoder();
-      const decoded = decoder.decode(bytes);
-      const compressedJson = JSON.parse(decoded);
-
-      const parsedPlaylist: Playlist = {
-        name: compressedJson.name,
-        songs: compressedJson.songs.map((entry: { v: string; s: number }) => ({
-          videoId: entry.v,
-          start: entry.s,
-        })),
-        createdAt: compressedJson?.createdAt,
-        updatedAt: compressedJson?.updatedAt,
-        author: compressedJson?.author,
-      };
-      return parsedPlaylist;
-    };
-
-    const decoded = decodePlaylistUrlParam(playlist);
-    title = tMeta("playlist.title", {
-      name: decoded.name,
-      siteName: siteConfig.siteName,
-    });
-    ogTitle = tMeta("playlist.ogTitle", { name: decoded.name });
-    ogSubtitle = tMeta("playlist.ogSubtitle", { count: decoded.songs.length });
-    ogImageUrl.searchParams.set("title", ogTitle);
-    ogImageUrl.searchParams.set("subtitle", ogSubtitle);
-    ogImageUrl.searchParams.set("titlecolor", "b81e8a");
+    const decoded = tryDecodePlaylistUrlParam(playlist);
+    if (decoded) {
+      title = tMeta("playlist.title", {
+        name: decoded.name,
+        siteName: siteConfig.siteName,
+      });
+      ogTitle = tMeta("playlist.ogTitle", { name: decoded.name });
+      ogSubtitle = tMeta("playlist.ogSubtitle", {
+        count: decoded.songs.length,
+      });
+      ogImageUrl = new URL("/api/og/playlist", baseUrl);
+      ogImageUrl.searchParams.set("p", encodePlaylistOgPayload(decoded));
+      ogImageUrl.searchParams.set("hl", locale);
+      ogImageWidth = 400;
+      ogImageHeight = 400;
+      twitterCard = "summary";
+    }
   }
 
-  ogImageUrl.searchParams.set("w", "1200");
-  ogImageUrl.searchParams.set("h", "630");
+  ogImageUrl.searchParams.set("w", String(ogImageWidth));
+  ogImageUrl.searchParams.set("h", String(ogImageHeight));
 
   const canonical = new URL(WATCH_PATH, baseUrl);
   if (q) canonical.searchParams.set("q", q);
@@ -247,14 +236,14 @@ export async function generateMetadata({
       images: [
         {
           url: `${ogImageUrl.pathname}${ogImageUrl.search}`,
-          width: 1200,
-          height: 630,
+          width: ogImageWidth,
+          height: ogImageHeight,
           alt: ogTitle,
         },
       ],
     },
     twitter: {
-      card: "summary_large_image",
+      card: twitterCard,
       title: ogTitle,
       description: ogSubtitle,
       images: [`${ogImageUrl.pathname}${ogImageUrl.search}`],

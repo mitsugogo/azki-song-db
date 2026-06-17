@@ -62,5 +62,9 @@ next-env.d.ts
 .github/copilot-instructions.md
 .github/for_copilot/*
 
+# agents
+.agents
+skills-lock.json
+
 public/build-info.json
 .flowbite-react/
