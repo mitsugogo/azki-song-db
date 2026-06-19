@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.4](https://github.com/mitsugogo/azki-song-db/compare/v2.7.3...v2.7.4) (2026-06-19)
+
+
+### Bug Fixes
+
+* TOPのイベント通知を一定期間非表示に ([a19c777](https://github.com/mitsugogo/azki-song-db/commit/a19c77779fd313c9038e6effe2b6997ef1d7da42))
+* プレイリスト再生モード中にページャーが機能しなくなるので非表示に ([df4bd7a](https://github.com/mitsugogo/azki-song-db/commit/df4bd7a4f237f5bbbc36ed72eac6dd437a76e548))
+
 ### [2.7.3](https://github.com/mitsugogo/azki-song-db/compare/v2.7.2...v2.7.3) (2026-06-16)
 
 ### [2.7.2](https://github.com/mitsugogo/azki-song-db/compare/v2.7.1...v2.7.2) (2026-06-15)
