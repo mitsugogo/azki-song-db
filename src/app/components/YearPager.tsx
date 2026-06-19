@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useCallback, useEffect } from "react";
 import { Song } from "../types/song";
 import { useHaptic } from "use-haptic";
 import { IoMusicalNotes } from "react-icons/io5";
-import { Badge } from "@mantine/core";
 
 interface PagerItem {
   year: number;

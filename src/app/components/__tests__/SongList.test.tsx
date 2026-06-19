@@ -118,7 +118,11 @@ const createSong = (overrides: Partial<Song> = {}): Song => ({
 
 const renderSongList = (
   songs: Song[],
-  options?: Partial<{ currentSong: Song | null; hideFuture: boolean }>,
+  options?: Partial<{
+    currentSong: Song | null;
+    hideFuture: boolean;
+    isPlaylistMode: boolean;
+  }>,
 ) => {
   // 仮想アイテムをsongsの長さに合わせて設定
   virtualItems = createVirtualItems(songs.length);
@@ -135,6 +139,7 @@ const renderSongList = (
       hideFutureSongs={options?.hideFuture ?? false}
       currentSong={options?.currentSong ?? null}
       changeCurrentSong={vi.fn()}
+      isPlaylistMode={options?.isPlaylistMode ?? false}
     />,
   );
 };
@@ -216,6 +221,20 @@ describe("SongsList", () => {
     );
 
     renderSongList(songs);
+
+    expect(screen.queryByTestId("year-pager")).toBeNull();
+  });
+
+  it("hides the YearPager in playlist mode", async () => {
+    const songs = Array.from({ length: 16 }, (_, index) =>
+      createSong({
+        title: `Song ${index}`,
+        video_id: `video-${index}`,
+        start: `00:${index.toString().padStart(2, "0")}`,
+      }),
+    );
+
+    renderSongList(songs, { isPlaylistMode: true });
 
     expect(screen.queryByTestId("year-pager")).toBeNull();
   });

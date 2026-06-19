@@ -1,20 +1,13 @@
 import { Song } from "../types/song";
 import { useLocalStorage } from "@mantine/hooks";
 import { useCallback } from "react";
+import type { Playlist } from "@/app/lib/playlistUrl";
+import {
+  decodePlaylistUrlParam as decodePlaylistUrlParamCore,
+  encodePlaylistUrlParam as encodePlaylistUrlParamCore,
+} from "@/app/lib/playlistUrl";
 
-export type Playlist = {
-  id?: string;
-  name: string;
-  songs: PlaylistEntry[];
-  createdAt?: string;
-  updatedAt?: string;
-  author?: string;
-};
-
-export type PlaylistEntry = {
-  videoId: string;
-  start: string;
-};
+export type { Playlist, PlaylistEntry } from "@/app/lib/playlistUrl";
 
 /**
  * プレイリストへの出し入れをするカスタムフック
@@ -155,52 +148,9 @@ const usePlaylists = () => {
     );
   };
 
-  const decodePlaylistUrlParam = useCallback((param: string) => {
-    const binaryString = atob(param);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    const decoder = new TextDecoder();
-    const decoded = decoder.decode(bytes);
-    const compressedJson = JSON.parse(decoded);
+  const decodePlaylistUrlParam = useCallback(decodePlaylistUrlParamCore, []);
 
-    const playlist: Playlist = {
-      id: compressedJson.id,
-      name: compressedJson.name,
-      songs: compressedJson.songs.map((entry: { v: string; s: number }) => ({
-        videoId: entry.v,
-        start: entry.s,
-      })),
-      createdAt: compressedJson?.createdAt,
-      updatedAt: compressedJson?.updatedAt,
-      author: compressedJson?.author,
-    };
-    return playlist;
-  }, []);
-
-  const encodePlaylistUrlParam = useCallback((playlist: Playlist) => {
-    const compressedSongs = playlist.songs.map((entry) => ({
-      v: entry.videoId,
-      s: entry.start,
-    }));
-    const compressedJson = {
-      id: playlist.id,
-      name: playlist.name,
-      songs: compressedSongs,
-      createdAt: playlist?.createdAt,
-      updatedAt: playlist?.updatedAt,
-      author: playlist?.author,
-    };
-    const jsonString = JSON.stringify(compressedJson);
-    const encoder = new TextEncoder();
-    const utf8Bytes = encoder.encode(jsonString);
-
-    const encoded = btoa(String.fromCharCode(...utf8Bytes));
-
-    return encoded;
-  }, []);
+  const encodePlaylistUrlParam = useCallback(encodePlaylistUrlParamCore, []);
 
   const isNowPlayingPlaylist = useCallback(() => {
     const url = new URL(window.location.href);

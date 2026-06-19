@@ -14,7 +14,11 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { useDisclosure, useIntersection } from "@mantine/hooks";
+import {
+  useDisclosure,
+  useIntersection,
+  useSessionStorage,
+} from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
 import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
@@ -81,6 +85,8 @@ const RECOMMENDED_SKELETON_COUNT = 20;
 // 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
 const HERO_BACKGROUND_RECENT_DAYS = 30;
 const HERO_BACKGROUND_RECENT_WEIGHT = 10;
+const ONGOING_EVENT_ALERT_DISMISSED_SESSION_KEY =
+  "ongoing-event-alert-dismissed-id";
 const ORIGINAL_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "original-songs") ??
   SONG_MODE_MENU_ITEMS[0];
@@ -255,7 +261,12 @@ export default function ClientTop() {
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
   const { items: eventItems, isLoading: isEventsLoading } = useEvents();
-  const [isShowOngoingEventsAlert, setOngoingEventsAlert] = useState(true);
+  const [dismissedOngoingEventAlertId, setDismissedOngoingEventAlertId] =
+    useSessionStorage<string | null>({
+      key: ONGOING_EVENT_ALERT_DISMISSED_SESSION_KEY,
+      defaultValue: null,
+      getInitialValueInEffect: false,
+    });
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
   const { ref: viewMilestonesRef, entry: viewMilestonesEntry } =
@@ -633,12 +644,16 @@ export default function ClientTop() {
   };
 
   useEffect(() => {
-    if (ongoingEvents.length === 0 || !isShowOngoingEventsAlert) {
+    if (ongoingEvents.length === 0) {
       return;
     }
 
     const event = ongoingEvents[0];
     const notificationId = `ongoing-event-${event.content}`;
+    if (dismissedOngoingEventAlertId === notificationId) {
+      return;
+    }
+
     if (ongoingEventNotificationIdRef.current === notificationId) {
       return;
     }
@@ -674,11 +689,16 @@ export default function ClientTop() {
       icon: <IoInformationSharp />,
       autoClose: false,
       onClose: () => {
-        setOngoingEventsAlert(false);
+        setDismissedOngoingEventAlertId(notificationId);
         ongoingEventNotificationIdRef.current = null;
       },
     });
-  }, [ongoingEvents, isShowOngoingEventsAlert, t]);
+  }, [
+    dismissedOngoingEventAlertId,
+    ongoingEvents,
+    setDismissedOngoingEventAlertId,
+    t,
+  ]);
 
   const handleHeroBackgroundReady = (event: YouTubeEvent) => {
     try {
