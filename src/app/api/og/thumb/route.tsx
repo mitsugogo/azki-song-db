@@ -61,25 +61,6 @@ export async function GET(req: NextRequest) {
           fontFamily: '"Noto Sans JP", "Noto Sans", sans-serif',
         }}
       >
-        <img
-          src={thumbnailUrl}
-          alt="YouTube Thumbnail"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            backgroundColor: "rgba(39, 28, 36, 0.28)",
-          }}
-        />
         <div
           style={{
             position: "absolute",
@@ -96,8 +77,9 @@ export async function GET(req: NextRequest) {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "42px 54px",
+            justifyContent: "flex-start",
+            gap: 58,
+            padding: "42px 54px 42px",
           }}
         >
           <div
@@ -178,47 +160,79 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                gap: 26,
+                gap: 30,
+                alignItems: "stretch",
               }}
             >
               <div
                 style={{
                   display: "flex",
-                  width: 74,
-                  height: 8,
-                  borderRadius: 999,
-                  backgroundColor: ogColors.primary,
-                }}
-              />
-              <div
-                style={{
-                  display: "block",
-                  lineClamp: 3,
+                  width: 320,
+                  minWidth: 320,
+                  height: 180,
+                  borderRadius: 20,
                   overflow: "hidden",
-                  fontSize: 56,
-                  fontWeight: 900,
-                  color: ogColors.ink,
-                  lineHeight: 1.22,
-                  letterSpacing: -1,
-                  paddingBottom: 6,
+                  border: `1px solid ${ogColors.line}`,
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
                 }}
               >
-                {songTitle}
+                <img
+                  src={thumbnailUrl}
+                  alt="YouTube Thumbnail"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
               </div>
               <div
                 style={{
-                  display: "block",
-                  lineClamp: 1,
-                  overflow: "hidden",
-                  fontSize: 30,
-                  color: ogColors.primaryDeep,
-                  fontWeight: 700,
-                  lineHeight: 1.25,
-                  paddingBottom: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 26,
+                  flex: 1,
+                  minWidth: 0,
                 }}
               >
-                {artist}
+                <div
+                  style={{
+                    display: "flex",
+                    width: 74,
+                    height: 8,
+                    borderRadius: 999,
+                    backgroundColor: ogColors.primary,
+                  }}
+                />
+                <div
+                  style={{
+                    display: "block",
+                    lineClamp: 2,
+                    overflow: "hidden",
+                    fontSize: 42,
+                    fontWeight: 900,
+                    color: ogColors.ink,
+                    lineHeight: 1.22,
+                    letterSpacing: -1,
+                    paddingBottom: 6,
+                  }}
+                >
+                  {songTitle}
+                </div>
+                <div
+                  style={{
+                    display: "block",
+                    lineClamp: 1,
+                    overflow: "hidden",
+                    fontSize: 30,
+                    color: ogColors.primaryDeep,
+                    fontWeight: 700,
+                    lineHeight: 1.25,
+                    paddingBottom: 2,
+                  }}
+                >
+                  {artist}
+                </div>
               </div>
             </div>
             <div

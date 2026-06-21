@@ -138,20 +138,6 @@ export const OgBackground = () => (
     <div
       style={{
         position: "absolute",
-        left: -80,
-        top: 38,
-        display: "flex",
-        width: 480,
-        height: 220,
-        borderRadius: 999,
-        background:
-          "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.34) 58%, transparent 78%)",
-        filter: "blur(18px)",
-      }}
-    />
-    <div
-      style={{
-        position: "absolute",
         right: -60,
         bottom: 14,
         display: "flex",
