@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.5](https://github.com/mitsugogo/azki-song-db/compare/v2.7.4...v2.7.5) (2026-06-21)
+
+
+### Bug Fixes
+
+* OGPの画像の可読性を修正 ([9fb062e](https://github.com/mitsugogo/azki-song-db/commit/9fb062e0373a26c47694aef05cc6feca1865ca97))
+
 ### [2.7.4](https://github.com/mitsugogo/azki-song-db/compare/v2.7.3...v2.7.4) (2026-06-19)
 
 
