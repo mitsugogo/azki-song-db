@@ -24,6 +24,29 @@ describe("collabUnits utilities", () => {
     expect(name).toBe("Star Flower");
   });
 
+  it("getCollabUnitName はバカタレサーカスを返す", () => {
+    const name = getCollabUnitName([
+      "尾丸ポルカ",
+      "不知火フレア",
+      "白上フブキ",
+      "角巻わため",
+    ]);
+    expect(name).toBe("バカタレサーカス");
+  });
+
+  it("getCollabUnitName は英語表記のバカタレサーカスを返す", () => {
+    const name = getCollabUnitName(
+      [
+        "Omaru Polka",
+        "Shiranui Flare",
+        "Shirakami Fubuki",
+        "Tsunomaki Watame",
+      ],
+      "en",
+    );
+    expect(name).toBe("BAKATARE CIRCUS");
+  });
+
   it("getCollabUnitName は不一致の場合 null を返す", () => {
     const name = getCollabUnitName(["AZKi", "存在しないメンバー"]);
     expect(name).toBeNull();
@@ -35,6 +58,21 @@ describe("collabUnits utilities", () => {
     // SorAZ の定義がある
     expect(members).toContain("ときのそら");
     expect(getCollabMembers("SORAZ")!).toEqual(getCollabMembers("soraz")!);
+  });
+
+  it("getCollabMembers はバカタレサーカスからメンバー配列を返す", () => {
+    expect(getCollabMembers("バカタレサーカス")).toEqual([
+      "角巻わため",
+      "白上フブキ",
+      "不知火フレア",
+      "尾丸ポルカ",
+    ]);
+    expect(getCollabMembers("bakatare circus", "en")).toEqual([
+      "Tsunomaki Watame",
+      "Shirakami Fubuki",
+      "Shiranui Flare",
+      "Omaru Polka",
+    ]);
   });
 
   it("getCollabMembers は該当なしで null を返す", () => {

@@ -213,6 +213,21 @@ export const collabUnits: CollabUnit[] = [
     },
   },
   {
+    members: ["角巻わため", "白上フブキ", "不知火フレア", "尾丸ポルカ"],
+    unitName: "バカタレサーカス",
+    hl: {
+      en: {
+        unitName: "BAKATARE CIRCUS",
+        members: [
+          "Tsunomaki Watame",
+          "Shirakami Fubuki",
+          "Shiranui Flare",
+          "Omaru Polka",
+        ],
+      },
+    },
+  },
+  {
     members: ["AZKi", "ロボ子さん", "水宮枢", "響咲リオナ"],
     unitName: "RoARiS",
     hl: {
