@@ -36,12 +36,7 @@ describe("collabUnits utilities", () => {
 
   it("getCollabUnitName は英語表記のバカタレサーカスを返す", () => {
     const name = getCollabUnitName(
-      [
-        "Omaru Polka",
-        "Shiranui Flare",
-        "Shirakami Fubuki",
-        "Tsunomaki Watame",
-      ],
+      ["Omaru Polka", "Shiranui Flare", "Shirakami Fubuki", "Tsunomaki Watame"],
       "en",
     );
     expect(name).toBe("BAKATARE CIRCUS");
