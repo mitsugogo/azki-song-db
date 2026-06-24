@@ -11,6 +11,8 @@ interface SearchNoResultsViewProps {
   searchValue: string[];
   setSearchValue: (values: string[]) => void;
   setSearchTerm: (term: string) => void;
+  azkiOnly: boolean;
+  setAzkiOnly: (value: boolean) => void;
 }
 
 const SearchNoResultsView = ({
@@ -19,6 +21,8 @@ const SearchNoResultsView = ({
   searchValue,
   setSearchValue,
   setSearchTerm,
+  azkiOnly,
+  setAzkiOnly,
 }: SearchNoResultsViewProps) => {
   const t = useTranslations("SearchBrowse");
   return (
@@ -40,6 +44,8 @@ const SearchNoResultsView = ({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
       />
     </div>
   );

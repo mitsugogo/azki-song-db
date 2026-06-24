@@ -22,6 +22,8 @@ interface SearchResultsViewProps {
   searchValue: string[];
   setSearchValue: (values: string[]) => void;
   setSearchTerm: (term: string) => void;
+  azkiOnly: boolean;
+  setAzkiOnly: (value: boolean) => void;
   cols: number;
   estimatedItemWidth: number;
   wrapperWidth: number | "100%";
@@ -39,6 +41,8 @@ const SearchResultsView = ({
   searchValue,
   setSearchValue,
   setSearchTerm,
+  azkiOnly,
+  setAzkiOnly,
   cols,
   estimatedItemWidth,
   wrapperWidth,
@@ -78,6 +82,8 @@ const SearchResultsView = ({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
         placeholder={tHeader("searchPlaceholder")}
       />
 
