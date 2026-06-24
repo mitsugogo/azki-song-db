@@ -1,6 +1,6 @@
-import { Button, Group } from "@mantine/core";
+import { Button, Group, Switch } from "@mantine/core";
 import { HiCog6Tooth } from "react-icons/hi2";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import SearchInput from "../../components/SearchInput";
 import SearchHelpPopover from "./SearchHelpPopover";
@@ -12,6 +12,8 @@ interface SearchQueryInputSectionProps {
   searchValue: string[];
   setSearchValue: (values: string[]) => void;
   setSearchTerm: (term: string) => void;
+  azkiOnly: boolean;
+  setAzkiOnly: (value: boolean) => void;
   placeholder?: string;
 }
 
@@ -20,10 +22,14 @@ const SearchQueryInputSection = ({
   searchValue,
   setSearchValue,
   setSearchTerm,
+  azkiOnly,
+  setAzkiOnly,
   placeholder,
 }: SearchQueryInputSectionProps) => {
   const t = useTranslations("AdvancedSearch");
+  const tSearchPage = useTranslations("SearchPage");
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const azkiOnlyLabelId = useId();
 
   const handleAdvancedSearchApply = (query: string) => {
     // クエリをタグ配列に分解して設定
@@ -36,6 +42,22 @@ const SearchQueryInputSection = ({
     <div className="mb-4 px-3">
       <Group mb="sm" justify="flex-end">
         <SearchHelpPopover />
+        <Group gap={6} wrap="nowrap">
+          <span
+            id={azkiOnlyLabelId}
+            className="text-xs font-medium text-gray-700 dark:text-gray-200"
+          >
+            {tSearchPage("azkiOnly")}
+          </span>
+          <Switch
+            size="sm"
+            color="pink"
+            withThumbIndicator={false}
+            checked={azkiOnly}
+            aria-labelledby={azkiOnlyLabelId}
+            onChange={(event) => setAzkiOnly(event.currentTarget.checked)}
+          />
+        </Group>
         <Button
           variant="subtle"
           size="xs"

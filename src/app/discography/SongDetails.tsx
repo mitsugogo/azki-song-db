@@ -328,9 +328,13 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                     </Table.Td>
                     <Table.Td>
                       <Link
-                        href={`/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
-                          s.slugv2 ?? encodeURIComponent(s.video_id)
-                        }`}
+                        href={
+                          s.album
+                            ? `/discography/album/${encodeURIComponent(slugify(s.album))}`
+                            : `/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
+                                s.slugv2 ?? encodeURIComponent(s.video_id)
+                              }`
+                        }
                         className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
                       >
                         {s.title}

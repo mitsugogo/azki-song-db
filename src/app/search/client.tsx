@@ -24,6 +24,7 @@ import { isCoverSong, isOriginalSong } from "../config/filters";
 import { useLocale, useTranslations } from "next-intl";
 import { Locale } from "@/app/types/locale";
 import { useSearchParams } from "next/navigation";
+import { isSungByAzki } from "./utils/azkiOnly";
 
 interface TagCategory {
   label: string;
@@ -72,10 +73,15 @@ const SearchPageClient = () => {
   const [filterMode, setFilterMode] =
     useState<FilterMode>(getInitialFilterMode);
   const [sortMode, setSortMode] = useState<SearchBrowseSortMode>("count-desc");
+  const [azkiOnly, setAzkiOnly] = useState(false);
   const searchParams = useSearchParams();
+  const searchableSongs = useMemo(
+    () => (azkiOnly ? allSongs.filter(isSungByAzki) : allSongs),
+    [allSongs, azkiOnly],
+  );
 
   const { songs, searchTerm, searchTokens, setSearchTerm } = useSearch(
-    allSongs,
+    searchableSongs,
     {
       syncUrl: true,
       urlUpdateMode: "push",
@@ -204,7 +210,7 @@ const SearchPageClient = () => {
   const colCount = useMemo(() => getGridCols(windowWidth), [windowWidth]);
   const categorySongs = useMemo(() => {
     return tagCategories.map((category) => {
-      const filtered = category.filter(allSongs);
+      const filtered = category.filter(searchableSongs);
       filtered.sort((a, b) => {
         return (
           new Date(b.broadcast_at).getTime() -
@@ -217,7 +223,7 @@ const SearchPageClient = () => {
         totalCount: filtered.length,
       };
     });
-  }, [allSongs, tagCategories]);
+  }, [searchableSongs, tagCategories]);
 
   const hasSearchTerm = searchTerm.trim().length > 0;
   const filteredSongs = useMemo(
@@ -227,7 +233,7 @@ const SearchPageClient = () => {
 
   const locale = useLocale();
   const filterModeData = useSearchFilterModeData(
-    allSongs,
+    searchableSongs,
     filterMode,
     sortMode,
     locale as Locale,
@@ -321,10 +327,12 @@ const SearchPageClient = () => {
         searchTerm={searchTerm}
         searchTokens={searchTokens}
         filteredSongs={filteredSongs}
-        allSongs={allSongs}
+        allSongs={searchableSongs}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
         cols={cols}
         estimatedItemWidth={estimatedItemWidth}
         wrapperWidth={wrapperWidth}
@@ -338,11 +346,13 @@ const SearchPageClient = () => {
   if (hasSearchTerm && filteredSongs.length === 0) {
     return (
       <SearchNoResultsView
-        allSongs={allSongs}
+        allSongs={searchableSongs}
         searchTokens={searchTokens}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
       />
     );
   }
@@ -350,10 +360,12 @@ const SearchPageClient = () => {
   return (
     <>
       <SearchBrowseView
-        allSongs={allSongs}
+        allSongs={searchableSongs}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
         filterMode={filterMode}
         setFilterMode={setFilterMode}
         sortMode={sortMode}

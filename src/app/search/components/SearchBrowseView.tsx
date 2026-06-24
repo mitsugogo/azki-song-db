@@ -33,6 +33,8 @@ interface SearchBrowseViewProps {
   searchValue: string[];
   setSearchValue: (values: string[]) => void;
   setSearchTerm: (term: string) => void;
+  azkiOnly: boolean;
+  setAzkiOnly: (value: boolean) => void;
   filterMode: FilterMode;
   setFilterMode: (mode: FilterMode) => void;
   sortMode: SearchBrowseSortMode;
@@ -46,6 +48,8 @@ const SearchBrowseView = ({
   searchValue,
   setSearchValue,
   setSearchTerm,
+  azkiOnly,
+  setAzkiOnly,
   filterMode,
   setFilterMode,
   sortMode,
@@ -86,6 +90,8 @@ const SearchBrowseView = ({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         setSearchTerm={setSearchTerm}
+        azkiOnly={azkiOnly}
+        setAzkiOnly={setAzkiOnly}
         placeholder={tHeader("searchPlaceholder")}
       />
 
