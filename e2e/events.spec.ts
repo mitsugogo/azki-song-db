@@ -23,7 +23,7 @@ test.describe("Home events", () => {
         body: JSON.stringify([
           {
             start_at: eventDate(-1),
-            end_at: eventDate(1),
+            end_at: eventDate(0),
             content: "進行中イベント",
             note: "開催中の表示確認",
             url: "https://example.com/ongoing",
@@ -78,6 +78,9 @@ test.describe("Home events", () => {
     await expect(eventsBox.getByText("次のイベント")).toBeVisible();
     await expect(eventsBox.getByText("単日イベント")).toBeVisible();
     await expect(eventsBox.getByText("開催中", { exact: true })).toBeVisible();
+    await expect(eventsBox.getByText("あと0日", { exact: true })).toHaveCount(
+      0,
+    );
     await expect(eventsBox.getByText("あと3日", { exact: true })).toBeVisible();
     await expect(eventsBox.getByText(/あと\d+日/).first()).toBeVisible();
     await expect(eventsBox.getByText("4件目のイベント")).toHaveCount(0);

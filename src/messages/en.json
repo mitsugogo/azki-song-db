@@ -166,6 +166,8 @@
     "heroLine2": "",
     "heroLine2_short": "Virtual DiVA AZKi",
     "description": "An unofficial song database collecting AZKi's original songs, collabs & covers, and setlists sung on livestreams.",
+    "birthdayMessage": "Happy Birthday AZKi!",
+    "birthdayAriaLabel": "Happy Birthday AZKi",
     "heroWatchFromBeginning": "Play from the beginning in the app player",
     "searchButton": "Search",
     "searching": "Searching...",

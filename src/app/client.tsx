@@ -2,7 +2,14 @@
 
 import { Link, useRouter } from "../i18n/navigation";
 import { Zen_Maru_Gothic } from "next/font/google";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   Avatar,
   AvatarGroup,
@@ -42,6 +49,7 @@ import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
 import { formatDate } from "./lib/formatDate";
 import { showAppNotification } from "./lib/notifications";
+import { isAzkiBirthday } from "./lib/birthday";
 import {
   buildMilestoneSearchHref,
   computeNextIsoForAnniversary,
@@ -99,6 +107,58 @@ const COLLABORATION_SONG_MODE_ITEM =
 const KARAOKE_SONG_MODE_ITEM =
   SONG_MODE_MENU_ITEMS.find((item) => item.mode === "tag:歌枠") ??
   SONG_MODE_MENU_ITEMS[0];
+const BIRTHDAY_BALLOONS = [
+  { x: "8%", delay: "0s", duration: "13s", color: "#f472b6", size: "2.9rem" },
+  {
+    x: "18%",
+    delay: "-5s",
+    duration: "15s",
+    color: "#38bdf8",
+    size: "2.4rem",
+  },
+  {
+    x: "29%",
+    delay: "-9s",
+    duration: "14s",
+    color: "#facc15",
+    size: "2.7rem",
+  },
+  {
+    x: "42%",
+    delay: "-2s",
+    duration: "16s",
+    color: "#a78bfa",
+    size: "2.2rem",
+  },
+  {
+    x: "55%",
+    delay: "-7s",
+    duration: "13.5s",
+    color: "#34d399",
+    size: "2.8rem",
+  },
+  {
+    x: "68%",
+    delay: "-3.5s",
+    duration: "15.5s",
+    color: "#fb7185",
+    size: "2.5rem",
+  },
+  {
+    x: "80%",
+    delay: "-10s",
+    duration: "14.5s",
+    color: "#60a5fa",
+    size: "2.6rem",
+  },
+  {
+    x: "91%",
+    delay: "-6s",
+    duration: "16.5s",
+    color: "#f97316",
+    size: "2.3rem",
+  },
+] as const;
 
 type BuildInfo = {
   buildDate?: string;
@@ -285,6 +345,7 @@ export default function ClientTop() {
     useState(false);
   const [isHeroBackgroundUnavailable, setHeroBackgroundUnavailable] =
     useState(false);
+  const [showBirthdayHero, setShowBirthdayHero] = useState(false);
   const ongoingEventNotificationIdRef = useRef<string | null>(null);
   const [buildDate, setBuildDate] = useState("N/A");
   const [appVersion, setAppVersion] = useState("N/A");
@@ -307,6 +368,10 @@ export default function ClientTop() {
       setShouldLoadViewStatistics(true);
     }
   }, [viewMilestonesEntry?.isIntersecting]);
+
+  useEffect(() => {
+    setShowBirthdayHero(isAzkiBirthday());
+  }, []);
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -800,6 +865,30 @@ export default function ClientTop() {
               }}
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-56 bg-linear-to-b from-transparent via-[#fffafc]/70 to-transparent dark:via-[#111827]/70 sm:h-72" />
+            {showBirthdayHero ? (
+              <div
+                className="birthday-balloons pointer-events-none absolute inset-0 z-[2] overflow-hidden"
+                aria-hidden="true"
+              >
+                {BIRTHDAY_BALLOONS.map((balloon, index) => (
+                  <span
+                    key={`${balloon.x}-${index}`}
+                    className="birthday-balloon"
+                    style={
+                      {
+                        "--balloon-x": balloon.x,
+                        "--balloon-delay": balloon.delay,
+                        "--balloon-duration": balloon.duration,
+                        "--balloon-color": balloon.color,
+                        "--balloon-size": balloon.size,
+                      } as CSSProperties
+                    }
+                  >
+                    <span className="birthday-balloon__shine" />
+                  </span>
+                ))}
+              </div>
+            ) : null}
             {heroBackgroundSong &&
             heroBackgroundVideoUrl &&
             heroBackgroundWatchHref ? (
@@ -857,6 +946,27 @@ export default function ClientTop() {
                     {t("heroLine2_short")}
                   </span>
                 </h1>
+                {showBirthdayHero ? (
+                  <div
+                    className="relative mt-4 inline-flex max-w-[min(100%,36rem)] items-center justify-center overflow-hidden rounded-full border border-pink-200/70 bg-white/78 px-4 py-2 text-sm font-bold text-primary shadow-[0_14px_40px_rgba(190,24,93,0.18)] backdrop-blur dark:border-pink-200/20 dark:bg-gray-900/72 dark:text-pink-100 sm:px-5 sm:text-base"
+                    role="status"
+                    aria-label={t("birthdayAriaLabel")}
+                  >
+                    <span
+                      className="pointer-events-none absolute left-4 top-1 size-1.5 rounded-full bg-pink-300/80 motion-safe:animate-ping dark:bg-pink-200/70"
+                      aria-hidden="true"
+                    />
+                    <span
+                      className="pointer-events-none absolute right-6 bottom-1.5 size-1 rounded-full bg-primary/70 motion-safe:animate-pulse dark:bg-pink-100/80"
+                      aria-hidden="true"
+                    />
+                    <LuSparkles
+                      className="mr-2 shrink-0 text-base text-primary/80 dark:text-pink-200"
+                      aria-hidden="true"
+                    />
+                    <span className="text-balance">{t("birthdayMessage")}</span>
+                  </div>
+                ) : null}
                 <p className="mt-4 max-w-2xl text-sm font-medium text-gray-800/80 drop-shadow-[0_1px_12px_rgba(255,255,255,0.85)] dark:text-gray-100/80 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] sm:text-base">
                   {t("description")}
                 </p>
@@ -1281,6 +1391,9 @@ export default function ClientTop() {
                             ? event.end_at || event.start_at
                             : event.start_at,
                         );
+                        const showDaysUntilEvent =
+                          daysUntilEvent !== null &&
+                          (!active || daysUntilEvent > 0);
                         return (
                           <div
                             key={`${event.start_at}-${event.content}-${index}`}
@@ -1299,7 +1412,7 @@ export default function ClientTop() {
                                       >
                                         {t("eventOngoing")}
                                       </Badge>
-                                      {daysUntilEvent !== null ? (
+                                      {showDaysUntilEvent ? (
                                         <Badge
                                           color="pink"
                                           size="md"
@@ -1312,7 +1425,7 @@ export default function ClientTop() {
                                         </Badge>
                                       ) : null}
                                     </>
-                                  ) : daysUntilEvent !== null ? (
+                                  ) : showDaysUntilEvent ? (
                                     <Badge
                                       color="pink"
                                       size="md"
