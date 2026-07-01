@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/mitsugogo/azki-song-db/compare/v2.9.0...v2.9.1) (2026-07-01)
+
+
+### Bug Fixes
+
+* Didscography選択バグ修正 ([a9294cf](https://github.com/mitsugogo/azki-song-db/commit/a9294cf865897a1d2e666e79709a849a2b84dbd9))
+
 ## [2.9.0](https://github.com/mitsugogo/azki-song-db/compare/v2.8.0...v2.9.0) (2026-07-01)
 
 
