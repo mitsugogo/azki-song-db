@@ -69,6 +69,7 @@ export default function DiscographyClient({
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
+    tabCounts,
   } = useDiscographyData(groupByAlbum, onlyOriginalMV);
 
   useEffect(() => {
@@ -221,7 +222,7 @@ export default function DiscographyClient({
               ref={tabRefCallbacks["0"]}
               className={discographyTabClass}
             >
-              {t("tabs.all", { count: allSongCountsByReleaseDate.length })}
+              {t("tabs.all", { count: tabCounts.all })}
             </Tabs.Tab>
             <Tabs.Tab
               value="1"
@@ -229,7 +230,7 @@ export default function DiscographyClient({
               className={discographyTabClass}
             >
               {t("tabs.originals", {
-                count: originalSongCountsByReleaseDate.length,
+                count: tabCounts.originals,
               })}
             </Tabs.Tab>
             <Tabs.Tab
@@ -237,14 +238,14 @@ export default function DiscographyClient({
               ref={tabRefCallbacks["2"]}
               className={discographyTabClass}
             >
-              {t("tabs.unit", { count: unitSongCountsByReleaseDate.length })}
+              {t("tabs.unit", { count: tabCounts.unit })}
             </Tabs.Tab>
             <Tabs.Tab
               value="3"
               ref={tabRefCallbacks["3"]}
               className={discographyTabClass}
             >
-              {t("tabs.covers", { count: coverSongCountsByReleaseDate.length })}
+              {t("tabs.covers", { count: tabCounts.covers })}
             </Tabs.Tab>
             <FloatingIndicator
               target={tabRefs[String(indicatorTab)]}

@@ -14,6 +14,7 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { normalizeSongTitle } from "./utils/normalizeSongTitle";
+import { groupReleaseVariants } from "./utils/releaseVariants";
 
 const SongItem = ({
   song,
@@ -53,6 +54,17 @@ const SongItem = ({
   };
 
   const handleClick = () => {
+    const releaseGroups = groupReleaseVariants(song.videos ?? []);
+    const hasSingleReleaseVariantGroup =
+      releaseGroups.length === 1 && releaseGroups[0].variants.length > 1;
+    if (hasSingleReleaseVariantGroup) {
+      const releaseSlug = slugify(releaseGroups[0].representative.title);
+      if (releaseSlug) {
+        router.push(`/discography/album/${encodeURIComponent(releaseSlug)}`);
+        return;
+      }
+    }
+
     if (song.isAlbum && groupByAlbum && albumSlug) {
       router.push(`/discography/album/${encodeURIComponent(albumSlug)}`);
       return;

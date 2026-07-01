@@ -65,9 +65,12 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
     setLoading(false);
   };
 
+  // sddefault が含まれる場合はスケールさせる
+  const isSdDefault = imageUrl.includes("sddefault");
+
   return (
     <div
-      className={`relative flex w-full h-full items-center justify-center aspect-video ${
+      className={`relative flex w-full h-full items-center justify-center aspect-video bg-black ${
         outcontainerClassName || ""
       } ${className || ""}`}
     >
@@ -76,21 +79,30 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
         className="absolute inset-0 h-full w-full"
         radius={0}
       >
-        <img
-          key={videoId}
-          ref={imageRef}
-          src={imageUrl}
-          alt={alt}
-          className={`absolute inset-0 h-full w-full object-cover outfit-image ${imageClassName || ""}`}
-          loading="lazy"
-          decoding="async"
-          onLoad={handleOnLoad}
-          onError={handleError}
-          style={{
-            opacity: loading ? 0 : 1,
-            transition: "opacity 0.5s",
-          }}
-        />
+        <picture className="absolute inset-0 h-full w-full block">
+          {imageUrl && imageUrl.endsWith(".webp") && (
+            <source srcSet={imageUrl} type="image/webp" />
+          )}
+          <img
+            key={videoId}
+            ref={imageRef}
+            src={imageUrl
+              .replace(".webp", ".jpg")
+              .replace("i.ytimg.com/vi_webp/", "img.youtube.com/vi/")}
+            alt={alt}
+            className={`absolute inset-0 h-full w-full object-cover object-center outfit-image${
+              isSdDefault ? "scale-[1.33] object-left" : ""
+            } ${imageClassName || ""}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={handleOnLoad}
+            onError={handleError}
+            style={{
+              opacity: loading ? 0 : 1,
+              transition: "opacity 0.5s",
+            }}
+          />
+        </picture>
       </Skeleton>
     </div>
   );

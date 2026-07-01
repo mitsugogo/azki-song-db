@@ -6,12 +6,14 @@ import slugify from "../../../lib/slugify";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import AlbumClient from "../../[category]/AlbumClient";
+import { groupReleaseVariants } from "../../utils/releaseVariants";
 
 type AlbumEntry = {
   album: string;
   slug: string;
   songs: Song[];
   representativeSong: Song;
+  releaseGroupKey?: string;
 };
 
 function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
@@ -37,12 +39,41 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
     const resolvedSlug = count === 0 ? baseSlug : `${baseSlug}-${count + 1}`;
     const albumSongs = grouped.get(album) ?? [];
     if (albumSongs.length === 0) continue;
+    const releaseGroups = groupReleaseVariants(albumSongs);
+    const representativeSong =
+      releaseGroups[0]?.representative ?? albumSongs[0];
 
     entries.push({
       album,
       slug: resolvedSlug,
-      songs: albumSongs,
-      representativeSong: albumSongs[0],
+      songs: releaseGroups.map((group) => group.representative),
+      representativeSong,
+    });
+  }
+
+  const standaloneReleaseGroups = groupReleaseVariants(songs).filter(
+    (group) =>
+      group.variants.length > 1 &&
+      group.variants.some((song) => !song.album?.trim()),
+  );
+
+  for (const group of standaloneReleaseGroups.sort((a, b) =>
+    a.representative.title.localeCompare(b.representative.title, "ja"),
+  )) {
+    const title = group.representative.title?.trim();
+    if (!title) continue;
+
+    const baseSlug = slugify(title) || "album";
+    const count = slugCounts.get(baseSlug) ?? 0;
+    slugCounts.set(baseSlug, count + 1);
+    const resolvedSlug = count === 0 ? baseSlug : `${baseSlug}-${count + 1}`;
+
+    entries.push({
+      album: title,
+      slug: resolvedSlug,
+      songs: [group.representative],
+      representativeSong: group.representative,
+      releaseGroupKey: group.key,
     });
   }
 
@@ -178,6 +209,7 @@ export default async function DiscographyAlbumPage({
     <AlbumClient
       albumName={matched.album}
       coverVideoId={matched.representativeSong.video_id}
+      releaseGroupKey={matched.releaseGroupKey}
     />
   );
 }
