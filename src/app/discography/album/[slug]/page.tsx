@@ -13,6 +13,7 @@ type AlbumEntry = {
   slug: string;
   songs: Song[];
   representativeSong: Song;
+  releaseGroupKey?: string;
 };
 
 function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
@@ -47,6 +48,32 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
       slug: resolvedSlug,
       songs: releaseGroups.map((group) => group.representative),
       representativeSong,
+    });
+  }
+
+  const standaloneReleaseGroups = groupReleaseVariants(songs).filter(
+    (group) =>
+      group.variants.length > 1 &&
+      group.variants.some((song) => !song.album?.trim()),
+  );
+
+  for (const group of standaloneReleaseGroups.sort((a, b) =>
+    a.representative.title.localeCompare(b.representative.title, "ja"),
+  )) {
+    const title = group.representative.title?.trim();
+    if (!title) continue;
+
+    const baseSlug = slugify(title) || "album";
+    const count = slugCounts.get(baseSlug) ?? 0;
+    slugCounts.set(baseSlug, count + 1);
+    const resolvedSlug = count === 0 ? baseSlug : `${baseSlug}-${count + 1}`;
+
+    entries.push({
+      album: title,
+      slug: resolvedSlug,
+      songs: [group.representative],
+      representativeSong: group.representative,
+      releaseGroupKey: group.key,
     });
   }
 
@@ -182,6 +209,7 @@ export default async function DiscographyAlbumPage({
     <AlbumClient
       albumName={matched.album}
       coverVideoId={matched.representativeSong.video_id}
+      releaseGroupKey={matched.releaseGroupKey}
     />
   );
 }

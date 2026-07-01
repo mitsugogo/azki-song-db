@@ -23,6 +23,7 @@ import {
   findReleaseVariantByInstanceKey,
   getSongInstanceKey,
   groupReleaseVariants,
+  matchesReleaseVariantGroupKey,
   type ReleaseVariantGroup,
 } from "../utils/releaseVariants";
 
@@ -158,9 +159,11 @@ function AlbumSongRow({
 export default function AlbumClient({
   albumName,
   coverVideoId,
+  releaseGroupKey,
 }: {
   albumName: string;
   coverVideoId?: string;
+  releaseGroupKey?: string;
 }) {
   const { allSongs, isLoading } = useSongs();
   const t = useTranslations("Discography");
@@ -171,7 +174,11 @@ export default function AlbumClient({
   const tWatch = useTranslations("Watch.nowPlayingSongInfo");
   const songs: Song[] = allSongs ?? [];
   const rawAlbumSongs = songs
-    .filter((song) => song.album && song.video_id && song.album === albumName)
+    .filter((song) =>
+      releaseGroupKey
+        ? song.video_id && matchesReleaseVariantGroupKey(song, releaseGroupKey)
+        : song.album && song.video_id && song.album === albumName,
+    )
     .sort((left, right) => {
       const leftOrder = left.source_order ?? Number.MAX_SAFE_INTEGER;
       const rightOrder = right.source_order ?? Number.MAX_SAFE_INTEGER;

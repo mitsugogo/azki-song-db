@@ -3,6 +3,7 @@ import type { Song } from "../../../types/song";
 import {
   chooseReleaseRepresentative,
   getReleaseVariantKind,
+  getSelectableReleaseVariants,
   groupReleaseVariants,
   hasMultipleReleaseVariants,
 } from "../releaseVariants";
@@ -119,6 +120,94 @@ describe("releaseVariants", () => {
 
     expect(groups).toHaveLength(2);
     expect(groups.every((group) => group.variants)).toBe(true);
+  });
+
+  it("アルバムがない同一曲・同一アーティストの複数MVを1グループにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        title: "from A to Z",
+        artist: "AZKi",
+        album: "",
+        video_id: "main-mv",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        title: "from A to Z",
+        artist: "AZKi",
+        album: "",
+        video_id: "early-mv",
+        tags: ["オリ曲MV"],
+        source_order: 1,
+      }),
+    ]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].variants.map((song) => song.video_id)).toEqual([
+      "early-mv",
+      "main-mv",
+    ]);
+    expect(groups[0].representative.video_id).toBe("early-mv");
+    expect(hasMultipleReleaseVariants(groups[0].variants)).toBe(true);
+  });
+
+  it("複数MVは切替対象として両方残す", () => {
+    const selectableVariants = getSelectableReleaseVariants([
+      baseSong({
+        video_id: "mv-2",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        video_id: "mv-1",
+        tags: ["オリ曲MV"],
+        source_order: 1,
+      }),
+    ]);
+
+    expect(selectableVariants.map((song) => song.video_id)).toEqual([
+      "mv-1",
+      "mv-2",
+    ]);
+    expect(hasMultipleReleaseVariants(selectableVariants)).toBe(true);
+  });
+
+  it("アニAZはアルバムが違っても同一曲・同一アーティストの元MVと1グループにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "",
+        video_id: "animated-mv",
+        tags: ["オリ曲MV", "アニAZ"],
+        source_order: 1,
+      }),
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "Re:Creating world",
+        video_id: "original-mv",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "",
+        video_id: "live-performance",
+        tags: ["歌枠"],
+        source_order: 3,
+      }),
+    ]);
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0].variants.map((song) => song.video_id)).toEqual([
+      "original-mv",
+      "animated-mv",
+    ]);
+    expect(groups[0].representative.video_id).toBe("original-mv");
+    expect(getReleaseVariantKind(groups[0].variants[1])).toBe("animated");
+    expect(groups[1].representative.video_id).toBe("live-performance");
   });
 
   it("片方だけのMVまたはアートトラックは単独グループとして扱う", () => {

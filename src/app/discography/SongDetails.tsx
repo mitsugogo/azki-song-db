@@ -8,174 +8,12 @@ import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { StatisticsItem } from "./createStatistics";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
-import { getCollabUnitName } from "../config/collabUnits";
+import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { normalizeSongTitle } from "./utils/normalizeSongTitle";
 import { getAlbumPlaylistUrl } from "./utils/albumLinks";
-import ReleaseVariantSwitcher from "./components/ReleaseVariantSwitcher";
-import {
-  findReleaseVariantByInstanceKey,
-  getSongInstanceKey,
-  groupReleaseVariants,
-  type ReleaseVariantGroup,
-} from "./utils/releaseVariants";
-
-function SongDetailsVideoRow({
-  group,
-  index,
-  isAlbum,
-  t,
-  locale,
-  onPreview,
-}: {
-  group: ReleaseVariantGroup;
-  index: number;
-  isAlbum: boolean;
-  t: ReturnType<typeof useTranslations>;
-  locale: string;
-  onPreview: (videoId: string | null) => void;
-}) {
-  const defaultInstanceKey = getSongInstanceKey(group.representative);
-  const [selectedInstanceKey, setSelectedInstanceKey] =
-    useState(defaultInstanceKey);
-  const selectedSong =
-    findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey) ??
-    group.representative;
-  const resolvedInstanceKey = getSongInstanceKey(selectedSong);
-
-  useEffect(() => {
-    if (!findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey)) {
-      setSelectedInstanceKey(defaultInstanceKey);
-    }
-  }, [defaultInstanceKey, group.variants, selectedInstanceKey]);
-
-  const handleVariantChange = (nextInstanceKey: string) => {
-    setSelectedInstanceKey(nextInstanceKey);
-    const nextSong =
-      findReleaseVariantByInstanceKey(group.variants, nextInstanceKey) ??
-      selectedSong;
-    if (!isAlbum) {
-      onPreview(nextSong.video_id);
-    }
-  };
-
-  const watchHref = selectedSong.tags.includes("カバー曲")
-    ? `/watch?q=tag:カバー曲&v=${selectedSong.video_id}${
-        Number(selectedSong.start ?? 0) > 0 ? `&t=${selectedSong.start}` : ""
-      }`
-    : `/watch?q=tag:オリ曲|album:${selectedSong.album}&v=${selectedSong.video_id}`;
-  const detailHref = selectedSong.album
-    ? `/discography/album/${encodeURIComponent(slugify(selectedSong.album))}`
-    : `/discography/${
-        isPossibleOriginalSong(selectedSong)
-          ? "originals"
-          : isCollaborationSong(selectedSong)
-            ? "collaborations"
-            : "covers"
-      }/${selectedSong.slugv2 ?? encodeURIComponent(selectedSong.video_id)}`;
-
-  return (
-    <Table.Tr
-      key={`${group.key}-${index}`}
-      className="odd:bg-white even:bg-gray-50/50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
-      onMouseEnter={() => {
-        if (!isAlbum) {
-          onPreview(selectedSong.video_id);
-        }
-      }}
-      onMouseLeave={() => {
-        if (!isAlbum) {
-          onPreview(null);
-        }
-      }}
-    >
-      <Table.Td className="dark:text-light-gray-500">
-        <Link
-          href={watchHref}
-          className=" hover:text-primary-600 dark:hover:text-white"
-        >
-          <BsPlayCircle size={24} />
-        </Link>
-      </Table.Td>
-      <Table.Td>
-        <div className="flex flex-col items-start gap-2">
-          <Link
-            href={detailHref}
-            className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-          >
-            {selectedSong.title}
-          </Link>
-          <ReleaseVariantSwitcher
-            variants={group.variants}
-            value={resolvedInstanceKey}
-            onChange={handleVariantChange}
-          />
-        </div>
-      </Table.Td>
-      <Table.Td>
-        <Link
-          href={`/?q=artist:${selectedSong.artist}`}
-          className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-        >
-          {selectedSong.artist}
-        </Link>
-      </Table.Td>
-      <Table.Td>
-        {selectedSong.lyricist &&
-          selectedSong.lyricist
-            .split("、")
-            .map((n: string, i: number, arr: string[]) => (
-              <span key={i}>
-                <Link
-                  href={`/?q=lyricist:${n}`}
-                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                >
-                  {n}
-                </Link>
-                {i < arr.length - 1 ? "、" : ""}
-              </span>
-            ))}
-      </Table.Td>
-      <Table.Td>
-        {selectedSong.composer &&
-          selectedSong.composer
-            .split("、")
-            .map((n: string, i: number, arr: string[]) => (
-              <span key={i}>
-                <Link
-                  href={`/?q=composer:${n}`}
-                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                >
-                  {n}
-                </Link>
-                {i < arr.length - 1 ? "、" : ""}
-              </span>
-            ))}
-      </Table.Td>
-      <Table.Td>
-        {selectedSong.arranger &&
-          selectedSong.arranger
-            .split("、")
-            .map((n: string, i: number, arr: string[]) => (
-              <span key={i}>
-                <Link
-                  href={`/?q=arranger:${n}`}
-                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                >
-                  {n}
-                </Link>
-                {i < arr.length - 1 ? "、" : ""}
-              </span>
-            ))}
-      </Table.Td>
-      <Table.Td className="dark:text-light-gray-500">
-        {formatDate(selectedSong.broadcast_at, locale)}
-      </Table.Td>
-    </Table.Tr>
-  );
-}
 
 const SongDetails = ({ song }: { song: StatisticsItem }) => {
   const t = useTranslations("Discography");
@@ -187,14 +25,25 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
   );
 
   const rawVideos = song.videos || [];
-  const variantGroups = useMemo(
-    () => groupReleaseVariants(rawVideos),
-    [rawVideos],
-  );
-  const videos = useMemo(
-    () => variantGroups.map((group) => group.representative),
-    [variantGroups],
-  );
+  const videos = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const v of rawVideos) {
+      const key = v.slugv2 || `${v.video_id}__${Number(v.start ?? 0)}`;
+      if (!map.has(key)) {
+        map.set(key, v);
+      } else {
+        const existing = map.get(key);
+        const existingIsMV = (existing.tags || []).some((t: string) =>
+          t.includes("MV"),
+        );
+        const vIsMV = (v.tags || []).some((t: string) => t.includes("MV"));
+        if (vIsMV && !existingIsMV) {
+          map.set(key, v);
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [rawVideos]);
   const initialIndex = Math.max(
     0,
     videos.findIndex((v) => v.video_id === song.firstVideo.video_id),
@@ -213,7 +62,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
     // videos の sing を "、" で分割して個別のアーティスト名を順序を保ってユニーク化
     const names: string[] = [];
     const seen = new Set<string>();
-    for (const v of rawVideos) {
+    for (const v of videos) {
       const parts = ((v.sing || "") as string)
         .split("、")
         .map((s) => s.trim())
@@ -226,7 +75,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
       }
     }
     return names;
-  }, [rawVideos]);
+  }, [videos]);
 
   // スライドショー間隔（ミリ秒）
   const SLIDE_INTERVAL = 5000;
@@ -427,7 +276,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             </p>
           )}
           <p className="text-sm">
-            {t("tracksCount", { count: variantGroups.length })}
+            {t("tracksCount", { count: videos.length })}
           </p>
 
           <div className="mt-4 max-h-62.5 overflow-y-auto">
@@ -454,16 +303,103 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {variantGroups.map((group, index) => (
-                  <SongDetailsVideoRow
-                    key={group.key}
-                    group={group}
-                    index={index}
-                    isAlbum={song.isAlbum}
-                    t={t}
-                    locale={locale}
-                    onPreview={setHoveredVideo}
-                  />
+                {videos.map((s, index) => (
+                  <Table.Tr
+                    key={index}
+                    className="odd:bg-white even:bg-gray-50/50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
+                    onMouseEnter={() => {
+                      if (!song.isAlbum) {
+                        setHoveredVideo(s.video_id);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!song.isAlbum) {
+                        setHoveredVideo(null);
+                      }
+                    }}
+                  >
+                    <Table.Td className="dark:text-light-gray-500">
+                      <Link
+                        href={`${s.tags.includes("カバー曲") ? `/watch?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}` : ""}` : `/watch?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
+                        className=" hover:text-primary-600 dark:hover:text-white"
+                      >
+                        <BsPlayCircle size={24} />
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>
+                      <Link
+                        href={
+                          s.album
+                            ? `/discography/album/${encodeURIComponent(slugify(s.album))}`
+                            : `/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
+                                s.slugv2 ?? encodeURIComponent(s.video_id)
+                              }`
+                        }
+                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+                      >
+                        {s.title}
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>
+                      <Link
+                        href={`/?q=artist:${s.artist}`}
+                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+                      >
+                        {s.artist}
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>
+                      {s.lyricist &&
+                        s.lyricist
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=lyricist:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
+                    </Table.Td>
+                    <Table.Td>
+                      {s.composer &&
+                        s.composer
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=composer:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
+                    </Table.Td>
+                    <Table.Td>
+                      {s.arranger &&
+                        s.arranger
+                          .split("、")
+                          .map((n: string, i: number, arr: string[]) => (
+                            <span key={i}>
+                              <Link
+                                href={`/?q=arranger:${n}`}
+                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                              >
+                                {n}
+                              </Link>
+                              {i < arr.length - 1 ? "、" : ""}
+                            </span>
+                          ))}
+                    </Table.Td>
+                    <Table.Td className="dark:text-light-gray-500">
+                      {formatDate(s.broadcast_at, locale)}
+                    </Table.Td>
+                  </Table.Tr>
                 ))}
               </Table.Tbody>
             </Table>

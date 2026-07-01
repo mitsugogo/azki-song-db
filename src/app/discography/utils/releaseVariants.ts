@@ -1,7 +1,7 @@
 import type { Song } from "../../types/song";
 import { normalizeSongTitle } from "./normalizeSongTitle";
 
-export type ReleaseVariantKind = "mv" | "art-track" | "other";
+export type ReleaseVariantKind = "mv" | "animated" | "art-track" | "other";
 
 export type ReleaseVariantGroup = {
   key: string;
@@ -18,10 +18,14 @@ const getSourceOrder = (song: Song, fallback: number) =>
 export const isMusicVideo = (song: Song) =>
   (song.tags || []).some((tag) => tag.includes("MV"));
 
+export const isAnimatedAz = (song: Song) =>
+  (song.tags || []).includes("アニAZ");
+
 export const isArtTrack = (song: Song) =>
   (song.tags || []).includes("アートトラック");
 
 export const getReleaseVariantKind = (song: Song): ReleaseVariantKind => {
+  if (isAnimatedAz(song)) return "animated";
   if (isMusicVideo(song)) return "mv";
   if (isArtTrack(song)) return "art-track";
   return "other";
@@ -31,18 +35,37 @@ export const getSongInstanceKey = (song: Song) =>
   `${song.video_id || "video"}__${Number(song.start ?? 0)}__${song.slugv2 || ""}`;
 
 const isReleaseVariantCandidate = (song: Song) =>
-  Boolean(song.album?.trim()) && (isMusicVideo(song) || isArtTrack(song));
+  isMusicVideo(song) || isArtTrack(song);
+
+const getTitleArtistKeyParts = (song: Song) => {
+  const title = normalizeKeyPart(normalizeSongTitle(song.title, song.artist));
+  const artist = normalizeKeyPart(song.artist);
+  return { title, artist };
+};
+
+const getCrossAlbumReleaseVariantGroupKey = (song: Song) => {
+  if (!isReleaseVariantCandidate(song)) {
+    return `single::${getSongInstanceKey(song)}`;
+  }
+
+  const { title, artist } = getTitleArtistKeyParts(song);
+
+  if (!title || !artist) {
+    return `single::${getSongInstanceKey(song)}`;
+  }
+
+  return `release::cross-album::${title}::${artist}`;
+};
 
 export const getReleaseVariantGroupKey = (song: Song) => {
   if (!isReleaseVariantCandidate(song)) {
     return `single::${getSongInstanceKey(song)}`;
   }
 
-  const title = normalizeKeyPart(normalizeSongTitle(song.title, song.artist));
-  const artist = normalizeKeyPart(song.artist);
-  const album = normalizeKeyPart(song.album);
+  const { title, artist } = getTitleArtistKeyParts(song);
+  const album = normalizeKeyPart(song.album) || "no-album";
 
-  if (!title || !artist || !album) {
+  if (!title || !artist) {
     return `single::${getSongInstanceKey(song)}`;
   }
 
@@ -52,8 +75,9 @@ export const getReleaseVariantGroupKey = (song: Song) => {
 const variantPriority = (song: Song) => {
   const kind = getReleaseVariantKind(song);
   if (kind === "mv") return 0;
-  if (kind === "art-track") return 1;
-  return 2;
+  if (kind === "animated") return 1;
+  if (kind === "art-track") return 2;
+  return 3;
 };
 
 export const sortReleaseVariants = (songs: Song[]) =>
@@ -73,6 +97,12 @@ export const chooseReleaseRepresentative = (songs: Song[]) =>
   sortReleaseVariants(songs)[0];
 
 export const groupReleaseVariants = (songs: Song[]): ReleaseVariantGroup[] => {
+  const animatedTitleArtistKeys = new Set(
+    songs.filter(isAnimatedAz).map((song) => {
+      const { title, artist } = getTitleArtistKeyParts(song);
+      return title && artist ? `${title}::${artist}` : "";
+    }),
+  );
   const groups = new Map<
     string,
     {
@@ -82,7 +112,15 @@ export const groupReleaseVariants = (songs: Song[]): ReleaseVariantGroup[] => {
   >();
 
   songs.forEach((song, index) => {
-    const key = getReleaseVariantGroupKey(song);
+    const { title, artist } = getTitleArtistKeyParts(song);
+    const titleArtistKey = title && artist ? `${title}::${artist}` : "";
+    const shouldCrossAlbumGroup =
+      isReleaseVariantCandidate(song) &&
+      titleArtistKey &&
+      animatedTitleArtistKeys.has(titleArtistKey);
+    const key = shouldCrossAlbumGroup
+      ? getCrossAlbumReleaseVariantGroupKey(song)
+      : getReleaseVariantGroupKey(song);
     const current = groups.get(key);
     if (current) {
       current.variants.push(song);
@@ -115,22 +153,12 @@ export const hasMultipleReleaseVariants = (variants: Song[]) => {
   );
   return (
     variants.length > 1 &&
-    (kinds.has("mv") || kinds.has("art-track")) &&
-    kinds.size > 1
+    (kinds.has("mv") || kinds.has("animated") || kinds.has("art-track"))
   );
 };
 
 export const getSelectableReleaseVariants = (variants: Song[]) => {
-  const selectedByKind = new Map<ReleaseVariantKind, Song>();
-
-  for (const variant of sortReleaseVariants(variants)) {
-    const kind = getReleaseVariantKind(variant);
-    if (!selectedByKind.has(kind)) {
-      selectedByKind.set(kind, variant);
-    }
-  }
-
-  return Array.from(selectedByKind.values());
+  return sortReleaseVariants(variants);
 };
 
 export const findReleaseVariantByInstanceKey = (
@@ -143,3 +171,7 @@ export const findReleaseVariantByInstanceKey = (
     null
   );
 };
+
+export const matchesReleaseVariantGroupKey = (song: Song, groupKey: string) =>
+  getReleaseVariantGroupKey(song) === groupKey ||
+  getCrossAlbumReleaseVariantGroupKey(song) === groupKey;

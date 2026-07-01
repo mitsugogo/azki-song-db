@@ -661,6 +661,7 @@
     },
     "releaseVariants": {
       "mv": "MV",
+      "animated": "AniAZ",
       "artTrack": "Art Track",
       "other": "Video",
       "switcherLabel": "Switch video version"

@@ -18,6 +18,11 @@ type ReleaseVariantSwitcherProps = {
   testId?: string;
 };
 
+const circledNumbers = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
+
+const toVariantIndexLabel = (index: number) =>
+  circledNumbers[index] ?? `(${index + 1})`;
+
 export default function ReleaseVariantSwitcher({
   variants,
   value,
@@ -32,16 +37,32 @@ export default function ReleaseVariantSwitcher({
     return null;
   }
 
+  const kindCounts = selectableVariants.reduce((counts, variant) => {
+    const kind = getReleaseVariantKind(variant);
+    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+    return counts;
+  }, new Map<ReturnType<typeof getReleaseVariantKind>, number>());
+  const kindSeen = new Map<ReturnType<typeof getReleaseVariantKind>, number>();
+
   const data = selectableVariants.map((variant) => {
     const kind = getReleaseVariantKind(variant);
+    const baseLabel =
+      kind === "mv"
+        ? t("mv")
+        : kind === "animated"
+          ? t("animated")
+          : kind === "art-track"
+            ? t("artTrack")
+            : t("other");
+    const kindIndex = kindSeen.get(kind) ?? 0;
+    kindSeen.set(kind, kindIndex + 1);
+
     return {
       value: getSongInstanceKey(variant),
       label:
-        kind === "mv"
-          ? t("mv")
-          : kind === "art-track"
-            ? t("artTrack")
-            : t("other"),
+        (kindCounts.get(kind) ?? 0) > 1
+          ? `${baseLabel}${toVariantIndexLabel(kindIndex)}`
+          : baseLabel,
     };
   });
   const resolvedValue = data.some((item) => item.value === value)

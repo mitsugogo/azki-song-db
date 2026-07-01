@@ -152,11 +152,13 @@ export default function ClientPage({
   );
   const currentVariantGroup = useMemo(() => {
     if (!preferredMatchedSong) return null;
-    const groupKey = getReleaseVariantGroupKey(preferredMatchedSong);
+    const instanceKey = getSongInstanceKey(preferredMatchedSong);
     return (
-      groupReleaseVariants(
-        songs.filter((song) => getReleaseVariantGroupKey(song) === groupKey),
-      )[0] ?? null
+      groupReleaseVariants(songs).find((group) =>
+        group.variants.some(
+          (variant) => getSongInstanceKey(variant) === instanceKey,
+        ),
+      ) ?? null
     );
   }, [preferredMatchedSong, songs]);
   const song =
@@ -241,6 +243,10 @@ export default function ClientPage({
 
   const isCover = isCoverSong(song);
   const singerSeparator = locale.startsWith("ja") ? "、" : ", ";
+  const breadcrumbAlbumTitle =
+    currentVariantGroup && currentVariantGroup.variants.length > 1
+      ? currentVariantGroup.representative.title?.trim()
+      : song.album?.trim();
 
   // 現在のページのURL
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -258,15 +264,16 @@ export default function ClientPage({
                   : t("unitLabel"),
             href: `/discography/${encodeURIComponent(category)}`,
           },
-          ...(song.album
+          ...(breadcrumbAlbumTitle
             ? [
                 {
                   label: (
                     <>
-                      <LuFolder className="inline mr-1" /> {song.album}
+                      <LuFolder className="inline mr-1" />{" "}
+                      {breadcrumbAlbumTitle}
                     </>
                   ),
-                  href: `/discography/album/${encodeURIComponent(slugify(song.album))}`,
+                  href: `/discography/album/${encodeURIComponent(slugify(breadcrumbAlbumTitle))}`,
                 },
               ]
             : []),

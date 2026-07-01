@@ -652,6 +652,7 @@
     },
     "releaseVariants": {
       "mv": "MV",
+      "animated": "アニAZ",
       "artTrack": "アートトラック",
       "other": "動画",
       "switcherLabel": "動画バージョンを切り替え"
