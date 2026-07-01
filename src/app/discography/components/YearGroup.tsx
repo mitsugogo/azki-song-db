@@ -105,7 +105,7 @@ export default function YearGroup({
                 data-discography-anchor={`album-${s.key}`}
                 ref={anchorToScroll === s.key ? targetRef : undefined}
               >
-                <SongDetails song={s} />
+                <SongDetails song={s} groupByAlbum={groupByAlbum} />
               </div>
             );
           }

@@ -57,7 +57,7 @@ const SongItem = ({
     const releaseGroups = groupReleaseVariants(song.videos ?? []);
     const hasSingleReleaseVariantGroup =
       releaseGroups.length === 1 && releaseGroups[0].variants.length > 1;
-    if (hasSingleReleaseVariantGroup) {
+    if (groupByAlbum && hasSingleReleaseVariantGroup) {
       const releaseSlug = slugify(releaseGroups[0].representative.title);
       if (releaseSlug) {
         router.push(`/discography/album/${encodeURIComponent(releaseSlug)}`);
@@ -70,7 +70,7 @@ const SongItem = ({
       return;
     }
 
-    if (!song.isAlbum) {
+    if (!song.isAlbum || !groupByAlbum) {
       if (song.videos.length > 1) {
         onClick(song.key);
         return;

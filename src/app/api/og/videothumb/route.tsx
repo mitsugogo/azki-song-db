@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     const tagsText = song.tags.join(" / ");
     const archiveSummaryText =
       hl === "ja"
-        ? `${songsByVideoId.length}曲収録の配信アーカイブ`
+        ? `${songsByVideoId.length}曲収録`
         : `${songsByVideoId.length} songs in this stream archive`;
     const fonts = await fetchOgFonts(
       `${title}${subTitle}${tagsText}${dateText}${archiveSummaryText}`,
@@ -114,10 +114,9 @@ export async function GET(req: NextRequest) {
                 padding: "12px 18px",
                 borderRadius: 18,
                 backgroundColor: "rgba(255, 250, 252, 0.9)",
-                border: `1px solid ${ogColors.line}`,
                 color: ogColors.primaryDeep,
                 fontSize: 22,
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               <div style={{ display: "flex" }}>AZKi Song Database</div>
@@ -136,7 +135,7 @@ export async function GET(req: NextRequest) {
                   fontSize: 18,
                 }}
               >
-                Stream archive
+                Stream
               </div>
             </div>
             <div
@@ -146,11 +145,10 @@ export async function GET(req: NextRequest) {
                 gap: 12,
                 color: ogColors.primaryDeep,
                 fontSize: 22,
-                fontWeight: 700,
+                fontWeight: 600,
                 padding: "12px 18px",
                 borderRadius: 18,
                 backgroundColor: "rgba(255, 250, 252, 0.9)",
-                border: `1px solid ${ogColors.line}`,
               }}
             >
               <div style={{ display: "flex", color: ogColors.primary }}>
@@ -166,10 +164,10 @@ export async function GET(req: NextRequest) {
               flexDirection: "column",
               gap: 30,
               padding: "36px 40px 34px",
-              borderRadius: 34,
-              backgroundColor: "rgba(255, 250, 252, 0.9)",
-              border: "2px solid rgba(255, 255, 255, 0.7)",
-              boxShadow: "0 18px 54px rgba(45, 36, 48, 0.18)",
+              borderRadius: 16,
+              backgroundColor: "rgba(255, 255, 255, 1)",
+              border: "2px solid rgba(255, 255, 255, 0.5)",
+              boxShadow: "0 18px 32px rgba(45, 36, 48, 0.18)",
               width: "100%",
             }}
           >
@@ -213,20 +211,11 @@ export async function GET(req: NextRequest) {
               >
                 <div
                   style={{
-                    display: "flex",
-                    width: 74,
-                    height: 8,
-                    borderRadius: 999,
-                    backgroundColor: ogColors.primary,
-                  }}
-                />
-                <div
-                  style={{
                     display: "block",
                     lineClamp: 2,
                     overflow: "hidden",
                     fontSize: 42,
-                    fontWeight: 800,
+                    fontWeight: 700,
                     color: ogColors.ink,
                     lineHeight: 1.22,
                     letterSpacing: -1,
@@ -242,7 +231,7 @@ export async function GET(req: NextRequest) {
                     overflow: "hidden",
                     fontSize: 30,
                     color: ogColors.primaryDeep,
-                    fontWeight: 700,
+                    fontWeight: 500,
                     lineHeight: 1.25,
                   }}
                 >
@@ -275,7 +264,6 @@ export async function GET(req: NextRequest) {
                     padding: "10px 16px",
                     borderRadius: 14,
                     backgroundColor: "rgba(255, 255, 255, 0.84)",
-                    border: `1px solid ${ogColors.line}`,
                     color: ogColors.primary,
                     fontSize: 18,
                     fontWeight: 700,

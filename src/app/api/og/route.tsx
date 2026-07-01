@@ -42,19 +42,34 @@ export async function GET(req: NextRequest) {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 30,
+            gap: 28,
             position: "relative",
-            maxWidth: 980,
+            maxWidth: 1000,
+            padding: "42px 46px 40px",
+            borderRadius: 16,
+            backgroundColor: "rgba(255, 255, 255, 1)",
+            border: "2px solid rgba(255, 255, 255, 0.5)",
+            boxShadow: "0 18px 32px rgba(45, 36, 48, 0.18)",
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: 68,
+              width: 74,
+              height: 8,
+              borderRadius: 999,
+              backgroundColor: ogColors.primary,
+            }}
+          />
+          <div
+            style={{
+              display: "block",
+              fontSize: 64,
               fontWeight: 700,
               color: `#${titleColor}`,
               lineHeight: 1.18,
               letterSpacing: 0,
+              overflow: "hidden",
               lineClamp: '3 "..."',
             }}
           >
@@ -62,12 +77,13 @@ export async function GET(req: NextRequest) {
           </div>
           <div
             style={{
-              display: subTitle ? "flex" : "none",
+              display: subTitle ? "block" : "none",
               fontSize: 34,
               fontStyle: "normal",
               color: `#${subTitleColor}`,
               lineHeight: 1.42,
               maxWidth: 840,
+              overflow: "hidden",
               lineClamp: '2 "..."',
             }}
           >
