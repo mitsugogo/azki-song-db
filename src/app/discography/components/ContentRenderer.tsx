@@ -128,7 +128,7 @@ export default function ContentRenderer({
               data-discography-anchor={`album-${song.key}`}
               ref={anchorToScroll === song.key ? targetRef : undefined}
             >
-              <SongDetails song={song} />
+              <SongDetails song={song} groupByAlbum={groupByAlbum} />
             </div>
           );
         }

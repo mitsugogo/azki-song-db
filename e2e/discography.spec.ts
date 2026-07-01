@@ -201,6 +201,54 @@ test.describe("Discography page", () => {
     ).toBeVisible();
   });
 
+  test("album toggle off opens Neko release variants without album navigation", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const nekoVariants = songs.filter(
+      (song) =>
+        song.title === "猫ならばいける" &&
+        song.artist === "AZKi" &&
+        (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+    );
+    const originalMv = nekoVariants.find(
+      (song) => !(song.tags ?? []).includes("アニAZ"),
+    );
+    const animatedMv = nekoVariants.find((song) =>
+      (song.tags ?? []).includes("アニAZ"),
+    );
+    test.skip(
+      !originalMv || !animatedMv,
+      "猫ならばいける MV/AniAZ fixtures missing",
+    );
+
+    await page.goto("/discography/originals", {
+      waitUntil: "domcontentloaded",
+    });
+    await waitForDiscographyTabs(page);
+
+    await page.getByLabel(/Group by album|アルバムごとに表示/).click();
+    await page.locator('[title*="猫ならばいける"]').first().click();
+
+    await expect(page).not.toHaveURL(/\/discography\/album\//);
+    await expect(
+      page.getByRole("heading", { name: "猫ならばいける" }),
+    ).toBeVisible();
+    await expect(page.getByText("MV", { exact: true })).toBeVisible();
+    await expect(page.getByText("アニAZ", { exact: true })).toBeVisible();
+    await expect(
+      page.locator(
+        `a[href="/discography/album/${encodeURIComponent("猫ならばいける")}"]`,
+      ),
+    ).toHaveCount(0);
+    await expect(
+      page
+        .locator('a[href^="/discography/originals/"]')
+        .filter({ hasText: "猫ならばいける" })
+        .first(),
+    ).toBeVisible();
+  });
+
   test("song detail breadcrumbs point to virtual release album pages", async ({
     page,
   }) => {

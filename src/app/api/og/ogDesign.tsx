@@ -121,32 +121,15 @@ export const OgBackground = () => (
         inset: 0,
         display: "flex",
         backgroundColor: ogColors.background,
-        backgroundImage:
-          "linear-gradient(135deg, #fffafc 0%, #fdf2f7 46%, #eef8ff 100%)",
       }}
     />
     <div
       style={{
         position: "absolute",
-        inset: 0,
+        inset: 28,
         display: "flex",
-        opacity: 0.52,
-        backgroundImage:
-          "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.42) 42%, rgba(253, 242, 248, 0.92) 100%)",
-      }}
-    />
-    <div
-      style={{
-        position: "absolute",
-        right: -60,
-        bottom: 14,
-        display: "flex",
-        width: 420,
-        height: 260,
-        borderRadius: 999,
-        background:
-          "radial-gradient(ellipse at center, rgba(190, 24, 93, 0.12), rgba(190, 24, 93, 0.05) 52%, transparent 76%)",
-        filter: "blur(18px)",
+        borderRadius: 34,
+        border: "2px solid rgba(255, 255, 255, 0.28)",
       }}
     />
   </>
@@ -189,14 +172,12 @@ export const BrandBadge = ({ label = "Song Database" }: { label?: string }) => (
       alignItems: "center",
       gap: 12,
       alignSelf: "flex-start",
-      padding: "10px 16px",
-      borderRadius: 16,
-      backgroundColor: "rgba(255, 255, 255, 0.9)",
-      border: `1px solid ${ogColors.line}`,
-      color: ogColors.primary,
+      padding: "12px 18px",
+      borderRadius: 18,
+      backgroundColor: "rgba(255, 250, 252, 0.9)",
+      color: ogColors.primaryDeep,
       fontSize: 22,
-      fontWeight: 700,
-      boxShadow: "0 18px 46px rgba(190, 24, 93, 0.12)",
+      fontWeight: 600,
     }}
   >
     <div style={{ display: "flex" }}>{siteConfig.siteName}</div>
@@ -211,9 +192,8 @@ export const BrandBadge = ({ label = "Song Database" }: { label?: string }) => (
     <div
       style={{
         display: "flex",
-        color: ogColors.muted,
+        color: ogColors.primary,
         fontSize: 18,
-        fontWeight: 400,
       }}
     >
       {label}
@@ -259,7 +239,6 @@ export const InfoPill = ({ children }: { children: React.ReactNode }) => (
       padding: "10px 16px",
       borderRadius: 14,
       backgroundColor: "rgba(255, 255, 255, 0.84)",
-      border: `1px solid ${ogColors.line}`,
       color: ogColors.primary,
       fontSize: 20,
       fontWeight: 700,

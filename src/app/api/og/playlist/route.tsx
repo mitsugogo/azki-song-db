@@ -107,14 +107,25 @@ const fallbackOgImage = async (width: number, height: number) => {
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: ogColors.background,
-        backgroundImage:
-          "linear-gradient(135deg, #fffafc 0%, #fdf2f7 48%, #eef8ff 100%)",
         color: ogColors.primaryDeep,
         fontFamily: ogFontFamily,
         fontSize: 44,
         fontWeight: 900,
+        position: "relative",
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          inset: Math.max(8, Math.round(Math.min(width, height) * 0.04)),
+          display: "flex",
+          borderRadius: Math.max(
+            16,
+            Math.round(Math.min(width, height) * 0.05),
+          ),
+          border: "2px solid rgba(255, 255, 255, 0.28)",
+        }}
+      />
       <div style={{ display: "flex" }}>Playlist</div>
       <div
         style={{
@@ -177,8 +188,25 @@ export async function GET(req: NextRequest) {
           overflow: "hidden",
           backgroundColor: ogColors.background,
           fontFamily: ogFontFamily,
+          position: "relative",
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            inset: Math.max(
+              8,
+              Math.round(Math.min(imageWidth, imageHeight) * 0.04),
+            ),
+            display: "flex",
+            borderRadius: Math.max(
+              16,
+              Math.round(Math.min(imageWidth, imageHeight) * 0.05),
+            ),
+            border: "2px solid rgba(255, 255, 255, 0.28)",
+            zIndex: 1,
+          }}
+        />
         {rows.map((row, rowIndex) => (
           <div
             key={rowIndex}

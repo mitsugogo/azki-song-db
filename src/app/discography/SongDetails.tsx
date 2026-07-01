@@ -7,6 +7,7 @@ import { BsPlayCircle } from "react-icons/bs";
 import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { StatisticsItem } from "./createStatistics";
+import type { Song } from "../types/song";
 import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
 import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
@@ -14,10 +15,172 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { normalizeSongTitle } from "./utils/normalizeSongTitle";
 import { getAlbumPlaylistUrl } from "./utils/albumLinks";
+import ReleaseVariantSwitcher from "./components/ReleaseVariantSwitcher";
+import {
+  findReleaseVariantByInstanceKey,
+  getSongInstanceKey,
+  groupReleaseVariants,
+  type ReleaseVariantGroup,
+} from "./utils/releaseVariants";
 
-const SongDetails = ({ song }: { song: StatisticsItem }) => {
+function SongDetailsVariantRow({
+  group,
+  isAlbumView,
+  locale,
+  onPreview,
+}: {
+  group: ReleaseVariantGroup;
+  isAlbumView: boolean;
+  locale: string;
+  onPreview: (song: Song | null) => void;
+}) {
+  const defaultInstanceKey = getSongInstanceKey(group.representative);
+  const [selectedInstanceKey, setSelectedInstanceKey] =
+    useState(defaultInstanceKey);
+  const selectedSong =
+    findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey) ??
+    group.representative;
+  const resolvedInstanceKey = getSongInstanceKey(selectedSong);
+
+  useEffect(() => {
+    if (!findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey)) {
+      setSelectedInstanceKey(defaultInstanceKey);
+    }
+  }, [defaultInstanceKey, group.variants, selectedInstanceKey]);
+
+  const detailCategory = isPossibleOriginalSong(selectedSong)
+    ? "originals"
+    : isCollaborationSong(selectedSong)
+      ? "collaborations"
+      : "covers";
+  const detailSlug = selectedSong.slugv2 ?? selectedSong.video_id;
+  const watchHref = selectedSong.tags.includes("カバー曲")
+    ? `/watch?q=tag:カバー曲&v=${selectedSong.video_id}${Number(selectedSong.start ?? 0) > 0 ? `&t=${selectedSong.start}` : ""}`
+    : `/watch?q=tag:オリ曲|album:${selectedSong.album}&v=${selectedSong.video_id}`;
+  const handleVariantChange = (value: string) => {
+    setSelectedInstanceKey(value);
+    const nextSong =
+      findReleaseVariantByInstanceKey(group.variants, value) ??
+      group.representative;
+    if (!isAlbumView) {
+      onPreview(nextSong);
+    }
+  };
+
+  return (
+    <Table.Tr
+      className="odd:bg-white even:bg-gray-50/50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
+      onMouseEnter={() => {
+        if (!isAlbumView) {
+          onPreview(selectedSong);
+        }
+      }}
+      onMouseLeave={() => {
+        if (!isAlbumView) {
+          onPreview(null);
+        }
+      }}
+    >
+      <Table.Td className="dark:text-light-gray-500">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={watchHref}
+            className=" hover:text-primary-600 dark:hover:text-white"
+          >
+            <BsPlayCircle size={24} />
+          </Link>
+          <ReleaseVariantSwitcher
+            variants={group.variants}
+            value={resolvedInstanceKey}
+            onChange={handleVariantChange}
+          />
+        </div>
+      </Table.Td>
+      <Table.Td>
+        <Link
+          href={
+            isAlbumView && selectedSong.album
+              ? `/discography/album/${encodeURIComponent(slugify(selectedSong.album))}`
+              : `/discography/${detailCategory}/${encodeURIComponent(detailSlug)}`
+          }
+          className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+        >
+          {selectedSong.title}
+        </Link>
+      </Table.Td>
+      <Table.Td>
+        <Link
+          href={`/?q=artist:${selectedSong.artist}`}
+          className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
+        >
+          {selectedSong.artist}
+        </Link>
+      </Table.Td>
+      <Table.Td>
+        {selectedSong.lyricist &&
+          selectedSong.lyricist
+            .split("、")
+            .map((n: string, i: number, arr: string[]) => (
+              <span key={i}>
+                <Link
+                  href={`/?q=lyricist:${n}`}
+                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                >
+                  {n}
+                </Link>
+                {i < arr.length - 1 ? "、" : ""}
+              </span>
+            ))}
+      </Table.Td>
+      <Table.Td>
+        {selectedSong.composer &&
+          selectedSong.composer
+            .split("、")
+            .map((n: string, i: number, arr: string[]) => (
+              <span key={i}>
+                <Link
+                  href={`/?q=composer:${n}`}
+                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                >
+                  {n}
+                </Link>
+                {i < arr.length - 1 ? "、" : ""}
+              </span>
+            ))}
+      </Table.Td>
+      <Table.Td>
+        {selectedSong.arranger &&
+          selectedSong.arranger
+            .split("、")
+            .map((n: string, i: number, arr: string[]) => (
+              <span key={i}>
+                <Link
+                  href={`/?q=arranger:${n}`}
+                  className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
+                >
+                  {n}
+                </Link>
+                {i < arr.length - 1 ? "、" : ""}
+              </span>
+            ))}
+      </Table.Td>
+      <Table.Td className="dark:text-light-gray-500">
+        {formatDate(selectedSong.broadcast_at, locale)}
+      </Table.Td>
+    </Table.Tr>
+  );
+}
+
+const SongDetails = ({
+  song,
+  groupByAlbum = true,
+}: {
+  song: StatisticsItem;
+  groupByAlbum?: boolean;
+}) => {
   const t = useTranslations("Discography");
   const locale = useLocale();
+  const isAlbumView = song.isAlbum && groupByAlbum;
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
   const displayTitle = normalizeSongTitle(
     song.firstVideo.title,
@@ -44,6 +207,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
     }
     return Array.from(map.values());
   }, [rawVideos]);
+  const videoGroups = useMemo(() => groupReleaseVariants(videos), [videos]);
   const initialIndex = Math.max(
     0,
     videos.findIndex((v) => v.video_id === song.firstVideo.video_id),
@@ -122,7 +286,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
     <div className="grid-cols-2 md:grid-cols-3 xl:grid-cols-4 col-span-2 md:col-span-3 xl:col-span-4 p-4 bg-gray-50/20 dark:bg-gray-800 rounded-lg shadow-inner shadow-gray-100 dark:shadow-gray-900 my-2">
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="w-full md:w-1/3 relative aspect-video">
-          {song.isAlbum ? (
+          {isAlbumView ? (
             <YoutubeThumbnail
               videoId={song.firstVideo.video_id}
               alt={song.firstVideo.video_title}
@@ -139,7 +303,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
         </div>
         <div className="flex-1 text-gray-900 dark:text-gray-200">
           <h2 className="text-2xl font-bold mb-1">
-            {song.isAlbum && song.firstVideo.album && albumPath ? (
+            {isAlbumView && song.firstVideo.album && albumPath ? (
               <Link
                 href={albumPath}
                 className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
@@ -159,7 +323,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               {song.firstVideo.artist}
             </Link>
           </p>
-          {!song.isAlbum && (
+          {!isAlbumView && (
             <>
               {song.firstVideo.lyricist && (
                 <p className="text-sm">
@@ -255,7 +419,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
               )}
             </p>
           )}
-          {!song.isAlbum && (
+          {!isAlbumView && (
             <span>
               <p className="text-sm">
                 {t("labels.publishedDate")}{" "}
@@ -276,7 +440,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             </p>
           )}
           <p className="text-sm">
-            {t("tracksCount", { count: videos.length })}
+            {t("tracksCount", { count: videoGroups.length })}
           </p>
 
           <div className="mt-4 max-h-62.5 overflow-y-auto">
@@ -303,103 +467,16 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {videos.map((s, index) => (
-                  <Table.Tr
-                    key={index}
-                    className="odd:bg-white even:bg-gray-50/50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
-                    onMouseEnter={() => {
-                      if (!song.isAlbum) {
-                        setHoveredVideo(s.video_id);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      if (!song.isAlbum) {
-                        setHoveredVideo(null);
-                      }
-                    }}
-                  >
-                    <Table.Td className="dark:text-light-gray-500">
-                      <Link
-                        href={`${s.tags.includes("カバー曲") ? `/watch?q=tag:カバー曲&v=${s.video_id}${Number(s.start ?? 0) > 0 ? `&t=${s.start}` : ""}` : `/watch?q=tag:オリ曲|album:${s.album}&v=${s.video_id}`}`}
-                        className=" hover:text-primary-600 dark:hover:text-white"
-                      >
-                        <BsPlayCircle size={24} />
-                      </Link>
-                    </Table.Td>
-                    <Table.Td>
-                      <Link
-                        href={
-                          s.album
-                            ? `/discography/album/${encodeURIComponent(slugify(s.album))}`
-                            : `/discography/${isPossibleOriginalSong(s) ? "originals" : isCollaborationSong(s) ? "collaborations" : "covers"}/${
-                                s.slugv2 ?? encodeURIComponent(s.video_id)
-                              }`
-                        }
-                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-                      >
-                        {s.title}
-                      </Link>
-                    </Table.Td>
-                    <Table.Td>
-                      <Link
-                        href={`/?q=artist:${s.artist}`}
-                        className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500"
-                      >
-                        {s.artist}
-                      </Link>
-                    </Table.Td>
-                    <Table.Td>
-                      {s.lyricist &&
-                        s.lyricist
-                          .split("、")
-                          .map((n: string, i: number, arr: string[]) => (
-                            <span key={i}>
-                              <Link
-                                href={`/?q=lyricist:${n}`}
-                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                              >
-                                {n}
-                              </Link>
-                              {i < arr.length - 1 ? "、" : ""}
-                            </span>
-                          ))}
-                    </Table.Td>
-                    <Table.Td>
-                      {s.composer &&
-                        s.composer
-                          .split("、")
-                          .map((n: string, i: number, arr: string[]) => (
-                            <span key={i}>
-                              <Link
-                                href={`/?q=composer:${n}`}
-                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                              >
-                                {n}
-                              </Link>
-                              {i < arr.length - 1 ? "、" : ""}
-                            </span>
-                          ))}
-                    </Table.Td>
-                    <Table.Td>
-                      {s.arranger &&
-                        s.arranger
-                          .split("、")
-                          .map((n: string, i: number, arr: string[]) => (
-                            <span key={i}>
-                              <Link
-                                href={`/?q=arranger:${n}`}
-                                className="text-primary hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-500 mr-1"
-                              >
-                                {n}
-                              </Link>
-                              {i < arr.length - 1 ? "、" : ""}
-                            </span>
-                          ))}
-                    </Table.Td>
-                    <Table.Td className="dark:text-light-gray-500">
-                      {formatDate(s.broadcast_at, locale)}
-                    </Table.Td>
-                  </Table.Tr>
+                {videoGroups.map((group) => (
+                  <SongDetailsVariantRow
+                    key={group.key}
+                    group={group}
+                    isAlbumView={isAlbumView}
+                    locale={locale}
+                    onPreview={(previewSong) =>
+                      setHoveredVideo(previewSong?.video_id ?? null)
+                    }
+                  />
                 ))}
               </Table.Tbody>
             </Table>
@@ -407,7 +484,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link
               href={
-                song.isAlbum && albumPlaylistUrl
+                isAlbumView && albumPlaylistUrl
                   ? albumPlaylistUrl
                   : `https://www.youtube.com/watch?v=${song.firstVideo.video_id}`
               }
@@ -419,7 +496,7 @@ const SongDetails = ({ song }: { song: StatisticsItem }) => {
             </Link>
             <Link
               href={
-                song.isAlbum
+                isAlbumView
                   ? `/watch?q=album:${encodeURIComponent(song.firstVideo.album)}&v=${song.firstVideo.video_id}`
                   : `/watch?v=${song.firstVideo.video_id}${Number(song?.firstVideo?.start ?? 0) > 0 ? `&t=${song.firstVideo.start}` : ""}`
               }
