@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/mitsugogo/azki-song-db/compare/v2.8.0...v2.9.0) (2026-07-01)
+
+
+### Features
+
+* 「アニAZ」と通常MVの切り替えが出来る機能を追加 ([435648f](https://github.com/mitsugogo/azki-song-db/commit/435648f61adce3d6004f1b4c05967d540e4fb9bf))
+* MVとアートトラックを同一化 ([5875b8d](https://github.com/mitsugogo/azki-song-db/commit/5875b8dcb7341f36ececa71fee840704cb3501ad))
+
+
+### Bug Fixes
+
+* Discographyの楽曲数は一定となるように修正 ([09e384d](https://github.com/mitsugogo/azki-song-db/commit/09e384d2cdb0401f33e65a1e1a6ffe62d0c1e90b))
+
 ## [2.8.0](https://github.com/mitsugogo/azki-song-db/compare/v2.7.6...v2.8.0) (2026-06-30)
 
 
