@@ -11,7 +11,7 @@ describe("useYoutubeThumbnailFallback", () => {
     );
 
     expect(result.current.imageUrl).toBe(
-      `https://img.youtube.com/vi/${testVideoId}/maxresdefault.jpg`,
+      `https://i.ytimg.com/vi_webp/${testVideoId}/maxresdefault.webp`,
     );
   });
 
@@ -20,31 +20,31 @@ describe("useYoutubeThumbnailFallback", () => {
       useYoutubeThumbnailFallback(testVideoId),
     );
 
-    expect(result.current.imageUrl).toContain("maxresdefault.jpg");
+    expect(result.current.imageUrl).toContain("maxresdefault.webp");
 
     act(() => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("maxresdefault.jpg?retry=1");
+    expect(result.current.imageUrl).toContain("maxresdefault.webp?retry=1");
 
     act(() => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("sddefault.jpg");
+    expect(result.current.imageUrl).toContain("sddefault.webp");
 
     act(() => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("sddefault.jpg?retry=1");
+    expect(result.current.imageUrl).toContain("sddefault.webp?retry=1");
 
     act(() => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("hqdefault.jpg");
+    expect(result.current.imageUrl).toContain("hqdefault.webp");
   });
 
   it("全ての解像度を試した後は再試行を停止する", () => {
@@ -82,7 +82,7 @@ describe("useYoutubeThumbnailFallback", () => {
       result.current.handleError(); // default
     });
 
-    expect(result.current.imageUrl).toContain("default.jpg");
+    expect(result.current.imageUrl).toContain("default.webp");
 
     // 最終到達後は何度呼んでもURLが変わらず、追加ログもしない
     act(() => {
@@ -92,7 +92,7 @@ describe("useYoutubeThumbnailFallback", () => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("default.jpg");
+    expect(result.current.imageUrl).toContain("default.webp");
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
 
     consoleWarnSpy.mockRestore();
@@ -114,14 +114,14 @@ describe("useYoutubeThumbnailFallback", () => {
       result.current.handleError();
     });
 
-    expect(result.current.imageUrl).toContain("video1/sddefault.jpg");
+    expect(result.current.imageUrl).toContain("video1/sddefault.webp");
 
     // videoIdを変更
     rerender({ videoId: "video2" });
 
     // 最高解像度にリセットされる
     expect(result.current.imageUrl).toBe(
-      "https://img.youtube.com/vi/video2/maxresdefault.jpg",
+      "https://i.ytimg.com/vi_webp/video2/maxresdefault.webp",
     );
   });
 
@@ -149,7 +149,7 @@ describe("useYoutubeThumbnailFallback", () => {
     });
 
     expect(result.current.imageUrl).toBe(
-      `https://img.youtube.com/vi/${testVideoId}/maxresdefault.jpg?retry=1`,
+      `https://i.ytimg.com/vi_webp/${testVideoId}/maxresdefault.webp?retry=1`,
     );
   });
 });
