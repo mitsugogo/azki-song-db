@@ -65,6 +65,45 @@ export function useDiscographyData(
     releaseVariantAlbumKeyByInstance.get(getSongInstanceKey(s)) ||
     s.album ||
     getSongKeyTitle(s);
+  const tabCounts = useMemo(() => {
+    const countStatisticsItems = (items: Song[], keyFn: (song: Song) => string) =>
+      createStatistics(items, keyFn, false).map(applyReleaseVariantGrouping)
+        .length;
+
+    const originals = songs.filter((s) => {
+      const isOriginal = s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
+      return isOriginal && isPossibleOriginalSong(s);
+    });
+    const units = songs.filter(
+      (s) => isCollaborationSong(s) || isFesOverallSong(s),
+    );
+    const covers = songs.filter((s) => isCoverSong(s));
+    const allFiltered = songs.filter(
+      (s) =>
+        isPossibleOriginalSong(s) ||
+        isCollaborationSong(s) ||
+        isFesOverallSong(s) ||
+        isCoverSong(s),
+    );
+    const normalizeSingers = (s: Song) =>
+      ((s.sing || "") as string)
+        .split("、")
+        .map((x) => x.trim())
+        .filter(Boolean)
+        .sort()
+        .join("、");
+
+    return {
+      all: countStatisticsItems(allFiltered, getSongKeyTitle),
+      originals: countStatisticsItems(originals, getSongKeyTitle),
+      unit: countStatisticsItems(units, getSongKeyTitle),
+      covers: countStatisticsItems(covers, (song) => {
+        const singers = normalizeSingers(song);
+        const normalizedTitle = getSongKeyTitle(song);
+        return singers ? `${normalizedTitle}__${singers}` : normalizedTitle;
+      }),
+    };
+  }, [songs]);
 
   // オリジナル楽曲の統計
   const originalSongCountsByReleaseDate = useMemo(() => {
@@ -147,5 +186,6 @@ export function useDiscographyData(
     unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
     allSongCountsByReleaseDate,
+    tabCounts,
   };
 }
