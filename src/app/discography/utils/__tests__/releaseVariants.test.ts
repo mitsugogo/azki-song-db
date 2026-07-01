@@ -1,0 +1,227 @@
+import { describe, expect, it } from "vitest";
+import type { Song } from "../../../types/song";
+import {
+  chooseReleaseRepresentative,
+  getReleaseVariantKind,
+  getSelectableReleaseVariants,
+  groupReleaseVariants,
+  hasMultipleReleaseVariants,
+} from "../releaseVariants";
+
+const baseSong = (overrides: Partial<Song>): Song =>
+  ({
+    title: "Going My Way",
+    artist: "AZKi & 星街すいせい",
+    album: "Going My Way",
+    lyricist: "",
+    composer: "",
+    arranger: "",
+    album_list_uri: "",
+    album_release_at: "2026-05-19T00:00:00.000Z",
+    album_is_compilation: false,
+    sing: "AZKi、星街すいせい",
+    sings: ["AZKi", "星街すいせい"],
+    video_title: "",
+    video_uri: "",
+    video_id: "base-video",
+    start: 0,
+    end: 0,
+    broadcast_at: "2026-05-19T00:00:00.000Z",
+    year: 2026,
+    tags: ["オリ曲"],
+    milestones: [],
+    hl: {
+      ja: {
+        title: "Going My Way",
+        artist: "AZKi & 星街すいせい",
+        artists: ["AZKi", "星街すいせい"],
+        album: "Going My Way",
+        sing: "AZKi、星街すいせい",
+        sings: ["AZKi", "星街すいせい"],
+      },
+    },
+    ...overrides,
+  }) as Song;
+
+describe("releaseVariants", () => {
+  it("同一アルバム・同一曲・同一アーティストのMVとアートトラックを1グループにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        video_id: "art-track",
+        source_order: 1,
+        tags: ["オリ曲", "アートトラック"],
+      }),
+      baseSong({
+        video_id: "music-video",
+        source_order: 2,
+        tags: ["オリ曲MV"],
+      }),
+    ]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].variants.map((song) => song.video_id)).toEqual([
+      "music-video",
+      "art-track",
+    ]);
+    expect(groups[0].representative.video_id).toBe("music-video");
+    expect(hasMultipleReleaseVariants(groups[0].variants)).toBe(true);
+  });
+
+  it("代表曲はMVをアートトラックより優先する", () => {
+    const representative = chooseReleaseRepresentative([
+      baseSong({
+        video_id: "art-track",
+        tags: ["オリ曲", "アートトラック"],
+        source_order: 1,
+      }),
+      baseSong({
+        video_id: "music-video",
+        tags: ["オリ曲MV"],
+        source_order: 99,
+      }),
+    ]);
+
+    expect(representative.video_id).toBe("music-video");
+  });
+
+  it("同名でも別アーティストや別アルバムは混ぜない", () => {
+    const groups = groupReleaseVariants([
+      baseSong({ video_id: "mv-1", tags: ["オリ曲MV"] }),
+      baseSong({
+        video_id: "mv-2",
+        artist: "AZKi",
+        tags: ["オリ曲MV"],
+      }),
+      baseSong({
+        video_id: "mv-3",
+        album: "Another Album",
+        tags: ["オリ曲MV"],
+      }),
+    ]);
+
+    expect(groups).toHaveLength(3);
+  });
+
+  it("歌枠などの通常動画は同名でも動画単位のままにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        video_id: "live-1",
+        album: "",
+        tags: ["歌枠"],
+        broadcast_at: "2026-05-20T00:00:00.000Z",
+      }),
+      baseSong({
+        video_id: "live-2",
+        album: "",
+        tags: ["歌枠"],
+        broadcast_at: "2026-05-21T00:00:00.000Z",
+      }),
+    ]);
+
+    expect(groups).toHaveLength(2);
+    expect(groups.every((group) => group.variants)).toBe(true);
+  });
+
+  it("アルバムがない同一曲・同一アーティストの複数MVを1グループにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        title: "from A to Z",
+        artist: "AZKi",
+        album: "",
+        video_id: "main-mv",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        title: "from A to Z",
+        artist: "AZKi",
+        album: "",
+        video_id: "early-mv",
+        tags: ["オリ曲MV"],
+        source_order: 1,
+      }),
+    ]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].variants.map((song) => song.video_id)).toEqual([
+      "early-mv",
+      "main-mv",
+    ]);
+    expect(groups[0].representative.video_id).toBe("early-mv");
+    expect(hasMultipleReleaseVariants(groups[0].variants)).toBe(true);
+  });
+
+  it("複数MVは切替対象として両方残す", () => {
+    const selectableVariants = getSelectableReleaseVariants([
+      baseSong({
+        video_id: "mv-2",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        video_id: "mv-1",
+        tags: ["オリ曲MV"],
+        source_order: 1,
+      }),
+    ]);
+
+    expect(selectableVariants.map((song) => song.video_id)).toEqual([
+      "mv-1",
+      "mv-2",
+    ]);
+    expect(hasMultipleReleaseVariants(selectableVariants)).toBe(true);
+  });
+
+  it("アニAZはアルバムが違っても同一曲・同一アーティストの元MVと1グループにする", () => {
+    const groups = groupReleaseVariants([
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "",
+        video_id: "animated-mv",
+        tags: ["オリ曲MV", "アニAZ"],
+        source_order: 1,
+      }),
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "Re:Creating world",
+        video_id: "original-mv",
+        tags: ["オリ曲MV"],
+        source_order: 2,
+      }),
+      baseSong({
+        title: "猫ならばいける",
+        artist: "AZKi",
+        album: "",
+        video_id: "live-performance",
+        tags: ["歌枠"],
+        source_order: 3,
+      }),
+    ]);
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0].variants.map((song) => song.video_id)).toEqual([
+      "original-mv",
+      "animated-mv",
+    ]);
+    expect(groups[0].representative.video_id).toBe("original-mv");
+    expect(getReleaseVariantKind(groups[0].variants[1])).toBe("animated");
+    expect(groups[1].representative.video_id).toBe("live-performance");
+  });
+
+  it("片方だけのMVまたはアートトラックは単独グループとして扱う", () => {
+    const groups = groupReleaseVariants([
+      baseSong({ video_id: "mv-only", tags: ["オリ曲MV"] }),
+      baseSong({
+        video_id: "art-only",
+        title: "Only Art",
+        tags: ["オリ曲", "アートトラック"],
+      }),
+    ]);
+
+    expect(groups).toHaveLength(2);
+    expect(getReleaseVariantKind(groups[0].representative)).toBe("mv");
+    expect(getReleaseVariantKind(groups[1].representative)).toBe("art-track");
+  });
+});

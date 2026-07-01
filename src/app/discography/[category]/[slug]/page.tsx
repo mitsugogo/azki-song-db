@@ -11,6 +11,7 @@ import {
 } from "@/app/config/filters";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import ClientPage from "./ClientPage";
+import { chooseReleaseRepresentative } from "../../utils/releaseVariants";
 
 export async function generateStaticParams() {
   let songs: Song[] = [];
@@ -76,13 +77,7 @@ export async function generateMetadata({
       (s.title && slugify(s.title) === slug) ||
       (s.album && slugify(s.album) === slug),
   );
-  const matchedForMeta =
-    metadataCandidates.length > 1
-      ? (metadataCandidates.find((s) =>
-          // タグ配列内の要素に "MV" を含むものを優先（部分一致）
-          s.tags?.some((t) => t.includes("MV")),
-        ) ?? metadataCandidates[0])
-      : metadataCandidates[0];
+  const matchedForMeta = chooseReleaseRepresentative(metadataCandidates);
   const canonical = new URL(
     `/discography/${encodeURIComponent(resolved.category)}/${encodeURIComponent(slug)}`,
     baseUrl,

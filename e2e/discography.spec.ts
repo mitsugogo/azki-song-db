@@ -1,10 +1,9 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 import { getCachedSongs } from "./test-utils";
 
-const waitForDiscographyTabs = async (
-  page: Parameters<typeof test>[0]["page"],
-) => {
+const waitForDiscographyTabs = async (page: Page) => {
   await expect(page.getByRole("heading", { name: /Discography/i })).toBeVisible(
     {
       timeout: 10000,
@@ -52,6 +51,195 @@ test.describe("Discography page", () => {
     // Look for images (album covers)
     const images = page.locator("img");
     await expect(images.first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test("album page groups MV and art track with variant switcher", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const goingMyWay = songs.filter(
+      (song) => song.album === "Going My Way" && song.title === "Going My Way",
+    );
+    const mv = goingMyWay.find((song) =>
+      (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+    );
+    const artTrack = goingMyWay.find((song) =>
+      (song.tags ?? []).includes("アートトラック"),
+    );
+    test.skip(!mv || !artTrack, "Going My Way MV/art track fixtures missing");
+
+    await page.goto("/discography/album/going-my-way", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(
+      page.getByRole("heading", { name: "Going My Way" }),
+    ).toBeVisible({ timeout: 10000 });
+
+    const rows = page.locator("section article").filter({
+      has: page.getByRole("link", { name: "Going My Way" }),
+    });
+    await expect(rows).toHaveCount(1);
+
+    const row = rows.first();
+    await expect(row.getByTestId("album-release-variant-0")).toBeVisible();
+    await expect(
+      row.locator(`a[href="https://www.youtube.com/watch?v=${mv.video_id}"]`),
+    ).toBeVisible();
+
+    await row.getByText("アートトラック").click();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${artTrack.video_id}"]`,
+      ),
+    ).toBeVisible();
+  });
+
+  test("album page groups multiple MV variants without album", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const mvVariants = songs
+      .filter(
+        (song) =>
+          song.title === "from A to Z" &&
+          song.artist === "AZKi" &&
+          !song.album &&
+          (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+      )
+      .sort((left, right) => {
+        const leftOrder = left.source_order ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = right.source_order ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder;
+      });
+    test.skip(
+      mvVariants.length < 2,
+      "from A to Z multiple MV fixtures missing",
+    );
+
+    await page.goto("/discography/album/from-a-to-z", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(
+      page.getByRole("heading", { name: "from A to Z" }),
+    ).toBeVisible({ timeout: 10000 });
+
+    const rows = page.locator("section article").filter({
+      has: page.getByRole("link", { name: "from A to Z" }),
+    });
+    await expect(rows).toHaveCount(1);
+
+    const row = rows.first();
+    await expect(row.getByText("MV①")).toBeVisible();
+    await expect(row.getByText("MV②")).toBeVisible();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${mvVariants[0].video_id}"]`,
+      ),
+    ).toBeVisible();
+
+    await row.getByText("MV②").click();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${mvVariants[1].video_id}"]`,
+      ),
+    ).toBeVisible();
+  });
+
+  test("album page groups AniAZ with original MV across album boundary", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const nekoVariants = songs.filter(
+      (song) =>
+        song.title === "猫ならばいける" &&
+        song.artist === "AZKi" &&
+        (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+    );
+    const originalMv = nekoVariants.find(
+      (song) => !(song.tags ?? []).includes("アニAZ"),
+    );
+    const animatedMv = nekoVariants.find((song) =>
+      (song.tags ?? []).includes("アニAZ"),
+    );
+    test.skip(
+      !originalMv || !animatedMv,
+      "猫ならばいける MV/AniAZ fixtures missing",
+    );
+
+    await page.goto(
+      `/discography/album/${encodeURIComponent("猫ならばいける")}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
+
+    await expect(
+      page.getByRole("heading", { name: "猫ならばいける" }),
+    ).toBeVisible({ timeout: 10000 });
+
+    const rows = page.locator("section article").filter({
+      has: page.getByRole("link", { name: "猫ならばいける" }),
+    });
+    await expect(rows).toHaveCount(1);
+
+    const row = rows.first();
+    await expect(row.getByText("MV", { exact: true })).toBeVisible();
+    await expect(row.getByText("アニAZ", { exact: true })).toBeVisible();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${originalMv.video_id}"]`,
+      ),
+    ).toBeVisible();
+
+    await row.getByText("アニAZ", { exact: true }).click();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${animatedMv.video_id}"]`,
+      ),
+    ).toBeVisible();
+  });
+
+  test("song detail breadcrumbs point to virtual release album pages", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const fromAToZ = songs.find(
+      (song) =>
+        song.title === "from A to Z" &&
+        song.artist === "AZKi" &&
+        !song.album &&
+        (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+    );
+    const nekoAniAz = songs.find(
+      (song) =>
+        song.title === "猫ならばいける" &&
+        song.artist === "AZKi" &&
+        (song.tags ?? []).includes("アニAZ"),
+    );
+    test.skip(
+      !fromAToZ || !nekoAniAz,
+      "from A to Z / 猫ならばいける fixtures missing",
+    );
+
+    await page.goto(
+      `/discography/originals/${encodeURIComponent(fromAToZ.slugv2 ?? fromAToZ.slug)}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await expect(
+      page.locator('a[href="/discography/album/from-a-to-z"]'),
+    ).toBeVisible({ timeout: 10000 });
+
+    await page.goto(
+      `/discography/originals/${encodeURIComponent(nekoAniAz.slugv2 ?? nekoAniAz.slug)}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await expect(
+      page.locator(
+        `a[href="/discography/album/${encodeURIComponent("猫ならばいける")}"]`,
+      ),
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test("discography slug page shows details", async ({ page }) => {
