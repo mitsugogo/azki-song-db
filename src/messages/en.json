@@ -659,6 +659,12 @@
       "groupByYear": "Group by year",
       "onlyOriginalMV": "Original MVs only"
     },
+    "releaseVariants": {
+      "mv": "MV",
+      "artTrack": "Art Track",
+      "other": "Video",
+      "switcherLabel": "Switch video version"
+    },
     "tabDescriptions": {
       "originals": "A list of original songs.",
       "unit": "A list of unit / guest songs.",

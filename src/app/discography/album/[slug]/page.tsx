@@ -6,6 +6,7 @@ import slugify from "../../../lib/slugify";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import AlbumClient from "../../[category]/AlbumClient";
+import { groupReleaseVariants } from "../../utils/releaseVariants";
 
 type AlbumEntry = {
   album: string;
@@ -37,12 +38,15 @@ function buildAlbumEntries(songs: Song[]): AlbumEntry[] {
     const resolvedSlug = count === 0 ? baseSlug : `${baseSlug}-${count + 1}`;
     const albumSongs = grouped.get(album) ?? [];
     if (albumSongs.length === 0) continue;
+    const releaseGroups = groupReleaseVariants(albumSongs);
+    const representativeSong =
+      releaseGroups[0]?.representative ?? albumSongs[0];
 
     entries.push({
       album,
       slug: resolvedSlug,
-      songs: albumSongs,
-      representativeSong: albumSongs[0],
+      songs: releaseGroups.map((group) => group.representative),
+      representativeSong,
     });
   }
 

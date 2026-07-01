@@ -8,7 +8,7 @@ import { findRouteForRelease } from "../../../config/timelineRoutes";
 import { findVisualForRelease } from "../../../config/timelineVisuals";
 import { FaPlay, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { Badge, LoadingOverlay, Modal } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../../lib/formatDate";
 import { renderLinkedText } from "../../../lib/textLinkify";
@@ -19,6 +19,106 @@ import { getCollabUnitName } from "@/app/config/collabUnits";
 import DiscographyBreadcrumbs from "../../components/DiscographyBreadcrumbs";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import { pageClasses } from "@/app/theme";
+import ReleaseVariantSwitcher from "../../components/ReleaseVariantSwitcher";
+import {
+  chooseReleaseRepresentative,
+  findReleaseVariantByInstanceKey,
+  getReleaseVariantGroupKey,
+  getSongInstanceKey,
+  groupReleaseVariants,
+  type ReleaseVariantGroup,
+} from "../../utils/releaseVariants";
+
+function RelatedVideoCard({
+  group,
+  category,
+  locale,
+  showPublishedDate = false,
+}: {
+  group: ReleaseVariantGroup;
+  category: string;
+  locale: string;
+  showPublishedDate?: boolean;
+}) {
+  const t = useTranslations("Discography");
+  const defaultInstanceKey = getSongInstanceKey(group.representative);
+  const [selectedInstanceKey, setSelectedInstanceKey] =
+    useState(defaultInstanceKey);
+  const selectedSong =
+    findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey) ??
+    group.representative;
+  const resolvedInstanceKey = getSongInstanceKey(selectedSong);
+  const internalHref = selectedSong.slugv2
+    ? `/discography/${category}/${encodeURIComponent(selectedSong.slugv2)}`
+    : selectedSong.title
+      ? `/discography/${category}/${encodeURIComponent(slugify(selectedSong.title))}`
+      : "#";
+
+  useEffect(() => {
+    if (!findReleaseVariantByInstanceKey(group.variants, selectedInstanceKey)) {
+      setSelectedInstanceKey(defaultInstanceKey);
+    }
+  }, [defaultInstanceKey, group.variants, selectedInstanceKey]);
+
+  return (
+    <div className="flex items-center gap-3 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2">
+      <div className="w-28 h-16 overflow-hidden rounded">
+        <YoutubeThumbnail
+          videoId={selectedSong.video_id}
+          alt={selectedSong.video_title}
+          className="w-full h-full"
+          imageClassName="object-cover"
+        />
+      </div>
+      <div className="text-sm flex-1 min-w-0">
+        <div className="font-medium wrap-break-word">
+          {showPublishedDate ? (
+            selectedSong.video_title
+          ) : (
+            <Link href={internalHref}>{selectedSong.title}</Link>
+          )}
+        </div>
+        <div className="text-xs text-gray-600 dark:text-gray-300">
+          {showPublishedDate
+            ? `${t("labels.publishedDate")} ${formatDate(
+                selectedSong.broadcast_at,
+                locale,
+              )}`
+            : `${selectedSong.artist} - ${selectedSong.sing}`}
+        </div>
+        <ReleaseVariantSwitcher
+          variants={group.variants}
+          value={resolvedInstanceKey}
+          onChange={setSelectedInstanceKey}
+          className="mt-2"
+        />
+        <div className="mt-2 flex flex-wrap gap-2">
+          <a
+            href={`https://www.youtube.com/watch?v=${selectedSong.video_id}${
+              showPublishedDate && Number(selectedSong.start) > 0
+                ? `&t=${selectedSong.start}s`
+                : ""
+            }`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
+          >
+            <FaYoutube className="inline mr-1 -mt-1" />{" "}
+            {t("buttons.watchOnYouTube")}
+          </a>
+          <Link
+            href={`/watch?q=video_id:${selectedSong.video_id}&v=${selectedSong.video_id}${
+              Number(selectedSong.start) > 0 ? `&t=${selectedSong.start}` : ""
+            }`}
+            className="inline-block bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
+          >
+            <FaPlay className="inline mr-1 -mt-1" /> {t("buttons.play")}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ClientPage({
   category,
@@ -31,6 +131,58 @@ export default function ClientPage({
   const locale = useLocale();
   const { allSongs, isLoading } = useSongs();
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+  const [selectedVariantKey, setSelectedVariantKey] = useState<string | null>(
+    null,
+  );
+
+  const songs: Song[] = allSongs ?? [];
+  const matched = useMemo(
+    () =>
+      songs.filter(
+        (s) =>
+          s.slug === slug ||
+          s.slugv2 === slug ||
+          (s.album && slugify(s.album) === slug),
+      ),
+    [slug, songs],
+  );
+  const preferredMatchedSong = useMemo(
+    () => chooseReleaseRepresentative(matched) ?? null,
+    [matched],
+  );
+  const currentVariantGroup = useMemo(() => {
+    if (!preferredMatchedSong) return null;
+    const groupKey = getReleaseVariantGroupKey(preferredMatchedSong);
+    return (
+      groupReleaseVariants(
+        songs.filter((song) => getReleaseVariantGroupKey(song) === groupKey),
+      )[0] ?? null
+    );
+  }, [preferredMatchedSong, songs]);
+  const song =
+    currentVariantGroup &&
+    findReleaseVariantByInstanceKey(
+      currentVariantGroup.variants,
+      selectedVariantKey,
+    )
+      ? findReleaseVariantByInstanceKey(
+          currentVariantGroup.variants,
+          selectedVariantKey,
+        )
+      : (currentVariantGroup?.representative ?? preferredMatchedSong);
+
+  useEffect(() => {
+    if (!currentVariantGroup) return;
+    const resolvedSelected = findReleaseVariantByInstanceKey(
+      currentVariantGroup.variants,
+      selectedVariantKey,
+    );
+    if (!resolvedSelected) {
+      setSelectedVariantKey(
+        getSongInstanceKey(currentVariantGroup.representative),
+      );
+    }
+  }, [currentVariantGroup, selectedVariantKey]);
 
   if (isLoading) {
     return (
@@ -40,14 +192,6 @@ export default function ClientPage({
     );
   }
 
-  const songs: Song[] = allSongs ?? [];
-  const matched = songs.filter(
-    (s) =>
-      s.slug === slug ||
-      s.slugv2 === slug ||
-      (s.album && slugify(s.album) === slug),
-  );
-
   if (!matched || matched.length === 0) {
     return (
       <div className={pageClasses.shell}>
@@ -56,16 +200,6 @@ export default function ClientPage({
       </div>
     );
   }
-
-  const includeMVTagged = matched.some((s) =>
-    s.tags?.some((t) => t.includes("MV")),
-  );
-  const song =
-    matched.length > 1
-      ? includeMVTagged
-        ? matched.find((s) => s.tags?.some((t) => t.includes("MV")))
-        : matched[0]
-      : matched[0];
 
   if (!song) {
     return (
@@ -88,8 +222,9 @@ export default function ClientPage({
       song.album &&
       s.album === song.album &&
       s.video_id &&
-      s.video_id !== song.video_id,
+      getReleaseVariantGroupKey(s) !== getReleaseVariantGroupKey(song),
   );
+  const relatedAlbumGroups = groupReleaseVariants(relatedAlbum);
 
   const relatedSameTitle = songs.filter(
     (s: Song) =>
@@ -100,6 +235,7 @@ export default function ClientPage({
       s.video_id !== song.video_id &&
       s.tags?.some((t) => t.includes("歌枠")),
   );
+  const relatedSameTitleGroups = groupReleaseVariants(relatedSameTitle);
 
   const unitName = getCollabUnitName(song.sing.split("、"));
 
@@ -187,6 +323,14 @@ export default function ClientPage({
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             {song.artist}
           </p>
+          {currentVariantGroup && (
+            <ReleaseVariantSwitcher
+              variants={currentVariantGroup.variants}
+              value={getSongInstanceKey(song)}
+              onChange={setSelectedVariantKey}
+              className="mb-4"
+            />
+          )}
 
           {song.lyricist && (
             <p className="text-sm">
@@ -329,123 +473,41 @@ export default function ClientPage({
           </div>
 
           <div>
-            {relatedAlbum && relatedAlbum.length > 0 && (
+            {relatedAlbumGroups.length > 0 && (
               <>
                 <h2 className="text-lg font-semibold mb-2">
                   {t("relatedVideos")}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {Array.from(
-                    new Map(relatedAlbum.map((s) => [s.video_id, s])).values(),
-                  ).map((s) => {
-                    const internalHref = s.slugv2
-                      ? `/discography/${category}/${encodeURIComponent(s.slugv2)}`
-                      : s.title
-                        ? `/discography/${category}/${encodeURIComponent(slugify(s.title))}`
-                        : "#";
-                    return (
-                      <div
-                        key={s.video_id}
-                        className="flex items-center gap-3 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
-                      >
-                        <div className="w-28 h-16 overflow-hidden rounded">
-                          <YoutubeThumbnail
-                            videoId={s.video_id}
-                            alt={s.video_title}
-                            className="w-full h-full"
-                            imageClassName="object-cover"
-                          />
-                        </div>
-                        <div className="text-sm flex-1">
-                          <div className="font-medium">
-                            <Link href={internalHref}>{s.title}</Link>
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {s.artist} - {s.sing}
-                          </div>
-                          <div className="mt-2 space-x-2">
-                            <a
-                              href={`https://www.youtube.com/watch?v=${s.video_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
-                            >
-                              <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                              {t("buttons.watchOnYouTube")}
-                            </a>
-                            <Link
-                              href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
-                              className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
-                            >
-                              <FaPlay className="inline mr-1 -mt-1" />{" "}
-                              {t("buttons.play")}
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {relatedAlbumGroups.map((group) => (
+                    <RelatedVideoCard
+                      key={group.key}
+                      group={group}
+                      category={category}
+                      locale={locale}
+                    />
+                  ))}
                 </div>
               </>
             )}
 
-            {relatedSameTitle && relatedSameTitle.length > 0 && (
+            {relatedSameTitleGroups.length > 0 && (
               <>
                 <h2 className="text-lg font-semibold mb-2 mt-4">
-                  {t("relatedStreamsTitle", { count: relatedSameTitle.length })}
+                  {t("relatedStreamsTitle", {
+                    count: relatedSameTitleGroups.length,
+                  })}
                 </h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                  {Array.from(
-                    new Map(
-                      relatedSameTitle.map((s) => [s.video_id, s]),
-                    ).values(),
-                  ).map((s) => {
-                    const internalHref = s.slug
-                      ? `/discography/${encodeURIComponent(s.slug)}`
-                      : s.title
-                        ? `/discography/${encodeURIComponent(slugify(s.title))}`
-                        : "#";
-                    return (
-                      <div
-                        key={s.video_id}
-                        className="flex items-center gap-2 rounded-md overflow-hidden bg-gray-50/20 dark:bg-gray-800 p-2"
-                      >
-                        <div className="w-28 h-16 overflow-hidden rounded">
-                          <YoutubeThumbnail
-                            videoId={s.video_id}
-                            alt={s.video_title}
-                            className="w-full h-full"
-                            imageClassName="object-cover"
-                          />
-                        </div>
-                        <div className="text-sm flex-1">
-                          <div className="font-medium">{s.video_title}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {t("labels.publishedDate")}{" "}
-                            {formatDate(s.broadcast_at, locale)}
-                          </div>
-                          <div className="mt-2 space-x-2">
-                            <a
-                              href={`https://www.youtube.com/watch?v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}s` : ""}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block bg-red-600 text-white py-1 px-3 rounded-md text-xs"
-                            >
-                              <FaYoutube className="inline mr-1 -mt-1" />{" "}
-                              {t("buttons.watchOnYouTube")}
-                            </a>
-                            <Link
-                              href={`/watch?q=video_id:${s.video_id}&v=${s.video_id}${Number(s.start) > 0 ? `&t=${s.start}` : ""}`}
-                              className="inline-block ml-1 bg-primary-600 text-white py-1 px-3 rounded-md text-xs"
-                            >
-                              <FaPlay className="inline mr-1 -mt-1" />{" "}
-                              {t("buttons.play")}
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {relatedSameTitleGroups.map((group) => (
+                    <RelatedVideoCard
+                      key={group.key}
+                      group={group}
+                      category={category}
+                      locale={locale}
+                      showPublishedDate
+                    />
+                  ))}
                 </div>
               </>
             )}

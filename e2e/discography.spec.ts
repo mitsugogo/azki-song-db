@@ -1,10 +1,9 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { setupApiMocks } from "./mocks";
 import { getCachedSongs } from "./test-utils";
 
-const waitForDiscographyTabs = async (
-  page: Parameters<typeof test>[0]["page"],
-) => {
+const waitForDiscographyTabs = async (page: Page) => {
   await expect(page.getByRole("heading", { name: /Discography/i })).toBeVisible(
     {
       timeout: 10000,
@@ -52,6 +51,48 @@ test.describe("Discography page", () => {
     // Look for images (album covers)
     const images = page.locator("img");
     await expect(images.first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test("album page groups MV and art track with variant switcher", async ({
+    page,
+  }) => {
+    const songs: any[] = getCachedSongs();
+    const goingMyWay = songs.filter(
+      (song) => song.album === "Going My Way" && song.title === "Going My Way",
+    );
+    const mv = goingMyWay.find((song) =>
+      (song.tags ?? []).some((tag: string) => tag.includes("MV")),
+    );
+    const artTrack = goingMyWay.find((song) =>
+      (song.tags ?? []).includes("アートトラック"),
+    );
+    test.skip(!mv || !artTrack, "Going My Way MV/art track fixtures missing");
+
+    await page.goto("/discography/album/going-my-way", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(
+      page.getByRole("heading", { name: "Going My Way" }),
+    ).toBeVisible({ timeout: 10000 });
+
+    const rows = page.locator("section article").filter({
+      has: page.getByRole("link", { name: "Going My Way" }),
+    });
+    await expect(rows).toHaveCount(1);
+
+    const row = rows.first();
+    await expect(row.getByTestId("album-release-variant-0")).toBeVisible();
+    await expect(
+      row.locator(`a[href="https://www.youtube.com/watch?v=${mv.video_id}"]`),
+    ).toBeVisible();
+
+    await row.getByText("アートトラック").click();
+    await expect(
+      row.locator(
+        `a[href="https://www.youtube.com/watch?v=${artTrack.video_id}"]`,
+      ),
+    ).toBeVisible();
   });
 
   test("discography slug page shows details", async ({ page }) => {

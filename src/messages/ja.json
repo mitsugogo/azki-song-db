@@ -650,6 +650,12 @@
       "groupByYear": "年ごとに区切る",
       "onlyOriginalMV": "オリ曲MVのみ"
     },
+    "releaseVariants": {
+      "mv": "MV",
+      "artTrack": "アートトラック",
+      "other": "動画",
+      "switcherLabel": "動画バージョンを切り替え"
+    },
     "tabDescriptions": {
       "originals": "オリジナル楽曲の一覧です。",
       "unit": "ユニット・ゲスト楽曲の一覧です。",

@@ -3,14 +3,26 @@ import { Song } from "../../types/song";
 import { createStatistics } from "../createStatistics";
 import useSongs from "../../hook/useSongs";
 import {
-  filterOriginalSongs,
   isCollaborationSong,
   isCoverSong,
   isFesOverallSong,
-  isOriginalSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
 import { normalizeSongTitle } from "../utils/normalizeSongTitle";
+import { groupReleaseVariants } from "../utils/releaseVariants";
+import type { StatisticsItem } from "../createStatistics";
+
+const applyReleaseVariantGrouping = (item: StatisticsItem): StatisticsItem => {
+  const groups = groupReleaseVariants(item.videos ?? []);
+  if (groups.length === 0) return item;
+
+  return {
+    ...item,
+    count: groups.length,
+    firstVideo: groups[0].representative,
+    lastVideo: groups[groups.length - 1].representative,
+  };
+};
 
 /**
  * Discographyページのデータフェッチと統計計算を管理するカスタムフック
@@ -37,7 +49,7 @@ export function useDiscographyData(
       (s) =>
         groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
-    );
+    ).map(applyReleaseVariantGrouping);
   }, [songs, groupByAlbum, onlyOriginalMV]);
 
   // ユニット/ゲスト楽曲の統計
@@ -50,7 +62,7 @@ export function useDiscographyData(
       (s) =>
         groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
-    );
+    ).map(applyReleaseVariantGrouping);
   }, [songs, groupByAlbum]);
 
   // カバー楽曲の統計
@@ -75,7 +87,7 @@ export function useDiscographyData(
         return singers ? `${normalizedTitle}__${singers}` : normalizedTitle;
       },
       groupByAlbum,
-    );
+    ).map(applyReleaseVariantGrouping);
   }, [songs, groupByAlbum]);
 
   // 全楽曲の統計
@@ -93,7 +105,7 @@ export function useDiscographyData(
       (s) =>
         groupByAlbum ? s.album || getSongKeyTitle(s) : getSongKeyTitle(s),
       groupByAlbum,
-    );
+    ).map(applyReleaseVariantGrouping);
   }, [songs, groupByAlbum]);
 
   return {
