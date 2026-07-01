@@ -66,12 +66,16 @@ export function useDiscographyData(
     s.album ||
     getSongKeyTitle(s);
   const tabCounts = useMemo(() => {
-    const countStatisticsItems = (items: Song[], keyFn: (song: Song) => string) =>
+    const countStatisticsItems = (
+      items: Song[],
+      keyFn: (song: Song) => string,
+    ) =>
       createStatistics(items, keyFn, false).map(applyReleaseVariantGrouping)
         .length;
 
     const originals = songs.filter((s) => {
-      const isOriginal = s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
+      const isOriginal =
+        s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
       return isOriginal && isPossibleOriginalSong(s);
     });
     const units = songs.filter(
