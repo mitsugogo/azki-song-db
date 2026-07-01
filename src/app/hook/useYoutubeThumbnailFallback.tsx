@@ -11,7 +11,7 @@ const RESOLUTIONS = [
 type Resolution = (typeof RESOLUTIONS)[number];
 
 const getImageUrl = (videoId: string, resolution: Resolution): string => {
-  return `https://img.youtube.com/vi/${videoId}/${resolution}.jpg`;
+  return `https://i.ytimg.com/vi_webp/${videoId}/${resolution}.webp`;
 };
 
 interface YoutubeThumbnailFallbackResult {
