@@ -14,6 +14,10 @@ import { Song } from "@/app/types/song";
 const publicCacheControl =
   "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300";
 const privateCacheControl = "private, no-store, max-age=0, must-revalidate";
+const membersOnlyResponseHeaders = {
+  "Cache-Control": privateCacheControl,
+  Vary: "Cookie",
+} as const;
 
 export async function GET(request: Request) {
   try {
@@ -48,9 +52,7 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(redirectUrl, {
         status: 307,
-        headers: {
-          "Cache-Control": publicCacheControl,
-        },
+        headers: membersOnlyResponseHeaders,
       });
     }
 
@@ -286,6 +288,7 @@ export async function GET(request: Request) {
       const sheetTitle = (sheet.properties?.title || "").toLowerCase();
       if (sheetTitle === "artists" || sheetTitle === "song_titles") return; // 翻訳シートはスキップ
       const isMembersOnlySong = isMembersOnlySongSheetTitle(sheetTitle);
+      if (isMembersOnlySong && !includeMembersOnlySongs) return;
 
       sheetRows.slice(1).forEach((row) => {
         const vals = row.values || [];
@@ -469,7 +472,7 @@ export async function GET(request: Request) {
     const now = new Date();
     const responseHeaders: Record<string, string> = {
       "Cache-Control": includeMembersOnlyRequested
-        ? privateCacheControl
+        ? membersOnlyResponseHeaders["Cache-Control"]
         : publicCacheControl,
       "Vercel-Cache-Tag": buildVercelCacheTagHeader([
         cacheTags.coreDataset,
@@ -482,7 +485,7 @@ export async function GET(request: Request) {
 
     // Cookie の有無でレスポンスが変わるのはメン限クエリ指定時のみ。
     if (includeMembersOnlyRequested) {
-      responseHeaders.Vary = "Cookie";
+      responseHeaders.Vary = membersOnlyResponseHeaders.Vary;
     }
 
     return NextResponse.json(

@@ -153,9 +153,107 @@ describe("songs route", () => {
       "http://localhost/api/songs?hl=ja",
     );
     expect(response.headers.get("cache-control")).toBe(
-      "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+      "private, no-store, max-age=0, must-revalidate",
     );
+    expect(response.headers.get("vary")).toBe("Cookie");
     expect(getMock).not.toHaveBeenCalled();
+  });
+
+  it("メン限OFFではレスポンスに混ざったメン限シートも返さない", async () => {
+    getMock.mockResolvedValue({
+      data: {
+        sheets: [
+          {
+            properties: { title: "歌枠【メン限】" },
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [
+                      { formattedValue: "ID" },
+                      { formattedValue: "有効" },
+                      { formattedValue: "曲名" },
+                      { formattedValue: "アーティスト" },
+                      { formattedValue: "動画" },
+                      { formattedValue: "開始" },
+                      { formattedValue: "配信日" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "1" },
+                      { userEnteredValue: { boolValue: true } },
+                      { formattedValue: "Member Song" },
+                      { formattedValue: "AZKi" },
+                      {
+                        formattedValue: "https://youtu.be/abcdefghijk",
+                        hyperlink: "https://youtu.be/abcdefghijk",
+                      },
+                      { userEnteredValue: { numberValue: 0 } },
+                      { userEnteredValue: { numberValue: 45658 } },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            properties: { title: "歌枠2025" },
+            data: [
+              {
+                rowData: [
+                  {
+                    values: [
+                      { formattedValue: "ID" },
+                      { formattedValue: "有効" },
+                      { formattedValue: "曲名" },
+                      { formattedValue: "アーティスト" },
+                      { formattedValue: "動画" },
+                      { formattedValue: "開始" },
+                      { formattedValue: "配信日" },
+                    ],
+                  },
+                  {
+                    values: [
+                      { formattedValue: "2" },
+                      { userEnteredValue: { boolValue: true } },
+                      { formattedValue: "Public Song" },
+                      { formattedValue: "AZKi" },
+                      {
+                        formattedValue: "https://youtu.be/lmnopqrstuv",
+                        hyperlink: "https://youtu.be/lmnopqrstuv",
+                      },
+                      { userEnteredValue: { numberValue: 0 } },
+                      { userEnteredValue: { numberValue: 45657 } },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const response = await GET(new Request("http://localhost/api/songs?hl=ja"));
+    const songs = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(songs).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: "Member Song",
+        }),
+      ]),
+    );
+    expect(songs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: "Public Song",
+          is_members_only: false,
+        }),
+      ]),
+    );
   });
 
   it("メン限シート由来の楽曲にフラグを付与する", async () => {
@@ -234,7 +332,17 @@ describe("songs route", () => {
       },
     });
 
-    const response = await GET(new Request("http://localhost/api/songs?hl=ja"));
+    const token = createMembersOnlyAccessToken();
+    const response = await GET(
+      new Request(
+        `http://localhost/api/songs?hl=ja&${songsMembersOnlyQueryParamKey}=true`,
+        {
+          headers: {
+            cookie: `azki_members_only_access=${encodeURIComponent(token ?? "")}`,
+          },
+        },
+      ),
+    );
     const songs = await response.json();
 
     expect(response.status).toBe(200);
