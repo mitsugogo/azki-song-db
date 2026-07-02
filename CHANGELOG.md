@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.2](https://github.com/mitsugogo/azki-song-db/compare/v2.9.1...v2.9.2) (2026-07-02)
+
+
+### Bug Fixes
+
+* 楽曲APIのキャッシュ戦略修正 ([3ba3242](https://github.com/mitsugogo/azki-song-db/commit/3ba3242d13212ccd467a54f96d31c9d4f92ed95e))
+
 ### [2.9.1](https://github.com/mitsugogo/azki-song-db/compare/v2.9.0...v2.9.1) (2026-07-01)
 
 
