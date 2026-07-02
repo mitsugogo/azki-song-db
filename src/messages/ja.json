@@ -21,6 +21,7 @@
     "discography": "Discography",
     "activity": "活動記録",
     "anniversaries": "記念日",
+    "archives": "配信アーカイブ",
     "statistics": "統計情報",
     "allData": "全収録データ",
     "myBest9Songs": "究極の9曲",
@@ -312,6 +313,12 @@
       "description": "AZKiさんの活動や楽曲に関する記念日を一覧表示します。",
       "ogSubtitle": "記念日一覧 - {siteName}",
       "ogAlt": "{siteName} - 記念日一覧"
+    },
+    "archives": {
+      "title": "配信アーカイブ",
+      "description": "AZKiさんの配信アーカイブを一覧表示します。",
+      "ogSubtitle": "配信アーカイブ - {siteName}",
+      "ogAlt": "{siteName} - 配信アーカイブ"
     },
     "playlist": {
       "title": "プレイリスト",
@@ -783,6 +790,45 @@
     "noteLabel": "メモ",
     "linkLabel": "リンク",
     "openLink": "リンク"
+  },
+  "Archives": {
+    "homeLabel": "HOME",
+    "breadcrumb": "配信アーカイブ",
+    "title": "配信アーカイブ",
+    "description": "配信済のアーカイブからシリーズやタイムスタンプなどで検索できます。",
+    "searchPlaceholder": "配信タイトル・シリーズ・概要欄・話題などで検索...",
+    "seriesPlaceholder": "シリーズ一覧",
+    "seriesNothingFound": "該当するシリーズはありません",
+    "dateRangePlaceholder": "配信期間",
+    "clearFilters": "条件をクリア",
+    "resultCount": "{count} / {total} 件",
+    "seriesCount": "{count} シリーズ",
+    "itemsCount": "{count} 件",
+    "activityTitle": "活動時間",
+    "activityShow": "活動量を表示",
+    "activityHide": "活動量を非表示",
+    "activityTotalDuration": "合計 {duration}",
+    "activityYearLabel": "表示年",
+    "activityLegendLess": "少ない",
+    "activityLegendMore": "多い",
+    "activityCellLabel": "{date}: {duration}（{count} 件）",
+    "activityEmptyCellLabel": "{date}: 0m",
+    "activityNoData": "配信開始日を算出できるアーカイブがありません。",
+    "loading": "配信アーカイブを読み込み中...",
+    "empty": "表示できる配信アーカイブはありません。",
+    "thumbnailLabel": "サムネイル",
+    "publishedAtLabel": "配信日時",
+    "videoDurationLabel": "動画時間",
+    "topicLabel": "シリーズ",
+    "titleLabel": "配信タイトル",
+    "descriptionLabel": "概要欄",
+    "timestampLabel": "タイムスタンプ",
+    "linkLabel": "リンク",
+    "timestampTooltip": "配信コメント内の有志のタイムスタンプです",
+    "TimestampComment": {
+      "close": "折りたたむ",
+      "more": "もっとみる"
+    }
   },
   "Statistics": {
     "title": "統計情報",

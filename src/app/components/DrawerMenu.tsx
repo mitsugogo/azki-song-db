@@ -80,6 +80,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
     "/discography": t("discography"),
     "/summary": t("activity"),
     "/anniversaries": t("anniversaries"),
+    "/stream-archives": t("archives"),
     "/statistics": t("statistics"),
     "/data": t("allData"),
     "/share/my-best-9-songs": t("myBest9Songs"),

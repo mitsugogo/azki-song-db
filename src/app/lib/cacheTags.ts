@@ -6,6 +6,8 @@ export const cacheTags = {
   milestonesList: "milestones:list",
   events: "events",
   eventsList: "events:list",
+  archives: "archives",
+  archivesList: "archives:list",
   channels: "channels",
   channelsList: "channels:list",
   ytInfo: "yt:info",
