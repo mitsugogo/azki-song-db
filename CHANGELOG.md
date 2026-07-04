@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/mitsugogo/azki-song-db/compare/v2.10.0...v2.11.0) (2026-07-04)
+
+
+### Features
+
+* アクティビティを追加 ([b7b2728](https://github.com/mitsugogo/azki-song-db/commit/b7b2728dec2c94341b37b3305ed359cfd79b1ef6))
+* 配信アーカイブに再生ボタンを追加 ([92d18f0](https://github.com/mitsugogo/azki-song-db/commit/92d18f026e15fb9278b2d004c7889ac4302c6573))
+
 ## [2.10.0](https://github.com/mitsugogo/azki-song-db/compare/v2.9.2...v2.10.0) (2026-07-04)
 
 
