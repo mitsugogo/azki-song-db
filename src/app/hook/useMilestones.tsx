@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { fetchJsonDedup } from "../lib/fetchDedup";
 
-type MilestoneItem = {
+export type MilestoneItem = {
   date: string; // ISO or empty
   content: string;
   note?: string;

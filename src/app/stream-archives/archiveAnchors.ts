@@ -9,7 +9,7 @@ export const getArchiveAnchorHref = (videoId: string) =>
 export const getArchiveAnchorUrl = (currentHref: string, videoId: string) => {
   const url = new URL(currentHref);
   url.search = "";
-  url.hash = getArchiveAnchorHref(videoId);
+  url.hash = getArchiveAnchorId(videoId);
   return url.toString();
 };
 
@@ -18,9 +18,10 @@ export const getArchiveVideoIdFromHash = (hash: string) => {
 
   try {
     const decodedHash = decodeURIComponent(hashValue);
-    return decodedHash.startsWith(ARCHIVE_ANCHOR_PREFIX)
-      ? decodedHash.slice(ARCHIVE_ANCHOR_PREFIX.length)
-      : null;
+    const archiveHash = decodedHash
+      .split("#")
+      .findLast((part) => part.startsWith(ARCHIVE_ANCHOR_PREFIX));
+    return archiveHash ? archiveHash.slice(ARCHIVE_ANCHOR_PREFIX.length) : null;
   } catch {
     return null;
   }
