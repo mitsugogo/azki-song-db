@@ -1242,7 +1242,7 @@ export default function ArchivesPageClient() {
         <div className="w-full max-w-full overflow-hidden rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
           <OverlayScrollbarsComponent
             ref={archiveScrollRef}
-            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-340px)] lg:h-[calc(100dvh-363px)]"
+            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-440px)] lg:h-[calc(100dvh-383px)]"
           >
             <div style={{ minWidth: DESKTOP_TABLE_MIN_WIDTH }}>
               <div
@@ -1393,7 +1393,7 @@ export default function ArchivesPageClient() {
       ) : (
         <OverlayScrollbarsComponent
           ref={archiveScrollRef}
-          className="h-[calc(100dvh-320px)] pr-1 md:h-[calc(100dvh-290px)]"
+          className="h-[calc(100dvh-490px)] pr-1 md:h-[calc(100dvh-290px)]"
         >
           <div
             className="relative"
