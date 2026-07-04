@@ -40,12 +40,19 @@ import {
   HiSearch,
   HiX,
 } from "react-icons/hi";
-import { HiArrowsUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
+import {
+  HiArrowsUpDown,
+  HiChevronDown,
+  HiChevronUp,
+  HiPlay,
+} from "react-icons/hi2";
 import { FaYoutube } from "react-icons/fa6";
 import { useLocale, useTranslations } from "next-intl";
 import useArchives from "../hook/useArchives";
 import useChannels from "../hook/useChannels";
+import useSongs from "../hook/useSongs";
 import { ArchiveItem } from "../types/archiveItem";
+import type { Song } from "../types/song";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import { formatDate } from "../lib/formatDate";
 import historyHelper from "../lib/history";
@@ -68,6 +75,7 @@ import {
   getArchiveVideoIdFromHash,
 } from "./archiveAnchors";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
+import { buildWatchHref } from "../lib/watchUrl";
 
 type ArchiveGroup = {
   key: string;
@@ -86,6 +94,7 @@ type IndexedArchiveItem = ArchiveItem & {
   streamStartedDateKey: string;
   videoDurationSeconds: number;
   searchText: string;
+  appWatchHref: string | null;
 };
 
 type ArchiveFilterState = {
@@ -110,7 +119,7 @@ type ArchiveSortState = {
 const DESKTOP_COLUMNS = "184px 150px 104px 160px 280px 320px 1fr";
 const DESKTOP_STICKY_SUMMARY_COLUMNS = "184px 150px 104px 160px 280px 320px";
 const DESKTOP_TABLE_MIN_WIDTH = 1724;
-const DESKTOP_STICKY_SUMMARY_HEIGHT = 144;
+const DESKTOP_STICKY_SUMMARY_HEIGHT = 160;
 const DESKTOP_STICKY_SUMMARY_TOP = 32;
 const DATE_PARAM_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TEXT_QUERY_PARAM = "keyword";
@@ -234,6 +243,7 @@ const formatArchiveDate = (value: string, locale: string) => {
 const createIndexedArchives = (
   items: ArchiveItem[],
   channelsById: Map<string, ChannelEntry>,
+  firstSongsByVideoId: Map<string, Song>,
 ) =>
   items.map((item) => {
     const seriesTitle = getArchiveSeriesTitle(item);
@@ -262,6 +272,7 @@ const createIndexedArchives = (
         item.stream_started_at,
       ].join("\n"),
     );
+    const firstSong = firstSongsByVideoId.get(item.video_id);
 
     return {
       ...item,
@@ -273,8 +284,31 @@ const createIndexedArchives = (
       streamStartedDateKey,
       videoDurationSeconds,
       searchText,
+      appWatchHref: firstSong
+        ? buildWatchHref({
+            videoId: firstSong.video_id,
+            start: firstSong.start,
+          })
+        : null,
     };
   });
+
+const createFirstSongsByVideoId = (songs: Song[]) => {
+  const map = new Map<string, Song>();
+
+  songs.forEach((song) => {
+    if (!song.video_id) {
+      return;
+    }
+
+    const currentSong = map.get(song.video_id);
+    if (!currentSong || Number(song.start) < Number(currentSong.start)) {
+      map.set(song.video_id, song);
+    }
+  });
+
+  return map;
+};
 
 const createArchiveGroups = (items: IndexedArchiveItem[]) => {
   const groups = new Map<string, ArchiveGroup>();
@@ -590,9 +624,11 @@ const ArchiveChannelLink = memo(function ArchiveChannelLink({
 const ThumbnailLink = memo(function ThumbnailLink({
   item,
   className,
+  appWatchLabel,
 }: {
   item: IndexedArchiveItem;
   className: string;
+  appWatchLabel: string;
 }) {
   return (
     <div className={className}>
@@ -617,6 +653,20 @@ const ThumbnailLink = memo(function ThumbnailLink({
           </span>
         )}
       </Link>
+      {item.appWatchHref && (
+        <Button
+          component={Link}
+          href={item.appWatchHref}
+          variant="light"
+          color="pink"
+          size="xs"
+          fullWidth
+          leftSection={<HiPlay className="h-4 w-4" />}
+          className="mt-2"
+        >
+          {appWatchLabel}
+        </Button>
+      )}
     </div>
   );
 });
@@ -654,6 +704,7 @@ const MobileGroupHeader = memo(function MobileGroupHeader({
 const MobileArchiveCard = memo(function MobileArchiveCard({
   item,
   locale,
+  appWatchLabel,
   timestampLabel,
   anchorLinkLabel,
   anchorCopiedLabel,
@@ -663,6 +714,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
 }: {
   item: IndexedArchiveItem;
   locale: string;
+  appWatchLabel: string;
   timestampLabel: string;
   anchorLinkLabel: string;
   anchorCopiedLabel: string;
@@ -684,7 +736,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
         isAnchored ? "ring-2 ring-primary/40" : ""
       }`}
     >
-      <ThumbnailLink item={item} className="" />
+      <ThumbnailLink item={item} className="" appWatchLabel={appWatchLabel} />
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -783,15 +835,17 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
   item,
   locale,
   highlightQuery,
+  appWatchLabel,
 }: {
   item: IndexedArchiveItem;
   locale: string;
   highlightQuery: string;
+  appWatchLabel: string;
 }) {
   const cellClass =
-    "h-36 bg-white/95 px-3 py-3 text-gray-800 shadow-sm dark:bg-gray-900/95 dark:text-gray-100";
+    "h-40 bg-white/95 px-3 py-3 text-gray-800 shadow-sm dark:bg-gray-900/95 dark:text-gray-100";
   const mutedCellClass =
-    "h-36 bg-white/95 px-3 py-3 text-gray-600 shadow-sm dark:bg-gray-900/95 dark:text-gray-300";
+    "h-40 bg-white/95 px-3 py-3 text-gray-600 shadow-sm dark:bg-gray-900/95 dark:text-gray-300";
 
   return (
     <div
@@ -802,7 +856,11 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
       }}
     >
       <div className={cellClass}>
-        <ThumbnailLink item={item} className="w-40 rounded-md" />
+        <ThumbnailLink
+          item={item}
+          className="w-40 rounded-md"
+          appWatchLabel={appWatchLabel}
+        />
       </div>
       <div className={`${cellClass} whitespace-nowrap`}>
         {formatArchiveDate(item.stream_started_at, locale)}
@@ -855,6 +913,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
   item,
   locale,
   highlightQuery,
+  appWatchLabel,
   anchorLinkLabel,
   anchorCopiedLabel,
   isAnchored,
@@ -865,6 +924,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
   item: IndexedArchiveItem;
   locale: string;
   highlightQuery: string;
+  appWatchLabel: string;
   anchorLinkLabel: string;
   anchorCopiedLabel: string;
   isAnchored: boolean;
@@ -889,7 +949,11 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
       style={{ gridTemplateColumns: DESKTOP_COLUMNS }}
     >
       <div className="px-3 py-3 align-top text-gray-800 dark:text-gray-100">
-        <ThumbnailLink item={item} className="w-40 rounded-md" />
+        <ThumbnailLink
+          item={item}
+          className="w-40 rounded-md"
+          appWatchLabel={appWatchLabel}
+        />
       </div>
       <div className="whitespace-nowrap px-3 py-3 align-top text-gray-800 dark:text-gray-100">
         {formatArchiveDate(item.stream_started_at, locale)}
@@ -969,6 +1033,7 @@ export default function ArchivesPageClient() {
   const locale = useLocale();
   const { items, isLoading } = useArchives();
   const { channels } = useChannels();
+  const { allSongs } = useSongs();
   const [filterQuery, setFilterQuery] = useState("");
   const [debouncedFilterQuery] = useDebouncedValue(filterQuery, 200);
   const deferredFilterQuery = useDeferredValue(debouncedFilterQuery);
@@ -1009,9 +1074,14 @@ export default function ArchivesPageClient() {
     return map;
   }, [channels]);
 
+  const firstSongsByVideoId = useMemo(
+    () => createFirstSongsByVideoId(allSongs),
+    [allSongs],
+  );
+
   const indexedItems = useMemo(
-    () => createIndexedArchives(items, channelsById),
-    [channelsById, items],
+    () => createIndexedArchives(items, channelsById, firstSongsByVideoId),
+    [channelsById, firstSongsByVideoId, items],
   );
   const archiveSortCollator = useMemo(
     () => new Intl.Collator(locale, { numeric: true, sensitivity: "base" }),
@@ -1227,7 +1297,12 @@ export default function ArchivesPageClient() {
 
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [archiveEntries.length, isDesktop, rowVirtualizer]);
+  }, [
+    archiveEntries.length,
+    firstSongsByVideoId.size,
+    isDesktop,
+    rowVirtualizer,
+  ]);
 
   useEffect(() => {
     if (!isUrlFilterReady || isLoading || archiveEntries.length === 0) {
@@ -1574,6 +1649,7 @@ export default function ArchivesPageClient() {
                       item={activeStickyArchiveItem}
                       locale={locale}
                       highlightQuery={deferredFilterQuery}
+                      appWatchLabel={t("appWatchLabel")}
                     />
                   </div>
                 </div>
@@ -1629,6 +1705,7 @@ export default function ArchivesPageClient() {
                           item={entry.item}
                           locale={locale}
                           highlightQuery={deferredFilterQuery}
+                          appWatchLabel={t("appWatchLabel")}
                           anchorLinkLabel={t("anchorLinkLabel")}
                           anchorCopiedLabel={t("anchorCopiedLabel")}
                           isAnchored={
@@ -1703,6 +1780,7 @@ export default function ArchivesPageClient() {
                     <MobileArchiveCard
                       item={entry.item}
                       locale={locale}
+                      appWatchLabel={t("appWatchLabel")}
                       timestampLabel={t("timestampLabel")}
                       anchorLinkLabel={t("anchorLinkLabel")}
                       anchorCopiedLabel={t("anchorCopiedLabel")}
