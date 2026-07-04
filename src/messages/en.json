@@ -21,6 +21,7 @@
     "discography": "Discography",
     "activity": "Activity",
     "anniversaries": "Anniversaries",
+    "archives": "Stream Archives",
     "statistics": "Statistics",
     "allData": "All Data",
     "myBest9Songs": "Cloud Nine",
@@ -314,6 +315,12 @@
       "description": "Browse anniversaries related to AZKi's activities and songs.",
       "ogSubtitle": "Anniversary list - {siteName}",
       "ogAlt": "{siteName} - Anniversary list"
+    },
+    "archives": {
+      "title": "Stream Archives",
+      "description": "Browse AZKi's stream archives.",
+      "ogSubtitle": "Stream archives - {siteName}",
+      "ogAlt": "{siteName} - Stream archives"
     },
     "playlist": {
       "title": "Playlist",
@@ -792,6 +799,47 @@
     "linkLabel": "Link",
     "openLink": "Open link",
     "featuredTodayTitle": "Anniversary🎉"
+  },
+  "Archives": {
+    "homeLabel": "HOME",
+    "breadcrumb": "Stream Archives",
+    "title": "Stream Archives",
+    "description": "You can search by series, timestamp, etc. from the distributed archives.",
+    "searchPlaceholder": "Search by distribution title, series, summary column, topic, etc...",
+    "seriesPlaceholder": "Series list",
+    "seriesNothingFound": "No matching series",
+    "dateRangePlaceholder": "Stream period",
+    "clearFilters": "Clear filters",
+    "resultCount": "{count} / {total} items",
+    "seriesCount": "{count} series",
+    "itemsCount": "{count} items",
+    "activityTitle": "Activity time",
+    "activityShow": "Show activity",
+    "activityHide": "Hide activity",
+    "activityTotalDuration": "{duration} total",
+    "activityYearLabel": "Display year",
+    "activityLegendLess": "Less",
+    "activityLegendMore": "More",
+    "activityCellLabel": "{date}: {duration} ({count} streams)",
+    "activityEmptyCellLabel": "{date}: 0m",
+    "activityNoData": "No archives have a calculable stream start date.",
+    "loading": "Loading stream archives...",
+    "empty": "No stream archives to display.",
+    "thumbnailLabel": "Thumbnail",
+    "publishedAtLabel": "Stream date",
+    "videoDurationLabel": "Duration",
+    "topicLabel": "series",
+    "titleLabel": "Stream title",
+    "descriptionLabel": "Description",
+    "timestampLabel": "Timestamps",
+    "linkLabel": "Link",
+    "anchorLinkLabel": "Copy link to this item",
+    "anchorCopiedLabel": "Copied",
+    "timestampTooltip": "This is the time stamp of the volunteer in the broadcast comment.",
+    "TimestampComment": {
+      "more": "See more",
+      "close": "fold"
+    }
   },
   "Statistics": {
     "title": "Statistics",

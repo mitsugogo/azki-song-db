@@ -7,6 +7,9 @@ overrides:
   glob: ^9.3.0
   rimraf: ^4.0.0
   postcss: ^8.5.15
+  vite: 8.0.16
+  undici: 7.28.0
+  js-yaml: 4.2.0
 
 allowBuilds:
   "@parcel/watcher": true

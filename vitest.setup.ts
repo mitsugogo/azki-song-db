@@ -25,6 +25,7 @@ vi.mock("next-intl", () => {
     useTranslations: () => (key: string) => {
       const translations: Record<string, string> = {
         "detail.preview": "プレビュー",
+        close: "閉じる",
         groupArranger: "編曲",
         groupArtist: "アーティスト",
         groupComposer: "作曲",
@@ -36,6 +37,7 @@ vi.mock("next-intl", () => {
         groupTitle: "曲名",
         groupUnit: "ユニット",
         groupYear: "配信年",
+        more: "もっと見る",
         searchPlaceholder: "曲名、アーティスト、タグなどで検索",
       };
       return translations[key] ?? key;
