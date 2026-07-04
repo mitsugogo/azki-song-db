@@ -826,6 +826,7 @@
     "loading": "Loading stream archives...",
     "empty": "No stream archives to display.",
     "thumbnailLabel": "Thumbnail",
+    "appWatchLabel": "Play",
     "publishedAtLabel": "Stream date",
     "videoDurationLabel": "Duration",
     "topicLabel": "series",
