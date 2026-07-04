@@ -833,6 +833,8 @@
     "descriptionLabel": "Description",
     "timestampLabel": "Timestamps",
     "linkLabel": "Link",
+    "anchorLinkLabel": "Copy link to this item",
+    "anchorCopiedLabel": "Copied",
     "timestampTooltip": "This is the time stamp of the volunteer in the broadcast comment.",
     "TimestampComment": {
       "more": "See more",

@@ -1,7 +1,16 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import {
+  memo,
+  startTransition,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import {
   Badge,
   Breadcrumbs,
@@ -24,8 +33,10 @@ import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
   HiChartBar,
+  HiCheck,
   HiChevronRight,
   HiHome,
+  HiLink,
   HiSearch,
   HiX,
 } from "react-icons/hi";
@@ -51,6 +62,11 @@ import {
   getStreamStartedAtMs,
   isInStreamStartedDateRange,
 } from "./archiveActivity";
+import {
+  getArchiveAnchorId,
+  getArchiveAnchorUrl,
+  getArchiveVideoIdFromHash,
+} from "./archiveAnchors";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 
 type ArchiveGroup = {
@@ -452,6 +468,83 @@ const YoutubeButton = memo(function YoutubeButton({
   );
 });
 
+const copyTextToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+      return document.execCommand("copy");
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+};
+
+const ArchiveAnchorLink = memo(function ArchiveAnchorLink({
+  videoId,
+  label,
+  copiedLabel,
+}: {
+  videoId: string;
+  label: string;
+  copiedLabel: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copyResetTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current !== null) {
+        window.clearTimeout(copyResetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleClick = useCallback(async () => {
+    const didCopy = await copyTextToClipboard(
+      getArchiveAnchorUrl(window.location.href, videoId),
+    );
+    if (!didCopy) {
+      return;
+    }
+
+    setCopied(true);
+    if (copyResetTimerRef.current !== null) {
+      window.clearTimeout(copyResetTimerRef.current);
+    }
+    copyResetTimerRef.current = window.setTimeout(() => {
+      setCopied(false);
+      copyResetTimerRef.current = null;
+    }, 1600);
+  }, [videoId]);
+
+  return (
+    <Tooltip label={copied ? copiedLabel : label} withArrow>
+      <button
+        type="button"
+        aria-label={copied ? copiedLabel : label}
+        onClick={handleClick}
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/40 dark:text-gray-300 dark:hover:text-primary-200"
+      >
+        {copied ? (
+          <HiCheck className="h-4 w-4 text-teal-600 dark:text-teal-300" />
+        ) : (
+          <HiLink className="h-4 w-4" />
+        )}
+      </button>
+    </Tooltip>
+  );
+});
+
 const ArchiveChannelLink = memo(function ArchiveChannelLink({
   item,
 }: {
@@ -561,13 +654,19 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
   item,
   locale,
   timestampLabel,
+  anchorLinkLabel,
+  anchorCopiedLabel,
   highlightQuery,
+  isAnchored,
   onTimestampResize,
 }: {
   item: IndexedArchiveItem;
   locale: string;
   timestampLabel: string;
+  anchorLinkLabel: string;
+  anchorCopiedLabel: string;
   highlightQuery: string;
+  isAnchored: boolean;
   onTimestampResize: () => void;
 }) {
   const normalizedHighlightQuery = normalizeSearchText(highlightQuery);
@@ -577,7 +676,13 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
     normalizeSearchText(item.description).includes(normalizedHighlightQuery);
 
   return (
-    <article className="card-glassmorphism overflow-hidden border border-primary/10">
+    <article
+      id={getArchiveAnchorId(item.video_id)}
+      tabIndex={-1}
+      className={`card-glassmorphism overflow-hidden border border-primary/10 focus:outline-none ${
+        isAnchored ? "ring-2 ring-primary/40" : ""
+      }`}
+    >
       <ThumbnailLink item={item} className="" />
 
       <div className="p-4">
@@ -597,6 +702,11 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
               {formatArchiveDate(item.stream_started_at, locale)}
             </Text>
           </div>
+          <ArchiveAnchorLink
+            videoId={item.video_id}
+            label={anchorLinkLabel}
+            copiedLabel={anchorCopiedLabel}
+          />
         </div>
 
         {item.topic && (
@@ -745,6 +855,9 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
   item,
   locale,
   highlightQuery,
+  anchorLinkLabel,
+  anchorCopiedLabel,
+  isAnchored,
   isTimestampExpanded,
   onTimestampResize,
   onTimestampExpandedChange,
@@ -752,6 +865,9 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
   item: IndexedArchiveItem;
   locale: string;
   highlightQuery: string;
+  anchorLinkLabel: string;
+  anchorCopiedLabel: string;
+  isAnchored: boolean;
   isTimestampExpanded: boolean;
   onTimestampResize: () => void;
   onTimestampExpandedChange: (videoId: string, expanded: boolean) => void;
@@ -765,7 +881,11 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
 
   return (
     <div
-      className="grid border-b border-light-gray-200/50 bg-white/70 text-sm dark:border-white/10 dark:bg-gray-900/50"
+      id={getArchiveAnchorId(item.video_id)}
+      tabIndex={-1}
+      className={`grid border-b border-light-gray-200/50 bg-white/70 text-sm focus:outline-none dark:border-white/10 dark:bg-gray-900/50 ${
+        isAnchored ? "ring-2 ring-inset ring-primary/40" : ""
+      }`}
       style={{ gridTemplateColumns: DESKTOP_COLUMNS }}
     >
       <div className="px-3 py-3 align-top text-gray-800 dark:text-gray-100">
@@ -791,18 +911,27 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
         )}
       </div>
       <div className="px-3 py-3 align-top font-semibold">
-        <FaYoutube className="h-4 w-4 inline text-red-600" />
-        <Link
-          href={item.video_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-1 text-primary hover:text-primary/80"
-        >
-          <ArchiveTextHighlight highlight={highlightQuery}>
-            {item.title}
-          </ArchiveTextHighlight>
-        </Link>
-        <ArchiveChannelLink item={item} />
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <FaYoutube className="h-4 w-4 inline text-red-600" />
+            <Link
+              href={item.video_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 text-primary hover:text-primary/80"
+            >
+              <ArchiveTextHighlight highlight={highlightQuery}>
+                {item.title}
+              </ArchiveTextHighlight>
+            </Link>
+            <ArchiveChannelLink item={item} />
+          </div>
+          <ArchiveAnchorLink
+            videoId={item.video_id}
+            label={anchorLinkLabel}
+            copiedLabel={anchorCopiedLabel}
+          />
+        </div>
       </div>
       <div className="px-3 py-3 align-top text-gray-600 dark:text-gray-300">
         <p className="max-h-24 line-clamp-3 whitespace-pre-line leading-6">
@@ -842,6 +971,7 @@ export default function ArchivesPageClient() {
   const { channels } = useChannels();
   const [filterQuery, setFilterQuery] = useState("");
   const [debouncedFilterQuery] = useDebouncedValue(filterQuery, 200);
+  const deferredFilterQuery = useDeferredValue(debouncedFilterQuery);
   const [selectedSeriesKey, setSelectedSeriesKey] = useState<string | null>(
     null,
   );
@@ -856,13 +986,17 @@ export default function ArchivesPageClient() {
   >(null);
   const [isActivityVisible, setIsActivityVisible] = useState(false);
   const [archiveScrollTop, setArchiveScrollTop] = useState(0);
+  const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
+    string | null
+  >(null);
   const [sortState, setSortState] =
     useState<ArchiveSortState>(DEFAULT_ARCHIVE_SORT);
   const archiveScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
+  const isFilterInputFocusedRef = useRef(false);
 
   const normalizedQuery = useMemo(
-    () => normalizeSearchText(debouncedFilterQuery),
-    [debouncedFilterQuery],
+    () => normalizeSearchText(deferredFilterQuery),
+    [deferredFilterQuery],
   );
 
   const channelsById = useMemo(() => {
@@ -969,6 +1103,39 @@ export default function ArchivesPageClient() {
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
+  const scrollToCurrentArchiveHash = useCallback(() => {
+    if (isFilterInputFocusedRef.current) {
+      return;
+    }
+
+    const videoId = getArchiveVideoIdFromHash(window.location.hash);
+    if (!videoId) {
+      setActiveArchiveAnchorVideoId(null);
+      return;
+    }
+
+    const archiveEntryIndex = archiveEntries.findIndex(
+      (entry) => entry.type === "item" && entry.item.video_id === videoId,
+    );
+    if (archiveEntryIndex === -1) {
+      setActiveArchiveAnchorVideoId(null);
+      return;
+    }
+
+    setActiveArchiveAnchorVideoId(videoId);
+    rowVirtualizer.scrollToIndex(archiveEntryIndex, { align: "center" });
+
+    window.setTimeout(() => {
+      if (isFilterInputFocusedRef.current) {
+        return;
+      }
+
+      document
+        .getElementById(getArchiveAnchorId(videoId))
+        ?.focus({ preventScroll: true });
+    }, 80);
+  }, [archiveEntries, rowVirtualizer]);
+
   const activeStickyArchiveItem = useMemo(() => {
     if (!isDesktop || expandedTimestampVideoIds.size === 0) {
       return null;
@@ -1012,7 +1179,10 @@ export default function ArchivesPageClient() {
 
     const updateScrollTop = () => {
       if (viewport) {
-        setArchiveScrollTop(viewport.scrollTop);
+        const nextScrollTop = viewport.scrollTop;
+        startTransition(() => {
+          setArchiveScrollTop(nextScrollTop);
+        });
       }
     };
     const scheduleUpdateScrollTop = () => {
@@ -1059,6 +1229,42 @@ export default function ArchivesPageClient() {
     rowVirtualizer.measure();
   }, [archiveEntries.length, isDesktop, rowVirtualizer]);
 
+  useEffect(() => {
+    if (!isUrlFilterReady || isLoading || archiveEntries.length === 0) {
+      return;
+    }
+
+    let frameId: number | null = null;
+    const scheduleArchiveHashScroll = () => {
+      if (isFilterInputFocusedRef.current) {
+        return;
+      }
+
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        scrollToCurrentArchiveHash();
+      });
+    };
+
+    scheduleArchiveHashScroll();
+    window.addEventListener("hashchange", scheduleArchiveHashScroll);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      window.removeEventListener("hashchange", scheduleArchiveHashScroll);
+    };
+  }, [
+    archiveEntries.length,
+    isLoading,
+    isUrlFilterReady,
+    scrollToCurrentArchiveHash,
+  ]);
+
   const handleTimestampExpandedChange = useCallback(
     (videoId: string, expanded: boolean) => {
       setExpandedTimestampVideoIds((currentVideoIds) => {
@@ -1081,27 +1287,77 @@ export default function ArchivesPageClient() {
   );
 
   const handleActivityDateClick = useCallback((dateKey: string) => {
-    setDateRange([dateKey, dateKey]);
+    startTransition(() => {
+      setDateRange([dateKey, dateKey]);
+    });
   }, []);
 
   const handleSortChange = useCallback((columnKey: ArchiveSortKey) => {
-    setSortState((current) => {
-      if (current.key === columnKey) {
+    startTransition(() => {
+      setSortState((current) => {
+        if (current.key === columnKey) {
+          return {
+            key: columnKey,
+            direction: current.direction === "asc" ? "desc" : "asc",
+          };
+        }
+
         return {
           key: columnKey,
-          direction: current.direction === "asc" ? "desc" : "asc",
+          direction: DESC_DEFAULT_SORT_KEYS.has(columnKey) ? "desc" : "asc",
         };
-      }
+      });
+    });
+  }, []);
 
-      return {
-        key: columnKey,
-        direction: DESC_DEFAULT_SORT_KEYS.has(columnKey) ? "desc" : "asc",
-      };
+  const handleFilterQueryChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setFilterQuery(event.currentTarget.value);
+    },
+    [],
+  );
+
+  const handleFilterQueryFocus = useCallback(() => {
+    isFilterInputFocusedRef.current = true;
+  }, []);
+
+  const handleFilterQueryBlur = useCallback(() => {
+    isFilterInputFocusedRef.current = false;
+    if (!isUrlFilterReady) {
+      return;
+    }
+
+    updateArchiveFilterUrl({
+      query: filterQuery,
+      seriesKey: selectedSeriesKey,
+      dateRange,
+    });
+  }, [dateRange, filterQuery, isUrlFilterReady, selectedSeriesKey]);
+
+  const handleSeriesKeyChange = useCallback((value: string | null) => {
+    startTransition(() => {
+      setSelectedSeriesKey(value);
+    });
+  }, []);
+
+  const handleDateRangeChange = useCallback((value: DateRangeValue) => {
+    startTransition(() => {
+      setDateRange(value);
+    });
+  }, []);
+
+  const handleClearDetailedFilters = useCallback(() => {
+    startTransition(() => {
+      setSelectedSeriesKey(null);
+      setDateRange([null, null]);
     });
   }, []);
 
   useEffect(() => {
     if (!isUrlFilterReady) {
+      return;
+    }
+    if (isFilterInputFocusedRef.current) {
       return;
     }
 
@@ -1185,7 +1441,9 @@ export default function ArchivesPageClient() {
             value={filterQuery}
             placeholder={t("searchPlaceholder")}
             leftSection={<HiSearch />}
-            onChange={(event) => setFilterQuery(event.currentTarget.value)}
+            onChange={handleFilterQueryChange}
+            onFocus={handleFilterQueryFocus}
+            onBlur={handleFilterQueryBlur}
           />
           <Select
             data={seriesOptions}
@@ -1196,7 +1454,7 @@ export default function ArchivesPageClient() {
             clearable
             maxDropdownHeight={320}
             nothingFoundMessage={t("seriesNothingFound")}
-            onChange={setSelectedSeriesKey}
+            onChange={handleSeriesKeyChange}
           />
           <DatePickerInput
             type="range"
@@ -1205,17 +1463,14 @@ export default function ArchivesPageClient() {
             leftSection={<HiCalendar />}
             clearable
             valueFormat="YYYY/MM/DD"
-            onChange={setDateRange}
+            onChange={handleDateRangeChange}
           />
           {hasDetailedFilters && (
             <Button
               variant="light"
               color="gray"
               leftSection={<HiX />}
-              onClick={() => {
-                setSelectedSeriesKey(null);
-                setDateRange([null, null]);
-              }}
+              onClick={handleClearDetailedFilters}
             >
               {t("clearFilters")}
             </Button>
@@ -1318,7 +1573,7 @@ export default function ArchivesPageClient() {
                     <DesktopStickyArchiveSummary
                       item={activeStickyArchiveItem}
                       locale={locale}
-                      highlightQuery={debouncedFilterQuery}
+                      highlightQuery={deferredFilterQuery}
                     />
                   </div>
                 </div>
@@ -1364,7 +1619,7 @@ export default function ArchivesPageClient() {
                         <DesktopGroupHeader
                           group={entry.group}
                           locale={locale}
-                          highlightQuery={debouncedFilterQuery}
+                          highlightQuery={deferredFilterQuery}
                           itemsCountLabel={t("itemsCount", {
                             count: entry.group.items.length,
                           })}
@@ -1373,7 +1628,12 @@ export default function ArchivesPageClient() {
                         <DesktopArchiveRow
                           item={entry.item}
                           locale={locale}
-                          highlightQuery={debouncedFilterQuery}
+                          highlightQuery={deferredFilterQuery}
+                          anchorLinkLabel={t("anchorLinkLabel")}
+                          anchorCopiedLabel={t("anchorCopiedLabel")}
+                          isAnchored={
+                            activeArchiveAnchorVideoId === entry.item.video_id
+                          }
                           isTimestampExpanded={expandedTimestampVideoIds.has(
                             entry.item.video_id,
                           )}
@@ -1434,7 +1694,7 @@ export default function ArchivesPageClient() {
                     <MobileGroupHeader
                       group={entry.group}
                       locale={locale}
-                      highlightQuery={debouncedFilterQuery}
+                      highlightQuery={deferredFilterQuery}
                       itemsCountLabel={t("itemsCount", {
                         count: entry.group.items.length,
                       })}
@@ -1444,7 +1704,12 @@ export default function ArchivesPageClient() {
                       item={entry.item}
                       locale={locale}
                       timestampLabel={t("timestampLabel")}
-                      highlightQuery={debouncedFilterQuery}
+                      anchorLinkLabel={t("anchorLinkLabel")}
+                      anchorCopiedLabel={t("anchorCopiedLabel")}
+                      highlightQuery={deferredFilterQuery}
+                      isAnchored={
+                        activeArchiveAnchorVideoId === entry.item.video_id
+                      }
                       onTimestampResize={scheduleRowMeasure}
                     />
                   )}

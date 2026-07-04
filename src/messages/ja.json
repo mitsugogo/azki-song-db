@@ -824,6 +824,8 @@
     "descriptionLabel": "概要欄",
     "timestampLabel": "タイムスタンプ",
     "linkLabel": "リンク",
+    "anchorLinkLabel": "この項目へのリンクをコピー",
+    "anchorCopiedLabel": "コピーしました",
     "timestampTooltip": "配信コメント内の有志のタイムスタンプです",
     "TimestampComment": {
       "close": "折りたたむ",
