@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/mitsugogo/azki-song-db/compare/v2.9.2...v2.10.0) (2026-07-04)
+
+
+### Features
+
+* 配信のアーカイブリスト機能 ([2ff68aa](https://github.com/mitsugogo/azki-song-db/commit/2ff68aa5ecb2ebd50b5ee1388bf4d0a031a4aad4))
+
+
+### Bug Fixes
+
+* 固定要素が出たときにリンクを踏めないバグを修正 ([faf655b](https://github.com/mitsugogo/azki-song-db/commit/faf655b42dcdd17bbea280ee8777d6ee18849546))
+
 ### [2.9.2](https://github.com/mitsugogo/azki-song-db/compare/v2.9.1...v2.9.2) (2026-07-02)
 
 
