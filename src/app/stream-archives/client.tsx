@@ -108,6 +108,7 @@ type ArchiveSortState = {
 };
 
 const DESKTOP_COLUMNS = "184px 150px 104px 160px 280px 320px 1fr";
+const DESKTOP_STICKY_SUMMARY_COLUMNS = "184px 150px 104px 160px 280px 320px";
 const DESKTOP_TABLE_MIN_WIDTH = 1724;
 const DESKTOP_STICKY_SUMMARY_HEIGHT = 144;
 const DESKTOP_STICKY_SUMMARY_TOP = 32;
@@ -794,9 +795,9 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
 
   return (
     <div
-      className="grid text-sm"
+      className="inline-grid text-sm"
       style={{
-        gridTemplateColumns: DESKTOP_COLUMNS,
+        gridTemplateColumns: DESKTOP_STICKY_SUMMARY_COLUMNS,
         height: DESKTOP_STICKY_SUMMARY_HEIGHT,
       }}
     >
@@ -846,7 +847,6 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
           )}
         </p>
       </div>
-      <div className={mutedCellClass} />
     </div>
   );
 });
@@ -1569,7 +1569,7 @@ export default function ArchivesPageClient() {
               </div>
               {activeStickyArchiveItem && (
                 <div className="pointer-events-none sticky top-8 z-9 h-0">
-                  <div className="pointer-events-auto">
+                  <div className="pointer-events-auto w-fit">
                     <DesktopStickyArchiveSummary
                       item={activeStickyArchiveItem}
                       locale={locale}
