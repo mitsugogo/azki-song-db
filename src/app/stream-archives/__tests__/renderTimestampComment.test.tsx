@@ -62,4 +62,20 @@ describe("renderTimestampComment", () => {
     );
     expect(container.querySelector("mark")?.textContent).toBe("second");
   });
+
+  it("highlights kana variants using the original comment text", () => {
+    const { container } = render(
+      <MantineProvider>
+        <div>
+          {renderTimestampComment(
+            "00:01 今日はｻﾗﾐｨ回です",
+            "test-video-id",
+            "さらみぃ",
+          )}
+        </div>
+      </MantineProvider>,
+    );
+
+    expect(container.querySelector("mark")?.textContent).toBe("ｻﾗﾐｨ");
+  });
 });

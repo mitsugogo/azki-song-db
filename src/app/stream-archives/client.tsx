@@ -15,7 +15,6 @@ import {
   Badge,
   Breadcrumbs,
   Button,
-  Highlight,
   LoadingOverlay,
   Select,
   Text,
@@ -74,6 +73,11 @@ import {
   getArchiveAnchorUrl,
   getArchiveVideoIdFromHash,
 } from "./archiveAnchors";
+import {
+  findArchiveSearchHighlightRange,
+  normalizeArchiveSearchText,
+  normalizeArchiveSeriesKey,
+} from "./archiveSearch";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
 
@@ -137,11 +141,6 @@ const getThumbnailUrl = (videoId: string) =>
 
 const getChannelUrl = (channelId: string) =>
   `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`;
-
-const normalizeSearchText = (value: string) => value.trim().toLowerCase();
-
-const normalizeSeriesKey = (value: string) =>
-  normalizeSearchText(value).replace(/[\s\-_.,，、:：!！?？#＃]/g, "");
 
 const normalizeDateParam = (value: string | null) =>
   value && DATE_PARAM_PATTERN.test(value) ? value : null;
@@ -247,7 +246,7 @@ const createIndexedArchives = (
 ) =>
   items.map((item) => {
     const seriesTitle = getArchiveSeriesTitle(item);
-    const seriesKey = normalizeSeriesKey(seriesTitle) || "other";
+    const seriesKey = normalizeArchiveSeriesKey(seriesTitle) || "other";
     const channel = item.channel_id
       ? (channelsById.get(item.channel_id) ?? null)
       : null;
@@ -256,7 +255,7 @@ const createIndexedArchives = (
     const streamStartedDateKey = getJstDateKey(item.stream_started_at);
     const videoDurationSeconds =
       parseVideoDurationSeconds(item.video_duration) ?? 0;
-    const searchText = normalizeSearchText(
+    const searchText = normalizeArchiveSearchText(
       [
         seriesTitle,
         item.topic,
@@ -449,33 +448,28 @@ const ArchiveTextHighlight = memo(function ArchiveTextHighlight({
   className?: string;
   highlight: string;
 }) {
-  const normalizedHighlight = highlight.trim();
+  const highlightRange = findArchiveSearchHighlightRange(children, highlight);
 
-  if (!normalizedHighlight) {
+  if (!highlightRange) {
     return <span className={className}>{children}</span>;
   }
 
   return (
-    <Highlight
-      component="span"
-      color="yellow"
-      highlight={normalizedHighlight}
-      className={className}
-      style={{
-        color: "inherit",
-        font: "inherit",
-        fontWeight: "inherit",
-        lineHeight: "inherit",
-      }}
-      highlightStyles={{
-        color: "inherit",
-        font: "inherit",
-        fontWeight: "inherit",
-        lineHeight: "inherit",
-      }}
-    >
-      {children}
-    </Highlight>
+    <span className={className}>
+      {children.slice(0, highlightRange.start)}
+      <mark
+        style={{
+          backgroundColor: "var(--mantine-color-yellow-light)",
+          color: "inherit",
+          font: "inherit",
+          fontWeight: "inherit",
+          lineHeight: "inherit",
+        }}
+      >
+        {children.slice(highlightRange.start, highlightRange.end)}
+      </mark>
+      {children.slice(highlightRange.end)}
+    </span>
   );
 });
 
@@ -722,11 +716,13 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
   isAnchored: boolean;
   onTimestampResize: () => void;
 }) {
-  const normalizedHighlightQuery = normalizeSearchText(highlightQuery);
+  const normalizedHighlightQuery = normalizeArchiveSearchText(highlightQuery);
   const shouldShowMatchedDescription =
     Boolean(normalizedHighlightQuery) &&
     Boolean(item.description) &&
-    normalizeSearchText(item.description).includes(normalizedHighlightQuery);
+    normalizeArchiveSearchText(item.description).includes(
+      normalizedHighlightQuery,
+    );
 
   return (
     <article
@@ -1060,7 +1056,7 @@ export default function ArchivesPageClient() {
   const isFilterInputFocusedRef = useRef(false);
 
   const normalizedQuery = useMemo(
-    () => normalizeSearchText(deferredFilterQuery),
+    () => normalizeArchiveSearchText(deferredFilterQuery),
     [deferredFilterQuery],
   );
 
