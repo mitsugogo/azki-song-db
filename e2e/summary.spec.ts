@@ -166,6 +166,28 @@ test.describe("Summary pages", () => {
       ).toBeVisible();
     });
 
+    test("opens month picker from month page year button", async ({ page }) => {
+      await page.goto("/activity/2026/06");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("button", {
+          name: /2026年5月の月別アクティビティへ移動/,
+        }),
+      ).toBeHidden();
+
+      await page.getByRole("button", { name: "2026 年" }).click();
+
+      await page
+        .getByRole("button", {
+          name: /2026年5月の月別アクティビティへ移動/,
+        })
+        .click();
+
+      await expect(page).toHaveURL(/\/activity\/2026\/05$/);
+    });
+
     test("normalizes single-digit month URL", async ({ page }) => {
       await page.goto("/activity/2026/6");
 

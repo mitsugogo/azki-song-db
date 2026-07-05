@@ -1,23 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
-import { Breadcrumbs, Button, Popover } from "@mantine/core";
-import { MonthPicker } from "@mantine/dates";
+import { Link } from "@/i18n/navigation";
+import { Breadcrumbs, Button } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses, pageClasses } from "../../theme";
 import YearSummaryClient from "./YearSummaryClient";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { ScrollToTopButton } from "../../components/ScrollToTopButton";
-import {
-  ACTIVITY_START_MONTH,
-  ACTIVITY_START_YEAR,
-  getActivityMonthHref,
-  isActivityMonthInRange,
-  padMonth,
-  type ActivityMonth,
-} from "../monthActivity";
+import ActivityMonthPickerButton from "../ActivityMonthPickerButton";
 
 export default function SummaryYearClient(props: {
   initialSongs: any[];
@@ -27,8 +19,6 @@ export default function SummaryYearClient(props: {
 }) {
   const { initialSongs, year, displayYearServer, rawYearParam } = props;
   const t = useTranslations("Summary");
-  const locale = useLocale();
-  const router = useRouter();
   const minYear = 2018;
   const maxYear = new Date().getFullYear();
   const prevYear =
@@ -42,47 +32,6 @@ export default function SummaryYearClient(props: {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stickyTriggerRef = useRef<HTMLDivElement>(null);
   const [isStickyActive, setIsStickyActive] = useState(false);
-  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
-  const currentActivityMonth = new Date();
-  const monthPickerMinDate = `${ACTIVITY_START_YEAR}-${padMonth(
-    ACTIVITY_START_MONTH,
-  )}-01`;
-  const monthPickerMaxDate = `${currentActivityMonth.getFullYear()}-${padMonth(
-    currentActivityMonth.getMonth() + 1,
-  )}-01`;
-  const monthPickerDefaultDate = displayYearServer
-    ? `${displayYearServer}-01-01`
-    : monthPickerMaxDate;
-
-  const getMonthPickerActivityMonth = (value: string): ActivityMonth => {
-    const [yearValue, monthValue] = value.split("-");
-    return {
-      year: Number(yearValue),
-      month: Number(monthValue),
-    };
-  };
-
-  const formatMonthLabel = (month: number) => {
-    try {
-      return new Intl.DateTimeFormat(locale || undefined, {
-        month: "long",
-      }).format(new Date(2020, month - 1, 1));
-    } catch {
-      return `${month}${t("monthOfYearSuffix")}`;
-    }
-  };
-
-  const handleActivityMonthChange = (value: string | null) => {
-    if (!value) return;
-
-    const activityMonth = getMonthPickerActivityMonth(value);
-    if (!isActivityMonthInRange(activityMonth, currentActivityMonth)) {
-      return;
-    }
-
-    setIsMonthPickerOpen(false);
-    router.push(getActivityMonthHref(activityMonth));
-  };
 
   useEffect(() => {
     const root = scrollContainerRef.current;
@@ -177,46 +126,10 @@ export default function SummaryYearClient(props: {
               : t("page.title")}
           </h1>
           {displayYearServer && (
-            <Popover
-              opened={isMonthPickerOpen}
-              onChange={setIsMonthPickerOpen}
-              position="bottom-end"
-              shadow="md"
-              withinPortal
-            >
-              <Popover.Target>
-                <Button
-                  onClick={() => setIsMonthPickerOpen((current) => !current)}
-                  variant="light"
-                  size="sm"
-                  radius="md"
-                >
-                  {t("monthActivityButton")}
-                </Button>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <MonthPicker
-                  allowDeselect={false}
-                  defaultDate={monthPickerDefaultDate}
-                  locale={locale}
-                  maxDate={monthPickerMaxDate}
-                  minDate={monthPickerMinDate}
-                  monthsListFormat={locale.startsWith("ja") ? "M月" : "MMM"}
-                  value={null}
-                  yearLabelFormat={locale.startsWith("ja") ? "YYYY年" : "YYYY"}
-                  getMonthControlProps={(date) => {
-                    const activityMonth = getMonthPickerActivityMonth(date);
-                    return {
-                      "aria-label": t("monthActivityAriaLabel", {
-                        month: formatMonthLabel(activityMonth.month),
-                        year: activityMonth.year,
-                      }),
-                    };
-                  }}
-                  onChange={handleActivityMonthChange}
-                />
-              </Popover.Dropdown>
-            </Popover>
+            <ActivityMonthPickerButton
+              defaultYear={displayYearServer}
+              label={t("monthActivityButton")}
+            />
           )}
         </div>
       </div>

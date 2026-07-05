@@ -8,6 +8,7 @@ import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
 import ActivityTimelineSection from "../../../components/ActivityTimelineSection";
 import { ScrollToTopButton } from "../../../components/ScrollToTopButton";
+import ActivityMonthPickerButton from "../../ActivityMonthPickerButton";
 import useActivityTimeline from "../../../hook/useActivityTimeline";
 import useChannels from "../../../hook/useChannels";
 import useEvents from "../../../hook/useEvents";
@@ -123,16 +124,10 @@ export default function SummaryMonthClient({
           <div className="h-9 min-w-px" aria-hidden="true" />
         )}
 
-        {/* 年 ジャンプ */}
-        <Button
-          component={Link}
-          href={`/activity/${activityMonth.year}`}
-          variant="light"
-          size="sm"
-          radius="md"
-        >
-          {t("jumpToYear", { year: activityMonth.year })}
-        </Button>
+        <ActivityMonthPickerButton
+          defaultYear={activityMonth.year}
+          label={t("jumpToYear", { year: activityMonth.year })}
+        />
 
         {nextMonth && nextMonthLabel ? (
           <Button
