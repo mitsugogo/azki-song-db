@@ -1045,6 +1045,8 @@
     "monthActivityTitle": "{month}",
     "monthActivityDescription": "Review music, streams, view milestones, records, and events from {month}.",
     "monthActivityLink": "Monthly activity: {month}",
+    "monthActivityButton": "Monthly activity",
+    "monthActivityAriaLabel": "Go to monthly activity for {month} {year}",
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years} years {months} months {days} days",

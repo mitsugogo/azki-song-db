@@ -1036,6 +1036,8 @@
     "monthActivityTitle": "{month}",
     "monthActivityDescription": "{month}の音楽・配信・再生数・記録・イベントを時系列で振り返ります。",
     "monthActivityLink": "月別アクティビティ: {month}",
+    "monthActivityButton": "月別アクティビティ",
+    "monthActivityAriaLabel": "{year}年{month}の月別アクティビティへ移動",
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years}年{months}ヶ月{days}日",

@@ -86,6 +86,28 @@ test.describe("Summary pages", () => {
       ).toBeVisible();
     });
 
+    test("links from year summary to monthly activity", async ({ page }) => {
+      await page.goto("/activity/2026");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("button", {
+          name: /2026年6月の月別アクティビティへ移動/,
+        }),
+      ).toBeHidden();
+
+      await page.getByRole("button", { name: "月別アクティビティ" }).click();
+
+      await page
+        .getByRole("button", {
+          name: /2026年6月の月別アクティビティへ移動/,
+        })
+        .click();
+
+      await expect(page).toHaveURL(/\/activity\/2026\/06$/);
+    });
+
     test("summary から watch へ遷移してもライトモードを維持する", async ({
       page,
     }) => {

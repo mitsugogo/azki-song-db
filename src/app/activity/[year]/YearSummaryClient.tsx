@@ -59,11 +59,7 @@ const normalizeExternalMilestoneUrl = (url: string) => {
   }
 };
 
-export default function YearSummaryClient({
-  initialSongs,
-  year,
-  displayYearServer,
-}: Props) {
+export default function YearSummaryClient({ initialSongs, year }: Props) {
   const t = useTranslations("Summary");
   const locale = useLocale();
 
