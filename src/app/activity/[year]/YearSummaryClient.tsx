@@ -915,7 +915,12 @@ export default function YearSummaryClient({
                 locale={locale}
                 showArtist={true}
                 bottomContent={
-                  <Text size="xs" c="dimmed" className="mt-1 line-clamp-2">
+                  <Text
+                    component="div"
+                    size="xs"
+                    c="dimmed"
+                    className="mt-1 line-clamp-2"
+                  >
                     {(() => {
                       const unitName = getCollabUnitName(s.sings, locale);
 
