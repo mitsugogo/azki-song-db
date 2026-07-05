@@ -19,7 +19,7 @@ export const pageList: PageCategory[] = [
     category: "活動の記録",
     items: [
       { name: "Discography", href: "/discography" },
-      { name: "活動記録", href: "/summary" },
+      { name: "活動記録", href: "/activity" },
       { name: "記念日", href: "/anniversaries" },
       { name: "配信アーカイブ", href: "/stream-archives" },
       { name: "統計情報", href: "/statistics" },

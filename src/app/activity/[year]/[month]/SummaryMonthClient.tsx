@@ -90,11 +90,11 @@ export default function SummaryMonthClient({
         <Link href="/" className={breadcrumbClasses.link}>
           <FaHome className="inline mr-1" /> {t("homeLabel")}
         </Link>
-        <Link href="/summary" className={breadcrumbClasses.link}>
+        <Link href="/activity" className={breadcrumbClasses.link}>
           {t("page.title")}
         </Link>
         <Link
-          href={`/summary/${activityMonth.year}`}
+          href={`/activity/${activityMonth.year}`}
           className={breadcrumbClasses.link}
         >
           {activityMonth.year}
@@ -126,7 +126,7 @@ export default function SummaryMonthClient({
         {/* 年 ジャンプ */}
         <Button
           component={Link}
-          href={`/summary/${activityMonth.year}`}
+          href={`/activity/${activityMonth.year}`}
           variant="light"
           size="sm"
           radius="md"

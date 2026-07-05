@@ -78,7 +78,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
     "/": t("home"),
     "/search": t("search"),
     "/discography": t("discography"),
-    "/summary": t("activity"),
+    "/activity": t("activity"),
     "/anniversaries": t("anniversaries"),
     "/stream-archives": t("archives"),
     "/statistics": t("statistics"),

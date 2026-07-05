@@ -61,11 +61,11 @@ export default function SummaryYearClient(props: {
         <Link href="/" className={breadcrumbClasses.link}>
           <FaHome className="inline mr-1" /> {t("homeLabel")}
         </Link>
-        <Link href="/summary" className={breadcrumbClasses.link}>
+        <Link href="/activity" className={breadcrumbClasses.link}>
           {t("page.title")}
         </Link>
         <Link
-          href={`/summary/${rawYearParam}`}
+          href={`/activity/${rawYearParam}`}
           className={breadcrumbClasses.link}
         >
           {displayYearServer
@@ -90,7 +90,7 @@ export default function SummaryYearClient(props: {
               {prevYear ? (
                 <Button
                   component={Link}
-                  href={`/summary/${prevYear}`}
+                  href={`/activity/${prevYear}`}
                   variant="light"
                   size="sm"
                   radius="md"
@@ -104,7 +104,7 @@ export default function SummaryYearClient(props: {
               {nextYear ? (
                 <Button
                   component={Link}
-                  href={`/summary/${nextYear}`}
+                  href={`/activity/${nextYear}`}
                   variant="light"
                   size="sm"
                   radius="md"

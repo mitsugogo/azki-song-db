@@ -53,7 +53,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
         className="rounded-2xl border border-gray-50/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
       >
         <Link
-          href={`/summary/${year}`}
+          href={`/activity/${year}`}
           className="block p-3 h-full bg-transparent hover:bg-white/10 dark:hover:bg-white/5 transition duration-200"
           onClick={() => setLoading(true)}
         >
@@ -112,7 +112,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                 return (
                   <Badge
                     component={Link}
-                    href={`/summary/${year}/${month}`}
+                    href={`/activity/${year}/${month}`}
                     color="gray"
                     variant="light"
                     size="xs"

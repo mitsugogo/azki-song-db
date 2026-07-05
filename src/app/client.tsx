@@ -856,7 +856,7 @@ export default function ClientTop() {
                 <Link href={`/discography`} className="hover:text-primary-500">
                   {tDrawer("discography")}
                 </Link>
-                <Link href={`/summary`} className="hover:text-primary-500">
+                <Link href={`/activity`} className="hover:text-primary-500">
                   {tDrawer("activity")}
                 </Link>
                 <Link
@@ -1673,7 +1673,7 @@ export default function ClientTop() {
                           </h2>
                         </div>
                         <Link
-                          href="/summary"
+                          href="/activity"
                           className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
                         >
                           {t("viewSummary")}

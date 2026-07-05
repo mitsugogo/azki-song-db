@@ -60,7 +60,7 @@ export default function SummaryPageClient() {
         <Link href="/" className={breadcrumbClasses.link}>
           <FaHome className="inline mr-1" /> {t("homeLabel")}
         </Link>
-        <Link href="/summary" className={breadcrumbClasses.link}>
+        <Link href="/activity" className={breadcrumbClasses.link}>
           {t("page.title")}
         </Link>
       </Breadcrumbs>

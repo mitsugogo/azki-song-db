@@ -11,7 +11,7 @@ export function padMonth(month: number) {
 }
 
 export function getActivityMonthHref({ year, month }: ActivityMonth) {
-  return `/summary/${year}/${padMonth(month)}`;
+  return `/activity/${year}/${padMonth(month)}`;
 }
 
 export function toMonthIndex({ year, month }: ActivityMonth) {
