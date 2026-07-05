@@ -23,6 +23,7 @@ import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { BsGeoAlt } from "react-icons/bs";
 import SummarySongCard from "./SummarySongCard";
 import { getCollabUnitName } from "@/app/config/collabUnits";
 
@@ -338,6 +339,8 @@ export default function YearSummaryClient({
       note?: string;
       is_external: boolean;
       url: string;
+      place: string;
+      place_url: string;
     };
 
     const milestones = new Map<number, Map<string, YearMilestone>>();
@@ -376,6 +379,8 @@ export default function YearSummaryClient({
         is_external: existing.is_external || candidate.is_external,
         url: existing.url || candidate.url,
         note: existing.note || candidate.note,
+        place: existing.place || candidate.place,
+        place_url: existing.place_url || candidate.place_url,
       });
     };
 
@@ -398,6 +403,8 @@ export default function YearSummaryClient({
               milestone,
               is_external: false,
               url: "",
+              place: "",
+              place_url: "",
             });
           });
       });
@@ -416,6 +423,8 @@ export default function YearSummaryClient({
         is_external: true,
         url: m.url || "",
         note: m.note || "",
+        place: m.place || "",
+        place_url: m.place_url || "",
       });
     });
 
@@ -588,6 +597,24 @@ export default function YearSummaryClient({
                       </Link>
                     </>
                   )}
+                  {milestone.is_external && milestone.place ? (
+                    <Text c="dimmed" component="span" size="xs">
+                      <br />
+                      <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                      {milestone.place_url ? (
+                        <Link
+                          href={milestone.place_url}
+                          className="hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {milestone.place}
+                        </Link>
+                      ) : (
+                        milestone.place
+                      )}
+                    </Text>
+                  ) : null}
                 </div>
               </li>
             ))}

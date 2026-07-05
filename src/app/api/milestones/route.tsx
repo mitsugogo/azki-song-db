@@ -3,7 +3,15 @@ import { NextResponse } from "next/server";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import { Locale } from "@/app/types/locale";
 
-type HeaderKey = "date" | "content" | "content_en" | "note" | "note_en" | "url";
+type HeaderKey =
+  | "date"
+  | "content"
+  | "content_en"
+  | "note"
+  | "note_en"
+  | "url"
+  | "place"
+  | "place_url";
 
 type HeaderDefinition = {
   key: HeaderKey;
@@ -24,7 +32,7 @@ export async function GET(request: Request) {
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: ["milestones!A:F"],
+      ranges: ["milestones!A:H"],
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -37,6 +45,7 @@ export async function GET(request: Request) {
     const normalize = (s: string | undefined | null) =>
       String(s || "")
         .replace(/[（）\(\)\s\?\？\.,，、!！]/g, "")
+        .replace(/_/g, "")
         .toLowerCase();
 
     const HEADER_SCHEMA: HeaderDefinition[] = [
@@ -46,6 +55,19 @@ export async function GET(request: Request) {
       { key: "note", aliases: ["備考", "note", "extra"] },
       { key: "note_en", aliases: ["備考_en", "note(en)", "note_en"] },
       { key: "url", aliases: ["url", "リンク", "url(リンク)", "URL"] },
+      { key: "place", aliases: ["場所", "place", "location", "venue"] },
+      {
+        key: "place_url",
+        aliases: [
+          "場所url",
+          "場所URL",
+          "場所_url",
+          "placeurl",
+          "place_url",
+          "locationurl",
+          "venueurl",
+        ],
+      },
     ];
 
     // 1行目をヘッダーとして列マップ作成
@@ -57,6 +79,8 @@ export async function GET(request: Request) {
       note: -1,
       note_en: -1,
       url: -1,
+      place: -1,
+      place_url: -1,
     };
     HEADER_SCHEMA.forEach((def) => {
       const index = headerValues.findIndex((cell) => {
@@ -112,6 +136,8 @@ export async function GET(request: Request) {
       const noteEn = getStr("note_en");
       const localizedNote = locale === "en" && noteEn ? noteEn : note;
       const url = getLink("url");
+      const place = getStr("place");
+      const placeUrl = getLink("place_url");
 
       // 日付か内容のいずれかがある行だけ取り込む
       if (!dateStr && !localizedContent) return;
@@ -121,6 +147,8 @@ export async function GET(request: Request) {
         content: localizedContent,
         note: localizedNote,
         url,
+        place,
+        place_url: placeUrl,
       });
     });
 

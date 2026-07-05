@@ -7,6 +7,7 @@ import { Song } from "../types/song";
 import useMilestones from "../hook/useMilestones";
 import { Badge } from "@mantine/core";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { BsGeoAlt } from "react-icons/bs";
 import { useTranslations, useLocale } from "next-intl";
 import { useRef, useState, useLayoutEffect } from "react";
 import { formatDate } from "../lib/formatDate";
@@ -16,6 +17,8 @@ type TimelineMilestone = {
   text: string;
   note: string;
   url: string;
+  place: string;
+  place_url: string;
   is_external: boolean;
 };
 
@@ -54,6 +57,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         text: m.trim(),
         note: "",
         url: "",
+        place: "",
+        place_url: "",
         is_external: false,
       })),
     );
@@ -78,6 +83,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
       text: m.content?.trim() || "",
       note: m.note || "",
       url: m.url || "",
+      place: m.place || "",
+      place_url: m.place_url || "",
       is_external: true, // APIからのマイルストーンかどうか
     }))
     .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
@@ -116,12 +123,17 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     const mergedNote =
       songMilestone.note || apiGroup.find((m) => Boolean(m.note))?.note || "";
     const mergedUrl = apiGroup.find((m) => Boolean(m.url))?.url || "";
+    const mergedPlace = apiGroup.find((m) => Boolean(m.place))?.place || "";
+    const mergedPlaceUrl =
+      apiGroup.find((m) => Boolean(m.place_url))?.place_url || "";
 
     mergedCrossSourceMilestones.push({
       ...songMilestone,
       date: mergedDate,
       note: mergedNote,
       url: mergedUrl,
+      place: mergedPlace,
+      place_url: mergedPlaceUrl,
       is_external: songMilestone.is_external || apiGroup.length > 0,
     });
   }
@@ -147,6 +159,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         ...prev,
         note: prev.note || m.note,
         url: prev.url || m.url,
+        place: prev.place || m.place,
+        place_url: prev.place_url || m.place_url,
         is_external: prev.is_external || m.is_external,
       });
     }
@@ -251,6 +265,23 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                     {m.note ? (
                       <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
                         {m.note}
+                      </span>
+                    ) : null}
+                    {m.place ? (
+                      <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
+                        <BsGeoAlt className="-mt-0.5 mr-0.5 inline" />
+                        {m.place_url ? (
+                          <Link
+                            href={m.place_url}
+                            className="hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {m.place}
+                          </Link>
+                        ) : (
+                          m.place
+                        )}
                       </span>
                     ) : null}
                     {m.is_external && m.url ? (
@@ -550,6 +581,23 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                           {m.note ? (
                             <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
                               {m.note}
+                            </span>
+                          ) : null}
+                          {m.place ? (
+                            <span className="ml-2 text-sm text-light-gray-600 dark:text-light-gray-400">
+                              <BsGeoAlt className="-mt-0.5 mr-0.5 inline" />
+                              {m.place_url ? (
+                                <Link
+                                  href={m.place_url}
+                                  className="hover:underline"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {m.place}
+                                </Link>
+                              ) : (
+                                m.place
+                              )}
                             </span>
                           ) : null}
                           {m.is_external && m.url ? (
