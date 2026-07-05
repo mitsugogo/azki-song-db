@@ -12,6 +12,7 @@ type HeaderKey =
   | "content_en"
   | "place"
   | "place_en"
+  | "place_url"
   | "note"
   | "note_en"
   | "url";
@@ -35,6 +36,18 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
   {
     key: "place_en",
     aliases: ["場所en", "場所_en", "placeen", "place(en)", "place_en"],
+  },
+  {
+    key: "place_url",
+    aliases: [
+      "場所url",
+      "場所URL",
+      "場所_url",
+      "placeurl",
+      "place_url",
+      "locationurl",
+      "venueurl",
+    ],
   },
   {
     key: "content_en",
@@ -110,7 +123,7 @@ export async function GET(request: Request) {
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: ["events!A:J"],
+      ranges: ["events!A:M"],
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -128,6 +141,7 @@ export async function GET(request: Request) {
       content_en: -1,
       place: -1,
       place_en: -1,
+      place_url: -1,
       note: -1,
       note_en: -1,
       url: -1,
@@ -188,6 +202,7 @@ export async function GET(request: Request) {
       const contentEn = getString("content_en");
       const place = getString("place");
       const placeEn = getString("place_en");
+      const placeUrl = getLink("place_url");
       const note = getString("note");
       const noteEn = getString("note_en");
       const localizedContent =
@@ -205,6 +220,7 @@ export async function GET(request: Request) {
         end_at: endAt,
         content: localizedContent,
         place: localizedPlace,
+        place_url: placeUrl,
         note: localizedNote,
         url,
       });

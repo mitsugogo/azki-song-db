@@ -7,6 +7,8 @@ export type MilestoneItem = {
   content: string;
   note?: string;
   url?: string;
+  place?: string;
+  place_url?: string;
 };
 
 const cachedMilestonesByLocale = new Map<string, MilestoneItem[]>();
@@ -63,6 +65,8 @@ const useMilestones = () => {
           content: it?.content || "",
           note: it?.note || "",
           url: it?.url || "",
+          place: it?.place || "",
+          place_url: it?.place_url || "",
         }))
         .filter((it: MilestoneItem) => it.date || it.content);
 

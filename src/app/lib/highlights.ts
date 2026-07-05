@@ -12,6 +12,8 @@ export type MilestoneHighlightItem = {
   content: string;
   note?: string;
   url?: string;
+  place?: string;
+  place_url?: string;
   is_external?: boolean;
   song?: Song;
 };
@@ -21,6 +23,8 @@ export type TimelineMilestoneHighlight = {
   text: string;
   note: string;
   url: string;
+  place: string;
+  place_url: string;
   is_external: boolean;
   song?: Song;
 };
@@ -297,6 +301,8 @@ export const buildTimelineMilestones = (
         text: milestone.trim(),
         note: "",
         url: "",
+        place: "",
+        place_url: "",
         is_external: false,
         song: song,
       })),
@@ -329,6 +335,8 @@ export const buildTimelineMilestones = (
         text,
         note: milestone.note || "",
         url: milestone.url || "",
+        place: milestone.place || "",
+        place_url: milestone.place_url || "",
         is_external: true,
         song: milestone.song,
       },
@@ -372,12 +380,19 @@ export const buildTimelineMilestones = (
       "";
     const mergedUrl =
       apiGroup.find((milestone) => Boolean(milestone.url))?.url || "";
+    const mergedPlace =
+      apiGroup.find((milestone) => Boolean(milestone.place))?.place || "";
+    const mergedPlaceUrl =
+      apiGroup.find((milestone) => Boolean(milestone.place_url))?.place_url ||
+      "";
 
     mergedCrossSourceMilestones.push({
       ...songMilestone,
       date: mergedDate,
       note: mergedNote,
       url: mergedUrl,
+      place: mergedPlace,
+      place_url: mergedPlaceUrl,
       is_external: songMilestone.is_external || apiGroup.length > 0,
     });
   }
@@ -400,6 +415,8 @@ export const buildTimelineMilestones = (
       ...previous,
       note: previous.note || milestone.note,
       url: previous.url || milestone.url,
+      place: previous.place || milestone.place,
+      place_url: previous.place_url || milestone.place_url,
       is_external: previous.is_external || milestone.is_external,
       song: previous.song || milestone.song,
     });

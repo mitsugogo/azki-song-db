@@ -212,7 +212,7 @@
     "activityViewMilestoneBadge": "再生数",
     "activityMilestoneBadge": "記録",
     "activityEventBadge": "イベント",
-    "activitySongUpdateDescription": "{count}曲追加",
+    "activitySongUpdateDescription": "収録楽曲を追加：{count}曲",
     "activityArchiveTitle": "配信アーカイブを追加",
     "activityArchiveDescription": "配信アーカイブを追加",
     "activityArchiveDescriptionWithTopic": "{topic} の配信アーカイブを追加",

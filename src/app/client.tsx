@@ -345,8 +345,8 @@ function getActivityItemLabel(
   if (item.kind === "song_update") {
     return {
       badge: t("activitySongUpdateBadge"),
-      title: item.videoTitle,
-      description: t("activitySongUpdateDescription", { count: item.count }),
+      title: t("activitySongUpdateDescription", { count: item.count }),
+      description: item.videoTitle || item.songs[0].title || "",
     };
   }
 
@@ -370,7 +370,7 @@ function getActivityItemLabel(
     return {
       badge: t("activityEventBadge"),
       title: item.event.content,
-      description: item.event.place || "",
+      description: item.event.note || "",
     };
   }
 
@@ -421,7 +421,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
       title:
         "min-w-0 text-sm font-semibold leading-6 text-gray-900 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "w-28 sm:w-32",
-      description: "text-gray-600 dark:text-gray-300",
+      description: "font-medium text-gray-600 dark:text-gray-300",
     };
   }
 
@@ -453,11 +453,39 @@ function getActivityTitleHref(item: ActivityTimelineItem) {
 }
 
 function getActivityDescriptionHref(item: ActivityTimelineItem) {
-  if (item.kind === "archive" || item.kind === "view_milestone") {
+  if (
+    item.kind === "archive" ||
+    item.kind === "view_milestone" ||
+    item.kind === "song_update"
+  ) {
     return item.youtubeHref;
   }
 
   return undefined;
+}
+
+function getActivityPlaceHref(item: ActivityTimelineItem) {
+  if (item.kind === "milestone") {
+    return item.milestone.place_url || undefined;
+  }
+
+  if (item.kind === "event") {
+    return item.event.place_url || undefined;
+  }
+
+  return undefined;
+}
+
+function getActivityPlaceLabel(item: ActivityTimelineItem) {
+  if (item.kind === "milestone") {
+    return item.milestone.place || "";
+  }
+
+  if (item.kind === "event") {
+    return item.event.place || "";
+  }
+
+  return "";
 }
 
 function isExternalHref(href: string | undefined) {
@@ -1704,7 +1732,18 @@ export default function ClientTop() {
                                     {event.place ? (
                                       <>
                                         <BsGeoAlt className="mr-1 inline" />
-                                        {event.place}
+                                        {event.place_url ? (
+                                          <Link
+                                            href={event.place_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:underline"
+                                          >
+                                            {event.place}
+                                          </Link>
+                                        ) : (
+                                          event.place
+                                        )}
                                         <span className="mx-1">|</span>
                                       </>
                                     ) : null}
@@ -1950,6 +1989,27 @@ export default function ClientTop() {
                                     <div className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                       {milestoneContent}
                                     </div>
+                                    {milestone.place ? (
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        className="mt-1"
+                                      >
+                                        <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                        {milestone.place_url ? (
+                                          <Link
+                                            href={milestone.place_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:underline"
+                                          >
+                                            {milestone.place}
+                                          </Link>
+                                        ) : (
+                                          milestone.place
+                                        )}
+                                      </Text>
+                                    ) : null}
                                     {milestone.note ? (
                                       <Text
                                         size="xs"
@@ -2054,11 +2114,14 @@ export default function ClientTop() {
                         const thumbnailHref = item.youtubeHref ?? item.href;
                         const descriptionHref =
                           getActivityDescriptionHref(item);
+                        const placeHref = getActivityPlaceHref(item);
+                        const placeLabel = getActivityPlaceLabel(item);
                         const titleIsExternal = isExternalHref(titleHref);
                         const thumbnailIsExternal =
                           isExternalHref(thumbnailHref);
                         const descriptionIsExternal =
                           isExternalHref(descriptionHref);
+                        const placeIsExternal = isExternalHref(placeHref);
                         const activitySingerAvatars =
                           getActivitySingerAvatars(item);
                         const archiveLinkProps =
@@ -2080,6 +2143,15 @@ export default function ClientTop() {
                             bullet={getActivityItemBullet(item.kind)}
                             title={
                               <div className="flex flex-wrap items-center gap-2">
+                                <Badge
+                                  size="xs"
+                                  radius="sm"
+                                  color={color}
+                                  variant="light"
+                                  className="shrink-0"
+                                >
+                                  {itemLabel.badge}
+                                </Badge>
                                 {titleHref ? (
                                   <Link
                                     href={titleHref}
@@ -2101,15 +2173,6 @@ export default function ClientTop() {
                                     {itemLabel.title}
                                   </span>
                                 )}
-                                <Badge
-                                  size="xs"
-                                  radius="sm"
-                                  color={color}
-                                  variant="light"
-                                  className="shrink-0"
-                                >
-                                  {itemLabel.badge}
-                                </Badge>
                               </div>
                             }
                           >
@@ -2157,6 +2220,21 @@ export default function ClientTop() {
                                           }
                                           className="transition hover:text-primary dark:hover:text-pink-200"
                                         >
+                                          {descriptionHref.includes(
+                                            "youtube.com",
+                                          ) ||
+                                          descriptionHref.includes(
+                                            "youtu.be",
+                                          ) ? (
+                                            <FaYoutube className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-red-600 dark:text-red-500" />
+                                          ) : descriptionHref.includes(
+                                              "twitter.com",
+                                            ) ||
+                                            descriptionHref.includes(
+                                              "x.com",
+                                            ) ? (
+                                            <FaXTwitter className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-sky-600 dark:text-sky-500" />
+                                          ) : null}
                                           {itemLabel.description}
                                         </Link>
                                       ) : (
@@ -2164,9 +2242,31 @@ export default function ClientTop() {
                                       )}
                                     </Text>
                                   ) : null}
-                                  <Text size="xs" c="dimmed" className="mt-1">
-                                    {formatDate(item.occurredAt, locale)}
-                                  </Text>
+                                  {placeLabel ? (
+                                    <Text size="xs" c="dimmed" className="mt-1">
+                                      <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                      {placeHref ? (
+                                        <Link
+                                          href={placeHref}
+                                          target={
+                                            placeIsExternal
+                                              ? "_blank"
+                                              : undefined
+                                          }
+                                          rel={
+                                            placeIsExternal
+                                              ? "noopener noreferrer"
+                                              : undefined
+                                          }
+                                          className="hover:underline"
+                                        >
+                                          {placeLabel}
+                                        </Link>
+                                      ) : (
+                                        placeLabel
+                                      )}
+                                    </Text>
+                                  ) : null}
                                   {activitySingerAvatars.length > 0 ? (
                                     <Avatar.Group
                                       className="mt-2"
@@ -2210,6 +2310,9 @@ export default function ClientTop() {
                                 </div>
                               </div>
                             </div>
+                            <Text size="xs" c="dimmed" className="mt-1">
+                              {formatDate(item.occurredAt, locale)}
+                            </Text>
                           </Timeline.Item>
                         );
                       })}
