@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
-      title,
+      title: `${title} | ${siteConfig.siteName}`,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: `${title} | ${siteConfig.siteName}`,
       description: subtitle,
       images: [ogImagePath],
     },
