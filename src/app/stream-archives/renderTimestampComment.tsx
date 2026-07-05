@@ -1,6 +1,6 @@
-import { Highlight } from "@mantine/core";
 import Link from "next/link";
 import { Fragment } from "react";
+import { findArchiveSearchHighlightRange } from "./archiveSearch";
 
 const TimestampTextHighlight = ({
   children,
@@ -9,32 +9,31 @@ const TimestampTextHighlight = ({
   children: string;
   highlight?: string;
 }) => {
-  const normalizedHighlight = highlight?.trim();
+  const highlightRange = findArchiveSearchHighlightRange(
+    children,
+    highlight ?? "",
+  );
 
-  if (!normalizedHighlight) {
+  if (!highlightRange) {
     return <span>{children}</span>;
   }
 
   return (
-    <Highlight
-      component="span"
-      color="yellow"
-      highlight={normalizedHighlight}
-      style={{
-        color: "inherit",
-        font: "inherit",
-        fontWeight: "inherit",
-        lineHeight: "inherit",
-      }}
-      highlightStyles={{
-        color: "inherit",
-        font: "inherit",
-        fontWeight: "inherit",
-        lineHeight: "inherit",
-      }}
-    >
-      {children}
-    </Highlight>
+    <span>
+      {children.slice(0, highlightRange.start)}
+      <mark
+        style={{
+          backgroundColor: "var(--mantine-color-yellow-light)",
+          color: "inherit",
+          font: "inherit",
+          fontWeight: "inherit",
+          lineHeight: "inherit",
+        }}
+      >
+        {children.slice(highlightRange.start, highlightRange.end)}
+      </mark>
+      {children.slice(highlightRange.end)}
+    </span>
   );
 };
 
