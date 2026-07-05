@@ -117,4 +117,40 @@ test.describe("Summary pages", () => {
         .toBe(false);
     });
   });
+
+  test.describe("Month activity page", () => {
+    test("displays monthly activity page with month pager", async ({
+      page,
+    }) => {
+      await page.goto("/summary/2026/06");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("heading", { name: "2026年6月", exact: true, level: 1 }),
+      ).toBeVisible();
+      await expect(page.locator('a[href="/summary/2026/05"]')).toBeVisible();
+      await expect(page.locator('a[href="/summary/2026/07"]')).toBeVisible();
+    });
+
+    test("normalizes single-digit month URL", async ({ page }) => {
+      await page.goto("/summary/2026/6");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(page).toHaveURL(/\/summary\/2026\/06$/);
+    });
+
+    test("summary index links to current monthly activity", async ({
+      page,
+    }) => {
+      await page.goto("/summary");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.locator('a[href^="/summary/"][href$="/07"]').first(),
+      ).toBeVisible();
+    });
+  });
 });

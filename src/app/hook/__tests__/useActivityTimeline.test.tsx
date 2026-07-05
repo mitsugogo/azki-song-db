@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildViewMilestoneItems } from "../useActivityTimeline";
+import {
+  buildViewMilestoneItems,
+  filterActivityTimelineItems,
+  type ActivityTimelineItem,
+} from "../useActivityTimeline";
 import type { ViewStat } from "../../types/api/stat/views";
 import type { Song } from "../../types/song";
 
@@ -94,5 +98,94 @@ describe("buildViewMilestoneItems", () => {
     });
 
     expect(items).toEqual([]);
+  });
+});
+
+describe("filterActivityTimelineItems", () => {
+  const createActivityItem = (
+    id: string,
+    occurredAt: string,
+  ): ActivityTimelineItem => ({
+    id,
+    kind: "milestone",
+    occurredAt,
+    href: undefined,
+    milestone: {
+      date: occurredAt,
+      content: id,
+    },
+  });
+
+  it("月内のactivityだけを境界込みで返す", () => {
+    const items = filterActivityTimelineItems(
+      [
+        createActivityItem("before", "2026-05-31T23:59:59.999Z"),
+        createActivityItem("start", "2026-06-01T00:00:00.000Z"),
+        createActivityItem("middle", "2026-06-15T00:00:00.000Z"),
+        createActivityItem("end", "2026-07-01T00:00:00.000Z"),
+      ],
+      {
+        dateRange: {
+          start: new Date("2026-06-01T00:00:00.000Z"),
+          endExclusive: new Date("2026-07-01T00:00:00.000Z"),
+        },
+        now: new Date("2026-07-02T00:00:00.000Z").getTime(),
+      },
+    );
+
+    expect(items.map((item) => item.id)).toEqual(["middle", "start"]);
+  });
+
+  it("未来日と無効な日付を除外する", () => {
+    const items = filterActivityTimelineItems(
+      [
+        createActivityItem("valid", "2026-06-10T00:00:00.000Z"),
+        createActivityItem("future", "2026-06-20T00:00:00.000Z"),
+        createActivityItem("invalid", "not-a-date"),
+      ],
+      {
+        dateRange: {
+          start: new Date("2026-06-01T00:00:00.000Z"),
+          endExclusive: new Date("2026-07-01T00:00:00.000Z"),
+        },
+        now: new Date("2026-06-15T00:00:00.000Z").getTime(),
+      },
+    );
+
+    expect(items.map((item) => item.id)).toEqual(["valid"]);
+  });
+
+  it("eventやmilestoneも日付順に並べて表示対象に残す", () => {
+    const eventItem: ActivityTimelineItem = {
+      id: "event",
+      kind: "event",
+      occurredAt: "2026-06-20T00:00:00.000Z",
+      href: undefined,
+      event: {
+        start_at: "2026-06-20T00:00:00.000Z",
+        end_at: "",
+        content: "Test Event",
+        place: "",
+        place_url: "",
+        note: "",
+        url: "",
+      },
+    };
+    const items = filterActivityTimelineItems(
+      [
+        createActivityItem("older-milestone", "2026-06-01T00:00:00.000Z"),
+        createActivityItem("newer-milestone", "2026-06-15T00:00:00.000Z"),
+        eventItem,
+      ],
+      {
+        now: new Date("2026-06-30T00:00:00.000Z").getTime(),
+      },
+    );
+
+    expect(items.map((item) => item.id)).toEqual([
+      "event",
+      "newer-milestone",
+      "older-milestone",
+    ]);
   });
 });

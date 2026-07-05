@@ -1,14 +1,20 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { Breadcrumbs } from "@mantine/core";
+import { Breadcrumbs, Button } from "@mantine/core";
 import { FaHome } from "react-icons/fa";
 import { HiChevronRight } from "react-icons/hi";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import SummaryTopClient from "./client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  formatActivityMonthLabel,
+  getActivityMonthHref,
+  getCurrentActivityMonth,
+} from "./monthActivity";
 
 export default function SummaryPageClient() {
+  const locale = useLocale();
   const t = useTranslations("Summary");
 
   const activityStart = new Date(2018, 10, 15);
@@ -38,6 +44,11 @@ export default function SummaryPageClient() {
     months: String(months),
     days: String(days),
   });
+  const currentActivityMonth = getCurrentActivityMonth(now);
+  const currentActivityMonthLabel = formatActivityMonthLabel(
+    currentActivityMonth,
+    locale,
+  );
 
   return (
     <div className={pageClasses.shellFlushBottom}>
@@ -66,6 +77,16 @@ export default function SummaryPageClient() {
             duration: avtivityDurationStr,
           })}
         </p>
+        <Button
+          component={Link}
+          href={getActivityMonthHref(currentActivityMonth)}
+          variant="light"
+          radius="md"
+          size="sm"
+          className="mb-6"
+        >
+          {t("monthActivityLink", { month: currentActivityMonthLabel })}
+        </Button>
 
         <SummaryTopClient />
       </div>

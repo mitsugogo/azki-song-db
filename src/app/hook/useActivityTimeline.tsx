@@ -86,6 +86,12 @@ type UseActivityTimelineOptions = {
   archiveLimit?: number;
   viewMilestoneCandidateLimit?: number;
   viewMilestonePeriod?: Period;
+  dateRange?: ActivityTimelineDateRange;
+};
+
+export type ActivityTimelineDateRange = {
+  start: Date;
+  endExclusive: Date;
 };
 
 const DEFAULT_ACTIVITY_LIMIT = 20;
@@ -417,6 +423,33 @@ export function buildViewMilestoneItems(
   );
 }
 
+export function filterActivityTimelineItems(
+  items: ActivityTimelineItem[],
+  options: {
+    dateRange?: ActivityTimelineDateRange;
+    now?: number;
+  } = {},
+) {
+  const now = options.now ?? Date.now();
+  const rangeStart = options.dateRange
+    ? getDateTime(options.dateRange.start)
+    : Number.NEGATIVE_INFINITY;
+  const rangeEndExclusive = options.dateRange
+    ? getDateTime(options.dateRange.endExclusive)
+    : Number.POSITIVE_INFINITY;
+
+  return items
+    .filter((item) => {
+      const occurredAt = getDateTime(item.occurredAt);
+      return (
+        occurredAt <= now &&
+        occurredAt >= rangeStart &&
+        occurredAt < rangeEndExclusive
+      );
+    })
+    .sort((a, b) => getDateTime(b.occurredAt) - getDateTime(a.occurredAt));
+}
+
 export default function useActivityTimeline({
   songs,
   events = [],
@@ -430,6 +463,7 @@ export default function useActivityTimeline({
   archiveLimit = DEFAULT_ARCHIVE_LIMIT,
   viewMilestoneCandidateLimit = DEFAULT_VIEW_MILESTONE_CANDIDATE_LIMIT,
   viewMilestonePeriod = "30d",
+  dateRange,
 }: UseActivityTimelineOptions) {
   const { items: archives, isLoading: isArchivesLoading } = useArchives();
   const milestoneVideoIds = useMemo(
@@ -441,27 +475,39 @@ export default function useActivityTimeline({
 
   const items = useMemo(() => {
     const now = Date.now();
-    const songUpdateItems = buildSongUpdateItems(songs, songUpdateLimit);
-    const archiveItems = buildArchiveItems(archives, archiveLimit);
+    const effectiveSongUpdateLimit = dateRange
+      ? Number.POSITIVE_INFINITY
+      : songUpdateLimit;
+    const effectiveArchiveLimit = dateRange
+      ? Number.POSITIVE_INFINITY
+      : archiveLimit;
+    const songUpdateItems = buildSongUpdateItems(
+      songs,
+      effectiveSongUpdateLimit,
+    );
+    const archiveItems = buildArchiveItems(archives, effectiveArchiveLimit);
     const milestoneItems = buildMilestoneItems(milestones);
     const eventItems = buildEventItems(events);
     const viewMilestoneItems = enabled
       ? buildViewMilestoneItems(songs, viewStatisticsByVideoId)
       : [];
 
-    return [
+    const combinedItems = [
       ...songUpdateItems,
       ...archiveItems,
       ...viewMilestoneItems,
       ...milestoneItems,
       ...eventItems,
-    ]
-      .filter((item) => getDateTime(item.occurredAt) <= now)
-      .sort((a, b) => getDateTime(b.occurredAt) - getDateTime(a.occurredAt))
-      .slice(0, limit);
+    ];
+
+    return filterActivityTimelineItems(combinedItems, {
+      dateRange,
+      now,
+    }).slice(0, limit);
   }, [
     archiveLimit,
     archives,
+    dateRange,
     enabled,
     events,
     limit,

@@ -5,6 +5,7 @@ import { Song } from "../types/song";
 import { useLoading } from "../context/LoadingContext";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
+import { Badge, Button } from "@mantine/core";
 
 export default function YearsTile({ songs }: { songs: Song[] }) {
   const { setLoading } = useLoading();
@@ -87,6 +88,45 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                   )}
               </ul>
             )}
+            <hr className="mt-2 border-light-gray-200 dark:border-white/10" />
+            <div className="mt-2">
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+                const monthCount = songs.filter(
+                  (s) =>
+                    Number(s.year) === year &&
+                    new Date(s.broadcast_at).getMonth() + 1 === month,
+                ).length;
+                if (
+                  year === new Date().getFullYear() &&
+                  month > new Date().getMonth() + 1
+                ) {
+                  return null;
+                }
+                // デビュー月より前も非表示
+                if (
+                  year === 2018 &&
+                  month < new Date("2018-11-15").getMonth() + 1
+                ) {
+                  return null;
+                }
+                return (
+                  <Badge
+                    component={Link}
+                    href={`/summary/${year}/${month}`}
+                    color="gray"
+                    variant="light"
+                    size="xs"
+                    radius="xs"
+                    key={month}
+                    className="mr-1 cursor-pointer hover:bg-primary-200 dark:hover:bg-primary-800"
+                  >
+                    {new Intl.DateTimeFormat(locale, { month: "long" }).format(
+                      new Date(2020, month - 1, 1),
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
         </Link>
       </li>
