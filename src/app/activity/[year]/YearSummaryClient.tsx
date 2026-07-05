@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useEffect, useState, FormEvent } from "react";
 import { Song } from "../../types/song";
@@ -59,11 +59,7 @@ const normalizeExternalMilestoneUrl = (url: string) => {
   }
 };
 
-export default function YearSummaryClient({
-  initialSongs,
-  year,
-  displayYearServer,
-}: Props) {
+export default function YearSummaryClient({ initialSongs, year }: Props) {
   const t = useTranslations("Summary");
   const locale = useLocale();
 
@@ -105,7 +101,7 @@ export default function YearSummaryClient({
     if (typeof window === "undefined") return null;
     const pathname = window.location.pathname || "";
 
-    const m = pathname.match(/\/summary\/(\d{4})(?:\/|$)/);
+    const m = pathname.match(/\/activity\/(\d{4})(?:\/|$)/);
     if (m) {
       const y = Number(m[1]);
       return Number.isFinite(y) ? y : null;
@@ -915,7 +911,12 @@ export default function YearSummaryClient({
                 locale={locale}
                 showArtist={true}
                 bottomContent={
-                  <Text size="xs" c="dimmed" className="mt-1 line-clamp-2">
+                  <Text
+                    component="div"
+                    size="xs"
+                    c="dimmed"
+                    className="mt-1 line-clamp-2"
+                  >
                     {(() => {
                       const unitName = getCollabUnitName(s.sings, locale);
 

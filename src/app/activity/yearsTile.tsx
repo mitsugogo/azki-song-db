@@ -5,6 +5,7 @@ import { Song } from "../types/song";
 import { useLoading } from "../context/LoadingContext";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
+import { Badge } from "@mantine/core";
 
 export default function YearsTile({ songs }: { songs: Song[] }) {
   const { setLoading } = useLoading();
@@ -49,13 +50,15 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
     return (
       <li
         key={year}
-        className="rounded-2xl border border-gray-50/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
+        className="group relative rounded-2xl border border-gray-50/60 bg-white/80 dark:border-white/10 dark:bg-gray-900/40 shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_16px_40px_rgba(190,24,93,0.15)] dark:hover:shadow-[0_16px_40px_rgba(190,24,93,0.08)] transition-all duration-200"
       >
         <Link
-          href={`/summary/${year}`}
-          className="block p-3 h-full bg-transparent hover:bg-white/10 dark:hover:bg-white/5 transition duration-200"
+          href={`/activity/${year}`}
+          className="absolute inset-0 z-0 rounded-2xl bg-transparent transition duration-200 group-hover:bg-white/10 dark:group-hover:bg-white/5"
+          aria-label={`${year}${t("yearSuffix")}`}
           onClick={() => setLoading(true)}
-        >
+        />
+        <div className="pointer-events-none relative z-10 flex h-full flex-col p-3">
           <div className="flex items-center justify-between">
             <span className="text-lg font-semibold">
               {year}
@@ -66,7 +69,7 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
               {t("songsSuffix")}
             </span>
           </div>
-          <div>
+          <div className="flex flex-1 flex-col">
             {milestonesByYear[year] && (
               <ul className="mt-2 space-y-1">
                 {milestonesByYear[year]
@@ -87,8 +90,45 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                   )}
               </ul>
             )}
+            <div className="mt-auto pt-2">
+              <hr className="border-light-gray-200 dark:border-white/10" />
+              <div className="mt-2">
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+                  if (
+                    year === new Date().getFullYear() &&
+                    month > new Date().getMonth() + 1
+                  ) {
+                    return null;
+                  }
+                  // デビュー月より前も非表示
+                  if (
+                    year === 2018 &&
+                    month < new Date("2018-11-15").getMonth() + 1
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <Badge
+                      component={Link}
+                      href={`/activity/${year}/${month}`}
+                      color="gray"
+                      variant="light"
+                      size="xs"
+                      radius="xs"
+                      key={month}
+                      className="pointer-events-auto relative z-20 mr-1 cursor-pointer hover:bg-primary-200 dark:hover:bg-primary-800"
+                      onClick={() => setLoading(true)}
+                    >
+                      {new Intl.DateTimeFormat(locale, {
+                        month: "long",
+                      }).format(new Date(2020, month - 1, 1))}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </Link>
+        </div>
       </li>
     );
   });

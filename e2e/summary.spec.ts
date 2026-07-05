@@ -27,8 +27,15 @@ test.describe("Summary pages", () => {
     await setupApiMocks(page);
   });
   test.describe("Summary index page", () => {
-    test("displays yearly activity summary", async ({ page }) => {
+    test("redirects legacy summary path to activity", async ({ page }) => {
       await page.goto("/summary");
+
+      await expect(page).toHaveURL(/\/activity$/);
+      await expect(page).toHaveTitle(/活動記録/);
+    });
+
+    test("displays yearly activity summary", async ({ page }) => {
+      await page.goto("/activity");
 
       await expect(page).toHaveTitle(/活動記録/);
 
@@ -43,13 +50,13 @@ test.describe("Summary pages", () => {
     });
 
     test("displays year links", async ({ page }) => {
-      await page.goto("/summary");
+      await page.goto("/activity");
 
       await page.waitForLoadState("domcontentloaded");
 
       // Wait for year links to appear (rendered client-side)
-      await page.waitForSelector('a[href^="/summary/20"]', { timeout: 10000 });
-      const yearLinks = page.locator('a[href^="/summary/20"]');
+      await page.waitForSelector('a[href^="/activity/20"]', { timeout: 10000 });
+      const yearLinks = page.locator('a[href^="/activity/20"]');
       expect(await yearLinks.count()).toBeGreaterThan(0);
     });
   });
@@ -57,7 +64,7 @@ test.describe("Summary pages", () => {
   test.describe("Year detail page", () => {
     test("displays specific year summary", async ({ page }) => {
       // Test with a recent year that likely has data
-      await page.goto("/summary/2024");
+      await page.goto("/activity/2024");
 
       await page.waitForLoadState("domcontentloaded");
 
@@ -68,7 +75,7 @@ test.describe("Summary pages", () => {
     });
 
     test("shows year-specific statistics", async ({ page }) => {
-      await page.goto("/summary/2024");
+      await page.goto("/activity/2024");
 
       await page.waitForLoadState("domcontentloaded");
 
@@ -77,6 +84,28 @@ test.describe("Summary pages", () => {
       await expect(
         page.getByRole("heading", { name: "2024年", exact: true, level: 1 }),
       ).toBeVisible();
+    });
+
+    test("links from year summary to monthly activity", async ({ page }) => {
+      await page.goto("/activity/2026");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("button", {
+          name: /2026年6月の月別アクティビティへ移動/,
+        }),
+      ).toBeHidden();
+
+      await page.getByRole("button", { name: "月別アクティビティ" }).click();
+
+      await page
+        .getByRole("button", {
+          name: /2026年6月の月別アクティビティへ移動/,
+        })
+        .click();
+
+      await expect(page).toHaveURL(/\/activity\/2026\/06$/);
     });
 
     test("summary から watch へ遷移してもライトモードを維持する", async ({
@@ -92,7 +121,7 @@ test.describe("Summary pages", () => {
       );
       await setTheme(page, "dark");
 
-      await page.goto("/summary/2026", { waitUntil: "domcontentloaded" });
+      await page.goto("/activity/2026", { waitUntil: "domcontentloaded" });
       await page.waitForSelector('a[href*="/watch?v="]', { timeout: 15000 });
 
       await setTheme(page, "light");
@@ -115,6 +144,68 @@ test.describe("Summary pages", () => {
           ),
         )
         .toBe(false);
+    });
+  });
+
+  test.describe("Month activity page", () => {
+    test("displays monthly activity page with month pager", async ({
+      page,
+    }) => {
+      await page.goto("/activity/2026/06");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("heading", { name: "2026年6月", exact: true, level: 1 }),
+      ).toBeVisible();
+      await expect(
+        page.locator('a[href="/activity/2026/05"]').first(),
+      ).toBeVisible();
+      await expect(
+        page.locator('a[href="/activity/2026/07"]').first(),
+      ).toBeVisible();
+    });
+
+    test("opens month picker from month page year button", async ({ page }) => {
+      await page.goto("/activity/2026/06");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.getByRole("button", {
+          name: /2026年5月の月別アクティビティへ移動/,
+        }),
+      ).toBeHidden();
+
+      await page.getByRole("button", { name: "2026 年" }).click();
+
+      await page
+        .getByRole("button", {
+          name: /2026年5月の月別アクティビティへ移動/,
+        })
+        .click();
+
+      await expect(page).toHaveURL(/\/activity\/2026\/05$/);
+    });
+
+    test("normalizes single-digit month URL", async ({ page }) => {
+      await page.goto("/activity/2026/6");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(page).toHaveURL(/\/activity\/2026\/06$/);
+    });
+
+    test("summary index links to current monthly activity", async ({
+      page,
+    }) => {
+      await page.goto("/activity");
+
+      await page.waitForLoadState("domcontentloaded");
+
+      await expect(
+        page.locator('a[href^="/activity/"][href$="/07"]').first(),
+      ).toBeVisible();
     });
   });
 });

@@ -325,7 +325,9 @@
       "title": "Activity Summary",
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.).",
       "yearTitle": "AZKi's song activity in {year}",
-      "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals"
+      "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals",
+      "monthTitle": "{month} activity",
+      "monthDescription": "Music, streams, milestones, and events from {month}."
     },
     "anniversaries": {
       "title": "Anniversaries",
@@ -1040,6 +1042,13 @@
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.). Click a year for details.",
       "activityDays": "Days active: {days} (since 2018/11/15 — {duration})"
     },
+    "monthActivityTitle": "{month}",
+    "monthActivityDescription": "Review music, streams, view milestones, records, and events from {month}.",
+    "monthActivityLink": "Monthly activity: {month}",
+    "monthActivityButton": "Monthly activity",
+    "monthActivityAriaLabel": "Go to monthly activity for {month} {year}",
+    "previousMonth": "<< {month}",
+    "nextMonth": "{month} >>",
     "duration": "{years} years {months} months {days} days",
     "yearCards": {
       "recordedSongsLabel": "Recorded songs",
@@ -1077,7 +1086,8 @@
       "second": "2nd costume",
       "third": "3rd costume",
       "fourth": "4th costume"
-    }
+    },
+    "jumpToYear": "year: {year}"
   },
   "Acknowledgment": {
     "intro": {

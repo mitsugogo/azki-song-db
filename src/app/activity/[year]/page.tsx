@@ -71,8 +71,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
   const canonical = hasValidYear
-    ? new URL(`/summary/${yearNum}`, baseUrl).toString()
-    : new URL("/summary", baseUrl).toString();
+    ? new URL(`/activity/${yearNum}`, baseUrl).toString()
+    : new URL("/activity", baseUrl).toString();
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {

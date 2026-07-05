@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  redirects() {
+    return [
+      {
+        source: "/summary/:path*",
+        destination: "/activity/:path*",
+        permanent: true,
+      },
+    ];
+  },
   headers() {
     if (process.env.NODE_ENV !== "production") {
       return [];

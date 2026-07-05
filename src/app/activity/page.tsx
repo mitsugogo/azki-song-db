@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ogImageUrl.searchParams.set("subtitle", subtitle);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
-  const canonical = new URL("/summary", baseUrl).toString();
+  const canonical = new URL("/activity", baseUrl).toString();
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {

@@ -324,7 +324,9 @@
       "title": "活動記録",
       "description": "その年のAZKiさんの活動（収録楽曲数・カバー/オリ曲など）をまとめています",
       "yearTitle": "AZKiさんの{year}年の歌の活動",
-      "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました"
+      "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました",
+      "monthTitle": "{month}のアクティビティ",
+      "monthDescription": "{month}の音楽・配信・記録・イベントをまとめました"
     },
     "anniversaries": {
       "title": "記念日",
@@ -1031,6 +1033,13 @@
       "description": "各年ごとの活動の要約ページです。年をクリックすると詳細ページへ移動します。",
       "activityDays": "活動日数: {days} 日目（2018/11/15 から {duration} 経過）"
     },
+    "monthActivityTitle": "{month}",
+    "monthActivityDescription": "{month}の音楽・配信・再生数・記録・イベントを時系列で振り返ります。",
+    "monthActivityLink": "月別アクティビティ: {month}",
+    "monthActivityButton": "月別アクティビティ",
+    "monthActivityAriaLabel": "{year}年{month}の月別アクティビティへ移動",
+    "previousMonth": "<< {month}",
+    "nextMonth": "{month} >>",
     "duration": "{years}年{months}ヶ月{days}日",
     "yearCards": {
       "recordedSongsLabel": "収録楽曲",
@@ -1068,7 +1077,8 @@
       "second": "2nd衣装",
       "third": "3rd衣装",
       "fourth": "4th衣装"
-    }
+    },
+    "jumpToYear": "{year} 年"
   },
   "Acknowledgment": {
     "intro": {
