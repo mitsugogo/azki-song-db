@@ -231,16 +231,7 @@ const updateArchiveFilterUrl = ({
 };
 
 const getArchiveSeriesTitle = (item: ArchiveItem) => {
-  const bracketMatch = item.title.match(/^【([^】]+)】/);
-  const titleLead = bracketMatch?.[1]
-    ?.replace(/\s*[#＃][0-9０-９]+.*$/, "")
-    .replace(/\s+$/, "");
-
-  if (titleLead === "アニメ" && item.topic === "ホロぐら") {
-    return "ホロぐら";
-  }
-
-  return titleLead || item.topic || "その他";
+  return item.topic || "その他";
 };
 
 const isShortsArchive = (item: ArchiveItem) =>
