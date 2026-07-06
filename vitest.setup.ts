@@ -18,6 +18,14 @@ global.__mockNextRouter = {
   refresh: vi.fn(),
 };
 
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+
 vi.mock("next-intl", () => {
   return {
     __esModule: true,
