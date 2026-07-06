@@ -15,6 +15,7 @@ import {
   Badge,
   Breadcrumbs,
   Button,
+  Checkbox,
   LoadingOverlay,
   Select,
   Text,
@@ -105,6 +106,7 @@ type ArchiveFilterState = {
   query: string;
   seriesKey: string | null;
   dateRange: DateRangeValue;
+  includeShorts: boolean;
 };
 
 type ArchiveSortKey =
@@ -127,6 +129,7 @@ const DESKTOP_STICKY_SUMMARY_HEIGHT = 160;
 const DESKTOP_STICKY_SUMMARY_TOP = 32;
 const DATE_PARAM_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TEXT_QUERY_PARAM = "keyword";
+const INCLUDE_SHORTS_PARAM = "includeShorts";
 const DEFAULT_ARCHIVE_SORT: ArchiveSortState = {
   key: "stream_started_at",
   direction: "desc",
@@ -151,6 +154,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
       query: "",
       seriesKey: null,
       dateRange: [null, null],
+      includeShorts: false,
     };
   }
 
@@ -164,6 +168,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
       normalizeDateParam(params.get("from")),
       normalizeDateParam(params.get("to")),
     ],
+    includeShorts: params.get(INCLUDE_SHORTS_PARAM) === "1",
   };
 };
 
@@ -181,6 +186,7 @@ const updateArchiveFilterUrl = ({
   query,
   seriesKey,
   dateRange,
+  includeShorts,
 }: ArchiveFilterState) => {
   if (typeof window === "undefined") {
     return;
@@ -215,6 +221,12 @@ const updateArchiveFilterUrl = ({
     url.searchParams.delete("to");
   }
 
+  if (includeShorts) {
+    url.searchParams.set(INCLUDE_SHORTS_PARAM, "1");
+  } else {
+    url.searchParams.delete(INCLUDE_SHORTS_PARAM);
+  }
+
   historyHelper.replaceUrlIfDifferent(url.href, { dispatchEvent: false });
 };
 
@@ -224,8 +236,19 @@ const getArchiveSeriesTitle = (item: ArchiveItem) => {
     ?.replace(/\s*[#＃][0-9０-９]+.*$/, "")
     .replace(/\s+$/, "");
 
+  if (titleLead === "アニメ" && item.topic === "ホロぐら") {
+    return "ホロぐら";
+  }
+
   return titleLead || item.topic || "その他";
 };
+
+const isShortsArchive = (item: ArchiveItem) =>
+  /[#＃]\s*shorts/i.test(
+    [item.title, item.topic, item.description, item.timestamp_comment].join(
+      "\n",
+    ),
+  );
 
 const formatArchiveDate = (value: string, locale: string) => {
   if (!value) {
@@ -1037,6 +1060,7 @@ export default function ArchivesPageClient() {
     null,
   );
   const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
+  const [includeShorts, setIncludeShorts] = useState(false);
   const [isUrlFilterReady, setIsUrlFilterReady] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [expandedTimestampVideoIds, setExpandedTimestampVideoIds] = useState<
@@ -1100,7 +1124,8 @@ export default function ArchivesPageClient() {
   );
 
   const hasDateRange = Boolean(dateRange[0] || dateRange[1]);
-  const hasDetailedFilters = Boolean(selectedSeriesKey) || hasDateRange;
+  const hasDetailedFilters =
+    Boolean(selectedSeriesKey) || hasDateRange || includeShorts;
 
   const filteredItems = useMemo(
     () =>
@@ -1108,9 +1133,16 @@ export default function ArchivesPageClient() {
         (item) =>
           (!normalizedQuery || item.searchText.includes(normalizedQuery)) &&
           (!selectedSeriesKey || item.seriesKey === selectedSeriesKey) &&
+          (includeShorts || !isShortsArchive(item)) &&
           isInDateRange(item, dateRange),
       ),
-    [dateRange, indexedItems, normalizedQuery, selectedSeriesKey],
+    [
+      dateRange,
+      includeShorts,
+      indexedItems,
+      normalizedQuery,
+      selectedSeriesKey,
+    ],
   );
 
   const sortedFilteredItems = useMemo(() => {
@@ -1402,8 +1434,15 @@ export default function ArchivesPageClient() {
       query: filterQuery,
       seriesKey: selectedSeriesKey,
       dateRange,
+      includeShorts,
     });
-  }, [dateRange, filterQuery, isUrlFilterReady, selectedSeriesKey]);
+  }, [
+    dateRange,
+    filterQuery,
+    includeShorts,
+    isUrlFilterReady,
+    selectedSeriesKey,
+  ]);
 
   const handleSeriesKeyChange = useCallback((value: string | null) => {
     startTransition(() => {
@@ -1417,10 +1456,20 @@ export default function ArchivesPageClient() {
     });
   }, []);
 
+  const handleIncludeShortsChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      startTransition(() => {
+        setIncludeShorts(event.currentTarget.checked);
+      });
+    },
+    [],
+  );
+
   const handleClearDetailedFilters = useCallback(() => {
     startTransition(() => {
       setSelectedSeriesKey(null);
       setDateRange([null, null]);
+      setIncludeShorts(false);
     });
   }, []);
 
@@ -1436,8 +1485,15 @@ export default function ArchivesPageClient() {
       query: debouncedFilterQuery,
       seriesKey: selectedSeriesKey,
       dateRange,
+      includeShorts,
     });
-  }, [dateRange, debouncedFilterQuery, isUrlFilterReady, selectedSeriesKey]);
+  }, [
+    dateRange,
+    debouncedFilterQuery,
+    includeShorts,
+    isUrlFilterReady,
+    selectedSeriesKey,
+  ]);
 
   useEffect(() => {
     const syncFiltersFromUrl = () => {
@@ -1445,6 +1501,7 @@ export default function ArchivesPageClient() {
       setFilterQuery(nextState.query);
       setSelectedSeriesKey(nextState.seriesKey);
       setDateRange(nextState.dateRange);
+      setIncludeShorts(nextState.includeShorts);
       setIsUrlFilterReady(true);
     };
 
@@ -1507,7 +1564,7 @@ export default function ArchivesPageClient() {
       )}
 
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto]">
+        <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]">
           <TextInput
             value={filterQuery}
             placeholder={t("searchPlaceholder")}
@@ -1535,6 +1592,12 @@ export default function ArchivesPageClient() {
             clearable
             valueFormat="YYYY/MM/DD"
             onChange={handleDateRangeChange}
+          />
+          <Checkbox
+            checked={includeShorts}
+            label={t("includeShortsLabel")}
+            className="self-center"
+            onChange={handleIncludeShortsChange}
           />
           {hasDetailedFilters && (
             <Button

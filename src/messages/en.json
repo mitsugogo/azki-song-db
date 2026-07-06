@@ -829,6 +829,7 @@
     "seriesPlaceholder": "Series list",
     "seriesNothingFound": "No matching series",
     "dateRangePlaceholder": "Stream period",
+    "includeShortsLabel": "Include #shorts",
     "clearFilters": "Clear filters",
     "resultCount": "{count} / {total} items",
     "seriesCount": "{count} series",

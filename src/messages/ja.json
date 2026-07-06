@@ -820,6 +820,7 @@
     "seriesPlaceholder": "シリーズ一覧",
     "seriesNothingFound": "該当するシリーズはありません",
     "dateRangePlaceholder": "配信期間",
+    "includeShortsLabel": "#shorts を含める",
     "clearFilters": "条件をクリア",
     "resultCount": "{count} / {total} 件",
     "seriesCount": "{count} シリーズ",
