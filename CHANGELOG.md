@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.13.0](https://github.com/mitsugogo/azki-song-db/compare/v2.12.1...v2.13.0) (2026-07-06)
+
+
+### Features
+
+* 配信アーカイブで「シリーズ別」に見る機能を追加 ([1eb1134](https://github.com/mitsugogo/azki-song-db/commit/1eb11340523662223b6d071249d7b1a10a705d69))
+
+
+### Bug Fixes
+
+* シリーズ抽出を一本化 ([bfc1190](https://github.com/mitsugogo/azki-song-db/commit/bfc1190584ea4b4965848e3c380221ccac130497))
+
 ### [2.12.1](https://github.com/mitsugogo/azki-song-db/compare/v2.12.0...v2.12.1) (2026-07-05)
 
 ## [2.12.0](https://github.com/mitsugogo/azki-song-db/compare/v2.11.1...v2.12.0) (2026-07-05)
