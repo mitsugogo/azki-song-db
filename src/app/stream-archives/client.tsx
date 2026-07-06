@@ -18,6 +18,7 @@ import {
   Checkbox,
   LoadingOverlay,
   Select,
+  SegmentedControl,
   Text,
   TextInput,
   Tooltip,
@@ -107,7 +108,10 @@ type ArchiveFilterState = {
   seriesKey: string | null;
   dateRange: DateRangeValue;
   includeShorts: boolean;
+  viewMode: ArchiveViewMode;
 };
+
+type ArchiveViewMode = "series" | "list";
 
 type ArchiveSortKey =
   | "stream_started_at"
@@ -130,6 +134,7 @@ const DESKTOP_STICKY_SUMMARY_TOP = 32;
 const DATE_PARAM_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TEXT_QUERY_PARAM = "keyword";
 const INCLUDE_SHORTS_PARAM = "includeShorts";
+const VIEW_PARAM = "view";
 const DEFAULT_ARCHIVE_SORT: ArchiveSortState = {
   key: "stream_started_at",
   direction: "desc",
@@ -148,6 +153,9 @@ const getChannelUrl = (channelId: string) =>
 const normalizeDateParam = (value: string | null) =>
   value && DATE_PARAM_PATTERN.test(value) ? value : null;
 
+const normalizeArchiveViewMode = (value: string | null): ArchiveViewMode =>
+  value === "series" ? "series" : "list";
+
 const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
   if (typeof window === "undefined") {
     return {
@@ -155,6 +163,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
       seriesKey: null,
       dateRange: [null, null],
       includeShorts: false,
+      viewMode: "list",
     };
   }
 
@@ -169,6 +178,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
       normalizeDateParam(params.get("to")),
     ],
     includeShorts: params.get(INCLUDE_SHORTS_PARAM) === "1",
+    viewMode: normalizeArchiveViewMode(params.get(VIEW_PARAM)),
   };
 };
 
@@ -187,6 +197,7 @@ const updateArchiveFilterUrl = ({
   seriesKey,
   dateRange,
   includeShorts,
+  viewMode,
 }: ArchiveFilterState) => {
   if (typeof window === "undefined") {
     return;
@@ -225,6 +236,12 @@ const updateArchiveFilterUrl = ({
     url.searchParams.set(INCLUDE_SHORTS_PARAM, "1");
   } else {
     url.searchParams.delete(INCLUDE_SHORTS_PARAM);
+  }
+
+  if (viewMode === "series") {
+    url.searchParams.set(VIEW_PARAM, viewMode);
+  } else {
+    url.searchParams.delete(VIEW_PARAM);
   }
 
   historyHelper.replaceUrlIfDifferent(url.href, { dispatchEvent: false });
@@ -351,6 +368,11 @@ const createArchiveGroups = (items: IndexedArchiveItem[]) => {
 
   return Array.from(groups.values());
 };
+
+const getLatestArchiveGroupItem = (group: ArchiveGroup) =>
+  group.items.reduce((latestItem, item) =>
+    item.streamStartedAtMs > latestItem.streamStartedAtMs ? item : latestItem,
+  );
 
 const compareText = (collator: Intl.Collator, left: string, right: string) =>
   collator.compare(left || "", right || "");
@@ -676,6 +698,58 @@ const ThumbnailLink = memo(function ThumbnailLink({
         </Button>
       )}
     </div>
+  );
+});
+
+const ArchiveSeriesCard = memo(function ArchiveSeriesCard({
+  group,
+  locale,
+  itemsCountLabel,
+  openSeriesLabel,
+  onSelect,
+}: {
+  group: ArchiveGroup;
+  locale: string;
+  itemsCountLabel: string;
+  openSeriesLabel: string;
+  onSelect: (seriesKey: string) => void;
+}) {
+  const latestItem = getLatestArchiveGroupItem(group);
+
+  return (
+    <button
+      type="button"
+      aria-label={openSeriesLabel}
+      onClick={() => onSelect(group.key)}
+      className="group block min-w-0 cursor-pointer text-left focus:outline-none"
+    >
+      <div className="relative pt-2">
+        <span className="absolute inset-x-7 top-0 h-3 rounded-t-lg bg-gray-300/70 dark:bg-gray-700/80" />
+        <span className="absolute inset-x-4 top-1 h-3 rounded-t-lg bg-gray-400/70 dark:bg-gray-600/80" />
+        <div className="relative overflow-hidden rounded-lg bg-black shadow-sm ring-1 ring-black/10 transition group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-primary/50 dark:ring-white/10">
+          <Image
+            src={getThumbnailUrl(latestItem.video_id)}
+            width={320}
+            height={180}
+            alt={latestItem.title}
+            loading="lazy"
+            decoding="async"
+            className="aspect-video w-full object-cover transition duration-200 group-hover:scale-[1.03]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" />
+          <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded bg-black/75 px-2 py-1 text-xs font-semibold leading-none text-white shadow-sm">
+            <BiSolidVideos className="h-3.5 w-3.5" />
+            {itemsCountLabel}
+          </span>
+        </div>
+      </div>
+      <h2 className="mt-2 line-clamp-2 text-sm font-bold leading-snug text-gray-900 transition group-hover:text-primary dark:text-gray-100 dark:group-hover:text-primary-200">
+        {group.title}
+      </h2>
+      <Text className="mt-1" c="dimmed" fz="xs">
+        {formatArchiveDate(group.latestStreamStartedAt, locale)}
+      </Text>
+    </button>
   );
 });
 
@@ -1065,6 +1139,7 @@ export default function ArchivesPageClient() {
   const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
     string | null
   >(null);
+  const [viewMode, setViewMode] = useState<ArchiveViewMode>("list");
   const [sortState, setSortState] =
     useState<ArchiveSortState>(DEFAULT_ARCHIVE_SORT);
   const archiveScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
@@ -1098,9 +1173,15 @@ export default function ArchivesPageClient() {
     () => new Intl.Collator(locale, { numeric: true, sensitivity: "base" }),
     [locale],
   );
-  const archiveActivitySummary = useMemo(
-    () => createArchiveActivitySummary(indexedItems),
+
+  const archiveActivityItems = useMemo(
+    () => indexedItems.filter((item) => !isShortsArchive(item)),
     [indexedItems],
+  );
+
+  const archiveActivitySummary = useMemo(
+    () => createArchiveActivitySummary(archiveActivityItems),
+    [archiveActivityItems],
   );
 
   const seriesOptions = useMemo(
@@ -1116,24 +1197,27 @@ export default function ArchivesPageClient() {
 
   const hasDateRange = Boolean(dateRange[0] || dateRange[1]);
   const hasDetailedFilters =
-    Boolean(selectedSeriesKey) || hasDateRange || includeShorts;
+    (viewMode === "list" && Boolean(selectedSeriesKey)) ||
+    hasDateRange ||
+    includeShorts;
 
-  const filteredItems = useMemo(
+  const seriesFilteredItems = useMemo(
     () =>
       indexedItems.filter(
         (item) =>
           (!normalizedQuery || item.searchText.includes(normalizedQuery)) &&
-          (!selectedSeriesKey || item.seriesKey === selectedSeriesKey) &&
           (includeShorts || !isShortsArchive(item)) &&
           isInDateRange(item, dateRange),
       ),
-    [
-      dateRange,
-      includeShorts,
-      indexedItems,
-      normalizedQuery,
-      selectedSeriesKey,
-    ],
+    [dateRange, includeShorts, indexedItems, normalizedQuery],
+  );
+
+  const filteredItems = useMemo(
+    () =>
+      seriesFilteredItems.filter(
+        (item) => !selectedSeriesKey || item.seriesKey === selectedSeriesKey,
+      ),
+    [selectedSeriesKey, seriesFilteredItems],
   );
 
   const sortedFilteredItems = useMemo(() => {
@@ -1152,9 +1236,19 @@ export default function ArchivesPageClient() {
     [archiveGroups],
   );
 
+  const seriesViewGroups = useMemo(
+    () =>
+      createArchiveGroups(seriesFilteredItems).sort(
+        (a, b) => b.latestStreamStartedAtMs - a.latestStreamStartedAtMs,
+      ),
+    [seriesFilteredItems],
+  );
+
   const totalCount = items.length;
-  const displayCount = filteredItems.length;
-  const displayGroupCount = archiveGroups.length;
+  const displayCount =
+    viewMode === "series" ? seriesFilteredItems.length : filteredItems.length;
+  const displayGroupCount =
+    viewMode === "series" ? seriesViewGroups.length : archiveGroups.length;
 
   useEffect(() => {
     if (archiveActivitySummary.years.length === 0) {
@@ -1177,7 +1271,7 @@ export default function ArchivesPageClient() {
   }, [archiveActivitySummary]);
 
   const rowVirtualizer = useVirtualizer({
-    count: archiveEntries.length,
+    count: viewMode === "list" ? archiveEntries.length : 0,
     getScrollElement: () =>
       archiveScrollRef.current?.osInstance()?.elements().viewport as Element,
     estimateSize: (index) => {
@@ -1321,10 +1415,16 @@ export default function ArchivesPageClient() {
     firstSongsByVideoId.size,
     isDesktop,
     rowVirtualizer,
+    viewMode,
   ]);
 
   useEffect(() => {
-    if (!isUrlFilterReady || isLoading || archiveEntries.length === 0) {
+    if (
+      viewMode !== "list" ||
+      !isUrlFilterReady ||
+      isLoading ||
+      archiveEntries.length === 0
+    ) {
       return;
     }
 
@@ -1357,6 +1457,7 @@ export default function ArchivesPageClient() {
     isLoading,
     isUrlFilterReady,
     scrollToCurrentArchiveHash,
+    viewMode,
   ]);
 
   const handleTimestampExpandedChange = useCallback(
@@ -1404,6 +1505,19 @@ export default function ArchivesPageClient() {
     });
   }, []);
 
+  const handleViewModeChange = useCallback((value: string) => {
+    startTransition(() => {
+      setViewMode(normalizeArchiveViewMode(value));
+    });
+  }, []);
+
+  const handleSeriesCardSelect = useCallback((seriesKey: string) => {
+    startTransition(() => {
+      setSelectedSeriesKey(seriesKey);
+      setViewMode("list");
+    });
+  }, []);
+
   const handleFilterQueryChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setFilterQuery(event.currentTarget.value);
@@ -1426,6 +1540,7 @@ export default function ArchivesPageClient() {
       seriesKey: selectedSeriesKey,
       dateRange,
       includeShorts,
+      viewMode,
     });
   }, [
     dateRange,
@@ -1433,6 +1548,7 @@ export default function ArchivesPageClient() {
     includeShorts,
     isUrlFilterReady,
     selectedSeriesKey,
+    viewMode,
   ]);
 
   const handleSeriesKeyChange = useCallback((value: string | null) => {
@@ -1477,6 +1593,7 @@ export default function ArchivesPageClient() {
       seriesKey: selectedSeriesKey,
       dateRange,
       includeShorts,
+      viewMode,
     });
   }, [
     dateRange,
@@ -1484,6 +1601,7 @@ export default function ArchivesPageClient() {
     includeShorts,
     isUrlFilterReady,
     selectedSeriesKey,
+    viewMode,
   ]);
 
   useEffect(() => {
@@ -1493,6 +1611,7 @@ export default function ArchivesPageClient() {
       setSelectedSeriesKey(nextState.seriesKey);
       setDateRange(nextState.dateRange);
       setIncludeShorts(nextState.includeShorts);
+      setViewMode(nextState.viewMode);
       setIsUrlFilterReady(true);
     };
 
@@ -1521,12 +1640,23 @@ export default function ArchivesPageClient() {
         <p className={pageClasses.description}>{t("description")}</p>
       </div>
 
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <SegmentedControl
+          value={viewMode}
+          aria-label={t("viewModeSwitchAriaLabel")}
+          data={[
+            { value: "series", label: t("seriesViewLabel") },
+            { value: "list", label: t("videoListViewLabel") },
+          ]}
+          onChange={handleViewModeChange}
+          className="w-full md:w-auto"
+        />
         <Button
           variant="light"
           color="green"
           leftSection={<HiChartBar />}
           onClick={() => setIsActivityVisible((current) => !current)}
+          className="md:ml-auto"
         >
           {isActivityVisible ? t("activityHide") : t("activityShow")}
         </Button>
@@ -1555,7 +1685,13 @@ export default function ArchivesPageClient() {
       )}
 
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="grid flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]">
+        <div
+          className={`grid flex-1 grid-cols-1 gap-3 ${
+            viewMode === "list"
+              ? "lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]"
+              : "lg:grid-cols-[minmax(240px,1.4fr)_minmax(260px,1fr)_auto_auto]"
+          }`}
+        >
           <TextInput
             value={filterQuery}
             placeholder={t("searchPlaceholder")}
@@ -1564,17 +1700,19 @@ export default function ArchivesPageClient() {
             onFocus={handleFilterQueryFocus}
             onBlur={handleFilterQueryBlur}
           />
-          <Select
-            data={seriesOptions}
-            value={selectedSeriesKey}
-            placeholder={t("seriesPlaceholder")}
-            leftSection={<BiSolidVideos />}
-            searchable
-            clearable
-            maxDropdownHeight={320}
-            nothingFoundMessage={t("seriesNothingFound")}
-            onChange={handleSeriesKeyChange}
-          />
+          {viewMode === "list" && (
+            <Select
+              data={seriesOptions}
+              value={selectedSeriesKey}
+              placeholder={t("seriesPlaceholder")}
+              leftSection={<BiSolidVideos />}
+              searchable
+              clearable
+              maxDropdownHeight={320}
+              nothingFoundMessage={t("seriesNothingFound")}
+              onChange={handleSeriesKeyChange}
+            />
+          )}
           <DatePickerInput
             type="range"
             value={dateRange}
@@ -1614,6 +1752,29 @@ export default function ArchivesPageClient() {
           overlayProps={{ radius: "sm", blur: 2 }}
           loaderProps={{ color: "pink", type: "bars" }}
         />
+      ) : viewMode === "series" ? (
+        seriesViewGroups.length === 0 ? (
+          <p className="px-3 py-6 text-sm text-gray-600 dark:text-gray-300">
+            {t("empty")}
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+            {seriesViewGroups.map((group) => (
+              <ArchiveSeriesCard
+                key={group.key}
+                group={group}
+                locale={locale}
+                itemsCountLabel={t("itemsCount", {
+                  count: group.items.length,
+                })}
+                openSeriesLabel={t("openSeriesLabel", {
+                  title: group.title,
+                })}
+                onSelect={handleSeriesCardSelect}
+              />
+            ))}
+          </div>
+        )
       ) : filteredItems.length === 0 ? (
         <p className="px-3 py-6 text-sm text-gray-600 dark:text-gray-300">
           {t("empty")}
