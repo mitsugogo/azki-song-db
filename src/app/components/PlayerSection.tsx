@@ -162,8 +162,7 @@ export default function PlayerSection({
       onReady: handlePlayerOnReady as (event: YouTubeEvent<any>) => void,
       onStateChange: handleStateChange as (event: YouTubeEvent<any>) => void,
       onError: handlePlayerError as
-        | ((event: YouTubeEvent<any>) => void)
-        | undefined,
+        ((event: YouTubeEvent<any>) => void) | undefined,
     }),
     [
       isSharedPlayerActive,

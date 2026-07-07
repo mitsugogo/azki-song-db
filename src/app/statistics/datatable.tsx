@@ -24,8 +24,7 @@ import { Badge } from "@mantine/core";
 
 export default function DataTable<
   T extends
-    | { lastVideo?: { video_title: string; video_id: string } }
-    | StatisticsItem,
+    { lastVideo?: { video_title: string; video_id: string } } | StatisticsItem,
 >({
   data,
   caption,
