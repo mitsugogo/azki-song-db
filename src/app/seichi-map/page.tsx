@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { baseUrl, siteConfig } from "@/app/config/siteConfig";
 import { getOptionalServerSession } from "@/app/lib/authSession";
+import {
+  getSeichiMapShareByShareId,
+  validateSeichiMapShareId,
+} from "@/app/lib/seichiMapShareSheet";
 import { metadata } from "../layout";
 import SeichiMapCompleteClient from "./client";
 
@@ -33,18 +37,47 @@ const getFirstSearchParam = (
   return Array.isArray(value) ? value[0] : value;
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(
+  props: SeichiMapPageProps,
+): Promise<Metadata> {
   const locale = await getLocale();
   const tMeta = await getTranslations({
     namespace: "Metadata.seichiMapComplete",
     locale,
   });
   const title = tMeta("title");
-  const description = tMeta("description");
+  const baseDescription = tMeta("description");
+
+  // shareIdがある場合はニックネームを取得して、OG画像を変更
+  let ogSubtitle = baseDescription;
+  const resolvedSearchParams = await props.searchParams;
+  const shareIdParam = getFirstSearchParam(resolvedSearchParams, "share");
+  if (shareIdParam) {
+    const shareId = validateSeichiMapShareId(
+      typeof shareIdParam === "string"
+        ? shareIdParam
+        : (shareIdParam as string[])[0],
+    );
+    if (shareId) {
+      const sharedData = await getSeichiMapShareByShareId(shareId);
+      console.log("sharedData", sharedData, shareId);
+      if (sharedData?.shareId === shareId) {
+        const tMetaShared = await getTranslations({
+          namespace: "Metadata.seichiMapCompleteShared",
+          locale,
+        });
+        const templateText = tMetaShared("descriptionTemplate", {
+          nickname: sharedData.nickname,
+        });
+        ogSubtitle = templateText;
+      }
+    }
+  }
+
   const canonical = new URL("/seichi-map", baseUrl).toString();
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
-  ogImageUrl.searchParams.set("subtitle", description);
+  ogImageUrl.searchParams.set("subtitle", ogSubtitle);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
@@ -52,11 +85,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     ...metadata,
     title: `${title} | ${siteConfig.siteName}`,
-    description,
+    description: baseDescription,
     openGraph: {
       ...metadata.openGraph,
       title: `${title} | ${siteConfig.siteName}`,
-      description,
+      description: baseDescription,
       url: canonical,
       siteName: siteConfig.siteName,
       locale: locale === "ja" ? "ja_JP" : "en_US",
@@ -66,7 +99,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `${title} | ${siteConfig.siteName}`,
-      description,
+      description: baseDescription,
       images: [ogImagePath],
     },
     alternates: {
