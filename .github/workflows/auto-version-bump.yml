@@ -26,11 +26,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.3.0
+          version: 11.10.0
           run_install: false
 
-      - name: Setup Takumi Guard Registry
-        uses: flatt-security/setup-takumi-guard-npm@v1
+      # - name: Setup Takumi Guard Registry
+      #   uses: flatt-security/setup-takumi-guard-npm@v1
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -41,6 +41,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        # env:
+        #   NPM_CONFIG_FETCHING_CONCURRENCY: "4"
+        #   NPM_CONFIG_NETWORK_CONCURRENCY: "4"
+        #   NPM_CONFIG_FETCH_RETRIES: "5"
+        #   NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: "15000"
+        #   NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: "60000"
 
       - name: Configure Git User
         run: |

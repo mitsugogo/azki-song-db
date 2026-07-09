@@ -22,6 +22,7 @@
     "activity": "活動記録",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
+    "seichiMapComplete": "聖地マップ",
     "statistics": "統計情報",
     "allData": "全収録データ",
     "myBest9Songs": "究極の9曲",
@@ -339,6 +340,10 @@
       "description": "AZKiさんの配信アーカイブを一覧表示します。",
       "ogSubtitle": "配信アーカイブ - {siteName}",
       "ogAlt": "{siteName} - 配信アーカイブ"
+    },
+    "seichiMapComplete": {
+      "title": "聖地マップ",
+      "description": "AZKi聖地マップの最新KMLを読み込み、訪問ログとコンプリート率を記録できます。"
     },
     "playlist": {
       "title": "プレイリスト",
@@ -856,6 +861,134 @@
     "TimestampComment": {
       "close": "折りたたむ",
       "more": "もっとみる"
+    }
+  },
+  "SeichiMapComplete": {
+    "userName": "ユーザー",
+    "breadcrumb": "聖地マップ",
+    "title": "聖地マップ",
+    "description": "AZKi聖地マップの訪問ログとコンプリート率を記録します。",
+    "credit": {
+      "prefix": "地点情報は ",
+      "linkLabel": "AZKi聖地マップ",
+      "suffix": " よりご提供頂いております"
+    },
+    "auth": {
+      "logoutTooltip": "ログアウト",
+      "logout": "ログアウト",
+      "loginWithGoogle": "Googleでログイン"
+    },
+    "alerts": {
+      "loginRequired": "Googleでログインすると訪問ログを保存できます。"
+    },
+    "share": {
+      "open": "共有",
+      "title": "訪問状況を共有",
+      "description": "共有URLを知っている人は、あなたの最新の訪問状況を閲覧できます。GoogleアカウントのIDは公開されません。",
+      "nicknameLabel": "ニックネーム",
+      "urlLabel": "共有URL",
+      "publish": "共有URLを発行",
+      "update": "更新",
+      "copy": "コピー",
+      "copied": "コピー済み",
+      "stop": "公開を中止",
+      "publicView": "共有表示",
+      "viewMode": "閲覧モード",
+      "loadingUser": "共有ユーザー",
+      "sharedTitle": "{nickname}さんの聖地マップコンプリート状況",
+      "sharedDescription": "共有された訪問状況を閲覧しています。記録・編集・削除はできません。",
+      "viewing": "{nickname} さんの訪問状況を表示しています。",
+      "backToMyMap": "自分の聖地マップに戻る"
+    },
+    "loading": {
+      "map": "聖地マップを読み込み中..."
+    },
+    "progress": {
+      "title": "訪問ログ",
+      "sharedTitle": "{nickname} さんの訪問ログ",
+      "percent": "{percent}% 達成"
+    },
+    "layers": {
+      "title": "レイヤー",
+      "summary": "レイヤー {visible}/{total}",
+      "visibleCount": "{visible} / {total} 表示",
+      "showAll": "すべてON",
+      "hideAll": "すべてOFF",
+      "expand": "レイヤー選択を開く",
+      "collapse": "折りたたむ"
+    },
+    "tabs": {
+      "locations": "聖地リスト",
+      "visited": "訪問済"
+    },
+    "search": {
+      "locationLabel": "場所検索",
+      "locationPlaceholder": "場所名・レイヤー・説明で検索",
+      "visitedPlaceholder": "場所名・メモ・訪問日で検索"
+    },
+    "list": {
+      "uncategorized": "未分類",
+      "emptyLocations": "条件に一致する場所がありません。",
+      "count": "{count} 件",
+      "layerProgress": "{done}件 / {total}件 ({percent}%)",
+      "visitedBadge": "訪問済",
+      "recordedTitle": "記録済み",
+      "sharedRecordedTitle": "{nickname} さんの訪問済み",
+      "recordedCount": "{visible} / {total} 件",
+      "emptyVisited": "まだ記録がありません。",
+      "openPostLink": "投稿リンクを開く",
+      "loadMore": "さらに{count}件表示"
+    },
+    "popup": {
+      "visitedAt": "{date} に訪問済",
+      "visited": "訪問済",
+      "youtube": "YouTube",
+      "youtubeThumbnailAlt": "YouTube サムネイル",
+      "youtubeVideo": "YouTube 動画",
+      "videoId": "動画ID: {videoId}",
+      "streamedAt": "{date} 配信",
+      "playFrom": "{timestamp} から再生",
+      "googleMaps": "Google Maps",
+      "recordVisit": "訪問を記録",
+      "editVisit": "訪問を編集",
+      "deleteVisited": "訪問済を削除"
+    },
+    "modal": {
+      "recordTitle": "訪問を記録",
+      "editTitle": "訪問を編集",
+      "locationLabel": "場所",
+      "visitedDateLabel": "訪問日",
+      "noteLabel": "メモ",
+      "urlLabel": "URL",
+      "urlPlaceholder": "https://x.com/...",
+      "sameDate": "同じ日",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "update": "更新"
+    },
+    "confirm": {
+      "deleteVisited": "訪問ログを削除しますか？ この操作は元に戻せません。",
+      "stopSharing": "訪問状況の公開を中止しますか？ 共有URLからは閲覧できなくなります。"
+    },
+    "aria": {
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "errors": {
+      "locationsFetchFailed": "聖地マップの取得に失敗しました",
+      "visitedFetchFailed": "訪問ログの取得に失敗しました",
+      "sharedVisitedFetchFailed": "共有された訪問ログの取得に失敗しました",
+      "dataLoadFailed": "データの読み込みに失敗しました",
+      "googleMapsLoadFailed": "Google Mapsの読み込みに失敗しました",
+      "deleteFailed": "削除に失敗しました",
+      "locationNotSelected": "場所が選択されていません",
+      "saveFailed": "保存に失敗しました",
+      "updateFailed": "更新に失敗しました",
+      "submitFailed": "保存中にエラーが発生しました",
+      "shareNicknameRequired": "ニックネームを入力してください",
+      "shareSaveFailed": "共有URLの保存に失敗しました",
+      "shareDeleteFailed": "公開中止に失敗しました",
+      "shareCopyFailed": "共有URLのコピーに失敗しました"
     }
   },
   "Statistics": {

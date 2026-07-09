@@ -7,6 +7,16 @@ import {
   it,
   vi,
 } from "vitest";
+
+vi.mock("@/app/lib/prisma", () => ({
+  prisma: {
+    statistics: {
+      findMany: vi.fn(),
+    },
+  },
+}));
+
+import { prisma } from "@/app/lib/prisma";
 import { getStatisticsByVideoId } from "../shared";
 
 const originalSpreadsheetId = process.env.SPREADSHEET_ID;
@@ -23,33 +33,22 @@ describe("stat views shared", () => {
     vi.useRealTimers();
   });
 
-  it("Google SheetsのDateをJSTとして解釈してUTCに変換する", async () => {
-    const payload = {
-      status: "ok",
-      table: {
-        rows: [
-          {
-            c: [
-              { v: "Date(2026,1,23,0,15,4)" },
-              null,
-              null,
-              { v: 100 },
-              { v: 10 },
-              { v: 1 },
-              { v: "hYUBjfxfzIk" },
-            ],
-          },
-        ],
-      },
-    };
-
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      text: async () =>
-        `google.visualization.Query.setResponse(${JSON.stringify(payload)})`,
-    } as Response);
+  it("データベースの統計レコードを日時昇順で返す", async () => {
+    const findManyMock = vi
+      .spyOn(prisma.statistics, "findMany")
+      .mockResolvedValue([
+        {
+          videoId: "hYUBjfxfzIk",
+          datetime: new Date("2026-02-22T15:15:04.000Z"),
+          viewCount: 100,
+          likeCount: 10,
+          commentCount: 1,
+        },
+      ] as any);
 
     const stats = await getStatisticsByVideoId("hYUBjfxfzIk", "7d");
 
+    expect(findManyMock).toHaveBeenCalled();
     expect(stats).not.toBeNull();
     expect(stats).toHaveLength(1);
     expect(stats?.[0]?.datetime?.toISOString()).toBe(
@@ -57,27 +56,19 @@ describe("stat views shared", () => {
     );
   });
 
-  it("periodの基準日をJSTの日付で計算する", async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-02-25T16:30:00.000Z"));
-
-    const payload = {
-      status: "ok",
-      table: {
-        rows: [],
-      },
-    };
-
-    const fetchMock = vi.spyOn(global, "fetch").mockResolvedValue({
-      text: async () =>
-        `google.visualization.Query.setResponse(${JSON.stringify(payload)})`,
-    } as Response);
+  it("periodフィルタを有効にしてデータベースを検索する", async () => {
+    const findManyMock = vi
+      .spyOn(prisma.statistics, "findMany")
+      .mockResolvedValue([] as any);
 
     await getStatisticsByVideoId("hYUBjfxfzIk", "1d");
 
-    const calledUrl = String(fetchMock.mock.calls[0]?.[0] ?? "");
-    const tq = new URL(calledUrl).searchParams.get("tq") ?? "";
-    expect(decodeURIComponent(tq)).toContain("A >= date '2026-02-25'");
+    expect(findManyMock).toHaveBeenCalled();
+    const calledWhere = findManyMock.mock.calls[0]?.[0]?.where;
+    expect(calledWhere).toBeDefined();
+    expect(calledWhere.videoId).toEqual({ in: ["hYUBjfxfzIk"] });
+    expect(calledWhere.datetime).toBeDefined();
+    expect(calledWhere.datetime.gte).toBeInstanceOf(Date);
   });
 
   afterAll(() => {

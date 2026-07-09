@@ -5,13 +5,7 @@ import { AnniversaryItem } from "@/app/types/anniversaryItem";
 import { Locale } from "@/app/types/locale";
 
 type HeaderKey =
-  | "date"
-  | "first_date"
-  | "name"
-  | "name_en"
-  | "url"
-  | "note"
-  | "note_en";
+  "date" | "first_date" | "name" | "name_en" | "url" | "note" | "note_en";
 
 type HeaderDefinition = {
   key: HeaderKey;

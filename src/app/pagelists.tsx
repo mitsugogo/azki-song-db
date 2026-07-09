@@ -22,6 +22,7 @@ export const pageList: PageCategory[] = [
       { name: "活動記録", href: "/activity" },
       { name: "記念日", href: "/anniversaries" },
       { name: "配信アーカイブ", href: "/stream-archives" },
+      { name: "聖地マップ", href: "/seichi-map" },
       { name: "統計情報", href: "/statistics" },
       { name: "全データ", href: "/data" },
     ],

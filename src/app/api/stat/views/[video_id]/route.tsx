@@ -2,8 +2,6 @@ import { NextRequest } from "next/server";
 import { getStatisticsByVideoId, isValidPeriod, parsePeriod } from "../shared";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 
-export const runtime = "edge";
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ video_id: string }> },

@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model SeichiMapVisited {
+  /// レコードの一意識別子
+  id           String   @id
+  /// ユーザーの識別子
+  userId       String
+  /// 訪問先の名称
+  locationName String
+  /// 訪問日時
+  visitedAt    DateTime
+  /// メモやコメント
+  note         String?
+  /// 最終更新日時
+  updatedAt    DateTime
+  /// URL
+  url          String?
+  /// 外部ロケーション識別子
+  locationId   String?
+}
+
+model SeichiMapShare {
+  /// 共有レコードの一意識別子
+  shareId   String   @id
+  /// ユーザーの識別子
+  userId    String
+  /// 共有時のニックネーム
+  nickname  String
+  /// 共有作成日時
+  createdAt DateTime
+  /// 共有更新日時
+  updatedAt DateTime
+}
+
+model Statistics {
+  id           String   @id @default(uuid()) @db.Char(36)
+  videoId      String?  @db.VarChar(50) @map("video_id")
+  datetime     DateTime
+  title        String?  @db.VarChar(255)
+  category     String?  @db.VarChar(50)
+  viewCount    Int?     @map("view_count")
+  likeCount    Int?     @map("like_count")
+  commentCount Int?     @map("comment_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("statistics")
+  @@index([videoId, datetime])
+}
