@@ -22,6 +22,7 @@
     "activity": "Activity",
     "anniversaries": "Anniversaries",
     "archives": "Stream Archives",
+    "seichiMapComplete": "Seichi Map",
     "statistics": "Statistics",
     "allData": "All Data",
     "myBest9Songs": "Cloud Nine",
@@ -341,6 +342,10 @@
       "description": "Browse AZKi's stream archives.",
       "ogSubtitle": "Stream archives - {siteName}",
       "ogAlt": "{siteName} - Stream archives"
+    },
+    "seichiMapComplete": {
+      "title": "Seichi Map",
+      "description": "Load the latest AZKi seichi map KML and track visited locations and completion progress."
     },
     "playlist": {
       "title": "Playlist",
@@ -865,6 +870,134 @@
     "TimestampComment": {
       "more": "See more",
       "close": "fold"
+    }
+  },
+  "SeichiMapComplete": {
+    "userName": "User",
+    "breadcrumb": "Seichi Map",
+    "title": "Seichi Map",
+    "description": "Track visited locations and completion progress for the AZKi seichi map.",
+    "credit": {
+      "prefix": "Location data is provided by ",
+      "linkLabel": "AZKi Seichi Map",
+      "suffix": "."
+    },
+    "auth": {
+      "logoutTooltip": "Log out",
+      "logout": "Log out",
+      "loginWithGoogle": "Sign in with Google"
+    },
+    "alerts": {
+      "loginRequired": "Sign in with Google to save your visited locations."
+    },
+    "share": {
+      "open": "Share",
+      "title": "Share Visit Status",
+      "description": "Anyone with the shared URL can view your latest visit status. Your Google account ID is not exposed.",
+      "nicknameLabel": "Nickname",
+      "urlLabel": "Share URL",
+      "publish": "Create share URL",
+      "update": "Update",
+      "copy": "Copy",
+      "copied": "Copied",
+      "stop": "Stop publishing",
+      "publicView": "Shared view",
+      "viewMode": "View mode",
+      "loadingUser": "Shared user",
+      "sharedTitle": "{nickname}'s Seichi Map Completion Status",
+      "sharedDescription": "You are viewing shared visit status. Recording, editing, and deleting are disabled.",
+      "viewing": "Viewing {nickname}'s visit status.",
+      "backToMyMap": "Back to my Seichi Map"
+    },
+    "loading": {
+      "map": "Loading the seichi map..."
+    },
+    "progress": {
+      "title": "Visit Log",
+      "sharedTitle": "{nickname}'s Visit Log",
+      "percent": "{percent}% complete"
+    },
+    "layers": {
+      "title": "Layers",
+      "summary": "Layers {visible}/{total}",
+      "visibleCount": "{visible} / {total} shown",
+      "showAll": "All on",
+      "hideAll": "All off",
+      "expand": "Open layer selector",
+      "collapse": "Collapse"
+    },
+    "tabs": {
+      "locations": "Location List",
+      "visited": "Visited"
+    },
+    "search": {
+      "locationLabel": "Search locations",
+      "locationPlaceholder": "Search by location, layer, or description",
+      "visitedPlaceholder": "Search by location, note, or visit date"
+    },
+    "list": {
+      "uncategorized": "Uncategorized",
+      "emptyLocations": "No locations match the current filters.",
+      "count": "{count} items",
+      "layerProgress": "{done} / {total} ({percent}%)",
+      "visitedBadge": "Visited",
+      "recordedTitle": "Recorded",
+      "sharedRecordedTitle": "{nickname}'s visited locations",
+      "recordedCount": "{visible} / {total} items",
+      "emptyVisited": "No visits recorded yet.",
+      "openPostLink": "Open post link",
+      "loadMore": "Show {count} more"
+    },
+    "popup": {
+      "visitedAt": "Visited on {date}",
+      "visited": "Visited",
+      "youtube": "YouTube",
+      "youtubeThumbnailAlt": "YouTube thumbnail",
+      "youtubeVideo": "YouTube video",
+      "videoId": "Video ID: {videoId}",
+      "streamedAt": "Streamed on {date}",
+      "playFrom": "Play from {timestamp}",
+      "googleMaps": "Google Maps",
+      "recordVisit": "Record visit",
+      "editVisit": "Edit visit",
+      "deleteVisited": "Delete visited status"
+    },
+    "modal": {
+      "recordTitle": "Record visit",
+      "editTitle": "Edit visit",
+      "locationLabel": "Location",
+      "visitedDateLabel": "Visit date",
+      "noteLabel": "Note",
+      "urlLabel": "URL",
+      "urlPlaceholder": "https://x.com/...",
+      "sameDate": "Same day",
+      "cancel": "Cancel",
+      "save": "Save",
+      "update": "Update"
+    },
+    "confirm": {
+      "deleteVisited": "Delete this visit log? This action cannot be undone.",
+      "stopSharing": "Stop publishing your visit status? The shared URL will no longer work."
+    },
+    "aria": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "errors": {
+      "locationsFetchFailed": "Failed to load the seichi map",
+      "visitedFetchFailed": "Failed to load visit logs",
+      "sharedVisitedFetchFailed": "Failed to load shared visit logs",
+      "dataLoadFailed": "Failed to load data",
+      "googleMapsLoadFailed": "Failed to load Google Maps",
+      "deleteFailed": "Failed to delete",
+      "locationNotSelected": "No location is selected",
+      "saveFailed": "Failed to save",
+      "updateFailed": "Failed to update",
+      "submitFailed": "An error occurred while saving",
+      "shareNicknameRequired": "Enter a nickname",
+      "shareSaveFailed": "Failed to save the share URL",
+      "shareDeleteFailed": "Failed to stop publishing",
+      "shareCopyFailed": "Failed to copy the share URL"
     }
   },
   "Statistics": {

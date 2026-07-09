@@ -81,6 +81,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
     "/activity": t("activity"),
     "/anniversaries": t("anniversaries"),
     "/stream-archives": t("archives"),
+    "/seichi-map": t("seichiMapComplete"),
     "/statistics": t("statistics"),
     "/data": t("allData"),
     "/share/my-best-9-songs": t("myBest9Songs"),

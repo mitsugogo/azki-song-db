@@ -12,11 +12,7 @@ import type { EventItem } from "../types/eventItem";
 import type { Song } from "../types/song";
 
 export type ActivityTimelineKind =
-  | "song_update"
-  | "archive"
-  | "view_milestone"
-  | "milestone"
-  | "event";
+  "song_update" | "archive" | "view_milestone" | "milestone" | "event";
 
 type BaseActivityTimelineItem = {
   id: string;

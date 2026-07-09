@@ -1,64 +1,51 @@
+import { prisma } from "@/app/lib/prisma";
 import { Period, VALID_PERIODS, ViewStat } from "@/app/types/api/stat/views";
-import { cacheTags } from "@/app/lib/cacheTags";
 
-const SHEET_NAME = "statistics";
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-function escapeQueryValue(value: string) {
-  return value.replace(/'/g, "''");
-}
-
-function buildWhereClause(videoIds: string[]) {
-  return videoIds
-    .map((videoId) => `G = '${escapeQueryValue(videoId)}'`)
-    .join(" OR ");
-}
-
-function buildQuery(videoIds: string[], period?: Period) {
-  const whereClause = buildWhereClause(videoIds);
-  const periodClause = period ? ` AND A >= date '${getGSDate(period)}'` : "";
-  return `SELECT * WHERE (${whereClause})${periodClause}`;
-}
-
-function buildRequestUrl(query: string) {
-  const spreadsheetId = process.env.SPREADSHEET_ID;
-  const apiKey = process.env.GOOGLE_API_KEY;
-  const encodedQuery = encodeURIComponent(query);
-  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&tq=${encodedQuery}&sheet=${SHEET_NAME}&key=${apiKey}`;
-}
-
-function parseGvizPayload(text: string) {
-  const jsonStr = text.match(
-    /google\.visualization\.Query\.setResponse\(([\s\S\w]+)\)/,
-  );
-  if (!jsonStr) return null;
-  return JSON.parse(jsonStr[1]);
+function buildJstBoundaryDate(period: Period): Date {
+  const dateString = getGSDate(period);
+  return new Date(`${dateString}T00:00:00+09:00`);
 }
 
 function sortByDatetimeAsc(stats: ViewStat[]) {
   return [...stats].sort((a, b) => {
-    const aTime = a.datetime ? new Date(a.datetime).getTime() : 0;
-    const bTime = b.datetime ? new Date(b.datetime).getTime() : 0;
+    const aTime = a.datetime ? a.datetime.getTime() : 0;
+    const bTime = b.datetime ? b.datetime.getTime() : 0;
     return aTime - bTime;
   });
 }
 
-function toViewStat(row: any): ViewStat {
+function toViewStat(row: {
+  datetime: Date | null;
+  viewCount: number | null;
+  likeCount: number | null;
+  commentCount: number | null;
+}): ViewStat {
   return {
-    datetime: parseGoogleDate(row.c[0]?.v),
-    viewCount: row.c[3]?.v,
-    likeCount: row.c[4]?.v,
-    commentCount: row.c[5]?.v,
-  } as ViewStat;
+    datetime: row.datetime,
+    viewCount: Number(row.viewCount ?? 0),
+    likeCount: Number(row.likeCount ?? 0),
+    commentCount: Number(row.commentCount ?? 0),
+  };
 }
 
-function parseRowsByVideoId(rows: any[], videoIds: string[]) {
+function parseRowsByVideoId(
+  rows: Array<{
+    datetime: Date | null;
+    viewCount: number | null;
+    likeCount: number | null;
+    commentCount: number | null;
+    videoId: string | null;
+  }>,
+  videoIds: string[],
+) {
   const grouped: Record<string, ViewStat[]> = Object.fromEntries(
     videoIds.map((videoId) => [videoId, []]),
   );
 
   rows.forEach((row) => {
-    const videoId = row.c[6]?.v;
+    const videoId = row.videoId;
     if (!videoId || !grouped[videoId]) return;
     grouped[videoId].push(toViewStat(row));
   });
@@ -88,30 +75,29 @@ export async function getStatisticsByVideoIds(
   const uniqueVideoIds = [...new Set(videoIds.filter(Boolean))];
   if (uniqueVideoIds.length === 0) return {};
 
-  const query = buildQuery(uniqueVideoIds, period);
-  const url = buildRequestUrl(query);
+  const where: Record<string, unknown> = {
+    videoId: { in: uniqueVideoIds },
+  };
 
-  try {
-    const response = await fetch(url, {
-      next: {
-        revalidate: 60,
-        tags: [cacheTags.statViews, cacheTags.statViewsList],
-      },
-    });
-    const text = await response.text();
-    const data = parseGvizPayload(text);
-    if (!data) return null;
-
-    if (data.status === "error") {
-      console.error("Query Error:", data.errors);
-      return null;
-    }
-
-    return parseRowsByVideoId(data.table.rows || [], uniqueVideoIds);
-  } catch (error) {
-    console.error("Fetch error:", error);
-    return null;
+  if (period && period !== "all") {
+    where.datetime = {
+      gte: buildJstBoundaryDate(period),
+    };
   }
+
+  const rows = await prisma.statistics.findMany({
+    where,
+    orderBy: { datetime: "asc" },
+    select: {
+      videoId: true,
+      datetime: true,
+      viewCount: true,
+      likeCount: true,
+      commentCount: true,
+    },
+  });
+
+  return parseRowsByVideoId(rows, uniqueVideoIds);
 }
 
 export async function getStatisticsByVideoId(videoId: string, period?: Period) {
@@ -155,20 +141,4 @@ function getGSDate(period: Period): string {
       break;
   }
   return pastDateAsJst.toISOString().split("T")[0];
-}
-
-function parseGoogleDate(dateStr: string): Date | null {
-  const match = String(dateStr || "").match(/\((.+)\)/);
-  if (!match) return null;
-
-  const parts = match[1].split(",").map(Number);
-  const jstMs = Date.UTC(
-    parts[0],
-    parts[1],
-    parts[2],
-    parts[3] || 0,
-    parts[4] || 0,
-    parts[5] || 0,
-  );
-  return new Date(jstMs - JST_OFFSET_MS);
 }

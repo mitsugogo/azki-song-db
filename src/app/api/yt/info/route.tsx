@@ -41,8 +41,9 @@ export async function GET(req: NextRequest) {
   try {
     const requests = chunkedVideoIds.map((chunk) => {
       return youtube.videos.list({
-        part: ["id", "snippet", "statistics"] as string[],
+        part: ["id", "snippet", "statistics", "localizations"] as string[],
         id: chunk.join(","),
+        hl: "ja",
       } as MethodOptions);
     });
 
@@ -51,10 +52,13 @@ export async function GET(req: NextRequest) {
     const allVideoInfos = responses.flatMap((response) =>
       response?.data?.items?.map((item) => ({
         videoId: item.id,
-        title: item.snippet?.title,
+        title: item.snippet?.localized?.title ?? item.snippet?.title,
         snippet: item.snippet,
         statistics: item.statistics,
-        thumbnailUrl: item.snippet?.thumbnails?.default?.url,
+        thumbnailUrl:
+          item.snippet?.thumbnails?.medium?.url ??
+          item.snippet?.thumbnails?.high?.url ??
+          item.snippet?.thumbnails?.default?.url,
       })),
     );
 

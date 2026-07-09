@@ -168,10 +168,6 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
 }
 
 function getActivityTitleHref(item: ActivityTimelineItem) {
-  if (item.kind === "song_update") {
-    return item.youtubeHref ?? item.href;
-  }
-
   return item.titleHref ?? item.href;
 }
 
