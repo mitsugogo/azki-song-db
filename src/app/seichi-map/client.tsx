@@ -862,6 +862,8 @@ export default function SeichiMapCompleteClient({
   const mapClickListenerRef = useRef<any>(null);
   const mapMouseMoveListenerRef = useRef<any>(null);
   const mapIdleListenerRef = useRef<any>(null);
+  const hoverTimerRef = useRef<number | null>(null);
+  const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<any>(null);
   const isLocationVisitedRef = useRef<(location: LocationOption) => boolean>(
     () => false,
@@ -1190,6 +1192,13 @@ export default function SeichiMapCompleteClient({
     return locations.find((location) => location.id === selectedLocationId);
   }, [locations, selectedLocationId]);
 
+  const clearHoveredLocationPreview = useCallback(() => {
+    if (hoverTimerRef.current) {
+      window.clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
   const resetForm = useCallback(() => {
     setSelectedVisitedId(null);
     setSelectedLocationId(null);
@@ -1429,11 +1438,34 @@ export default function SeichiMapCompleteClient({
               }
             },
           );
+          mapRef.current.addListener("mousedown", () => {
+            isMapDraggingRef.current = true;
+            clearHoveredLocationPreview();
+            setHoveredLocation(null);
+          });
+          mapRef.current.addListener("dragstart", () => {
+            isMapDraggingRef.current = true;
+            clearHoveredLocationPreview();
+            setHoveredLocation(null);
+          });
+          mapRef.current.addListener("mouseup", () => {
+            isMapDraggingRef.current = false;
+          });
+          mapRef.current.addListener("dragend", () => {
+            isMapDraggingRef.current = false;
+          });
           mapMouseMoveListenerRef.current = mapRef.current.addListener(
             "mousemove",
             (event: any) => {
               const mapElement = mapElementRef.current;
               const mouseEvent = event.domEvent as MouseEvent | undefined;
+              clearHoveredLocationPreview();
+
+              if (isMapDraggingRef.current) {
+                setHoveredLocation(null);
+                return;
+              }
+
               if (!event.latLng || !mapElement || !mouseEvent) {
                 setHoveredLocation(null);
                 return;
@@ -1449,16 +1481,19 @@ export default function SeichiMapCompleteClient({
               }
 
               const mapRect = mapElement.getBoundingClientRect();
-              setHoveredLocation({
-                name: location.name,
-                x: mouseEvent.clientX - mapRect.left,
-                y: mouseEvent.clientY - mapRect.top,
-              });
+              hoverTimerRef.current = window.setTimeout(() => {
+                setHoveredLocation({
+                  name: location.name,
+                  x: mouseEvent.clientX - mapRect.left,
+                  y: mouseEvent.clientY - mapRect.top,
+                });
+              }, 300);
             },
           );
           mapIdleListenerRef.current = mapRef.current.addListener(
             "idle",
             () => {
+              clearHoveredLocationPreview();
               setHoveredLocation(null);
               syncMapViewportToUrl(mapRef.current, {
                 keepViewport: !isSharedViewRef.current,
@@ -1486,6 +1521,7 @@ export default function SeichiMapCompleteClient({
     if (!mapElement) return;
 
     const clearHoveredLocation = () => {
+      clearHoveredLocationPreview();
       setHoveredLocation(null);
     };
 
@@ -1493,10 +1529,11 @@ export default function SeichiMapCompleteClient({
     return () => {
       mapElement.removeEventListener("mouseleave", clearHoveredLocation);
     };
-  }, []);
+  }, [clearHoveredLocationPreview]);
 
   useEffect(() => {
     return () => {
+      clearHoveredLocationPreview();
       mapIdleListenerRef.current?.remove?.();
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
@@ -1505,7 +1542,7 @@ export default function SeichiMapCompleteClient({
       mapOverlayRef.current = null;
       mapRef.current = null;
     };
-  }, []);
+  }, [clearHoveredLocationPreview]);
 
   const openRecordModal = useCallback(
     (location: LocationOption, visitedItem?: VisitedItem) => {
@@ -2547,7 +2584,7 @@ export default function SeichiMapCompleteClient({
                                 withBorder
                                 radius="md"
                                 p="sm"
-                                className="bg-white/80 dark:bg-white/[0.03]"
+                                className="bg-white/80 dark:bg-white/3"
                               >
                                 <Group
                                   justify="space-between"
