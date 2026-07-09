@@ -64,6 +64,16 @@ export async function getSeichiMapShareByUserId(
   return record ? toSeichiMapShareItem(record) : null;
 }
 
+export async function getSeichiMapShareByShareId(
+  shareId: string,
+): Promise<SeichiMapShareItem | null> {
+  const record = await prisma.seichiMapShare.findUnique({
+    where: { shareId },
+  });
+
+  return record ? toSeichiMapShareItem(record) : null;
+}
+
 export async function getSeichiMapSharedVisits(shareId: string) {
   const share = await prisma.seichiMapShare.findUnique({
     where: { shareId },

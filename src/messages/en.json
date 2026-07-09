@@ -347,6 +347,10 @@
       "title": "Seichi Map",
       "description": "Record your visits and completion rate of the AZKi Seichi Map."
     },
+    "seichiMapCompleteShared": {
+      "title": "Seichi Map",
+      "descriptionTemplate": "{nickname}'s Seichi Map Visit Log"
+    },
     "playlist": {
       "title": "Playlist",
       "description": "AZKi's original and cover songs collection"

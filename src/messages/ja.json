@@ -345,6 +345,10 @@
       "title": "聖地マップ",
       "description": "AZKi聖地マップの訪問ログとコンプリート率を記録できます。"
     },
+    "seichiMapCompleteShared": {
+      "title": "聖地マップ",
+      "descriptionTemplate": "{nickname}さんの聖地マップ訪問ログ"
+    },
     "playlist": {
       "title": "プレイリスト",
       "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"

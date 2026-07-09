@@ -47,20 +47,8 @@ export async function GET(req: NextRequest) {
             maxWidth: 1000,
             padding: "42px 46px 40px",
             borderRadius: 16,
-            backgroundColor: "rgba(255, 255, 255, 1)",
-            border: "2px solid rgba(255, 255, 255, 0.5)",
-            boxShadow: "0 18px 32px rgba(45, 36, 48, 0.18)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              width: 74,
-              height: 8,
-              borderRadius: 999,
-              backgroundColor: ogColors.primary,
-            }}
-          />
           <div
             style={{
               display: "block",
