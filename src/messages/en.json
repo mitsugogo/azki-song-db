@@ -345,7 +345,7 @@
     },
     "seichiMapComplete": {
       "title": "Seichi Map",
-      "description": "Load the latest AZKi seichi map KML and track visited locations and completion progress."
+      "description": "Record your visits and completion rate of the AZKi Seichi Map."
     },
     "playlist": {
       "title": "Playlist",
