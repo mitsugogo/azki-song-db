@@ -18,7 +18,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.3.0
+          version: 11.10.0
           run_install: false
 
       - name: Setup Takumi Guard Registry
@@ -34,8 +34,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
-          # 検証エラーを無視する設定
-          NPM_CONFIG_LOCKFILE_VERIFICATION: "false"
           NPM_CONFIG_FETCHING_CONCURRENCY: "4"
           NPM_CONFIG_NETWORK_CONCURRENCY: "4"
           NPM_CONFIG_FETCH_RETRIES: "5"
@@ -47,6 +45,7 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test -- --run
+
   # e2e-test:
   #   name: E2E Tests
   #   runs-on: ubuntu-latest

@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
-          version: 11.3.0
+          version: 11.10.0
           run_install: false
       - uses: actions/setup-node@v6
         with:
@@ -22,6 +22,13 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+        env:
+          NPM_CONFIG_FETCHING_CONCURRENCY: "4"
+          NPM_CONFIG_NETWORK_CONCURRENCY: "4"
+          NPM_CONFIG_FETCH_RETRIES: "5"
+          NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: "15000"
+          NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: "60000"
+
       - run: pnpm format
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
