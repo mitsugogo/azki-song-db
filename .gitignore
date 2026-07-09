@@ -68,3 +68,5 @@ skills-lock.json
 
 public/build-info.json
 .flowbite-react/
+
+/src/generated/prisma

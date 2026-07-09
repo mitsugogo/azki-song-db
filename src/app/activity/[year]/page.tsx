@@ -24,8 +24,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = (await (params as unknown)) as
-    | { year?: string | string[] }
-    | undefined;
+    { year?: string | string[] } | undefined;
 
   const rawYearParam = String(resolvedParams?.year ?? "");
   const paramStr = Array.isArray(resolvedParams?.year)
