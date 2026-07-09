@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.14.0](https://github.com/mitsugogo/azki-song-db/compare/v2.13.0...v2.14.0) (2026-07-09)
+
+
+### Features
+
+* 聖地マップ ([ca688a2](https://github.com/mitsugogo/azki-song-db/commit/ca688a22901f731d12f6fd100bef6849ee63812e))
+
+
+### Bug Fixes
+
+* アクティビティリンク修正 ([a58ffb6](https://github.com/mitsugogo/azki-song-db/commit/a58ffb6afd0312a4221ec02fdc20eae26f4948ee))
+
 ## [2.13.0](https://github.com/mitsugogo/azki-song-db/compare/v2.12.1...v2.13.0) (2026-07-06)
 
 
