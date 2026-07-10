@@ -96,6 +96,8 @@ const ACTIVITY_TIMELINE_PAGE_SIZE = 20;
 // 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
 const HERO_BACKGROUND_RECENT_DAYS = 30;
 const HERO_BACKGROUND_RECENT_WEIGHT = 10;
+const HERO_BACKGROUND_PLAYBACK_TIMEOUT_MS = 15_000;
+const YOUTUBE_PLAYER_STATE_PLAYING = 1;
 const ONGOING_EVENT_ALERT_DISMISSED_SESSION_KEY =
   "ongoing-event-alert-dismissed-id";
 const ORIGINAL_SONG_MODE_ITEM =
@@ -361,6 +363,7 @@ export default function ClientTop() {
     useState(false);
   const [showBirthdayHero, setShowBirthdayHero] = useState(false);
   const ongoingEventNotificationIdRef = useRef<string | null>(null);
+  const heroBackgroundHasPlayedRef = useRef(false);
   const [buildDate, setBuildDate] = useState("N/A");
   const [appVersion, setAppVersion] = useState("N/A");
 
@@ -540,7 +543,22 @@ export default function ClientTop() {
   );
 
   useEffect(() => {
+    heroBackgroundHasPlayedRef.current = false;
     setHeroBackgroundUnavailable(false);
+
+    if (!heroBackgroundSong?.video_id) {
+      return;
+    }
+
+    const playbackTimeout = window.setTimeout(() => {
+      if (!heroBackgroundHasPlayedRef.current) {
+        setHeroBackgroundUnavailable(true);
+      }
+    }, HERO_BACKGROUND_PLAYBACK_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(playbackTimeout);
+    };
   }, [heroBackgroundSong?.video_id]);
 
   const featuredAnniversaries = useMemo(
@@ -822,6 +840,12 @@ export default function ClientTop() {
     setHeroBackgroundUnavailable(true);
   };
 
+  const handleHeroBackgroundStateChange = (event: YouTubeEvent) => {
+    if (event.data === YOUTUBE_PLAYER_STATE_PLAYING) {
+      heroBackgroundHasPlayedRef.current = true;
+    }
+  };
+
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
       <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 sm:px-6 lg:px-8">
@@ -896,6 +920,7 @@ export default function ClientTop() {
                   title=""
                   onReady={handleHeroBackgroundReady}
                   onError={handleHeroBackgroundError}
+                  onStateChange={handleHeroBackgroundStateChange}
                 />
               </div>
             ) : null}
