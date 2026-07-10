@@ -342,10 +342,7 @@ export default function SongCountOverview({
                           <Badge
                             color="pink"
                             component={Link}
-                            href={
-                              getDiscographyLink(item.song) ||
-                              "/watch?v=" + item.videoId
-                            }
+                            href={"/watch?v=" + item.videoId}
                             leftSection={<FaPlayCircle />}
                             radius="xs"
                             size="xs"
@@ -461,10 +458,7 @@ export default function SongCountOverview({
                           <Badge
                             color="pink"
                             component={Link}
-                            href={
-                              getDiscographyLink(item.song) ||
-                              "/watch?v=" + item.videoId
-                            }
+                            href={"/watch?v=" + item.videoId}
                             leftSection={<FaPlayCircle />}
                             radius="xs"
                             size="xs"
