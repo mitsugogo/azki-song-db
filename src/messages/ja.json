@@ -19,7 +19,7 @@
     "home": "HOME",
     "search": "検索",
     "discography": "Discography",
-    "activity": "活動記録",
+    "activity": "アクティビティ",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
     "seichiMapComplete": "聖地マップ",
@@ -30,7 +30,8 @@
     "mapTitle": "AZKi聖地マップ",
     "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。",
     "whereMyAzkichiBegan": "あなたのあずきちはどこから？",
-    "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？"
+    "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？",
+    "categoryArchive": "保管庫"
   },
   "SearchInput": {
     "search": "検索",
