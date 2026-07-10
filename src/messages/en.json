@@ -953,6 +953,7 @@
       "loadMore": "Show {count} more"
     },
     "popup": {
+      "uniqueVisitors": "Visited by {count} people",
       "visitedAt": "Visited on {date}",
       "visited": "Visited",
       "youtube": "YouTube",

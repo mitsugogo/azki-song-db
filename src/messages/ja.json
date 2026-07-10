@@ -944,6 +944,7 @@
       "loadMore": "さらに{count}件表示"
     },
     "popup": {
+      "uniqueVisitors": "{count}人が訪問済",
       "visitedAt": "{date} に訪問済",
       "visited": "訪問済",
       "youtube": "YouTube",

@@ -126,6 +126,26 @@ export async function loadSeichiMapVisitedRows(
   }));
 }
 
+export async function loadSeichiMapUniqueVisitorCounts(): Promise<
+  Record<string, number>
+> {
+  const rows = await prisma.$queryRaw<
+    { locationId: string; uniqueVisitorCount: bigint }[]
+  >`
+    SELECT locationId, COUNT(DISTINCT userId) AS uniqueVisitorCount
+    FROM SeichiMapVisited
+    WHERE locationId IS NOT NULL AND locationId <> ''
+    GROUP BY locationId
+  `;
+
+  return Object.fromEntries(
+    rows.map(({ locationId, uniqueVisitorCount }) => [
+      locationId,
+      Number(uniqueVisitorCount),
+    ]),
+  );
+}
+
 export async function createSeichiMapVisited(
   userId: string,
   body: ValidatedSeichiMapVisitedBody,
