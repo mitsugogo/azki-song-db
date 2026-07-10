@@ -64,6 +64,7 @@ import { parseXStatusDateFromUrl } from "../lib/xStatus";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
+  uniqueVisitorCount: number;
 };
 
 type VisitedItem = {
@@ -1285,7 +1286,9 @@ export default function SeichiMapCompleteClient({
       }
 
       const locationItems =
-        (await locationsResponse.json()) as SeichiMapLocation[];
+        (await locationsResponse.json()) as (SeichiMapLocation & {
+          uniqueVisitorCount?: number;
+        })[];
       let visitedItems: VisitedItem[] = [];
       let archiveVideoMeta: Record<string, ArchiveVideoMeta> = {};
       let nextSharedViewInfo: ShareInfo | null = null;
@@ -1366,6 +1369,7 @@ export default function SeichiMapCompleteClient({
         locationItems.map((item) => ({
           ...item,
           key: item.id,
+          uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
         })),
       );
       setVisited(visitedItems);
@@ -1623,6 +1627,18 @@ export default function SeichiMapCompleteClient({
       folder.style.fontWeight = "600";
       folder.style.color = "#868e96";
       content.appendChild(folder);
+
+      if (location.uniqueVisitorCount > 0) {
+        const visitorCount = document.createElement("div");
+        visitorCount.textContent = t("popup.uniqueVisitors", {
+          count: location.uniqueVisitorCount,
+        });
+        visitorCount.style.color = "#2b8a3e";
+        visitorCount.style.fontSize = "12px";
+        visitorCount.style.fontWeight = "700";
+        visitorCount.style.marginTop = "2px";
+        content.appendChild(visitorCount);
+      }
 
       if (visitedItem) {
         const visitedDateLabel = formatVisitedDateLabel(visitedItem.visitedAt);
@@ -2208,7 +2224,7 @@ export default function SeichiMapCompleteClient({
       ) : null}
 
       <Grid gap="md" align="stretch">
-        <Grid.Col span={{ base: 12, xl: 8 }}>
+        <Grid.Col span={{ base: 12, lg: 8 }}>
           <Paper
             withBorder
             radius="md"
@@ -2248,7 +2264,7 @@ export default function SeichiMapCompleteClient({
           </Paper>
         </Grid.Col>
 
-        <Grid.Col span={{ base: 12, xl: 4 }}>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
           <Paper
             withBorder
             radius="md"

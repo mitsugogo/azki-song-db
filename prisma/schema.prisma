@@ -29,6 +29,9 @@ model SeichiMapVisited {
   url          String?
   /// 外部ロケーション識別子
   locationId   String?
+
+  @@index([userId, visitedAt], map: "SeichiMapVisited_user_visited_idx")
+  @@index([locationId, userId], map: "SeichiMapVisited_location_visitor_idx")
 }
 
 model SeichiMapShare {
