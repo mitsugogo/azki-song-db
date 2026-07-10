@@ -30,7 +30,8 @@
     "mapTitle": "AZKi Pilgrimage Map: \"Seichi-Junrei\"",
     "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
-    "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?"
+    "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
+    "categoryArchive": "storage"
   },
   "SearchInput": {
     "search": "Search",
