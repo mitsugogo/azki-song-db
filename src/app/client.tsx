@@ -91,7 +91,7 @@ const zenMaruGothic = Zen_Maru_Gothic({
 
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
-const ACTIVITY_TIMELINE_PAGE_SIZE = 20;
+const ACTIVITY_TIMELINE_PAGE_SIZE = 5;
 
 // 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
 const HERO_BACKGROUND_RECENT_DAYS = 30;

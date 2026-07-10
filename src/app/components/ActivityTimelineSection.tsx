@@ -358,10 +358,10 @@ export default function ActivityTimelineSection({
           </div>
           {showArchivesLink ? (
             <Link
-              href="/stream-archives"
+              href="/activity"
               className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
             >
-              {tDrawer("archives")}
+              {tDrawer("activity")}
               <LuArrowRight className="shrink-0" />
             </Link>
           ) : null}
