@@ -139,6 +139,7 @@ export default function SongModeControls({
 
         <Tooltip
           label={authenticated ? undefined : t("signInRequired")}
+          disabled={authenticated}
           withArrow
           position="bottom"
         >

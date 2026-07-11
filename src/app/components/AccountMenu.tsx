@@ -10,11 +10,11 @@ export default function AccountMenu() {
   const t = useTranslations("Account");
 
   return (
-    <Menu position="bottom-end" withArrow width={240}>
+    <Menu position="bottom-end" width={240} shadow="md" withinPortal={true}>
       <Menu.Target>
         <button
           type="button"
-          className="ml-2 rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-white"
+          className="ml-2 mr-1 rounded-full cursor-pointer outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-white"
           aria-label={t("menuLabel")}
         >
           <Avatar
