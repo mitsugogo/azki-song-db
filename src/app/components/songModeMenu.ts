@@ -6,6 +6,7 @@ import {
   LuLibrary,
   LuMicVocal,
   LuMusic,
+  LuPartyPopper,
   LuUsers,
 } from "react-icons/lu";
 
@@ -16,6 +17,7 @@ export type SongMode =
   | "collaboration-songs"
   | "tag:歌枠"
   | "tag:コラボ|tag:歌枠"
+  | "tag:記念ライブ OR tag:企画ライブ"
   | "tag:楽曲紹介shorts";
 
 export type SongModeGroup = "mode" | "theme";
@@ -29,6 +31,7 @@ export type SongModeMenuItem = {
     | "collaboration"
     | "karaoke"
     | "collabKaraoke"
+    | "specialLive"
     | "shorts";
   icon: IconType;
   color: ButtonProps["color"];
@@ -73,6 +76,13 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
     group: "theme",
   },
   {
+    mode: "tag:記念ライブ OR tag:企画ライブ",
+    labelKey: "specialLive",
+    icon: LuPartyPopper,
+    color: "magenta",
+    group: "theme",
+  },
+  {
     mode: "tag:コラボ|tag:歌枠",
     labelKey: "collabKaraoke",
     icon: LuUsers,
@@ -97,12 +107,15 @@ export const getSongModeGroupLabels = (
 
 export const getSongMode = (term?: string | null): SongMode => {
   const tokens = (term ?? "")
-    .split("|")
+    .split(/\||\s+or\s+/i)
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
 
   if (tokens.includes("tag:コラボ") && tokens.includes("tag:歌枠")) {
     return "tag:コラボ|tag:歌枠";
+  }
+  if (tokens.includes("tag:記念ライブ") && tokens.includes("tag:企画ライブ")) {
+    return "tag:記念ライブ OR tag:企画ライブ";
   }
   if (tokens.includes("tag:歌枠")) {
     return "tag:歌枠";
