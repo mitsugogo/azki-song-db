@@ -59,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "ランダムで楽曲を再生します",
       "playlist": "プレイリスト",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "songList": "楽曲一覧",
       "songsUnit": "曲",
       "songsUnit_w/o_en": "曲",
@@ -159,6 +160,7 @@
       "menu": "メニュー",
       "removeFromFavorites": "お気に入りから削除",
       "addToFavorites": "お気に入りに追加",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "shareCurrentSong": "現在の楽曲をシェア"
     }
   },
@@ -592,6 +594,18 @@
     "updatedLabel": "更新日:",
     "copyUrl": "共有用URLコピー",
     "copied": "コピーしました",
+    "visibility": {
+      "label": "共有設定",
+      "public": "公開",
+      "unlisted": "URLを知っている人にのみ公開",
+      "private": "非公開"
+    },
+    "shared": {
+      "songCount": "全{count}曲",
+      "play": "このプレイリストを再生",
+      "song": "曲名",
+      "artist": "アーティスト"
+    },
     "head": {
       "play": "再生",
       "index": "#",
@@ -884,7 +898,8 @@
       "loginWithGoogle": "Googleでログイン"
     },
     "alerts": {
-      "loginRequired": "Googleでログインすると訪問ログを保存できます。"
+      "loginRequired": "Googleでログインすると訪問ログを保存できます。",
+      "login": "Googleでサインイン"
     },
     "share": {
       "open": "共有",
@@ -1353,6 +1368,22 @@
     "hint": "問題が続く場合は、ホームに戻って別のページからアクセスしてみてください。",
     "retry": "再試行",
     "backToHome": "ホームに戻る"
+  },
+  "Account": {
+    "menuLabel": "アカウントメニュー",
+    "guest": "ゲスト",
+    "signIn": "Googleでサインイン",
+    "signOut": "サインアウト",
+    "language": "言語: {language}",
+    "theme": {
+      "light": "ライトモード",
+      "dark": "ダークモード",
+      "auto": "システム設定"
+    },
+    "signInRequiredTitle": "サインインが必要です",
+    "signInRequiredDescription": "プレイリストとお気に入りはGoogleアカウントに保存されます。",
+    "libraryErrorTitle": "ライブラリを読み込めませんでした",
+    "libraryErrorMessage": "旧データは削除していません。時間をおいて再読み込みしてください。"
   },
   "ShareModal": {
     "title": "シェア",

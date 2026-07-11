@@ -1,6 +1,6 @@
 import { Song } from "../types/song";
-import { useLocalStorage } from "@mantine/hooks";
 import { useCallback } from "react";
+import { useUserLibrary } from "../context/UserLibraryContext";
 
 export type FavoriteEntry = {
   videoId: string;
@@ -13,10 +13,9 @@ export type FavoriteEntry = {
  * @returns
  */
 const useFavorites = () => {
-  const [favorites, setFavorites] = useLocalStorage<FavoriteEntry[]>({
-    key: "system-favorites",
-    defaultValue: [],
-  });
+  const library = useUserLibrary();
+  const favorites = library.favorites;
+  const setFavorites = library.setFavorites;
 
   // お気に入りに追加
   const addToFavorites = useCallback(
@@ -30,7 +29,7 @@ const useFavorites = () => {
       );
       if (exists) return;
 
-      setFavorites((prev) => [...prev, { videoId, start }]);
+      setFavorites([...favorites, { videoId, start }]);
     },
     [favorites, setFavorites],
   );
@@ -40,13 +39,13 @@ const useFavorites = () => {
     (song: Song) => {
       const videoId = song.video_id;
       const start = String(song.start);
-      setFavorites((prev) =>
-        prev.filter(
+      setFavorites(
+        favorites.filter(
           (entry) => !(entry.videoId === videoId && entry.start === start),
         ),
       );
     },
-    [setFavorites],
+    [favorites, setFavorites],
   );
 
   // お気に入りに入っているかチェック
@@ -64,13 +63,20 @@ const useFavorites = () => {
   // お気に入りをトグル
   const toggleFavorite = useCallback(
     (song: Song) => {
+      if (!library.authenticated) {
+        library.requestSignIn({
+          type: "favorite",
+          entry: { videoId: song.video_id, start: String(song.start) },
+        });
+        return;
+      }
       if (isInFavorites(song)) {
         removeFromFavorites(song);
       } else {
         addToFavorites(song);
       }
     },
-    [isInFavorites, removeFromFavorites, addToFavorites],
+    [isInFavorites, library, removeFromFavorites, addToFavorites],
   );
 
   // お気に入りを並び替え
@@ -89,8 +95,8 @@ const useFavorites = () => {
   // 複数のお気に入りを削除
   const removeMultipleFavorites = useCallback(
     (entries: FavoriteEntry[]) => {
-      setFavorites((prev) =>
-        prev.filter(
+      setFavorites(
+        favorites.filter(
           (fav) =>
             !entries.some(
               (entry) =>
@@ -99,7 +105,7 @@ const useFavorites = () => {
         ),
       );
     },
-    [setFavorites],
+    [favorites, setFavorites],
   );
 
   return {
@@ -111,6 +117,9 @@ const useFavorites = () => {
     reorderFavorites,
     clearAllFavorites,
     removeMultipleFavorites,
+    authenticated: library.authenticated,
+    ready: library.ready,
+    requestSignIn: library.requestSignIn,
   };
 };
 

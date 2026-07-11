@@ -155,6 +155,10 @@ vi.mock("../../../components/YoutubeThumbnail", () => ({
   ),
 }));
 
+vi.mock("../../../components/SignedInOnly", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 import PlaylistDetailPage from "../client";
 
 const sampleSong: Song = {

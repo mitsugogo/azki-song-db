@@ -10,6 +10,8 @@ import ServiceWorkerCleanup from "./ServiceWorkerCleanup";
 
 // MiniPlayerを遅延読み込みし、初期レンダリングを高速化
 import MiniPlayer from "./MiniPlayer";
+import { SessionProvider } from "next-auth/react";
+import { UserLibraryProvider } from "../context/UserLibraryContext";
 
 export default function ClientProviders({
   children,
@@ -17,18 +19,22 @@ export default function ClientProviders({
   children: React.ReactNode;
 }) {
   return (
-    <GlobalPlayerProvider>
-      <SharedYouTubePlayerProvider>
-        <LoadingProvider>
-          <Notifications position="top-right" zIndex={10000} limit={5} />
-          {children}
-          <MiniPlayer />
-          <PageTransitionHandler />
-          <LoadingOverlayIfNeeded />
-          <ServiceWorkerCleanup />
-        </LoadingProvider>
-      </SharedYouTubePlayerProvider>
-    </GlobalPlayerProvider>
+    <SessionProvider>
+      <UserLibraryProvider>
+        <GlobalPlayerProvider>
+          <SharedYouTubePlayerProvider>
+            <LoadingProvider>
+              <Notifications position="top-right" zIndex={10000} limit={5} />
+              {children}
+              <MiniPlayer />
+              <PageTransitionHandler />
+              <LoadingOverlayIfNeeded />
+              <ServiceWorkerCleanup />
+            </LoadingProvider>
+          </SharedYouTubePlayerProvider>
+        </GlobalPlayerProvider>
+      </UserLibraryProvider>
+    </SessionProvider>
   );
 }
 

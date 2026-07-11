@@ -5,6 +5,7 @@ export type Playlist = {
   createdAt?: string;
   updatedAt?: string;
   author?: string;
+  visibility?: "PRIVATE" | "UNLISTED" | "PUBLIC";
 };
 
 export type PlaylistEntry = {

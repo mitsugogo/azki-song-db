@@ -7,8 +7,9 @@ import { FaYoutube } from "react-icons/fa6";
 import { Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
-import ThemeToggle from "./ThemeToggle";
 import FoldableToggle from "./FoldableToggle";
+import AccountMenu from "./AccountMenu";
+import ThemeToggle from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
 import useSongs from "../hook/useSongs";
 import SearchInput from "./SearchInput";
@@ -180,6 +181,7 @@ export function Header() {
               </div>
               <FoldableToggle />
               <ThemeToggle />
+              <AccountMenu />
             </div>
           </div>
         </div>

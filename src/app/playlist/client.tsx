@@ -8,6 +8,7 @@ import {
   Button,
   Checkbox,
   CopyButton,
+  Select,
   Table,
 } from "@mantine/core";
 import { HiHome, HiChevronRight } from "react-icons/hi";
@@ -19,27 +20,40 @@ import { useTranslations, useLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { FaCheck, FaPlay, FaStar } from "react-icons/fa6";
 import { showAppNotification } from "@/app/lib/notifications";
+import SignedInOnly from "../components/SignedInOnly";
 
 export default function PlaylistPage() {
+  return (
+    <SignedInOnly>
+      <PlaylistPageContent />
+    </SignedInOnly>
+  );
+}
+
+function PlaylistPageContent() {
   const t = useTranslations("Playlist");
   const g = useTranslations("DrawerMenu");
 
   const locale = useLocale();
 
-  const buildShareUrl = (playlistParam: string) => {
+  const buildShareUrl = (playlistId: string) => {
     const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
     return (
       (typeof window !== "undefined" ? window.location.origin : "") +
-      `${prefix}/?playlist=` +
-      playlistParam
+      `${prefix}/playlist/shared/${encodeURIComponent(playlistId)}`
     );
   };
 
   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const { playlists, deletePlaylist, encodePlaylistUrlParam, getMaxLimit } =
-    usePlaylists();
+  const {
+    playlists,
+    deletePlaylist,
+    updatePlaylist,
+    encodePlaylistUrlParam,
+    getMaxLimit,
+  } = usePlaylists();
 
   const { favorites } = useFavorites();
 
@@ -50,6 +64,7 @@ export default function PlaylistPage() {
     songs: favorites,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    visibility: "PRIVATE" as const,
   };
 
   // お気に入りを最上段に配置
@@ -185,33 +200,55 @@ export default function PlaylistPage() {
                   </p>
                 )}
               </div>
-              <div className="mt-4 flex justify-end">
-                {playlist.songs.length > 0 && (
-                  <CopyButton
-                    value={buildShareUrl(encodePlaylistUrlParam(playlist))}
-                    timeout={3000}
-                  >
-                    {({ copied, copy }) => (
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        color={copied ? "teal" : "blue"}
-                        onClick={() => {
-                          copy();
-                          showAppNotification({
-                            title: t("urlCopiedTitle"),
-                            message: t("urlCopiedTitle"),
-                            type: "success",
-                            icon: <FaCheck />,
-                          });
-                        }}
+              {!isFavorites && (
+                <div className="mt-4 flex flex-col items-end gap-2">
+                  <Select
+                    aria-label={t("visibility.label")}
+                    size="xs"
+                    value={playlist.visibility ?? "PRIVATE"}
+                    data={[
+                      { value: "PUBLIC", label: t("visibility.public") },
+                      { value: "UNLISTED", label: t("visibility.unlisted") },
+                      { value: "PRIVATE", label: t("visibility.private") },
+                    ]}
+                    onChange={(visibility) => {
+                      if (visibility)
+                        updatePlaylist({
+                          ...playlist,
+                          visibility: visibility as
+                            "PUBLIC" | "UNLISTED" | "PRIVATE",
+                        });
+                    }}
+                  />
+                  {playlist.songs.length > 0 &&
+                    playlist.visibility !== "PRIVATE" &&
+                    playlist.id && (
+                      <CopyButton
+                        value={buildShareUrl(playlist.id)}
+                        timeout={3000}
                       >
-                        {copied ? t("copied") : t("copyUrl")}
-                      </Button>
+                        {({ copied, copy }) => (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            color={copied ? "teal" : "blue"}
+                            onClick={() => {
+                              copy();
+                              showAppNotification({
+                                title: t("urlCopiedTitle"),
+                                message: t("urlCopiedTitle"),
+                                type: "success",
+                                icon: <FaCheck />,
+                              });
+                            }}
+                          >
+                            {copied ? t("copied") : t("copyUrl")}
+                          </Button>
+                        )}
+                      </CopyButton>
                     )}
-                  </CopyButton>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -326,30 +363,60 @@ export default function PlaylistPage() {
                       new Date(playlist.updatedAt as string).toLocaleString()}
                   </Table.Td>
                   <Table.Td>
-                    {playlist.songs.length > 0 && (
-                      <CopyButton
-                        value={buildShareUrl(encodePlaylistUrlParam(playlist))}
-                        timeout={3000}
-                      >
-                        {({ copied, copy }) => (
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            color={copied ? "teal" : "blue"}
-                            onClick={() => {
-                              copy();
-                              showAppNotification({
-                                title: t("urlCopiedTitle"),
-                                message: t("urlCopiedTitle"),
-                                type: "success",
-                                icon: <FaCheck />,
+                    {!isFavorites && (
+                      <div className="flex min-w-44 flex-col gap-2">
+                        <Select
+                          aria-label={t("visibility.label")}
+                          size="xs"
+                          value={playlist.visibility ?? "PRIVATE"}
+                          data={[
+                            { value: "PUBLIC", label: t("visibility.public") },
+                            {
+                              value: "UNLISTED",
+                              label: t("visibility.unlisted"),
+                            },
+                            {
+                              value: "PRIVATE",
+                              label: t("visibility.private"),
+                            },
+                          ]}
+                          onChange={(visibility) => {
+                            if (visibility)
+                              updatePlaylist({
+                                ...playlist,
+                                visibility: visibility as
+                                  "PUBLIC" | "UNLISTED" | "PRIVATE",
                               });
-                            }}
-                          >
-                            {copied ? t("copied") : t("copyUrl")}
-                          </Button>
-                        )}
-                      </CopyButton>
+                          }}
+                        />
+                        {playlist.songs.length > 0 &&
+                          playlist.visibility !== "PRIVATE" &&
+                          playlist.id && (
+                            <CopyButton
+                              value={buildShareUrl(playlist.id)}
+                              timeout={3000}
+                            >
+                              {({ copied, copy }) => (
+                                <Button
+                                  variant="outline"
+                                  size="xs"
+                                  color={copied ? "teal" : "blue"}
+                                  onClick={() => {
+                                    copy();
+                                    showAppNotification({
+                                      title: t("urlCopiedTitle"),
+                                      message: t("urlCopiedTitle"),
+                                      type: "success",
+                                      icon: <FaCheck />,
+                                    });
+                                  }}
+                                >
+                                  {copied ? t("copied") : t("copyUrl")}
+                                </Button>
+                              )}
+                            </CopyButton>
+                          )}
+                      </div>
                     )}
                   </Table.Td>
                 </Table.Tr>

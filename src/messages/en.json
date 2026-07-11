@@ -59,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "Play songs randomly",
       "playlist": "Playlist",
+      "signInRequired": "Sign in to use this feature",
       "songList": "Songs",
       "songsUnit": "songs",
       "songsUnit_w/o_en": "",
@@ -160,6 +161,7 @@
       "menu": "Menu",
       "removeFromFavorites": "Remove from favorites",
       "addToFavorites": "Add to favorites",
+      "signInRequired": "Sign in to use this feature",
       "shareCurrentSong": "Share current song"
     }
   },
@@ -592,6 +594,18 @@
     "updatedLabel": "Updated:",
     "copyUrl": "Copy share URL",
     "copied": "Copied",
+    "visibility": {
+      "label": "Visibility",
+      "public": "Public",
+      "unlisted": "Anyone with the link",
+      "private": "Private"
+    },
+    "shared": {
+      "songCount": "{count} songs",
+      "play": "Play this playlist",
+      "song": "Song",
+      "artist": "Artist"
+    },
     "head": {
       "play": "Play",
       "index": "#",
@@ -893,7 +907,8 @@
       "loginWithGoogle": "Sign in with Google"
     },
     "alerts": {
-      "loginRequired": "Sign in with Google to save your visited locations."
+      "loginRequired": "Sign in with Google to save your visited locations.",
+      "login": "Sign in with Google"
     },
     "share": {
       "open": "Share",
@@ -1355,6 +1370,22 @@
     "hint": "If the issue continues, go back home and try from another page.",
     "retry": "Try again",
     "backToHome": "Back to home"
+  },
+  "Account": {
+    "menuLabel": "Account menu",
+    "guest": "Guest",
+    "signIn": "Sign in with Google",
+    "signOut": "Sign out",
+    "language": "Language: {language}",
+    "theme": {
+      "light": "Light mode",
+      "dark": "Dark mode",
+      "auto": "System theme"
+    },
+    "signInRequiredTitle": "Sign in required",
+    "signInRequiredDescription": "Playlists and favorites are saved to your Google account.",
+    "libraryErrorTitle": "Could not load your library",
+    "libraryErrorMessage": "Your legacy data was not deleted. Reload the page and try again later."
   },
   "ShareModal": {
     "title": "Share",

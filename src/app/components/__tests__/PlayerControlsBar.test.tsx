@@ -64,6 +64,7 @@ vi.mock("../../hook/usePlaylists", () => ({
     isInPlaylist: isInPlaylistMock,
     removeFromPlaylist: removeFromPlaylistMock,
     isInAnyPlaylist: isInAnyPlaylistMock,
+    authenticated: true,
   }),
 }));
 
@@ -72,6 +73,7 @@ vi.mock("../../hook/useFavorites", () => ({
   default: () => ({
     isInFavorites: isInFavoritesMock,
     toggleFavorite: toggleFavoriteMock,
+    authenticated: true,
   }),
 }));
 

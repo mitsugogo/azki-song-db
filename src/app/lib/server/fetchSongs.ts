@@ -24,14 +24,6 @@ const getBaseCandidates = (baseUrlOverride?: string) => {
   return Array.from(new Set(candidates));
 };
 
-const globalForSongs = globalThis as typeof globalThis & {
-  __azkiSongsFetchCache?: Map<string, Promise<Song[]>>;
-};
-
-const songsFetchCache =
-  globalForSongs.__azkiSongsFetchCache ??
-  (globalForSongs.__azkiSongsFetchCache = new Map());
-
 const fetchSongsJson = async (
   url: URL,
   init?: RequestInit,
@@ -68,17 +60,7 @@ export async function fetchSongsFromApiCached({
         return await fetchSongsJson(songsUrl, { headers });
       }
 
-      const cacheKey = songsUrl.toString();
-      const cached = songsFetchCache.get(cacheKey);
-      if (cached) {
-        return await cached;
-      }
-
       const promise = fetchSongsJson(songsUrl);
-      songsFetchCache.set(cacheKey, promise);
-      promise.catch(() => {
-        songsFetchCache.delete(cacheKey);
-      });
 
       return await promise;
     } catch {

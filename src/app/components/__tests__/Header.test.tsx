@@ -66,6 +66,11 @@ vi.mock("../LanguageSwitcher", () => ({
   default: () => <div data-testid="language-switcher" />,
 }));
 
+vi.mock("../AccountMenu", () => ({
+  __esModule: true,
+  default: () => <div data-testid="account-menu" />,
+}));
+
 vi.mock("../../hook/useSongs", () => ({
   __esModule: true,
   default: () => ({ allSongs: [], songsFetchedAt: null }),

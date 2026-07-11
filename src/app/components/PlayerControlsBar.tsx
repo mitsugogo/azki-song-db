@@ -199,10 +199,18 @@ export default function PlayerControlsBar({
     isInPlaylist,
     removeFromPlaylist,
     isInAnyPlaylist,
+    authenticated,
+    requestSignIn,
   } = usePlaylists();
 
   // Favorites
-  const { isInFavorites, toggleFavorite } = useFavorites();
+  const {
+    isInFavorites,
+    toggleFavorite,
+    authenticated: isAuthenticated,
+  } = useFavorites();
+  // Check if it's PC screen (lg breakpoint)
+  const isPcScreen = useMediaQuery("(min-width: 1024px)");
 
   const addOrRemovePlaylist = (playlist: Playlist) => {
     if (currentSong && isInPlaylist(playlist, currentSong)) {
@@ -212,8 +220,32 @@ export default function PlayerControlsBar({
     }
   };
 
-  // Check if it's PC screen (lg breakpoint)
-  const isPcScreen = useMediaQuery("(min-width: 1024px)");
+  const togglePlaylistMenu = () => {
+    if (!currentSong) return;
+    if (!authenticated) {
+      requestSignIn({
+        type: "playlist-menu",
+        entry: {
+          videoId: currentSong.video_id,
+          start: String(currentSong.start),
+        },
+      });
+      return;
+    }
+    setShowPlaylistMenu((opened) => !opened);
+  };
+
+  useEffect(() => {
+    const resume = (event: Event) => {
+      const action = (event as CustomEvent<{ type?: string }>).detail;
+      if (action?.type !== "playlist-menu") return;
+      setShowPlaylistMenu(true);
+      if (isPcScreen) setIsPcMenuOpen(true);
+      else setIsMenuOpen(true);
+    };
+    window.addEventListener("azki-library-action", resume);
+    return () => window.removeEventListener("azki-library-action", resume);
+  }, [isPcScreen]);
 
   // Volume slider hover state for PC
   const [isVolumeHovered, setIsVolumeHovered] = useState(false);
@@ -800,27 +832,36 @@ export default function PlayerControlsBar({
               {/* Favorite button */}
               <Tooltip
                 label={
-                  isInFavorites(currentSong)
-                    ? t("removeFromFavorites")
-                    : t("addToFavorites")
-                }
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleFavorite(currentSong)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all hover:bg-white/20 text-white"
-                  aria-label={
-                    isInFavorites(currentSong)
+                  isAuthenticated
+                    ? isInFavorites(currentSong)
                       ? t("removeFromFavorites")
                       : t("addToFavorites")
-                  }
-                >
-                  {isInFavorites(currentSong) ? (
-                    <FaStar className="text-base text-yellow-400 dark:text-yellow-500" />
-                  ) : (
-                    <FaRegStar className="text-base" />
-                  )}
-                </button>
+                    : t("signInRequired")
+                }
+              >
+                <span>
+                  <button
+                    type="button"
+                    disabled={!isAuthenticated}
+                    onClick={() => toggleFavorite(currentSong)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-all text-white ${
+                      isAuthenticated
+                        ? "cursor-pointer hover:bg-white/20"
+                        : "cursor-not-allowed opacity-50"
+                    }`}
+                    aria-label={
+                      isInFavorites(currentSong)
+                        ? t("removeFromFavorites")
+                        : t("addToFavorites")
+                    }
+                  >
+                    {isInFavorites(currentSong) ? (
+                      <FaStar className="text-base text-yellow-400 dark:text-yellow-500" />
+                    ) : (
+                      <FaRegStar className="text-base" />
+                    )}
+                  </button>
+                </span>
               </Tooltip>
 
               {/* Share button */}
@@ -879,21 +920,35 @@ export default function PlayerControlsBar({
                             withinPortal={false}
                           >
                             <Menu.Target>
-                              <button
-                                onClick={() =>
-                                  setShowPlaylistMenu(!showPlaylistMenu)
+                              <Tooltip
+                                label={
+                                  isAuthenticated
+                                    ? undefined
+                                    : t("signInRequired")
                                 }
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                                withArrow
                               >
-                                {isInAnyPlaylist(currentSong) ? (
-                                  <FaStar className="inline mr-2" />
-                                ) : (
-                                  <FaPlus className="inline mr-2" />
-                                )}
-                                {isInAnyPlaylist(currentSong)
-                                  ? t("playlistAdded")
-                                  : t("addToPlaylist")}
-                              </button>
+                                <span className="block">
+                                  <button
+                                    disabled={!isAuthenticated}
+                                    onClick={togglePlaylistMenu}
+                                    className={`w-full text-left px-4 py-2 text-sm dark:text-gray-100 ${
+                                      isAuthenticated
+                                        ? "text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                        : "cursor-not-allowed text-gray-400 opacity-60"
+                                    }`}
+                                  >
+                                    {isInAnyPlaylist(currentSong) ? (
+                                      <FaStar className="inline mr-2" />
+                                    ) : (
+                                      <FaPlus className="inline mr-2" />
+                                    )}
+                                    {isInAnyPlaylist(currentSong)
+                                      ? t("playlistAdded")
+                                      : t("addToPlaylist")}
+                                  </button>
+                                </span>
+                              </Tooltip>
                             </Menu.Target>
 
                             <Menu.Dropdown>
@@ -1011,22 +1066,36 @@ export default function PlayerControlsBar({
                       </li>
                     </ul>
                     <div className="py-2">
-                      <button
-                        onClick={() => {
-                          toggleFavorite(currentSong);
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
+                      <Tooltip
+                        label={
+                          isAuthenticated ? undefined : t("signInRequired")
+                        }
+                        withArrow
                       >
-                        {isInFavorites(currentSong) ? (
-                          <FaStar className="inline mr-2 text-yellow-400" />
-                        ) : (
-                          <FaRegStar className="inline mr-2" />
-                        )}
-                        {isInFavorites(currentSong)
-                          ? t("removeFromFavorites")
-                          : t("addToFavorites")}
-                      </button>
+                        <span className="block">
+                          <button
+                            disabled={!isAuthenticated}
+                            onClick={() => {
+                              toggleFavorite(currentSong);
+                              setIsMenuOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm dark:text-gray-100 ${
+                              isAuthenticated
+                                ? "text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                : "cursor-not-allowed text-gray-400 opacity-60"
+                            }`}
+                          >
+                            {isInFavorites(currentSong) ? (
+                              <FaStar className="inline mr-2 text-yellow-400" />
+                            ) : (
+                              <FaRegStar className="inline mr-2" />
+                            )}
+                            {isInFavorites(currentSong)
+                              ? t("removeFromFavorites")
+                              : t("addToFavorites")}
+                          </button>
+                        </span>
+                      </Tooltip>
                     </div>
                     <div className="py-2">
                       <button
@@ -1049,9 +1118,7 @@ export default function PlayerControlsBar({
                       >
                         <Menu.Target>
                           <button
-                            onClick={() =>
-                              setShowPlaylistMenu(!showPlaylistMenu)
-                            }
+                            onClick={togglePlaylistMenu}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                           >
                             {isInAnyPlaylist(currentSong) ? (

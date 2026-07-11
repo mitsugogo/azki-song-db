@@ -1,5 +1,5 @@
 import { Button, Input, Modal } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import usePlaylists from "../hook/usePlaylists";
 
@@ -17,6 +17,18 @@ export default function CreatePlaylistModal({
 
   // プレイリスト
   const { savePlaylist, isDuplicate } = usePlaylists();
+  useEffect(() => {
+    const resume = (event: Event) => {
+      if (
+        (event as CustomEvent<{ type?: string }>).detail?.type ===
+        "create-playlist"
+      ) {
+        setOpenModal(true);
+      }
+    };
+    window.addEventListener("azki-library-action", resume);
+    return () => window.removeEventListener("azki-library-action", resume);
+  }, [setOpenModal]);
   return (
     <Modal
       opened={onenModal}
