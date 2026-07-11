@@ -41,7 +41,7 @@ describe("release view statistics route", () => {
         ],
       },
     });
-    expect(response.headers.get("cache-control")).toContain("s-maxage=86400");
+    expect(response.headers.get("cache-control")).toContain("s-maxage=180");
     expect(response.headers.get("vercel-cache-tag")).toBe(
       "stat:views,stat:views:releases",
     );
