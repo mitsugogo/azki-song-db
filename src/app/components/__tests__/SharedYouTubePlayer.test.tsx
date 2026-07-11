@@ -81,10 +81,10 @@ describe("SharedYouTubePlayer", () => {
     window.cancelAnimationFrame = vi.fn();
   });
 
-  it("keeps the same iframe load props when switching slots for the same video", async () => {
+  it("playerKeyが異なっても同一動画のスロット移譲ではiframeを維持する", async () => {
     const { rerender } = render(
       <SharedYouTubePlayerProvider>
-        <Source sourceId="main" active startTime={30} />
+        <Source sourceId="main" active startTime={30} playerKey={1} />
       </SharedYouTubePlayerProvider>,
     );
 

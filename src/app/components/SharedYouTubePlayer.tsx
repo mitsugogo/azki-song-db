@@ -36,6 +36,7 @@ type ActiveSlot = {
 };
 
 type PlayerLoad = {
+  sourceId: string;
   videoId: string;
   startTime?: number;
   playerKey?: number;
@@ -224,13 +225,15 @@ function SharedYouTubePlayerHost({
     setPlayerLoad((current) => {
       if (
         current?.videoId === activeSource.videoId &&
-        current.playerKey === activeSource.playerKey
+        (current.sourceId !== activeSource.sourceId ||
+          current.playerKey === activeSource.playerKey)
       ) {
         return current;
       }
 
       deliveredReadySourceIdRef.current = null;
       return {
+        sourceId: activeSource.sourceId,
         videoId: activeSource.videoId,
         startTime: activeSource.startTime,
         playerKey: activeSource.playerKey,
