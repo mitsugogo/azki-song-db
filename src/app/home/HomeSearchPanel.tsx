@@ -40,6 +40,7 @@ export const HomeSearchPanel = memo(function HomeSearchPanel({
         allSongs={songs}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
+        onEmptyInputEnter={handleSearch}
         placeholder={tHeader("searchPlaceholder")}
         className="[&_input]:h-12 [&_input]:text-base"
       />
