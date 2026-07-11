@@ -178,6 +178,7 @@ describe("PlayerSection", () => {
       sourceId: "main",
       active: true,
       videoId: "v1",
+      playerKey: 1,
     });
   });
 

@@ -18,6 +18,7 @@ type SharedYouTubePlayerSource = {
   active: boolean;
   videoId?: string;
   startTime?: number;
+  playerKey?: number;
   showNativeControls?: boolean;
   zIndex?: number;
   onReady: (event: YouTubeEvent<any>) => void;
@@ -37,6 +38,7 @@ type ActiveSlot = {
 type PlayerLoad = {
   videoId: string;
   startTime?: number;
+  playerKey?: number;
   showNativeControls?: boolean;
 };
 
@@ -220,7 +222,10 @@ function SharedYouTubePlayerHost({
 
     setHostZIndex(activeSource.zIndex ?? 1);
     setPlayerLoad((current) => {
-      if (current?.videoId === activeSource.videoId) {
+      if (
+        current?.videoId === activeSource.videoId &&
+        current.playerKey === activeSource.playerKey
+      ) {
         return current;
       }
 
@@ -228,6 +233,7 @@ function SharedYouTubePlayerHost({
       return {
         videoId: activeSource.videoId,
         startTime: activeSource.startTime,
+        playerKey: activeSource.playerKey,
         showNativeControls: activeSource.showNativeControls,
       };
     });
@@ -322,6 +328,7 @@ function SharedYouTubePlayerHost({
       }}
     >
       <YouTubePlayer
+        key={playerLoad.playerKey}
         video_id={playerLoad.videoId}
         startTime={playerLoad.startTime}
         showNativeControls={playerLoad.showNativeControls}
