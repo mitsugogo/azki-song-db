@@ -206,7 +206,7 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
           "composer:": (s, v) => equalsOrIncludes(s.composer.toLowerCase(), v),
           "arranger:": (s, v) => equalsOrIncludes(s.arranger.toLowerCase(), v),
           "tag:": (s, v) =>
-            s.tags
+            [...s.tags, ...(s.song_tags ?? [])]
               .join(",")
               .toLowerCase()
               .split(",")

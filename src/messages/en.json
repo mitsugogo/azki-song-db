@@ -649,6 +649,7 @@
       "title": "Title",
       "artist": "Artist",
       "tag": "Tag",
+      "songTag": "Song tag",
       "singer": "Singer",
       "collab": "Collab / Unit",
       "relatedArtists": "AZKi's song history (stream date:2026/04/01)",
@@ -1313,6 +1314,15 @@
     "guestAppearance": "Guest Appearances",
     "azkiOnly": "AZKi only",
     "ballad": "Ballads",
+    "vocaloid": "Vocaloid",
+    "jPop": "J-POP",
+    "rock": "Rock",
+    "anisong": "Anime songs",
+    "hololiveSongs": "hololive songs",
+    "springSongs": "Spring songs",
+    "summerSongs": "Summer songs",
+    "autumnSongs": "Autumn songs",
+    "winterSongs": "Winter songs",
     "acoustic": "Acoustic / Live Performance"
   },
   "SearchHelp": {

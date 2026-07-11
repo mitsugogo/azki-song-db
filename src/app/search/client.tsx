@@ -32,6 +32,9 @@ interface TagCategory {
   filter: (songs: Song[]) => Song[];
 }
 
+const hasTag = (song: Song, tag: string): boolean =>
+  song.tags.includes(tag) || song.song_tags?.includes(tag) === true;
+
 const getGridCols = (width: number): number => {
   if (width >= 5120) return 20;
   if (width >= 3840) return 16;
@@ -50,6 +53,7 @@ const isFilterMode = (value: string): value is FilterMode => {
     "title",
     "artist",
     "tag",
+    "song-tag",
     "singer",
     "collab",
     "related-artists",
@@ -139,18 +143,6 @@ const SearchPageClient = () => {
           songs.filter((song) => song.tags.includes("ゲスト出演")),
       },
       {
-        label: t("ballad"),
-        value: "バラード|しっとり",
-        filter: (songs) =>
-          songs.filter(
-            (song) =>
-              song.video_title.includes("バラード") ||
-              song.video_title.includes("しっとり") ||
-              song.tags.includes("バラード") ||
-              song.tags.includes("しっとり"),
-          ),
-      },
-      {
         label: t("acoustic"),
         value: "tag:アコースティック|アコースティック|生演奏",
         filter: (songs) =>
@@ -160,6 +152,57 @@ const SearchPageClient = () => {
               song.video_title.includes("アコースティック") ||
               song.video_title.includes("生演奏"),
           ),
+      },
+      {
+        label: t("ballad"),
+        value: "tag:バラード",
+        filter: (songs) => songs.filter((song) => hasTag(song, "バラード")),
+      },
+      {
+        label: t("vocaloid"),
+        value: "tag:ボカロ",
+        filter: (songs) => songs.filter((song) => hasTag(song, "ボカロ")),
+      },
+      {
+        label: t("jPop"),
+        value: "tag:J-POP",
+        filter: (songs) => songs.filter((song) => hasTag(song, "J-POP")),
+      },
+      {
+        label: t("rock"),
+        value: "tag:ロック",
+        filter: (songs) => songs.filter((song) => hasTag(song, "ロック")),
+      },
+      {
+        label: t("anisong"),
+        value: "tag:アニソン",
+        filter: (songs) => songs.filter((song) => hasTag(song, "アニソン")),
+      },
+      {
+        label: t("hololiveSongs"),
+        value: "tag:ホロライブ楽曲",
+        filter: (songs) =>
+          songs.filter((song) => hasTag(song, "ホロライブ楽曲")),
+      },
+      {
+        label: t("springSongs"),
+        value: "tag:春ソング",
+        filter: (songs) => songs.filter((song) => hasTag(song, "春ソング")),
+      },
+      {
+        label: t("summerSongs"),
+        value: "tag:夏ソング",
+        filter: (songs) => songs.filter((song) => hasTag(song, "夏ソング")),
+      },
+      // {
+      //   label: t("autumnSongs"),
+      //   value: "tag:秋ソング",
+      //   filter: (songs) => songs.filter((song) => hasTag(song, "秋ソング")),
+      // },
+      {
+        label: t("winterSongs"),
+        value: "tag:冬ソング",
+        filter: (songs) => songs.filter((song) => hasTag(song, "冬ソング")),
       },
     ],
     [],

@@ -155,7 +155,9 @@ export default function SearchInput({
       };
 
       const availableTags = Array.from(
-        new Set(allSongs.flatMap((song) => song.tags)),
+        new Set(
+          allSongs.flatMap((song) => [...song.tags, ...(song.song_tags ?? [])]),
+        ),
       ).filter((tag) => tag !== "");
 
       const availableMilestones = Array.from(

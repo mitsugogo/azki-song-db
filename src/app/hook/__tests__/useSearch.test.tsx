@@ -222,6 +222,24 @@ describe("useSearch", () => {
     );
   });
 
+  it("楽曲タグもtag検索で検索できる", async () => {
+    const songWithSongTag: Song = {
+      ...mockSongs[0],
+      tags: [],
+      song_tags: ["アニソン"],
+    };
+    const { result } = renderHook(() => useSearch([songWithSongTag]));
+
+    result.current.setSearchTerm("tag:アニソン");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs).toEqual([songWithSongTag]);
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it("年検索が動作する", async () => {
     const { result } = renderHook(() => useSearch(mockSongs));
 

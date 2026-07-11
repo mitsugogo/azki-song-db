@@ -15,6 +15,7 @@ export type FilterMode =
   | "title"
   | "artist"
   | "tag"
+  | "song-tag"
   | "singer"
   | "collab"
   | "related-artists"
@@ -66,6 +67,7 @@ export interface FilterModeDataMap {
   title: TitleFilterItem[];
   artist: ArtistFilterItem[];
   tag: TagFilterItem[];
+  "song-tag": TagFilterItem[];
   singer: SingerFilterItem[];
   collab: CollabFilterItem[];
   "related-artists": RelatedArtistsCategoryFilterItem[];
@@ -155,6 +157,30 @@ const getTagData = (
   const tagCountMap = new Map<string, number>();
   allSongs.forEach((song) => {
     song.tags.forEach((tag) => {
+      if (tag !== "") {
+        tagCountMap.set(tag, (tagCountMap.get(tag) || 0) + 1);
+      }
+    });
+  });
+
+  return Array.from(tagCountMap.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => {
+      const tagCompare = sortJapaneseAndEnglish(a.tag, b.tag);
+      if (sortMode === "count-desc") {
+        return sortByCountDescThen(a.count, b.count, tagCompare);
+      }
+      return tagCompare;
+    });
+};
+
+const getSongTagData = (
+  allSongs: Song[],
+  sortMode: SearchBrowseSortMode,
+): TagFilterItem[] => {
+  const tagCountMap = new Map<string, number>();
+  allSongs.forEach((song) => {
+    (song.song_tags ?? []).forEach((tag) => {
       if (tag !== "") {
         tagCountMap.set(tag, (tagCountMap.get(tag) || 0) + 1);
       }
@@ -360,6 +386,12 @@ const getFilterModeData = (
       return {
         filterMode,
         data: getTagData(allSongs, sortMode),
+      };
+    }
+    case "song-tag": {
+      return {
+        filterMode,
+        data: getSongTagData(allSongs, sortMode),
       };
     }
     case "singer": {

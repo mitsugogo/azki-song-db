@@ -84,3 +84,24 @@ describe("useSearchFilterModeData related-artists", () => {
     expect(childhood?.artists[1].artist).toBe("Dream");
   });
 });
+
+describe("useSearchFilterModeData song-tag", () => {
+  it("楽曲タグだけを集計して件数順で返す", () => {
+    const songs: Song[] = [
+      createSong({ song_tags: ["アニソン", "冬ソング"] }),
+      createSong({ video_id: "vid2", song_tags: ["アニソン"] }),
+      createSong({ video_id: "vid3", tags: ["通常タグ"] }),
+    ];
+    const { result } = renderHook(() =>
+      useSearchFilterModeData(songs, "song-tag", "count-desc", "ja"),
+    );
+
+    expect(result.current).toEqual({
+      filterMode: "song-tag",
+      data: [
+        { tag: "アニソン", count: 2 },
+        { tag: "冬ソング", count: 1 },
+      ],
+    });
+  });
+});
