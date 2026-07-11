@@ -41,6 +41,7 @@ import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
 import { LuPlay } from "react-icons/lu";
 import YoutubeThumbnail from "../../components/YoutubeThumbnail";
 import { FaYoutube } from "react-icons/fa6";
+import SignedInOnly from "../../components/SignedInOnly";
 
 type PlaylistWithSongs = {
   id: string;
@@ -153,6 +154,14 @@ const SortableRow = ({
 };
 
 export default function PlaylistDetailPage() {
+  return (
+    <SignedInOnly>
+      <PlaylistDetailPageContent />
+    </SignedInOnly>
+  );
+}
+
+function PlaylistDetailPageContent() {
   const t = useTranslations("Playlist");
   const g = useTranslations("DrawerMenu");
 

@@ -199,10 +199,14 @@ export default function PlayerControlsBar({
     isInPlaylist,
     removeFromPlaylist,
     isInAnyPlaylist,
+    authenticated,
+    requestSignIn,
   } = usePlaylists();
 
   // Favorites
   const { isInFavorites, toggleFavorite } = useFavorites();
+  // Check if it's PC screen (lg breakpoint)
+  const isPcScreen = useMediaQuery("(min-width: 1024px)");
 
   const addOrRemovePlaylist = (playlist: Playlist) => {
     if (currentSong && isInPlaylist(playlist, currentSong)) {
@@ -212,8 +216,32 @@ export default function PlayerControlsBar({
     }
   };
 
-  // Check if it's PC screen (lg breakpoint)
-  const isPcScreen = useMediaQuery("(min-width: 1024px)");
+  const togglePlaylistMenu = () => {
+    if (!currentSong) return;
+    if (!authenticated) {
+      requestSignIn({
+        type: "playlist-menu",
+        entry: {
+          videoId: currentSong.video_id,
+          start: String(currentSong.start),
+        },
+      });
+      return;
+    }
+    setShowPlaylistMenu((opened) => !opened);
+  };
+
+  useEffect(() => {
+    const resume = (event: Event) => {
+      const action = (event as CustomEvent<{ type?: string }>).detail;
+      if (action?.type !== "playlist-menu") return;
+      setShowPlaylistMenu(true);
+      if (isPcScreen) setIsPcMenuOpen(true);
+      else setIsMenuOpen(true);
+    };
+    window.addEventListener("azki-library-action", resume);
+    return () => window.removeEventListener("azki-library-action", resume);
+  }, [isPcScreen]);
 
   // Volume slider hover state for PC
   const [isVolumeHovered, setIsVolumeHovered] = useState(false);
@@ -880,9 +908,7 @@ export default function PlayerControlsBar({
                           >
                             <Menu.Target>
                               <button
-                                onClick={() =>
-                                  setShowPlaylistMenu(!showPlaylistMenu)
-                                }
+                                onClick={togglePlaylistMenu}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                               >
                                 {isInAnyPlaylist(currentSong) ? (
@@ -1049,9 +1075,7 @@ export default function PlayerControlsBar({
                       >
                         <Menu.Target>
                           <button
-                            onClick={() =>
-                              setShowPlaylistMenu(!showPlaylistMenu)
-                            }
+                            onClick={togglePlaylistMenu}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-100"
                           >
                             {isInAnyPlaylist(currentSong) ? (

@@ -3,6 +3,14 @@ import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import usePlaylists, { Playlist } from "../usePlaylists";
 import type { Song } from "../../types/song";
 
+const { mockLibraryRef } = vi.hoisted(() => ({
+  mockLibraryRef: { current: null as any },
+}));
+
+vi.mock("../../context/UserLibraryContext", () => ({
+  useUserLibrary: () => mockLibraryRef.current,
+}));
+
 describe("usePlaylists", () => {
   const mockSong: Song = {
     video_id: "test_video_id",
@@ -34,6 +42,44 @@ describe("usePlaylists", () => {
     // localStorageをクリア
     localStorage.clear();
     vi.clearAllMocks();
+
+    const playlists: Playlist[] = [];
+    const favorites: Array<{ videoId: string; start: string }> = [];
+
+    mockLibraryRef.current = {
+      playlists,
+      favorites,
+      authenticated: true,
+      ready: true,
+      requestSignIn: vi.fn(),
+      savePlaylist: (playlist: Playlist) => {
+        const now = new Date().toISOString();
+        const next: Playlist = {
+          ...playlist,
+          id: playlist.id ?? `pl-${Date.now()}`,
+          createdAt: playlist.createdAt ?? now,
+          updatedAt: playlist.updatedAt ?? now,
+        };
+        playlists.push(next);
+      },
+      updatePlaylist: (playlist: Playlist) => {
+        const index = playlists.findIndex((p) =>
+          playlist.id && p.id ? p.id === playlist.id : p.name === playlist.name,
+        );
+        if (index >= 0) {
+          playlists.splice(index, 1, { ...playlist });
+        }
+      },
+      deletePlaylist: (playlist: Playlist) => {
+        const filtered = playlists.filter((p) =>
+          playlist.id && p.id ? p.id !== playlist.id : p.name !== playlist.name,
+        );
+        playlists.splice(0, playlists.length, ...filtered);
+      },
+      setFavorites: (next: Array<{ videoId: string; start: string }>) => {
+        favorites.splice(0, favorites.length, ...next);
+      },
+    };
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 import { Song } from "../types/song";
-import { useLocalStorage } from "@mantine/hooks";
 import { useCallback } from "react";
+import { useUserLibrary } from "../context/UserLibraryContext";
 import type { Playlist } from "@/app/lib/playlistUrl";
 import {
   decodePlaylistUrlParam as decodePlaylistUrlParamCore,
@@ -14,10 +14,8 @@ export type { Playlist, PlaylistEntry } from "@/app/lib/playlistUrl";
  * @returns
  */
 const usePlaylists = () => {
-  const [playlists, setPlaylists] = useLocalStorage<Playlist[]>({
-    key: "playlists",
-    defaultValue: [],
-  });
+  const library = useUserLibrary();
+  const playlists = library.playlists;
 
   const isSamePlaylist = (a: Playlist, b: Playlist) => {
     if (a.id && b.id) {
@@ -30,11 +28,10 @@ const usePlaylists = () => {
   const savePlaylist = (playlist: Playlist) => {
     const isNew = !playlists.find((p) => p.name === playlist.name);
     if (isNew) {
-      playlist.id = String(Date.now());
       playlist.createdAt = new Date().toISOString();
     }
     playlist.updatedAt = new Date().toISOString();
-    setPlaylists((prev) => [...prev, playlist]);
+    library.savePlaylist(playlist);
   };
 
   // 該当のプレイリストに入っているかチェック
@@ -73,7 +70,7 @@ const usePlaylists = () => {
 
   // プレイリストを削除
   const deletePlaylist = (playlist: Playlist) => {
-    setPlaylists((prev) => prev.filter((p) => !isSamePlaylist(p, playlist)));
+    library.deletePlaylist(playlist);
   };
 
   // プレイリストに追加
@@ -86,66 +83,38 @@ const usePlaylists = () => {
 
     if (isInPlaylist(playlist, song)) return;
 
-    setPlaylists((prev) =>
-      prev.map((p) =>
-        isSamePlaylist(p, playlist)
-          ? {
-              ...p,
-              songs: [...p.songs, { videoId, start }],
-              updatedAt: new Date().toISOString(),
-            }
-          : p,
-      ),
-    );
+    library.updatePlaylist({
+      ...playlist,
+      songs: [...playlist.songs, { videoId, start }],
+    });
   };
 
   // プレイリストから削除
   const removeFromPlaylist = (playlist: Playlist, song: Song) => {
     const videoId = song.video_id;
     const start = String(song.start);
-    setPlaylists((prev) =>
-      prev.map((p) =>
-        isSamePlaylist(p, playlist)
-          ? {
-              ...p,
-              songs: p.songs.filter(
-                (entry) => entry.videoId !== videoId || entry.start !== start,
-              ),
-              updatedAt: new Date().toISOString(),
-            }
-          : p,
+    library.updatePlaylist({
+      ...playlist,
+      songs: playlist.songs.filter(
+        (entry) => entry.videoId !== videoId || entry.start !== start,
       ),
-    );
+    });
   };
 
   // プレイリストを更新
   const updatePlaylist = (playlist: Playlist) => {
     playlist.updatedAt = new Date().toISOString();
-    setPlaylists((prev) =>
-      prev.map((p) => (isSamePlaylist(p, playlist) ? playlist : p)),
-    );
+    library.updatePlaylist(playlist);
   };
 
   // プレイリストの名前を変更
   const renamePlaylist = (playlist: Playlist, newName: string) => {
-    setPlaylists((prev) =>
-      prev.map((p) =>
-        isSamePlaylist(p, playlist)
-          ? { ...p, name: newName, updatedAt: new Date().toISOString() }
-          : p,
-      ),
-    );
+    library.updatePlaylist({ ...playlist, name: newName });
   };
 
   // プレイリスト内の曲をすべて削除
   const clearAllSongs = (playlist: Playlist) => {
-    setPlaylists((prev) =>
-      prev.map((p) =>
-        isSamePlaylist(p, playlist)
-          ? { ...p, songs: [], updatedAt: new Date().toISOString() }
-          : p,
-      ),
-    );
+    library.updatePlaylist({ ...playlist, songs: [] });
   };
 
   const decodePlaylistUrlParam = useCallback(decodePlaylistUrlParamCore, []);
@@ -174,6 +143,9 @@ const usePlaylists = () => {
     isNowPlayingPlaylist,
     decodePlaylistUrlParam,
     encodePlaylistUrlParam,
+    authenticated: library.authenticated,
+    ready: library.ready,
+    requestSignIn: library.requestSignIn,
   };
 };
 

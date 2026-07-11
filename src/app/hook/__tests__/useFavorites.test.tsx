@@ -1,7 +1,15 @@
 import { renderHook, act } from "@testing-library/react";
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import useFavorites from "../useFavorites";
 import type { Song } from "../../types/song";
+
+const { mockLibraryRef } = vi.hoisted(() => ({
+  mockLibraryRef: { current: null as any },
+}));
+
+vi.mock("../../context/UserLibraryContext", () => ({
+  useUserLibrary: () => mockLibraryRef.current,
+}));
 
 describe("useFavorites", () => {
   const mockSong: Song = {
@@ -25,6 +33,23 @@ describe("useFavorites", () => {
 
   beforeEach(() => {
     localStorage.clear();
+    const favorites: Array<{ videoId: string; start: string }> = [];
+    const playlists: any[] = [];
+    const setFavorites = (next: Array<{ videoId: string; start: string }>) => {
+      favorites.splice(0, favorites.length, ...next);
+    };
+
+    mockLibraryRef.current = {
+      favorites,
+      playlists,
+      setFavorites,
+      savePlaylist: vi.fn(),
+      updatePlaylist: vi.fn(),
+      deletePlaylist: vi.fn(),
+      authenticated: true,
+      ready: true,
+      requestSignIn: vi.fn(),
+    };
   });
 
   afterEach(() => {

@@ -10,7 +10,7 @@ import {
 } from "react";
 import "dayjs/locale/ja";
 import { useLocale, useTranslations } from "next-intl";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import {
   Alert,
   Anchor,
@@ -49,7 +49,6 @@ import {
   FiEdit3,
   FiExternalLink,
   FiLogIn,
-  FiLogOut,
   FiMapPin,
   FiSearch,
   FiShare2,
@@ -2147,38 +2146,14 @@ export default function SeichiMapCompleteClient({
           </Text>
         </Box>
         <Group gap="xs">
-          {isSharedView ? null : isSignedIn ? (
-            <>
-              <Badge variant="light" color="pink" size="lg">
-                {userName}
-              </Badge>
-              <Button
-                variant="light"
-                color="pink"
-                leftSection={<FiShare2 size={16} />}
-                onClick={openShareModal}
-              >
-                {t("share.open")}
-              </Button>
-              <Tooltip label={t("auth.logoutTooltip")}>
-                <Button
-                  variant="light"
-                  color="gray"
-                  leftSection={<FiLogOut size={16} />}
-                  onClick={() => void signOut({ callbackUrl: "/seichi-map" })}
-                >
-                  {t("auth.logout")}
-                </Button>
-              </Tooltip>
-            </>
-          ) : (
+          {!isSharedView && isSignedIn && (
             <Button
-              leftSection={<FiLogIn size={16} />}
-              onClick={() =>
-                void signIn("google", { callbackUrl: "/seichi-map" })
-              }
+              variant="light"
+              color="pink"
+              leftSection={<FiShare2 size={16} />}
+              onClick={openShareModal}
             >
-              {t("auth.loginWithGoogle")}
+              {t("share.open")}
             </Button>
           )}
         </Group>
@@ -2695,6 +2670,21 @@ export default function SeichiMapCompleteClient({
               ) : (
                 <Alert color="pink" variant="light">
                   {t("alerts.loginRequired")}
+                  <div className="mt-2 -ml-1.5">
+                    {!isSignedIn ? (
+                      <Button
+                        color="pink"
+                        size="xs"
+                        className="ml-2"
+                        leftSection={<FiLogIn size={14} />}
+                        onClick={() =>
+                          void signIn("google", { callbackUrl: "/seichi-map" })
+                        }
+                      >
+                        {t("alerts.login")}
+                      </Button>
+                    ) : null}
+                  </div>
                 </Alert>
               )}
             </Stack>
