@@ -59,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "ランダムで楽曲を再生します",
       "playlist": "プレイリスト",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "songList": "楽曲一覧",
       "songsUnit": "曲",
       "songsUnit_w/o_en": "曲",
@@ -159,6 +160,7 @@
       "menu": "メニュー",
       "removeFromFavorites": "お気に入りから削除",
       "addToFavorites": "お気に入りに追加",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "shareCurrentSong": "現在の楽曲をシェア"
     }
   },

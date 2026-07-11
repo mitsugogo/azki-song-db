@@ -59,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "Play songs randomly",
       "playlist": "Playlist",
+      "signInRequired": "Sign in to use this feature",
       "songList": "Songs",
       "songsUnit": "songs",
       "songsUnit_w/o_en": "",
@@ -160,6 +161,7 @@
       "menu": "Menu",
       "removeFromFavorites": "Remove from favorites",
       "addToFavorites": "Add to favorites",
+      "signInRequired": "Sign in to use this feature",
       "shareCurrentSong": "Share current song"
     }
   },

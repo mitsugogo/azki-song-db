@@ -34,7 +34,7 @@ export default function SongModeControls({
 }: SongModeControlsProps) {
   const t = useTranslations("Watch.searchAndSongList");
   const tSongMode = useTranslations("Watch.songMode");
-  const { isNowPlayingPlaylist } = usePlaylists();
+  const { isNowPlayingPlaylist, authenticated } = usePlaylists();
   const textClassName =
     sizeClassName ?? (variant === "mobile" ? "text-xs" : "text-sm");
   const rowMarginClassName = variant === "mobile" ? "mt-1" : "mt-2";
@@ -137,16 +137,25 @@ export default function SongModeControls({
           </Button>
         </Tooltip>
 
-        <Button
-          className={`${buttonBaseClassName} min-w-0 flex-1 text-white shadow-gray-400/20 dark:shadow-none ${textClassName} ${
-            isNowPlayingPlaylist()
-              ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
-              : neutralButtonClassName
-          }`}
-          onClick={onPlaylist}
+        <Tooltip
+          label={authenticated ? undefined : t("signInRequired")}
+          withArrow
+          position="bottom"
         >
-          <span className="truncate">{t("playlist")}</span>
-        </Button>
+          <span className="min-w-0 flex-1">
+            <Button
+              disabled={!authenticated}
+              className={`${buttonBaseClassName} w-full text-white shadow-gray-400/20 dark:shadow-none ${textClassName} ${
+                isNowPlayingPlaylist()
+                  ? "bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-600"
+                  : neutralButtonClassName
+              }`}
+              onClick={onPlaylist}
+            >
+              <span className="truncate">{t("playlist")}</span>
+            </Button>
+          </span>
+        </Tooltip>
       </div>
     </div>
   );

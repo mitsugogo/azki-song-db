@@ -4,6 +4,7 @@ import {
   getCachedEvents,
   getCachedMilestones,
 } from "./test-utils";
+import type { Playlist, PlaylistEntry } from "../src/app/lib/playlistUrl";
 
 export const setupApiMocks = async (page: any) => {
   // Mock the songs API with cached data
@@ -112,6 +113,82 @@ export const setupApiMocks = async (page: any) => {
           },
         ],
       }),
+    });
+  });
+};
+
+export const setupAuthenticatedApiMocks = async (page: any) => {
+  await setupApiMocks(page);
+
+  let library: { playlists: Playlist[]; favorites: PlaylistEntry[] } = {
+    playlists: [],
+    favorites: [],
+  };
+
+  await page.route("**/api/auth/session", async (route: any) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        user: {
+          name: "E2E User",
+          email: "e2e@example.com",
+          image: null,
+        },
+        expires: "2099-01-01T00:00:00.000Z",
+      }),
+    });
+  });
+
+  await page.route("**/api/library", async (route: any) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(library),
+    });
+  });
+
+  await page.route("**/api/library/playlists", async (route: any) => {
+    if (route.request().method() !== "POST") {
+      await route.continue();
+      return;
+    }
+
+    const playlist = await route.request().postDataJSON();
+    const createdPlaylist = {
+      ...playlist,
+      id: playlist.id ?? `e2e-playlist-${Date.now()}`,
+    };
+    library = {
+      ...library,
+      playlists: [...library.playlists, createdPlaylist],
+    };
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(library),
+    });
+  });
+
+  await page.route("**/api/library/playlists/*", async (route: any) => {
+    if (route.request().method() !== "PUT") {
+      await route.continue();
+      return;
+    }
+
+    const updatedPlaylist = await route.request().postDataJSON();
+    library = {
+      ...library,
+      playlists: library.playlists.map((playlist) =>
+        playlist.id === updatedPlaylist.id ? updatedPlaylist : playlist,
+      ),
+    };
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(library),
     });
   });
 };
