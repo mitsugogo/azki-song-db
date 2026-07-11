@@ -1,9 +1,9 @@
 "use client";
 
-import { Avatar, Menu } from "@mantine/core";
+import { Avatar, Menu, Tooltip } from "@mantine/core";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { FaRightFromBracket, FaRightToBracket, FaUser } from "react-icons/fa6";
+import { FaGoogle, FaRightFromBracket, FaUser } from "react-icons/fa6";
 
 export default function AccountMenu() {
   const { data: session, status } = useSession();
@@ -41,7 +41,7 @@ export default function AccountMenu() {
           </Menu.Item>
         ) : (
           <Menu.Item
-            leftSection={<FaRightToBracket />}
+            leftSection={<FaGoogle />}
             disabled={status === "loading"}
             onClick={() =>
               void signIn("google", { callbackUrl: window.location.href })
