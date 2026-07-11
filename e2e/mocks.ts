@@ -94,24 +94,30 @@ export const setupApiMocks = async (page: any) => {
   });
 
   await page.route("**/api/stat/views**", async (route: any) => {
+    const pathname = new URL(route.request().url()).pathname;
+    const isListResponse =
+      pathname === "/api/stat/views" || pathname === "/api/stat/views/releases";
+
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        statistics: [
-          {
-            datetime: new Date("2026-01-01T00:00:00.000Z").toISOString(),
-            viewCount: 900,
-            likeCount: 10,
-            commentCount: 1,
-          },
-          {
-            datetime: new Date("2026-01-10T00:00:00.000Z").toISOString(),
-            viewCount: 1000,
-            likeCount: 12,
-            commentCount: 1,
-          },
-        ],
+        statistics: isListResponse
+          ? {}
+          : [
+              {
+                datetime: new Date("2026-01-01T00:00:00.000Z").toISOString(),
+                viewCount: 900,
+                likeCount: 10,
+                commentCount: 1,
+              },
+              {
+                datetime: new Date("2026-01-10T00:00:00.000Z").toISOString(),
+                viewCount: 1000,
+                likeCount: 12,
+                commentCount: 1,
+              },
+            ],
       }),
     });
   });

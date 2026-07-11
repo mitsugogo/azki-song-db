@@ -1,6 +1,10 @@
-export interface ViewStat {
-  datetime: Date | null;
+export interface ViewCountStat {
+  datetime: Date | string | null;
   viewCount: number;
+}
+
+export interface ViewStat extends ViewCountStat {
+  datetime: Date | null;
   likeCount: number;
   commentCount: number;
 }

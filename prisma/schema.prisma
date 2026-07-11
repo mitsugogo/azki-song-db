@@ -65,6 +65,7 @@ model Statistics {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([videoId, datetime])
+  @@index([category, datetime, videoId], map: "Statistics_category_datetime_video_idx")
   @@map("statistics")
 }
 

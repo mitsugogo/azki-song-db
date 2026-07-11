@@ -14,6 +14,7 @@ export const cacheTags = {
   ytVideo: "yt:video",
   statViews: "stat:views",
   statViewsList: "stat:views:list",
+  statViewsReleases: "stat:views:releases",
   statViewsSingle: "stat:views:single",
 } as const;
 

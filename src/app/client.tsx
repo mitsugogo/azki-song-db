@@ -45,7 +45,7 @@ import useMilestones from "./hook/useMilestones";
 import useActivityTimeline from "./hook/useActivityTimeline";
 import useSongs from "./hook/useSongs";
 import { useStatistics } from "./hook/useStatistics";
-import useStatViewCounts from "./hook/useStatViewCounts";
+import useReleaseViewCounts from "./hook/useReleaseViewCounts";
 import { isCoverSong, isOriginalSong } from "./config/filters";
 import SongCountOverview from "./statistics/SongCountOverview";
 import { buildWatchHref } from "./lib/watchUrl";
@@ -585,27 +585,8 @@ export default function ClientTop() {
     songs: allSongs,
   });
 
-  const viewLabelVideoIds = useMemo(
-    () =>
-      [
-        ...statistics.originalSongCountsByReleaseDate,
-        ...statistics.coverSongCountsByReleaseDate,
-      ]
-        .map(
-          (item) =>
-            item.song?.video_id ||
-            item.firstVideo?.video_id ||
-            item.lastVideo?.video_id,
-        )
-        .filter(Boolean),
-    [
-      statistics.originalSongCountsByReleaseDate,
-      statistics.coverSongCountsByReleaseDate,
-    ],
-  );
-
   const { data: viewStatisticsByVideoId, loading: isViewStatisticsLoading } =
-    useStatViewCounts(viewLabelVideoIds, "7d", shouldLoadViewStatistics);
+    useReleaseViewCounts("7d", shouldLoadViewStatistics);
 
   const milestoneStatistics = useMemo(() => {
     const attachMilestone = (items: StatisticsItem[]) =>
