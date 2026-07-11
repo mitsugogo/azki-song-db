@@ -6,6 +6,7 @@ import {
   Group,
   Text,
   useMantineTheme,
+  useComputedColorScheme,
   Code,
   Textarea,
 } from "@mantine/core";
@@ -29,6 +30,7 @@ export default function AdvancedSearchModal({
 }: AdvancedSearchModalProps) {
   const t = useTranslations("AdvancedSearch");
   const theme = useMantineTheme();
+  const colorScheme = useComputedColorScheme("light");
 
   // フォームフィールド
   const [allKeywords, setAllKeywords] = useState("");
@@ -176,7 +178,10 @@ export default function AdvancedSearchModal({
         {/* プレビュー */}
         <div
           style={{
-            background: theme.colors.gray[0],
+            background:
+              colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[0],
             padding: theme.spacing.md,
             borderRadius: theme.radius.sm,
           }}
