@@ -115,9 +115,94 @@ type Props = {
   userName: string;
 };
 
+type GoogleLatLngLike = {
+  lat: (() => number) | number;
+  lng: (() => number) | number;
+};
+
+type GooglePointLike = {
+  x: number;
+  y: number;
+};
+
+type GoogleMapBoundsLike = {
+  getNorthEast: () => GoogleLatLngLike;
+  getSouthWest: () => GoogleLatLngLike;
+};
+
+type GoogleMapProjectionLike = {
+  fromLatLngToDivPixel: (latLng: GoogleLatLngLike) => GooglePointLike | null;
+};
+
+type GoogleMapsEventListener = {
+  remove: () => void;
+};
+
+type GoogleMapMouseEvent = {
+  latLng?: GoogleLatLngLike;
+  domEvent?: MouseEvent;
+  stop?: () => void;
+};
+
+type GoogleMapInstance = {
+  getBounds: () => GoogleMapBoundsLike | null;
+  getCenter: () => GoogleLatLngLike | null;
+  getZoom: () => number | undefined;
+  panTo: (latLng: { lat: number; lng: number }) => void;
+  setZoom: (zoom: number) => void;
+  addListener: (
+    eventName: string,
+    handler: (event?: GoogleMapMouseEvent) => void,
+  ) => GoogleMapsEventListener;
+};
+
+type GoogleInfoWindow = {
+  setContent: (content: string | Node) => void;
+  setPosition: (latLng: { lat: number; lng: number }) => void;
+  open: (options: { map: GoogleMapInstance }) => void;
+  close: () => void;
+};
+
+type GoogleOverlayViewBase = {
+  setMap(map: GoogleMapInstance | null): void;
+  getProjection?(): GoogleMapProjectionLike | null;
+  getPanes?(): { overlayLayer: Element } | null;
+};
+
+type GoogleMapsCoreLibrary = {
+  LatLng: new (lat: number, lng: number) => GoogleLatLngLike;
+};
+
+type GoogleMapsMapsLibrary = {
+  OverlayView: new () => GoogleOverlayViewBase;
+  Map: new (
+    mapElement: HTMLElement,
+    options: {
+      center: { lat: number; lng: number };
+      zoom: number;
+      mapId: string;
+      mapTypeControl: boolean;
+      clickableIcons: boolean;
+      fullscreenControl: boolean;
+      streetViewControl: boolean;
+    },
+  ) => GoogleMapInstance;
+  InfoWindow: new () => GoogleInfoWindow;
+};
+
+type GoogleMapsDynamicGlobal = GoogleMapsMapsLibrary & {
+  importLibrary?: (libraryName: string) => Promise<unknown>;
+  [key: string]: unknown;
+};
+
+type GoogleWindowGlobal = {
+  maps?: GoogleMapsDynamicGlobal;
+  [key: string]: unknown;
+};
+
 declare global {
   interface Window {
-    google?: any;
+    google?: GoogleWindowGlobal;
     __azkiSeichiMapScriptPromise?: Promise<GoogleMapsLibraries>;
     __azkiSeichiMapLoaderVersion?: number;
     __azkiSeichiMapLoaderLanguage?: string;
@@ -141,15 +226,15 @@ const urlPattern = /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%#]+/g;
 const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 
 type GoogleMapsLibraries = {
-  core: any;
-  maps: any;
+  core: GoogleMapsCoreLibrary;
+  maps: GoogleMapsMapsLibrary;
 };
 
 type CanvasOverlayHandle = {
   setLocations: (locations: LocationOption[]) => void;
   setSelectedLocationId: (locationId: string | null) => void;
-  setMap: (map: any | null) => void;
-  findLocationAtLatLng: (latLng: any) => LocationOption | null;
+  setMap: (map: GoogleMapInstance | null) => void;
+  findLocationAtLatLng: (latLng: GoogleLatLngLike) => LocationOption | null;
   draw: () => void;
 };
 
@@ -171,8 +256,8 @@ const sleep = (milliseconds: number) =>
   });
 
 const installGoogleMapsLoader = (apiKey: string, language: string) => {
-  const googleGlobal = (window.google ??= {});
-  const mapsGlobal = (googleGlobal.maps ??= {});
+  const googleGlobal = (window.google ??= {} as GoogleWindowGlobal);
+  const mapsGlobal = (googleGlobal.maps ??= {} as GoogleMapsDynamicGlobal);
   const requestedLibraries = new Set<string>();
   let scriptPromise: Promise<void> | undefined;
 
@@ -208,7 +293,13 @@ const installGoogleMapsLoader = (apiKey: string, language: string) => {
       document.head.appendChild(script);
     });
 
-    return scriptPromise.then(() => mapsGlobal.importLibrary(libraryName));
+    return scriptPromise.then(() => {
+      const importLibrary = mapsGlobal.importLibrary;
+      if (!importLibrary) {
+        throw new Error("google_maps_load_failed");
+      }
+      return importLibrary(libraryName);
+    });
   };
 };
 
@@ -469,9 +560,9 @@ const createSeichiCanvasOverlay = ({
   isVisited,
   getSelectedLocationId,
 }: {
-  coreApi: any;
-  mapsApi: any;
-  map: any;
+  coreApi: GoogleMapsCoreLibrary;
+  mapsApi: GoogleMapsMapsLibrary;
+  map: GoogleMapInstance;
   isVisited: (location: LocationOption) => boolean;
   getSelectedLocationId: () => string | null;
 }) => {
@@ -484,7 +575,7 @@ const createSeichiCanvasOverlay = ({
     private hitPoints: CanvasHitPoint[] = [];
     private drawFrame: number | null = null;
 
-    setMap(nextMap: any | null) {
+    setMap(nextMap: GoogleMapInstance | null) {
       super.setMap(nextMap);
     }
 
@@ -493,7 +584,7 @@ const createSeichiCanvasOverlay = ({
       this.canvas.style.position = "absolute";
       this.canvas.style.pointerEvents = "none";
       this.canvas.style.zIndex = "1";
-      this.getPanes()?.overlayLayer.appendChild(this.canvas);
+      this.getPanes?.()?.overlayLayer?.appendChild(this.canvas);
     }
 
     onRemove() {
@@ -599,7 +690,7 @@ const createSeichiCanvasOverlay = ({
       }
     }
 
-    findLocationAtLatLng(latLng: any) {
+    findLocationAtLatLng(latLng: GoogleLatLngLike) {
       const projection = this.getProjection?.();
       if (!projection) return null;
 
@@ -636,11 +727,22 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
         mapsApi.importLibrary("core"),
         mapsApi.importLibrary("maps"),
       ]);
-      return { core, maps };
+      return {
+        core: core as GoogleMapsCoreLibrary,
+        maps: maps as GoogleMapsMapsLibrary,
+      };
     }
 
-    if (mapsApi?.Map && mapsApi.OverlayView) {
-      return { core: mapsApi, maps: mapsApi };
+    if (
+      mapsApi?.Map &&
+      mapsApi.OverlayView &&
+      mapsApi.InfoWindow &&
+      mapsApi.LatLng
+    ) {
+      return {
+        core: mapsApi as unknown as GoogleMapsCoreLibrary,
+        maps: mapsApi as unknown as GoogleMapsMapsLibrary,
+      };
     }
 
     await sleep(50);
@@ -794,7 +896,7 @@ const buildSeichiMapShareApiUrl = (shareId: string) => {
 };
 
 const syncMapViewportToUrl = (
-  map: any,
+  map: GoogleMapInstance,
   options?: { keepViewport?: boolean },
 ) => {
   if (typeof window === "undefined") return;
@@ -857,14 +959,14 @@ export default function SeichiMapCompleteClient({
   const mapsLanguage = locale === "ja" ? "ja" : "en";
   const datePickerLocale = locale === "ja" ? "ja" : "en";
   const mapElementRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<GoogleMapInstance | null>(null);
   const mapOverlayRef = useRef<CanvasOverlayHandle | null>(null);
-  const mapClickListenerRef = useRef<any>(null);
-  const mapMouseMoveListenerRef = useRef<any>(null);
-  const mapIdleListenerRef = useRef<any>(null);
+  const mapClickListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const mapMouseMoveListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const mapIdleListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
-  const infoWindowRef = useRef<any>(null);
+  const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
   const isLocationVisitedRef = useRef<(location: LocationOption) => boolean>(
     () => false,
   );
@@ -1418,7 +1520,7 @@ export default function SeichiMapCompleteClient({
             mapTypeControl: false,
             clickableIcons: false,
             fullscreenControl: true,
-            streetViewControl: false,
+            streetViewControl: true,
           });
           infoWindowRef.current = new InfoWindow();
           mapOverlayRef.current = createSeichiCanvasOverlay({
@@ -1430,8 +1532,8 @@ export default function SeichiMapCompleteClient({
           });
           mapClickListenerRef.current = mapRef.current.addListener(
             "click",
-            (event: any) => {
-              if (!event.latLng) return;
+            (event?: GoogleMapMouseEvent) => {
+              if (!event?.latLng) return;
               const location = mapOverlayRef.current?.findLocationAtLatLng(
                 event.latLng,
               );
@@ -1459,9 +1561,9 @@ export default function SeichiMapCompleteClient({
           });
           mapMouseMoveListenerRef.current = mapRef.current.addListener(
             "mousemove",
-            (event: any) => {
+            (event?: GoogleMapMouseEvent) => {
               const mapElement = mapElementRef.current;
-              const mouseEvent = event.domEvent as MouseEvent | undefined;
+              const mouseEvent = event?.domEvent;
               clearHoveredLocationPreview();
 
               if (isMapDraggingRef.current) {
@@ -1469,7 +1571,7 @@ export default function SeichiMapCompleteClient({
                 return;
               }
 
-              if (!event.latLng || !mapElement || !mouseEvent) {
+              if (!event?.latLng || !mapElement || !mouseEvent) {
                 setHoveredLocation(null);
                 return;
               }
@@ -1496,6 +1598,7 @@ export default function SeichiMapCompleteClient({
           mapIdleListenerRef.current = mapRef.current.addListener(
             "idle",
             () => {
+              if (!mapRef.current) return;
               clearHoveredLocationPreview();
               setHoveredLocation(null);
               syncMapViewportToUrl(mapRef.current, {
