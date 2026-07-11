@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       {
         headers: {
           "Cache-Control":
-            "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+            "public, max-age=0, must-revalidate, s-maxage=180, stale-while-revalidate=300",
           "Vercel-Cache-Tag": buildVercelCacheTagHeader([
             cacheTags.statViews,
             cacheTags.statViewsReleases,
