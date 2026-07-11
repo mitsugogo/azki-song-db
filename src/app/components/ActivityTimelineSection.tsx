@@ -531,7 +531,10 @@ export default function ActivityTimelineSection({
                             </Text>
                           ) : null}
                           {activitySingerAvatars.length > 0 ? (
-                            <Avatar.Group className="mt-2" spacing="xxs">
+                            <Avatar.Group
+                              className="mt-2 flex-wrap gap-y-1"
+                              spacing="xxs"
+                            >
                               {activitySingerAvatars.map((avatar) => {
                                 const image = (
                                   <Avatar
