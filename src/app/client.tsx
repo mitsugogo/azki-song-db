@@ -1640,7 +1640,7 @@ export default function ClientTop() {
                                     {formatAnniversaryName(item, locale)}
                                   </p>
                                   {item.note ? (
-                                    <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <p className="mt-2 line-clamp-2 text-xs text-gray-500 dark:text-gray-100">
                                       {item.note}
                                     </p>
                                   ) : null}
