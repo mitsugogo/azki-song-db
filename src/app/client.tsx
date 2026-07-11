@@ -92,6 +92,7 @@ const zenMaruGothic = Zen_Maru_Gothic({
 const RECOMMENDED_SONG_COUNT = 20;
 const RECOMMENDED_SKELETON_COUNT = 20;
 const ACTIVITY_TIMELINE_PAGE_SIZE = 5;
+const FEATURED_ANNIVERSARIES_WINDOW_DAYS = 35;
 
 // 背景動画の選出において、最近の楽曲を優先するための期間（日数）と重みつけ
 const HERO_BACKGROUND_RECENT_DAYS = 30;
@@ -562,7 +563,11 @@ export default function ClientTop() {
   }, [heroBackgroundSong?.video_id]);
 
   const featuredAnniversaries = useMemo(
-    () => getFeaturedAnniversaries(anniversaryItems),
+    () =>
+      getFeaturedAnniversaries(
+        anniversaryItems,
+        FEATURED_ANNIVERSARIES_WINDOW_DAYS,
+      ),
     [anniversaryItems],
   );
 
@@ -1709,112 +1714,104 @@ export default function ClientTop() {
                                 />
                               </div>
                             ))
-                          : todayMilestones
-                              .slice(0, 1)
-                              .map((milestone, index) => {
-                                const milestoneContent =
-                                  milestone.is_external ? (
-                                    milestone.url ? (
-                                      <Link
-                                        href={milestone.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
-                                      >
-                                        {milestone.text}
-                                      </Link>
-                                    ) : (
-                                      <span className="font-semibold text-gray-900 dark:text-white">
-                                        {milestone.text}
-                                      </span>
-                                    )
-                                  ) : (
-                                    <Link
-                                      href={buildMilestoneSearchHref(
-                                        milestone.text,
-                                      )}
-                                      className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
-                                    >
-                                      {milestone.text}
-                                    </Link>
-                                  );
-
-                                return (
-                                  <div
-                                    key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
-                                    className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                          : todayMilestones.map((milestone, index) => {
+                              const milestoneContent = milestone.is_external ? (
+                                milestone.url ? (
+                                  <Link
+                                    href={milestone.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
                                   >
-                                    <Text size="xs" c="dimmed">
-                                      {formatDate(milestone.date, locale)}
-                                    </Text>
-                                    <div className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-                                      {milestoneContent}
-                                    </div>
-                                    {milestone.place ? (
-                                      <Text
-                                        size="xs"
-                                        c="dimmed"
-                                        className="mt-1"
-                                      >
-                                        <BsGeoAlt className="-mt-0.5 mr-1 inline" />
-                                        {milestone.place_url ? (
-                                          <Link
-                                            href={milestone.place_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="hover:underline"
-                                          >
-                                            {milestone.place}
-                                          </Link>
-                                        ) : (
-                                          milestone.place
-                                        )}
-                                      </Text>
-                                    ) : null}
-                                    {milestone.note ? (
-                                      <Text
-                                        size="xs"
-                                        c="dimmed"
-                                        className="mt-1 whitespace-pre-line"
-                                      >
-                                        {milestone.note}
-                                      </Text>
-                                    ) : null}
+                                    {milestone.text}
+                                  </Link>
+                                ) : (
+                                  <span className="font-semibold text-gray-900 dark:text-white">
+                                    {milestone.text}
+                                  </span>
+                                )
+                              ) : (
+                                <Link
+                                  href={buildMilestoneSearchHref(
+                                    milestone.text,
+                                  )}
+                                  className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                                >
+                                  {milestone.text}
+                                </Link>
+                              );
 
-                                    {/* 動画 */}
-                                    {milestone?.song && (
-                                      <div className="mt-1 flex items-center gap-3">
-                                        <div className="relative aspect-video w-21 shrink-0 overflow-hidden rounded-md bg-black">
-                                          <YoutubeThumbnail
-                                            videoId={milestone.song.video_id}
-                                            alt={milestone.song.video_title}
-                                          />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                          <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                                            <Link
-                                              href={buildWatchHref({
-                                                videoId:
-                                                  milestone.song.video_id,
-                                                start: milestone.song.start,
-                                              })}
-                                              className="text-primary hover:text-primary-600 dark:hover:text-pink-300"
-                                            >
-                                              {milestone.song.video_title}
-                                            </Link>
-                                          </p>
-                                          <p className="text-xs text-gray-600 dark:text-gray-300">
-                                            {formatDate(
-                                              milestone.song.broadcast_at,
-                                              locale,
-                                            )}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    )}
+                              return (
+                                <div
+                                  key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
+                                  className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                                >
+                                  <Text size="xs" c="dimmed">
+                                    {formatDate(milestone.date, locale)}
+                                  </Text>
+                                  <div className="mt-1 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                                    {milestoneContent}
                                   </div>
-                                );
-                              })}
+                                  {milestone.place ? (
+                                    <Text size="xs" c="dimmed" className="mt-1">
+                                      <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                      {milestone.place_url ? (
+                                        <Link
+                                          href={milestone.place_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="hover:underline"
+                                        >
+                                          {milestone.place}
+                                        </Link>
+                                      ) : (
+                                        milestone.place
+                                      )}
+                                    </Text>
+                                  ) : null}
+                                  {milestone.note ? (
+                                    <Text
+                                      size="xs"
+                                      c="dimmed"
+                                      className="mt-1 whitespace-pre-line"
+                                    >
+                                      {milestone.note}
+                                    </Text>
+                                  ) : null}
+
+                                  {/* 動画 */}
+                                  {milestone?.song && (
+                                    <div className="mt-1 flex items-center gap-3">
+                                      <div className="relative aspect-video w-21 shrink-0 overflow-hidden rounded-md bg-black">
+                                        <YoutubeThumbnail
+                                          videoId={milestone.song.video_id}
+                                          alt={milestone.song.video_title}
+                                        />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                                          <Link
+                                            href={buildWatchHref({
+                                              videoId: milestone.song.video_id,
+                                              start: milestone.song.start,
+                                            })}
+                                            className="text-primary hover:text-primary-600 dark:hover:text-pink-300"
+                                          >
+                                            {milestone.song.video_title}
+                                          </Link>
+                                        </p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                                          {formatDate(
+                                            milestone.song.broadcast_at,
+                                            locale,
+                                          )}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                       </div>
                     </section>
                   )}
