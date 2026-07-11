@@ -163,9 +163,13 @@ test.describe("Discography page", () => {
     const animatedMv = nekoVariants.find((song) =>
       (song.tags ?? []).includes("アニAZ"),
     );
+    // 両バリアントが同じアルバムに属する場合はクロスアルバムシナリオではないためスキップ
     test.skip(
-      !originalMv || !animatedMv,
-      "猫ならばいける MV/AniAZ fixtures missing",
+      !originalMv ||
+        !animatedMv ||
+        (!!originalMv.album?.trim() &&
+          originalMv.album?.trim() === animatedMv.album?.trim()),
+      "猫ならばいける MV/AniAZ fixtures missing or not cross-album",
     );
 
     await page.goto(
@@ -283,10 +287,22 @@ test.describe("Discography page", () => {
       `/discography/originals/${encodeURIComponent(nekoAniAz.slugv2 ?? nekoAniAz.slug)}`,
       { waitUntil: "domcontentloaded" },
     );
+    // nekoAniAz が実アルバムに属する場合はそのアルバムページへ、仮想ページが存在する場合は曲名ベースのURLへ
+    const nekoAlbumSlug = (nekoAniAz.album || "")
+      .normalize("NFKC")
+      .trim()
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const expectedNekoAlbumHref = nekoAlbumSlug
+      ? `/discography/album/${encodeURIComponent(nekoAlbumSlug)}`
+      : `/discography/album/${encodeURIComponent("猫ならばいける")}`;
     await expect(
-      page.locator(
-        `a[href="/discography/album/${encodeURIComponent("猫ならばいける")}"]`,
-      ),
+      page
+        .getByLabel("Breadcrumb")
+        .locator(`a[href="${expectedNekoAlbumHref}"]`),
     ).toBeVisible({ timeout: 10000 });
   });
 
