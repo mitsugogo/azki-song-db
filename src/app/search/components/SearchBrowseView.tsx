@@ -63,6 +63,7 @@ const SearchBrowseView = ({
     "title",
     "artist",
     "tag",
+    "song-tag",
     "singer",
     "collab",
     "related-artists",
@@ -131,6 +132,15 @@ const SearchBrowseView = ({
             leftSection={<FaTag />}
           >
             {t("filters.tag")}
+          </Button>
+          <Button
+            variant={filterMode === "song-tag" ? "filled" : "light"}
+            color="pink"
+            size="sm"
+            onClick={() => setFilterMode("song-tag")}
+            leftSection={<FaTag />}
+          >
+            {t("filters.songTag")}
           </Button>
           <Button
             variant={filterMode === "singer" ? "filled" : "light"}

@@ -58,6 +58,7 @@ export async function generateMetadata({
     title: "title",
     artist: "artist",
     tag: "tag",
+    "song-tag": "songTag",
     singer: "singer",
     collab: "collab",
     "related-artists": "relatedArtists",
@@ -69,6 +70,7 @@ export async function generateMetadata({
     artist: "🎤",
     singer: "🎤",
     tag: "🏷️",
+    "song-tag": "🏷️",
     collab: "👥",
     "related-artists": "📊",
   };

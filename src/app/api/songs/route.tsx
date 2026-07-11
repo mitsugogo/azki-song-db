@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     const publicRanges = [
       // 翻訳用マップ
       "artists!A:C",
-      "song_titles!A:D",
+      "song_titles!A:E",
 
       // データ
       "歌枠2021以前!A:L",
@@ -137,6 +137,10 @@ export async function GET(request: Request) {
       { key: "end", aliases: ["end", "終了", "終了時刻"] },
       { key: "broadcast_at", aliases: ["配信日", "date", "broadcast_at"] },
       { key: "tags", aliases: ["tags（カンマ区切り）", "タグ", "tags"] },
+      {
+        key: "song_tags",
+        aliases: ["song_tags（カンマ区切り）", "楽曲タグ", "song_tags"],
+      },
       { key: "extra", aliases: ["備考", "extra", "note"] },
       { key: "milestones", aliases: ["マイルストーン", "milestones"] },
       { key: "album", aliases: ["アルバム", "album"] },
@@ -161,6 +165,7 @@ export async function GET(request: Request) {
     const titlesMap: Record<string, string> = {};
     const artistAliasesMap: Record<string, string[]> = {};
     const titleAliasesMap: Record<string, string[]> = {};
+    const titleSongTagsMap: Record<string, string[]> = {};
 
     const sheetsArr = response.data.sheets || [];
 
@@ -254,11 +259,20 @@ export async function GET(request: Request) {
                 vals[colMap["title_aliases"]].formattedValue ||
                 ""
               : "") || "";
+          const songTags =
+            (colMap["song_tags"] !== -1 && vals[colMap["song_tags"]]
+              ? vals[colMap["song_tags"]].userEnteredValue?.stringValue ||
+                vals[colMap["song_tags"]].formattedValue ||
+                ""
+              : "") || "";
           if (title && artist) {
             const key = `${normalize(title)}|${normalize(artist)}`;
             titlesMap[key] = titleEn || "";
             if (aliases) {
               titleAliasesMap[key] = splitSearchAliases(aliases);
+            }
+            if (songTags) {
+              titleSongTagsMap[key] = splitSearchAliases(songTags);
             }
           }
         });
@@ -446,6 +460,7 @@ export async function GET(request: Request) {
             .split(/[,,、]/)
             .map((t) => t.trim())
             .filter(Boolean),
+          song_tags: titleSongTagsMap[titleAliasKey] ?? [],
           extra: getStr("extra"),
           milestones: getStr("milestones")
             .split(/[,,、]/)
