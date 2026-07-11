@@ -161,6 +161,10 @@ type GoogleInfoWindow = {
   setPosition: (latLng: { lat: number; lng: number }) => void;
   open: (options: { map: GoogleMapInstance }) => void;
   close: () => void;
+  addListener?: (
+    eventName: string,
+    handler: () => void,
+  ) => GoogleMapsEventListener;
 };
 
 type GoogleOverlayViewBase = {
@@ -964,6 +968,8 @@ export default function SeichiMapCompleteClient({
   const mapClickListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const mapMouseMoveListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const mapIdleListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const infoWindowCloseClickListenerRef =
+    useRef<GoogleMapsEventListener | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
@@ -1523,6 +1529,10 @@ export default function SeichiMapCompleteClient({
             streetViewControl: true,
           });
           infoWindowRef.current = new InfoWindow();
+          infoWindowCloseClickListenerRef.current =
+            infoWindowRef.current.addListener?.("closeclick", () => {
+              setSelectedLocationId(null);
+            }) ?? null;
           mapOverlayRef.current = createSeichiCanvasOverlay({
             coreApi: libraries.core,
             mapsApi: libraries.maps,
@@ -1540,7 +1550,11 @@ export default function SeichiMapCompleteClient({
               if (location) {
                 event.stop?.();
                 openLocationInfoWindowRef.current(location);
+                return;
               }
+
+              setSelectedLocationId(null);
+              infoWindowRef.current?.close?.();
             },
           );
           mapRef.current.addListener("mousedown", () => {
@@ -1640,6 +1654,7 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     return () => {
       clearHoveredLocationPreview();
+      infoWindowCloseClickListenerRef.current?.remove?.();
       mapIdleListenerRef.current?.remove?.();
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
