@@ -391,7 +391,7 @@ export default function ActivityTimelineSection({
             <Timeline
               active={items.length - 1}
               bulletSize={30}
-              color="pink"
+              color="azki"
               lineWidth={2}
             >
               {items.map((item) => {
