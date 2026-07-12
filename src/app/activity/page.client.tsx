@@ -12,38 +12,13 @@ import {
   getActivityMonthHref,
   getCurrentActivityMonth,
 } from "./monthActivity";
+import ActivityJourney from "./ActivityJourney";
 
 export default function SummaryPageClient() {
   const locale = useLocale();
   const t = useTranslations("Summary");
 
-  const activityStart = new Date(2018, 10, 15);
   const now = new Date();
-  const activityDays =
-    Math.floor(
-      (now.getTime() - activityStart.getTime()) / (1000 * 60 * 60 * 24),
-    ) + 1;
-
-  const years = now.getFullYear() - activityStart.getFullYear();
-  let months = now.getMonth() - activityStart.getMonth();
-  let days = now.getDate() - activityStart.getDate();
-
-  if (days < 0) {
-    months -= 1;
-    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-    days += previousMonthEnd.getDate();
-  }
-  let adjYears = years;
-  if (months < 0) {
-    adjYears -= 1;
-    months += 12;
-  }
-
-  const avtivityDurationStr = t("duration", {
-    years: String(adjYears),
-    months: String(months),
-    days: String(days),
-  });
   const currentActivityMonth = getCurrentActivityMonth(now);
   const currentActivityMonthLabel = formatActivityMonthLabel(
     currentActivityMonth,
@@ -71,12 +46,7 @@ export default function SummaryPageClient() {
         <p className="mb-4 text-sm leading-6 text-gray-600 dark:text-gray-300">
           {t("page.description")}
         </p>
-        <p className="mb-4 text-sm leading-6 text-gray-600 dark:text-gray-300">
-          {t("page.activityDays", {
-            days: activityDays,
-            duration: avtivityDurationStr,
-          })}
-        </p>
+        <ActivityJourney />
         <Button
           component={Link}
           href={getActivityMonthHref(currentActivityMonth)}

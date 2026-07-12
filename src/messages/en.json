@@ -1204,7 +1204,7 @@
     "monthSuffix": " months",
     "daySuffix": " days",
     "songsSuffix": " songs",
-    "daysActiveLabel": "Days active:",
+    "daysActiveLabel": "",
     "daysSuffix": " days",
     "homeLabel": "HOME",
     "page": {
@@ -1220,6 +1220,18 @@
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years} years {months} months {days} days",
+    "journey": {
+      "ariaLabel": "A timeline of AZKi and the Pioneers' journey. Day {days}, {duration} since debut",
+      "daysLabel": "Our journey",
+      "daysValue": "Day {days}",
+      "duration": "{duration} since debut",
+      "debut": "Debut",
+      "today": "Today",
+      "pioneersAppear": "The Pioneers take shape",
+      "pioneersAppearCompact": "Pioneers",
+      "millionSubscribers": "1M subscribers",
+      "millionSubscribersCompact": "1M subs"
+    },
     "yearCards": {
       "recordedSongsLabel": "Recorded songs",
       "sungInStreamsLabel": "Songs sung in streams",

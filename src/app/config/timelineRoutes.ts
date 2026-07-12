@@ -23,14 +23,15 @@ export const ROUTE_RANGES: RouteConfig[] = [
     label: "ルートγ",
     labelKey: "routes.gamma",
     from: "2023-07-01",
-    to: "2025-06-30",
-  },
-  {
-    label: "新たなルート",
-    labelKey: "routes.new",
-    from: "2025-07-01",
     to: null,
+    // to: "2025-06-30",
   },
+  // {
+  //   label: "新たなルート",
+  //   labelKey: "routes.new",
+  //   from: "2025-07-01",
+  //   to: null,
+  // },
 ];
 
 export default ROUTE_RANGES;

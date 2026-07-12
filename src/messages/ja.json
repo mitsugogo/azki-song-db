@@ -1211,6 +1211,18 @@
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years}年{months}ヶ月{days}日",
+    "journey": {
+      "ariaLabel": "AZKiと開拓者が歩んできた活動年表。活動{days}日目、デビューから{duration}経過",
+      "daysLabel": "歩んできた日々",
+      "daysValue": "{days}日目",
+      "duration": "デビューから {duration}",
+      "debut": "デビュー",
+      "today": "今日",
+      "pioneersAppear": "開拓者の姿が誕生",
+      "pioneersAppearCompact": "開拓者誕生",
+      "millionSubscribers": "100万人達成",
+      "millionSubscribersCompact": "100万人"
+    },
     "yearCards": {
       "recordedSongsLabel": "収録楽曲",
       "sungInStreamsLabel": "歌枠で歌った曲数",
