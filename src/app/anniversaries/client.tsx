@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Breadcrumbs, Table } from "@mantine/core";
+import { Badge, Breadcrumbs, Table, Text } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { useLocale, useTranslations } from "next-intl";
 import useAnniversaries from "../hook/useAnniversaries";
 import { formatDate } from "../lib/formatDate";
+import { renderLinkedText } from "../lib/textLinkify";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa6";
@@ -488,9 +489,9 @@ export default function AnniversariesPageClient() {
                       <p className="text-[11px] font-semibold uppercase text-gray-500 dark:text-gray-400">
                         {t("noteLabel")}
                       </p>
-                      <p className="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-300">
-                        {item.note || "-"}
-                      </p>
+                      <Text c="dimmed" size="sm" className="mt-1">
+                        {renderLinkedText(item.note || "")}
+                      </Text>
                     </div>
 
                     <div>
@@ -507,7 +508,7 @@ export default function AnniversariesPageClient() {
                                 component={Link}
                                 size="lg"
                                 radius="xl"
-                                color={isYoutube ? "red" : "pink"}
+                                color={isYoutube ? "red" : "blue"}
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -576,15 +577,17 @@ export default function AnniversariesPageClient() {
                           <Table.Td className="whitespace-nowrap">
                             {firstDate}
                           </Table.Td>
-                          <Table.Td className="whitespace-nowrap text-primary-700 dark:text-pink-200">
+                          <Table.Td className="whitespace-nowrap text-primary-700 dark:text-primary-300">
                             {daysUntil !== null
                               ? daysUntil === 0
                                 ? "-"
                                 : t("daysUntil", { days: daysUntil })
                               : "-"}
                           </Table.Td>
-                          <Table.Td className="text-gray-600 dark:text-gray-300">
-                            {item.note || "-"}
+                          <Table.Td>
+                            <Text c="dimmed" size="sm">
+                              {renderLinkedText(item.note || "")}
+                            </Text>
                           </Table.Td>
                           <Table.Td className="whitespace-nowrap">
                             {item.url
@@ -596,7 +599,7 @@ export default function AnniversariesPageClient() {
                                       component={Link}
                                       size="sm"
                                       radius="sm"
-                                      color={isYoutube ? "red" : "pink"}
+                                      color={isYoutube ? "red" : "blue"}
                                       href={item.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -611,7 +614,7 @@ export default function AnniversariesPageClient() {
                                     </Badge>
                                   );
                                 })()
-                              : "-"}
+                              : ""}
                           </Table.Td>
                         </Table.Tr>
                       );
