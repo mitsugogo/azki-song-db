@@ -1,4 +1,4 @@
-import { ViewStat } from "../types/api/stat/views";
+import { ViewCountStat } from "../types/api/stat/views";
 import { ViewMilestoneInfo } from "../types/viewMilestone";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -71,7 +71,7 @@ function getTarget(viewCount: number): ViewMilestoneTarget | null {
   return null;
 }
 
-function findAchievedAt(history: ViewStat[], targetCount: number) {
+function findAchievedAt(history: ViewCountStat[], targetCount: number) {
   const sorted = [...history]
     .filter((item) => item?.datetime)
     .sort(
@@ -94,7 +94,7 @@ function findAchievedAt(history: ViewStat[], targetCount: number) {
   return null;
 }
 
-function estimateReachedAt(history: ViewStat[], targetCount: number) {
+function estimateReachedAt(history: ViewCountStat[], targetCount: number) {
   if (history.length < 2) return null;
 
   const sorted = [...history]
@@ -138,7 +138,7 @@ function estimateReachedAt(history: ViewStat[], targetCount: number) {
 
 export function buildViewMilestoneInfo(
   viewCount: number,
-  history: ViewStat[] | undefined,
+  history: ViewCountStat[] | undefined,
 ): ViewMilestoneInfo | null {
   const target = getTarget(viewCount);
   if (!target) return null;
@@ -174,7 +174,7 @@ function getLatestAchievedTarget(viewCount: number) {
 
 export function buildLatestAchievedViewMilestoneInfo(
   viewCount: number,
-  history: ViewStat[] | undefined,
+  history: ViewCountStat[] | undefined,
 ): ViewMilestoneInfo | null {
   const targetCount = getLatestAchievedTarget(viewCount);
   if (!targetCount) return null;

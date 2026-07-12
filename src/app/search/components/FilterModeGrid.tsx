@@ -80,7 +80,7 @@ const FilterModeGrid = ({ filterModeResult }: FilterModeGridProps) => {
             });
           })()}
 
-        {filterMode === "tag" &&
+        {(filterMode === "tag" || filterMode === "song-tag") &&
           (() => {
             const maxCount = Math.max(...data.map((item) => item.count), 1);
             return data.map((item, index) => {

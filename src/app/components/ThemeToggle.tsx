@@ -57,7 +57,7 @@ const ThemeToggle = ({ className }: { className?: string }) => {
       type="button"
       aria-label={t("label")}
       title={t("label")}
-      className={`outline-none cursor-pointer ml-2 p-2 rounded-md ${className ?? "hover:bg-primary-600 dark:hover:bg-primary-800"}`}
+      className={`outline-none cursor-pointer ml-2 p-2 rounded-md ${className ?? "hover:bg-primary-600 dark:hover:bg-primary-900/50"}`}
       onClick={handleClick}
     >
       {getThemeIcon()}

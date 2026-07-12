@@ -30,7 +30,8 @@
     "mapTitle": "AZKi Pilgrimage Map: \"Seichi-Junrei\"",
     "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
-    "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?"
+    "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
+    "categoryArchive": "storage"
   },
   "SearchInput": {
     "search": "Search",
@@ -58,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "Play songs randomly",
       "playlist": "Playlist",
+      "signInRequired": "Sign in to use this feature",
       "songList": "Songs",
       "songsUnit": "songs",
       "songsUnit_w/o_en": "",
@@ -84,10 +86,20 @@
       "cover": "Covers",
       "collaboration": "Collabs / Guest Songs",
       "karaoke": "Singing streams",
+      "specialLive": "Special Live",
       "collabKaraoke": "Collab Karaoke",
       "shorts": "Song Intro Shorts",
+      "ballad": "Ballads",
+      "springSongs": "Spring songs",
+      "summerSongs": "Summer songs",
+      "winterSongs": "Winter songs",
+      "animeSongs": "Anime Songs",
+      "hololiveSongs": "hololive Songs",
+      "vocaloidSongs": "Vocaloid Songs",
       "groupMode": "Mode",
       "groupTheme": "Theme",
+      "groupScene": "Scene",
+      "genre": "Genre",
       "surpriseTooltip": "Play songs randomly"
     },
     "nowPlayingSongInfo": {
@@ -159,6 +171,7 @@
       "menu": "Menu",
       "removeFromFavorites": "Remove from favorites",
       "addToFavorites": "Add to favorites",
+      "signInRequired": "Sign in to use this feature",
       "shareCurrentSong": "Share current song"
     }
   },
@@ -591,6 +604,18 @@
     "updatedLabel": "Updated:",
     "copyUrl": "Copy share URL",
     "copied": "Copied",
+    "visibility": {
+      "label": "Visibility",
+      "public": "Public",
+      "unlisted": "Anyone with the link",
+      "private": "Private"
+    },
+    "shared": {
+      "songCount": "{count} songs",
+      "play": "Play this playlist",
+      "song": "Song",
+      "artist": "Artist"
+    },
     "head": {
       "play": "Play",
       "index": "#",
@@ -633,6 +658,7 @@
       "title": "Title",
       "artist": "Artist",
       "tag": "Tag",
+      "songTag": "Song tag",
       "singer": "Singer",
       "collab": "Collab / Unit",
       "relatedArtists": "AZKi's song history (stream date:2026/04/01)",
@@ -892,7 +918,8 @@
       "loginWithGoogle": "Sign in with Google"
     },
     "alerts": {
-      "loginRequired": "Sign in with Google to save your visited locations."
+      "loginRequired": "Sign in with Google to save your visited locations.",
+      "login": "Sign in with Google"
     },
     "share": {
       "open": "Share",
@@ -953,6 +980,7 @@
       "loadMore": "Show {count} more"
     },
     "popup": {
+      "uniqueVisitors": "Visited by {count} people",
       "visitedAt": "Visited on {date}",
       "visited": "Visited",
       "youtube": "YouTube",
@@ -1176,7 +1204,7 @@
     "monthSuffix": " months",
     "daySuffix": " days",
     "songsSuffix": " songs",
-    "daysActiveLabel": "Days active:",
+    "daysActiveLabel": "",
     "daysSuffix": " days",
     "homeLabel": "HOME",
     "page": {
@@ -1192,6 +1220,18 @@
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years} years {months} months {days} days",
+    "journey": {
+      "ariaLabel": "A timeline of AZKi and the Pioneers' journey. Day {days}, {duration} since debut",
+      "daysLabel": "Our journey",
+      "daysValue": "Day {days}",
+      "duration": "{duration} since debut",
+      "debut": "Debut",
+      "today": "Today",
+      "pioneersAppear": "The Pioneers take shape",
+      "pioneersAppearCompact": "Pioneers",
+      "millionSubscribers": "1M subscribers",
+      "millionSubscribersCompact": "1M subs"
+    },
     "yearCards": {
       "recordedSongsLabel": "Recorded songs",
       "sungInStreamsLabel": "Songs sung in streams",
@@ -1295,6 +1335,15 @@
     "guestAppearance": "Guest Appearances",
     "azkiOnly": "AZKi only",
     "ballad": "Ballads",
+    "vocaloid": "Vocaloid",
+    "jPop": "J-POP",
+    "rock": "Rock",
+    "anisong": "Anime songs",
+    "hololiveSongs": "hololive songs",
+    "springSongs": "Spring songs",
+    "summerSongs": "Summer songs",
+    "autumnSongs": "Autumn songs",
+    "winterSongs": "Winter songs",
     "acoustic": "Acoustic / Live Performance"
   },
   "SearchHelp": {
@@ -1353,6 +1402,22 @@
     "hint": "If the issue continues, go back home and try from another page.",
     "retry": "Try again",
     "backToHome": "Back to home"
+  },
+  "Account": {
+    "menuLabel": "Account menu",
+    "guest": "Guest",
+    "signIn": "Sign in with Google",
+    "signOut": "Sign out",
+    "language": "Language: {language}",
+    "theme": {
+      "light": "Light mode",
+      "dark": "Dark mode",
+      "auto": "System theme"
+    },
+    "signInRequiredTitle": "Sign in required",
+    "signInRequiredDescription": "Playlists and favorites are saved to your Google account.",
+    "libraryErrorTitle": "Could not load your library",
+    "libraryErrorMessage": "Your legacy data was not deleted. Reload the page and try again later."
   },
   "ShareModal": {
     "title": "Share",

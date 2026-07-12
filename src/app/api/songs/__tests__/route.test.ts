@@ -58,7 +58,7 @@ describe("songs route", () => {
 
     const args = getMock.mock.calls[0]?.[0];
     expect(args?.ranges).toEqual(
-      expect.arrayContaining(["artists!A:C", "song_titles!A:D"]),
+      expect.arrayContaining(["artists!A:C", "song_titles!A:E"]),
     );
     expect(args?.ranges).not.toEqual(
       expect.arrayContaining([...membersOnlySongRanges]),
@@ -406,6 +406,7 @@ describe("songs route", () => {
                       { formattedValue: "artist" },
                       { formattedValue: "title_en" },
                       { formattedValue: "検索別名" },
+                      { formattedValue: "楽曲タグ" },
                     ],
                   },
                   {
@@ -414,6 +415,10 @@ describe("songs route", () => {
                       { formattedValue: "AZKi" },
                       { formattedValue: "afterglow" },
                       { formattedValue: "あふたー,アフター、あふたー" },
+                      {
+                        formattedValue:
+                          "ラブライブ！,アニソン、キャラソン,冬ソング",
+                      },
                     ],
                   },
                 ],
@@ -472,6 +477,7 @@ describe("songs route", () => {
         artist_aliases: ["あずき"],
         sing: "AZKi、星街すいせい",
         sing_aliases: ["あずき", "ほしまち", "すいせい"],
+        song_tags: ["ラブライブ！", "アニソン", "キャラソン", "冬ソング"],
       }),
     );
   });

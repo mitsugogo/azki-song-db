@@ -48,6 +48,7 @@ export interface Song {
   broadcast_at: string;
   year: number;
   tags: string[];
+  song_tags?: string[];
   milestones: string[];
   extra?: string;
   live_call?: string;

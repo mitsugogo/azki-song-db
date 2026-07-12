@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { setupApiMocks } from "./mocks";
+import { setupAuthenticatedApiMocks } from "./mocks";
 
 const gotoWatchPage = async (page: Page) => {
   await page.goto("/watch");
@@ -40,6 +40,7 @@ const openPlaylistModal = async (page: Page) => {
   const { playlistButton } = getMobileActionButtons(page);
 
   await expect(playlistButton).toBeVisible({ timeout: 10000 });
+  await expect(playlistButton).toBeEnabled({ timeout: 10000 });
   await playlistButton.click();
 
   const playlistModal = page.locator('[role="dialog"]').filter({
@@ -55,7 +56,7 @@ test.describe("Mobile action buttons", () => {
   test.describe.configure({ mode: "serial" });
 
   test.beforeEach(async ({ page }) => {
-    await setupApiMocks(page);
+    await setupAuthenticatedApiMocks(page);
   });
 
   test("displays mobile action buttons", async ({ page }) => {

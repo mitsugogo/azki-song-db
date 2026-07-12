@@ -1,7 +1,13 @@
 import { prisma } from "@/app/lib/prisma";
-import { Period, VALID_PERIODS, ViewStat } from "@/app/types/api/stat/views";
+import {
+  Period,
+  VALID_PERIODS,
+  ViewCountStat,
+  ViewStat,
+} from "@/app/types/api/stat/views";
 
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+export const RELEASE_STAT_CATEGORIES = ["オリ曲", "カバー"] as const;
 
 function buildJstBoundaryDate(period: Period): Date {
   const dateString = getGSDate(period);
@@ -57,6 +63,37 @@ function parseRowsByVideoId(
   return grouped;
 }
 
+export function parseViewCountRowsByVideoId(
+  rows: Array<{
+    datetime: Date | null;
+    viewCount: number | null;
+    videoId: string | null;
+  }>,
+) {
+  const grouped: Record<string, ViewCountStat[]> = {};
+
+  rows.forEach((row) => {
+    if (!row.videoId) return;
+
+    const statistics = grouped[row.videoId] ?? [];
+    statistics.push({
+      datetime: row.datetime,
+      viewCount: Number(row.viewCount ?? 0),
+    });
+    grouped[row.videoId] = statistics;
+  });
+
+  Object.keys(grouped).forEach((videoId) => {
+    grouped[videoId] = [...grouped[videoId]].sort((a, b) => {
+      const aTime = a.datetime ? new Date(a.datetime).getTime() : 0;
+      const bTime = b.datetime ? new Date(b.datetime).getTime() : 0;
+      return aTime - bTime;
+    });
+  });
+
+  return grouped;
+}
+
 export function parsePeriod(period: string | null): Period | null {
   if (!period) return null;
   if (!VALID_PERIODS.includes(period as Period)) return null;
@@ -104,6 +141,32 @@ export async function getStatisticsByVideoId(videoId: string, period?: Period) {
   const grouped = await getStatisticsByVideoIds([videoId], period);
   if (!grouped) return null;
   return grouped[videoId] || [];
+}
+
+export async function getReleaseViewStatistics(period: Period = "7d") {
+  const where = {
+    category: { in: [...RELEASE_STAT_CATEGORIES] },
+    videoId: { not: null },
+    ...(period === "all"
+      ? {}
+      : {
+          datetime: {
+            gte: buildJstBoundaryDate(period),
+          },
+        }),
+  };
+
+  const rows = await prisma.statistics.findMany({
+    where,
+    orderBy: { datetime: "asc" },
+    select: {
+      videoId: true,
+      datetime: true,
+      viewCount: true,
+    },
+  });
+
+  return parseViewCountRowsByVideoId(rows);
 }
 
 function getGSDate(period: Period): string {

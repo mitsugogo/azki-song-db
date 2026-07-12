@@ -35,6 +35,7 @@ interface SearchInputProps {
   allSongs: Song[];
   searchValue: string[];
   onSearchChange: (values: string[]) => void;
+  onEmptyInputEnter?: () => void;
   placeholder?: string;
   className?: string;
 }
@@ -117,6 +118,7 @@ export default function SearchInput({
   allSongs,
   searchValue,
   onSearchChange,
+  onEmptyInputEnter,
   placeholder,
   className,
 }: SearchInputProps) {
@@ -153,7 +155,9 @@ export default function SearchInput({
       };
 
       const availableTags = Array.from(
-        new Set(allSongs.flatMap((song) => song.tags)),
+        new Set(
+          allSongs.flatMap((song) => [...song.tags, ...(song.song_tags ?? [])]),
+        ),
       ).filter((tag) => tag !== "");
 
       const availableMilestones = Array.from(
@@ -561,6 +565,17 @@ export default function SearchInput({
       maxDropdownHeight={200}
       value={searchValue}
       onChange={handleSearchChange}
+      onKeyDown={(event) => {
+        if (
+          event.key === "Enter" &&
+          !event.nativeEvent.isComposing &&
+          event.currentTarget.value === "" &&
+          searchValue.length > 0
+        ) {
+          event.preventDefault();
+          onEmptyInputEnter?.();
+        }
+      }}
       filter={aliasAwareFilter}
       limit={15}
       splitChars={["|"]}

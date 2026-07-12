@@ -44,11 +44,11 @@ const RelatedArtistsSection = ({ categories }: RelatedArtistsSectionProps) => {
               </p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                {category.artists.map((artist) => {
+                {category.artists.map((artist, index) => {
                   const pct = Math.round((artist.count / maxCount) * 100);
                   return (
                     <Link
-                      key={`${category.categoryKey}-${artist.artist}`}
+                      key={`${category.categoryKey}-${artist.artist}-${index}`}
                       href={`/search?q=${encodeURIComponent(`artist:${artist.artist}`)}`}
                       className="card-glassmorphism hover-lift-shadow block relative overflow-hidden"
                     >

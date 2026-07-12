@@ -7,8 +7,9 @@ import { FaYoutube } from "react-icons/fa6";
 import { Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
-import ThemeToggle from "./ThemeToggle";
 import FoldableToggle from "./FoldableToggle";
+import AccountMenu from "./AccountMenu";
+import ThemeToggle from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
 import useSongs from "../hook/useSongs";
 import SearchInput from "./SearchInput";
@@ -44,7 +45,7 @@ export function Header() {
   };
   return (
     <>
-      <header className="relative z-30 bg-primary dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
+      <header className="relative z-30 bg-primary-800 dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
         <div className="w-full px-2">
           <div className="relative flex h-10 lg:h-16 items-center">
             <div className="absolute inset-y-0 left-0 flex items-center z-10">
@@ -167,7 +168,7 @@ export function Header() {
               <Link
                 href={siteConfig.channelUrl}
                 target="_blank"
-                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-primary-100 bg-primary-700 hover:bg-primary-600 dark:bg-transparent dark:hover:bg-primary-900 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
+                className="hidden lg:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-primary-100 dark:text-white bg-primary-800 hover:bg-primary-700 dark:bg-transparent dark:hover:bg-primary-900/50 focus:border-primary-700 focus:ring-primary-700 dark:focus:ring-primary-700"
               >
                 <FaYoutube className="mr-1" />
                 {siteConfig.channelName}
@@ -180,6 +181,7 @@ export function Header() {
               </div>
               <FoldableToggle />
               <ThemeToggle />
+              <AccountMenu />
             </div>
           </div>
         </div>

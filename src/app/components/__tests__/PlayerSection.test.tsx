@@ -100,6 +100,11 @@ vi.mock("../NowPlayingSongInfo", () => ({
   default: () => <div data-testid="now-playing" />,
 }));
 
+vi.mock("../SongModeControls", () => ({
+  __esModule: true,
+  default: () => <div data-testid="song-mode-controls" />,
+}));
+
 const baseSong: Song = {
   title: "S1",
   artist: "A",
@@ -173,6 +178,7 @@ describe("PlayerSection", () => {
       sourceId: "main",
       active: true,
       videoId: "v1",
+      playerKey: 1,
     });
   });
 

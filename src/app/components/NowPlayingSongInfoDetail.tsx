@@ -494,6 +494,30 @@ const NowPlayingSongInfoDetail = ({
                     </Badge>
                   );
                 })}
+                {(currentSong.song_tags ?? []).map((tag) => {
+                  const existsSameTag = searchTerm.includes(`tag:${tag}`);
+                  return (
+                    <Badge
+                      key={`song-tag-${tag}`}
+                      radius="sm"
+                      color={existsSameTag ? "blue" : "brown"}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        if (existsSameTag) {
+                          setSearchTerm(
+                            searchTerm.replace(`tag:${tag}`, "").trim(),
+                          );
+                        } else {
+                          setSearchTerm(
+                            `${searchTerm ? `${searchTerm}|` : ""}tag:${tag}`,
+                          );
+                        }
+                      }}
+                    >
+                      {tag}
+                    </Badge>
+                  );
+                })}
               </dd>
             </div>
 

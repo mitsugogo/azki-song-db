@@ -32,16 +32,19 @@ function Source({
   sourceId,
   active,
   startTime,
+  playerKey,
 }: {
   sourceId: string;
   active: boolean;
   startTime: number;
+  playerKey?: number;
 }) {
   useSharedYouTubePlayerSource({
     sourceId,
     active,
     videoId: active ? "same-video" : undefined,
     startTime,
+    playerKey,
     onReady: vi.fn(),
     onStateChange: vi.fn(),
   });
@@ -78,10 +81,10 @@ describe("SharedYouTubePlayer", () => {
     window.cancelAnimationFrame = vi.fn();
   });
 
-  it("keeps the same iframe load props when switching slots for the same video", async () => {
+  it("playerKeyが異なっても同一動画のスロット移譲ではiframeを維持する", async () => {
     const { rerender } = render(
       <SharedYouTubePlayerProvider>
-        <Source sourceId="main" active startTime={30} />
+        <Source sourceId="main" active startTime={30} playerKey={1} />
       </SharedYouTubePlayerProvider>,
     );
 
@@ -105,5 +108,25 @@ describe("SharedYouTubePlayer", () => {
       startTime: 30,
     });
     expect(youtubePlayerUnmounts.current).toBe(0);
+  });
+
+  it("同一動画でも再作成キーが変われば iframe を再マウントする", async () => {
+    const { rerender } = render(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="main" active startTime={30} playerKey={1} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+
+    rerender(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="main" active startTime={30} playerKey={2} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+
+    expect(youtubePlayerUnmounts.current).toBe(1);
   });
 });

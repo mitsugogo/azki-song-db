@@ -9,7 +9,7 @@ import DataTable from "./datatable";
 import SongCountOverview from "./SongCountOverview";
 import { useSongData } from "../hook/useSongData";
 import { useStatistics } from "../hook/useStatistics";
-import useStatViewCounts from "../hook/useStatViewCounts";
+import useReleaseViewCounts from "../hook/useReleaseViewCounts";
 import Loading from "../loading";
 import historyHelper from "../lib/history";
 import { buildViewMilestoneInfo } from "../lib/viewMilestone";
@@ -37,27 +37,7 @@ export default function StatisticsPage() {
     songs,
   });
 
-  const viewLabelVideoIds = useMemo(
-    () =>
-      [
-        ...statistics.originalSongCountsByReleaseDate,
-        ...statistics.coverSongCountsByReleaseDate,
-      ]
-        .map(
-          (item) =>
-            item.song?.video_id ||
-            item.firstVideo?.video_id ||
-            item.lastVideo?.video_id,
-        )
-        .filter(Boolean),
-    [
-      statistics.originalSongCountsByReleaseDate,
-      statistics.coverSongCountsByReleaseDate,
-    ],
-  );
-
-  const { data: viewStatisticsByVideoId } =
-    useStatViewCounts(viewLabelVideoIds);
+  const { data: viewStatisticsByVideoId } = useReleaseViewCounts("7d");
 
   const statisticsWithMilestones = useMemo(() => {
     const attachMilestone = (

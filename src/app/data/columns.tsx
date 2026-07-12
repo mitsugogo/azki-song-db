@@ -6,6 +6,7 @@ import MilestoneBadge from "../components/MilestoneBadge";
 import { BsPlayCircle } from "react-icons/bs";
 type TFuncLike = (key: string, values?: Record<string, any>) => string;
 import { formatDate } from "../lib/formatDate";
+import { FaCircleCheck } from "react-icons/fa6";
 const formatTimeFromSeconds = (s?: string) => {
   if (!s) return "-";
   const n = parseInt(s || "0");
@@ -25,7 +26,7 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
           href={`/search?q=${queryKey}:${encodeURIComponent(item)}`}
           className="hover:underline text-primary dark:text-primary-300 mr-2"
         >
-          <Badge color="blue" size="xs" className="inline-block">
+          <Badge color="cyan" size="xs" className="inline-block">
             {item}
           </Badge>
         </Link>
@@ -117,7 +118,7 @@ export const getColumns = (
             href={`/search?q=sing:${encodeURIComponent(title)}`}
             className="hover:underline text-primary dark:text-primary-300 mr-2"
           >
-            <Badge color="blue" size="xs" className="inline-block">
+            <Badge color="pink" size="xs" className="inline-block">
               {title}
             </Badge>
           </Link>
@@ -164,9 +165,7 @@ export const getColumns = (
     header: t("table.album_is_compilation"),
     cell: (info) =>
       info.getValue<boolean>() ? (
-        <Badge color="blue" size="xs">
-          {t("table.album_is_compilation")}
-        </Badge>
+        <FaCircleCheck className="text-green-700" />
       ) : (
         ""
       ),

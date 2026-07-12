@@ -7,17 +7,17 @@
 @import "overlayscrollbars/styles/overlayscrollbars.css";
 
 @theme {
-  --color-primary-50: #fdf2f7;
-  --color-primary-100: #fce7f0;
-  --color-primary-200: #fbcfe1;
-  --color-primary-300: #f9a8ca;
-  --color-primary-400: #f472a8;
-  --color-primary-500: #ec488c;
-  --color-primary-600: #db2772;
-  --color-primary-700: #be185d;
-  --color-primary-800: #9d174f;
-  --color-primary-900: #831844;
-  --color-primary-950: #500725;
+  --color-primary-50: #ffeaf7;
+  --color-primary-100: #fcd4e8;
+  --color-primary-200: #f3a7cd;
+  --color-primary-300: #ec77b1;
+  --color-primary-400: #e55099;
+  --color-primary-500: #e2378b;
+  --color-primary-600: #d11c76;
+  --color-primary-700: #d11c76;
+  --color-primary-800: #b31264;
+  --color-primary-900: #9e0157;
+  --color-primary-950: #69003a;
   --color-primary: var(--color-primary-700);
   --bg-primary: var(--color-primary-700);
 
@@ -324,8 +324,12 @@ body {
   .dark\:bg-azki-gradient:where(.dark, .dark *) {
     background-attachment: fixed;
     background-image:
-      radial-gradient(circle at top, rgba(190, 24, 93, 0.2), transparent 34%),
-      linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      radial-gradient(
+        ellipse 75% 14rem at 50% -5rem,
+        rgba(190, 24, 93, 0.2),
+        transparent 100%
+      ),
+      linear-gradient(var(--mantine-color-dark-9), var(--mantine-color-dark-9));
   }
 
   /* グラスモーフィズムカード */

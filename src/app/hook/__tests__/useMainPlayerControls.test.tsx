@@ -896,6 +896,38 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
   });
 
+  it("開始位置へのシーク前にENDEDが来ても次の楽曲へ遷移しない", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({ target: mockPlayer } as any);
+    });
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 0,
+      } as any);
+    });
+
+    expect(result.current.currentSong).toEqual(mockSongs[1]);
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
+    expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
+  });
+
   it("0:00から再生開始した場合の補正シークは1回だけ試みる", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

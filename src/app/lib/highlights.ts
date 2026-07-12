@@ -152,6 +152,7 @@ export const isAnniversaryToday = (
 
 export const getFeaturedAnniversaries = (
   items: AnniversaryItem[],
+  maxDays: number = 35,
   nowMsArg?: number,
 ) => {
   const nowMs = typeof nowMsArg === "number" ? nowMsArg : Date.now();
@@ -176,35 +177,11 @@ export const getFeaturedAnniversaries = (
     return aTime - bTime;
   });
 
-  const todayItems = sortedItems.filter((item) =>
-    isAnniversaryToday(item, nowMs),
-  );
-  if (todayItems.length > 0) {
-    return todayItems;
-  }
-
-  let minDays = Number.MAX_SAFE_INTEGER;
-  const nextItems: AnniversaryItem[] = [];
-  sortedItems.forEach((item) => {
+  return sortedItems.filter((item) => {
     const nextIso = computeNextIsoForAnniversary(item, nowMs);
     const days = nextIso ? getDaysUntil(nextIso, nowMs) : null;
-    if (days === null || days <= 0) {
-      return;
-    }
-
-    if (days < minDays) {
-      minDays = days;
-      nextItems.length = 0;
-      nextItems.push(item);
-      return;
-    }
-
-    if (days === minDays) {
-      nextItems.push(item);
-    }
+    return days !== null && days >= 0 && days <= maxDays;
   });
-
-  return nextItems;
 };
 
 const getYearFromDate = (dateStr?: string | null) => {

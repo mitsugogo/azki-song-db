@@ -2,12 +2,12 @@
 
 import { useMemo } from "react";
 import useArchives from "./useArchives";
-import useStatViewCounts from "./useStatViewCounts";
+import useReleaseViewCounts from "./useReleaseViewCounts";
 import type { MilestoneItem } from "./useMilestones";
 import { getDiscographyLink } from "../lib/song";
 import { buildWatchHref } from "../lib/watchUrl";
 import type { ArchiveItem } from "../types/archiveItem";
-import type { Period, ViewStat } from "../types/api/stat/views";
+import type { Period, ViewCountStat } from "../types/api/stat/views";
 import type { EventItem } from "../types/eventItem";
 import type { Song } from "../types/song";
 
@@ -80,7 +80,6 @@ type UseActivityTimelineOptions = {
   limit?: number;
   songUpdateLimit?: number;
   archiveLimit?: number;
-  viewMilestoneCandidateLimit?: number;
   viewMilestonePeriod?: Period;
   dateRange?: ActivityTimelineDateRange;
 };
@@ -93,7 +92,6 @@ export type ActivityTimelineDateRange = {
 const DEFAULT_ACTIVITY_LIMIT = 20;
 const DEFAULT_SONG_UPDATE_LIMIT = 8;
 const DEFAULT_ARCHIVE_LIMIT = 8;
-const DEFAULT_VIEW_MILESTONE_CANDIDATE_LIMIT = Number.POSITIVE_INFINITY;
 const FIRST_VIEW_MILESTONE_TARGET = 500000;
 const MILLION_VIEW_MILESTONE_STEP = 1000000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -249,51 +247,6 @@ function buildEventItems(events: EventItem[]): EventActivityTimelineItem[] {
     .filter((item): item is EventActivityTimelineItem => Boolean(item));
 }
 
-function buildMilestoneCandidateVideoIds(
-  songs: Song[],
-  candidateLimit: number,
-) {
-  const songsByVideoId = new Map<string, Song>();
-
-  songs.forEach((song) => {
-    if (!song.video_id) {
-      return;
-    }
-
-    const existing = songsByVideoId.get(song.video_id);
-    const currentViewCount = Number(song.view_count ?? 0);
-    const existingViewCount = Number(existing?.view_count ?? 0);
-
-    if (!existing || currentViewCount > existingViewCount) {
-      songsByVideoId.set(song.video_id, song);
-    }
-  });
-
-  const candidates = Array.from(songsByVideoId.values());
-  const highValueCandidates = [...candidates].sort(
-    (a, b) => Number(b.view_count ?? 0) - Number(a.view_count ?? 0),
-  );
-  const recentCandidates = [...candidates].sort(
-    (a, b) => getDateTime(b.broadcast_at) - getDateTime(a.broadcast_at),
-  );
-  const orderedVideoIds: string[] = [];
-  const seenVideoIds = new Set<string>();
-
-  [...highValueCandidates, ...recentCandidates].forEach((song) => {
-    if (
-      orderedVideoIds.length >= candidateLimit ||
-      seenVideoIds.has(song.video_id)
-    ) {
-      return;
-    }
-
-    orderedVideoIds.push(song.video_id);
-    seenVideoIds.add(song.video_id);
-  });
-
-  return orderedVideoIds;
-}
-
 function getCrossedViewMilestoneTargets(
   previousViewCount: number,
   currentViewCount: number,
@@ -333,7 +286,7 @@ function getCrossedViewMilestoneTargets(
 function buildViewMilestoneItemsForVideo(
   videoId: string,
   song: Song,
-  history: ViewStat[],
+  history: ViewCountStat[],
 ): ViewMilestoneActivityTimelineItem[] {
   const sortedHistory = [...history]
     .filter((item) => item?.datetime)
@@ -388,7 +341,7 @@ function buildViewMilestoneItemsForVideo(
 
 export function buildViewMilestoneItems(
   songs: Song[],
-  viewStatisticsByVideoId: Record<string, ViewStat[]>,
+  viewStatisticsByVideoId: Record<string, ViewCountStat[]>,
 ): ViewMilestoneActivityTimelineItem[] {
   const songsByVideoId = new Map<string, Song>();
 
@@ -457,17 +410,12 @@ export default function useActivityTimeline({
   limit = DEFAULT_ACTIVITY_LIMIT,
   songUpdateLimit = DEFAULT_SONG_UPDATE_LIMIT,
   archiveLimit = DEFAULT_ARCHIVE_LIMIT,
-  viewMilestoneCandidateLimit = DEFAULT_VIEW_MILESTONE_CANDIDATE_LIMIT,
   viewMilestonePeriod = "30d",
   dateRange,
 }: UseActivityTimelineOptions) {
   const { items: archives, isLoading: isArchivesLoading } = useArchives();
-  const milestoneVideoIds = useMemo(
-    () => buildMilestoneCandidateVideoIds(songs, viewMilestoneCandidateLimit),
-    [songs, viewMilestoneCandidateLimit],
-  );
   const { data: viewStatisticsByVideoId, loading: isViewMilestonesLoading } =
-    useStatViewCounts(milestoneVideoIds, viewMilestonePeriod, enabled);
+    useReleaseViewCounts(viewMilestonePeriod, enabled);
 
   const items = useMemo(() => {
     const now = Date.now();

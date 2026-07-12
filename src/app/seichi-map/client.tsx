@@ -10,7 +10,7 @@ import {
 } from "react";
 import "dayjs/locale/ja";
 import { useLocale, useTranslations } from "next-intl";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import {
   Alert,
   Anchor,
@@ -49,7 +49,6 @@ import {
   FiEdit3,
   FiExternalLink,
   FiLogIn,
-  FiLogOut,
   FiMapPin,
   FiSearch,
   FiShare2,
@@ -64,6 +63,7 @@ import { parseXStatusDateFromUrl } from "../lib/xStatus";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
+  uniqueVisitorCount: number;
 };
 
 type VisitedItem = {
@@ -115,9 +115,98 @@ type Props = {
   userName: string;
 };
 
+type GoogleLatLngLike = {
+  lat: (() => number) | number;
+  lng: (() => number) | number;
+};
+
+type GooglePointLike = {
+  x: number;
+  y: number;
+};
+
+type GoogleMapBoundsLike = {
+  getNorthEast: () => GoogleLatLngLike;
+  getSouthWest: () => GoogleLatLngLike;
+};
+
+type GoogleMapProjectionLike = {
+  fromLatLngToDivPixel: (latLng: GoogleLatLngLike) => GooglePointLike | null;
+};
+
+type GoogleMapsEventListener = {
+  remove: () => void;
+};
+
+type GoogleMapMouseEvent = {
+  latLng?: GoogleLatLngLike;
+  domEvent?: MouseEvent;
+  stop?: () => void;
+};
+
+type GoogleMapInstance = {
+  getBounds: () => GoogleMapBoundsLike | null;
+  getCenter: () => GoogleLatLngLike | null;
+  getZoom: () => number | undefined;
+  panTo: (latLng: { lat: number; lng: number }) => void;
+  setZoom: (zoom: number) => void;
+  addListener: (
+    eventName: string,
+    handler: (event?: GoogleMapMouseEvent) => void,
+  ) => GoogleMapsEventListener;
+};
+
+type GoogleInfoWindow = {
+  setContent: (content: string | Node) => void;
+  setPosition: (latLng: { lat: number; lng: number }) => void;
+  open: (options: { map: GoogleMapInstance }) => void;
+  close: () => void;
+  addListener?: (
+    eventName: string,
+    handler: () => void,
+  ) => GoogleMapsEventListener;
+};
+
+type GoogleOverlayViewBase = {
+  setMap(map: GoogleMapInstance | null): void;
+  getProjection?(): GoogleMapProjectionLike | null;
+  getPanes?(): { overlayLayer: Element } | null;
+};
+
+type GoogleMapsCoreLibrary = {
+  LatLng: new (lat: number, lng: number) => GoogleLatLngLike;
+};
+
+type GoogleMapsMapsLibrary = {
+  OverlayView: new () => GoogleOverlayViewBase;
+  Map: new (
+    mapElement: HTMLElement,
+    options: {
+      center: { lat: number; lng: number };
+      zoom: number;
+      mapId: string;
+      mapTypeControl: boolean;
+      clickableIcons: boolean;
+      fullscreenControl: boolean;
+      streetViewControl: boolean;
+    },
+  ) => GoogleMapInstance;
+  InfoWindow: new () => GoogleInfoWindow;
+};
+
+type GoogleMapsDynamicGlobal = GoogleMapsMapsLibrary & {
+  importLibrary?: (libraryName: string) => Promise<unknown>;
+  [key: string]: unknown;
+};
+
+type GoogleWindowGlobal = {
+  maps?: GoogleMapsDynamicGlobal;
+  [key: string]: unknown;
+};
+
 declare global {
   interface Window {
-    google?: any;
+    google?: GoogleWindowGlobal;
     __azkiSeichiMapScriptPromise?: Promise<GoogleMapsLibraries>;
     __azkiSeichiMapLoaderVersion?: number;
     __azkiSeichiMapLoaderLanguage?: string;
@@ -141,15 +230,15 @@ const urlPattern = /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%#]+/g;
 const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 
 type GoogleMapsLibraries = {
-  core: any;
-  maps: any;
+  core: GoogleMapsCoreLibrary;
+  maps: GoogleMapsMapsLibrary;
 };
 
 type CanvasOverlayHandle = {
   setLocations: (locations: LocationOption[]) => void;
   setSelectedLocationId: (locationId: string | null) => void;
-  setMap: (map: any | null) => void;
-  findLocationAtLatLng: (latLng: any) => LocationOption | null;
+  setMap: (map: GoogleMapInstance | null) => void;
+  findLocationAtLatLng: (latLng: GoogleLatLngLike) => LocationOption | null;
   draw: () => void;
 };
 
@@ -171,8 +260,8 @@ const sleep = (milliseconds: number) =>
   });
 
 const installGoogleMapsLoader = (apiKey: string, language: string) => {
-  const googleGlobal = (window.google ??= {});
-  const mapsGlobal = (googleGlobal.maps ??= {});
+  const googleGlobal = (window.google ??= {} as GoogleWindowGlobal);
+  const mapsGlobal = (googleGlobal.maps ??= {} as GoogleMapsDynamicGlobal);
   const requestedLibraries = new Set<string>();
   let scriptPromise: Promise<void> | undefined;
 
@@ -208,7 +297,13 @@ const installGoogleMapsLoader = (apiKey: string, language: string) => {
       document.head.appendChild(script);
     });
 
-    return scriptPromise.then(() => mapsGlobal.importLibrary(libraryName));
+    return scriptPromise.then(() => {
+      const importLibrary = mapsGlobal.importLibrary;
+      if (!importLibrary) {
+        throw new Error("google_maps_load_failed");
+      }
+      return importLibrary(libraryName);
+    });
   };
 };
 
@@ -469,9 +564,9 @@ const createSeichiCanvasOverlay = ({
   isVisited,
   getSelectedLocationId,
 }: {
-  coreApi: any;
-  mapsApi: any;
-  map: any;
+  coreApi: GoogleMapsCoreLibrary;
+  mapsApi: GoogleMapsMapsLibrary;
+  map: GoogleMapInstance;
   isVisited: (location: LocationOption) => boolean;
   getSelectedLocationId: () => string | null;
 }) => {
@@ -484,7 +579,7 @@ const createSeichiCanvasOverlay = ({
     private hitPoints: CanvasHitPoint[] = [];
     private drawFrame: number | null = null;
 
-    setMap(nextMap: any | null) {
+    setMap(nextMap: GoogleMapInstance | null) {
       super.setMap(nextMap);
     }
 
@@ -493,7 +588,7 @@ const createSeichiCanvasOverlay = ({
       this.canvas.style.position = "absolute";
       this.canvas.style.pointerEvents = "none";
       this.canvas.style.zIndex = "1";
-      this.getPanes()?.overlayLayer.appendChild(this.canvas);
+      this.getPanes?.()?.overlayLayer?.appendChild(this.canvas);
     }
 
     onRemove() {
@@ -599,7 +694,7 @@ const createSeichiCanvasOverlay = ({
       }
     }
 
-    findLocationAtLatLng(latLng: any) {
+    findLocationAtLatLng(latLng: GoogleLatLngLike) {
       const projection = this.getProjection?.();
       if (!projection) return null;
 
@@ -636,11 +731,22 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
         mapsApi.importLibrary("core"),
         mapsApi.importLibrary("maps"),
       ]);
-      return { core, maps };
+      return {
+        core: core as GoogleMapsCoreLibrary,
+        maps: maps as GoogleMapsMapsLibrary,
+      };
     }
 
-    if (mapsApi?.Map && mapsApi.OverlayView) {
-      return { core: mapsApi, maps: mapsApi };
+    if (
+      mapsApi?.Map &&
+      mapsApi.OverlayView &&
+      mapsApi.InfoWindow &&
+      mapsApi.LatLng
+    ) {
+      return {
+        core: mapsApi as unknown as GoogleMapsCoreLibrary,
+        maps: mapsApi as unknown as GoogleMapsMapsLibrary,
+      };
     }
 
     await sleep(50);
@@ -794,7 +900,7 @@ const buildSeichiMapShareApiUrl = (shareId: string) => {
 };
 
 const syncMapViewportToUrl = (
-  map: any,
+  map: GoogleMapInstance,
   options?: { keepViewport?: boolean },
 ) => {
   if (typeof window === "undefined") return;
@@ -857,14 +963,16 @@ export default function SeichiMapCompleteClient({
   const mapsLanguage = locale === "ja" ? "ja" : "en";
   const datePickerLocale = locale === "ja" ? "ja" : "en";
   const mapElementRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<GoogleMapInstance | null>(null);
   const mapOverlayRef = useRef<CanvasOverlayHandle | null>(null);
-  const mapClickListenerRef = useRef<any>(null);
-  const mapMouseMoveListenerRef = useRef<any>(null);
-  const mapIdleListenerRef = useRef<any>(null);
+  const mapClickListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const mapMouseMoveListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const mapIdleListenerRef = useRef<GoogleMapsEventListener | null>(null);
+  const infoWindowCloseClickListenerRef =
+    useRef<GoogleMapsEventListener | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
-  const infoWindowRef = useRef<any>(null);
+  const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
   const isLocationVisitedRef = useRef<(location: LocationOption) => boolean>(
     () => false,
   );
@@ -995,24 +1103,9 @@ export default function SeichiMapCompleteClient({
     return map;
   }, [visited]);
 
-  const visitedByLocationName = useMemo(() => {
-    const map = new Map<string, VisitedItem>();
-    visited.forEach((item) => {
-      if (item.locationName) {
-        map.set(item.locationName, item);
-      }
-    });
-    return map;
-  }, [visited]);
-
   const getVisitedItemForLocation = useCallback(
-    (location: LocationOption) => {
-      return (
-        visitedByLocationId.get(location.id) ??
-        visitedByLocationName.get(location.name)
-      );
-    },
-    [visitedByLocationId, visitedByLocationName],
+    (location: LocationOption) => visitedByLocationId.get(location.id),
+    [visitedByLocationId],
   );
 
   const isLocationVisited = useCallback(
@@ -1285,7 +1378,9 @@ export default function SeichiMapCompleteClient({
       }
 
       const locationItems =
-        (await locationsResponse.json()) as SeichiMapLocation[];
+        (await locationsResponse.json()) as (SeichiMapLocation & {
+          uniqueVisitorCount?: number;
+        })[];
       let visitedItems: VisitedItem[] = [];
       let archiveVideoMeta: Record<string, ArchiveVideoMeta> = {};
       let nextSharedViewInfo: ShareInfo | null = null;
@@ -1366,6 +1461,7 @@ export default function SeichiMapCompleteClient({
         locationItems.map((item) => ({
           ...item,
           key: item.id,
+          uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
         })),
       );
       setVisited(visitedItems);
@@ -1415,9 +1511,13 @@ export default function SeichiMapCompleteClient({
             mapTypeControl: false,
             clickableIcons: false,
             fullscreenControl: true,
-            streetViewControl: false,
+            streetViewControl: true,
           });
           infoWindowRef.current = new InfoWindow();
+          infoWindowCloseClickListenerRef.current =
+            infoWindowRef.current.addListener?.("closeclick", () => {
+              setSelectedLocationId(null);
+            }) ?? null;
           mapOverlayRef.current = createSeichiCanvasOverlay({
             coreApi: libraries.core,
             mapsApi: libraries.maps,
@@ -1427,15 +1527,19 @@ export default function SeichiMapCompleteClient({
           });
           mapClickListenerRef.current = mapRef.current.addListener(
             "click",
-            (event: any) => {
-              if (!event.latLng) return;
+            (event?: GoogleMapMouseEvent) => {
+              if (!event?.latLng) return;
               const location = mapOverlayRef.current?.findLocationAtLatLng(
                 event.latLng,
               );
               if (location) {
                 event.stop?.();
                 openLocationInfoWindowRef.current(location);
+                return;
               }
+
+              setSelectedLocationId(null);
+              infoWindowRef.current?.close?.();
             },
           );
           mapRef.current.addListener("mousedown", () => {
@@ -1456,9 +1560,9 @@ export default function SeichiMapCompleteClient({
           });
           mapMouseMoveListenerRef.current = mapRef.current.addListener(
             "mousemove",
-            (event: any) => {
+            (event?: GoogleMapMouseEvent) => {
               const mapElement = mapElementRef.current;
-              const mouseEvent = event.domEvent as MouseEvent | undefined;
+              const mouseEvent = event?.domEvent;
               clearHoveredLocationPreview();
 
               if (isMapDraggingRef.current) {
@@ -1466,7 +1570,7 @@ export default function SeichiMapCompleteClient({
                 return;
               }
 
-              if (!event.latLng || !mapElement || !mouseEvent) {
+              if (!event?.latLng || !mapElement || !mouseEvent) {
                 setHoveredLocation(null);
                 return;
               }
@@ -1493,6 +1597,7 @@ export default function SeichiMapCompleteClient({
           mapIdleListenerRef.current = mapRef.current.addListener(
             "idle",
             () => {
+              if (!mapRef.current) return;
               clearHoveredLocationPreview();
               setHoveredLocation(null);
               syncMapViewportToUrl(mapRef.current, {
@@ -1534,6 +1639,7 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     return () => {
       clearHoveredLocationPreview();
+      infoWindowCloseClickListenerRef.current?.remove?.();
       mapIdleListenerRef.current?.remove?.();
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
@@ -1623,6 +1729,18 @@ export default function SeichiMapCompleteClient({
       folder.style.fontWeight = "600";
       folder.style.color = "#868e96";
       content.appendChild(folder);
+
+      if (location.uniqueVisitorCount > 0) {
+        const visitorCount = document.createElement("div");
+        visitorCount.textContent = t("popup.uniqueVisitors", {
+          count: location.uniqueVisitorCount,
+        });
+        visitorCount.style.color = "#2b8a3e";
+        visitorCount.style.fontSize = "12px";
+        visitorCount.style.fontWeight = "700";
+        visitorCount.style.marginTop = "2px";
+        content.appendChild(visitorCount);
+      }
 
       if (visitedItem) {
         const visitedDateLabel = formatVisitedDateLabel(visitedItem.visitedAt);
@@ -2131,38 +2249,14 @@ export default function SeichiMapCompleteClient({
           </Text>
         </Box>
         <Group gap="xs">
-          {isSharedView ? null : isSignedIn ? (
-            <>
-              <Badge variant="light" color="pink" size="lg">
-                {userName}
-              </Badge>
-              <Button
-                variant="light"
-                color="pink"
-                leftSection={<FiShare2 size={16} />}
-                onClick={openShareModal}
-              >
-                {t("share.open")}
-              </Button>
-              <Tooltip label={t("auth.logoutTooltip")}>
-                <Button
-                  variant="light"
-                  color="gray"
-                  leftSection={<FiLogOut size={16} />}
-                  onClick={() => void signOut({ callbackUrl: "/seichi-map" })}
-                >
-                  {t("auth.logout")}
-                </Button>
-              </Tooltip>
-            </>
-          ) : (
+          {!isSharedView && isSignedIn && (
             <Button
-              leftSection={<FiLogIn size={16} />}
-              onClick={() =>
-                void signIn("google", { callbackUrl: "/seichi-map" })
-              }
+              variant="light"
+              color="pink"
+              leftSection={<FiShare2 size={16} />}
+              onClick={openShareModal}
             >
-              {t("auth.loginWithGoogle")}
+              {t("share.open")}
             </Button>
           )}
         </Group>
@@ -2208,7 +2302,7 @@ export default function SeichiMapCompleteClient({
       ) : null}
 
       <Grid gap="md" align="stretch">
-        <Grid.Col span={{ base: 12, xl: 8 }}>
+        <Grid.Col span={{ base: 12, lg: 8 }}>
           <Paper
             withBorder
             radius="md"
@@ -2248,7 +2342,7 @@ export default function SeichiMapCompleteClient({
           </Paper>
         </Grid.Col>
 
-        <Grid.Col span={{ base: 12, xl: 4 }}>
+        <Grid.Col span={{ base: 12, lg: 4 }}>
           <Paper
             withBorder
             radius="md"
@@ -2679,6 +2773,21 @@ export default function SeichiMapCompleteClient({
               ) : (
                 <Alert color="pink" variant="light">
                   {t("alerts.loginRequired")}
+                  <div className="mt-2 -ml-1.5">
+                    {!isSignedIn ? (
+                      <Button
+                        color="pink"
+                        size="xs"
+                        className="ml-2"
+                        leftSection={<FiLogIn size={14} />}
+                        onClick={() =>
+                          void signIn("google", { callbackUrl: "/seichi-map" })
+                        }
+                      >
+                        {t("alerts.login")}
+                      </Button>
+                    ) : null}
+                  </div>
                 </Alert>
               )}
             </Stack>

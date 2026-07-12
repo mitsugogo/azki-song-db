@@ -159,6 +159,7 @@ export default function PlayerSection({
       active: isSharedPlayerActive,
       videoId: sharedVideoId,
       startTime,
+      playerKey,
       onReady: handlePlayerOnReady as (event: YouTubeEvent<any>) => void,
       onStateChange: handleStateChange as (event: YouTubeEvent<any>) => void,
       onError: handlePlayerError as
@@ -168,6 +169,7 @@ export default function PlayerSection({
       isSharedPlayerActive,
       sharedVideoId,
       startTime,
+      playerKey,
       handlePlayerOnReady,
       handleStateChange,
       handlePlayerError,

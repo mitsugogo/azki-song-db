@@ -17,7 +17,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
 import Acknowledgment from "./Acknowledgment";
-import { pageList } from "../pagelists";
 import usePWAInstall from "../hook/usePWAInstall";
 import useSongs from "../hook/useSongs";
 import { formatDate } from "../lib/formatDate";
@@ -47,6 +46,17 @@ type BuildInfo = {
   version?: string;
 };
 
+interface PageItem {
+  name: string;
+  href: string;
+  tooltip?: string;
+}
+
+interface PageCategory {
+  category?: string;
+  items: PageItem[];
+}
+
 function buildBugReportUrl(currentSong: Song | null) {
   const base =
     "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
@@ -69,31 +79,48 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
   const t = useTranslations("DrawerMenu");
   const locale = useLocale();
 
-  const categoryLabelMap: Record<string, string> = {
-    活動の記録: t("categoryActivity"),
-    シェア: t("categoryShare"),
-  };
-
-  const itemLabelMap: Record<string, string> = {
-    "/": t("home"),
-    "/search": t("search"),
-    "/discography": t("discography"),
-    "/activity": t("activity"),
-    "/anniversaries": t("anniversaries"),
-    "/stream-archives": t("archives"),
-    "/seichi-map": t("seichiMapComplete"),
-    "/statistics": t("statistics"),
-    "/data": t("allData"),
-    "/share/my-best-9-songs": t("myBest9Songs"),
-    "/share/where-my-azkichi-began": t("whereMyAzkichiBegan"),
-  };
+  const pageList: PageCategory[] = [
+    {
+      items: [
+        { name: t("home"), href: "/" },
+        { name: t("search"), href: "/search" },
+      ],
+    },
+    {
+      category: t("categoryActivity"),
+      items: [
+        { name: t("discography"), href: "/discography" },
+        { name: t("activity"), href: "/activity" },
+        { name: t("anniversaries"), href: "/anniversaries" },
+        { name: t("allData"), href: "/data" },
+      ],
+    },
+    {
+      category: t("categoryArchive"),
+      items: [
+        { name: t("archives"), href: "/stream-archives" },
+        { name: t("seichiMapComplete"), href: "/seichi-map" },
+        { name: t("statistics"), href: "/statistics" },
+      ],
+    },
+    {
+      category: t("categoryShare"),
+      items: [
+        { name: t("myBest9Songs"), href: "/share/my-best-9-songs" },
+        {
+          name: t("whereMyAzkichiBegan"),
+          href: "/share/where-my-azkichi-began",
+        },
+      ],
+    },
+  ];
 
   const navigation = useMemo<DrawerNavCategory[]>(() => {
     return pageList.map((category) => ({
       ...category,
       items: category.items.map((item) => {
         const originalHref = item.href;
-        const resolvedLabel = itemLabelMap[originalHref] ?? item.name;
+        const resolvedLabel = item.name;
         return {
           ...item,
           label: resolvedLabel,
@@ -151,7 +178,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                     size="xs"
                     className="ml-3 mt-6 mb-2 font-semibold uppercase"
                   >
-                    {categoryLabelMap[category.category] ?? category.category}
+                    {category.category}
                   </Text>
                 )}
                 {category.items.map((item) => {
@@ -248,28 +275,6 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
                   2025.11.19 (Wed.) - PIA ARENA MM
                 </div>{" "}
                 AZKi SOLO LiVE 2025 &quot;Departure&quot;
-                <LiaExternalLinkAltSolid className="ml-3 -mt-1 inline text-right" />
-              </Link>
-            </Tooltip>
-
-            <Tooltip
-              arrowOffset={10}
-              arrowSize={4}
-              label={t("mapTooltip")}
-              withArrow
-              position="top"
-            >
-              <Link
-                href="https://note.com/yspione/n/nccf2fbbdc0dc"
-                target="_blank"
-                className="block rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white"
-                onClick={onClose}
-              >
-                <div className="text-xs text-gray-400 dark:text-light-gray-500">
-                  {t("mapSubtitle")}
-                </div>{" "}
-                <FaMapMarkerAlt className="mr-1 inline text-xl" />
-                {t("mapTitle")}
                 <LiaExternalLinkAltSolid className="ml-3 -mt-1 inline text-right" />
               </Link>
             </Tooltip>

@@ -114,7 +114,11 @@ const useSongs = (options: UseSongsOptions = {}) => {
 
       setAllSongs([...dataCopy]);
 
-      const tags = [...new Set(dataCopy.flatMap((song) => song.tags))].sort();
+      const tags = [
+        ...new Set(
+          dataCopy.flatMap((song) => [...song.tags, ...(song.song_tags ?? [])]),
+        ),
+      ].sort();
       const songTitles = [
         ...new Set(dataCopy.map((song) => song.title)),
       ].sort();

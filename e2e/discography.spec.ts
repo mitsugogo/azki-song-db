@@ -150,36 +150,62 @@ test.describe("Discography page", () => {
   test("album page groups AniAZ with original MV across album boundary", async ({
     page,
   }) => {
-    const songs: any[] = getCachedSongs();
-    const nekoVariants = songs.filter(
-      (song) =>
-        song.title === "猫ならばいける" &&
-        song.artist === "AZKi" &&
-        (song.tags ?? []).some((tag: string) => tag.includes("MV")),
-    );
-    const originalMv = nekoVariants.find(
-      (song) => !(song.tags ?? []).includes("アニAZ"),
-    );
-    const animatedMv = nekoVariants.find((song) =>
-      (song.tags ?? []).includes("アニAZ"),
-    );
-    test.skip(
-      !originalMv || !animatedMv,
-      "猫ならばいける MV/AniAZ fixtures missing",
-    );
+    const songTemplate = getCachedSongs()[0] ?? {};
+    const originalMv = {
+      ...songTemplate,
+      title: "猫ならばいける",
+      artist: "AZKi",
+      album: "Re:Creating world",
+      video_id: "neko-original-mv",
+      slugv2: "neko-original-mv",
+      tags: ["オリ曲MV"],
+      source_order: 2,
+      broadcast_at: "2024-01-01T00:00:00.000Z",
+    };
+    const animatedMv = {
+      ...songTemplate,
+      title: "猫ならばいける",
+      artist: "AZKi",
+      album: "",
+      video_id: "neko-animated-mv",
+      slugv2: "neko-animated-mv",
+      tags: ["オリ曲MV", "アニAZ"],
+      source_order: 1,
+      broadcast_at: "2024-01-02T00:00:00.000Z",
+    };
+    const unrelatedSong = {
+      ...songTemplate,
+      title: "無関係な歌枠",
+      artist: "AZKi",
+      album: "",
+      video_id: "unrelated-live",
+      slugv2: "unrelated-live",
+      tags: ["歌枠"],
+      source_order: 3,
+      broadcast_at: "2024-01-03T00:00:00.000Z",
+    };
 
-    await page.goto(
-      `/discography/album/${encodeURIComponent("猫ならばいける")}`,
-      {
-        waitUntil: "domcontentloaded",
-      },
-    );
+    await page.unroute("**/api/songs**");
+    await page.route("**/api/songs**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([originalMv, animatedMv, unrelatedSong]),
+      });
+    });
+
+    await page.goto("/discography/originals", {
+      waitUntil: "domcontentloaded",
+    });
+    await waitForDiscographyTabs(page);
+    await page.getByLabel(/Group by album|アルバムごとに表示/).click();
+    await page.locator('[title*="猫ならばいける"]').first().click();
 
     await expect(
       page.getByRole("heading", { name: "猫ならばいける" }),
     ).toBeVisible({ timeout: 10000 });
 
-    const rows = page.locator("section article").filter({
+    const rows = page.getByRole("row").filter({
       has: page.getByRole("link", { name: "猫ならばいける" }),
     });
     await expect(rows).toHaveCount(1);
@@ -188,17 +214,13 @@ test.describe("Discography page", () => {
     await expect(row.getByText("MV", { exact: true })).toBeVisible();
     await expect(row.getByText("アニAZ", { exact: true })).toBeVisible();
     await expect(
-      row.locator(
+      page.locator(
         `a[href="https://www.youtube.com/watch?v=${originalMv.video_id}"]`,
       ),
     ).toBeVisible();
 
     await row.getByText("アニAZ", { exact: true }).click();
-    await expect(
-      row.locator(
-        `a[href="https://www.youtube.com/watch?v=${animatedMv.video_id}"]`,
-      ),
-    ).toBeVisible();
+    await expect(row.getByRole("radio", { name: "アニAZ" })).toBeChecked();
   });
 
   test("album toggle off opens Neko release variants without album navigation", async ({
@@ -283,10 +305,22 @@ test.describe("Discography page", () => {
       `/discography/originals/${encodeURIComponent(nekoAniAz.slugv2 ?? nekoAniAz.slug)}`,
       { waitUntil: "domcontentloaded" },
     );
+    // nekoAniAz が実アルバムに属する場合はそのアルバムページへ、仮想ページが存在する場合は曲名ベースのURLへ
+    const nekoAlbumSlug = (nekoAniAz.album || "")
+      .normalize("NFKC")
+      .trim()
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const expectedNekoAlbumHref = nekoAlbumSlug
+      ? `/discography/album/${encodeURIComponent(nekoAlbumSlug)}`
+      : `/discography/album/${encodeURIComponent("猫ならばいける")}`;
     await expect(
-      page.locator(
-        `a[href="/discography/album/${encodeURIComponent("猫ならばいける")}"]`,
-      ),
+      page
+        .getByLabel("Breadcrumb")
+        .locator(`a[href="${expectedNekoAlbumHref}"]`),
     ).toBeVisible({ timeout: 10000 });
   });
 

@@ -244,7 +244,9 @@ export default function ClientPage({
   const isCover = isCoverSong(song);
   const singerSeparator = locale.startsWith("ja") ? "、" : ", ";
   const breadcrumbAlbumTitle =
-    currentVariantGroup && currentVariantGroup.variants.length > 1
+    currentVariantGroup &&
+    currentVariantGroup.variants.length > 1 &&
+    currentVariantGroup.variants.some((v) => !v.album?.trim())
       ? currentVariantGroup.representative.title?.trim()
       : song.album?.trim();
 

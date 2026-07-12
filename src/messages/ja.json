@@ -19,7 +19,7 @@
     "home": "HOME",
     "search": "検索",
     "discography": "Discography",
-    "activity": "活動記録",
+    "activity": "アクティビティ",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
     "seichiMapComplete": "聖地マップ",
@@ -30,7 +30,8 @@
     "mapTitle": "AZKi聖地マップ",
     "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。",
     "whereMyAzkichiBegan": "あなたのあずきちはどこから？",
-    "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？"
+    "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？",
+    "categoryArchive": "保管庫"
   },
   "SearchInput": {
     "search": "検索",
@@ -58,6 +59,7 @@
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "ランダムで楽曲を再生します",
       "playlist": "プレイリスト",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "songList": "楽曲一覧",
       "songsUnit": "曲",
       "songsUnit_w/o_en": "曲",
@@ -84,10 +86,20 @@
       "cover": "カバー曲",
       "collaboration": "ユニット・ゲスト参加曲",
       "karaoke": "歌枠",
+      "specialLive": "記念ライブ",
       "collabKaraoke": "コラボ歌枠",
       "shorts": "楽曲紹介shorts",
+      "ballad": "バラード",
+      "springSongs": "春ソング",
+      "summerSongs": "夏ソング",
+      "winterSongs": "冬ソング",
+      "animeSongs": "アニソン",
+      "hololiveSongs": "ホロライブ曲",
+      "vocaloidSongs": "VOCALOID",
       "groupMode": "モード",
-      "groupTheme": "テーマ"
+      "groupTheme": "テーマ",
+      "groupScene": "シーン",
+      "groupGenre": "ジャンル"
     },
     "nowPlayingSongInfo": {
       "views": "{count} 回視聴",
@@ -158,6 +170,7 @@
       "menu": "メニュー",
       "removeFromFavorites": "お気に入りから削除",
       "addToFavorites": "お気に入りに追加",
+      "signInRequired": "この機能を使うにはサインインが必要です",
       "shareCurrentSong": "現在の楽曲をシェア"
     }
   },
@@ -591,6 +604,18 @@
     "updatedLabel": "更新日:",
     "copyUrl": "共有用URLコピー",
     "copied": "コピーしました",
+    "visibility": {
+      "label": "共有設定",
+      "public": "公開",
+      "unlisted": "URLを知っている人にのみ公開",
+      "private": "非公開"
+    },
+    "shared": {
+      "songCount": "全{count}曲",
+      "play": "このプレイリストを再生",
+      "song": "曲名",
+      "artist": "アーティスト"
+    },
     "head": {
       "play": "再生",
       "index": "#",
@@ -631,6 +656,7 @@
       "title": "曲名",
       "artist": "アーティスト",
       "tag": "タグ",
+      "songTag": "楽曲タグ",
       "singer": "歌った人",
       "collab": "コラボ・ユニット",
       "relatedArtists": "AZKiさんの音楽遍歴(2026/04/01)",
@@ -883,7 +909,8 @@
       "loginWithGoogle": "Googleでログイン"
     },
     "alerts": {
-      "loginRequired": "Googleでログインすると訪問ログを保存できます。"
+      "loginRequired": "Googleでログインすると訪問ログを保存できます。",
+      "login": "Googleでサインイン"
     },
     "share": {
       "open": "共有",
@@ -944,6 +971,7 @@
       "loadMore": "さらに{count}件表示"
     },
     "popup": {
+      "uniqueVisitors": "{count}人が訪問済",
       "visitedAt": "{date} に訪問済",
       "visited": "訪問済",
       "youtube": "YouTube",
@@ -1183,6 +1211,18 @@
     "previousMonth": "<< {month}",
     "nextMonth": "{month} >>",
     "duration": "{years}年{months}ヶ月{days}日",
+    "journey": {
+      "ariaLabel": "AZKiと開拓者が歩んできた活動年表。活動{days}日目、デビューから{duration}経過",
+      "daysLabel": "歩んできた日々",
+      "daysValue": "{days}日目",
+      "duration": "デビューから {duration}",
+      "debut": "デビュー",
+      "today": "今日",
+      "pioneersAppear": "開拓者の姿が誕生",
+      "pioneersAppearCompact": "開拓者誕生",
+      "millionSubscribers": "100万人達成",
+      "millionSubscribersCompact": "100万人"
+    },
     "yearCards": {
       "recordedSongsLabel": "収録楽曲",
       "sungInStreamsLabel": "歌枠で歌った曲数",
@@ -1292,7 +1332,16 @@
     "anniversaryLive": "記念ライブ",
     "guestAppearance": "ゲスト出演",
     "azkiOnly": "AZKiさんのみ",
-    "ballad": "しっとり",
+    "ballad": "バラード",
+    "vocaloid": "ボカロ",
+    "jPop": "J-POP",
+    "rock": "ロック",
+    "anisong": "アニソン",
+    "hololiveSongs": "ホロライブ楽曲",
+    "springSongs": "春ソング",
+    "summerSongs": "夏ソング",
+    "autumnSongs": "秋ソング",
+    "winterSongs": "冬ソング",
     "acoustic": "アコースティック・生演奏"
   },
   "SearchHelp": {
@@ -1351,6 +1400,22 @@
     "hint": "問題が続く場合は、ホームに戻って別のページからアクセスしてみてください。",
     "retry": "再試行",
     "backToHome": "ホームに戻る"
+  },
+  "Account": {
+    "menuLabel": "アカウントメニュー",
+    "guest": "ゲスト",
+    "signIn": "Googleでサインイン",
+    "signOut": "サインアウト",
+    "language": "言語: {language}",
+    "theme": {
+      "light": "ライトモード",
+      "dark": "ダークモード",
+      "auto": "システム設定"
+    },
+    "signInRequiredTitle": "サインインが必要です",
+    "signInRequiredDescription": "プレイリストとお気に入りはGoogleアカウントに保存されます。",
+    "libraryErrorTitle": "ライブラリを読み込めませんでした",
+    "libraryErrorMessage": "旧データは削除していません。時間をおいて再読み込みしてください。"
   },
   "ShareModal": {
     "title": "シェア",

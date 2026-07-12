@@ -134,7 +134,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
       title:
         "min-w-0 text-base font-bold leading-7 text-gray-950 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "w-32 sm:w-36",
-      description: "font-medium text-gray-700 dark:text-gray-200",
+      description: "font-medium text-gray-700 dark:text-gray-100",
     };
   }
 
@@ -144,7 +144,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
       title:
         "min-w-0 text-sm font-semibold leading-6 text-gray-900 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "w-28 sm:w-32",
-      description: "font-medium text-gray-600 dark:text-gray-300",
+      description: "font-medium text-gray-600 dark:text-gray-100",
     };
   }
 
@@ -154,7 +154,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
       title:
         "min-w-0 text-sm font-semibold leading-6 text-gray-800 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "",
-      description: "text-xs text-gray-600 dark:text-gray-300",
+      description: "text-xs text-gray-600 dark:text-gray-200",
     };
   }
 
@@ -163,7 +163,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
     title:
       "min-w-0 text-xs font-medium leading-5 text-gray-700 transition hover:text-primary dark:text-gray-200 dark:hover:text-pink-200",
     thumbnail: "w-16 opacity-80 sm:w-20",
-    description: "text-xs text-gray-500 dark:text-gray-400",
+    description: "text-xs text-gray-500 dark:text-gray-200",
   };
 }
 
@@ -358,10 +358,10 @@ export default function ActivityTimelineSection({
           </div>
           {showArchivesLink ? (
             <Link
-              href="/stream-archives"
+              href="/activity"
               className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
             >
-              {tDrawer("archives")}
+              {tDrawer("activity")}
               <LuArrowRight className="shrink-0" />
             </Link>
           ) : null}
@@ -391,7 +391,7 @@ export default function ActivityTimelineSection({
             <Timeline
               active={items.length - 1}
               bulletSize={30}
-              color="pink"
+              color="azki"
               lineWidth={2}
             >
               {items.map((item) => {
@@ -531,7 +531,10 @@ export default function ActivityTimelineSection({
                             </Text>
                           ) : null}
                           {activitySingerAvatars.length > 0 ? (
-                            <Avatar.Group className="mt-2" spacing="xxs">
+                            <Avatar.Group
+                              className="mt-2 flex-wrap gap-y-1"
+                              spacing="xxs"
+                            >
                               {activitySingerAvatars.map((avatar) => {
                                 const image = (
                                   <Avatar

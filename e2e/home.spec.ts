@@ -49,8 +49,7 @@ test.describe("Home page", () => {
     });
     await searchInput.fill(query);
     await searchInput.press("Enter");
-    await searchInput.press("Escape");
-    await page.getByRole("button", { name: "検索する" }).click();
+    await searchInput.press("Enter");
 
     await expect(page).toHaveURL(/\/search\?q=/);
     await expect(page.getByRole("heading", { name: "検索結果" })).toBeVisible();

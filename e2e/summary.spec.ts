@@ -47,6 +47,13 @@ test.describe("Summary pages", () => {
         level: 1,
       });
       await expect(heading).toBeVisible();
+      await expect(page.getByText("歩んできた日々")).toBeVisible();
+      await expect(page.getByText("デビュー / ルートα")).toBeVisible();
+      await expect(page.getByText("ルートβ", { exact: true })).toBeVisible();
+      await expect(page.getByText("ルートγ", { exact: true })).toBeVisible();
+      await expect(page.getByText("開拓者の姿が誕生")).toBeVisible();
+      await expect(page.getByText("100万人達成")).toBeVisible();
+      await expect(page.getByText("今日", { exact: true })).toBeVisible();
     });
 
     test("displays year links", async ({ page }) => {

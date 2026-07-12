@@ -38,6 +38,7 @@ export default function useMainPlayerControls({
   const lastPlayerReadyAtRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
   const initialStartSeekRef = useRef<number | null>(null);
+  const initialPlaybackTargetRef = useRef<number | null>(null);
   const initialStartSeekRetryCountRef = useRef(0);
   const membersOnlyReloadAttemptedSongKeyRef = useRef<string | null>(null);
   const membersOnlyLoadVideoByIdAttemptedSongKeyRef = useRef<string | null>(
@@ -330,6 +331,10 @@ export default function useMainPlayerControls({
         Number.isFinite(requestedStartTime) &&
         requestedStartTime > 0;
 
+      initialPlaybackTargetRef.current = shouldSeekToRequestedStart
+        ? requestedStartTime
+        : null;
+
       // 上の workaround が有効なケースでは、従来の初期 seek と競合すると
       // 0:00 へ落ちたりプレイヤーがチカつくため、初期位置合わせは loadVideoById 側に一本化する。
       let shouldUseLoadVideoByIdWorkaround = false;
@@ -430,7 +435,25 @@ export default function useMainPlayerControls({
    */
   const handlePlayerStateChange = useCallback(
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
-      originalHandleStateChange(event);
+      const currentTime =
+        typeof event.target.getCurrentTime === "function"
+          ? event.target.getCurrentTime()
+          : NaN;
+      const initialPlaybackTarget =
+        initialPlaybackTargetRef.current ??
+        Number(startTime ?? currentSong?.start ?? 0);
+      const endedBeforeInitialSeek =
+        event.data === 0 &&
+        initialPlaybackTarget !== null &&
+        Number.isFinite(initialPlaybackTarget) &&
+        initialPlaybackTarget > 0 &&
+        typeof currentTime === "number" &&
+        Number.isFinite(currentTime) &&
+        currentTime < initialPlaybackTarget - 1;
+
+      if (!endedBeforeInitialSeek) {
+        originalHandleStateChange(event);
+      }
       updatePlayerSnapshot(event.target);
 
       const requestedStartTime = initialStartSeekRef.current;
@@ -442,11 +465,6 @@ export default function useMainPlayerControls({
         Number.isFinite(requestedStartTime) &&
         requestedStartTime > 0
       ) {
-        const currentTime =
-          typeof event.target.getCurrentTime === "function"
-            ? event.target.getCurrentTime()
-            : NaN;
-
         if (
           typeof currentTime === "number" &&
           Number.isFinite(currentTime) &&
@@ -465,6 +483,7 @@ export default function useMainPlayerControls({
           currentTime >= requestedStartTime - 1
         ) {
           initialStartSeekRef.current = null;
+          initialPlaybackTargetRef.current = null;
           initialStartSeekRetryCountRef.current = 0;
           zeroStartSeekRetryAttemptedSongKeyRef.current = null;
         } else if (
@@ -528,6 +547,7 @@ export default function useMainPlayerControls({
       currentSong,
       globalPlayer,
       originalHandleStateChange,
+      startTime,
       updatePlayerSnapshot,
     ],
   );

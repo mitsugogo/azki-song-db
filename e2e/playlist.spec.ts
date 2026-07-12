@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { setupApiMocks } from "./mocks";
+import { setupApiMocks, setupAuthenticatedApiMocks } from "./mocks";
 
 test.describe("Playlist page", () => {
   test.describe.configure({ mode: "serial" });
@@ -47,6 +47,10 @@ test.describe("プレイリスト機能", () => {
   const playlistName = `e2e-playlist-${Date.now()}`;
   const songsToAdd = [0, 1, 2]; // 最初の3曲を追加
 
+  test.beforeEach(async ({ page }) => {
+    await setupAuthenticatedApiMocks(page);
+  });
+
   test("追加・再生", async ({ page }) => {
     // トップページへ
     await page.goto("/watch");
@@ -57,7 +61,11 @@ test.describe("プレイリスト機能", () => {
     await page.waitForTimeout(1000);
 
     // プレイリストボタンをクリック
-    await page.getByRole("button", { name: "プレイリストに追加" }).click();
+    const addToPlaylistButton = page.getByRole("button", {
+      name: "プレイリストに追加",
+    });
+    await expect(addToPlaylistButton).toBeEnabled({ timeout: 10000 });
+    await addToPlaylistButton.click();
     await page.waitForTimeout(1000);
 
     // 「プレイリストを作成」ボタンをクリック

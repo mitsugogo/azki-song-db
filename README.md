@@ -140,6 +140,7 @@ Major data APIs in this project return the `Vercel-Cache-Tag` response header.
 - `/api/events`: `dataset:core,events,events:list`
 - `/api/anniversaries`: `dataset:core,milestones,milestones:list`
 - `/api/stat/views`: `stat:views,stat:views:list`
+- `/api/stat/views/releases`: `stat:views,stat:views:releases`
 - `/api/stat/views/[video_id]`: `stat:views,stat:views:single`
 
 ## License

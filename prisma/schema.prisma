@@ -12,6 +12,12 @@ datasource db {
   provider = "mysql"
 }
 
+enum PlaylistVisibility {
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
 model SeichiMapVisited {
   /// レコードの一意識別子
   id           String   @id
@@ -29,6 +35,9 @@ model SeichiMapVisited {
   url          String?
   /// 外部ロケーション識別子
   locationId   String?
+
+  @@index([userId, visitedAt], map: "SeichiMapVisited_user_visited_idx")
+  @@index([locationId, userId], map: "SeichiMapVisited_location_visitor_idx")
 }
 
 model SeichiMapShare {
@@ -46,7 +55,7 @@ model SeichiMapShare {
 
 model Statistics {
   id           String   @id @default(uuid()) @db.Char(36)
-  videoId      String?  @db.VarChar(50) @map("video_id")
+  videoId      String?  @map("video_id") @db.VarChar(50)
   datetime     DateTime
   title        String?  @db.VarChar(255)
   category     String?  @db.VarChar(50)
@@ -55,6 +64,57 @@ model Statistics {
   commentCount Int?     @map("comment_count")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  @@map("statistics")
   @@index([videoId, datetime])
+  @@index([category, datetime, videoId], map: "Statistics_category_datetime_video_idx")
+  @@map("statistics")
+}
+
+model UserPlaylist {
+  id         String                 @id @default(uuid()) @db.Char(36)
+  userId     String                 @db.VarChar(255)
+  name       String                 @db.VarChar(200)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  visibility PlaylistVisibility     @default(PRIVATE)
+  entries    UserPlaylistEntry[]
+  imports    LegacyPlaylistImport[]
+
+  @@unique([userId, name], map: "UserPlaylist_user_name_key")
+  @@index([userId, updatedAt], map: "UserPlaylist_user_updated_idx")
+}
+
+model UserPlaylistEntry {
+  id         String       @id @default(uuid()) @db.Char(36)
+  playlistId String       @db.Char(36)
+  videoId    String       @db.VarChar(100)
+  start      String       @db.VarChar(32)
+  position   Int
+  playlist   UserPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, videoId, start], map: "UserPlaylistEntry_song_key")
+  @@unique([playlistId, position], map: "UserPlaylistEntry_position_key")
+}
+
+model UserFavorite {
+  id        String   @id @default(uuid()) @db.Char(36)
+  userId    String   @db.VarChar(255)
+  videoId   String   @db.VarChar(100)
+  start     String   @db.VarChar(32)
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId, start], map: "UserFavorite_song_key")
+  @@unique([userId, position], map: "UserFavorite_position_key")
+}
+
+model LegacyPlaylistImport {
+  id          String        @id @default(uuid()) @db.Char(36)
+  userId      String        @db.VarChar(255)
+  fingerprint String        @db.Char(64)
+  playlistId  String?       @db.Char(36)
+  importedAt  DateTime      @default(now())
+  playlist    UserPlaylist? @relation(fields: [playlistId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, fingerprint], map: "LegacyPlaylistImport_user_fingerprint_key")
+  @@index([playlistId], map: "LegacyPlaylistImport_playlist_idx")
 }
