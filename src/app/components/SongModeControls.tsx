@@ -7,6 +7,8 @@ import usePlaylists from "../hook/usePlaylists";
 import {
   getSongModeGroupLabels,
   getSongModeItemLabel,
+  getSongModeSearchTerm,
+  renderSongModeIcon,
   SONG_MODE_MENU_ITEMS,
   type SongModeGroup,
   type SongModeMenuItem,
@@ -15,7 +17,7 @@ import {
 
 type SongModeControlsProps = {
   currentSongMode: SongMode;
-  onSelectSongMode: (mode: SongMode) => void;
+  onSelectSongMode: (searchTerm: string) => void;
   onSurprise: () => void;
   onPlaylist: () => void;
   variant?: "desktop" | "mobile";
@@ -52,18 +54,19 @@ export default function SongModeControls({
   const songModeGroupedItems = {
     mode: groupedSongModeMenuItems.filter((item) => item.group === "mode"),
     theme: groupedSongModeMenuItems.filter((item) => item.group === "theme"),
+    scene: groupedSongModeMenuItems.filter((item) => item.group === "scene"),
+    genre: groupedSongModeMenuItems.filter((item) => item.group === "genre"),
   } as const;
   const songModeGroupLabels = getSongModeGroupLabels(tSongMode);
   const currentSongModeItem =
     songModeMenuItems.find((item) => item.mode === currentSongMode) ??
     allSongModeItem;
-  const CurrentSongModeIcon = currentSongModeItem.icon;
 
   return (
     <div className={`flex flex-col gap-1.25 ${rowMarginClassName}`}>
       <Menu
         withinPortal={false}
-        width={220}
+        width={variant === "mobile" ? 320 : 440}
         position="bottom-end"
         withArrow
         shadow="md"
@@ -73,7 +76,10 @@ export default function SongModeControls({
             aria-label={`${tSongMode("selectMode")}: ${getSongModeItemLabel(currentSongModeItem, tSongMode)}`}
             className={`${buttonBaseClassName} w-full min-w-0 shadow-gray-400/20 dark:shadow-none ${textClassName}`}
             color={currentSongModeItem.color}
-            leftSection={<CurrentSongModeIcon className="h-4 w-4" />}
+            leftSection={renderSongModeIcon(
+              currentSongModeItem.icon,
+              "h-4 w-4",
+            )}
             rightSection={<LuChevronDown className="h-4 w-4" />}
             justify="space-between"
           >
@@ -85,8 +91,10 @@ export default function SongModeControls({
 
         <Menu.Dropdown>
           <Menu.Item
-            leftSection={<allSongModeItem.icon className="h-4 w-4" />}
-            onClick={() => onSelectSongMode(allSongModeItem.mode)}
+            leftSection={renderSongModeIcon(allSongModeItem.icon, "h-4 w-4")}
+            onClick={() =>
+              onSelectSongMode(getSongModeSearchTerm(allSongModeItem.mode))
+            }
           >
             {getSongModeItemLabel(allSongModeItem, tSongMode)}
           </Menu.Item>
@@ -101,20 +109,23 @@ export default function SongModeControls({
               return (
                 <div key={group}>
                   <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
-                  {items.map((item) => {
-                    const ModeIcon = item.icon;
-
-                    return (
-                      <Menu.Item
-                        key={item.mode}
-                        leftSection={<ModeIcon className="h-4 w-4" />}
-                        onClick={() => onSelectSongMode(item.mode)}
-                      >
-                        {getSongModeItemLabel(item, tSongMode)}
-                      </Menu.Item>
-                    );
-                  })}
-                  {group === "mode" && songModeGroupedItems.theme.length > 0 ? (
+                  <div className="grid grid-cols-2">
+                    {items.map((item) => {
+                      return (
+                        <Menu.Item
+                          key={item.mode}
+                          leftSection={renderSongModeIcon(item.icon, "h-4 w-4")}
+                          onClick={() =>
+                            onSelectSongMode(getSongModeSearchTerm(item.mode))
+                          }
+                        >
+                          {getSongModeItemLabel(item, tSongMode)}
+                        </Menu.Item>
+                      );
+                    })}
+                  </div>
+                  {group !== "genre" &&
+                  songModeGroupedItems.genre.length > 0 ? (
                     <Menu.Divider />
                   ) : null}
                 </div>

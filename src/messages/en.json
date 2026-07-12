@@ -89,8 +89,17 @@
       "specialLive": "Special Live",
       "collabKaraoke": "Collab Karaoke",
       "shorts": "Song Intro Shorts",
+      "ballad": "Ballads",
+      "springSongs": "Spring songs",
+      "summerSongs": "Summer songs",
+      "winterSongs": "Winter songs",
+      "animeSongs": "Anime Songs",
+      "hololiveSongs": "hololive Songs",
+      "vocaloidSongs": "Vocaloid Songs",
       "groupMode": "Mode",
       "groupTheme": "Theme",
+      "groupScene": "Scene",
+      "genre": "Genre",
       "surpriseTooltip": "Play songs randomly"
     },
     "nowPlayingSongInfo": {

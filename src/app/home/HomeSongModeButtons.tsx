@@ -5,7 +5,10 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
-import { SONG_MODE_MENU_ITEMS } from "../components/songModeMenu";
+import {
+  renderSongModeIcon,
+  SONG_MODE_MENU_ITEMS,
+} from "../components/songModeMenu";
 import { baseUrl } from "../config/siteConfig";
 import { showAppNotification } from "../lib/notifications";
 
@@ -35,7 +38,7 @@ const SONG_MODES = [
     copiedKey: "collaborationSongsLinkCopied",
   },
   {
-    mode: "tag:歌枠",
+    mode: "singing-stream",
     href: "/watch?q=tag:歌枠",
     shareUrl: new URL("/watch?q=tag:%E6%AD%8C%E6%9E%A0", baseUrl).toString(),
     color: "gray",
@@ -53,7 +56,6 @@ export const HomeSongModeButtons = memo(function HomeSongModeButtons() {
         const menuItem =
           SONG_MODE_MENU_ITEMS.find(({ mode }) => mode === item.mode) ??
           SONG_MODE_MENU_ITEMS[0];
-        const Icon = menuItem.icon;
 
         return (
           <Button.Group key={item.mode} className="w-full">
@@ -61,7 +63,7 @@ export const HomeSongModeButtons = memo(function HomeSongModeButtons() {
               component={Link}
               href={item.href}
               className="min-w-0 flex-1"
-              leftSection={<Icon className="h-4 w-4" />}
+              leftSection={renderSongModeIcon(menuItem.icon, "h-4 w-4")}
               color={item.color}
               variant="light"
             >

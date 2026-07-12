@@ -89,8 +89,17 @@
       "specialLive": "記念ライブ",
       "collabKaraoke": "コラボ歌枠",
       "shorts": "楽曲紹介shorts",
+      "ballad": "バラード",
+      "springSongs": "春ソング",
+      "summerSongs": "夏ソング",
+      "winterSongs": "冬ソング",
+      "animeSongs": "アニソン",
+      "hololiveSongs": "ホロライブ曲",
+      "vocaloidSongs": "VOCALOID",
       "groupMode": "モード",
-      "groupTheme": "テーマ"
+      "groupTheme": "テーマ",
+      "groupScene": "シーン",
+      "groupGenre": "ジャンル"
     },
     "nowPlayingSongInfo": {
       "views": "{count} 回視聴",
