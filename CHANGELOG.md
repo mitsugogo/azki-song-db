@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.15.0](https://github.com/mitsugogo/azki-song-db/compare/v2.14.2...v2.15.0) (2026-07-12)
+
+
+### Features
+
+* サイト全体をGoogleアカウントサインイン対応 ([272451d](https://github.com/mitsugogo/azki-song-db/commit/272451d25398d4611c0d9b3a3ccc98b0a9763d26))
+* 楽曲タグ機能を追加 ([2898d5a](https://github.com/mitsugogo/azki-song-db/commit/2898d5ada01eafba4e8d3627b8e4bf4caac7e63f))
+* **聖地マップ:** 地点別訪問者数を表示 ([3c4f9e0](https://github.com/mitsugogo/azki-song-db/commit/3c4f9e0ec1959ed5899c6777c0444a5deba69e83))
+* 記念ライブモードを追加 ([975fecd](https://github.com/mitsugogo/azki-song-db/commit/975fecd75fd1651902d217b004f858bbfc2128bf))
+
+
+### Bug Fixes
+
+* **player:** ミニプレイヤー遷移で0秒に戻される不具合を修正 ([a802563](https://github.com/mitsugogo/azki-song-db/commit/a80256353bd10d921f8b6b3962fdedeb4e3108cd))
+* **player:** 動画ロードが遅い時にシークがおかしくなる不具合を修正 ([0c67667](https://github.com/mitsugogo/azki-song-db/commit/0c67667df9db96e019d59927e7d0847319d2af02))
+* **player:** 稀に動画コントロールバーが出ない場合があったのを修正 ([0547965](https://github.com/mitsugogo/azki-song-db/commit/05479655d7ba1a3915e6bb6ba7b2d82ed826eca1))
+* **seichi-map:** 同一地点名を複数回カウントしてまっているのを修正 ([4418d76](https://github.com/mitsugogo/azki-song-db/commit/4418d765f7bdb4420d14ddcef21ad0018c7b1314))
+* TOPの背景動画が再生できない場合に背景にfallback ([81fb0ce](https://github.com/mitsugogo/azki-song-db/commit/81fb0cef13ee9698782540a9ceee371bef49e1f5))
+* **watch:** 更新直後にsongsを特定出来なかった場合があったのを修正 ([ea3acaf](https://github.com/mitsugogo/azki-song-db/commit/ea3acafbc20573f4bb82dde67a32125648291aab))
+* **再生数:** 再生リンクを修正 ([9ea3df3](https://github.com/mitsugogo/azki-song-db/commit/9ea3df37a2681a6f0ae31c8f811730bb0028ac8a))
+
 ### [2.14.2](https://github.com/mitsugogo/azki-song-db/compare/v2.14.1...v2.14.2) (2026-07-09)
 
 
