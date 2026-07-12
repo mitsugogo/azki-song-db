@@ -1103,24 +1103,9 @@ export default function SeichiMapCompleteClient({
     return map;
   }, [visited]);
 
-  const visitedByLocationName = useMemo(() => {
-    const map = new Map<string, VisitedItem>();
-    visited.forEach((item) => {
-      if (item.locationName) {
-        map.set(item.locationName, item);
-      }
-    });
-    return map;
-  }, [visited]);
-
   const getVisitedItemForLocation = useCallback(
-    (location: LocationOption) => {
-      return (
-        visitedByLocationId.get(location.id) ??
-        visitedByLocationName.get(location.name)
-      );
-    },
-    [visitedByLocationId, visitedByLocationName],
+    (location: LocationOption) => visitedByLocationId.get(location.id),
+    [visitedByLocationId],
   );
 
   const isLocationVisited = useCallback(
