@@ -44,6 +44,18 @@ export const theme = createTheme({
       "#7b594e",
       "#5d4037",
     ],
+    azki: [
+      "#ffeaf7",
+      "#fcd4e8",
+      "#f3a7cd",
+      "#ec77b1",
+      "#e55099",
+      "#e2378b",
+      "#e12883",
+      "#d11c76",
+      "#b31264",
+      "#9e0157",
+    ],
   },
   components: {
     Badge: {
