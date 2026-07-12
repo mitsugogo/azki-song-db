@@ -324,8 +324,12 @@ body {
   .dark\:bg-azki-gradient:where(.dark, .dark *) {
     background-attachment: fixed;
     background-image:
-      radial-gradient(circle at top, rgba(190, 24, 93, 0.2), transparent 34%),
-      linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      radial-gradient(
+        ellipse 75% 14rem at 50% -5rem,
+        rgba(190, 24, 93, 0.2),
+        transparent 100%
+      ),
+      linear-gradient(var(--mantine-color-dark-9), var(--mantine-color-dark-9));
   }
 
   /* グラスモーフィズムカード */
