@@ -19,6 +19,7 @@
     "home": "HOME",
     "search": "Search",
     "discography": "Discography",
+    "journey": "AZKi Music Journey",
     "activity": "Activity",
     "anniversaries": "Anniversaries",
     "archives": "Stream Archives",
@@ -1269,6 +1270,46 @@
   },
   "Footer": {
     "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
+  },
+  "Journey": {
+    "metadata": {
+      "title": "AZKi Music Journey",
+      "description": "Follow AZKi's journey through the activity timeline, original-song releases, and selected LIVE or project streams."
+    },
+    "hero": {
+      "subtitle": "A journey through songs and memories",
+      "start": "Begin the journey"
+    },
+    "chapterDescription": "This phase is led by {milestones} activity-timeline records, with {songs} original-song releases and {archives} LIVE or project streams as supporting context.",
+    "chapterDescriptions": {
+      "alpha": "AZKi's first step as Virtual Diva. Through songs and streams, this is the route where she and the Pioneers nurtured AZKi's music from its roots.",
+      "beta": "Her activities once had a set ending. After meeting the Pioneers, she chose to continue. Joining hololive Generation 0 broadened her stage, while new friends and challenges carried AZKi's expression even farther.",
+      "gamma": "The present, where every step so far becomes strength as AZKi continues to refresh both her music and everyday life. Since discovering GeoGuessr, she has continued to change dramatically, journeying toward new scenery together with the Pioneers."
+    },
+    "representativeSong": "Original song from this phase",
+    "representativeSongsTitle": "Representative song",
+    "timelineTitle": "Activity timeline",
+    "counts": {
+      "songs": "Original songs",
+      "archives": "LIVE / projects",
+      "videos": "Videos",
+      "milestones": "Activity records"
+    },
+    "footprint": {
+      "title": "Your footprint",
+      "plays": "Played {count} times on this device",
+      "favorites": "{count} favorites",
+      "totalPlays": "Played {count} times on this device",
+      "totalFavorites": "{count} favorites"
+    },
+    "current": {
+      "eyebrow": "You are here",
+      "title": "NOW",
+      "description": "The activity timeline currently contains {milestones} records and {songs} original-song releases. {archives} LIVE and project streams are included as supporting context.",
+      "latest": "Latest original song",
+      "play": "Play now"
+    },
+    "dataNotice": "The activity history uses the same song-sheet milestones and milestones API as the Activity timeline. Stream archives are used only as supporting context for LIVE and project streams and their first broadcasts; the events API is not used. Song totals count deduplicated original songs released during each phase. Your footprint counts plays stored on this device and signed-in favorites across all songs published during each phase."
   },
   "Summary": {
     "timelineTitle": "Timeline",

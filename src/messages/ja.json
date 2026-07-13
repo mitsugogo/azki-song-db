@@ -19,6 +19,7 @@
     "home": "HOME",
     "search": "検索",
     "discography": "Discography",
+    "journey": "AZKi Music Journey",
     "activity": "アクティビティ",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
@@ -1260,6 +1261,46 @@
   },
   "Footer": {
     "disclaimer": "本サイトは有志による非公式のファンサイトです。動画はホロライブプロダクション様及びAZKi様が制作したものです。動画の権利は制作者に帰属します。"
+  },
+  "Journey": {
+    "metadata": {
+      "title": "AZKi Music Journey",
+      "description": "活動年表、オリジナル楽曲、LIVE・企画配信の記録からAZKiの活動の歩みをたどります。"
+    },
+    "hero": {
+      "subtitle": "歌と記憶をたどる旅",
+      "start": "旅をはじめる"
+    },
+    "chapterDescription": "活動年表の{milestones}件のできごとを主軸に、{songs}曲のオリジナル楽曲リリースと、補助情報として{archives}件のLIVE・企画配信を収録しています。",
+    "chapterDescriptions": {
+      "alpha": "Virtual Divaとして踏み出した最初の一歩。歌と配信を重ね、開拓者とともにAZKiの音楽を育てていった原点のルート。",
+      "beta": "終わりが決まっていた活動。開拓者との出会いを経て、活動を続けることを決意した。ホロライブ0期生として活動の舞台を広げ、仲間との出会いと新たな挑戦がAZKiの表現をさらに遠くへ運んでいくルート。",
+      "gamma": "これまでの歩みを力に、音楽も日常も軽やかに更新していく現在地。GeoGuessrとの出会いから大きく変わり続けるAZKiと、これから生まれる景色を開拓者と共に歩んでいく。"
+    },
+    "representativeSong": "この期間のオリジナル楽曲",
+    "representativeSongsTitle": "代表楽曲",
+    "timelineTitle": "活動年表",
+    "counts": {
+      "songs": "オリジナル楽曲",
+      "archives": "LIVE・企画",
+      "videos": "動画数",
+      "milestones": "活動年表"
+    },
+    "footprint": {
+      "title": "あなたの足跡",
+      "plays": "この端末で {count} 回再生",
+      "favorites": "お気に入り {count} 曲",
+      "totalPlays": "この端末で合計 {count} 回再生",
+      "totalFavorites": "お気に入り {count} 曲"
+    },
+    "current": {
+      "eyebrow": "現在地",
+      "title": "NOW",
+      "description": "これまで{milestones}件のできごとがあり、{songs}曲のオリジナル楽曲がリリースされています。",
+      "latest": "最新のオリジナル楽曲",
+      "play": "今すぐ再生"
+    },
+    "dataNotice": "活動年表は @mitsugogo が作成しており、誤りが含まれている可能性があります。個人の足跡は、各期間に公開された全楽曲を対象に、この端末の再生回数とサインイン中のお気に入りを集計します。"
   },
   "Summary": {
     "timelineTitle": "活動年表",
