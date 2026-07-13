@@ -5,6 +5,7 @@ import { Button, Skeleton } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
 import { LuChevronDown, LuHeadphones, LuHeart, LuPlay } from "react-icons/lu";
 import { Link } from "@/i18n/navigation";
+import { ScrollToTopButton } from "@/app/components/ScrollToTopButton";
 import useArchives from "@/app/hook/useArchives";
 import useFavorites from "@/app/hook/useFavorites";
 import useMilestones from "@/app/hook/useMilestones";
@@ -379,6 +380,7 @@ export default function JourneyClient() {
           </div>
         )}
       </div>
+      <ScrollToTopButton />
     </main>
   );
 }
