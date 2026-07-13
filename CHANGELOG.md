@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.15.1](https://github.com/mitsugogo/azki-song-db/compare/v2.15.0...v2.15.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* **seichi-map:** 地点名を打ち替えたときに地点を記録を見失ってしまうのを修正 ([1005c36](https://github.com/mitsugogo/azki-song-db/commit/1005c36228d113fc6cd17227d2379ac2346c23af))
+
 ## [2.15.0](https://github.com/mitsugogo/azki-song-db/compare/v2.14.2...v2.15.0) (2026-07-12)
 
 
