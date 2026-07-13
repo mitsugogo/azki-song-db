@@ -1264,7 +1264,7 @@ export default function SeichiMapCompleteClient({
         ? new Date(item.visitedAt).toLocaleDateString(htmlLocale)
         : "";
       return normalizeSearchText(
-        `${item.locationName} ${item.note} ${item.url} ${item.visitedAt.slice(0, 10)} ${localizedDate}`,
+        `${locationById.get(item.locationId)?.name ?? item.locationName} ${item.note} ${item.url} ${item.visitedAt.slice(0, 10)} ${localizedDate}`,
       ).includes(query);
     });
   }, [
@@ -2687,7 +2687,8 @@ export default function SeichiMapCompleteClient({
                                 >
                                   <Stack gap={4} className="min-w-0 flex-1">
                                     <Text fw={600} lineClamp={2}>
-                                      {item.locationName}
+                                      {locationById.get(item.locationId)
+                                        ?.name ?? item.locationName}
                                     </Text>
                                     <Group gap={6}>
                                       <FiCalendar size={12} />
