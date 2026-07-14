@@ -82,10 +82,10 @@ const ARCHIVE_EXCLUDED_PATTERN =
 const ARCHIVE_LIVE_PATTERN = /\b(?:3d\s*)?live\b|ライブ/i;
 const ARCHIVE_PROJECT_PATTERN = /企画|project|プロジェクト|大会|耐久/i;
 const FEATURED_MILESTONE_PATTERN =
-  /^(?:\d{4}年生誕|活動\d+周年|活動\d+ヶ月記念|初オリ曲MV|初めてのASMR配信|かなけん 最初で最後の 3DLIVE を開催|AS_tar結成|終電駅名ASMR（中央線ASMR）配信|\d{2,3}万人達成|「ぺこあずクッキング」で初のオフコラボ|AZロケ.*|あずいろ3周年|AS_tar新曲「Going My Way」リリース|#AZKi初配信 （エイプリルフール企画）|KoZMy結成|AZKi SOLO LiVE 2025 "Departure"|「Virtual Diva AZKi」としてYouTube活動開始|100万人達成|メジャーデビューEP「3枚目の地図」リリース|オリジナルソング「equal」リリース|瀬名航さんとのコラボEP「恋の宅配便」リリース|3rdビジュお披露目|床|「すばるあずきみずしーの3コードミラクル」開始|初作詞の「from A to Z」リリース|ホロぐら初登場|ホロライブ移籍(?:（ホロライブ0期生）)?|初めてのGeoGuessr配信|「かなけん」入社|開拓者の姿が明かされる|あずいろ結成|初のロケ動画(?:「AZKi's LOCATION!!」公開)?)$/;
+  /^(?:\d{4}年生誕|活動\d+周年|活動\d+ヶ月記念|初オリ曲MV|2ndビジュお披露目|ホロアース AZKi降臨祭|初めてのASMR配信|かなけん 最初で最後の 3DLIVE を開催|AS_tar結成|終電駅名ASMR（中央線ASMR）配信|\d{2,3}万人達成|「ぺこあずクッキング」で初のオフコラボ|AZロケ.*|あずいろ3周年|AS_tar新曲「Going My Way」リリース|#AZKi初配信 （エイプリルフール企画）|KoZMy結成|AZKi SOLO LiVE 2025 "Departure"|「Virtual Diva AZKi」としてYouTube活動開始|100万人達成|メジャーデビューEP「3枚目の地図」リリース|オリジナルソング「equal」リリース|瀬名航さんとのコラボEP「恋の宅配便」リリース|3rdビジュお披露目|床|「すばるあずきみずしーの3コードミラクル」開始|初作詞の「from A to Z」リリース|ホロぐら初登場|ホロライブ移籍(?:（ホロライブ0期生）)?|初めてのGeoGuessr配信|「かなけん」入社|開拓者の姿が明かされる|あずいろ結成|初のロケ動画(?:「AZKi's LOCATION!!」公開)?)$/;
 
 export const JOURNEY_PROMINENT_MILESTONE_PATTERN =
-  /^(?:「Virtual Diva AZKi」としてYouTube活動開始|京王電鉄コラボ|初めてのGeoGuessr配信|.*年生誕|活動.*周年|AZKi Major Debut LiVE「声音エントロピー」.*|AZKi SOLO LiVE 2025 "Departure"|#AZKi初配信 （エイプリルフール企画）|初のロケ動画「AZKi's LOCATION!!」公開|ビクターエンターテインメントからメジャーデビュー|100万人達成)$/;
+  /^(?:「Virtual Diva AZKi」としてYouTube活動開始|ホロライブ移籍（ホロライブ0期生）|EP「Re:Start」「Re:Birth」リリース|ビクターエンターテインメントからメジャーデビューが決定|床|開拓者の姿が明かされる|3rdビジュお披露目|4thビジュお披露目|初オリ曲MV|2ndビジュお披露目|京王電鉄コラボ|初めてのGeoGuessr配信|.*年生誕|活動.*周年|AZKi Major Debut LiVE「声音エントロピー」|AZKi SOLO LiVE 2025 "Departure"|#AZKi初配信 （エイプリルフール企画）|初のロケ動画「AZKi's LOCATION!!」公開|ビクターエンターテインメントからメジャーデビュー|100万人達成)$/;
 
 const getArchiveSearchableText = (archive: ArchiveItem) =>
   `${archive.topic} ${archive.title}`
@@ -109,6 +109,20 @@ export const isFeaturedJourneyMilestoneTitle = (title: string) =>
 
 export const isProminentJourneyMilestoneTitle = (title: string) =>
   JOURNEY_PROMINENT_MILESTONE_PATTERN.test(title);
+
+const normalizeMilestoneLookupKey = (value: string) =>
+  value
+    .normalize("NFKC")
+    .replace(/\s+/g, "")
+    .replace(/(?:達成|突破)$/, "");
+
+const hasMatchingMilestone = (song: Song, milestoneTitle: string) => {
+  if (song.milestones.includes(milestoneTitle)) return true;
+  const milestoneKey = normalizeMilestoneLookupKey(milestoneTitle);
+  return song.milestones.some(
+    (candidate) => normalizeMilestoneLookupKey(candidate) === milestoneKey,
+  );
+};
 
 export const getJourneyYouTubeVideoId = (url: string | undefined) => {
   if (!url) return null;
@@ -287,7 +301,8 @@ const buildMoments = ({
       const featured = isFeaturedJourneyMilestoneTitle(milestone.text);
       const milestoneSong = featured
         ? songs.find(
-            (song) => song.video_id && song.milestones.includes(milestone.text),
+            (song) =>
+              song.video_id && hasMatchingMilestone(song, milestone.text),
           )
         : undefined;
       const linkedVideoId = getJourneyYouTubeVideoId(milestone.url);
@@ -311,6 +326,14 @@ const buildMoments = ({
               toJourneyDateKey(song.broadcast_at) === milestoneDateKey,
           )
         : undefined;
+      const sameDayMilestoneSong = featured
+        ? songs.find(
+            (song) =>
+              song.video_id &&
+              song.milestones.length > 0 &&
+              toJourneyDateKey(song.broadcast_at) === milestoneDateKey,
+          )
+        : undefined;
       const transferArchive = milestone.text.startsWith("ホロライブ移籍")
         ? mediaArchives.find((archive) =>
             archive.title.includes("ホロライブへ移籍しました"),
@@ -329,22 +352,29 @@ const buildMoments = ({
                 videoTitlesById[linkedVideoId] ||
                 milestone.text,
             }
-          : sameDayArchive
+          : sameDayMilestoneSong
             ? {
-                videoId: sameDayArchive.video_id,
-                title: sameDayArchive.title,
+                videoId: sameDayMilestoneSong.video_id,
+                title:
+                  sameDayMilestoneSong.video_title ||
+                  sameDayMilestoneSong.title,
               }
-            : sameDaySong
+            : sameDayArchive
               ? {
-                  videoId: sameDaySong.video_id,
-                  title: sameDaySong.video_title || sameDaySong.title,
+                  videoId: sameDayArchive.video_id,
+                  title: sameDayArchive.title,
                 }
-              : transferArchive
+              : sameDaySong
                 ? {
-                    videoId: transferArchive.video_id,
-                    title: transferArchive.title,
+                    videoId: sameDaySong.video_id,
+                    title: sameDaySong.video_title || sameDaySong.title,
                   }
-                : undefined;
+                : transferArchive
+                  ? {
+                      videoId: transferArchive.video_id,
+                      title: transferArchive.title,
+                    }
+                  : undefined;
 
       return {
         id: `milestone-${milestone.date.toISOString()}-${index}`,

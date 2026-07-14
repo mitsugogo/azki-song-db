@@ -228,14 +228,26 @@ export function JourneyChapterSection({
                                       href={moment.media.href}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="mt-3 grid max-w-xl overflow-hidden rounded-lg border border-pink-300/25 bg-white/[0.045] transition hover:border-pink-300/55 hover:bg-white/[0.065] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pink-300 sm:grid-cols-[180px_minmax(0,1fr)]"
+                                      className={`grid overflow-hidden border border-pink-300/25 bg-white/[0.045] transition hover:border-pink-300/55 hover:bg-white/[0.065] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pink-300 ${
+                                        moment.prominent
+                                          ? "mt-4 max-w-3xl rounded-xl sm:grid-cols-[280px_minmax(0,1fr)]"
+                                          : "mt-2.5 max-w-lg rounded-md sm:grid-cols-[150px_minmax(0,1fr)]"
+                                      }`}
                                     >
                                       <YoutubeThumbnail
                                         videoId={moment.media.videoId}
                                         alt={moment.media.title}
                                       />
-                                      <span className="flex min-w-0 items-center gap-2 p-3 text-sm font-medium leading-5 text-slate-100">
-                                        <LuPlay className="shrink-0 text-pink-300" />
+                                      <span
+                                        className={`flex min-w-0 items-center font-medium text-slate-100 ${
+                                          moment.prominent
+                                            ? "gap-3 p-5 text-base leading-7 sm:text-lg"
+                                            : "gap-2 p-2.5 text-xs leading-5 sm:text-[13px]"
+                                        }`}
+                                      >
+                                        <LuPlay
+                                          className={`shrink-0 text-pink-300 ${moment.prominent ? "text-lg" : "text-xs"}`}
+                                        />
                                         <span>{moment.media.title}</span>
                                       </span>
                                     </a>

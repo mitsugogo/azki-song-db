@@ -154,12 +154,11 @@ export default function JourneyClient() {
 
   return (
     <main className="relative min-h-screen overflow-x-clip bg-[#030711] text-slate-100 [color-scheme:dark]">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-80 [background-image:radial-gradient(circle_at_18%_12%,rgba(244,72,124,0.13),transparent_24%),radial-gradient(circle_at_82%_28%,rgba(34,211,238,0.11),transparent_22%),radial-gradient(circle_at_50%_70%,rgba(59,130,246,0.07),transparent_30%),radial-gradient(circle,rgba(255,255,255,0.5)_0.6px,transparent_0.8px)] [background-size:auto,auto,auto,42px_42px]"
-      />
-
       <section className="relative flex min-h-[calc(100dvh-2.5rem)] items-center justify-center overflow-hidden px-5 py-20 text-center sm:px-8 lg:min-h-[calc(100dvh-4rem)]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-80 [background-image:radial-gradient(circle_at_18%_12%,rgba(244,72,124,0.13),transparent_24%),radial-gradient(circle_at_82%_28%,rgba(34,211,238,0.11),transparent_22%),radial-gradient(circle_at_50%_70%,rgba(59,130,246,0.07),transparent_30%),radial-gradient(circle,rgba(255,255,255,0.5)_0.6px,transparent_0.8px)] [background-size:auto,auto,auto,42px_42px]"
+        />
         <div
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 top-[42%] bg-linear-to-b from-transparent via-[#071325]/40 to-[#071325]"
@@ -285,19 +284,22 @@ export default function JourneyClient() {
         </div>
       </section>
 
-      <div id="journey-loading" className="relative border-t border-white/10">
+      <div
+        id="journey-loading"
+        className="relative border-t border-white/10 bg-[#050b17]"
+      >
         {isLoading && chapters.length === 0 ? (
           <JourneyLoading />
         ) : (
           <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[180px_minmax(0,1fr)]">
-            <aside className="relative hidden border-r border-white/10 px-8 lg:block">
+            <aside className="relative hidden border-r border-white/10 bg-[#050b17] px-8 lg:block">
               <JourneyProgress
                 chapters={chapters}
                 activeChapterId={activeChapterId}
                 getLabel={getChapterLabel}
               />
             </aside>
-            <div className="min-w-0">
+            <div className="min-w-0 bg-[#030711] [background-image:radial-gradient(circle_at_18%_12%,rgba(244,72,124,0.13),transparent_24%),radial-gradient(circle_at_82%_28%,rgba(34,211,238,0.11),transparent_22%),radial-gradient(circle_at_50%_70%,rgba(59,130,246,0.07),transparent_30%),radial-gradient(circle,rgba(255,255,255,0.5)_0.6px,transparent_0.8px)] [background-size:auto,auto,auto,42px_42px]">
               <div className="lg:hidden">
                 <JourneyProgress
                   chapters={chapters}

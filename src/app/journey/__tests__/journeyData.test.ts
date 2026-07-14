@@ -438,6 +438,45 @@ describe("buildJourneyChapters", () => {
     });
   });
 
+  it("同日の動画よりマイルストーンが付いた動画を優先する", () => {
+    const chapters = buildJourneyChapters({
+      songs: [
+        song({
+          title: "Milestone Song",
+          video_id: "milestone-video",
+          video_title: "110万人記念歌枠",
+          broadcast_at: "2024-09-25T20:00:00+09:00",
+          milestones: ["110万人"],
+        }),
+      ],
+      archives: [
+        archive({
+          video_id: "same-day-video",
+          title: "同日に公開された別の動画",
+          stream_started_at: "2024-09-24T20:00:00+09:00",
+        }),
+      ],
+      milestones: [
+        {
+          date: "2024-09-24T00:00:00+09:00",
+          content: "110万人達成",
+        },
+      ],
+      playCountState: createEmptySongPlayCountState(),
+      favorites: [],
+      now: new Date("2026-07-13T00:00:00+09:00"),
+    });
+
+    expect(
+      chapters
+        .flatMap((chapter) => chapter.moments)
+        .find((moment) => moment.title === "110万人達成")?.media,
+    ).toMatchObject({
+      videoId: "milestone-video",
+      title: "110万人記念歌枠",
+    });
+  });
+
   it("JSTで同じ日のマイルストーンを1つの日付グループにまとめる", () => {
     const days = groupJourneyMomentsByDate([
       {
