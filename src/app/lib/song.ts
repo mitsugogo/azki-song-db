@@ -1,6 +1,7 @@
 import {
   isCollaborationSong,
   isCoverSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "../config/filters";
 import { Song } from "../types/song";
@@ -16,6 +17,9 @@ export const getDiscographyLink = (song: Song) => {
   }
   if (isCollaborationSong(song)) {
     return `/discography/collaborations/${encodeURIComponent(song.slugv2)}`;
+  }
+  if (isOverallSong(song)) {
+    return `/discography/overall/${encodeURIComponent(song.slugv2)}`;
   }
   if (isCoverSong(song)) {
     return `/discography/covers/${encodeURIComponent(song.slugv2)}`;

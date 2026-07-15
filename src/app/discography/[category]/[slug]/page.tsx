@@ -7,6 +7,7 @@ import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import {
   isCollaborationSong,
   isCoverSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
@@ -29,15 +30,17 @@ export async function generateStaticParams() {
   // 各楽曲についてカテゴリを決定し、カテゴリ+スラグの組合せで静的パスを生成する
   const paramSet = new Set<string>();
 
-  const getCategory = (s: Song) =>
-    isPossibleOriginalSong(s)
-      ? "originals"
-      : isCollaborationSong(s)
-        ? "collaborations"
-        : "covers";
+  const getCategory = (s: Song) => {
+    if (isPossibleOriginalSong(s)) return "originals";
+    if (isCollaborationSong(s)) return "collaborations";
+    if (isOverallSong(s)) return "overall";
+    if (isCoverSong(s)) return "covers";
+    return null;
+  };
 
   songs.forEach((s) => {
     const category = getCategory(s);
+    if (!category) return;
     const candidates: string[] = [];
     if (s.slug) candidates.push(s.slug);
     if (s.title) candidates.push(slugify(s.title));
@@ -68,7 +71,10 @@ export async function generateMetadata({
 
   const originals = songs.filter(
     (s) =>
-      isPossibleOriginalSong(s) || isCollaborationSong(s) || isCoverSong(s),
+      isPossibleOriginalSong(s) ||
+      isCollaborationSong(s) ||
+      isOverallSong(s) ||
+      isCoverSong(s),
   );
   const metadataCandidates = originals.filter(
     (s) =>

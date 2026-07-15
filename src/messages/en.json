@@ -304,6 +304,10 @@
           "title": "Collaboration songs | {siteName}",
           "description": "A list of collaboration and unit songs featuring AZKi."
         },
+        "overall": {
+          "title": "Group songs | {siteName}",
+          "description": "A list of group and official songs featuring AZKi."
+        },
         "covers": {
           "title": "Cover songs | {siteName}",
           "description": "A list of cover songs sung by AZKi."
@@ -709,10 +713,12 @@
       "all": "All ({count})",
       "originals": "Original songs ({count})",
       "unit": "Unit / guest songs ({count})",
+      "overall": "Group songs ({count})",
       "covers": "Covers ({count})"
     },
     "originalsLabel": "Original songs",
     "unitLabel": "Unit / guest songs",
+    "overallLabel": "Group songs",
     "coversLabel": "Covers",
     "songsSuffix": " songs",
     "viewsSuffix": " views",
@@ -731,6 +737,7 @@
     "tabDescriptions": {
       "originals": "A list of original songs.",
       "unit": "A list of unit / guest songs.",
+      "overall": "A list of group and official songs featuring AZKi.",
       "covers": "A list of cover songs."
     },
     "yearHeader": "{year} ({count} songs)",

@@ -263,7 +263,9 @@ export default function ClientPage({
                 ? t("originalsLabel")
                 : category === "covers"
                   ? t("coversLabel")
-                  : t("unitLabel"),
+                  : category === "overall"
+                    ? t("overallLabel")
+                    : t("unitLabel"),
             href: `/discography/${encodeURIComponent(category)}`,
           },
           ...(breadcrumbAlbumTitle

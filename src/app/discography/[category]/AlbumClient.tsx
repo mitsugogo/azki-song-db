@@ -7,6 +7,7 @@ import { FaDatabase, FaPlay, FaYoutube } from "react-icons/fa6";
 import { LoadingOverlay } from "@mantine/core";
 import {
   isCollaborationSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "../../config/filters";
 import useSongs from "../../hook/useSongs";
@@ -29,9 +30,10 @@ import {
 
 function resolveSongCategory(
   song: Song,
-): "originals" | "collaborations" | "covers" {
+): "originals" | "collaborations" | "overall" | "covers" {
   if (isPossibleOriginalSong(song)) return "originals";
   if (isCollaborationSong(song)) return "collaborations";
+  if (isOverallSong(song)) return "overall";
   return "covers";
 }
 
@@ -48,6 +50,9 @@ function getCategoryBreadcrumb(song: Song): { labelKey: string; href: string } {
   }
   if (category === "collaborations") {
     return { labelKey: "unitLabel", href: "/discography/collab" };
+  }
+  if (category === "overall") {
+    return { labelKey: "overallLabel", href: "/discography/overall" };
   }
   return { labelKey: "coversLabel", href: "/discography/covers" };
 }

@@ -19,9 +19,10 @@ const TAB_URLS = [
   "/discography",
   "/discography/originals",
   "/discography/collab",
+  "/discography/overall",
   "/discography/covers",
 ];
-const TAB_VALUES = ["0", "1", "2", "3"] as const;
+const TAB_VALUES = ["0", "1", "2", "3", "4"] as const;
 
 const discographyTabClass =
   "relative z-10 shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold leading-5 text-gray-700 transition-colors hover:text-primary data-[active=true]:text-white dark:text-gray-200 dark:hover:text-pink-200 dark:data-[active=true]:text-white md:px-4 md:py-2 md:text-sm";
@@ -68,6 +69,7 @@ export default function DiscographyClient({
     allSongCountsByReleaseDate,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
+    overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
     tabCounts,
   } = useDiscographyData(groupByAlbum, onlyOriginalMV);
@@ -85,6 +87,7 @@ export default function DiscographyClient({
       allSongCountsByReleaseDate,
       originalSongCountsByReleaseDate,
       unitSongCountsByReleaseDate,
+      overallSongCountsByReleaseDate,
       coverSongCountsByReleaseDate,
     ];
     const data = dataForTab[activeTab] ?? [];
@@ -106,6 +109,7 @@ export default function DiscographyClient({
     allSongCountsByReleaseDate,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
+    overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   ]);
 
@@ -171,6 +175,7 @@ export default function DiscographyClient({
     allSongCountsByReleaseDate,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
+    overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
   ];
 
@@ -243,6 +248,13 @@ export default function DiscographyClient({
             <Tabs.Tab
               value="3"
               ref={tabRefCallbacks["3"]}
+              className={discographyTabClass}
+            >
+              {t("tabs.overall", { count: tabCounts.overall })}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="4"
+              ref={tabRefCallbacks["4"]}
               className={discographyTabClass}
             >
               {t("tabs.covers", { count: tabCounts.covers })}
