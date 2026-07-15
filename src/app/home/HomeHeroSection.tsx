@@ -6,7 +6,7 @@ import { type CSSProperties, memo, useEffect, useMemo, useState } from "react";
 import { FaYoutube } from "react-icons/fa6";
 import { LuSparkles, LuVolumeX } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
-import { zenMaruGothic } from "../fonts";
+import { robotoFlex, zenMaruGothic } from "../fonts";
 import { isAzkiBirthday } from "../lib/birthday";
 import { formatDate } from "../lib/formatDate";
 import { buildWatchHref } from "../lib/watchUrl";
@@ -194,6 +194,12 @@ export const HomeHeroSection = memo(function HomeHeroSection({
           <p className="mt-4 max-w-2xl text-sm font-medium text-gray-800/80 drop-shadow-[0_1px_12px_rgba(255,255,255,0.85)] dark:text-gray-100/80 dark:drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] sm:text-base">
             {t("description")}
           </p>
+          <Link
+            href="/journey"
+            className={`${robotoFlex.className} mt-4 inline-flex items-center rounded-full border border-primary/25 bg-white/65 px-4 py-2 text-[0.68rem] font-semibold tracking-[0.08em] text-primary/80 shadow-[0_8px_28px_rgba(190,24,93,0.12)] backdrop-blur-md transition hover:-translate-y-0.5 hover:border-primary/45 hover:bg-white/85 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary dark:border-pink-200/25 dark:bg-gray-950/60 dark:text-pink-100/80 dark:shadow-[0_8px_28px_rgba(0,0,0,0.24)] dark:hover:border-pink-200/45 dark:hover:bg-gray-900/80 dark:hover:text-pink-100 sm:px-5 sm:text-xs`}
+          >
+            {t("anniversaryThanks")}
+          </Link>
         </div>
 
         <HomeSearchPanel songs={songs} />
