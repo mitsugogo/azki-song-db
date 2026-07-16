@@ -840,8 +840,7 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
                     t === "オリ曲" ||
                     t === "オリ曲MV" ||
                     t === "カバー曲" ||
-                    t === "カバー曲MV" ||
-                    t === "fes全体曲",
+                    t === "カバー曲MV",
                 ),
               ).length
             }
@@ -869,8 +868,7 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
                     t === "オリ曲" ||
                     t === "オリ曲MV" ||
                     t === "カバー曲" ||
-                    t === "カバー曲MV" ||
-                    t === "fes全体曲",
+                    t === "カバー曲MV",
                 ),
               )
               .sort(

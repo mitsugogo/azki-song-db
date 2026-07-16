@@ -5,7 +5,7 @@ import useSongs from "../../hook/useSongs";
 import {
   isCollaborationSong,
   isCoverSong,
-  isFesOverallSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
 import { normalizeSongTitle } from "../utils/normalizeSongTitle";
@@ -78,15 +78,14 @@ export function useDiscographyData(
         s.tags.includes("オリ曲") || s.tags.includes("オリ曲MV");
       return isOriginal && isPossibleOriginalSong(s);
     });
-    const units = songs.filter(
-      (s) => isCollaborationSong(s) || isFesOverallSong(s),
-    );
+    const units = songs.filter((s) => isCollaborationSong(s));
+    const overall = songs.filter((s) => isOverallSong(s));
     const covers = songs.filter((s) => isCoverSong(s));
     const allFiltered = songs.filter(
       (s) =>
         isPossibleOriginalSong(s) ||
         isCollaborationSong(s) ||
-        isFesOverallSong(s) ||
+        isOverallSong(s) ||
         isCoverSong(s),
     );
     const normalizeSingers = (s: Song) =>
@@ -101,6 +100,7 @@ export function useDiscographyData(
       all: countStatisticsItems(allFiltered, getSongKeyTitle),
       originals: countStatisticsItems(originals, getSongKeyTitle),
       unit: countStatisticsItems(units, getSongKeyTitle),
+      overall: countStatisticsItems(overall, getSongKeyTitle),
       covers: countStatisticsItems(covers, (song) => {
         const singers = normalizeSingers(song);
         const normalizedTitle = getSongKeyTitle(song);
@@ -126,11 +126,19 @@ export function useDiscographyData(
 
   // ユニット/ゲスト楽曲の統計
   const unitSongCountsByReleaseDate = useMemo(() => {
-    const units = songs.filter(
-      (s) => isCollaborationSong(s) || isFesOverallSong(s),
-    );
+    const units = songs.filter((s) => isCollaborationSong(s));
     return createStatistics(
       units,
+      (s) => (groupByAlbum ? getAlbumGroupingKey(s) : getSongKeyTitle(s)),
+      groupByAlbum,
+    ).map(applyReleaseVariantGrouping);
+  }, [songs, groupByAlbum, releaseVariantAlbumKeyByInstance]);
+
+  // 全体曲の統計（AZKiのオリジナル楽曲数には含めない）
+  const overallSongCountsByReleaseDate = useMemo(() => {
+    const overallSongs = songs.filter((s) => isOverallSong(s));
+    return createStatistics(
+      overallSongs,
       (s) => (groupByAlbum ? getAlbumGroupingKey(s) : getSongKeyTitle(s)),
       groupByAlbum,
     ).map(applyReleaseVariantGrouping);
@@ -172,7 +180,7 @@ export function useDiscographyData(
       (s) =>
         isPossibleOriginalSong(s) ||
         isCollaborationSong(s) ||
-        isFesOverallSong(s) ||
+        isOverallSong(s) ||
         isCoverSong(s),
     );
     return createStatistics(
@@ -188,6 +196,7 @@ export function useDiscographyData(
     songs,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
+    overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
     allSongCountsByReleaseDate,
     tabCounts,

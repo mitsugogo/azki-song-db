@@ -9,6 +9,7 @@ import slugify from "../lib/slugify";
 import {
   isCollaborationSong,
   isCoverSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "../config/filters";
 import { useTranslations, useLocale } from "next-intl";
@@ -45,9 +46,11 @@ const SongItem = ({
       ? "originals"
       : isCollaborationSong(video)
         ? "collab"
-        : isCoverSong(video)
-          ? "covers"
-          : null;
+        : isOverallSong(video)
+          ? "overall"
+          : isCoverSong(video)
+            ? "covers"
+            : null;
 
     if (!category) return null;
     return `/discography/${category}/${encodeURIComponent(slug)}`;

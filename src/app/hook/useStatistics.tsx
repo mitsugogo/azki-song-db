@@ -4,6 +4,7 @@ import { createStatistics } from "../lib/statisticsHelpers";
 import {
   isCollaborationSong,
   isCoverSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "../config/filters";
 
@@ -46,8 +47,9 @@ export function useStatistics({ songs }: UseStatisticsProps) {
   const originalSongCounts = useMemo(() => {
     const originals = songs.filter((s) => {
       return (
-        isPossibleOriginalSong(s, true) ||
-        (s.artist.includes("AZKi") && s.sing.includes("AZKi"))
+        !isOverallSong(s) &&
+        (isPossibleOriginalSong(s, true) ||
+          (s.artist.includes("AZKi") && s.sing.includes("AZKi")))
       );
     });
     return createStatistics(originals, (s) => s.title);
