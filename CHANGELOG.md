@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.16.0](https://github.com/mitsugogo/azki-song-db/compare/v2.15.1...v2.16.0) (2026-07-16)
+
+
+### Features
+
+* Discographyに「全体曲」タブを追加 ([f1b1989](https://github.com/mitsugogo/azki-song-db/commit/f1b1989def5d8a72c598230664d0bb87c61168e4))
+
+
+### Bug Fixes
+
+* 再生数達成お祝いが急増に耐えられなかった不具合を修正 ([16dfad4](https://github.com/mitsugogo/azki-song-db/commit/16dfad4338c1fdf3be2eba63a74563a332033811))
+
 ### [2.15.1](https://github.com/mitsugogo/azki-song-db/compare/v2.15.0...v2.15.1) (2026-07-13)
 
 
