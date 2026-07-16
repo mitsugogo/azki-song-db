@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 const createNextIntlPlugin = require("next-intl/plugin");
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const serverActionAllowedOrigins =
+  process.env.SERVER_ACTIONS_ALLOWED_ORIGINS?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const nextConfig: NextConfig = {
   /* config options here */
   distDir: process.env.NEXT_PLW ? ".next-playwright" : ".next",
@@ -17,6 +22,13 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks", "react-icons"],
+    ...(serverActionAllowedOrigins?.length
+      ? {
+          serverActions: {
+            allowedOrigins: serverActionAllowedOrigins,
+          },
+        }
+      : {}),
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

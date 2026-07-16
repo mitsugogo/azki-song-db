@@ -8,7 +8,11 @@ import { FaYoutube, FaDatabase } from "react-icons/fa6";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { StatisticsItem } from "./createStatistics";
 import type { Song } from "../types/song";
-import { isCollaborationSong, isPossibleOriginalSong } from "../config/filters";
+import {
+  isCollaborationSong,
+  isOverallSong,
+  isPossibleOriginalSong,
+} from "../config/filters";
 import { getCollabMembers, getCollabUnitName } from "../config/collabUnits";
 import slugify from "../lib/slugify";
 import { useTranslations, useLocale } from "next-intl";
@@ -52,11 +56,15 @@ function SongDetailsVariantRow({
     ? "originals"
     : isCollaborationSong(selectedSong)
       ? "collaborations"
-      : "covers";
+      : isOverallSong(selectedSong)
+        ? "overall"
+        : "covers";
   const detailSlug = selectedSong.slugv2 ?? selectedSong.video_id;
   const watchHref = selectedSong.tags.includes("カバー曲")
     ? `/watch?q=tag:カバー曲&v=${selectedSong.video_id}${Number(selectedSong.start ?? 0) > 0 ? `&t=${selectedSong.start}` : ""}`
-    : `/watch?q=tag:オリ曲|album:${selectedSong.album}&v=${selectedSong.video_id}`;
+    : isOverallSong(selectedSong)
+      ? `/watch?q=tag:${selectedSong.tags.includes("公式ソング") ? "公式ソング" : selectedSong.tags.includes("全体曲") ? "全体曲" : "fes全体曲"}&v=${selectedSong.video_id}`
+      : `/watch?q=tag:オリ曲|album:${selectedSong.album}&v=${selectedSong.video_id}`;
   const handleVariantChange = (value: string) => {
     setSelectedInstanceKey(value);
     const nextSong =

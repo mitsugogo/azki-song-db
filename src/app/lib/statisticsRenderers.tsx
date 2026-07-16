@@ -9,6 +9,10 @@ import { FaYoutube } from "react-icons/fa6";
 import { BsPlayCircleFill } from "react-icons/bs";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "./formatDate";
+import {
+  getViewMilestoneAchievedTarget,
+  getViewMilestoneRemainingCount,
+} from "./viewMilestone";
 
 export const renderLastVideoCell = (
   lastVideo: Song,
@@ -154,7 +158,7 @@ function ViewCountCell({
     return t("milestone", { count: count.toLocaleString(locale) });
   };
 
-  const remain = getRemainCount(viewCount);
+  const remain = getViewMilestoneRemainingCount(viewCount, milestone);
   if (remain) {
     const estimatedAt = formatMilestoneDate(milestone?.estimatedAt, locale);
     return (
@@ -169,7 +173,7 @@ function ViewCountCell({
     );
   }
 
-  const after = getAfterCount(viewCount);
+  const after = getViewMilestoneAchievedTarget(viewCount, milestone);
   if (after) {
     const achievedAt = formatMilestoneDate(milestone?.achievedAt, locale);
     return (
@@ -192,60 +196,6 @@ function ViewCountCell({
 
   return null;
 }
-
-const getRemainCount = (viewCount: number) => {
-  if (viewCount < 100000) {
-    const remaining = 10000 - (viewCount % 10000);
-    if (remaining <= 3000) return remaining;
-  }
-  if (viewCount < 1000000) {
-    const remaining = 100000 - (viewCount % 100000);
-    if (remaining <= 10000) return remaining;
-  }
-  if (viewCount >= 1000000) {
-    const remaining = 1000000 - (viewCount % 1000000);
-    if (remaining <= 20000) return remaining;
-  }
-  return null;
-};
-
-const getAfterCount = (viewCount: number) => {
-  // 100万台の処理
-  if (viewCount >= 1000000) {
-    const milestone = Math.floor(viewCount / 1000000) * 1000000;
-    // +10000までの範囲
-    if (viewCount <= milestone + 10000) {
-      return milestone;
-    }
-  }
-  // 30～90万台の処理
-  else if (viewCount >= 300000) {
-    const milestone = Math.floor(viewCount / 100000) * 100000;
-    // +10000までの範囲
-    if (viewCount <= milestone + 10000) {
-      return milestone;
-    }
-  }
-  // 10万台の処理
-  else if (viewCount >= 100000) {
-    const milestone = Math.floor(viewCount / 100000) * 100000;
-    // +5000までの範囲
-    if (viewCount <= milestone + 5000) {
-      return milestone;
-    }
-  }
-  // 10万までの処理
-  else if (viewCount >= 10000) {
-    const milestone = Math.floor(viewCount / 10000) * 10000;
-    // +1000までの範囲
-    if (viewCount <= milestone + 1000) {
-      return milestone;
-    }
-  }
-
-  // それ以外の場合はnullを返す
-  return null;
-};
 
 export const viewCountSortFn = (rowA: any, rowB: any) => {
   const extractViewCount = (row: any) => {
@@ -270,8 +220,12 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
   const viewCountB = extractViewCount(rowB);
 
   // viewCountAとBの残り再生数を計算
-  const remainA = getRemainCount(viewCountA) || 0;
-  const remainB = getRemainCount(viewCountB) || 0;
+  const remainA =
+    getViewMilestoneRemainingCount(viewCountA, rowA.original?.viewMilestone) ||
+    0;
+  const remainB =
+    getViewMilestoneRemainingCount(viewCountB, rowB.original?.viewMilestone) ||
+    0;
 
   if (remainA && remainB) {
     return remainA - remainB;
@@ -283,8 +237,12 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
     return 1;
   }
 
-  const afterA = getAfterCount(viewCountA) || 0;
-  const afterB = getAfterCount(viewCountB) || 0;
+  const afterA =
+    getViewMilestoneAchievedTarget(viewCountA, rowA.original?.viewMilestone) ||
+    0;
+  const afterB =
+    getViewMilestoneAchievedTarget(viewCountB, rowB.original?.viewMilestone) ||
+    0;
   if (afterA && afterB) {
     return afterA - afterB;
   }
@@ -293,10 +251,6 @@ export const viewCountSortFn = (rowA: any, rowB: any) => {
   }
   if (afterB) {
     return 1;
-  }
-
-  if (afterA && afterB) {
-    return afterA - afterB;
   }
 
   return viewCountB - viewCountA;

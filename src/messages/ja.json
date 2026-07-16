@@ -303,6 +303,10 @@
           "title": "コラボ・ユニット楽曲 | {siteName}",
           "description": "AZKiが参加したコラボ・ユニット楽曲一覧です。"
         },
+        "overall": {
+          "title": "全体曲 | {siteName}",
+          "description": "AZKiが参加した全体曲・公式ソングの一覧です。"
+        },
         "covers": {
           "title": "カバー楽曲 | {siteName}",
           "description": "AZKiが歌唱したカバー楽曲一覧です。"
@@ -700,10 +704,12 @@
       "all": "すべて ({count})",
       "originals": "オリジナル楽曲 ({count})",
       "unit": "ユニット・ゲスト楽曲 ({count})",
+      "overall": "全体曲 ({count})",
       "covers": "カバー楽曲 ({count})"
     },
     "originalsLabel": "オリジナル楽曲",
     "unitLabel": "ユニット・ゲスト楽曲",
+    "overallLabel": "全体曲",
     "coversLabel": "カバー楽曲",
     "songsSuffix": "曲",
     "viewsSuffix": "回再生",
@@ -722,6 +728,7 @@
     "tabDescriptions": {
       "originals": "オリジナル楽曲の一覧です。",
       "unit": "ユニット・ゲスト楽曲の一覧です。",
+      "overall": "AZKiが参加した全体曲・公式ソングの一覧です。",
       "covers": "カバー楽曲の一覧です。"
     },
     "yearHeader": "{year}年 ({count}曲)",

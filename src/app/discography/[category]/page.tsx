@@ -8,6 +8,7 @@ import { baseUrl, siteConfig } from "@/app/config/siteConfig";
 import {
   isCollaborationSong,
   isCoverSong,
+  isOverallSong,
   isPossibleOriginalSong,
 } from "@/app/config/filters";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
@@ -18,13 +19,14 @@ type AlbumEntry = {
   slug: string;
 };
 
-type DiscographyCategory = "originals" | "collab" | "covers";
+type DiscographyCategory = "originals" | "collab" | "overall" | "covers";
 
 function normalizeCategorySlug(value: string): DiscographyCategory | null {
   const lower = value.toLowerCase();
 
   const originals = new Set(["originals", "original", "ori"]);
   const collabs = new Set(["collab", "collabo", "collaboration", "unit"]);
+  const overall = new Set(["overall"]);
   const covers = new Set(["covers", "cover"]);
 
   if (originals.has(lower) || lower.includes("original")) {
@@ -41,6 +43,10 @@ function normalizeCategorySlug(value: string): DiscographyCategory | null {
 
   if (covers.has(lower) || lower.includes("cover")) {
     return "covers";
+  }
+
+  if (overall.has(lower)) {
+    return "overall";
   }
 
   return null;
@@ -153,7 +159,10 @@ export default async function CategoryOrLegacyRedirect({
 
   let filteredSongs = songs.filter(
     (s) =>
-      isCollaborationSong(s) || isCoverSong(s) || isPossibleOriginalSong(s),
+      isCollaborationSong(s) ||
+      isCoverSong(s) ||
+      isOverallSong(s) ||
+      isPossibleOriginalSong(s),
   );
 
   const matchedAlbum = buildAlbumEntries(filteredSongs).find(
@@ -178,7 +187,9 @@ export default async function CategoryOrLegacyRedirect({
       ? "originals"
       : isCollaborationSong(possibleSong)
         ? "collabo"
-        : "covers";
+        : isOverallSong(possibleSong)
+          ? "overall"
+          : "covers";
     const targetSlug =
       possibleSong.slugv2 ||
       possibleSong.slug ||

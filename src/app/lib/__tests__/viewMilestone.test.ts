@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildLatestAchievedViewMilestoneInfo,
   buildViewMilestoneInfo,
+  getViewMilestoneAchievedTarget,
 } from "../viewMilestone";
 import { ViewStat } from "../../types/api/stat/views";
 
@@ -90,6 +91,31 @@ describe("buildViewMilestoneInfo", () => {
     expect(result?.status).toBe("achieved");
     expect(result?.targetCount).toBe(6000000);
     expect(result?.achievedAt).toBe("2026-02-23T00:00:00.000Z");
+  });
+
+  it("取得間隔の間に節目から1万回以上伸びても達成情報を返す", () => {
+    const history: ViewStat[] = [
+      createStat("2026-07-16T00:07:04.000Z", 392280),
+      createStat("2026-07-17T00:07:10.000Z", 422369),
+    ];
+
+    const result = buildViewMilestoneInfo(422369, history);
+
+    expect(result).toEqual({
+      status: "achieved",
+      targetCount: 400000,
+      achievedAt: "2026-07-17T00:07:10.000Z",
+    });
+    expect(getViewMilestoneAchievedTarget(422369, result)).toBe(400000);
+  });
+
+  it("履歴開始時点ですでに節目から離れている場合は達成扱いにしない", () => {
+    const history: ViewStat[] = [
+      createStat("2026-07-16T00:07:04.000Z", 420000),
+      createStat("2026-07-17T00:07:10.000Z", 422369),
+    ];
+
+    expect(buildViewMilestoneInfo(422369, history)).toBeNull();
   });
 
   it("対象外の再生回数ならnullを返す", () => {

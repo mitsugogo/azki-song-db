@@ -51,6 +51,29 @@ function getAchievedMilestone(viewCount: number) {
   return null;
 }
 
+export function getViewMilestoneRemainingCount(
+  viewCount: number,
+  milestone?: ViewMilestoneInfo | null,
+) {
+  if (milestone?.status === "remain") {
+    const remaining = milestone.targetCount - viewCount;
+    return remaining > 0 ? remaining : null;
+  }
+
+  return getRemainCount(viewCount);
+}
+
+export function getViewMilestoneAchievedTarget(
+  viewCount: number,
+  milestone?: ViewMilestoneInfo | null,
+) {
+  if (milestone?.status === "achieved") {
+    return milestone.targetCount;
+  }
+
+  return getAchievedMilestone(viewCount);
+}
+
 function getTarget(viewCount: number): ViewMilestoneTarget | null {
   const remain = getRemainCount(viewCount);
   if (remain) {
@@ -92,6 +115,38 @@ function findAchievedAt(history: ViewCountStat[], targetCount: number) {
   }
 
   return null;
+}
+
+function findLatestCrossedMilestone(history: ViewCountStat[]) {
+  const sorted = [...history]
+    .filter((item) => item?.datetime)
+    .sort(
+      (a, b) =>
+        new Date(a.datetime as Date).getTime() -
+        new Date(b.datetime as Date).getTime(),
+    );
+
+  let latest: { targetCount: number; achievedAt: string } | null = null;
+
+  for (let index = 1; index < sorted.length; index += 1) {
+    const previousCount = sorted[index - 1].viewCount ?? 0;
+    const current = sorted[index];
+    const currentCount = current.viewCount ?? 0;
+    const targetCount = getLatestAchievedTarget(currentCount);
+
+    if (
+      targetCount &&
+      previousCount < targetCount &&
+      currentCount >= targetCount
+    ) {
+      latest = {
+        targetCount,
+        achievedAt: new Date(current.datetime as Date).toISOString(),
+      };
+    }
+  }
+
+  return latest;
 }
 
 function estimateReachedAt(history: ViewCountStat[], targetCount: number) {
@@ -140,10 +195,19 @@ export function buildViewMilestoneInfo(
   viewCount: number,
   history: ViewCountStat[] | undefined,
 ): ViewMilestoneInfo | null {
-  const target = getTarget(viewCount);
-  if (!target) return null;
-
   const safeHistory = history || [];
+  const target = getTarget(viewCount);
+  if (!target) {
+    const crossedMilestone = findLatestCrossedMilestone(safeHistory);
+    if (!crossedMilestone) return null;
+
+    return {
+      status: "achieved",
+      targetCount: crossedMilestone.targetCount,
+      achievedAt: crossedMilestone.achievedAt,
+    };
+  }
+
   if (target.status === "achieved") {
     return {
       status: "achieved",
