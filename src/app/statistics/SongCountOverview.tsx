@@ -143,6 +143,7 @@ export default function SongCountOverview({
       .filter((item) => item.viewMilestone?.achievedAt)
       .map((item) => {
         const achievedAt = new Date(item.viewMilestone!.achievedAt!);
+        const displayedAchievedAt = toDisplayedMilestoneDate(achievedAt);
         return {
           key: item.key,
           title: item.song?.title || item.key,
@@ -152,7 +153,7 @@ export default function SongCountOverview({
           currentViewCount:
             (Number(item.song?.view_count ?? 0) || item.effectiveViewCount) ??
             0,
-          date: achievedAt,
+          date: displayedAchievedAt,
           song: item.song,
         };
       })
@@ -321,10 +322,7 @@ export default function SongCountOverview({
                           </span>
                           <span className="inline-flex items-center gap-1 leading-none">
                             <FaCalendar className="h-3 w-3 shrink-0 align-middle" />
-                            {formatDate(
-                              toDisplayedMilestoneDate(item.date),
-                              locale,
-                            )}
+                            {formatDate(item.date, locale)}
                           </span>
 
                           <Badge
