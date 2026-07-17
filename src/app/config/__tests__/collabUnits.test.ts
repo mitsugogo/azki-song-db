@@ -42,6 +42,13 @@ describe("collabUnits utilities", () => {
     expect(name).toBe("BAKATARE CIRCUS");
   });
 
+  it("getCollabUnitName はぺこマリを返す", () => {
+    expect(getCollabUnitName(["宝鐘マリン", "兎田ぺこら"])).toBe("ぺこマリ");
+    expect(getCollabUnitName(["Houshou Marine", "Usada Pekora"], "en")).toBe(
+      "PekoMari",
+    );
+  });
+
   it("getCollabUnitName は不一致の場合 null を返す", () => {
     const name = getCollabUnitName(["AZKi", "存在しないメンバー"]);
     expect(name).toBeNull();
@@ -67,6 +74,14 @@ describe("collabUnits utilities", () => {
       "Shirakami Fubuki",
       "Shiranui Flare",
       "Omaru Polka",
+    ]);
+  });
+
+  it("getCollabMembers はぺこマリからメンバー配列を返す", () => {
+    expect(getCollabMembers("ぺこマリ")).toEqual(["兎田ぺこら", "宝鐘マリン"]);
+    expect(getCollabMembers("pekomari", "en")).toEqual([
+      "Usada Pekora",
+      "Houshou Marine",
     ]);
   });
 

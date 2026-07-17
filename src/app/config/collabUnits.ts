@@ -179,6 +179,16 @@ export const collabUnits: CollabUnit[] = [
     },
   },
   {
+    members: ["兎田ぺこら", "宝鐘マリン"],
+    unitName: "ぺこマリ",
+    hl: {
+      en: {
+        unitName: "PekoMari",
+        members: ["Usada Pekora", "Houshou Marine"],
+      },
+    },
+  },
+  {
     members: ["AZKi", "水科葵"],
     unitName: "あずみず",
     hl: {
