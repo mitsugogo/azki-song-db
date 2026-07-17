@@ -289,6 +289,54 @@ describe("PlayerControlsBar", () => {
     expect(onSeekStart).toHaveBeenCalled();
   });
 
+  it("トラッククリックを onSeekEnd に伝える", () => {
+    const onSeekEnd = vi.fn();
+    const { container } = renderComponent({
+      tempSeekValue: 12,
+      onSeekEnd,
+    });
+    const track = container.querySelector(
+      ".youtube-progress-track",
+    )! as HTMLElement;
+
+    fireEvent.pointerDown(track);
+    fireEvent.pointerUp(track);
+
+    expect(onSeekEnd).toHaveBeenCalledWith(12, "track");
+  });
+
+  it("ノブ操作を onSeekEnd に伝える", () => {
+    const onSeekEnd = vi.fn();
+    const { container } = renderComponent({
+      tempSeekValue: 12,
+      onSeekEnd,
+    });
+    const thumb = container.querySelector(
+      ".youtube-progress-thumb",
+    )! as HTMLElement;
+
+    fireEvent.pointerDown(thumb);
+    fireEvent.pointerUp(thumb);
+
+    expect(onSeekEnd).toHaveBeenCalledWith(12, "thumb");
+  });
+
+  it("ノブの時刻ラベルをシークバーの下側に表示する", () => {
+    const { container } = renderComponent({ tempSeekValue: 12 });
+    const thumb = container.querySelector(
+      ".youtube-progress-thumb",
+    )! as HTMLElement;
+
+    fireEvent.focus(thumb);
+
+    const label = container.querySelector(
+      ".youtube-progress-label",
+    )! as HTMLElement;
+    expect(label).toBeTruthy();
+    expect(label.style.top).toBe("calc(100% + 8px)");
+    expect(label.textContent).toBe("00:12");
+  });
+
   it("プレミア公開前は時間表示を出さない", () => {
     const { queryByText } = renderComponent({
       timeDisplayMode: "hidden",
@@ -461,5 +509,25 @@ describe("PlayerControlsBar", () => {
 
     // first mark should be positioned in px (visual alignment)
     expect(marks[0].style.left).toContain("0px");
+  });
+
+  it("1チャプターだけの動画ではホバー表示と区間ハイライトを出さない", () => {
+    const onlySong = { ...baseSong, start: 10, end: 40, title: "Only Song" };
+    const { container } = renderComponent({
+      songsInVideo: [onlySong],
+      videoDuration: 100,
+      displayDuration: 100,
+      currentSong: onlySong,
+    });
+    const track = container.querySelector(
+      ".youtube-progress-track",
+    )! as HTMLElement;
+
+    fireEvent.mouseMove(track, { clientX: 50 });
+
+    expect(
+      container.querySelector("#youtube-progress-bar-chapter-tooltip"),
+    ).toBeNull();
+    expect(container.querySelector(".bg-white\\/30")).toBeNull();
   });
 });

@@ -19,6 +19,8 @@ type Hovered = {
   containerWidth: number;
 } | null;
 
+type SeekInteraction = "track" | "thumb";
+
 type PlayerControls = {
   isReady: boolean;
   play: () => void;
@@ -245,7 +247,11 @@ export default function useControlBar({
   }, [currentSong?.video_id, currentSong?.start, displayCurrentTime]);
 
   const seekToFromDisplayValue = useCallback(
-    (displayValue: number, force = false) => {
+    (
+      displayValue: number,
+      force = false,
+      interaction: SeekInteraction = "thumb",
+    ) => {
       // debug
       // eslint-disable-next-line no-console
       console.debug("seekToFromDisplayValue", { displayValue, force });
@@ -263,6 +269,7 @@ export default function useControlBar({
       // no-op
 
       const targetSong = songsInVideo
+        .slice()
         .sort((a: Song, b: Song) => Number(b.start) - Number(a.start))
         .find((song) => {
           const start = Number(song.start);
@@ -274,17 +281,25 @@ export default function useControlBar({
         const currentId = `${currentSong?.video_id}-${currentSong?.start}`;
         const targetId = `${targetSong.video_id}-${targetSong.start}`;
         const isDifferentVideo = currentSong?.video_id !== targetSong.video_id;
+        const activeSong = currentPlayingSong ?? currentSong;
+        const isActiveChapter =
+          activeSong?.video_id === targetSong.video_id &&
+          Number(activeSong.start) === Number(targetSong.start);
+        const seekTime =
+          interaction === "track" && !isActiveChapter
+            ? Number(targetSong.start)
+            : actualTime;
 
         // 異なる動画への切替時は player が入れ替わるため seek を直接呼ばない
         if (isDifferentVideo) {
-          changeCurrentSong(targetSong, targetSong.video_id, actualTime);
+          changeCurrentSong(targetSong, targetSong.video_id, seekTime);
           return;
         }
 
         if (currentId !== targetId) {
-          changeCurrentSong(targetSong, targetSong.video_id, actualTime);
+          changeCurrentSong(targetSong, targetSong.video_id, seekTime);
         }
-        playerControls.seekTo(actualTime);
+        playerControls.seekTo(seekTime);
       } else {
         playerControls.seekTo(actualTime);
       }
@@ -296,6 +311,7 @@ export default function useControlBar({
       videoStartTime,
       songsInVideo,
       currentSong,
+      currentPlayingSong,
       changeCurrentSong,
     ],
   );
@@ -315,7 +331,7 @@ export default function useControlBar({
   }, []);
 
   const handleSeekEnd = useCallback(
-    (value?: number) => {
+    (value?: number, interaction: SeekInteraction = "thumb") => {
       if (typeof value === "number" && Number.isFinite(value)) {
         setTempSeekValue(value);
       }
@@ -326,7 +342,7 @@ export default function useControlBar({
         typeof value === "number" && Number.isFinite(value)
           ? value
           : tempSeekValue;
-      seekToFromDisplayValue(targetValue, true);
+      seekToFromDisplayValue(targetValue, true, interaction);
     },
     [tempSeekValue, seekToFromDisplayValue],
   );

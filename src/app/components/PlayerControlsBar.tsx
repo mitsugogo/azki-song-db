@@ -45,6 +45,8 @@ type Hovered = {
   containerWidth: number;
 } | null;
 
+type SeekInteraction = "track" | "thumb";
+
 type CumulativeItem = {
   song: Song;
   /**
@@ -114,7 +116,7 @@ type Props = {
     e: ChangeEvent<HTMLInputElement> | SyntheticEvent<HTMLInputElement>,
   ) => void;
   onSeekStart?: () => void;
-  onSeekEnd?: (value?: number) => void;
+  onSeekEnd?: (value?: number, interaction?: SeekInteraction) => void;
 
   // player settings
   currentSong: Song | null;
@@ -255,6 +257,8 @@ export default function PlayerControlsBar({
   }, [allSongsHaveEnd, totalSongsDuration, displayDuration]);
 
   const sliderRootRef = useRef<HTMLDivElement | null>(null);
+  const seekInteractionRef = useRef<SeekInteraction>("track");
+  const pendingSeekValueRef = useRef(tempSeekValue);
   const [trackInsets, setTrackInsets] = useState({ left: 0, right: 0 });
   const getMenuPortalPosition = (anchor: HTMLElement | null) => {
     if (typeof window === "undefined" || !anchor) {
@@ -301,6 +305,10 @@ export default function PlayerControlsBar({
       };
     });
   }, [allSongsHaveEnd, songCumulativeMap, songsInVideo]);
+
+  useEffect(() => {
+    pendingSeekValueRef.current = tempSeekValue;
+  }, [tempSeekValue]);
 
   useEffect(() => {
     const root = sliderRootRef.current;
@@ -391,7 +399,7 @@ export default function PlayerControlsBar({
       <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-2">
         <div className="relative flex-1">
           {/* Chapter markers */}
-          {songsInVideo.length > 0 && (
+          {songsInVideo.length > 1 && (
             <div className="pointer-events-none absolute inset-0 flex mt-4 z-50">
               {chapters.map((item, idx) => {
                 const ds = item.displayStart ?? 0;
@@ -488,8 +496,15 @@ export default function PlayerControlsBar({
 
           <div
             ref={sliderRootRef}
-            onPointerDownCapture={() => {
+            onPointerDownCapture={(event) => {
               if (disabled) return;
+              const target = event.target as HTMLElement;
+              seekInteractionRef.current = target.closest(
+                ".youtube-progress-thumb",
+              )
+                ? "thumb"
+                : "track";
+              pendingSeekValueRef.current = tempSeekValue;
               try {
                 document.documentElement.setAttribute(
                   "data-seek-dragging",
@@ -503,14 +518,20 @@ export default function PlayerControlsBar({
               try {
                 document.documentElement.removeAttribute("data-seek-dragging");
               } catch (_) {}
-              onSeekEnd?.(tempSeekValue);
+              onSeekEnd?.(
+                pendingSeekValueRef.current,
+                seekInteractionRef.current,
+              );
             }}
             onPointerCancelCapture={() => {
               if (disabled) return;
               try {
                 document.documentElement.removeAttribute("data-seek-dragging");
               } catch (_) {}
-              onSeekEnd?.(tempSeekValue);
+              onSeekEnd?.(
+                pendingSeekValueRef.current,
+                seekInteractionRef.current,
+              );
             }}
           >
             <Slider
@@ -541,10 +562,14 @@ export default function PlayerControlsBar({
                 }))}
               onChange={(value) => {
                 if (Array.isArray(value)) return;
+                pendingSeekValueRef.current = value;
                 handleSeekChange(value);
               }}
               onMouseMove={(e) => {
-                if (songsInVideo.length === 0) return;
+                if (songsInVideo.length <= 1) {
+                  setHoveredChapter(null);
+                  return;
+                }
 
                 // トラック要素を基準にマウス位置を算出（値→px のマッピングと一致させる）
                 const rootRect =
@@ -644,18 +669,20 @@ export default function PlayerControlsBar({
                 track: "youtube-progress-track",
                 bar: "youtube-progress-bar-fill",
                 thumb: "youtube-progress-thumb",
+                label: "youtube-progress-label",
                 mark: "youtube-progress-mark",
               }}
               styles={{
                 track: { backgroundColor: "rgba(255,255,255,0.3)" },
                 bar: { backgroundColor: "#ff0000" },
+                label: { top: "calc(100% + 8px)", zIndex: 60 },
               }}
               data-seek-slider
             />
           </div>
 
           {/* Chapter Tooltip */}
-          {hoveredChapter && (
+          {songsInVideo.length > 1 && hoveredChapter && (
             <div
               id="youtube-progress-bar-chapter-tooltip"
               className="pointer-events-none absolute z-50 max-w-xs rounded-lg bg-black/95 px-3 py-2 text-white shadow-2xl backdrop-blur-sm"
