@@ -219,7 +219,7 @@ export default function PlayerSection({
       <OverlayScrollbarsComponent
         options={{ scrollbars: { autoHide: "leave" } }}
         element="div"
-        className="flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
+        className="player-section-scrollbars flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
         defer
       >
         {/* YouTube Player */}

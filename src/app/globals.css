@@ -132,6 +132,10 @@ body {
 }
 
 /* YouTube-style Progress Bar (Mantine Slider) */
+.player-section-scrollbars > [data-overlayscrollbars-viewport] {
+  z-index: auto !important;
+}
+
 .youtube-progress-bar {
   position: relative;
   top: 4px;
