@@ -44,7 +44,7 @@ describe("collabUnits utilities", () => {
 
   it("getCollabUnitName はぺこマリを返す", () => {
     expect(getCollabUnitName(["宝鐘マリン", "兎田ぺこら"])).toBe("ぺこマリ");
-    expect(getCollabUnitName(["Houshou Marine", "Usada Pekora"], "en")).toBe(
+    expect(getCollabUnitName(["Houshou marine", "Usada Pekora"], "en")).toBe(
       "PekoMari",
     );
   });
@@ -81,7 +81,7 @@ describe("collabUnits utilities", () => {
     expect(getCollabMembers("ぺこマリ")).toEqual(["兎田ぺこら", "宝鐘マリン"]);
     expect(getCollabMembers("pekomari", "en")).toEqual([
       "Usada Pekora",
-      "Houshou Marine",
+      "Houshou marine",
     ]);
   });
 
