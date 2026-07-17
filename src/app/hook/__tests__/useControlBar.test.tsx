@@ -102,6 +102,109 @@ describe("useControlBar (seek behavior)", () => {
     expect(mockPlayerControls.seekTo).toHaveBeenCalledTimes(1);
   });
 
+  it("再生中チャプターのトラッククリックはクリック位置へシークする", () => {
+    const songBWithEnd: Song = { ...songB, end: "60" };
+    const mockPlayerControls = {
+      isReady: true,
+      play: () => {},
+      pause: () => {},
+      seekTo: vi.fn(),
+      setVolume: () => {},
+      currentTime: 10,
+      seekInFlight: null,
+      volume: 100,
+      duration: 60,
+      isMuted: false,
+    } as any;
+
+    const { result } = renderHook(() =>
+      useControlBar({
+        allSongs: [songA, songBWithEnd],
+        currentSong: songA,
+        nextSong: songBWithEnd,
+        isPlaying: true,
+        playerControls: mockPlayerControls,
+        changeCurrentSong: vi.fn(),
+      }),
+    );
+
+    act(() => {
+      result.current.handleSeekEnd(12, "track");
+    });
+
+    expect(mockPlayerControls.seekTo).toHaveBeenCalledWith(12);
+  });
+
+  it("別チャプターのトラッククリックはチャプター先頭へシークする", () => {
+    const songBWithEnd: Song = { ...songB, end: "60" };
+    const changeCurrentSong = vi.fn();
+    const mockPlayerControls = {
+      isReady: true,
+      play: () => {},
+      pause: () => {},
+      seekTo: vi.fn(),
+      setVolume: () => {},
+      currentTime: 10,
+      seekInFlight: null,
+      volume: 100,
+      duration: 60,
+      isMuted: false,
+    } as any;
+
+    const { result } = renderHook(() =>
+      useControlBar({
+        allSongs: [songA, songBWithEnd],
+        currentSong: songA,
+        nextSong: songBWithEnd,
+        isPlaying: true,
+        playerControls: mockPlayerControls,
+        changeCurrentSong,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSeekEnd(40, "track");
+    });
+
+    expect(changeCurrentSong).toHaveBeenCalledWith(songBWithEnd, "vidX", 30);
+    expect(mockPlayerControls.seekTo).toHaveBeenCalledWith(30);
+  });
+
+  it("ノブを別チャプターへドラッグした場合は離した位置へシークする", () => {
+    const songBWithEnd: Song = { ...songB, end: "60" };
+    const changeCurrentSong = vi.fn();
+    const mockPlayerControls = {
+      isReady: true,
+      play: () => {},
+      pause: () => {},
+      seekTo: vi.fn(),
+      setVolume: () => {},
+      currentTime: 10,
+      seekInFlight: null,
+      volume: 100,
+      duration: 60,
+      isMuted: false,
+    } as any;
+
+    const { result } = renderHook(() =>
+      useControlBar({
+        allSongs: [songA, songBWithEnd],
+        currentSong: songA,
+        nextSong: songBWithEnd,
+        isPlaying: true,
+        playerControls: mockPlayerControls,
+        changeCurrentSong,
+      }),
+    );
+
+    act(() => {
+      result.current.handleSeekEnd(40, "thumb");
+    });
+
+    expect(changeCurrentSong).toHaveBeenCalledWith(songBWithEnd, "vidX", 40);
+    expect(mockPlayerControls.seekTo).toHaveBeenCalledWith(40);
+  });
+
   it("異なる動画の次へ操作ではseekは呼ばれず changeCurrentSong のみ行われる", () => {
     const mockChangeCurrentSong = vi.fn();
     const differentSong: Song = { ...songB, video_id: "vidY", start: "10" };

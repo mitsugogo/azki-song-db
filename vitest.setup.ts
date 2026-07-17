@@ -32,6 +32,7 @@ vi.mock("next-intl", () => {
     useLocale: () => "ja",
     useTranslations: () => (key: string) => {
       const translations: Record<string, string> = {
+        ballad: "バラード",
         "detail.preview": "プレビュー",
         close: "閉じる",
         groupArranger: "編曲",
@@ -47,6 +48,7 @@ vi.mock("next-intl", () => {
         groupYear: "配信年",
         more: "もっと見る",
         searchPlaceholder: "曲名、アーティスト、タグなどで検索",
+        songMode: "動画再生モード",
       };
       return translations[key] ?? key;
     },

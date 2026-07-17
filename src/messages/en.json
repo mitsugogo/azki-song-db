@@ -45,7 +45,8 @@
     "groupTag": "Tag",
     "groupMilestone": "Milestone",
     "groupYear": "Year",
-    "groupSeason": "Season"
+    "groupSeason": "Season",
+    "songMode": "Playback mode"
   },
   "ThemeToggle": {
     "label": "Toggle theme"
@@ -100,7 +101,9 @@
       "groupTheme": "Theme",
       "groupScene": "Scene",
       "genre": "Genre",
-      "surpriseTooltip": "Play songs randomly"
+      "surpriseTooltip": "Play songs randomly",
+      "copyModeUrl": "Copy the {mode} mode URL",
+      "modeUrlCopied": "Copied the {mode} mode URL"
     },
     "nowPlayingSongInfo": {
       "views": "{count} views",
@@ -203,6 +206,8 @@
     "collaborationSongsLinkCopied": "Copied the Unit / Guest Songs mode link",
     "karaokeSongsLinkCopied": "Copied the Singing Streams mode link",
     "shareLinkTooltip": "Copy a link to share this mode",
+    "showMoreSongModes": "Show more",
+    "showFewerSongModes": "Show less",
     "recommendedLabel": "Recommended",
     "recommendedTitle": "Recommended songs",
     "eventsTitle": "Events",
@@ -271,6 +276,61 @@
           "title": "Collab mode | {siteName}",
           "ogTitle": "Collab mode",
           "ogSubtitle": "A playlist collecting AZKi's collaboration songs"
+        },
+        "karaoke": {
+          "title": "Singing streams mode | {siteName}",
+          "ogTitle": "Singing streams mode",
+          "ogSubtitle": "A playlist of songs performed in AZKi's singing streams"
+        },
+        "collabKaraoke": {
+          "title": "Collab singing streams mode | {siteName}",
+          "ogTitle": "Collab singing streams mode",
+          "ogSubtitle": "A playlist of songs performed in AZKi's collab singing streams"
+        },
+        "specialLive": {
+          "title": "Anniversary / special live mode | {siteName}",
+          "ogTitle": "Anniversary / special live mode",
+          "ogSubtitle": "A playlist of songs performed in AZKi's anniversary and special live streams"
+        },
+        "shorts": {
+          "title": "Song-introduction Shorts mode | {siteName}",
+          "ogTitle": "Song-introduction Shorts mode",
+          "ogSubtitle": "A playlist collecting AZKi's song-introduction Shorts"
+        },
+        "ballad": {
+          "title": "Ballads mode | {siteName}",
+          "ogTitle": "Ballads mode",
+          "ogSubtitle": "A playlist of ballads and mellow songs performed by AZKi"
+        },
+        "springSongs": {
+          "title": "Spring songs mode | {siteName}",
+          "ogTitle": "Spring songs mode",
+          "ogSubtitle": "A playlist of spring songs performed by AZKi"
+        },
+        "summerSongs": {
+          "title": "Summer songs mode | {siteName}",
+          "ogTitle": "Summer songs mode",
+          "ogSubtitle": "A playlist of summer songs performed by AZKi"
+        },
+        "winterSongs": {
+          "title": "Winter songs mode | {siteName}",
+          "ogTitle": "Winter songs mode",
+          "ogSubtitle": "A playlist of winter songs performed by AZKi"
+        },
+        "animeSongs": {
+          "title": "Anime songs mode | {siteName}",
+          "ogTitle": "Anime songs mode",
+          "ogSubtitle": "A playlist of anime songs performed by AZKi"
+        },
+        "hololiveSongs": {
+          "title": "hololive songs mode | {siteName}",
+          "ogTitle": "hololive songs mode",
+          "ogSubtitle": "A playlist of hololive songs performed by AZKi"
+        },
+        "vocaloidSongs": {
+          "title": "Vocaloid songs mode | {siteName}",
+          "ogTitle": "Vocaloid songs mode",
+          "ogSubtitle": "A playlist of Vocaloid songs performed by AZKi"
         }
       },
       "search": {

@@ -85,6 +85,8 @@ export default function useMainPlayerControls({
   // keep a mutable ref with the latest videoId so callbacks can read it
   const latestVideoIdRef = useRef<string | null>(videoId ?? null);
   latestVideoIdRef.current = videoId ?? null;
+  const latestStartTimeRef = useRef(startTime);
+  latestStartTimeRef.current = startTime;
   const currentSongKeyRef = useRef<string | null>(
     currentSong ? `${currentSong.video_id}-${currentSong.start}` : null,
   );
@@ -439,19 +441,20 @@ export default function useMainPlayerControls({
         typeof event.target.getCurrentTime === "function"
           ? event.target.getCurrentTime()
           : NaN;
-      const initialPlaybackTarget =
-        initialPlaybackTargetRef.current ??
-        Number(startTime ?? currentSong?.start ?? 0);
-      const endedBeforeInitialSeek =
-        event.data === 0 &&
+      const initialPlaybackTarget = initialPlaybackTargetRef.current;
+      const isBeforeInitialPlaybackTarget =
         initialPlaybackTarget !== null &&
         Number.isFinite(initialPlaybackTarget) &&
         initialPlaybackTarget > 0 &&
         typeof currentTime === "number" &&
         Number.isFinite(currentTime) &&
         currentTime < initialPlaybackTarget - 1;
+      const shouldDeferPlaybackState =
+        isBeforeInitialPlaybackTarget && (event.data === 1 || event.data === 0);
 
-      if (!endedBeforeInitialSeek) {
+      // 開始位置へ到達する前の PLAYING / ENDED を通常の再生監視へ渡すと、
+      // 0:00 を別の曲として判定して次曲へ進んでしまうため、シーク完了まで保留する。
+      if (!shouldDeferPlaybackState) {
         originalHandleStateChange(event);
       }
       updatePlayerSnapshot(event.target);
@@ -487,7 +490,6 @@ export default function useMainPlayerControls({
           initialStartSeekRetryCountRef.current = 0;
           zeroStartSeekRetryAttemptedSongKeyRef.current = null;
         } else if (
-          currentSong?.is_members_only &&
           event.data === 1 &&
           typeof currentTime === "number" &&
           Number.isFinite(currentTime) &&
@@ -547,7 +549,6 @@ export default function useMainPlayerControls({
       currentSong,
       globalPlayer,
       originalHandleStateChange,
-      startTime,
       updatePlayerSnapshot,
     ],
   );
@@ -874,6 +875,18 @@ export default function useMainPlayerControls({
   // - そのため、既存の player が既に new `videoId` を表している場合は
   //   参照をクリアしない（誤って ready 状態を消してしまうのを防ぐ）。
   useEffect(() => {
+    const requestedStartTime = Number(latestStartTimeRef.current ?? 0);
+    const initialStartTime =
+      videoId && Number.isFinite(requestedStartTime) && requestedStartTime > 0
+        ? requestedStartTime
+        : null;
+    const resetInitialSeekStateForVideo = () => {
+      initialStartSeekRef.current = initialStartTime;
+      initialPlaybackTargetRef.current = initialStartTime;
+      initialStartSeekRetryCountRef.current = 0;
+      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
+    };
+
     let shouldClear = true;
     try {
       const now = Date.now();
@@ -915,9 +928,9 @@ export default function useMainPlayerControls({
       }
       setIsPlayerReady(false);
       pendingSeekRef.current = null;
-      initialStartSeekRef.current = null;
-      initialStartSeekRetryCountRef.current = 0;
-      zeroStartSeekRetryAttemptedSongKeyRef.current = null;
+      // 共有 iframe は videoId の変更では再マウントされず、新しい onReady が
+      // 来ないことがあるため、動画切替時点で初期シーク待ちを再設定する。
+      resetInitialSeekStateForVideo();
     } else {
       // もし getVideoDataが利用できないためにクリアを遅延していた場合、マイクロタスクをスケジュールして、何も設定されなければ playerRefVideoIdRef を再確認してクリアする
       const recentlyReady =
@@ -931,9 +944,7 @@ export default function useMainPlayerControls({
               playerRefVideoIdRef.current = null;
               setIsPlayerReady(false);
               pendingSeekRef.current = null;
-              initialStartSeekRef.current = null;
-              initialStartSeekRetryCountRef.current = 0;
-              zeroStartSeekRetryAttemptedSongKeyRef.current = null;
+              resetInitialSeekStateForVideo();
             }
           } catch (_) {}
         }, 0);

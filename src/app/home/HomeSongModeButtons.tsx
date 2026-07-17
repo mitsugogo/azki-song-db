@@ -1,100 +1,155 @@
 "use client";
 
-import { Button, CopyButton, Tooltip } from "@mantine/core";
+import { ActionIcon, Button, CopyButton, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { memo } from "react";
-import { LuCopy, LuCopyCheck } from "react-icons/lu";
+import { memo, useState } from "react";
+import { LuCheck, LuChevronDown, LuChevronUp, LuLink } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
 import {
+  getSongModeItemLabel,
   renderSongModeIcon,
   SONG_MODE_MENU_ITEMS,
+  type SongMode,
 } from "../components/songModeMenu";
 import { baseUrl } from "../config/siteConfig";
 import { showAppNotification } from "../lib/notifications";
+import { buildWatchHref } from "../lib/watchUrl";
 
-const SONG_MODES = [
+const FEATURED_SONG_MODES = [
   {
     mode: "original-songs",
-    href: "/watch?q=original-songs",
-    shareUrl: new URL("/watch?q=original-songs", baseUrl).toString(),
     color: "tan",
     labelKey: "originalSongs",
-    copiedKey: "originalSongsLinkCopied",
   },
   {
     mode: "cover-songs",
-    href: "/watch?q=cover-songs",
-    shareUrl: new URL("/watch?q=cover-songs", baseUrl).toString(),
     color: "gray",
     labelKey: "coverSongs",
-    copiedKey: "coverSongsLinkCopied",
   },
   {
     mode: "collaboration-songs",
-    href: "/watch?q=collaboration-songs",
-    shareUrl: new URL("/watch?q=collaboration-songs", baseUrl).toString(),
     color: "gray",
     labelKey: "collaborationSongs",
-    copiedKey: "collaborationSongsLinkCopied",
   },
   {
     mode: "singing-stream",
-    href: "/watch?q=tag:歌枠",
-    shareUrl: new URL("/watch?q=tag:%E6%AD%8C%E6%9E%A0", baseUrl).toString(),
     color: "gray",
     labelKey: "karaokeSongs",
-    copiedKey: "karaokeSongsLinkCopied",
   },
 ] as const;
 
+const ADDITIONAL_SONG_MODES = [
+  "spring-song",
+  "summer-song",
+  "winter-song",
+  "ballad",
+  "special-live",
+  "collab-singing-stream",
+  "song-introduction-shorts",
+  "anime-songs",
+  "hololive-songs",
+  "vocaloid-songs",
+] as const satisfies readonly Exclude<SongMode, "">[];
+
 export const HomeSongModeButtons = memo(function HomeSongModeButtons() {
   const t = useTranslations("Home");
+  const tSongMode = useTranslations("Watch.songMode");
+  const [showAdditionalModes, setShowAdditionalModes] = useState(false);
+
+  const renderModeButton = (
+    mode: Exclude<SongMode, "">,
+    label: string,
+    color?: string,
+  ) => {
+    const menuItem =
+      SONG_MODE_MENU_ITEMS.find((item) => item.mode === mode) ??
+      SONG_MODE_MENU_ITEMS[0];
+    const href = buildWatchHref({ searchTerm: menuItem.searchTerm });
+    const shareUrl = new URL(href, baseUrl).toString();
+
+    return (
+      <div key={mode} className="group relative w-full">
+        <Button
+          component={Link}
+          href={href}
+          className="w-full min-w-0"
+          leftSection={renderSongModeIcon(menuItem.icon, "h-4 w-4")}
+          color={color ?? menuItem.color}
+          variant="light"
+        >
+          {label}
+        </Button>
+        <CopyButton value={shareUrl}>
+          {({ copied, copy }) => (
+            <Tooltip withArrow arrowSize={8} label={t("shareLinkTooltip")}>
+              <ActionIcon
+                aria-label={t("shareLinkTooltip")}
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 opacity-40 transition-opacity hover:opacity-70 focus:opacity-70 md:opacity-0 md:group-hover:opacity-70"
+                color="gray.4"
+                variant="subtle"
+                onClick={() => {
+                  copy();
+                  showAppNotification({
+                    title: t("copied"),
+                    message: tSongMode("modeUrlCopied", { mode: label }),
+                    type: "success",
+                    autoClose: 5000,
+                  });
+                }}
+              >
+                {copied ? <LuCheck /> : <LuLink />}
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </CopyButton>
+      </div>
+    );
+  };
 
   return (
-    <div className="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-      {SONG_MODES.map((item) => {
-        const menuItem =
-          SONG_MODE_MENU_ITEMS.find(({ mode }) => mode === item.mode) ??
-          SONG_MODE_MENU_ITEMS[0];
+    <div className="mt-2 w-full">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {FEATURED_SONG_MODES.map((item) =>
+          renderModeButton(item.mode, t(item.labelKey), item.color),
+        )}
+      </div>
 
-        return (
-          <Button.Group key={item.mode} className="w-full">
-            <Button
-              component={Link}
-              href={item.href}
-              className="min-w-0 flex-1"
-              leftSection={renderSongModeIcon(menuItem.icon, "h-4 w-4")}
-              color={item.color}
-              variant="light"
-            >
-              {t(item.labelKey)}
-            </Button>
-            <CopyButton value={item.shareUrl}>
-              {({ copied, copy }) => (
-                <Tooltip withArrow arrowSize={8} label={t("shareLinkTooltip")}>
-                  <Button
-                    aria-label={t("shareLinkTooltip")}
-                    className="shrink-0"
-                    color={item.color}
-                    variant="light"
-                    onClick={() => {
-                      copy();
-                      showAppNotification({
-                        title: t("copied"),
-                        message: t(item.copiedKey),
-                        type: "success",
-                        autoClose: 5000,
-                      });
-                    }}
-                  >
-                    {copied ? <LuCopyCheck /> : <LuCopy />}
-                  </Button>
-                </Tooltip>
-              )}
-            </CopyButton>
-          </Button.Group>
-        );
-      })}
+      <button
+        type="button"
+        className="mx-auto mt-2 flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-xs text-gray-500/70 transition-colors hover:bg-gray-100/70 hover:text-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400 dark:text-gray-400/60 dark:hover:bg-gray-800/60 dark:hover:text-gray-300"
+        aria-expanded={showAdditionalModes}
+        aria-controls="additional-song-modes"
+        onClick={() => setShowAdditionalModes((current) => !current)}
+      >
+        {showAdditionalModes ? (
+          <LuChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+        ) : (
+          <LuChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+        )}
+        <span>
+          {showAdditionalModes
+            ? t("showFewerSongModes")
+            : t("showMoreSongModes")}
+        </span>
+      </button>
+
+      {showAdditionalModes ? (
+        <div
+          id="additional-song-modes"
+          className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2"
+        >
+          {ADDITIONAL_SONG_MODES.map((mode) => {
+            const menuItem =
+              SONG_MODE_MENU_ITEMS.find((item) => item.mode === mode) ??
+              SONG_MODE_MENU_ITEMS[0];
+
+            return renderModeButton(
+              mode,
+              getSongModeItemLabel(menuItem, tSongMode),
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 });

@@ -12,6 +12,7 @@ import {
   encodePlaylistOgPayload,
   tryDecodePlaylistUrlParam,
 } from "@/app/lib/playlistUrl";
+import { getSongModeMetadataKey } from "@/app/config/songModes";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -61,9 +62,7 @@ export async function generateMetadata({
   };
 
   if (q) {
-    const isOriginalSongsMode = q === "sololive2025" || q === "original-songs";
-    const isCoverSongsMode = q === "cover-songs";
-    const isCollaborationSongsMode = q === "collaboration-songs";
+    const songModeMetadataKey = getSongModeMetadataKey(q);
 
     const prefixMap: Record<string, { icon: string }> = {
       "unit:": { icon: "👥" },
@@ -76,18 +75,12 @@ export async function generateMetadata({
       "season:": { icon: "🌸" },
     };
 
-    if (isOriginalSongsMode) {
-      title = tMeta("mode.original.title", { siteName: siteConfig.siteName });
-      ogTitle = tMeta("mode.original.ogTitle");
-      ogSubtitle = tMeta("mode.original.ogSubtitle");
-    } else if (isCoverSongsMode) {
-      title = tMeta("mode.cover.title", { siteName: siteConfig.siteName });
-      ogTitle = tMeta("mode.cover.ogTitle");
-      ogSubtitle = tMeta("mode.cover.ogSubtitle");
-    } else if (isCollaborationSongsMode) {
-      title = tMeta("mode.collab.title", { siteName: siteConfig.siteName });
-      ogTitle = tMeta("mode.collab.ogTitle");
-      ogSubtitle = tMeta("mode.collab.ogSubtitle");
+    if (songModeMetadataKey) {
+      title = tMeta(`mode.${songModeMetadataKey}.title`, {
+        siteName: siteConfig.siteName,
+      });
+      ogTitle = tMeta(`mode.${songModeMetadataKey}.ogTitle`);
+      ogSubtitle = tMeta(`mode.${songModeMetadataKey}.ogSubtitle`);
     } else {
       let matched = false;
       for (const [prefix, { icon }] of Object.entries(prefixMap)) {

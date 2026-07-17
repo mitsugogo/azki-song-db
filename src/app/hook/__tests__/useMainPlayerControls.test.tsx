@@ -972,7 +972,7 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
   });
 
-  it("通常動画では0:00から再生開始しても追加の補正シークを行わない", () => {
+  it("通常動画でも0:00から再生開始した場合は補正シークを1回だけ試みる", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({
         songs: mockSongs,
@@ -1003,7 +1003,56 @@ describe("useMainPlayerControls", () => {
       } as any);
     });
 
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
+    expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).toHaveBeenCalledTimes(2);
+  });
+
+  it("共有iframeの別動画切替ではonReadyが再発火しなくても開始位置を補正する", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
     expect(mockPlayer.seekTo).toHaveBeenCalledTimes(1);
+    expect(mockPlayer.seekTo).toHaveBeenCalledWith(10, true);
+    expect(result.current.isPlaying).toBe(false);
+
+    mockPlayer.getCurrentTime.mockReturnValue(10);
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(result.current.isPlaying).toBe(true);
   });
 
   it("explicitな開始秒がある場合はcurrentSong.startより優先して補正シークされる", () => {

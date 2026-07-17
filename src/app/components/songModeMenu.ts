@@ -15,23 +15,9 @@ import {
   LuPartyPopper,
   LuUsers,
 } from "react-icons/lu";
+import { SONG_MODE_IDS, type SongMode } from "../config/songModes";
 
-export type SongMode =
-  | ""
-  | "original-songs"
-  | "cover-songs"
-  | "collaboration-songs"
-  | "singing-stream"
-  | "collab-singing-stream"
-  | "special-live"
-  | "song-introduction-shorts"
-  | "ballad"
-  | "spring-song"
-  | "summer-song"
-  | "winter-song"
-  | "anime-songs"
-  | "hololive-songs"
-  | "vocaloid-songs";
+export type { SongMode } from "../config/songModes";
 
 export type SongModeGroup = "mode" | "theme" | "scene" | "genre";
 
@@ -97,7 +83,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "singing-stream",
-    searchTerm: "tag:歌枠",
+    searchTerm: "singing-stream",
     labelKey: "karaoke",
     icon: LuMicVocal,
     color: "violet",
@@ -105,7 +91,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "special-live",
-    searchTerm: "tag:記念ライブ OR tag:企画ライブ",
+    searchTerm: "special-live",
     labelKey: "specialLive",
     icon: LuPartyPopper,
     color: "magenta",
@@ -113,7 +99,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "collab-singing-stream",
-    searchTerm: "tag:コラボ|tag:歌枠",
+    searchTerm: "collab-singing-stream",
     labelKey: "collabKaraoke",
     icon: LuUsers,
     color: "pink",
@@ -121,7 +107,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "song-introduction-shorts",
-    searchTerm: "tag:楽曲紹介shorts",
+    searchTerm: "song-introduction-shorts",
     labelKey: "shorts",
     icon: LuLibrary,
     color: "lime",
@@ -129,7 +115,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "ballad",
-    searchTerm: "tag:しっとり OR tag:バラード",
+    searchTerm: "ballad",
     labelKey: "ballad",
     icon: LuHeart,
     color: "blue",
@@ -137,7 +123,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "spring-song",
-    searchTerm: "tag:春ソング",
+    searchTerm: "spring-song",
     labelKey: "springSongs",
     icon: LuFlower,
     color: "pink",
@@ -145,7 +131,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "summer-song",
-    searchTerm: "tag:夏ソング",
+    searchTerm: "summer-song",
     labelKey: "summerSongs",
     icon: FaUmbrellaBeach,
     color: "red",
@@ -153,7 +139,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "winter-song",
-    searchTerm: "tag:冬ソング",
+    searchTerm: "winter-song",
     labelKey: "winterSongs",
     icon: FaSnowman,
     color: "cyan",
@@ -161,7 +147,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "anime-songs",
-    searchTerm: "tag:アニソン",
+    searchTerm: "anime-songs",
     labelKey: "animeSongs",
     icon: LuMicVocal,
     color: "palePurple",
@@ -169,7 +155,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "hololive-songs",
-    searchTerm: "tag:ホロライブ楽曲",
+    searchTerm: "hololive-songs",
     labelKey: "hololiveSongs",
     icon: createElement(FaPlay),
     color: "hololive",
@@ -177,7 +163,7 @@ export const SONG_MODE_MENU_ITEMS: SongModeMenuItem[] = [
   },
   {
     mode: "vocaloid-songs",
-    searchTerm: "tag:VOCALOID",
+    searchTerm: "vocaloid-songs",
     labelKey: "vocaloidSongs",
     icon: LuMicVocal,
     color: "miku",
@@ -199,6 +185,13 @@ export const getSongMode = (term?: string | null): SongMode => {
     .split(/\||\s+or\s+/i)
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
+
+  const directMode = SONG_MODE_IDS.find(
+    (mode) => mode !== "" && tokens.includes(mode),
+  );
+  if (directMode) {
+    return directMode;
+  }
 
   if (tokens.includes("tag:コラボ") && tokens.includes("tag:歌枠")) {
     return "collab-singing-stream";
