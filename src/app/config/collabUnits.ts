@@ -184,7 +184,7 @@ export const collabUnits: CollabUnit[] = [
     hl: {
       en: {
         unitName: "PekoMari",
-        members: ["Usada Pekora", "Houshou Marine"],
+        members: ["Usada Pekora", "Houshou marine"],
       },
     },
   },
