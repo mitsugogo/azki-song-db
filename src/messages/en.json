@@ -101,7 +101,9 @@
       "groupTheme": "Theme",
       "groupScene": "Scene",
       "genre": "Genre",
-      "surpriseTooltip": "Play songs randomly"
+      "surpriseTooltip": "Play songs randomly",
+      "copyModeUrl": "Copy the {mode} mode URL",
+      "modeUrlCopied": "Copied the {mode} mode URL"
     },
     "nowPlayingSongInfo": {
       "views": "{count} views",
@@ -204,6 +206,8 @@
     "collaborationSongsLinkCopied": "Copied the Unit / Guest Songs mode link",
     "karaokeSongsLinkCopied": "Copied the Singing Streams mode link",
     "shareLinkTooltip": "Copy a link to share this mode",
+    "showMoreSongModes": "Show more",
+    "showFewerSongModes": "Show less",
     "recommendedLabel": "Recommended",
     "recommendedTitle": "Recommended songs",
     "eventsTitle": "Events",

@@ -100,7 +100,9 @@
       "groupMode": "モード",
       "groupTheme": "テーマ",
       "groupScene": "シーン",
-      "groupGenre": "ジャンル"
+      "groupGenre": "ジャンル",
+      "copyModeUrl": "{mode}モードのURLをコピー",
+      "modeUrlCopied": "{mode}モードのURLをコピーしました"
     },
     "nowPlayingSongInfo": {
       "views": "{count} 回視聴",
@@ -203,6 +205,8 @@
     "collaborationSongsLinkCopied": "ユニット・ゲスト参加曲モードのリンクをクリップボードにコピーしました",
     "karaokeSongsLinkCopied": "歌枠モードのリンクをクリップボードにコピーしました",
     "shareLinkTooltip": "布教用のリンクをコピー",
+    "showMoreSongModes": "さらにみる",
+    "showFewerSongModes": "閉じる",
     "recommendedLabel": "RECOMMENDED",
     "recommendedTitle": "おすすめ楽曲",
     "eventsTitle": "イベント",

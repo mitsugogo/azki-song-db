@@ -1,9 +1,12 @@
 "use client";
 
-import { Button, Menu, Tooltip } from "@mantine/core";
-import { useTranslations } from "next-intl";
-import { LuChevronDown, LuSparkles } from "react-icons/lu";
+import { ActionIcon, Button, CopyButton, Menu, Tooltip } from "@mantine/core";
+import { useLocale, useTranslations } from "next-intl";
+import { LuCheck, LuChevronDown, LuLink, LuSparkles } from "react-icons/lu";
+import { routing } from "@/i18n/routing";
+import { baseUrl } from "../config/siteConfig";
 import usePlaylists from "../hook/usePlaylists";
+import { buildWatchHref } from "../lib/watchUrl";
 import {
   getSongModeGroupLabels,
   getSongModeItemLabel,
@@ -25,6 +28,13 @@ type SongModeControlsProps = {
   songModeMenuItems?: SongModeMenuItem[];
 };
 
+export const buildSongModeShareUrl = (searchTerm: string, locale: string) => {
+  const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  const watchHref = buildWatchHref({ searchTerm });
+
+  return new URL(`${localePrefix}${watchHref}`, baseUrl).toString();
+};
+
 export default function SongModeControls({
   currentSongMode,
   onSelectSongMode,
@@ -36,6 +46,7 @@ export default function SongModeControls({
 }: SongModeControlsProps) {
   const t = useTranslations("Watch.searchAndSongList");
   const tSongMode = useTranslations("Watch.songMode");
+  const locale = useLocale();
   const { isNowPlayingPlaylist, authenticated } = usePlaylists();
   const textClassName =
     sizeClassName ?? (variant === "mobile" ? "text-xs" : "text-sm");
@@ -61,12 +72,63 @@ export default function SongModeControls({
   const currentSongModeItem =
     songModeMenuItems.find((item) => item.mode === currentSongMode) ??
     allSongModeItem;
+  const renderMenuItem = (item: SongModeMenuItem) => {
+    const label = getSongModeItemLabel(item, tSongMode);
+    const searchTerm = getSongModeSearchTerm(item.mode);
+    const copyLabel = tSongMode("copyModeUrl", { mode: label });
+
+    return (
+      <div key={item.mode || "all"} className="group relative min-w-0">
+        <Menu.Item
+          className="pr-9"
+          leftSection={renderSongModeIcon(item.icon, "h-4 w-4")}
+          onClick={() => onSelectSongMode(searchTerm)}
+        >
+          {label}
+        </Menu.Item>
+        <CopyButton value={buildSongModeShareUrl(searchTerm, locale)}>
+          {({ copied, copy }) => (
+            <Tooltip
+              withArrow
+              arrowSize={8}
+              label={
+                copied ? tSongMode("modeUrlCopied", { mode: label }) : copyLabel
+              }
+            >
+              <ActionIcon
+                aria-label={copyLabel}
+                className={`absolute right-1 top-1/2 z-10 -translate-y-1/2 transition-opacity focus:opacity-70 ${
+                  variant === "mobile"
+                    ? "opacity-40 hover:opacity-70"
+                    : "opacity-0 group-hover:opacity-70"
+                }`}
+                color="gray.4"
+                size="sm"
+                variant="subtle"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  copy();
+                }}
+              >
+                {copied ? (
+                  <LuCheck className="h-3.5 w-3.5" />
+                ) : (
+                  <LuLink className="h-3.5 w-3.5" />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </CopyButton>
+      </div>
+    );
+  };
 
   return (
     <div className={`flex flex-col gap-1.25 ${rowMarginClassName}`}>
       <Menu
         withinPortal={false}
-        width={variant === "mobile" ? 320 : 440}
+        width={variant === "mobile" ? "80vw" : 520}
         position="bottom-end"
         withArrow
         shadow="md"
@@ -90,14 +152,7 @@ export default function SongModeControls({
         </Menu.Target>
 
         <Menu.Dropdown>
-          <Menu.Item
-            leftSection={renderSongModeIcon(allSongModeItem.icon, "h-4 w-4")}
-            onClick={() =>
-              onSelectSongMode(getSongModeSearchTerm(allSongModeItem.mode))
-            }
-          >
-            {getSongModeItemLabel(allSongModeItem, tSongMode)}
-          </Menu.Item>
+          {renderMenuItem(allSongModeItem)}
           <Menu.Divider />
           {(Object.keys(songModeGroupedItems) as SongModeGroup[]).map(
             (group) => {
@@ -110,19 +165,7 @@ export default function SongModeControls({
                 <div key={group}>
                   <Menu.Label>{songModeGroupLabels[group]}</Menu.Label>
                   <div className="grid grid-cols-2">
-                    {items.map((item) => {
-                      return (
-                        <Menu.Item
-                          key={item.mode}
-                          leftSection={renderSongModeIcon(item.icon, "h-4 w-4")}
-                          onClick={() =>
-                            onSelectSongMode(getSongModeSearchTerm(item.mode))
-                          }
-                        >
-                          {getSongModeItemLabel(item, tSongMode)}
-                        </Menu.Item>
-                      );
-                    })}
+                    {items.map(renderMenuItem)}
                   </div>
                   {group !== "genre" &&
                   songModeGroupedItems.genre.length > 0 ? (
