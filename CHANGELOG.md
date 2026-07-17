@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.17.0](https://github.com/mitsugogo/azki-song-db/compare/v2.16.2...v2.17.0) (2026-07-17)
+
+
+### Features
+
+* 再生モードの検索クエリを専用化 ([2d84273](https://github.com/mitsugogo/azki-song-db/commit/2d84273cff4ad45d6ea75ad3fa5dc3c3360ff526))
+* 楽曲再生モードのボタンを再整備 ([686835f](https://github.com/mitsugogo/azki-song-db/commit/686835f39cfa75e1b72f602734c2cdcea4b08734))
+
+
+### Bug Fixes
+
+* 動画がシークされない場合があったのを修正 ([86ee495](https://github.com/mitsugogo/azki-song-db/commit/86ee495db71e946713e6821065c98e65a40e7dd8))
+
 ### [2.16.2](https://github.com/mitsugogo/azki-song-db/compare/v2.16.1...v2.16.2) (2026-07-17)
 
 
