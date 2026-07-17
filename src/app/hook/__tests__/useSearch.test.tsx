@@ -1064,12 +1064,47 @@ describe("useSearch", () => {
 
     const { result } = renderHook(() => useSearch(songs));
 
-    result.current.setSearchTerm("tag:歌枠");
+    result.current.setSearchTerm("singing-stream");
 
     await waitFor(
       () => {
         expect(result.current.songs.length).toBe(1);
         expect(result.current.songs[0].video_id).toBe("karaoke1");
+      },
+      { timeout: 1000 },
+    );
+  });
+
+  it("バラードの専用検索クエリでしっとり・バラードタグを検索する", async () => {
+    const songs: Song[] = [
+      {
+        ...mockSongs[0],
+        video_id: "mellow1",
+        tags: ["しっとり"],
+      },
+      {
+        ...mockSongs[0],
+        video_id: "ballad1",
+        tags: ["バラード"],
+      },
+      {
+        ...mockSongs[0],
+        video_id: "rock1",
+        tags: ["ロック"],
+      },
+    ];
+
+    const { result } = renderHook(() => useSearch(songs));
+
+    result.current.setSearchTerm("ballad");
+
+    await waitFor(
+      () => {
+        expect(result.current.searchTerm).toBe("ballad");
+        expect(result.current.songs.map((song) => song.video_id)).toEqual([
+          "mellow1",
+          "ballad1",
+        ]);
       },
       { timeout: 1000 },
     );
@@ -1125,7 +1160,7 @@ describe("useSearch", () => {
 
     const { result } = renderHook(() => useSearch(songs));
 
-    result.current.setSearchTerm("tag:楽曲紹介shorts");
+    result.current.setSearchTerm("song-introduction-shorts");
 
     await waitFor(
       () => {

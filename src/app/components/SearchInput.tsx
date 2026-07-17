@@ -30,6 +30,11 @@ import {
   getCollabUnitName,
   normalizeMemberNames,
 } from "../config/collabUnits";
+import {
+  getSongModeItemLabel,
+  renderSongModeIcon,
+  SONG_MODE_MENU_ITEMS,
+} from "./songModeMenu";
 
 interface SearchInputProps {
   allSongs: Song[];
@@ -60,10 +65,22 @@ const searchPrefixes = [
   "season:",
 ] as const;
 
-const removeSearchPrefix = (value: string) => {
+const removeSingleSearchPrefix = (value: string) => {
   const prefix = searchPrefixes.find((item) => value.startsWith(item));
   return prefix ? value.slice(prefix.length) : value;
 };
+
+const removeSearchPrefix = (value: string) =>
+  value
+    .split(/\s+(OR)\s+/i)
+    .map((part) =>
+      part.toUpperCase() === "OR"
+        ? part.toUpperCase()
+        : removeSingleSearchPrefix(part),
+    )
+    .join(" ");
+
+const splitSearchOrExpression = (value: string) => value.split(/\s+(OR)\s+/i);
 
 const createAliasAwareFilter =
   (
@@ -124,6 +141,7 @@ export default function SearchInput({
 }: SearchInputProps) {
   const locale = useLocale();
   const t = useTranslations("SearchInput");
+  const tSongMode = useTranslations("Watch.songMode");
   const isEnglish = locale === "en";
 
   const resolvedPlaceholder = placeholder ?? t("search");
@@ -528,8 +546,13 @@ export default function SearchInput({
     disabled: boolean | undefined;
     reorderProps?: PillReorderProps;
   }) => {
-    const label = removeSearchPrefix(value);
-    const prefixMeta = getSearchPrefixMeta(value);
+    const expressionParts = splitSearchOrExpression(value);
+    const hasPrefixedExpressionPart = expressionParts.some(
+      (part) => part.toUpperCase() !== "OR" && getSearchPrefixMeta(part),
+    );
+    const songModeItem = SONG_MODE_MENU_ITEMS.find(
+      (item) => item.mode !== "" && item.searchTerm === value,
+    );
 
     return (
       <Pill
@@ -539,14 +562,43 @@ export default function SearchInput({
         disabled={disabled}
         {...reorderProps}
       >
-        {prefixMeta ? (
+        {songModeItem ? (
           <Group component="span" gap={4} wrap="nowrap">
-            <Tooltip label={prefixMeta.label} withArrow>
-              <span aria-label={prefixMeta.label} role="img">
-                {prefixMeta.icon}
+            <Tooltip label={t("songMode")} withArrow>
+              <span aria-label={t("songMode")} role="img">
+                {renderSongModeIcon(songModeItem.icon, "h-3.5 w-3.5")}
               </span>
             </Tooltip>
-            <span>{label}</span>
+            <span>{getSongModeItemLabel(songModeItem, tSongMode)}</span>
+          </Group>
+        ) : hasPrefixedExpressionPart ? (
+          <Group component="span" gap={4} wrap="nowrap">
+            {expressionParts.map((part, index) => {
+              if (part.toUpperCase() === "OR") {
+                return <span key={`operator-${index}`}>OR</span>;
+              }
+
+              const partPrefixMeta = getSearchPrefixMeta(part);
+              if (!partPrefixMeta) {
+                return <span key={`${part}-${index}`}>{part}</span>;
+              }
+
+              return (
+                <Group
+                  component="span"
+                  gap={4}
+                  wrap="nowrap"
+                  key={`${part}-${index}`}
+                >
+                  <Tooltip label={partPrefixMeta.label} withArrow>
+                    <span aria-label={partPrefixMeta.label} role="img">
+                      {partPrefixMeta.icon}
+                    </span>
+                  </Tooltip>
+                  <span>{removeSingleSearchPrefix(part)}</span>
+                </Group>
+              );
+            })}
           </Group>
         ) : (
           value

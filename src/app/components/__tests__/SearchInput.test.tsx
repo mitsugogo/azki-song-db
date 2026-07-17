@@ -201,6 +201,39 @@ describe("SearchInput", () => {
     });
   });
 
+  it("専用検索クエリを動画再生モードのラベルで表示する", () => {
+    renderSearchInput([createSong({})], vi.fn(), ["ballad"]);
+
+    expect(
+      screen.getByRole("img", { name: "動画再生モード" }).parentElement,
+    ).toHaveTextContent("バラード");
+    expect(screen.queryByText("ballad")).not.toBeInTheDocument();
+  });
+
+  it("OR条件では各検索語のprefixを表示から取り除く", () => {
+    renderSearchInput([createSong({})], vi.fn(), [
+      "tag:しっとり OR tag:バラード",
+    ]);
+
+    expect(screen.getAllByRole("img", { name: "タグ" })).toHaveLength(2);
+    expect(screen.getByText("OR").parentElement).toHaveTextContent(
+      "しっとりORバラード",
+    );
+    expect(screen.queryByText(/tag:/)).not.toBeInTheDocument();
+  });
+
+  it("異なるprefixのOR条件では各検索種別を個別のアイコンで表示する", () => {
+    renderSearchInput([createSong({})], vi.fn(), [
+      "tag:しっとり OR artist:バラード",
+    ]);
+
+    expect(screen.getByRole("img", { name: "タグ" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "アーティスト" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/(?:tag|artist):/)).not.toBeInTheDocument();
+  });
+
   it("季節・作詞・作曲・編曲の検索候補はprefixラベルをアイコン表示にする", () => {
     renderSearchInput([
       createSong({

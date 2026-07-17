@@ -45,7 +45,8 @@
     "groupTag": "タグ",
     "groupMilestone": "マイルストーン",
     "groupYear": "配信年",
-    "groupSeason": "季節"
+    "groupSeason": "季節",
+    "songMode": "動画再生モード"
   },
   "ThemeToggle": {
     "label": "テーマ切替"
@@ -270,6 +271,61 @@
           "title": "コラボ曲モード | {siteName}",
           "ogTitle": "コラボ曲モード",
           "ogSubtitle": "AZKiさんのコラボ楽曲を集めたプレイリスト"
+        },
+        "karaoke": {
+          "title": "歌枠モード | {siteName}",
+          "ogTitle": "歌枠モード",
+          "ogSubtitle": "AZKiさんの歌枠で歌唱した楽曲を集めたプレイリスト"
+        },
+        "collabKaraoke": {
+          "title": "コラボ歌枠モード | {siteName}",
+          "ogTitle": "コラボ歌枠モード",
+          "ogSubtitle": "AZKiさんのコラボ歌枠で歌唱した楽曲を集めたプレイリスト"
+        },
+        "specialLive": {
+          "title": "記念・企画ライブモード | {siteName}",
+          "ogTitle": "記念・企画ライブモード",
+          "ogSubtitle": "AZKiさんの記念・企画ライブで歌唱した楽曲を集めたプレイリスト"
+        },
+        "shorts": {
+          "title": "楽曲紹介Shortsモード | {siteName}",
+          "ogTitle": "楽曲紹介Shortsモード",
+          "ogSubtitle": "AZKiさんの楽曲紹介Shortsを集めたプレイリスト"
+        },
+        "ballad": {
+          "title": "バラードモード | {siteName}",
+          "ogTitle": "バラードモード",
+          "ogSubtitle": "AZKiさんが歌唱したバラード・しっとりした楽曲を集めたプレイリスト"
+        },
+        "springSongs": {
+          "title": "春ソングモード | {siteName}",
+          "ogTitle": "春ソングモード",
+          "ogSubtitle": "AZKiさんが歌唱した春の楽曲を集めたプレイリスト"
+        },
+        "summerSongs": {
+          "title": "夏ソングモード | {siteName}",
+          "ogTitle": "夏ソングモード",
+          "ogSubtitle": "AZKiさんが歌唱した夏の楽曲を集めたプレイリスト"
+        },
+        "winterSongs": {
+          "title": "冬ソングモード | {siteName}",
+          "ogTitle": "冬ソングモード",
+          "ogSubtitle": "AZKiさんが歌唱した冬の楽曲を集めたプレイリスト"
+        },
+        "animeSongs": {
+          "title": "アニソンモード | {siteName}",
+          "ogTitle": "アニソンモード",
+          "ogSubtitle": "AZKiさんが歌唱したアニメソングを集めたプレイリスト"
+        },
+        "hololiveSongs": {
+          "title": "ホロライブ楽曲モード | {siteName}",
+          "ogTitle": "ホロライブ楽曲モード",
+          "ogSubtitle": "AZKiさんが歌唱したホロライブ楽曲を集めたプレイリスト"
+        },
+        "vocaloidSongs": {
+          "title": "ボカロモード | {siteName}",
+          "ogTitle": "ボカロモード",
+          "ogSubtitle": "AZKiさんが歌唱したVOCALOID楽曲を集めたプレイリスト"
         }
       },
       "search": {

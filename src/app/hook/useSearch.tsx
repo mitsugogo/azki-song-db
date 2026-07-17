@@ -11,6 +11,7 @@ import {
   isCollaborationSong,
   isCoverSong,
 } from "../config/filters";
+import { expandSongModeQuery } from "../config/songModes";
 
 interface UseSearchOptions {
   syncUrl?: boolean;
@@ -334,8 +335,10 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
   // 曲を検索するcallback
   const searchSongs = useCallback(
     (songsToFilter: Song[], term: string) => {
+      const expandedTerm = expandSongModeQuery(term);
+
       // 検索ワードの分割(q=xxx|yyy|zzz)
-      const andClauses = term
+      const andClauses = expandedTerm
         .split(/[\|]+/)
         .map((word) => word.trim())
         .filter(Boolean);
