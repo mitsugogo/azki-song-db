@@ -15,7 +15,8 @@ import {
   type CSSProperties,
 } from "react";
 import { FaUser } from "react-icons/fa6";
-import { IoChevronUp, IoSearch } from "react-icons/io5";
+import { IoChevronUp, IoList, IoSearch } from "react-icons/io5";
+import { useTranslations } from "next-intl";
 import useControlBar from "../hook/useControlBar";
 import SongModeControls from "./SongModeControls";
 import type { YouTubePlayerWithVideoData } from "../hook/usePlayerControls";
@@ -26,7 +27,13 @@ import {
   SharedYouTubePlayerSlot,
   useSharedYouTubePlayerSource,
 } from "./SharedYouTubePlayer";
-import type { TabletopPanes, WatchLayoutMode } from "../hook/useWatchLayout";
+import {
+  COMPACT_TABLETOP_TAB_HEIGHT,
+  type TabletopPanes,
+  type TabletopVariant,
+  type TabletopView,
+  type WatchLayoutMode,
+} from "../hook/useWatchLayout";
 
 const resolveTimeDisplayMode = (
   liveBroadcastContent?: string | null,
@@ -99,6 +106,9 @@ type PlayerSectionProps = {
   showNowPlayingInfo?: boolean;
   layoutMode?: WatchLayoutMode;
   tabletopPanes?: TabletopPanes;
+  tabletopVariant?: TabletopVariant;
+  tabletopView?: TabletopView;
+  onTabletopViewChange?: (view: TabletopView) => void;
 };
 
 export default function PlayerSection({
@@ -138,7 +148,11 @@ export default function PlayerSection({
   showNowPlayingInfo = true,
   layoutMode = "landscape-columns",
   tabletopPanes = null,
+  tabletopVariant = null,
+  tabletopView = "details",
+  onTabletopViewChange,
 }: PlayerSectionProps) {
+  const t = useTranslations("Watch.tabletop");
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
   const [timedLiveCallLineCount, setTimedLiveCallLineCount] = useState(1);
@@ -164,6 +178,7 @@ export default function PlayerSection({
   const sharedVideoId = videoId || currentSong?.video_id;
   const isSharedPlayerActive = Boolean(currentSong && sharedVideoId);
   const isTabletop = layoutMode === "tabletop";
+  const isCompactTabletop = isTabletop && tabletopVariant === "compact";
 
   const sharedPlayerSource = useMemo(
     () => ({
@@ -238,16 +253,33 @@ export default function PlayerSection({
   const bottomPaneWidthFallback = bottomPaneFallback
     ? `${bottomPaneFallback.width}px`
     : "100vw";
+  const bottomPaneLeft = `env(viewport-segment-left 0 1, ${bottomPaneFallback?.left ?? 0}px)`;
+  const bottomPaneTop = `env(viewport-segment-top 0 1, ${
+    bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
+  })`;
+  const bottomPaneWidth = `env(viewport-segment-width 0 1, ${bottomPaneWidthFallback})`;
+  const bottomPaneHeight = `env(viewport-segment-height 0 1, ${
+    bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
+  })`;
   const detailPaneStyle: CSSProperties = {
     position: "fixed",
-    left: `env(viewport-segment-left 0 1, ${bottomPaneFallback?.left ?? 0}px)`,
-    top: `env(viewport-segment-top 0 1, ${
-      bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
-    })`,
-    width: `calc(env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
-    height: `env(viewport-segment-height 0 1, ${
-      bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
-    })`,
+    left: bottomPaneLeft,
+    top: isCompactTabletop
+      ? `calc(${bottomPaneTop} + ${COMPACT_TABLETOP_TAB_HEIGHT}px)`
+      : bottomPaneTop,
+    width: isCompactTabletop ? bottomPaneWidth : `calc(${bottomPaneWidth} / 2)`,
+    height: isCompactTabletop
+      ? `calc(${bottomPaneHeight} - ${COMPACT_TABLETOP_TAB_HEIGHT}px)`
+      : bottomPaneHeight,
+    display:
+      isCompactTabletop && tabletopView !== "details" ? "none" : undefined,
+  };
+  const compactTabletopTabsStyle: CSSProperties = {
+    position: "fixed",
+    left: bottomPaneLeft,
+    top: bottomPaneTop,
+    width: bottomPaneWidth,
+    height: `${COMPACT_TABLETOP_TAB_HEIGHT}px`,
   };
 
   const videoPane = (
@@ -285,6 +317,7 @@ export default function PlayerSection({
           : "flex flex-col"
       }
       style={isTabletop ? detailPaneStyle : undefined}
+      aria-hidden={isCompactTabletop && tabletopView !== "details"}
     >
       {/* Mobile: オーバーレイ検索ボタン */}
       {!isTabletop && (
@@ -349,19 +382,21 @@ export default function PlayerSection({
         />
       )}
 
-      <div
-        className={`${
-          layoutMode === "landscape-columns" ? "block md:hidden" : "block"
-        } mx-2 mt-2`}
-      >
-        <SongModeControls
-          onSurprise={() => playRandomSong?.(songs)}
-          onSelectSongMode={(mode) => setSearchTerm?.(mode)}
-          currentSongMode={currentSongMode}
-          onPlaylist={() => setShowPlaylistSelector?.(true)}
-          variant="mobile"
-        />
-      </div>
+      {!isCompactTabletop && (
+        <div
+          className={`${
+            layoutMode === "landscape-columns" ? "block md:hidden" : "block"
+          } mx-2 mt-2`}
+        >
+          <SongModeControls
+            onSurprise={() => playRandomSong?.(songs)}
+            onSelectSongMode={(mode) => setSearchTerm?.(mode)}
+            currentSongMode={currentSongMode}
+            onPlaylist={() => setShowPlaylistSelector?.(true)}
+            variant="mobile"
+          />
+        </div>
+      )}
 
       {currentSong?.live_call && (
         <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
@@ -440,6 +475,41 @@ export default function PlayerSection({
     </div>
   );
 
+  const compactTabletopTabs = isCompactTabletop ? (
+    <div
+      data-testid="compact-tabletop-tabs"
+      role="tablist"
+      aria-label={t("viewSwitcher")}
+      style={compactTabletopTabsStyle}
+      className="z-30 grid grid-cols-2 border-b border-gray-200 bg-background px-2 dark:border-gray-700"
+    >
+      {(["details", "songs"] as const).map((view) => {
+        const isActive = tabletopView === view;
+        return (
+          <button
+            key={view}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onTabletopViewChange?.(view)}
+            className={`flex min-w-0 items-center justify-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors ${
+              isActive
+                ? "border-pink-500 text-pink-600 dark:text-pink-300"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {view === "details" ? (
+              <FaInfoCircle className="h-4 w-4 shrink-0" />
+            ) : (
+              <IoList className="h-5 w-5 shrink-0" />
+            )}
+            <span className="truncate">{t(view)}</span>
+          </button>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
     <aside
       className={
@@ -455,6 +525,7 @@ export default function PlayerSection({
       {isTabletop ? (
         <>
           {videoPane}
+          {compactTabletopTabs}
           {detailsPane}
         </>
       ) : (

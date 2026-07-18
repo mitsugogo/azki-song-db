@@ -20,6 +20,7 @@ export default function WatchPageClient() {
         data-watch-layout={layout.mode}
         data-device-posture={layout.posture}
         data-viewport-segments={layout.segments.length}
+        data-tabletop-variant={layout.tabletopVariant ?? undefined}
       >
         {!hideHeader && <Header />}
         <main

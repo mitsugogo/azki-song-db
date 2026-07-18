@@ -57,6 +57,11 @@
     "exit": "通常表示に戻す"
   },
   "Watch": {
+    "tabletop": {
+      "viewSwitcher": "表示切替",
+      "details": "情報",
+      "songs": "楽曲一覧"
+    },
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "ランダムで楽曲を再生します",

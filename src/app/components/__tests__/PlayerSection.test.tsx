@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PlayerSection from "../PlayerSection";
 import { MantineProvider } from "@mantine/core";
@@ -251,6 +251,75 @@ describe("PlayerSection", () => {
       JSON.parse(getByTestId("player-controls").dataset.props ?? "{}"),
     ).toMatchObject({ showTheaterToggle: false });
     expect(sharedPlayerSourceRef.current).toMatchObject({ zIndex: 20 });
+  });
+
+  it("compact tabletopでは下段を全幅化して表示切替タブを出す", () => {
+    mockControlBar.songsInVideo = [baseSong];
+    const onTabletopViewChange = vi.fn();
+    const { getByTestId, getByRole, queryByTestId } = renderWithWrapper(
+      <PlayerSection
+        currentSong={baseSong}
+        previousSong={null}
+        nextSong={null}
+        allSongs={[baseSong]}
+        songs={[baseSong]}
+        searchTerm=""
+        isPlaying={false}
+        isMembersOnlyPlayerRecovering={false}
+        playerKey={1}
+        hideFutureSongs={false}
+        handlePlayerOnReady={() => {}}
+        handleStateChange={() => {}}
+        changeCurrentSong={() => {}}
+        playRandomSong={() => {}}
+        setSongsToCurrentVideo={() => {}}
+        setSongs={() => {}}
+        searchSongs={() => []}
+        setOpenShareModal={() => {}}
+        setSearchTerm={() => {}}
+        setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
+        layoutMode="tabletop"
+        tabletopVariant="compact"
+        tabletopView="details"
+        onTabletopViewChange={onTabletopViewChange}
+        tabletopPanes={{
+          top: {
+            x: 0,
+            y: 0,
+            left: 0,
+            top: 0,
+            width: 412,
+            height: 458,
+            right: 412,
+            bottom: 458,
+          },
+          bottom: {
+            x: 0,
+            y: 458,
+            left: 0,
+            top: 458,
+            width: 412,
+            height: 457,
+            right: 412,
+            bottom: 915,
+          },
+        }}
+      />,
+    );
+
+    const detailsPane = getByTestId("watch-player-details-pane");
+    expect(getByTestId("compact-tabletop-tabs")).toHaveStyle({
+      position: "fixed",
+      height: "48px",
+    });
+    expect(detailsPane.style.width).not.toContain("/ 2");
+    expect(detailsPane.style.top).toContain("48px");
+    expect(queryByTestId("song-mode-controls")).not.toBeInTheDocument();
+
+    fireEvent.click(getByRole("tab", { name: "songs" }));
+    expect(onTabletopViewChange).toHaveBeenCalledWith("songs");
   });
 
   it("does not activate the shared YouTube player when currentSong is null", () => {

@@ -277,6 +277,38 @@ describe("SearchAndSongList", () => {
     expect(screen.queryByLabelText("Close song list")).not.toBeInTheDocument();
   });
 
+  it("compact tabletopでは楽曲一覧を下段全幅で切り替え表示する", () => {
+    const { rerender } = render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="tabletop"
+        tabletopVariant="compact"
+        tabletopView="details"
+      />,
+    );
+
+    const hiddenPane = screen.getByTestId("watch-song-list-pane");
+    expect(hiddenPane).toHaveStyle({ display: "none" });
+    expect(hiddenPane.style.width).not.toContain("/ 2");
+
+    rerender(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="tabletop"
+        tabletopVariant="compact"
+        tabletopView="songs"
+      />,
+    );
+
+    expect(screen.getByTestId("watch-song-list-pane")).not.toHaveStyle({
+      display: "none",
+    });
+  });
+
   it("URL直打ちでオリ曲モードを開いたときは初期表示が古い順になる", async () => {
     render(
       <SearchAndSongList

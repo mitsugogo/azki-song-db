@@ -57,6 +57,11 @@
     "exit": "Return to normal view"
   },
   "Watch": {
+    "tabletop": {
+      "viewSwitcher": "Switch view",
+      "details": "Info",
+      "songs": "Songs"
+    },
     "searchAndSongList": {
       "randomOtherSong": "Surprise me",
       "surpriseTooltip": "Play songs randomly",

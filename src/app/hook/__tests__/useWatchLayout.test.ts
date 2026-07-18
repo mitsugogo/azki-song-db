@@ -66,6 +66,7 @@ describe("resolveWatchLayout", () => {
       top: segments[0],
       bottom: segments[1],
     });
+    expect(result.tabletopVariant).toBe("columns");
   });
 
   it("上下セグメントがあれば方向APIがportraitのままでもtabletopにする", () => {
@@ -82,6 +83,20 @@ describe("resolveWatchLayout", () => {
       top: segments[0],
       bottom: segments[1],
     });
+    expect(result.tabletopVariant).toBe("columns");
+  });
+
+  it("Flip相当の狭い上下セグメントをcompact tabletopにする", () => {
+    const segments = [segment(0, 0, 412, 458), segment(0, 458, 412, 457)];
+    const result = resolveWatchLayout({
+      ...baseInput,
+      posture: "folded",
+      orientation: "portrait",
+      segments,
+    });
+
+    expect(result.mode).toBe("tabletop");
+    expect(result.tabletopVariant).toBe("compact");
   });
 
   it("foldedだがセグメント未取得なら50dvh用のtabletopにする", () => {
@@ -92,6 +107,19 @@ describe("resolveWatchLayout", () => {
 
     expect(result.mode).toBe("tabletop");
     expect(result.tabletopPanes).toBeNull();
+    expect(result.tabletopVariant).toBe("columns");
+  });
+
+  it("portraitのfoldedでセグメント未取得ならFlip用compact fallbackにする", () => {
+    const result = resolveWatchLayout({
+      ...baseInput,
+      posture: "folded",
+      orientation: "portrait",
+    });
+
+    expect(result.mode).toBe("tabletop");
+    expect(result.tabletopPanes).toBeNull();
+    expect(result.tabletopVariant).toBe("compact");
   });
 
   it("左右セグメントはtabletopにしない", () => {
@@ -102,6 +130,7 @@ describe("resolveWatchLayout", () => {
     });
 
     expect(result.mode).toBe("landscape-columns");
+    expect(result.tabletopVariant).toBeNull();
   });
 
   it("API非対応時だけ手動foldableをtabletopとして扱う", () => {

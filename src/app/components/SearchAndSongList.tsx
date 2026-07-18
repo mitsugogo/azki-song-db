@@ -33,7 +33,13 @@ import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
 import { getSongMode, type SongMode } from "./songModeMenu";
 import SongModeControls from "./SongModeControls";
-import type { TabletopPanes, WatchLayoutMode } from "../hook/useWatchLayout";
+import {
+  COMPACT_TABLETOP_TAB_HEIGHT,
+  type TabletopPanes,
+  type TabletopVariant,
+  type TabletopView,
+  type WatchLayoutMode,
+} from "../hook/useWatchLayout";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -57,6 +63,8 @@ type SearchAndSongListPropsExt = {
   isTheaterMode?: boolean;
   layoutMode?: WatchLayoutMode;
   tabletopPanes?: TabletopPanes;
+  tabletopVariant?: TabletopVariant;
+  tabletopView?: TabletopView;
 };
 
 const sortSongsByBroadcastOrder = (
@@ -121,6 +129,8 @@ export default function SearchAndSongList({
   isTheaterMode,
   layoutMode = "landscape-columns",
   tabletopPanes = null,
+  tabletopVariant = null,
+  tabletopView = "details",
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
   const t = useTranslations("Watch.searchAndSongList");
   const overlayOpen = Boolean(isOverlayOpen);
@@ -132,6 +142,7 @@ export default function SearchAndSongList({
   );
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
   const isTabletop = layoutMode === "tabletop";
+  const isCompactTabletop = isTabletop && tabletopVariant === "compact";
   const isPortrait = layoutMode === "portrait-theater";
   const bottomPaneFallback = tabletopPanes?.bottom;
   const bottomPaneLeftFallback = `${bottomPaneFallback?.left ?? 0}px`;
@@ -141,14 +152,28 @@ export default function SearchAndSongList({
   const tabletopStyle: CSSProperties | undefined = isTabletop
     ? {
         position: "fixed",
-        left: `calc(env(viewport-segment-left 0 1, ${bottomPaneLeftFallback}) + env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
-        top: `env(viewport-segment-top 0 1, ${
-          bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
-        })`,
-        width: `calc(env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
-        height: `env(viewport-segment-height 0 1, ${
-          bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
-        })`,
+        left: isCompactTabletop
+          ? `env(viewport-segment-left 0 1, ${bottomPaneLeftFallback})`
+          : `calc(env(viewport-segment-left 0 1, ${bottomPaneLeftFallback}) + env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
+        top: isCompactTabletop
+          ? `calc(env(viewport-segment-top 0 1, ${
+              bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
+            }) + ${COMPACT_TABLETOP_TAB_HEIGHT}px)`
+          : `env(viewport-segment-top 0 1, ${
+              bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
+            })`,
+        width: isCompactTabletop
+          ? `env(viewport-segment-width 0 1, ${bottomPaneWidthFallback})`
+          : `calc(env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
+        height: isCompactTabletop
+          ? `calc(env(viewport-segment-height 0 1, ${
+              bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
+            }) - ${COMPACT_TABLETOP_TAB_HEIGHT}px)`
+          : `env(viewport-segment-height 0 1, ${
+              bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
+            })`,
+        display:
+          isCompactTabletop && tabletopView !== "songs" ? "none" : undefined,
       }
     : undefined;
 
@@ -286,6 +311,7 @@ export default function SearchAndSongList({
     <section
       data-testid={isTabletop ? "watch-song-list-pane" : undefined}
       data-segment-layout={isTabletop ? "css-env" : undefined}
+      aria-hidden={isCompactTabletop && tabletopView !== "songs"}
       style={tabletopStyle}
       className={`watch-song-list-section flex min-w-0 flex-col min-h-0 transition-[width] duration-300 ease-in-out ${
         isTabletop

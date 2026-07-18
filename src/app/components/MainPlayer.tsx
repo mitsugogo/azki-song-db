@@ -18,7 +18,7 @@ import SearchAndSongList from "./SearchAndSongList";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import ShareModal from "./ShareModal";
 import Loading from "../loading";
-import type { WatchLayoutState } from "../hook/useWatchLayout";
+import type { TabletopView, WatchLayoutState } from "../hook/useWatchLayout";
 
 /**
  * メインプレイヤー
@@ -34,6 +34,7 @@ const defaultWatchLayout: WatchLayoutState = {
   orientation: "landscape",
   segments: [],
   tabletopPanes: null,
+  tabletopVariant: null,
 };
 
 export default function MainPlayer({
@@ -249,6 +250,7 @@ export default function MainPlayer({
   const [isSongListOverlayOpen, setIsSongListOverlayOpen] = useState(false);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
   const [openShareModal, setOpenShareModal] = useState(false);
+  const [tabletopView, setTabletopView] = useState<TabletopView>("details");
   const [isTheaterMode, setIsTheaterMode] = useLocalStorage<boolean>({
     key: "player-theater-mode",
     defaultValue: false,
@@ -327,6 +329,9 @@ export default function MainPlayer({
           showNowPlayingInfo={!effectiveTheaterMode}
           layoutMode={layout.mode}
           tabletopPanes={layout.tabletopPanes}
+          tabletopVariant={layout.tabletopVariant}
+          tabletopView={tabletopView}
+          onTabletopViewChange={setTabletopView}
         />
 
         {/* 通常モード: 右カラムに楽曲一覧 */}
@@ -349,6 +354,8 @@ export default function MainPlayer({
             isTheaterMode={false}
             layoutMode={layout.mode}
             tabletopPanes={layout.tabletopPanes}
+            tabletopVariant={layout.tabletopVariant}
+            tabletopView={tabletopView}
           />
         )}
 
@@ -397,6 +404,8 @@ export default function MainPlayer({
                 isTheaterMode={true}
                 layoutMode={layout.mode}
                 tabletopPanes={layout.tabletopPanes}
+                tabletopVariant={layout.tabletopVariant}
+                tabletopView={tabletopView}
               />
             </div>
           </motion.div>

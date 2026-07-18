@@ -24,6 +24,13 @@ export type TabletopPanes = {
   bottom: ViewportSegmentRect;
 } | null;
 
+export type TabletopVariant = "columns" | "compact" | null;
+
+export type TabletopView = "details" | "songs";
+
+export const COMPACT_TABLETOP_MAX_WIDTH = 600;
+export const COMPACT_TABLETOP_TAB_HEIGHT = 48;
+
 export type WatchLayoutState = {
   mode: WatchLayoutMode;
   supportsDevicePosture: boolean;
@@ -31,11 +38,12 @@ export type WatchLayoutState = {
   orientation: "portrait" | "landscape";
   segments: ViewportSegmentRect[];
   tabletopPanes: TabletopPanes;
+  tabletopVariant: TabletopVariant;
 };
 
 export type WatchLayoutInput = Omit<
   WatchLayoutState,
-  "mode" | "tabletopPanes"
+  "mode" | "tabletopPanes" | "tabletopVariant"
 > & {
   manualFoldableMode: FoldableMode;
 };
@@ -111,15 +119,24 @@ export const resolveWatchLayout = (
   // Galaxyでは姿勢変更直後にorientationだけ古い値が残ることがあるため、
   // この場合はorientationよりセグメント形状を優先する。
   if (isFolded && tabletopPanes) {
-    return { ...input, mode: "tabletop", tabletopPanes };
+    return {
+      ...input,
+      mode: "tabletop",
+      tabletopPanes,
+      tabletopVariant:
+        tabletopPanes.bottom.width < COMPACT_TABLETOP_MAX_WIDTH
+          ? "compact"
+          : "columns",
+    };
   }
 
-  if (
-    input.orientation === "landscape" &&
-    isFolded &&
-    !hasMultipleUnrecognizedSegments
-  ) {
-    return { ...input, mode: "tabletop", tabletopPanes };
+  if (isFolded && !hasMultipleUnrecognizedSegments) {
+    return {
+      ...input,
+      mode: "tabletop",
+      tabletopPanes,
+      tabletopVariant: input.orientation === "portrait" ? "compact" : "columns",
+    };
   }
 
   return {
@@ -129,6 +146,7 @@ export const resolveWatchLayout = (
         ? "portrait-theater"
         : "landscape-columns",
     tabletopPanes: null,
+    tabletopVariant: null,
   };
 };
 

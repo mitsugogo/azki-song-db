@@ -53,6 +53,7 @@ const makeLayout = (mode: WatchLayoutState["mode"]): WatchLayoutState => ({
   orientation: mode === "portrait-theater" ? "portrait" : "landscape",
   segments: [],
   tabletopPanes: null,
+  tabletopVariant: mode === "tabletop" ? "columns" : null,
 });
 
 describe("WatchPageClient", () => {
@@ -89,6 +90,18 @@ describe("WatchPageClient", () => {
     );
     expect(
       container.querySelector('[data-watch-layout="tabletop"]'),
+    ).toBeInTheDocument();
+  });
+
+  it("compact tabletopを実機確認用data属性へ出す", () => {
+    layoutRef.current = {
+      ...makeLayout("tabletop"),
+      tabletopVariant: "compact",
+    };
+    const { container } = render(<WatchPageClient />);
+
+    expect(
+      container.querySelector('[data-tabletop-variant="compact"]'),
     ).toBeInTheDocument();
   });
 
