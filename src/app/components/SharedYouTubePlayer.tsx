@@ -22,7 +22,9 @@ type SharedYouTubePlayerSource = {
   playerKey?: number;
   showNativeControls?: boolean;
   zIndex?: number;
-  onReady: (event: YouTubeEvent<any>) => void;
+  // false を返す場合は、遷移途中などでこの ready 通知をまだ受理できないことを表す。
+  // 次の source 更新時に同じ iframe の ready を再配送する。
+  onReady: (event: YouTubeEvent<any>) => boolean | void;
   onStateChange: (event: YouTubeEvent<any>) => void;
   onError?: (event: YouTubeEvent<any>) => void;
 };
@@ -313,15 +315,33 @@ function SharedYouTubePlayerHost({
       return;
     }
 
-    deliveredReadySourceIdRef.current = activeSource.sourceId;
-    activeSource.onReady({ target: playerRef.current } as YouTubeEvent<any>);
+    const accepted = activeSource.onReady({
+      target: playerRef.current,
+    } as YouTubeEvent<any>);
+    if (accepted !== false) {
+      deliveredReadySourceIdRef.current = activeSource.sourceId;
+
+      // 同じ iframe を別スロットへ移しただけでは YouTube の statechange は
+      // 再発火しない。新しい source 側の再生アイコンとタイマー監視を
+      // 実プレイヤーの現在状態へ揃える。
+      if (typeof playerRef.current.getPlayerState === "function") {
+        const playerState = Number(playerRef.current.getPlayerState());
+        if (Number.isFinite(playerState)) {
+          activeSource.onStateChange({
+            target: playerRef.current,
+            data: playerState,
+          } as YouTubeEvent<any>);
+        }
+      }
+    }
   }, [activeSource]);
 
   const handleReady = useCallback((event: YouTubeEvent<any>) => {
     const source = activeSourceRef.current;
     playerRef.current = event.target;
-    deliveredReadySourceIdRef.current = source?.sourceId ?? null;
-    source?.onReady(event);
+    const accepted = source?.onReady(event);
+    deliveredReadySourceIdRef.current =
+      accepted === false ? null : (source?.sourceId ?? null);
   }, []);
 
   const handleStateChange = useCallback((event: YouTubeEvent<any>) => {

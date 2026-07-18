@@ -152,6 +152,29 @@ describe("useMainPlayerControls", () => {
     expect(result.current.playerControls.isReady).toBe(true);
   });
 
+  it("ミニからの復帰直後にplayerが0秒を返しても引き継いだ時刻を表示する", () => {
+    mockGlobalPlayer.currentTime = 42.8;
+    mockGlobalPlayer.currentSong = mockSongs[0];
+
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    expect(result.current.playerControls.currentTime).toBe(42.8);
+
+    const mockPlayer = createMockPlayer("vid1", "Song 1");
+    act(() => {
+      result.current.handlePlayerOnReady({ target: mockPlayer } as any);
+    });
+
+    expect(result.current.playerControls.currentTime).toBe(42.8);
+    expect(mockGlobalPlayer.setCurrentTime).not.toHaveBeenCalledWith(0);
+  });
+
   it("メンバー限定動画でエラー101/150が出た場合は1回だけプレイヤーを再作成する", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

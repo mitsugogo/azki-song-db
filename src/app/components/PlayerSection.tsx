@@ -81,7 +81,7 @@ type PlayerSectionProps = {
   timedLiveCallText?: string;
   handlePlayerOnReady: (
     event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
-  ) => void;
+  ) => boolean | void;
   handleStateChange: (
     event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData },
   ) => void;

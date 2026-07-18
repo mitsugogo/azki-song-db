@@ -36,11 +36,15 @@ function Source({
   active,
   startTime,
   playerKey,
+  onReady = vi.fn(),
+  onStateChange = vi.fn(),
 }: {
   sourceId: string;
   active: boolean;
   startTime: number;
   playerKey?: number;
+  onReady?: (event: any) => boolean | void;
+  onStateChange?: (event: any) => void;
 }) {
   useSharedYouTubePlayerSource({
     sourceId,
@@ -48,8 +52,8 @@ function Source({
     videoId: active ? "same-video" : undefined,
     startTime,
     playerKey,
-    onReady: vi.fn(),
-    onStateChange: vi.fn(),
+    onReady,
+    onStateChange,
   });
 
   return (
@@ -152,5 +156,64 @@ describe("SharedYouTubePlayer", () => {
     await act(async () => {});
 
     expect(youtubePlayerUnmounts.current).toBe(1);
+  });
+
+  it("遷移中に拒否された ready を次の source 更新で再配送する", async () => {
+    const rejectedReady = vi.fn(() => false);
+    const acceptedReady = vi.fn(() => true);
+    const player = { getVideoData: () => ({ video_id: "same-video" }) };
+    const { rerender } = render(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="main" active startTime={30} onReady={rejectedReady} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+    act(() => {
+      youtubePlayerPropsRef.current.onReady({ target: player });
+    });
+    expect(rejectedReady).toHaveBeenCalledWith({ target: player });
+
+    rerender(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="main" active startTime={30} onReady={acceptedReady} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+    expect(acceptedReady).toHaveBeenCalledWith({ target: player });
+  });
+
+  it("スロット移譲時に実プレイヤーの再生状態を新しい source へ配送する", async () => {
+    const miniStateChange = vi.fn();
+    const player = {
+      getVideoData: () => ({ video_id: "same-video" }),
+      getPlayerState: () => 1,
+    };
+    const { rerender } = render(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="main" active startTime={30} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+    act(() => {
+      youtubePlayerPropsRef.current.onReady({ target: player });
+    });
+
+    rerender(
+      <SharedYouTubePlayerProvider>
+        <Source
+          key="mini"
+          sourceId="mini"
+          active
+          startTime={95}
+          onStateChange={miniStateChange}
+        />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+    expect(miniStateChange).toHaveBeenCalledWith({ target: player, data: 1 });
   });
 });
