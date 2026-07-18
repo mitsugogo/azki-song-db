@@ -1,6 +1,6 @@
 import React from "react";
 import { act, render } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   SharedYouTubePlayerProvider,
   SharedYouTubePlayerSlot,
@@ -11,6 +11,9 @@ const { youtubePlayerPropsRef, youtubePlayerUnmounts } = vi.hoisted(() => ({
   youtubePlayerPropsRef: { current: null as any },
   youtubePlayerUnmounts: { current: 0 },
 }));
+
+const originalMoveBefore = HTMLElement.prototype.moveBefore;
+let moveBeforeMock: ReturnType<typeof vi.fn>;
 
 vi.mock("../YouTubePlayer", async () => {
   const React = await import("react");
@@ -62,29 +65,38 @@ describe("SharedYouTubePlayer", () => {
   beforeEach(() => {
     youtubePlayerPropsRef.current = null;
     youtubePlayerUnmounts.current = 0;
+    moveBeforeMock = vi.fn(function (
+      this: HTMLElement,
+      node: Node,
+      child: Node | null,
+    ) {
+      this.insertBefore(node, child);
+    });
+    Object.defineProperty(HTMLElement.prototype, "moveBefore", {
+      configurable: true,
+      writable: true,
+      value: moveBeforeMock,
+    });
+  });
 
-    Element.prototype.getBoundingClientRect = vi.fn(
-      () =>
-        ({
-          left: 10,
-          top: 20,
-          width: 320,
-          height: 180,
-          right: 330,
-          bottom: 200,
-          x: 10,
-          y: 20,
-          toJSON: () => {},
-        }) as DOMRect,
-    );
-    window.requestAnimationFrame = vi.fn(() => 1);
-    window.cancelAnimationFrame = vi.fn();
+  afterEach(() => {
+    Object.defineProperty(HTMLElement.prototype, "moveBefore", {
+      configurable: true,
+      writable: true,
+      value: originalMoveBefore,
+    });
   });
 
   it("playerKeyが異なっても同一動画のスロット移譲ではiframeを維持する", async () => {
-    const { rerender } = render(
+    const { getByTestId, rerender } = render(
       <SharedYouTubePlayerProvider>
-        <Source sourceId="main" active startTime={30} playerKey={1} />
+        <Source
+          key="main"
+          sourceId="main"
+          active
+          startTime={30}
+          playerKey={1}
+        />
       </SharedYouTubePlayerProvider>,
     );
 
@@ -95,9 +107,15 @@ describe("SharedYouTubePlayer", () => {
       startTime: 30,
     });
 
+    const player = getByTestId("youtube-player");
+    const host = getByTestId("shared-youtube-player-host");
+    const mainSlot = getByTestId("shared-youtube-player-slot-main");
+    expect(mainSlot).toContainElement(host);
+    expect(host).toHaveStyle({ position: "absolute", inset: "0" });
+
     rerender(
       <SharedYouTubePlayerProvider>
-        <Source sourceId="mini" active startTime={95} />
+        <Source key="mini" sourceId="mini" active startTime={95} />
       </SharedYouTubePlayerProvider>,
     );
 
@@ -108,6 +126,12 @@ describe("SharedYouTubePlayer", () => {
       startTime: 30,
     });
     expect(youtubePlayerUnmounts.current).toBe(0);
+    expect(getByTestId("youtube-player")).toBe(player);
+    expect(getByTestId("shared-youtube-player-host")).toBe(host);
+    expect(getByTestId("shared-youtube-player-slot-mini")).toContainElement(
+      host,
+    );
+    expect(moveBeforeMock).toHaveBeenCalled();
   });
 
   it("同一動画でも再作成キーが変われば iframe を再マウントする", async () => {

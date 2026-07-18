@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import type { YouTubeEvent } from "react-youtube";
 import YouTubePlayer from "./YouTubePlayer";
 
@@ -53,26 +54,32 @@ type SharedYouTubePlayerContextValue = {
 const SharedYouTubePlayerContext =
   createContext<SharedYouTubePlayerContextValue | null>(null);
 
-const rectHasChanged = (
-  current: Pick<DOMRect, "left" | "top" | "width" | "height"> | null,
-  next: Pick<DOMRect, "left" | "top" | "width" | "height">,
-) => {
-  if (!current) return true;
-  return (
-    Math.abs(current.left - next.left) > 0.5 ||
-    Math.abs(current.top - next.top) > 0.5 ||
-    Math.abs(current.width - next.width) > 0.5 ||
-    Math.abs(current.height - next.height) > 0.5
-  );
-};
-
 export function SharedYouTubePlayerProvider({
   children,
 }: {
   children: ReactNode;
 }) {
   const [activeSource, setActiveSource] = useState<ActiveSource | null>(null);
-  const [activeSlot, setActiveSlot] = useState<ActiveSlot | null>(null);
+  const [hostElement, setHostElement] = useState<HTMLDivElement | null>(null);
+  const activeSlotRef = useRef<ActiveSlot | null>(null);
+  const hostElementRef = useRef<HTMLDivElement | null>(null);
+  const parkingElementRef = useRef<HTMLDivElement | null>(null);
+
+  const moveHostElement = useCallback((target: HTMLElement | null) => {
+    const element = hostElementRef.current;
+    if (element && target && element.parentElement !== target) {
+      if (
+        element.isConnected &&
+        target.isConnected &&
+        typeof target.moveBefore === "function"
+      ) {
+        // iframe の browsing context を維持したままスロット間を移動する。
+        target.moveBefore(element, null);
+      } else {
+        target.appendChild(element);
+      }
+    }
+  }, []);
 
   const setSource = useCallback((source: SharedYouTubePlayerSource) => {
     if (!source.active || !source.videoId) {
@@ -92,15 +99,42 @@ export function SharedYouTubePlayerProvider({
     );
   }, []);
 
-  const setSlot = useCallback((slot: ActiveSlot) => {
-    setActiveSlot(slot);
-  }, []);
+  const setSlot = useCallback(
+    (slot: ActiveSlot) => {
+      activeSlotRef.current = slot;
+      moveHostElement(slot.element);
+    },
+    [moveHostElement],
+  );
 
-  const clearSlot = useCallback((sourceId: string) => {
-    setActiveSlot((current) =>
-      current?.sourceId === sourceId ? null : current,
+  const clearSlot = useCallback(
+    (sourceId: string) => {
+      if (activeSlotRef.current?.sourceId !== sourceId) return;
+
+      activeSlotRef.current = null;
+      moveHostElement(parkingElementRef.current);
+    },
+    [moveHostElement],
+  );
+
+  useEffect(() => {
+    const element = document.createElement("div");
+    element.style.position = "absolute";
+    element.style.inset = "0";
+    element.style.width = "100%";
+    element.style.height = "100%";
+
+    hostElementRef.current = element;
+    moveHostElement(
+      activeSlotRef.current?.element ?? parkingElementRef.current,
     );
-  }, []);
+    setHostElement(element);
+
+    return () => {
+      hostElementRef.current = null;
+      element.remove();
+    };
+  }, [moveHostElement]);
 
   const value = useMemo(
     () => ({
@@ -117,7 +151,21 @@ export function SharedYouTubePlayerProvider({
       {children}
       <SharedYouTubePlayerHost
         activeSource={activeSource}
-        activeSlot={activeSlot}
+        hostElement={hostElement}
+      />
+      <div
+        ref={parkingElementRef}
+        aria-hidden="true"
+        data-testid="shared-youtube-player-parking"
+        style={{
+          position: "fixed",
+          left: "-10000px",
+          top: 0,
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
       />
     </SharedYouTubePlayerContext.Provider>
   );
@@ -151,25 +199,27 @@ export function SharedYouTubePlayerSlot({
   className?: string;
 }) {
   const context = useContext(SharedYouTubePlayerContext);
-  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const elementRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!context) return;
-    if (!active || !element) {
-      context.clearSlot(sourceId);
-      return;
-    }
+  const setElement = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (elementRef.current) {
+        context?.clearSlot(sourceId);
+      }
 
-    context.setSlot({ sourceId, element });
-    return () => {
-      context.clearSlot(sourceId);
-    };
-  }, [active, context, element, sourceId]);
+      elementRef.current = element;
+      if (active && element) {
+        context?.setSlot({ sourceId, element });
+      }
+    },
+    [active, context, sourceId],
+  );
 
   return (
     <div
       ref={setElement}
       className={className}
+      style={{ position: "relative" }}
       data-testid={`shared-youtube-player-slot-${sourceId}`}
     />
   );
@@ -177,25 +227,17 @@ export function SharedYouTubePlayerSlot({
 
 function SharedYouTubePlayerHost({
   activeSource,
-  activeSlot,
+  hostElement,
 }: {
   activeSource: ActiveSource | null;
-  activeSlot: ActiveSlot | null;
+  hostElement: HTMLDivElement | null;
 }) {
   const playerRef = useRef<any>(null);
   const activeSourceRef = useRef<ActiveSource | null>(activeSource);
   const deliveredReadySourceIdRef = useRef<string | null>(null);
   const clearPlayerLoadTimeoutRef = useRef<number | null>(null);
-  const [rect, setRect] = useState<Pick<
-    DOMRect,
-    "left" | "top" | "width" | "height"
-  > | null>(null);
   const [playerLoad, setPlayerLoad] = useState<PlayerLoad | null>(null);
   const [hostZIndex, setHostZIndex] = useState(1);
-  const slotElement =
-    activeSource && activeSlot?.sourceId === activeSource.sourceId
-      ? activeSlot.element
-      : null;
 
   activeSourceRef.current = activeSource;
 
@@ -255,30 +297,6 @@ function SharedYouTubePlayerHost({
   }, [activeSource?.sourceId]);
 
   useEffect(() => {
-    if (!slotElement) {
-      return;
-    }
-
-    let frameId = 0;
-    const updateRect = () => {
-      const nextRect = slotElement.getBoundingClientRect();
-      const next = {
-        left: nextRect.left,
-        top: nextRect.top,
-        width: nextRect.width,
-        height: nextRect.height,
-      };
-      setRect((current) => (rectHasChanged(current, next) ? next : current));
-      frameId = window.requestAnimationFrame(updateRect);
-    };
-
-    updateRect();
-    return () => {
-      window.cancelAnimationFrame(frameId);
-    };
-  }, [slotElement]);
-
-  useEffect(() => {
     if (!activeSource || !playerRef.current) return;
     if (deliveredReadySourceIdRef.current === activeSource.sourceId) return;
 
@@ -314,19 +332,18 @@ function SharedYouTubePlayerHost({
     activeSourceRef.current?.onError?.(event);
   }, []);
 
-  if (!playerLoad || !rect || rect.width <= 0 || rect.height <= 0) {
+  if (!playerLoad || !hostElement) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       data-testid="shared-youtube-player-host"
       style={{
-        position: "fixed",
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
         zIndex: hostZIndex,
       }}
     >
@@ -339,6 +356,7 @@ function SharedYouTubePlayerHost({
         onStateChange={handleStateChange}
         onError={handleError}
       />
-    </div>
+    </div>,
+    hostElement,
   );
 }
