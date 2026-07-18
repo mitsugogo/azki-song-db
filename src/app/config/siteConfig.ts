@@ -3,6 +3,8 @@ export const siteConfig = {
   siteNameUpper: "AZKi SONG DATABASE",
   shortName: "AZKi Song DB",
   siteSlug: "azki-song-db",
+  launchedAt: "2025-08-07",
+  firstAnniversaryAt: "2026-08-07",
 
   // 推しのチャンネル名、URL
   talentName: "AZKi",

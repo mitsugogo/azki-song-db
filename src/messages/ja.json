@@ -19,7 +19,7 @@
     "home": "HOME",
     "search": "検索",
     "discography": "Discography",
-    "journey": "AZKi Music Journey",
+    "journey": "1周年記念",
     "activity": "アクティビティ",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
@@ -190,7 +190,7 @@
     "heroLine2": "Virtual DiVA AZKiの軌跡",
     "heroLine2_short": "VDiVA AZKiの軌跡",
     "description": "ホロライブ所属のVirtual DiVA AZKiさんのオリジナル楽曲、カバー楽曲、歌枠などをまとめた非公式の楽曲データベースサイトです。",
-    "anniversaryThanks": "Special Thanks — 1st Anniversary!",
+    "anniversaryThanks": "AZKi Song Database 1周年記念",
     "birthdayMessage": "Happy Birthday あずきち!",
     "birthdayAriaLabel": "AZKiさんのお誕生日！",
     "heroWatchFromBeginning": "アプリ内プレイヤーで最初から再生",
@@ -1265,12 +1265,104 @@
   },
   "Journey": {
     "metadata": {
-      "title": "AZKi Music Journey",
-      "description": "活動年表、オリジナル楽曲、LIVE・企画配信の記録からAZKiの活動の歩みをたどります。"
+      "title": "AZKi Song Database 1周年",
+      "description": "サイトに追加された大型機能と現在の収録データを振り返り、AZKiの音楽の歩みをたどる1周年記念ページです。"
     },
     "hero": {
-      "subtitle": "歌と記憶をたどる旅",
-      "start": "旅をはじめる"
+      "eyebrow": "AZKi SONG DATABASE",
+      "title": "1st Anniversary",
+      "period": "2025.08.07 — 2026.08.07",
+      "subtitle": "サイト公開から、もうすぐ1年。",
+      "description": "楽曲を探して聴く小さなプレイヤーから、活動記録、配信アーカイブ、聖地マップまで。この1年に増えた大きな機能と、蓄積されたデータを振り返ります。",
+      "start": "サイトの1年を見る"
+    },
+    "siteYear": {
+      "eyebrow": "SITE HISTORY / FIRST YEAR",
+      "title": "サイトの1年",
+      "description": "{siteName} は、楽曲を探してその場で聴く体験を起点に、AZKiの音楽と活動を多角的にたどれる場所へ成長しました。ここでは大きな機能追加を中心に振り返ります。",
+      "milestones": {
+        "launch": {
+          "title": "楽曲を探して、すぐに聴ける場所から",
+          "description": "歌枠のタイムスタンプ付き楽曲データ、YouTubeプレイヤー、高度な検索、統計を備えた最初の形を公開しました。"
+        },
+        "database": {
+          "title": "楽曲を一覧し、作品としてたどる",
+          "description": "Discographyと全収録データを公開。楽曲、アルバム、動画、再生数を別の切り口から見渡せるようになりました。"
+        },
+        "playlist": {
+          "title": "自分だけの聴き方を保存する",
+          "description": "プレイリスト、お気に入り、PWAに対応。選んだ曲を並べ、日常的に聴き続けられるプレイヤーへ広がりました。"
+        },
+        "discovery": {
+          "title": "活動と楽曲を、もっと見つけやすく",
+          "description": "年ごとの活動サマリー、専用検索ページ、楽曲詳細を追加。曲名だけでなく、時期や活動の流れからも探せるようになりました。"
+        },
+        "renewal": {
+          "title": "全面リニューアルと、共有する楽しみ",
+          "description": "v2で画面全体を刷新。好きな曲9選や開拓者になったきっかけの画像生成、記念日ページなど、思い出を形にして共有する機能が増えました。"
+        },
+        "archives": {
+          "title": "配信と活動を、時間軸で残す",
+          "description": "配信アーカイブ一覧と月別アクティビティを追加。配信を探し、セットリスト収録済みの動画はサイト内プレイヤーへ直接つながります。"
+        },
+        "community": {
+          "title": "データベースから、体験を共有する場所へ",
+          "description": "聖地マップ、Googleサインイン、楽曲タグ、あいまい検索に対応。個人の記録とみんなの情報を行き来できるようになりました。"
+        }
+      },
+      "features": {
+        "player": "タイムスタンプ再生",
+        "search": "高度な検索",
+        "statistics": "統計情報",
+        "discography": "Discography",
+        "allData": "全収録データ",
+        "viewCounts": "YouTube再生数",
+        "playlists": "プレイリスト",
+        "favorites": "お気に入り",
+        "pwa": "PWA",
+        "activity": "活動サマリー",
+        "searchPage": "検索ページ",
+        "songDetails": "楽曲詳細",
+        "renewal": "v2全面リニューアル",
+        "bestNine": "好きな曲9選",
+        "fanTimeline": "あなたのあずきちはどこから？",
+        "anniversaries": "記念日",
+        "streamArchives": "配信アーカイブ",
+        "monthlyActivity": "月別アクティビティ",
+        "archivePlayback": "アーカイブから再生",
+        "seichiMap": "聖地マップ",
+        "signIn": "Googleサインイン",
+        "songTags": "楽曲タグ",
+        "fuzzySearch": "あいまい検索"
+      }
+    },
+    "dataAnniversary": {
+      "eyebrow": "THE FIRST YEAR IN DATA",
+      "title": "データで見る1周年",
+      "description": "公開から1年。現在のデータベースに収録されている情報を、最新のAPIデータから集計します。",
+      "stats": {
+        "entries": "収録データ",
+        "songs": "楽曲",
+        "videos": "収録動画",
+        "archives": "配信アーカイブ",
+        "artists": "アーティスト",
+        "albums": "アルバム",
+        "activityRecords": "活動記録",
+        "songTags": "楽曲タグ"
+      },
+      "links": {
+        "data": "全収録データを見る",
+        "statistics": "統計を詳しく見る",
+        "archives": "配信アーカイブを見る",
+        "activity": "活動記録を見る"
+      },
+      "notice": "数値はページ表示時点の公開データから重複を除いて集計します。楽曲は曲名とアーティスト、動画と配信アーカイブは動画IDを基準に数えています。"
+    },
+    "musicJourney": {
+      "title": "AZKi Music Journey",
+      "period": "2018 — NOW",
+      "description": "サイトに蓄積された活動年表、オリジナル楽曲、LIVE・企画配信から、AZKiのこれまでの歩みをたどります。",
+      "start": "音楽の旅をはじめる"
     },
     "chapterDescription": "活動年表の{milestones}件のできごとを主軸に、{songs}曲のオリジナル楽曲リリースと、補助情報として{archives}件のLIVE・企画配信を収録しています。",
     "chapterDescriptions": {
