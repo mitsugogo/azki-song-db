@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import { FaLaptop } from "react-icons/fa6";
 import { BsSquareHalf } from "react-icons/bs";
@@ -7,8 +7,17 @@ import { useTranslations } from "next-intl";
 // 折りたたみモードの状態の型
 type FoldableMode = "default" | "foldable";
 
-const FoldableToggle = () => {
+type FoldableToggleProps = {
+  floating?: boolean;
+  forceVisible?: boolean;
+};
+
+const FoldableToggle = ({
+  floating = false,
+  forceVisible = false,
+}: FoldableToggleProps) => {
   const t = useTranslations("FoldableToggle");
+  const [supportsDevicePosture, setSupportsDevicePosture] = useState(true);
   // 'foldable-mode'というキーでlocalStorageに保存される状態を定義
   // デフォルト値は 'default'
   const [foldableMode, setFoldableMode] = useLocalStorage<FoldableMode>({
@@ -16,14 +25,9 @@ const FoldableToggle = () => {
     defaultValue: "default",
   });
 
-  // foldableModeに応じて <html> タグに 'foldable' クラスを適用/削除
   useEffect(() => {
-    if (foldableMode === "foldable") {
-      document.documentElement.classList.add("foldable");
-    } else {
-      document.documentElement.classList.remove("foldable");
-    }
-  }, [foldableMode]);
+    setSupportsDevicePosture(Boolean(navigator.devicePosture));
+  }, []);
 
   const handleClick = () => {
     // トグル処理: default -> foldable -> default
@@ -42,14 +46,29 @@ const FoldableToggle = () => {
     return <FaLaptop />;
   };
 
+  if (supportsDevicePosture && !forceVisible) return null;
+
+  const label = floating
+    ? t("exit")
+    : foldableMode === "foldable"
+      ? t("on")
+      : t("off");
+
   return (
     <button
       type="button"
-      className="outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-900/50 p-2 rounded-md"
+      className={
+        floating
+          ? "fixed right-4 bottom-4 z-[100] flex cursor-pointer items-center gap-2 rounded-full border border-white/30 bg-gray-900/90 px-4 py-2 text-white shadow-lg outline-none hover:bg-gray-800"
+          : "outline-none cursor-pointer ml-2 hover:bg-primary-600 dark:hover:bg-primary-900/50 p-2 rounded-md"
+      }
       onClick={handleClick}
-      title={foldableMode === "foldable" ? t("on") : t("off")}
+      title={label}
+      aria-label={label}
+      data-testid={floating ? "floating-foldable-toggle" : undefined}
     >
       {getFoldableIcon()}
+      {floating && <span className="text-sm font-semibold">{label}</span>}
     </button>
   );
 };

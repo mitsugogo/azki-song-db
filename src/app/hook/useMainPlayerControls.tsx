@@ -31,9 +31,12 @@ export default function useMainPlayerControls({
   allSongs,
   globalPlayer,
 }: UseMainPlayerControlsOptions) {
+  const initialCurrentTime = Number.isFinite(globalPlayer.currentTime)
+    ? Math.max(globalPlayer.currentTime, 0)
+    : 0;
   const playerRef = useRef<any>(null);
   const globalPlayerRef = useRef(globalPlayer);
-  const lastKnownCurrentTimeRef = useRef(0);
+  const lastKnownCurrentTimeRef = useRef(initialCurrentTime);
   const playerRefVideoIdRef = useRef<string | null>(null);
   const lastPlayerReadyAtRef = useRef<number | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
@@ -52,7 +55,8 @@ export default function useMainPlayerControls({
 
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [playerDuration, setPlayerDuration] = useState(0);
-  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
+  const [playerCurrentTime, setPlayerCurrentTime] =
+    useState(initialCurrentTime);
   const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
   const [isMembersOnlyPlayerRecovering, setIsMembersOnlyPlayerRecovering] =
     useState(false);
@@ -120,8 +124,19 @@ export default function useMainPlayerControls({
     if (typeof playerInstance.getCurrentTime === "function") {
       const currentTime = playerInstance.getCurrentTime();
       if (Number.isFinite(currentTime)) {
-        lastKnownCurrentTimeRef.current = currentTime;
-        setPlayerCurrentTime(currentTime);
+        const globalCurrentTime = Number(globalPlayerRef.current.currentTime);
+        const knownCurrentTime = Math.max(
+          lastKnownCurrentTimeRef.current,
+          Number.isFinite(globalCurrentTime) ? globalCurrentTime : 0,
+        );
+        // 共有 iframe をスロット間で移動した直後、YouTube API が一時的に
+        // 0 を返しても、ミニプレイヤーで確定した再生位置を表示し続ける。
+        const nextCurrentTime =
+          currentTime <= 0 && knownCurrentTime > 0.25
+            ? knownCurrentTime
+            : currentTime;
+        lastKnownCurrentTimeRef.current = nextCurrentTime;
+        setPlayerCurrentTime(nextCurrentTime);
       }
     }
   }, []);
@@ -298,7 +313,9 @@ export default function useMainPlayerControls({
         expectedVideoId &&
         videoIdFromPlayer !== expectedVideoId
       ) {
-        return;
+        // ミニプレイヤーからの復帰直後は、メイン側の曲情報が更新される前に
+        // 共有 iframe の ready が届くことがある。この通知は再配送してもらう。
+        return false;
       }
 
       originalHandlePlayerOnReady(event);
@@ -417,6 +434,8 @@ export default function useMainPlayerControls({
           // ignore
         }
       }
+
+      return true;
     },
     [
       originalHandlePlayerOnReady,
@@ -815,7 +834,9 @@ export default function useMainPlayerControls({
         playerRef.current &&
         typeof playerRef.current.getCurrentTime === "function"
       ) {
-        const time = playerRef.current.getCurrentTime();
+        const time = Number(playerRef.current.getCurrentTime());
+        if (!Number.isFinite(time)) return;
+        if (time <= 0 && lastKnownCurrentTimeRef.current > 0.25) return;
         lastKnownCurrentTimeRef.current = time;
         globalPlayer.setCurrentTime(time);
       }

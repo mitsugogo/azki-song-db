@@ -203,6 +203,112 @@ describe("SearchAndSongList", () => {
     window.history.replaceState({}, "", "/");
   });
 
+  it("横持ちでは曲名領域を確保するため一覧を40%幅にする", () => {
+    const { container } = render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="landscape-columns"
+      />,
+    );
+
+    expect(container.querySelector("section")).toHaveClass(
+      "watch-song-list-section",
+      "min-w-0",
+      "w-2/5",
+    );
+    expect(
+      container.querySelector(".watch-song-list-mode-controls"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(".watch-song-list-search"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(".watch-song-list-summary"),
+    ).toBeInTheDocument();
+  });
+
+  it("縦持ちではページ末尾の重複モード切替を描画しない", () => {
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="portrait-theater"
+      />,
+    );
+
+    // 閉じたモバイルオーバーレイ内の1組だけを残し、通常フローには出さない。
+    expect(screen.getAllByTestId("song-mode-controls")).toHaveLength(1);
+  });
+
+  it("縦持ちの検索シートはChrome UIを除いた動的viewport内に収める", () => {
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="portrait-theater"
+        isOverlayOpen
+      />,
+    );
+
+    expect(screen.getByTestId("mobile-song-list-sheet")).toHaveClass(
+      "h-[90dvh]",
+      "max-h-[90dvh]",
+    );
+  });
+
+  it("tabletopでは下段右半分に常設リストだけを表示する", () => {
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="tabletop"
+      />,
+    );
+
+    const songListPane = screen.getByTestId("watch-song-list-pane");
+    expect(songListPane).toHaveStyle({ position: "fixed" });
+    expect(songListPane).toHaveAttribute("data-segment-layout", "css-env");
+    expect(screen.getAllByTestId("songs-list-order")).toHaveLength(1);
+    expect(screen.queryByLabelText("Close song list")).not.toBeInTheDocument();
+  });
+
+  it("compact tabletopでは楽曲一覧を下段全幅で切り替え表示する", () => {
+    const { rerender } = render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="tabletop"
+        tabletopVariant="compact"
+        tabletopView="details"
+      />,
+    );
+
+    const hiddenPane = screen.getByTestId("watch-song-list-pane");
+    expect(hiddenPane).toHaveStyle({ display: "none" });
+    expect(hiddenPane.style.width).not.toContain("/ 2");
+
+    rerender(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginal]}
+        searchTerm=""
+        layoutMode="tabletop"
+        tabletopVariant="compact"
+        tabletopView="songs"
+      />,
+    );
+
+    expect(screen.getByTestId("watch-song-list-pane")).not.toHaveStyle({
+      display: "none",
+    });
+  });
+
   it("URL直打ちでオリ曲モードを開いたときは初期表示が古い順になる", async () => {
     render(
       <SearchAndSongList

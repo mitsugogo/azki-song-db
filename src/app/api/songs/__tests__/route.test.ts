@@ -144,14 +144,12 @@ describe("songs route", () => {
   it("メン限クエリ指定時にCookieがなければ公開URLへリダイレクトする", async () => {
     const response = await GET(
       new Request(
-        `http://localhost/api/songs?hl=ja&${songsMembersOnlyQueryParamKey}=true`,
+        `https://tunnel.example/api/songs?hl=ja&${songsMembersOnlyQueryParamKey}=true`,
       ),
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe(
-      "http://localhost/api/songs?hl=ja",
-    );
+    expect(response.headers.get("location")).toBe("/api/songs?hl=ja");
     expect(response.headers.get("cache-control")).toBe(
       "private, no-store, max-age=0, must-revalidate",
     );

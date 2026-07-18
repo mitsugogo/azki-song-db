@@ -2,10 +2,13 @@ import React from "react";
 import { render, fireEvent, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { pushMock, sharedPlayerSourceRef } = vi.hoisted(() => ({
-  pushMock: vi.fn(),
-  sharedPlayerSourceRef: { current: null as any },
-}));
+const { pushMock, sharedPlayerSourceRef, setStoredPositionMock } = vi.hoisted(
+  () => ({
+    pushMock: vi.fn(),
+    sharedPlayerSourceRef: { current: null as any },
+    setStoredPositionMock: vi.fn(),
+  }),
+);
 
 // Mocks
 vi.mock("../SharedYouTubePlayer", () => ({
@@ -47,7 +50,9 @@ vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
 }));
 
-vi.mock("@mantine/hooks", () => ({ useLocalStorage: () => [null, vi.fn()] }));
+vi.mock("@mantine/hooks", () => ({
+  useLocalStorage: () => [null, setStoredPositionMock],
+}));
 
 import MiniPlayer from "../MiniPlayer";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
@@ -145,6 +150,30 @@ describe("MiniPlayer", () => {
     fireEvent.click(closeBtn);
     expect(setIsPlaying).toHaveBeenCalledWith(false);
     expect(setIsMinimized).toHaveBeenCalledWith(false);
+  });
+
+  it("ドラッグ終了時にレンダー処理の外でスナップ位置を保存する", () => {
+    globalPlayerMockValue = {
+      currentSong: sampleSong,
+      isPlaying: true,
+      isMinimized: true,
+      currentTime: 42,
+      setIsPlaying: vi.fn(),
+      setCurrentTime: vi.fn(),
+      maximizePlayer: vi.fn(),
+      setIsMinimized: vi.fn(),
+      setCurrentSong: vi.fn(),
+    };
+    pathnameValue = "/some";
+
+    const { getByTestId } = render(<MiniPlayer />);
+    const miniPlayer = getByTestId("mini-player");
+
+    fireEvent.mouseDown(miniPlayer, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(document, { clientX: 140, clientY: 140 });
+    fireEvent.mouseUp(document);
+
+    expect(setStoredPositionMock).toHaveBeenCalled();
   });
 
   it("does not seek the mini player when retained time changes after ready", () => {
