@@ -149,9 +149,7 @@ describe("songs route", () => {
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe(
-      "/api/songs?hl=ja",
-    );
+    expect(response.headers.get("location")).toBe("/api/songs?hl=ja");
     expect(response.headers.get("cache-control")).toBe(
       "private, no-store, max-age=0, must-revalidate",
     );

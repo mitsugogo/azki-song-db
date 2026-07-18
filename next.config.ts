@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
   ...(allowedDevOrigins?.length ? { allowedDevOrigins } : {}),
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks", "react-icons"],
+    // Keep the Vercel Toolbar's SSE connection alive through Next's rewrite proxy.
+    ...(process.env.NODE_ENV === "development"
+      ? { proxyTimeout: 24 * 60 * 60 * 1000 }
+      : {}),
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
