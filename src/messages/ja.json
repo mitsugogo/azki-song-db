@@ -53,7 +53,8 @@
   },
   "FoldableToggle": {
     "on": "折りたたみモード: ON",
-    "off": "折りたたみモード: OFF"
+    "off": "折りたたみモード: OFF",
+    "exit": "通常表示に戻す"
   },
   "Watch": {
     "searchAndSongList": {

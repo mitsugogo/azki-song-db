@@ -50,9 +50,12 @@ export async function GET(request: Request) {
       const redirectUrl = new URL(requestUrl);
       redirectUrl.searchParams.delete(songsMembersOnlyQueryParamKey);
 
-      return NextResponse.redirect(redirectUrl, {
+      return new NextResponse(null, {
         status: 307,
-        headers: membersOnlyResponseHeaders,
+        headers: {
+          ...membersOnlyResponseHeaders,
+          Location: `${redirectUrl.pathname}${redirectUrl.search}`,
+        },
       });
     }
 

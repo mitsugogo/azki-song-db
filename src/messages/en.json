@@ -53,7 +53,8 @@
   },
   "FoldableToggle": {
     "on": "Foldable mode: ON",
-    "off": "Foldable mode: OFF"
+    "off": "Foldable mode: OFF",
+    "exit": "Return to normal view"
   },
   "Watch": {
     "searchAndSongList": {

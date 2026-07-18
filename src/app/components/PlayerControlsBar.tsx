@@ -124,6 +124,7 @@ type Props = {
   setHideFutureSongs: (value: boolean) => void;
   isTheaterMode: boolean;
   onToggleTheaterMode: () => void;
+  showTheaterToggle?: boolean;
 };
 
 export default function PlayerControlsBar({
@@ -163,6 +164,7 @@ export default function PlayerControlsBar({
   setHideFutureSongs,
   isTheaterMode,
   onToggleTheaterMode,
+  showTheaterToggle,
 }: Props) {
   const t = useTranslations("Watch.playerControls");
 
@@ -825,7 +827,7 @@ export default function PlayerControlsBar({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {currentSong && (
+          {currentSong && showTheaterToggle !== false && (
             <Tooltip
               label={
                 isTheaterMode ? t("exitTheaterMode") : t("enterTheaterMode")
@@ -834,7 +836,9 @@ export default function PlayerControlsBar({
               <button
                 type="button"
                 onClick={onToggleTheaterMode}
-                className={`hidden foldable:flex lg:flex h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all text-white ${
+                className={`${
+                  showTheaterToggle ? "flex" : "hidden lg:flex"
+                } h-9 w-9 items-center justify-center rounded-full cursor-pointer transition-all text-white ${
                   isTheaterMode
                     ? "bg-white/20 ring-1 ring-white/40"
                     : "hover:bg-white/20"

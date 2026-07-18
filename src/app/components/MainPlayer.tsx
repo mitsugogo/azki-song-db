@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useLocalStorage, useMediaQuery } from "@mantine/hooks";
+import { useLocalStorage } from "@mantine/hooks";
 import { motion } from "motion/react";
 
 // Custom Hooks
@@ -18,11 +18,27 @@ import SearchAndSongList from "./SearchAndSongList";
 import NowPlayingSongInfo from "./NowPlayingSongInfo";
 import ShareModal from "./ShareModal";
 import Loading from "../loading";
+import type { WatchLayoutState } from "../hook/useWatchLayout";
 
 /**
  * メインプレイヤー
  */
-export default function MainPlayer() {
+type MainPlayerProps = {
+  layout?: WatchLayoutState;
+};
+
+const defaultWatchLayout: WatchLayoutState = {
+  mode: "landscape-columns",
+  supportsDevicePosture: false,
+  posture: "continuous",
+  orientation: "landscape",
+  segments: [],
+  tabletopPanes: null,
+};
+
+export default function MainPlayer({
+  layout = defaultWatchLayout,
+}: MainPlayerProps) {
   // グローバルプレイヤー
   const globalPlayer = useGlobalPlayer();
   const pathname = usePathname();
@@ -237,25 +253,14 @@ export default function MainPlayer() {
     key: "player-theater-mode",
     defaultValue: false,
   });
-  const isDesktopControlsVisible = useMediaQuery("(min-width: 1024px)");
-  const [foldableMode] = useLocalStorage<"default" | "foldable">({
-    key: "foldable-mode",
-    defaultValue: "default",
-  });
-  const canUseTheaterMode =
-    isDesktopControlsVisible || foldableMode === "foldable";
+  const effectiveTheaterMode =
+    layout.mode === "landscape-columns" && isTheaterMode;
 
   // --- Effects ---
   useEffect(() => {
     if (allSongs.length === 0) return;
     setBaseUrl(window.location.origin);
   }, [allSongs]);
-
-  useEffect(() => {
-    if (canUseTheaterMode) return;
-    if (!isTheaterMode) return;
-    setIsTheaterMode(false);
-  }, [canUseTheaterMode, isTheaterMode, setIsTheaterMode]);
 
   const setSongsToCurrentVideo = () => {
     if (!currentSong) return;
@@ -275,10 +280,14 @@ export default function MainPlayer() {
   return (
     <>
       <div
-        className={`flex min-h-0 w-full flex-col md:h-full ${
-          isTheaterMode
-            ? "md:flex-col md:overflow-y-auto md:[scrollbar-width:none] md:[-ms-overflow-style:none] md:[&::-webkit-scrollbar]:hidden"
-            : "md:flex-row"
+        className={`min-h-0 w-full ${
+          layout.mode === "tabletop"
+            ? "h-dvh overflow-hidden"
+            : effectiveTheaterMode
+              ? "flex flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              : layout.mode === "portrait-theater"
+                ? "flex flex-col"
+                : "flex h-full flex-row"
         }`}
       >
         <PlayerSection
@@ -313,13 +322,15 @@ export default function MainPlayer() {
           playerKey={playerKey}
           hideFutureSongs={hideFutureSongs}
           playerControls={playerControls}
-          isTheaterMode={isTheaterMode}
+          isTheaterMode={effectiveTheaterMode}
           onToggleTheaterMode={() => setIsTheaterMode((prev) => !prev)}
-          showNowPlayingInfo={!isTheaterMode}
+          showNowPlayingInfo={!effectiveTheaterMode}
+          layoutMode={layout.mode}
+          tabletopPanes={layout.tabletopPanes}
         />
 
         {/* 通常モード: 右カラムに楽曲一覧 */}
-        {!isTheaterMode && (
+        {!effectiveTheaterMode && (
           <SearchAndSongList
             songs={songs}
             allSongs={allSongs}
@@ -336,18 +347,20 @@ export default function MainPlayer() {
             isOverlayOpen={isSongListOverlayOpen}
             setIsOverlayOpen={setIsSongListOverlayOpen}
             isTheaterMode={false}
+            layoutMode={layout.mode}
+            tabletopPanes={layout.tabletopPanes}
           />
         )}
 
         {/* シアターモード: プレイヤー下段に楽曲詳細(左)＋楽曲一覧(右) */}
-        {isTheaterMode && (
+        {effectiveTheaterMode && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="flex w-full flex-col mt-2 md:flex-row md:items-start md:gap-2 lg:gap-4 foldable:flex-col"
+            className="flex w-full flex-col mt-2 md:flex-row md:items-start md:gap-2 lg:gap-4"
           >
-            <div className="hidden md:block md:w-2/3 xl:w-9/12 pr-0 lg:pr-3 foldable:w-full">
+            <div className="hidden md:block md:w-2/3 xl:w-9/12 pr-0 lg:pr-3">
               <NowPlayingSongInfo
                 currentSong={currentSong}
                 currentSongPlayCount={currentSongPlayCount}
@@ -365,7 +378,7 @@ export default function MainPlayer() {
               />
             </div>
 
-            <div className="w-full md:w-1/3 xl:w-5/12 foldable:w-full">
+            <div className="w-full md:w-1/3 xl:w-5/12">
               <SearchAndSongList
                 songs={songs}
                 allSongs={allSongs}
@@ -382,6 +395,8 @@ export default function MainPlayer() {
                 isOverlayOpen={isSongListOverlayOpen}
                 setIsOverlayOpen={setIsSongListOverlayOpen}
                 isTheaterMode={true}
+                layoutMode={layout.mode}
+                tabletopPanes={layout.tabletopPanes}
               />
             </div>
           </motion.div>

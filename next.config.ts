@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 const createNextIntlPlugin = require("next-intl/plugin");
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-const serverActionAllowedOrigins =
-  process.env.SERVER_ACTIONS_ALLOWED_ORIGINS?.split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+const allowedDevOrigins = process.env.SERVER_ACTIONS_ALLOWED_ORIGINS?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -20,15 +19,9 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
   },
+  ...(allowedDevOrigins?.length ? { allowedDevOrigins } : {}),
   experimental: {
     optimizePackageImports: ["@mantine/core", "@mantine/hooks", "react-icons"],
-    ...(serverActionAllowedOrigins?.length
-      ? {
-          serverActions: {
-            allowedOrigins: serverActionAllowedOrigins,
-          },
-        }
-      : {}),
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

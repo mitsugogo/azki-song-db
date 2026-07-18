@@ -47,7 +47,7 @@ const SongListItem = React.memo(
       return (
         <li
           ref={ref}
-          className={`relative cursor-pointer transition flex lg:block dark:text-gray-50 rounded ${
+          className={`relative min-w-0 cursor-pointer transition flex lg:block dark:text-gray-50 rounded ${
             isSelected
               ? "bg-primary-200 hover:bg-primary-300 dark:inset-ring dark:inset-ring-primary dark:bg-gray-700 dark:hover:bg-primary-800/40 dark:shadow-md dark:shadow-primary-500/50 transition-colors duration-200 shadow-md"
               : "card-glassmorphism hover-shadow-md"
@@ -80,7 +80,7 @@ const SongListItem = React.memo(
         >
           <Link
             href={`/watch?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`}
-            className="flex lg:block lg:w-full"
+            className="flex w-full min-w-0 lg:block"
             onClick={(e) => {
               // デフォルトのLinkナビゲーションを防ぎ、
               // `changeCurrentSong` 側で履歴を管理する（不要な全体再レンダリングを防止）
@@ -89,7 +89,7 @@ const SongListItem = React.memo(
               } catch (_) {}
             }}
           >
-            <div className="flex lg:block lg:w-full mb-0 lg:mb-2 text-center relative">
+            <div className="flex shrink-0 lg:block lg:w-full mb-0 lg:mb-2 text-center relative">
               <Indicator
                 color="cyan"
                 size={8}
@@ -130,7 +130,7 @@ const SongListItem = React.memo(
                 )}
               </div>
             </div>
-            <div className="w-full space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
+            <div className="min-w-0 flex-1 space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
               <div>
                 {song.is_members_only && (
                   <div className="text-xs hidden lg:block">

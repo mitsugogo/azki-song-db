@@ -144,7 +144,7 @@ describe("PlayerSection", () => {
 
   it("registers the shared YouTube player when currentSong is provided", () => {
     mockControlBar.songsInVideo = [baseSong];
-    const { getByTestId } = renderWithWrapper(
+    const { getByTestId, container } = renderWithWrapper(
       <PlayerSection
         currentSong={baseSong}
         previousSong={null}
@@ -180,6 +180,73 @@ describe("PlayerSection", () => {
       videoId: "v1",
       playerKey: 1,
     });
+    expect(container.querySelector("aside")).toHaveClass("min-w-0", "w-3/5");
+  });
+
+  it("tabletopでは動画と詳細を上下セグメントへ分離する", () => {
+    mockControlBar.songsInVideo = [baseSong];
+    const { getByTestId, queryByTestId } = renderWithWrapper(
+      <PlayerSection
+        currentSong={baseSong}
+        previousSong={null}
+        nextSong={null}
+        allSongs={[baseSong]}
+        songs={[baseSong]}
+        searchTerm=""
+        isPlaying={false}
+        isMembersOnlyPlayerRecovering={false}
+        playerKey={1}
+        hideFutureSongs={false}
+        handlePlayerOnReady={() => {}}
+        handleStateChange={() => {}}
+        changeCurrentSong={() => {}}
+        playRandomSong={() => {}}
+        setSongsToCurrentVideo={() => {}}
+        setSongs={() => {}}
+        searchSongs={() => []}
+        setOpenShareModal={() => {}}
+        setSearchTerm={() => {}}
+        setHideFutureSongs={() => {}}
+        isTheaterMode={false}
+        onToggleTheaterMode={() => {}}
+        layoutMode="tabletop"
+        tabletopPanes={{
+          top: {
+            x: 0,
+            y: 0,
+            left: 0,
+            top: 0,
+            width: 700,
+            height: 320,
+            right: 700,
+            bottom: 320,
+          },
+          bottom: {
+            x: 0,
+            y: 336,
+            left: 0,
+            top: 336,
+            width: 700,
+            height: 320,
+            right: 700,
+            bottom: 656,
+          },
+        }}
+      />,
+    );
+
+    const videoPane = getByTestId("watch-video-pane");
+    const detailsPane = getByTestId("watch-player-details-pane");
+
+    expect(videoPane).toHaveStyle({ position: "fixed" });
+    expect(videoPane).toHaveAttribute("data-segment-layout", "css-env");
+    expect(detailsPane).toHaveStyle({ position: "fixed" });
+    expect(detailsPane).toHaveAttribute("data-segment-layout", "css-env");
+    expect(queryByTestId("os")).not.toBeInTheDocument();
+    expect(
+      JSON.parse(getByTestId("player-controls").dataset.props ?? "{}"),
+    ).toMatchObject({ showTheaterToggle: false });
+    expect(sharedPlayerSourceRef.current).toMatchObject({ zIndex: 20 });
   });
 
   it("does not activate the shared YouTube player when currentSong is null", () => {

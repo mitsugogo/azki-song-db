@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
 } from "react";
 import { Song } from "../types/song";
 import { useTranslations } from "next-intl";
@@ -32,6 +33,7 @@ import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
 import { getSongMode, type SongMode } from "./songModeMenu";
 import SongModeControls from "./SongModeControls";
+import type { TabletopPanes, WatchLayoutMode } from "../hook/useWatchLayout";
 
 // Propsの型定義
 type SearchAndSongListProps = {
@@ -53,6 +55,8 @@ type SearchAndSongListPropsExt = {
   isOverlayOpen?: boolean;
   setIsOverlayOpen?: (open: boolean) => void;
   isTheaterMode?: boolean;
+  layoutMode?: WatchLayoutMode;
+  tabletopPanes?: TabletopPanes;
 };
 
 const sortSongsByBroadcastOrder = (
@@ -115,6 +119,8 @@ export default function SearchAndSongList({
   isOverlayOpen,
   setIsOverlayOpen,
   isTheaterMode,
+  layoutMode = "landscape-columns",
+  tabletopPanes = null,
 }: SearchAndSongListProps & SearchAndSongListPropsExt) {
   const t = useTranslations("Watch.searchAndSongList");
   const overlayOpen = Boolean(isOverlayOpen);
@@ -125,6 +131,26 @@ export default function SearchAndSongList({
     currentSongMode === "original-songs" ? "asc" : "desc",
   );
   const previousSongModeRef = useRef<SongMode>(currentSongMode);
+  const isTabletop = layoutMode === "tabletop";
+  const isPortrait = layoutMode === "portrait-theater";
+  const bottomPaneFallback = tabletopPanes?.bottom;
+  const bottomPaneLeftFallback = `${bottomPaneFallback?.left ?? 0}px`;
+  const bottomPaneWidthFallback = bottomPaneFallback
+    ? `${bottomPaneFallback.width}px`
+    : "100vw";
+  const tabletopStyle: CSSProperties | undefined = isTabletop
+    ? {
+        position: "fixed",
+        left: `calc(env(viewport-segment-left 0 1, ${bottomPaneLeftFallback}) + env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
+        top: `env(viewport-segment-top 0 1, ${
+          bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
+        })`,
+        width: `calc(env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
+        height: `env(viewport-segment-height 0 1, ${
+          bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
+        })`,
+      }
+    : undefined;
 
   const { playlists, encodePlaylistUrlParam, savePlaylist, isDuplicate } =
     usePlaylists();
@@ -258,41 +284,52 @@ export default function SearchAndSongList({
 
   return (
     <section
-      className={`flex sm:w-full flex-col min-h-0 sm:mx-0 transition-[width] duration-300 ease-in-out ${
-        isTheaterMode
-          ? "md:w-full lg:w-full xl:w-full md:h-auto lg:h-auto foldable:w-full foldable:h-auto"
-          : "foldable:w-1/2 md:w-1/3 lg:w-1/3 xl:w-5/12 md:h-full foldable:h-full lg:h-full"
+      data-testid={isTabletop ? "watch-song-list-pane" : undefined}
+      data-segment-layout={isTabletop ? "css-env" : undefined}
+      style={tabletopStyle}
+      className={`flex min-w-0 flex-col min-h-0 transition-[width] duration-300 ease-in-out ${
+        isTabletop
+          ? "z-10 overflow-hidden bg-background"
+          : isTheaterMode || isPortrait
+            ? "w-full h-auto"
+            : "w-2/5 xl:w-5/12 h-full"
       }`}
     >
       <div
-        className={`flex flex-col bg-background px-2 lg:px-0 lg:pl-2 foldable:pt-1 py-0 ${
-          isTheaterMode ? "h-auto min-h-fit" : "h-full min-h-0"
+        className={`flex flex-col bg-background px-2 lg:px-0 lg:pl-2 py-0 ${
+          isTheaterMode || isPortrait ? "h-auto min-h-fit" : "h-full min-h-0"
         }`}
       >
-        <div className="mb-2 hidden lg:block foldable:hidden md:foldable:block">
-          <SongModeControls
-            currentSongMode={currentSongMode}
-            onSelectSongMode={setSearchTerm}
-            onSurprise={() => playRandomSong(songs)}
-            onPlaylist={() => setShowPlaylistSelector(true)}
-            sizeClassName="text-sm"
-          />
-        </div>
+        {isPortrait ? null : (
+          <>
+            <div className={`mb-2 ${isTabletop ? "block" : "hidden lg:block"}`}>
+              <SongModeControls
+                currentSongMode={currentSongMode}
+                onSelectSongMode={setSearchTerm}
+                onSurprise={() => playRandomSong(songs)}
+                onPlaylist={() => setShowPlaylistSelector(true)}
+                sizeClassName="text-sm"
+              />
+            </div>
 
-        <div className="hidden md:block lg:hidden foldable:hidden mt-2">
-          <SongModeControls
-            currentSongMode={currentSongMode}
-            onSelectSongMode={setSearchTerm}
-            onSurprise={() => playRandomSong(songs)}
-            onPlaylist={() => setShowPlaylistSelector(true)}
-            sizeClassName="text-xs"
-          />
-        </div>
+            <div
+              className={`${isTabletop ? "hidden" : "hidden md:block lg:hidden"} mt-2`}
+            >
+              <SongModeControls
+                currentSongMode={currentSongMode}
+                onSelectSongMode={setSearchTerm}
+                onSurprise={() => playRandomSong(songs)}
+                onPlaylist={() => setShowPlaylistSelector(true)}
+                sizeClassName="text-xs"
+              />
+            </div>
+          </>
+        )}
 
         <div
-          className={`hidden md:flex md:flex-col ${
-            isTheaterMode ? "md:min-h-fit" : "md:min-h-0 md:flex-1"
-          }`}
+          className={`${
+            isTabletop ? "flex" : isPortrait ? "hidden" : "hidden md:flex"
+          } flex-col ${isTheaterMode ? "min-h-fit" : "min-h-0 flex-1"}`}
         >
           <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
             {/* Search Bar */}
@@ -333,7 +370,11 @@ export default function SearchAndSongList({
             </Button>
           </div>
 
-          <div className={isTheaterMode ? "h-[60vh]" : "flex-1 min-h-0"}>
+          <div
+            className={
+              isTheaterMode && !isTabletop ? "h-[60vh]" : "flex-1 min-h-0"
+            }
+          >
             <Suspense fallback={<Loading />}>
               <SongsList
                 songs={sortedSongs}
@@ -348,98 +389,107 @@ export default function SearchAndSongList({
       </div>
 
       {/** Mobile: オーバーレイ検索 */}
-      <>
-        <div
-          aria-hidden={!overlayOpen}
-          className={`fixed inset-0 bg-black/70 backdrop-blur-md z-50 md:hidden transition-opacity duration-300 ${
-            overlayOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={() => setIsOverlayOpen?.(false)}
-        />
+      {!isTabletop && (
+        <>
+          <div
+            aria-hidden={!overlayOpen}
+            className={`fixed inset-0 bg-black/70 backdrop-blur-md z-50 ${
+              isPortrait ? "" : "md:hidden"
+            } transition-opacity duration-300 ${
+              overlayOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setIsOverlayOpen?.(false)}
+          />
 
-        <div
-          aria-hidden={!overlayOpen}
-          className={`fixed inset-x-0 bottom-0 md:hidden z-60 transform transition-transform duration-300 ${
-            overlayOpen ? "translate-y-0" : "translate-y-full"
-          } ${overlayOpen ? "" : "pointer-events-none"}`}
-        >
-          <div className="h-[90vh] max-h-[90vh] bg-white dark:bg-gray-900 rounded-t-lg shadow-lg overflow-hidden flex flex-col">
-            <div className="px-3 pt-3 pb-2 bg-white dark:bg-gray-900">
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <SearchInput
-                    allSongs={allSongs}
-                    searchValue={searchValue}
-                    onSearchChange={(values: string[]) => {
-                      setSearchValue(values);
-                      setSearchTerm(values.join("|"));
-                    }}
-                    placeholder={t("search")}
-                  />
+          <div
+            aria-hidden={!overlayOpen}
+            className={`fixed inset-x-0 bottom-0 ${
+              isPortrait ? "" : "md:hidden"
+            } z-60 transform transition-transform duration-300 ${
+              overlayOpen ? "translate-y-0" : "translate-y-full"
+            } ${overlayOpen ? "" : "pointer-events-none"}`}
+          >
+            <div
+              data-testid="mobile-song-list-sheet"
+              className="h-[90dvh] max-h-[90dvh] bg-white dark:bg-gray-900 rounded-t-lg shadow-lg overflow-hidden flex flex-col"
+            >
+              <div className="px-3 pt-3 pb-2 bg-white dark:bg-gray-900">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <SearchInput
+                      allSongs={allSongs}
+                      searchValue={searchValue}
+                      onSearchChange={(values: string[]) => {
+                        setSearchValue(values);
+                        setSearchTerm(values.join("|"));
+                      }}
+                      placeholder={t("search")}
+                    />
+                  </div>
+                  <Tooltip withArrow label={t("close")}>
+                    <button
+                      aria-label="Close song list"
+                      onClick={() => setIsOverlayOpen?.(false)}
+                      className="p-2 rounded-full bg-light-gray-200 dark:bg-gray-700"
+                    >
+                      {/* Close Icon */}
+                      <LuX className="w-5 h-5" />
+                    </button>
+                  </Tooltip>
                 </div>
-                <Tooltip withArrow label={t("close")}>
-                  <button
-                    aria-label="Close song list"
-                    onClick={() => setIsOverlayOpen?.(false)}
-                    className="p-2 rounded-full bg-light-gray-200 dark:bg-gray-700"
-                  >
-                    {/* Close Icon */}
-                    <LuX className="w-5 h-5" />
-                  </button>
-                </Tooltip>
+                <SongModeControls
+                  currentSongMode={currentSongMode}
+                  onSelectSongMode={setSearchTerm}
+                  onSurprise={() => playRandomSong(songs)}
+                  onPlaylist={() => setShowPlaylistSelector(true)}
+                  sizeClassName="text-xs"
+                />
               </div>
-              <SongModeControls
-                currentSongMode={currentSongMode}
-                onSelectSongMode={setSearchTerm}
-                onSurprise={() => playRandomSong(songs)}
-                onPlaylist={() => setShowPlaylistSelector(true)}
-                sizeClassName="text-xs"
-              />
-            </div>
 
-            <div className="px-3 py-0 flex items-center justify-between gap-2">
-              <p className="text-xs text-muted-foreground dark:text-white">
-                {t("songList")} ({songs.length}
-                {t("songsUnit")}/{allSongs.length}
-                {t("songsUnit")})
-              </p>
-              <button
-                type="button"
-                onClick={() =>
-                  setSortOrder((previousOrder) =>
-                    previousOrder === "asc" ? "desc" : "asc",
-                  )
-                }
-                disabled={isPlaylistMode}
-                aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
-                className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
-              >
-                {sortOrder === "asc" ? (
-                  <LuArrowUpWideNarrow className="h-4 w-4" />
-                ) : (
-                  <LuArrowDownWideNarrow className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+              <div className="px-3 py-0 flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground dark:text-white">
+                  {t("songList")} ({songs.length}
+                  {t("songsUnit")}/{allSongs.length}
+                  {t("songsUnit")})
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSortOrder((previousOrder) =>
+                      previousOrder === "asc" ? "desc" : "asc",
+                    )
+                  }
+                  disabled={isPlaylistMode}
+                  aria-label={`${sortOrder === "asc" ? t("sortAscending") : t("sortDescending")}`}
+                  className={`h-6 rounded-md border border-light-gray-300 dark:border-gray-600 px-2 text-[11px] text-muted-foreground dark:text-white hover:bg-light-gray-200 dark:hover:bg-gray-700`}
+                >
+                  {sortOrder === "asc" ? (
+                    <LuArrowUpWideNarrow className="h-4 w-4" />
+                  ) : (
+                    <LuArrowDownWideNarrow className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
 
-            <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 mt-2 ml-3 mr-1">
-              <div className="h-full">
-                <Suspense fallback={<Loading />}>
-                  <SongsList
-                    songs={sortedSongs}
-                    currentSong={currentSong}
-                    changeCurrentSong={changeCurrentSong as any}
-                    hideFutureSongs={hideFutureSongs}
-                    isInOverlay={true}
-                    isPlaylistMode={isPlaylistMode}
-                    onSelectSong={() => setIsOverlayOpen?.(false)}
-                  />
-                </Suspense>
+              <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 mt-2 ml-3 mr-1">
+                <div className="h-full">
+                  <Suspense fallback={<Loading />}>
+                    <SongsList
+                      songs={sortedSongs}
+                      currentSong={currentSong}
+                      changeCurrentSong={changeCurrentSong as any}
+                      hideFutureSongs={hideFutureSongs}
+                      isInOverlay={true}
+                      isPlaylistMode={isPlaylistMode}
+                      onSelectSong={() => setIsOverlayOpen?.(false)}
+                    />
+                  </Suspense>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </>
+        </>
+      )}
 
       <Modal
         opened={showPlaylistSelector}

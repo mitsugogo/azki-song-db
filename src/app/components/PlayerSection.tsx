@@ -7,7 +7,13 @@ import { FaInfoCircle } from "react-icons/fa";
 import { LoadingOverlay, Tooltip } from "@mantine/core";
 import { AnimatePresence, motion } from "motion/react";
 import PlayerControlsBar from "./PlayerControlsBar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import { FaUser } from "react-icons/fa6";
 import { IoChevronUp, IoSearch } from "react-icons/io5";
 import useControlBar from "../hook/useControlBar";
@@ -20,6 +26,7 @@ import {
   SharedYouTubePlayerSlot,
   useSharedYouTubePlayerSource,
 } from "./SharedYouTubePlayer";
+import type { TabletopPanes, WatchLayoutMode } from "../hook/useWatchLayout";
 
 const resolveTimeDisplayMode = (
   liveBroadcastContent?: string | null,
@@ -90,6 +97,8 @@ type PlayerSectionProps = {
   isTheaterMode: boolean;
   onToggleTheaterMode: () => void;
   showNowPlayingInfo?: boolean;
+  layoutMode?: WatchLayoutMode;
+  tabletopPanes?: TabletopPanes;
 };
 
 export default function PlayerSection({
@@ -127,6 +136,8 @@ export default function PlayerSection({
   isTheaterMode,
   onToggleTheaterMode,
   showNowPlayingInfo = true,
+  layoutMode = "landscape-columns",
+  tabletopPanes = null,
 }: PlayerSectionProps) {
   // ライブコール表示用の状態
   const [timedLiveCallKey, setTimedLiveCallKey] = useState(0);
@@ -152,6 +163,7 @@ export default function PlayerSection({
   );
   const sharedVideoId = videoId || currentSong?.video_id;
   const isSharedPlayerActive = Boolean(currentSong && sharedVideoId);
+  const isTabletop = layoutMode === "tabletop";
 
   const sharedPlayerSource = useMemo(
     () => ({
@@ -160,6 +172,7 @@ export default function PlayerSection({
       videoId: sharedVideoId,
       startTime,
       playerKey,
+      zIndex: isTabletop ? 20 : 1,
       onReady: handlePlayerOnReady as (event: YouTubeEvent<any>) => void,
       onStateChange: handleStateChange as (event: YouTubeEvent<any>) => void,
       onError: handlePlayerError as
@@ -170,6 +183,7 @@ export default function PlayerSection({
       sharedVideoId,
       startTime,
       playerKey,
+      isTabletop,
       handlePlayerOnReady,
       handleStateChange,
       handlePlayerError,
@@ -208,39 +222,77 @@ export default function PlayerSection({
     setTimedLiveCallKey((prevKey) => prevKey + 1);
   }, [timedLiveCallText]);
 
-  return (
-    <aside
-      className={`flex w-full pr-0 transition-[width] duration-300 ease-in-out ${
-        isTheaterMode
-          ? "md:w-full xl:w-full md:shrink-0 foldable:w-full"
-          : "foldable:w-full md:foldable:w-1/2 md:w-2/3 xl:w-9/12"
-      }`}
-    >
-      <OverlayScrollbarsComponent
-        options={{ scrollbars: { autoHide: "leave" } }}
-        element="div"
-        className="player-section-scrollbars flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
-        defer
-      >
-        {/* YouTube Player */}
-        <div className="relative aspect-video w-full bg-black shadow-md dark:shadow-none">
-          <LoadingOverlay
-            visible={isMembersOnlyPlayerRecovering}
-            zIndex={20}
-            loaderProps={{ color: "pink", type: "bars" }}
-            overlayProps={{ blur: 2, backgroundOpacity: 0.35 }}
-          />
-          <div className="absolute top-0 left-0 w-full h-full">
-            <SharedYouTubePlayerSlot
-              sourceId="main"
-              active={isSharedPlayerActive}
-              className="h-full w-full"
-            />
-          </div>
-        </div>
+  const topPaneFallback = tabletopPanes?.top;
+  const bottomPaneFallback = tabletopPanes?.bottom;
+  const topPaneStyle: CSSProperties = {
+    position: "fixed",
+    left: `env(viewport-segment-left 0 0, ${topPaneFallback?.left ?? 0}px)`,
+    top: `env(viewport-segment-top 0 0, ${topPaneFallback?.top ?? 0}px)`,
+    width: `env(viewport-segment-width 0 0, ${
+      topPaneFallback ? `${topPaneFallback.width}px` : "100vw"
+    })`,
+    height: `env(viewport-segment-height 0 0, ${
+      topPaneFallback ? `${topPaneFallback.height}px` : "50dvh"
+    })`,
+  };
+  const bottomPaneWidthFallback = bottomPaneFallback
+    ? `${bottomPaneFallback.width}px`
+    : "100vw";
+  const detailPaneStyle: CSSProperties = {
+    position: "fixed",
+    left: `env(viewport-segment-left 0 1, ${bottomPaneFallback?.left ?? 0}px)`,
+    top: `env(viewport-segment-top 0 1, ${
+      bottomPaneFallback ? `${bottomPaneFallback.top}px` : "50dvh"
+    })`,
+    width: `calc(env(viewport-segment-width 0 1, ${bottomPaneWidthFallback}) / 2)`,
+    height: `env(viewport-segment-height 0 1, ${
+      bottomPaneFallback ? `${bottomPaneFallback.height}px` : "50dvh"
+    })`,
+  };
 
-        {/* Mobile: オーバーレイ検索ボタン */}
-        <div className="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 p-2 invert">
+  const videoPane = (
+    <div
+      data-testid="watch-video-pane"
+      data-segment-layout={isTabletop ? "css-env" : undefined}
+      className={`relative w-full bg-black shadow-md dark:shadow-none ${
+        isTabletop ? "z-10 h-full" : "aspect-video"
+      }`}
+      style={isTabletop ? topPaneStyle : undefined}
+    >
+      <LoadingOverlay
+        visible={isMembersOnlyPlayerRecovering}
+        zIndex={20}
+        loaderProps={{ color: "pink", type: "bars" }}
+        overlayProps={{ blur: 2, backgroundOpacity: 0.35 }}
+      />
+      <div className="absolute top-0 left-0 w-full h-full">
+        <SharedYouTubePlayerSlot
+          sourceId="main"
+          active={isSharedPlayerActive}
+          className="h-full w-full"
+        />
+      </div>
+    </div>
+  );
+
+  const detailsPane = (
+    <div
+      data-testid="watch-player-details-pane"
+      data-segment-layout={isTabletop ? "css-env" : undefined}
+      className={
+        isTabletop
+          ? "z-10 min-h-0 overflow-y-auto bg-background px-2"
+          : "flex flex-col"
+      }
+      style={isTabletop ? detailPaneStyle : undefined}
+    >
+      {/* Mobile: オーバーレイ検索ボタン */}
+      {!isTabletop && (
+        <div
+          className={`${
+            layoutMode === "portrait-theater" ? "block" : "md:hidden"
+          } fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 p-2 invert`}
+        >
           <button
             aria-label="Open song list"
             onClick={() => setOpenSongListOverlay?.(true)}
@@ -249,139 +301,173 @@ export default function PlayerSection({
             <IoSearch className="w-6 h-6" />
           </button>
         </div>
+      )}
 
-        {controlBar.canUsePlayerControls && (
-          <PlayerControlsBar
-            songsInVideo={controlBar.songsInVideo}
-            allSongsHaveEnd={controlBar.allSongsHaveEnd}
-            songCumulativeMap={controlBar.songCumulativeMap}
-            totalSongsDuration={controlBar.totalSongsDuration}
-            videoDuration={controlBar.videoDuration}
-            videoStartTime={controlBar.videoStartTime}
-            displayDuration={controlBar.displayDuration}
-            tempSeekValue={controlBar.tempSeekValue}
-            handleSeekChange={controlBar.handleSeekChange}
-            onSeekStart={controlBar.handleSeekStart}
-            onSeekEnd={controlBar.handleSeekEnd}
-            hoveredChapter={controlBar.hoveredChapter}
-            setHoveredChapter={controlBar.setHoveredChapter}
-            isPlaying={isPlaying}
-            onTogglePlay={controlBar.handleTogglePlay}
-            disabled={!playerControls?.isReady}
-            isMuted={controlBar.isMuted}
-            onNext={nextSong ? controlBar.handleNext : undefined}
-            nextDisabled={!nextSong}
-            formattedCurrentTime={controlBar.formattedCurrentTime}
-            formattedDuration={controlBar.formattedDuration}
-            timeDisplayMode={timeDisplayMode}
-            displaySongTitle={controlBar.displaySongTitle}
-            displaySongArtist={controlBar.displaySongArtist}
-            onOpenShareModal={() => setOpenShareModal(true)}
-            volumeValue={controlBar.volumeValue}
-            tempVolumeValue={
-              controlBar.isMuted ? 0 : controlBar.tempVolumeValue
-            }
-            onVolumeIconClick={controlBar.handleVolumeIconClick}
-            isTouchDevice={controlBar.isTouchDevice}
-            showVolumeSlider={controlBar.showVolumeSlider}
-            onVolumeChange={(e) =>
-              controlBar.handleVolumeChange(
-                e as import("react").ChangeEvent<HTMLInputElement>,
-              )
-            }
-            currentSong={currentSong}
-            hideFutureSongs={hideFutureSongs}
-            setHideFutureSongs={setHideFutureSongs}
-            isTheaterMode={isTheaterMode}
-            onToggleTheaterMode={onToggleTheaterMode}
-          />
-        )}
+      {controlBar.canUsePlayerControls && (
+        <PlayerControlsBar
+          songsInVideo={controlBar.songsInVideo}
+          allSongsHaveEnd={controlBar.allSongsHaveEnd}
+          songCumulativeMap={controlBar.songCumulativeMap}
+          totalSongsDuration={controlBar.totalSongsDuration}
+          videoDuration={controlBar.videoDuration}
+          videoStartTime={controlBar.videoStartTime}
+          displayDuration={controlBar.displayDuration}
+          tempSeekValue={controlBar.tempSeekValue}
+          handleSeekChange={controlBar.handleSeekChange}
+          onSeekStart={controlBar.handleSeekStart}
+          onSeekEnd={controlBar.handleSeekEnd}
+          hoveredChapter={controlBar.hoveredChapter}
+          setHoveredChapter={controlBar.setHoveredChapter}
+          isPlaying={isPlaying}
+          onTogglePlay={controlBar.handleTogglePlay}
+          disabled={!playerControls?.isReady}
+          isMuted={controlBar.isMuted}
+          onNext={nextSong ? controlBar.handleNext : undefined}
+          nextDisabled={!nextSong}
+          formattedCurrentTime={controlBar.formattedCurrentTime}
+          formattedDuration={controlBar.formattedDuration}
+          timeDisplayMode={timeDisplayMode}
+          displaySongTitle={controlBar.displaySongTitle}
+          displaySongArtist={controlBar.displaySongArtist}
+          onOpenShareModal={() => setOpenShareModal(true)}
+          volumeValue={controlBar.volumeValue}
+          tempVolumeValue={controlBar.isMuted ? 0 : controlBar.tempVolumeValue}
+          onVolumeIconClick={controlBar.handleVolumeIconClick}
+          isTouchDevice={controlBar.isTouchDevice}
+          showVolumeSlider={controlBar.showVolumeSlider}
+          onVolumeChange={(e) =>
+            controlBar.handleVolumeChange(
+              e as import("react").ChangeEvent<HTMLInputElement>,
+            )
+          }
+          currentSong={currentSong}
+          hideFutureSongs={hideFutureSongs}
+          setHideFutureSongs={setHideFutureSongs}
+          isTheaterMode={isTheaterMode}
+          onToggleTheaterMode={onToggleTheaterMode}
+          showTheaterToggle={layoutMode === "landscape-columns"}
+        />
+      )}
 
-        <div className="block md:hidden mx-2 mt-2">
-          <SongModeControls
-            onSurprise={() => playRandomSong?.(songs)}
-            onSelectSongMode={(mode) => setSearchTerm?.(mode)}
-            currentSongMode={currentSongMode}
-            onPlaylist={() => setShowPlaylistSelector?.(true)}
-            variant="mobile"
-          />
-        </div>
+      <div
+        className={`${
+          layoutMode === "landscape-columns" ? "block md:hidden" : "block"
+        } mx-2 mt-2`}
+      >
+        <SongModeControls
+          onSurprise={() => playRandomSong?.(songs)}
+          onSelectSongMode={(mode) => setSearchTerm?.(mode)}
+          currentSongMode={currentSongMode}
+          onPlaylist={() => setShowPlaylistSelector?.(true)}
+          variant="mobile"
+        />
+      </div>
 
-        {currentSong?.live_call && (
-          <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
-            <div className="flex items-center shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
-              <span className="ml-1 text-muted-foreground text-nowrap">
-                <span className="ml-1 hidden lg:inline">コーレス</span>
-                <FaUser className="inline lg:hidden" />
-                <Tooltip
-                  label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
-                  className="hidden lg:inline"
-                  w={300}
-                  multiline
-                  withArrow
-                >
-                  <FaInfoCircle className="hidden lg:inline ml-1 -mt-0.75 text-light-gray-300 dark:text-gray-300" />
-                </Tooltip>
-              </span>
-            </div>
-            <div
-              className={`flex-1 min-w-0 ml-1 w-full relative`}
-              style={{
-                height: `${(timedLiveCallLineCount || 1) * 1.2}rem`,
-              }}
-            >
-              <AnimatePresence>
-                {timedLiveCallText && (
-                  <motion.p
-                    key={`${timedLiveCallText}-${timedLiveCallKey}`}
-                    initial={{
-                      opacity: 0,
-                      y: 15,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      type: "spring",
-                      damping: 20,
-                      stiffness: 100,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -20,
-                      transition: {
-                        duration: 0.2,
-                      },
-                    }}
-                    className="truncate w-full absolute top-0 left-0"
-                  >
-                    {renderLinkedText(timedLiveCallText ?? "")}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
+      {currentSong?.live_call && (
+        <div className="flex flex-row items-center gap-1 mt-2 p-2 text-sm bg-light-gray-100 dark:bg-gray-800 rounded px-2">
+          <div className="flex items-center shrink-0 border-r pr-3 border-light-gray-300 dark:border-gray-300">
+            <span className="ml-1 text-muted-foreground text-nowrap">
+              <span className="ml-1 hidden lg:inline">コーレス</span>
+              <FaUser className="inline lg:hidden" />
+              <Tooltip
+                label="コール＆レスポンスは「+αで覚えたら楽しいよ！」というものです。ライブは楽しむことが最優先ですので、無理に覚える必要はありません！"
+                className="hidden lg:inline"
+                w={300}
+                multiline
+                withArrow
+              >
+                <FaInfoCircle className="hidden lg:inline ml-1 -mt-0.75 text-light-gray-300 dark:text-gray-300" />
+              </Tooltip>
+            </span>
           </div>
-        )}
+          <div
+            className={`flex-1 min-w-0 ml-1 w-full relative`}
+            style={{
+              height: `${(timedLiveCallLineCount || 1) * 1.2}rem`,
+            }}
+          >
+            <AnimatePresence>
+              {timedLiveCallText && (
+                <motion.p
+                  key={`${timedLiveCallText}-${timedLiveCallKey}`}
+                  initial={{
+                    opacity: 0,
+                    y: 15,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    type: "spring",
+                    damping: 20,
+                    stiffness: 100,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -20,
+                    transition: {
+                      duration: 0.2,
+                    },
+                  }}
+                  className="truncate w-full absolute top-0 left-0"
+                >
+                  {renderLinkedText(timedLiveCallText ?? "")}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
 
-        {showNowPlayingInfo && (
-          <NowPlayingSongInfo
-            currentSong={currentSong}
-            currentSongPlayCount={currentSongPlayCount}
-            allSongs={allSongs}
-            searchTerm={searchTerm}
-            isPlaying={isPlaying}
-            hideFutureSongs={hideFutureSongs}
-            setSearchTerm={setSearchTerm}
-            setOpenShereModal={setOpenShareModal}
-            changeCurrentSong={changeCurrentSong}
-            videoTitle={videoTitle}
-            videoData={videoData}
-            videoInfo={videoInfo}
-            setHideFutureSongs={setHideFutureSongs}
-          />
-        )}
-      </OverlayScrollbarsComponent>
+      {showNowPlayingInfo && (
+        <NowPlayingSongInfo
+          currentSong={currentSong}
+          currentSongPlayCount={currentSongPlayCount}
+          allSongs={allSongs}
+          searchTerm={searchTerm}
+          isPlaying={isPlaying}
+          hideFutureSongs={hideFutureSongs}
+          setSearchTerm={setSearchTerm}
+          setOpenShereModal={setOpenShareModal}
+          changeCurrentSong={changeCurrentSong}
+          videoTitle={videoTitle}
+          videoData={videoData}
+          videoInfo={videoInfo}
+          setHideFutureSongs={setHideFutureSongs}
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <aside
+      className={
+        isTabletop
+          ? "contents"
+          : `flex min-w-0 pr-0 transition-[width] duration-300 ease-in-out ${
+              isTheaterMode || layoutMode === "portrait-theater"
+                ? "w-full shrink-0"
+                : "w-3/5 xl:w-7/12"
+            }`
+      }
+    >
+      {isTabletop ? (
+        <>
+          {videoPane}
+          {detailsPane}
+        </>
+      ) : (
+        <OverlayScrollbarsComponent
+          options={{ scrollbars: { autoHide: "leave" } }}
+          element="div"
+          className="player-section-scrollbars flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
+          defer
+        >
+          {videoPane}
+          {detailsPane}
+        </OverlayScrollbarsComponent>
+      )}
     </aside>
   );
 }
