@@ -287,7 +287,7 @@ export default function SearchAndSongList({
       data-testid={isTabletop ? "watch-song-list-pane" : undefined}
       data-segment-layout={isTabletop ? "css-env" : undefined}
       style={tabletopStyle}
-      className={`flex min-w-0 flex-col min-h-0 transition-[width] duration-300 ease-in-out ${
+      className={`watch-song-list-section flex min-w-0 flex-col min-h-0 transition-[width] duration-300 ease-in-out ${
         isTabletop
           ? "z-10 overflow-hidden bg-background"
           : isTheaterMode || isPortrait
@@ -302,7 +302,9 @@ export default function SearchAndSongList({
       >
         {isPortrait ? null : (
           <>
-            <div className={`mb-2 ${isTabletop ? "block" : "hidden lg:block"}`}>
+            <div
+              className={`watch-song-list-mode-controls mb-2 ${isTabletop ? "block" : "hidden lg:block"}`}
+            >
               <SongModeControls
                 currentSongMode={currentSongMode}
                 onSelectSongMode={setSearchTerm}
@@ -313,7 +315,7 @@ export default function SearchAndSongList({
             </div>
 
             <div
-              className={`${isTabletop ? "hidden" : "hidden md:block lg:hidden"} mt-2`}
+              className={`watch-song-list-mode-controls ${isTabletop ? "hidden" : "hidden md:block lg:hidden"} mt-2`}
             >
               <SongModeControls
                 currentSongMode={currentSongMode}
@@ -331,7 +333,7 @@ export default function SearchAndSongList({
             isTabletop ? "flex" : isPortrait ? "hidden" : "hidden md:flex"
           } flex-col ${isTheaterMode ? "min-h-fit" : "min-h-0 flex-1"}`}
         >
-          <div className="mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
+          <div className="watch-song-list-search mb-1 md:mb-4 md:mt-2 lg:mt-0 lg:hidden">
             {/* Search Bar */}
             <SearchInput
               allSongs={allSongs}
@@ -343,7 +345,7 @@ export default function SearchAndSongList({
               placeholder={t("search")}
             />
           </div>
-          <div className="mb-2 flex items-center justify-between gap-2">
+          <div className="watch-song-list-summary mb-2 flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground dark:text-white">
               {t("songList")} ({songs.length}
               {t("songsUnit_w/o_en")}/{allSongs.length}

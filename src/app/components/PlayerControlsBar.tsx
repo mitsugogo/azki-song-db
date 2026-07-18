@@ -395,7 +395,7 @@ export default function PlayerControlsBar({
   return (
     <div
       id="player-controls-bar"
-      className="relative z-30 flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
+      className="watch-player-controls-bar relative z-30 flex w-full flex-col rounded-b-lg bg-linear-to-b from-black/95 to-black/98 px-0 pb-3 text-white shadow-md backdrop-blur-sm"
     >
       {/* Progress Bar */}
       <div className="group relative mb-2 flex items-center gap-2 px-1 -mt-2">

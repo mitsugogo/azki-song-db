@@ -213,7 +213,20 @@ describe("SearchAndSongList", () => {
       />,
     );
 
-    expect(container.querySelector("section")).toHaveClass("min-w-0", "w-2/5");
+    expect(container.querySelector("section")).toHaveClass(
+      "watch-song-list-section",
+      "min-w-0",
+      "w-2/5",
+    );
+    expect(
+      container.querySelector(".watch-song-list-mode-controls"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(".watch-song-list-search"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector(".watch-song-list-summary"),
+    ).toBeInTheDocument();
   });
 
   it("縦持ちではページ末尾の重複モード切替を描画しない", () => {

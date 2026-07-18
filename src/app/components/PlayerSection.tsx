@@ -445,7 +445,7 @@ export default function PlayerSection({
       className={
         isTabletop
           ? "contents"
-          : `flex min-w-0 pr-0 transition-[width] duration-300 ease-in-out ${
+          : `watch-player-section flex min-w-0 pr-0 transition-[width] duration-300 ease-in-out ${
               isTheaterMode || layoutMode === "portrait-theater"
                 ? "w-full shrink-0"
                 : "w-3/5 xl:w-7/12"

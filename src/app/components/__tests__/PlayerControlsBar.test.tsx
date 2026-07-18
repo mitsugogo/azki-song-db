@@ -195,7 +195,10 @@ describe("PlayerControlsBar", () => {
     );
 
   it("再生ボタンをクリックすると onTogglePlay が呼ばれる", () => {
-    const { getByLabelText } = renderComponent();
+    const { container, getByLabelText } = renderComponent();
+    expect(container.querySelector("#player-controls-bar")).toHaveClass(
+      "watch-player-controls-bar",
+    );
     const btn = getByLabelText("再生");
     fireEvent.click(btn);
     expect(onTogglePlay).toHaveBeenCalled();

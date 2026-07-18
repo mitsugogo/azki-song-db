@@ -180,7 +180,11 @@ describe("PlayerSection", () => {
       videoId: "v1",
       playerKey: 1,
     });
-    expect(container.querySelector("aside")).toHaveClass("min-w-0", "w-3/5");
+    expect(container.querySelector("aside")).toHaveClass(
+      "watch-player-section",
+      "min-w-0",
+      "w-3/5",
+    );
   });
 
   it("tabletopでは動画と詳細を上下セグメントへ分離する", () => {
