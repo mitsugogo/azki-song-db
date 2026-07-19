@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.18.0](https://github.com/mitsugogo/azki-song-db/compare/v2.17.0...v2.18.0) (2026-07-19)
+
+
+### Features
+
+* 折りたたみ端末対応 ([30bfd7b](https://github.com/mitsugogo/azki-song-db/commit/30bfd7b5c8f688274d20d6fb6a0f2f3b887a02b5))
+
+
+### Bug Fixes
+
+* おそらくFlip系の端末でも破綻しないように ([7b8eb28](https://github.com/mitsugogo/azki-song-db/commit/7b8eb28b0863dc9fb67367992bb1ecdc948685fb))
+* プレイヤー復帰時の再生状態と位置を引き継ぐ ([82e05af](https://github.com/mitsugogo/azki-song-db/commit/82e05af43d522cdff07c1cc2fdecec1913fc4aec))
+
 ## [2.17.0](https://github.com/mitsugogo/azki-song-db/compare/v2.16.2...v2.17.0) (2026-07-17)
 
 
