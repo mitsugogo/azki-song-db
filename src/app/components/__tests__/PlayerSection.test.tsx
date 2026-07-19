@@ -27,8 +27,10 @@ if (typeof window !== "undefined" && !window.matchMedia) {
 
 // Mock OverlayScrollbarsComponent to avoid heavy native behavior
 vi.mock("overlayscrollbars-react", () => ({
-  OverlayScrollbarsComponent: ({ children }: any) => (
-    <div data-testid="os">{children}</div>
+  OverlayScrollbarsComponent: ({ children, className }: any) => (
+    <div data-testid="os" className={className}>
+      {children}
+    </div>
   ),
 }));
 
@@ -246,11 +248,50 @@ describe("PlayerSection", () => {
     expect(videoPane).toHaveAttribute("data-segment-layout", "css-env");
     expect(detailsPane).toHaveStyle({ position: "fixed" });
     expect(detailsPane).toHaveAttribute("data-segment-layout", "css-env");
-    expect(queryByTestId("os")).not.toBeInTheDocument();
+    expect(queryByTestId("os")).toHaveClass("watch-player-tabletop-scrollbars");
     expect(
       JSON.parse(getByTestId("player-controls").dataset.props ?? "{}"),
     ).toMatchObject({ showTheaterToggle: false });
     expect(sharedPlayerSourceRef.current).toMatchObject({ zIndex: 20 });
+  });
+
+  it("tabletop切替でも共有プレイヤースロットのDOMを維持する", () => {
+    mockControlBar.songsInVideo = [baseSong];
+    const props = {
+      currentSong: baseSong,
+      previousSong: null,
+      nextSong: null,
+      allSongs: [baseSong],
+      songs: [baseSong],
+      searchTerm: "",
+      isPlaying: true,
+      isMembersOnlyPlayerRecovering: false,
+      playerKey: 1,
+      hideFutureSongs: false,
+      handlePlayerOnReady: () => {},
+      handleStateChange: () => {},
+      changeCurrentSong: () => {},
+      playRandomSong: () => {},
+      setSongsToCurrentVideo: () => {},
+      setSongs: () => {},
+      searchSongs: () => [],
+      setOpenShareModal: () => {},
+      setSearchTerm: () => {},
+      setHideFutureSongs: () => {},
+      isTheaterMode: false,
+      onToggleTheaterMode: () => {},
+    };
+    const { getByTestId, rerender } = renderWithWrapper(
+      <PlayerSection {...props} layoutMode="landscape-columns" />,
+    );
+    const slot = getByTestId("shared-youtube-slot");
+    const scrollContainer = getByTestId("os");
+
+    rerender(<PlayerSection {...props} layoutMode="tabletop" />);
+
+    expect(getByTestId("shared-youtube-slot")).toBe(slot);
+    expect(getByTestId("os")).toBe(scrollContainer);
+    expect(scrollContainer).toHaveClass("watch-player-tabletop-scrollbars");
   });
 
   it("compact tabletopでは下段を全幅化して表示切替タブを出す", () => {
