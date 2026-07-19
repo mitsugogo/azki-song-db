@@ -75,7 +75,10 @@ const usePlayerControls = (
   const videoDataRef = useRef<YouTubeVideoData | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [playerKey, setPlayerKey] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  // MainPlayer が再マウントされても、MiniPlayer で保持していた再生状態を
+  // 最初の描画から引き継ぐ。共有 iframe の移動だけでは statechange が
+  // 再発火しないため、false 固定だとタイマー監視が開始されない。
+  const [isPlaying, setIsPlaying] = useState(globalPlayer.isPlaying);
 
   // === セトリネタバレ防止モード ===
   const [hideFutureSongs, setHideFutureSongs] = useLocalStorage<boolean>({

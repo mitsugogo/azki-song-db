@@ -284,18 +284,20 @@ export default function MiniPlayer() {
       const clampedX = Math.max(0, Math.min(newX, windowWidth - playerWidth));
       const clampedY = Math.max(0, Math.min(newY, windowHeight - playerHeight));
 
-      setPosition({ x: clampedX, y: clampedY });
+      const nextPosition = { x: clampedX, y: clampedY };
+      positionRef.current = nextPosition;
+      setPosition(nextPosition);
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       // ドラッグ終了時に四隅にスナップ
-      setPosition((prev) => {
-        const snapped = snapToCorner(prev.x, prev.y);
-        // 位置を保存
-        setStoredPosition(snapped);
-        return snapped;
-      });
+      const currentPosition = positionRef.current;
+      const snapped = snapToCorner(currentPosition.x, currentPosition.y);
+      positionRef.current = snapped;
+      setPosition(snapped);
+      // React の state updater（レンダー処理）内では副作用を実行しない。
+      setStoredPosition(snapped);
     };
 
     document.addEventListener("mousemove", handleMouseMove);

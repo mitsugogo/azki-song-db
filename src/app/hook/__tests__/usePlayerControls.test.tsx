@@ -189,6 +189,16 @@ describe("usePlayerControls", () => {
     expect(result.current.hideFutureSongs).toBe(false);
   });
 
+  it("ミニプレイヤーから復帰した再生状態を初期値として引き継ぐ", () => {
+    mockGlobalPlayer.isPlaying = true;
+
+    const { result } = renderHook(() =>
+      usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),
+    );
+
+    expect(result.current.isPlaying).toBe(true);
+  });
+
   it("changeCurrentSongで曲情報と再生曲を切り替えられる", () => {
     const { result } = renderHook(() =>
       usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),

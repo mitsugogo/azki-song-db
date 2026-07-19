@@ -77,9 +77,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* 折りたたみモード */
-@custom-variant foldable (&:where(.foldable, .foldable *));
-
 :root {
   --font-sans:
     "Noto Sans JP", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
@@ -376,5 +373,44 @@ body {
     .hover-shadow-md:hover {
       @apply border-primary/30 bg-white/95 shadow-[0_24px_60px_rgba(190,24,93,0.18)] dark:border-pink-300/30 dark:bg-gray-900/85;
     }
+  }
+}
+
+/* 高さの限られた通常スマホ横画面では、動画操作と楽曲一覧を同時に確保する。 */
+@media (orientation: landscape) and (max-height: 480px) {
+  [data-watch-layout="landscape-columns"] > header,
+  [data-watch-layout="landscape-columns"] > footer {
+    display: none;
+  }
+
+  [data-watch-layout="landscape-columns"] > main {
+    padding: 0 !important;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-player-section,
+  [data-watch-layout="landscape-columns"] .watch-song-list-section {
+    width: 50% !important;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-player-controls-bar {
+    padding-bottom: 0.25rem;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-song-list-mode-controls {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-song-list-mode-controls > div {
+    margin-top: 0.25rem;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-song-list-search {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  [data-watch-layout="landscape-columns"] .watch-song-list-summary {
+    margin-bottom: 0.25rem;
   }
 }
