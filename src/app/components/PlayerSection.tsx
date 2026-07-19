@@ -522,23 +522,20 @@ export default function PlayerSection({
             }`
       }
     >
-      {isTabletop ? (
-        <>
-          {videoPane}
-          {compactTabletopTabs}
-          {detailsPane}
-        </>
-      ) : (
-        <OverlayScrollbarsComponent
-          options={{ scrollbars: { autoHide: "leave" } }}
-          element="div"
-          className="player-section-scrollbars flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
-          defer
-        >
-          {videoPane}
-          {detailsPane}
-        </OverlayScrollbarsComponent>
-      )}
+      <OverlayScrollbarsComponent
+        options={{ scrollbars: { autoHide: "leave" } }}
+        element="div"
+        className={
+          isTabletop
+            ? "watch-player-tabletop-scrollbars"
+            : "player-section-scrollbars flex flex-col h-full w-full bg-background pr-0 lg:pr-3"
+        }
+        defer
+      >
+        {videoPane}
+        {compactTabletopTabs}
+        {detailsPane}
+      </OverlayScrollbarsComponent>
     </aside>
   );
 }
