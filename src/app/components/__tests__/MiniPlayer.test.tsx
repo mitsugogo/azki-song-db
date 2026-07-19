@@ -141,7 +141,8 @@ describe("MiniPlayer", () => {
     // maximize button
     const maxBtn = getByTitle("プレイヤーを最大化");
     fireEvent.click(maxBtn);
-    expect(maximizePlayer).toHaveBeenCalled();
+    // 遷移前にミニプレイヤーを無効化しない。遷移後は MainPlayer が最大化する。
+    expect(maximizePlayer).not.toHaveBeenCalled();
     expect(globalPlayerMockValue.setCurrentTime).toHaveBeenCalledWith(45.8);
     expect(pushMock).toHaveBeenCalledWith("/watch?v=v1&t=45s");
 
