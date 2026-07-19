@@ -300,7 +300,12 @@ export default function useMainPlayerControls({
    * プレイヤーが準備できたとき
    */
   const handlePlayerOnReady = useCallback(
-    (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+    (
+      event: YouTubeEvent<number> & {
+        target: YouTubePlayerWithVideoData;
+        isSharedPlayerHandoff?: boolean;
+      },
+    ) => {
       const videoIdFromPlayer =
         typeof event.target.getVideoData === "function"
           ? (event.target.getVideoData()?.video_id ?? null)
@@ -332,6 +337,16 @@ export default function useMainPlayerControls({
       try {
         applyPersistedVolume(event.target);
       } catch (_) {}
+
+      if (event.isSharedPlayerHandoff) {
+        // MiniPlayer から同じ iframe を受け取っただけなので、初期ロード用の
+        // seek / loadVideoById は行わない。再生位置と再生意図はそのまま使う。
+        initialPlaybackTargetRef.current = null;
+        initialStartSeekRef.current = null;
+        initialStartSeekRetryCountRef.current = 0;
+        setHasRestoredPosition(true);
+        return true;
+      }
 
       const currentVideoId = currentSong?.video_id;
       const readyVideoId =

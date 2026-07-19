@@ -1,6 +1,6 @@
 import React from "react";
 import { act, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   SharedYouTubePlayerProvider,
   SharedYouTubePlayerSlot,
@@ -11,9 +11,6 @@ const { youtubePlayerPropsRef, youtubePlayerUnmounts } = vi.hoisted(() => ({
   youtubePlayerPropsRef: { current: null as any },
   youtubePlayerUnmounts: { current: 0 },
 }));
-
-const originalMoveBefore = HTMLElement.prototype.moveBefore;
-let moveBeforeMock: ReturnType<typeof vi.fn>;
 
 vi.mock("../YouTubePlayer", async () => {
   const React = await import("react");
@@ -69,26 +66,6 @@ describe("SharedYouTubePlayer", () => {
   beforeEach(() => {
     youtubePlayerPropsRef.current = null;
     youtubePlayerUnmounts.current = 0;
-    moveBeforeMock = vi.fn(function (
-      this: HTMLElement,
-      node: Node,
-      child: Node | null,
-    ) {
-      this.insertBefore(node, child);
-    });
-    Object.defineProperty(HTMLElement.prototype, "moveBefore", {
-      configurable: true,
-      writable: true,
-      value: moveBeforeMock,
-    });
-  });
-
-  afterEach(() => {
-    Object.defineProperty(HTMLElement.prototype, "moveBefore", {
-      configurable: true,
-      writable: true,
-      value: originalMoveBefore,
-    });
   });
 
   it("playerKeyが異なっても同一動画のスロット移譲ではiframeを維持する", async () => {
@@ -114,7 +91,9 @@ describe("SharedYouTubePlayer", () => {
     const player = getByTestId("youtube-player");
     const host = getByTestId("shared-youtube-player-host");
     const mainSlot = getByTestId("shared-youtube-player-slot-main");
-    expect(mainSlot).toContainElement(host);
+    const surface = getByTestId("shared-youtube-player-surface");
+    expect(mainSlot).not.toContainElement(host);
+    expect(surface).toContainElement(host);
     expect(host).toHaveStyle({ position: "absolute", inset: "0" });
 
     rerender(
@@ -132,10 +111,10 @@ describe("SharedYouTubePlayer", () => {
     expect(youtubePlayerUnmounts.current).toBe(0);
     expect(getByTestId("youtube-player")).toBe(player);
     expect(getByTestId("shared-youtube-player-host")).toBe(host);
-    expect(getByTestId("shared-youtube-player-slot-mini")).toContainElement(
+    expect(getByTestId("shared-youtube-player-slot-mini")).not.toContainElement(
       host,
     );
-    expect(moveBeforeMock).toHaveBeenCalled();
+    expect(getByTestId("shared-youtube-player-surface")).toContainElement(host);
   });
 
   it("同一動画でも再作成キーが変われば iframe を再マウントする", async () => {
@@ -181,10 +160,14 @@ describe("SharedYouTubePlayer", () => {
     );
 
     await act(async () => {});
-    expect(acceptedReady).toHaveBeenCalledWith({ target: player });
+    expect(acceptedReady).toHaveBeenCalledWith({
+      target: player,
+      isSharedPlayerHandoff: false,
+    });
   });
 
-  it("スロット移譲時に実プレイヤーの再生状態を新しい source へ配送する", async () => {
+  it("スロット移譲時はhandoffとしてreadyを配送しstatechangeを再発火しない", async () => {
+    const miniReady = vi.fn();
     const miniStateChange = vi.fn();
     const player = {
       getVideoData: () => ({ video_id: "same-video" }),
@@ -208,12 +191,17 @@ describe("SharedYouTubePlayer", () => {
           sourceId="mini"
           active
           startTime={95}
+          onReady={miniReady}
           onStateChange={miniStateChange}
         />
       </SharedYouTubePlayerProvider>,
     );
 
     await act(async () => {});
-    expect(miniStateChange).toHaveBeenCalledWith({ target: player, data: 1 });
+    expect(miniReady).toHaveBeenCalledWith({
+      target: player,
+      isSharedPlayerHandoff: true,
+    });
+    expect(miniStateChange).not.toHaveBeenCalled();
   });
 });

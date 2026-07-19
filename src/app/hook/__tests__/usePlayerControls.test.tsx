@@ -995,7 +995,7 @@ describe("usePlayerControls", () => {
       clearSpy.mockRestore();
     });
 
-    it("BUFFERINGで監視タイマーが停止しisPlayingがfalseになる", () => {
+    it("BUFFERINGでは監視タイマーと再生状態を維持する", () => {
       const clearSpy = vi.spyOn(global, "clearInterval");
       const player = createMockPlayer("vid1", 5);
 
@@ -1014,6 +1014,8 @@ describe("usePlayerControls", () => {
         } as any);
       });
 
+      clearSpy.mockClear();
+
       act(() => {
         result.current.handleStateChange({
           target: player,
@@ -1021,8 +1023,8 @@ describe("usePlayerControls", () => {
         } as any);
       });
 
-      expect(clearSpy).toHaveBeenCalled();
-      expect(result.current.isPlaying).toBe(false);
+      expect(clearSpy).not.toHaveBeenCalled();
+      expect(result.current.isPlaying).toBe(true);
 
       clearSpy.mockRestore();
     });

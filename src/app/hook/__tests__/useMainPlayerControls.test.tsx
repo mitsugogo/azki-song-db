@@ -175,6 +175,40 @@ describe("useMainPlayerControls", () => {
     expect(mockGlobalPlayer.setCurrentTime).not.toHaveBeenCalledWith(0);
   });
 
+  it("共有iframeのhandoffでは初期seekや動画再読み込みを行わない", () => {
+    mockGlobalPlayer.currentTime = 42.8;
+    mockGlobalPlayer.currentSong = mockSongs[1];
+    mockGlobalPlayer.isPlaying = true;
+
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid2", "Song 2");
+    mockPlayer.getCurrentTime.mockReturnValue(42.8);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({
+        target: mockPlayer,
+        isSharedPlayerHandoff: true,
+      } as any);
+    });
+
+    expect(mockPlayer.seekTo).not.toHaveBeenCalled();
+    expect(mockPlayer.loadVideoById).not.toHaveBeenCalled();
+    expect(mockPlayer.cueVideoById).not.toHaveBeenCalled();
+    expect(result.current.playerControls.currentTime).toBe(42.8);
+    expect(result.current.isPlaying).toBe(true);
+  });
+
   it("メンバー限定動画でエラー101/150が出た場合は1回だけプレイヤーを再作成する", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({
