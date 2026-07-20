@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.18.1](https://github.com/mitsugogo/azki-song-db/compare/v2.18.0...v2.18.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* preserve player DOM when switching tabletop layout ([ce538d9](https://github.com/mitsugogo/azki-song-db/commit/ce538d9f3778bee59f546d510293059c1de6ddc2))
+* ミニプレイヤー復帰時の再生状態を維持 ([1f12dc3](https://github.com/mitsugogo/azki-song-db/commit/1f12dc30be6292bdc501d56ff08179f9c35486ca))
+* ミニプレイヤー復帰時の再生状態を維持 ([9b15c93](https://github.com/mitsugogo/azki-song-db/commit/9b15c93e5f5a6cf3fd0eaf98e80f355c76d11dd5))
+
 ## [2.18.0](https://github.com/mitsugogo/azki-song-db/compare/v2.17.0...v2.18.0) (2026-07-19)
 
 
