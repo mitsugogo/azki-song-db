@@ -133,6 +133,21 @@ body {
   z-index: auto !important;
 }
 
+/*
+ * Fold端末の姿勢変更時もYouTube iframeの親DOMを維持する。
+ * OverlayScrollbarsはマウントしたまま、tabletopではレイアウトボックスだけを外す。
+ */
+.watch-player-tabletop-scrollbars[data-overlayscrollbars-initialize],
+.watch-player-tabletop-scrollbars[data-overlayscrollbars~="host"],
+.watch-player-tabletop-scrollbars > [data-overlayscrollbars-contents],
+.watch-player-tabletop-scrollbars > [data-overlayscrollbars-viewport] {
+  display: contents !important;
+}
+
+.watch-player-tabletop-scrollbars > .os-scrollbar {
+  display: none !important;
+}
+
 .youtube-progress-bar {
   position: relative;
   top: 4px;

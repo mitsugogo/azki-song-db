@@ -841,10 +841,13 @@ const usePlayerControls = (
       switch (event.data) {
         case YouTube.PlayerState.UNSTARTED:
         case YouTube.PlayerState.PAUSED:
-        case YouTube.PlayerState.BUFFERING:
           clearMonitorInterval();
           pauseSongPlayCountSession();
           setIsPlaying(false);
+          break;
+        case YouTube.PlayerState.BUFFERING:
+          // バッファリングは再生意図の停止ではない。共有iframeの表示先を
+          // 切り替える途中でも再生中表示と監視タイマーを維持する。
           break;
         case YouTube.PlayerState.PLAYING:
           handlePlayingState();

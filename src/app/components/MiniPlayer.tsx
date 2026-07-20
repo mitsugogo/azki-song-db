@@ -44,7 +44,6 @@ export default function MiniPlayer() {
     currentTime,
     setIsPlaying,
     setCurrentTime,
-    maximizePlayer,
     setIsMinimized,
     setCurrentSong,
   } = useGlobalPlayer();
@@ -430,8 +429,6 @@ export default function MiniPlayer() {
   }, [setIsPlaying, setIsMinimized]);
 
   const handleMaximize = useCallback(() => {
-    maximizePlayer();
-
     const fallbackStart = Number(currentSong?.start ?? 0);
     const playerTime =
       playerRef.current &&
@@ -461,7 +458,6 @@ export default function MiniPlayer() {
     currentSong?.start,
     currentSong?.video_id,
     currentTime,
-    maximizePlayer,
     router,
     setCurrentTime,
   ]);

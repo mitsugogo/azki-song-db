@@ -657,7 +657,12 @@ const createSeichiCanvasOverlay = ({
       this.hitPoints = [];
 
       const selectedLocationId = getSelectedLocationId();
-      for (const location of this.locations) {
+      // Canvas は後から描いたピンほど手前に表示される。
+      const locationsInPaintOrder = this.locations
+        .map((location) => ({ location, visited: isVisited(location) }))
+        .sort((left, right) => Number(left.visited) - Number(right.visited));
+
+      for (const { location, visited } of locationsInPaintOrder) {
         const point = projection.fromLatLngToDivPixel(
           new coreApi.LatLng(location.latitude, location.longitude),
         );
@@ -669,7 +674,6 @@ const createSeichiCanvasOverlay = ({
           continue;
         }
 
-        const visited = isVisited(location);
         const selected = location.id === selectedLocationId;
         const markerColor = visited ? "#d63384" : "#1c7ed6";
         const radius = selected ? 8 : 6;

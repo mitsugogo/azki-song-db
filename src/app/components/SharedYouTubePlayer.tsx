@@ -24,7 +24,9 @@ type SharedYouTubePlayerSource = {
   zIndex?: number;
   // false を返す場合は、遷移途中などでこの ready 通知をまだ受理できないことを表す。
   // 次の source 更新時に同じ iframe の ready を再配送する。
-  onReady: (event: YouTubeEvent<any>) => boolean | void;
+  onReady: (
+    event: YouTubeEvent<any> & { isSharedPlayerHandoff?: boolean },
+  ) => boolean | void;
   onStateChange: (event: YouTubeEvent<any>) => void;
   onError?: (event: YouTubeEvent<any>) => void;
 };
@@ -65,23 +67,50 @@ export function SharedYouTubePlayerProvider({
   const [hostElement, setHostElement] = useState<HTMLDivElement | null>(null);
   const activeSlotRef = useRef<ActiveSlot | null>(null);
   const hostElementRef = useRef<HTMLDivElement | null>(null);
-  const parkingElementRef = useRef<HTMLDivElement | null>(null);
+  const slotResizeObserverRef = useRef<ResizeObserver | null>(null);
+  const positionFrameRef = useRef<number | null>(null);
+  const positionFramesRemainingRef = useRef(0);
 
-  const moveHostElement = useCallback((target: HTMLElement | null) => {
-    const element = hostElementRef.current;
-    if (element && target && element.parentElement !== target) {
-      if (
-        element.isConnected &&
-        target.isConnected &&
-        typeof target.moveBefore === "function"
-      ) {
-        // iframe の browsing context を維持したままスロット間を移動する。
-        target.moveBefore(element, null);
-      } else {
-        target.appendChild(element);
-      }
+  const positionHostElement = useCallback(() => {
+    const host = hostElementRef.current;
+    const slot = activeSlotRef.current?.element;
+    if (!host) return;
+
+    if (!slot?.isConnected) {
+      host.style.visibility = "hidden";
+      host.style.pointerEvents = "none";
+      return;
     }
+
+    const rect = slot.getBoundingClientRect();
+    host.style.left = `${rect.left}px`;
+    host.style.top = `${rect.top}px`;
+    host.style.width = `${rect.width}px`;
+    host.style.height = `${rect.height}px`;
+    host.style.visibility = "visible";
+    host.style.pointerEvents = "auto";
   }, []);
+
+  const scheduleHostPosition = useCallback(() => {
+    positionHostElement();
+    if (typeof window.requestAnimationFrame !== "function") return;
+
+    // MiniPlayer の spring animation や Fold の viewport 変化中も、
+    // iframe 自体は動かさず固定ホストの矩形だけを追従させる。
+    positionFramesRemainingRef.current = 45;
+    if (positionFrameRef.current !== null) return;
+
+    const updatePosition = () => {
+      positionFrameRef.current = null;
+      positionHostElement();
+      positionFramesRemainingRef.current -= 1;
+      if (positionFramesRemainingRef.current > 0) {
+        positionFrameRef.current = window.requestAnimationFrame(updatePosition);
+      }
+    };
+
+    positionFrameRef.current = window.requestAnimationFrame(updatePosition);
+  }, [positionHostElement]);
 
   const setSource = useCallback((source: SharedYouTubePlayerSource) => {
     if (!source.active || !source.videoId) {
@@ -104,9 +133,16 @@ export function SharedYouTubePlayerProvider({
   const setSlot = useCallback(
     (slot: ActiveSlot) => {
       activeSlotRef.current = slot;
-      moveHostElement(slot.element);
+      slotResizeObserverRef.current?.disconnect();
+      if (typeof ResizeObserver !== "undefined") {
+        slotResizeObserverRef.current = new ResizeObserver(
+          scheduleHostPosition,
+        );
+        slotResizeObserverRef.current.observe(slot.element);
+      }
+      scheduleHostPosition();
     },
-    [moveHostElement],
+    [scheduleHostPosition],
   );
 
   const clearSlot = useCallback(
@@ -114,29 +150,48 @@ export function SharedYouTubePlayerProvider({
       if (activeSlotRef.current?.sourceId !== sourceId) return;
 
       activeSlotRef.current = null;
-      moveHostElement(parkingElementRef.current);
+      slotResizeObserverRef.current?.disconnect();
+      slotResizeObserverRef.current = null;
+      positionFramesRemainingRef.current = 0;
+      if (positionFrameRef.current !== null) {
+        window.cancelAnimationFrame(positionFrameRef.current);
+        positionFrameRef.current = null;
+      }
+      positionHostElement();
     },
-    [moveHostElement],
+    [positionHostElement],
   );
 
   useEffect(() => {
-    const element = document.createElement("div");
-    element.style.position = "absolute";
-    element.style.inset = "0";
-    element.style.width = "100%";
-    element.style.height = "100%";
-
-    hostElementRef.current = element;
-    moveHostElement(
-      activeSlotRef.current?.element ?? parkingElementRef.current,
-    );
-    setHostElement(element);
+    window.addEventListener("resize", scheduleHostPosition);
+    window.addEventListener("scroll", scheduleHostPosition, true);
 
     return () => {
-      hostElementRef.current = null;
-      element.remove();
+      window.removeEventListener("resize", scheduleHostPosition);
+      window.removeEventListener("scroll", scheduleHostPosition, true);
+      slotResizeObserverRef.current?.disconnect();
+      if (positionFrameRef.current !== null) {
+        window.cancelAnimationFrame(positionFrameRef.current);
+      }
+      positionFramesRemainingRef.current = 0;
     };
-  }, [moveHostElement]);
+  }, [scheduleHostPosition]);
+
+  const setHostElementRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      hostElementRef.current = element;
+      setHostElement(element);
+      if (element) {
+        scheduleHostPosition();
+      }
+    },
+    [scheduleHostPosition],
+  );
+
+  useEffect(() => {
+    if (!hostElement) return;
+    hostElement.style.zIndex = String(activeSource?.zIndex ?? 1);
+  }, [activeSource?.zIndex, hostElement]);
 
   const value = useMemo(
     () => ({
@@ -156,16 +211,15 @@ export function SharedYouTubePlayerProvider({
         hostElement={hostElement}
       />
       <div
-        ref={parkingElementRef}
-        aria-hidden="true"
-        data-testid="shared-youtube-player-parking"
+        ref={setHostElementRef}
+        data-testid="shared-youtube-player-surface"
         style={{
           position: "fixed",
-          left: "-10000px",
+          left: 0,
           top: 0,
-          width: "1px",
-          height: "1px",
-          overflow: "hidden",
+          width: 0,
+          height: 0,
+          visibility: "hidden",
           pointerEvents: "none",
         }}
       />
@@ -237,6 +291,7 @@ function SharedYouTubePlayerHost({
   const playerRef = useRef<any>(null);
   const activeSourceRef = useRef<ActiveSource | null>(activeSource);
   const deliveredReadySourceIdRef = useRef<string | null>(null);
+  const lastReadySourceIdRef = useRef<string | null>(null);
   const clearPlayerLoadTimeoutRef = useRef<number | null>(null);
   const [playerLoad, setPlayerLoad] = useState<PlayerLoad | null>(null);
   const [hostZIndex, setHostZIndex] = useState(1);
@@ -254,6 +309,7 @@ function SharedYouTubePlayerHost({
           setPlayerLoad(null);
           playerRef.current = null;
           deliveredReadySourceIdRef.current = null;
+          lastReadySourceIdRef.current = null;
         }
         clearPlayerLoadTimeoutRef.current = null;
       }, 500);
@@ -276,6 +332,7 @@ function SharedYouTubePlayerHost({
       }
 
       deliveredReadySourceIdRef.current = null;
+      lastReadySourceIdRef.current = null;
       return {
         sourceId: activeSource.sourceId,
         videoId: activeSource.videoId,
@@ -315,24 +372,17 @@ function SharedYouTubePlayerHost({
       return;
     }
 
+    const isSharedPlayerHandoff = Boolean(
+      lastReadySourceIdRef.current &&
+      lastReadySourceIdRef.current !== activeSource.sourceId,
+    );
     const accepted = activeSource.onReady({
       target: playerRef.current,
-    } as YouTubeEvent<any>);
+      isSharedPlayerHandoff,
+    } as YouTubeEvent<any> & { isSharedPlayerHandoff: boolean });
     if (accepted !== false) {
       deliveredReadySourceIdRef.current = activeSource.sourceId;
-
-      // 同じ iframe を別スロットへ移しただけでは YouTube の statechange は
-      // 再発火しない。新しい source 側の再生アイコンとタイマー監視を
-      // 実プレイヤーの現在状態へ揃える。
-      if (typeof playerRef.current.getPlayerState === "function") {
-        const playerState = Number(playerRef.current.getPlayerState());
-        if (Number.isFinite(playerState)) {
-          activeSource.onStateChange({
-            target: playerRef.current,
-            data: playerState,
-          } as YouTubeEvent<any>);
-        }
-      }
+      lastReadySourceIdRef.current = activeSource.sourceId;
     }
   }, [activeSource]);
 
@@ -342,6 +392,9 @@ function SharedYouTubePlayerHost({
     const accepted = source?.onReady(event);
     deliveredReadySourceIdRef.current =
       accepted === false ? null : (source?.sourceId ?? null);
+    if (accepted !== false) {
+      lastReadySourceIdRef.current = source?.sourceId ?? null;
+    }
   }, []);
 
   const handleStateChange = useCallback((event: YouTubeEvent<any>) => {
