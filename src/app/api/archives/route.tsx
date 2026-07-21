@@ -234,7 +234,7 @@ export async function GET() {
     return NextResponse.json(items, {
       headers: {
         "Cache-Control":
-          "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
+          "public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=120",
         "Vercel-Cache-Tag": buildVercelCacheTagHeader([
           cacheTags.coreDataset,
           cacheTags.archives,
