@@ -19,6 +19,7 @@
     "home": "HOME",
     "search": "Search",
     "discography": "Discography",
+    "journey": "1st Anniversary",
     "activity": "Activity",
     "anniversaries": "Anniversaries",
     "archives": "Stream Archives",
@@ -190,6 +191,7 @@
     "heroLine2": "",
     "heroLine2_short": "Virtual DiVA AZKi",
     "description": "An unofficial song database collecting AZKi's original songs, collabs & covers, and setlists sung on livestreams.",
+    "anniversaryThanks": "AZKi Song Database — 1st Anniversary",
     "birthdayMessage": "Happy Birthday AZKi!",
     "birthdayAriaLabel": "Happy Birthday AZKi",
     "heroWatchFromBeginning": "Play from the beginning in the app player",
@@ -1269,6 +1271,138 @@
   },
   "Footer": {
     "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
+  },
+  "Journey": {
+    "metadata": {
+      "title": "AZKi Song Database 1st Anniversary",
+      "description": "A first-anniversary look at the site's major features, current data, and AZKi's musical journey."
+    },
+    "hero": {
+      "eyebrow": "AZKi SONG DATABASE",
+      "title": "1st Anniversary",
+      "period": "2025.08.07 — 2026.08.07",
+      "subtitle": "Almost one year since launch.",
+      "description": "What began as a small player for finding and hearing songs has grown to include activity records, stream archives, and a pilgrimage map. Look back at the major features and data added during the first year.",
+      "start": "Explore the first year"
+    },
+    "siteYear": {
+      "eyebrow": "SITE HISTORY / FIRST YEAR",
+      "title": "The site's first year",
+      "description": "{siteName} began with a simple way to find and play songs, then grew into a place to explore AZKi's music and activities from many angles. These are the major additions from its first year.",
+      "milestones": {
+        "launch": {
+          "title": "A place to find a song and play it immediately",
+          "description": "The first release combined timestamped singing-stream data, a YouTube player, advanced search, and statistics."
+        },
+        "database": {
+          "title": "Browse songs as a growing body of work",
+          "description": "Discography and the complete data table opened new views across songs, albums, videos, and view counts."
+        },
+        "playlist": {
+          "title": "Save your own way of listening",
+          "description": "Playlists, favorites, and PWA support turned the site into a player people could arrange and keep using every day."
+        },
+        "discovery": {
+          "title": "Find music through activity and context",
+          "description": "Yearly activity summaries, a dedicated search page, and song details made it possible to explore by period and activity as well as title."
+        },
+        "renewal": {
+          "title": "A full renewal and new ways to share",
+          "description": "Version 2 refreshed the entire experience. Best-nine picks, fan-origin image generation, and anniversary pages turned memories into shareable artifacts."
+        },
+        "archives": {
+          "title": "Preserve streams and activity on a timeline",
+          "description": "Stream archives and monthly activity arrived. Videos with recorded setlists now connect directly back to the in-app player."
+        },
+        "community": {
+          "title": "From a database to shared experiences",
+          "description": "The pilgrimage map, Google sign-in, song tags, and fuzzy search connect personal records with information contributed and explored by the community."
+        }
+      },
+      "features": {
+        "player": "Timestamp playback",
+        "search": "Advanced search",
+        "statistics": "Statistics",
+        "discography": "Discography",
+        "allData": "Complete data",
+        "viewCounts": "YouTube views",
+        "playlists": "Playlists",
+        "favorites": "Favorites",
+        "pwa": "PWA",
+        "activity": "Activity summaries",
+        "searchPage": "Search page",
+        "songDetails": "Song details",
+        "renewal": "Version 2 renewal",
+        "bestNine": "Best nine songs",
+        "fanTimeline": "Where my AZKi journey began",
+        "anniversaries": "Anniversaries",
+        "streamArchives": "Stream archives",
+        "monthlyActivity": "Monthly activity",
+        "archivePlayback": "Play from archives",
+        "seichiMap": "Pilgrimage map",
+        "signIn": "Google sign-in",
+        "songTags": "Song tags",
+        "fuzzySearch": "Fuzzy search"
+      }
+    },
+    "dataAnniversary": {
+      "eyebrow": "THE FIRST YEAR IN DATA",
+      "title": "The first year in data",
+      "description": "Almost one year after launch, these figures are calculated from the latest public data currently held by the database.",
+      "stats": {
+        "entries": "Data entries",
+        "songs": "Songs",
+        "videos": "Videos",
+        "archives": "Stream archives",
+        "artists": "Artists",
+        "albums": "Albums",
+        "activityRecords": "Activity records",
+        "songTags": "Song tags"
+      },
+      "links": {
+        "data": "Browse all data",
+        "statistics": "Explore statistics",
+        "archives": "Browse stream archives",
+        "activity": "Explore activity"
+      },
+      "notice": "Figures are deduplicated from public data at page-load time. Songs use title and artist as their key; videos and stream archives use YouTube video IDs."
+    },
+    "musicJourney": {
+      "title": "AZKi Music Journey",
+      "period": "2018 — NOW",
+      "description": "Follow AZKi's journey through the activity timeline, original-song releases, and selected LIVE or project streams collected by the site.",
+      "start": "Begin the music journey"
+    },
+    "chapterDescription": "This phase is led by {milestones} activity-timeline records, with {songs} original-song releases and {archives} LIVE or project streams as supporting context.",
+    "chapterDescriptions": {
+      "alpha": "AZKi's first step as Virtual Diva. Through songs and streams, this is the route where she and the Pioneers nurtured AZKi's music from its roots.",
+      "beta": "Her activities once had a set ending. After meeting the Pioneers, she chose to continue. Joining hololive Generation 0 broadened her stage, while new friends and challenges carried AZKi's expression even farther.",
+      "gamma": "The present, where every step so far becomes strength as AZKi continues to refresh both her music and everyday life. Since discovering GeoGuessr, she has continued to change dramatically, journeying toward new scenery together with the Pioneers."
+    },
+    "representativeSong": "Original song from this phase",
+    "representativeSongsTitle": "Representative song",
+    "timelineTitle": "Activity timeline",
+    "counts": {
+      "songs": "Original songs",
+      "archives": "LIVE / projects",
+      "videos": "Videos",
+      "milestones": "Activity records"
+    },
+    "footprint": {
+      "title": "Your footprint",
+      "plays": "Played {count} times on this device",
+      "favorites": "{count} favorites",
+      "totalPlays": "Played {count} times on this device",
+      "totalFavorites": "{count} favorites"
+    },
+    "current": {
+      "eyebrow": "You are here",
+      "title": "NOW",
+      "description": "The activity timeline currently contains {milestones} records and {songs} original-song releases. {archives} LIVE and project streams are included as supporting context.",
+      "latest": "Latest original song",
+      "play": "Play now"
+    },
+    "dataNotice": "The activity history uses the same song-sheet milestones and milestones API as the Activity timeline. Stream archives are used only as supporting context for LIVE and project streams and their first broadcasts; the events API is not used. Song totals count deduplicated original songs released during each phase. Your footprint counts plays stored on this device and signed-in favorites across all songs published during each phase."
   },
   "Summary": {
     "timelineTitle": "Timeline",

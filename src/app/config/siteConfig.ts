@@ -3,10 +3,13 @@ export const siteConfig = {
   siteNameUpper: "AZKi SONG DATABASE",
   shortName: "AZKi Song DB",
   siteSlug: "azki-song-db",
+  launchedAt: "2025-08-07",
+  firstAnniversaryAt: "2026-08-07",
 
   // 推しのチャンネル名、URL
   talentName: "AZKi",
   channelName: "AZKi Channel",
+  channelId: "UC0TXe_LYZ4scaW2XMyi5_kw",
   channelUrl: "https://www.youtube.com/@AZKi",
   xName: "AZKi_VDiVA",
   xUrl: "https://x.com/AZKi_VDiVA",

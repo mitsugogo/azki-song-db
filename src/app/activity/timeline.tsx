@@ -11,23 +11,10 @@ import { BsGeoAlt } from "react-icons/bs";
 import { useTranslations, useLocale } from "next-intl";
 import { useRef, useState, useLayoutEffect } from "react";
 import { formatDate } from "../lib/formatDate";
-
-type TimelineMilestone = {
-  date: Date;
-  text: string;
-  note: string;
-  url: string;
-  place: string;
-  place_url: string;
-  is_external: boolean;
-};
-
-function toDateKey(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+import {
+  buildActivityMilestones,
+  toActivityDateKey as toDateKey,
+} from "./activityMilestones";
 
 function toJstMonthDayKey(date: Date) {
   const jstOffsetMs = 9 * 60 * 60 * 1000;
@@ -49,125 +36,10 @@ export default function Timeline({ songs }: { songs: Song[] }) {
 
   const { items: externalMilestones } = useMilestones();
 
-  const songMilestones = songs
-    .filter((s) => s.milestones && s.milestones.length > 0 && s.broadcast_at)
-    .flatMap((s) =>
-      (s.milestones || []).map((m: string) => ({
-        date: new Date(s.broadcast_at),
-        text: m.trim(),
-        note: "",
-        url: "",
-        place: "",
-        place_url: "",
-        is_external: false,
-      })),
-    );
-
-  // 同じ milestone text が複数日付で出現する場合は、最も早い日付のみを利用
-  const dedupedSongMilestones = Array.from(
-    songMilestones
-      .reduce((map, milestone) => {
-        const key = milestone.text;
-        const existing = map.get(key);
-        if (!existing || milestone.date.getTime() < existing.date.getTime()) {
-          map.set(key, milestone);
-        }
-        return map;
-      }, new Map<string, TimelineMilestone>())
-      .values(),
+  const uniqueMilestones = buildActivityMilestones(
+    songs,
+    externalMilestones || [],
   );
-
-  const apiMilestones: TimelineMilestone[] = (externalMilestones || [])
-    .map((m) => ({
-      date: m.date ? new Date(m.date) : null,
-      text: m.content?.trim() || "",
-      note: m.note || "",
-      url: m.url || "",
-      place: m.place || "",
-      place_url: m.place_url || "",
-      is_external: true, // APIからのマイルストーンかどうか
-    }))
-    .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
-
-  // songs と api で同名マイルストーンが重複する場合は、古い日付を採用しつつ
-  // api 側の URL / note を引き継ぐ。
-  const songByText = new Map(
-    dedupedSongMilestones.map((m) => [m.text, m] as const),
-  );
-  const apiByText = apiMilestones.reduce((map, milestone) => {
-    const list = map.get(milestone.text);
-    if (list) {
-      list.push(milestone);
-    } else {
-      map.set(milestone.text, [milestone]);
-    }
-    return map;
-  }, new Map<string, TimelineMilestone[]>());
-
-  const mergedCrossSourceMilestones: TimelineMilestone[] = [];
-
-  for (const songMilestone of dedupedSongMilestones) {
-    const apiGroup = apiByText.get(songMilestone.text);
-    if (!apiGroup || apiGroup.length === 0) {
-      mergedCrossSourceMilestones.push(songMilestone);
-      continue;
-    }
-
-    const oldestApi = apiGroup.reduce((oldest, current) =>
-      current.date.getTime() < oldest.date.getTime() ? current : oldest,
-    );
-    const mergedDate =
-      oldestApi.date.getTime() < songMilestone.date.getTime()
-        ? oldestApi.date
-        : songMilestone.date;
-    const mergedNote =
-      songMilestone.note || apiGroup.find((m) => Boolean(m.note))?.note || "";
-    const mergedUrl = apiGroup.find((m) => Boolean(m.url))?.url || "";
-    const mergedPlace = apiGroup.find((m) => Boolean(m.place))?.place || "";
-    const mergedPlaceUrl =
-      apiGroup.find((m) => Boolean(m.place_url))?.place_url || "";
-
-    mergedCrossSourceMilestones.push({
-      ...songMilestone,
-      date: mergedDate,
-      note: mergedNote,
-      url: mergedUrl,
-      place: mergedPlace,
-      place_url: mergedPlaceUrl,
-      is_external: songMilestone.is_external || apiGroup.length > 0,
-    });
-  }
-
-  const allMilestones: TimelineMilestone[] = [
-    ...mergedCrossSourceMilestones,
-    ...apiMilestones.filter((m) => !songByText.has(m.text)),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
-
-  const uniqueMilestones = (() => {
-    const map = new Map<string, TimelineMilestone>();
-
-    for (const m of allMilestones) {
-      const key = `${toDateKey(m.date)}::${m.text}`;
-      const prev = map.get(key);
-
-      if (!prev) {
-        map.set(key, m);
-        continue;
-      }
-
-      map.set(key, {
-        ...prev,
-        note: prev.note || m.note,
-        url: prev.url || m.url,
-        place: prev.place || m.place,
-        place_url: prev.place_url || m.place_url,
-        is_external: prev.is_external || m.is_external,
-      });
-    }
-    return Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
-  })();
 
   const locale = useLocale();
   const isJP = locale === "ja";
