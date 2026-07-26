@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.18.2](https://github.com/mitsugogo/azki-song-db/compare/v2.18.1...v2.18.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* **聖地マップ:** 全画面でも訪問ダイアログが出るように ([8cbed14](https://github.com/mitsugogo/azki-song-db/commit/8cbed14246e3ed0d47e010f9dffe23b96b56c7cc))
+
 ### [2.18.1](https://github.com/mitsugogo/azki-song-db/compare/v2.18.0...v2.18.1) (2026-07-20)
 
 
