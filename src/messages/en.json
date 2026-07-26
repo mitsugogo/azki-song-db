@@ -1032,6 +1032,7 @@
     },
     "tabs": {
       "locations": "Location List",
+      "nearby": "Nearby",
       "visited": "Visited"
     },
     "search": {
@@ -1049,6 +1050,10 @@
       "sharedRecordedTitle": "{nickname}'s visited locations",
       "recordedCount": "{visible} / {total} items",
       "emptyVisited": "No visits recorded yet.",
+      "nearbyLoading": "Getting your current location...",
+      "nearbySummary": "Within 10 km, nearest first",
+      "nearbyCount": "{count} locations",
+      "emptyNearby": "No locations found within 10 km.",
       "openPostLink": "Open post link",
       "loadMore": "Show {count} more"
     },

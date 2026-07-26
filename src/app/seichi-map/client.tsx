@@ -60,12 +60,22 @@ import { breadcrumbClasses, pageClasses } from "../theme";
 import type { ArchiveItem } from "../types/archiveItem";
 import type { SeichiMapLocation } from "../lib/seichiMap";
 import { parseXStatusDateFromUrl } from "../lib/xStatus";
+import {
+  formatStraightLineDistance,
+  getNearbyLocations,
+  requestCurrentLocation as startCurrentLocationRequest,
+  updateCurrentLocationControl,
+} from "./currentLocation";
 import { getGoogleMapFullscreenPortalTarget } from "./fullscreen";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
   uniqueVisitorCount: number;
 };
+
+type ListMode = "locations" | "nearby" | "visited";
+
+type NearbyLocationStatus = "idle" | "locating" | "ready" | "unavailable";
 
 type VisitedItem = {
   id: string;
@@ -1065,7 +1075,11 @@ export default function SeichiMapCompleteClient({
   const currentLocationMarkerRef = useRef<GoogleAdvancedMarkerElement | null>(
     null,
   );
+  const currentLocationMarkerLibraryRef =
+    useRef<GoogleMapsMarkerLibrary | null>(null);
   const currentLocationControlRef = useRef<HTMLButtonElement | null>(null);
+  const cancelCurrentLocationRequestRef = useRef<(() => void) | null>(null);
+  const requestCurrentLocationRef = useRef<() => void>(() => undefined);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
@@ -1122,9 +1136,13 @@ export default function SeichiMapCompleteClient({
   const [recordModalPortalTarget, setRecordModalPortalTarget] =
     useState<HTMLElement | null>(null);
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
-  const [listMode, setListMode] = useState<"locations" | "visited">(
-    "locations",
-  );
+  const [listMode, setListMode] = useState<ListMode>("locations");
+  const [currentPosition, setCurrentPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [nearbyLocationStatus, setNearbyLocationStatus] =
+    useState<NearbyLocationStatus>("idle");
 
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const mapsMapId =
@@ -1259,6 +1277,11 @@ export default function SeichiMapCompleteClient({
         ),
     );
   }, [hiddenLayerNameSet, locations, uncategorizedLayerName]);
+
+  const nearbyLocations = useMemo(() => {
+    if (!currentPosition) return [];
+    return getNearbyLocations(currentPosition, visibleLocations);
+  }, [currentPosition, visibleLocations]);
 
   const completion = useMemo(() => {
     if (visibleLocations.length === 0) {
@@ -1586,6 +1609,52 @@ export default function SeichiMapCompleteClient({
     setVisibleVisitedCount(VISITED_PAGE_SIZE);
   }, [visitedSearchQuery]);
 
+  const requestCurrentLocation = useCallback(() => {
+    const control = currentLocationControlRef.current;
+    setListMode("nearby");
+    if (!navigator.geolocation) {
+      if (control) {
+        updateCurrentLocationControl(
+          control,
+          t("currentLocation.unsupported"),
+          false,
+        );
+      }
+      setCurrentPosition(null);
+      setNearbyLocationStatus("unavailable");
+      return;
+    }
+
+    cancelCurrentLocationRequestRef.current?.();
+    setCurrentPosition(null);
+    setNearbyLocationStatus("locating");
+    cancelCurrentLocationRequestRef.current = startCurrentLocationRequest({
+      control,
+      geolocation: navigator.geolocation,
+      labels: {
+        locating: t("currentLocation.locating"),
+        show: t("currentLocation.show"),
+        unavailable: t("currentLocation.unavailable"),
+      },
+      onSuccess: (coords) => {
+        setCurrentPosition({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        });
+        setNearbyLocationStatus("ready");
+        setListMode("nearby");
+      },
+      onUnavailable: () => {
+        setCurrentPosition(null);
+        setNearbyLocationStatus("unavailable");
+      },
+    });
+  }, [t]);
+
+  useEffect(() => {
+    requestCurrentLocationRef.current = requestCurrentLocation;
+  }, [requestCurrentLocation]);
+
   useEffect(() => {
     if (!mapsKey || !mapElementRef.current) {
       setMapLoading(false);
@@ -1599,6 +1668,7 @@ export default function SeichiMapCompleteClient({
         if (cancelled || !mapElementRef.current) {
           return;
         }
+        currentLocationMarkerLibraryRef.current = libraries.marker;
         if (!mapRef.current) {
           const { Map, InfoWindow } = libraries.maps;
           const initialViewport = readSharedMapViewport();
@@ -1623,77 +1693,9 @@ export default function SeichiMapCompleteClient({
             isVisited: (location) => isLocationVisitedRef.current(location),
             getSelectedLocationId: () => selectedLocationIdRef.current,
           });
-          const requestCurrentLocation = () => {
-            const map = mapRef.current;
-            const control = currentLocationControlRef.current;
-            if (!map || !control) return;
-
-            if (!navigator.geolocation) {
-              control.title = t("currentLocation.unsupported");
-              control.setAttribute(
-                "aria-label",
-                t("currentLocation.unsupported"),
-              );
-              return;
-            }
-
-            control.disabled = true;
-            control.style.cursor = "wait";
-            control.style.opacity = "0.7";
-            control.title = t("currentLocation.locating");
-            control.setAttribute("aria-label", t("currentLocation.locating"));
-
-            navigator.geolocation.getCurrentPosition(
-              ({ coords }) => {
-                if (cancelled || !mapRef.current) return;
-
-                const position = {
-                  lat: coords.latitude,
-                  lng: coords.longitude,
-                };
-                if (currentLocationMarkerRef.current) {
-                  currentLocationMarkerRef.current.position = position;
-                  currentLocationMarkerRef.current.map = mapRef.current;
-                } else {
-                  currentLocationMarkerRef.current =
-                    new libraries.marker.AdvancedMarkerElement({
-                      map: mapRef.current,
-                      position,
-                      title: t("currentLocation.markerTitle"),
-                      content: createCurrentLocationMarkerContent(),
-                      zIndex: 1000,
-                    });
-                }
-
-                mapRef.current.panTo(position);
-                mapRef.current.setZoom(CURRENT_LOCATION_MAP_ZOOM);
-                control.disabled = false;
-                control.style.cursor = "pointer";
-                control.style.opacity = "1";
-                control.title = t("currentLocation.show");
-                control.setAttribute("aria-label", t("currentLocation.show"));
-              },
-              () => {
-                if (cancelled) return;
-                control.disabled = false;
-                control.style.cursor = "pointer";
-                control.style.opacity = "1";
-                control.title = t("currentLocation.unavailable");
-                control.setAttribute(
-                  "aria-label",
-                  t("currentLocation.unavailable"),
-                );
-              },
-              {
-                enableHighAccuracy: true,
-                maximumAge: 30_000,
-                timeout: 10_000,
-              },
-            );
-          };
           currentLocationControlRef.current = createCurrentLocationControl(
             t("currentLocation.show"),
-            requestCurrentLocation,
+            () => requestCurrentLocationRef.current(),
           );
           mapRef.current.controls[
             libraries.core.ControlPosition.RIGHT_BOTTOM
@@ -1795,6 +1797,33 @@ export default function SeichiMapCompleteClient({
   }, [mapsKey, mapsLanguage, mapsMapId, t]);
 
   useEffect(() => {
+    const currentMap = mapRef.current;
+    const markerLibrary = currentLocationMarkerLibraryRef.current;
+    if (!currentPosition || !mapReady || !currentMap || !markerLibrary) return;
+
+    const position = {
+      lat: currentPosition.latitude,
+      lng: currentPosition.longitude,
+    };
+    if (currentLocationMarkerRef.current) {
+      currentLocationMarkerRef.current.position = position;
+      currentLocationMarkerRef.current.map = currentMap;
+    } else {
+      currentLocationMarkerRef.current =
+        new markerLibrary.AdvancedMarkerElement({
+          map: currentMap,
+          position,
+          title: t("currentLocation.markerTitle"),
+          content: createCurrentLocationMarkerContent(),
+          zIndex: 1000,
+        });
+    }
+
+    currentMap.panTo(position);
+    currentMap.setZoom(CURRENT_LOCATION_MAP_ZOOM);
+  }, [currentPosition, mapReady, t]);
+
+  useEffect(() => {
     const mapElement = mapElementRef.current;
     if (!mapElement) return;
 
@@ -1817,12 +1846,16 @@ export default function SeichiMapCompleteClient({
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
       infoWindowRef.current?.close?.();
+      cancelCurrentLocationRequestRef.current?.();
+      cancelCurrentLocationRequestRef.current = null;
+      requestCurrentLocationRef.current = () => undefined;
       currentLocationControlRef.current?.remove();
       currentLocationControlRef.current = null;
       if (currentLocationMarkerRef.current) {
         currentLocationMarkerRef.current.map = null;
         currentLocationMarkerRef.current = null;
       }
+      currentLocationMarkerLibraryRef.current = null;
       mapOverlayRef.current?.setMap(null);
       mapOverlayRef.current = null;
       mapRef.current = null;
@@ -2177,6 +2210,17 @@ export default function SeichiMapCompleteClient({
       openLocationInfoWindow(location);
     },
     [openLocationInfoWindow],
+  );
+
+  const handleListModeChange = useCallback(
+    (value: string) => {
+      const nextMode = value as ListMode;
+      setListMode(nextMode);
+      if (nextMode === "nearby") {
+        requestCurrentLocation();
+      }
+    },
+    [requestCurrentLocation],
   );
 
   const onEditVisited = useCallback(
@@ -2677,11 +2721,10 @@ export default function SeichiMapCompleteClient({
               {isLayerSelectorOpen ? null : (
                 <SegmentedControl
                   value={listMode}
-                  onChange={(value) =>
-                    setListMode(value as "locations" | "visited")
-                  }
+                  onChange={handleListModeChange}
                   data={[
                     { label: t("tabs.locations"), value: "locations" },
+                    { label: t("tabs.nearby"), value: "nearby" },
                     { label: t("tabs.visited"), value: "visited" },
                   ]}
                   fullWidth
@@ -2812,6 +2855,108 @@ export default function SeichiMapCompleteClient({
                     </ScrollArea>
                   </Paper>
                 </>
+              ) : listMode === "nearby" ? (
+                <Stack gap="sm" className="min-h-0 flex-1">
+                  <Group justify="space-between" gap="xs">
+                    <Text size="sm" c="dimmed">
+                      {t("list.nearbySummary")}
+                    </Text>
+                    {nearbyLocationStatus === "ready" ? (
+                      <Badge variant="light" color="blue">
+                        {t("list.nearbyCount", {
+                          count: nearbyLocations.length,
+                        })}
+                      </Badge>
+                    ) : null}
+                  </Group>
+
+                  {nearbyLocationStatus === "locating" ||
+                  nearbyLocationStatus === "idle" ? (
+                    <Center py="xl">
+                      <Stack gap="xs" align="center">
+                        <Loader size="sm" color="pink" />
+                        <Text size="sm" c="dimmed">
+                          {t("list.nearbyLoading")}
+                        </Text>
+                      </Stack>
+                    </Center>
+                  ) : nearbyLocationStatus === "unavailable" ? (
+                    <Alert
+                      color="orange"
+                      variant="light"
+                      icon={<FiAlertCircle size={16} />}
+                    >
+                      {t("currentLocation.unavailable")}
+                    </Alert>
+                  ) : nearbyLocations.length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                      {t("list.emptyNearby")}
+                    </Text>
+                  ) : (
+                    <Paper
+                      withBorder
+                      radius="md"
+                      p="xs"
+                      className="min-h-0 flex-1 bg-white/60 dark:bg-gray-950/20"
+                    >
+                      <ScrollArea h="100%" offsetScrollbars scrollbarSize={6}>
+                        <Stack gap={1}>
+                          {nearbyLocations.map(
+                            ({ location: item, distanceMeters }) => {
+                              const visitedLocation = isLocationVisited(item);
+                              return (
+                                <NavLink
+                                  key={item.key}
+                                  variant="light"
+                                  color={visitedLocation ? "green" : "pink"}
+                                  active={selectedLocationId === item.id}
+                                  onClick={() => showLocationOnMap(item)}
+                                  label={item.name}
+                                  description={
+                                    <Stack gap={0}>
+                                      <Text size="xs" c="dimmed" lineClamp={1}>
+                                        {getLocationLayerName(
+                                          item,
+                                          uncategorizedLayerName,
+                                        )}
+                                      </Text>
+                                      {item.description ? (
+                                        <Text
+                                          size="xs"
+                                          c="dimmed"
+                                          lineClamp={1}
+                                        >
+                                          {stripHtmlToLines(item.description)}
+                                        </Text>
+                                      ) : null}
+                                    </Stack>
+                                  }
+                                  leftSection={
+                                    <ThemeIcon
+                                      size={30}
+                                      radius="xl"
+                                      variant="light"
+                                      color={visitedLocation ? "green" : "pink"}
+                                    >
+                                      <FiMapPin size={14} />
+                                    </ThemeIcon>
+                                  }
+                                  rightSection={
+                                    <Badge variant="light" color="blue">
+                                      {formatStraightLineDistance(
+                                        distanceMeters,
+                                      )}
+                                    </Badge>
+                                  }
+                                />
+                              );
+                            },
+                          )}
+                        </Stack>
+                      </ScrollArea>
+                    </Paper>
+                  )}
+                </Stack>
               ) : canViewVisitedList ? (
                 <Stack gap="sm" className="min-h-0 flex-1">
                   <Group justify="space-between" align="end">

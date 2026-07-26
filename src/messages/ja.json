@@ -1023,6 +1023,7 @@
     },
     "tabs": {
       "locations": "聖地リスト",
+      "nearby": "近所の聖地",
       "visited": "訪問済"
     },
     "search": {
@@ -1040,6 +1041,10 @@
       "sharedRecordedTitle": "{nickname} さんの訪問済み",
       "recordedCount": "{visible} / {total} 件",
       "emptyVisited": "まだ記録がありません。",
+      "nearbyLoading": "現在地を取得しています...",
+      "nearbySummary": "現在地から10km以内・近い順",
+      "nearbyCount": "{count}件",
+      "emptyNearby": "現在地から10km以内に聖地はありません。",
       "openPostLink": "投稿リンクを開く",
       "loadMore": "さらに{count}件表示"
     },
