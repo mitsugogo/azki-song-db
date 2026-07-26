@@ -60,11 +60,22 @@ import { breadcrumbClasses, pageClasses } from "../theme";
 import type { ArchiveItem } from "../types/archiveItem";
 import type { SeichiMapLocation } from "../lib/seichiMap";
 import { parseXStatusDateFromUrl } from "../lib/xStatus";
+import {
+  formatStraightLineDistance,
+  getNearbyLocations,
+  requestCurrentLocation as startCurrentLocationRequest,
+  updateCurrentLocationControl,
+} from "./currentLocation";
+import { getGoogleMapFullscreenPortalTarget } from "./fullscreen";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
   uniqueVisitorCount: number;
 };
+
+type ListMode = "locations" | "nearby" | "visited";
+
+type NearbyLocationStatus = "idle" | "locating" | "ready" | "unavailable";
 
 type VisitedItem = {
   id: string;
@@ -138,6 +149,10 @@ type GoogleMapsEventListener = {
   remove: () => void;
 };
 
+type GoogleMapsControlArrayLike = {
+  push: (element: HTMLElement) => number;
+};
+
 type GoogleMapMouseEvent = {
   latLng?: GoogleLatLngLike;
   domEvent?: MouseEvent;
@@ -145,6 +160,7 @@ type GoogleMapMouseEvent = {
 };
 
 type GoogleMapInstance = {
+  controls: Record<number, GoogleMapsControlArrayLike>;
   getBounds: () => GoogleMapBoundsLike | null;
   getCenter: () => GoogleLatLngLike | null;
   getZoom: () => number | undefined;
@@ -174,6 +190,9 @@ type GoogleOverlayViewBase = {
 };
 
 type GoogleMapsCoreLibrary = {
+  ControlPosition: {
+    RIGHT_BOTTOM: number;
+  };
   LatLng: new (lat: number, lng: number) => GoogleLatLngLike;
 };
 
@@ -194,8 +213,24 @@ type GoogleMapsMapsLibrary = {
   InfoWindow: new () => GoogleInfoWindow;
 };
 
+type GoogleAdvancedMarkerElement = {
+  map: GoogleMapInstance | null;
+  position: { lat: number; lng: number };
+};
+
+type GoogleMapsMarkerLibrary = {
+  AdvancedMarkerElement: new (options: {
+    map: GoogleMapInstance;
+    position: { lat: number; lng: number };
+    title: string;
+    content: HTMLElement;
+    zIndex: number;
+  }) => GoogleAdvancedMarkerElement;
+};
+
 type GoogleMapsDynamicGlobal = GoogleMapsMapsLibrary & {
   importLibrary?: (libraryName: string) => Promise<unknown>;
+  marker?: GoogleMapsMarkerLibrary;
   [key: string]: unknown;
 };
 
@@ -219,6 +254,7 @@ const defaultCenter = {
 };
 
 const DEFAULT_MAP_ZOOM = 5;
+const CURRENT_LOCATION_MAP_ZOOM = 15;
 const MIN_SHARED_MAP_ZOOM = 1;
 const MAX_SHARED_MAP_ZOOM = 21;
 const VISITED_PAGE_SIZE = 50;
@@ -232,6 +268,7 @@ const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 type GoogleMapsLibraries = {
   core: GoogleMapsCoreLibrary;
   maps: GoogleMapsMapsLibrary;
+  marker: GoogleMapsMarkerLibrary;
 };
 
 type CanvasOverlayHandle = {
@@ -258,6 +295,63 @@ const sleep = (milliseconds: number) =>
   new Promise((resolve) => {
     window.setTimeout(resolve, milliseconds);
   });
+
+const createCurrentLocationMarkerContent = () => {
+  const marker = document.createElement("div");
+  marker.setAttribute("aria-hidden", "true");
+  marker.style.width = "18px";
+  marker.style.height = "18px";
+  marker.style.border = "3px solid #fff";
+  marker.style.borderRadius = "50%";
+  marker.style.background = "#1a73e8";
+  marker.style.boxShadow =
+    "0 1px 4px rgba(0, 0, 0, 0.45), 0 0 0 8px rgba(26, 115, 232, 0.2)";
+  return marker;
+};
+
+const createCurrentLocationControl = (label: string, onClick: () => void) => {
+  const button = document.createElement("button");
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const iconPath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path",
+  );
+
+  icon.setAttribute("aria-hidden", "true");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("width", "24");
+  icon.setAttribute("height", "24");
+  icon.style.display = "block";
+  icon.style.pointerEvents = "none";
+  iconPath.setAttribute(
+    "d",
+    "M11 1h2v2.06A9.01 9.01 0 0 1 20.94 11H23v2h-2.06A9.01 9.01 0 0 1 13 20.94V23h-2v-2.06A9.01 9.01 0 0 1 3.06 13H1v-2h2.06A9.01 9.01 0 0 1 11 3.06V1Zm1 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z",
+  );
+  iconPath.setAttribute("fill", "currentColor");
+  icon.append(iconPath);
+
+  button.type = "button";
+  button.title = label;
+  button.setAttribute("aria-label", label);
+  button.style.width = "40px";
+  button.style.height = "40px";
+  button.style.margin = "10px";
+  button.style.padding = "0";
+  button.style.border = "0";
+  button.style.borderRadius = "2px";
+  button.style.background = "#fff";
+  button.style.color = "#3c4043";
+  button.style.cursor = "pointer";
+  button.style.display = "grid";
+  button.style.placeItems = "center";
+  button.style.boxShadow = "0 1px 4px rgba(0, 0, 0, 0.3)";
+  button.append(icon);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onClick();
+  });
+  return button;
+};
 
 const installGoogleMapsLoader = (apiKey: string, language: string) => {
   const googleGlobal = (window.google ??= {} as GoogleWindowGlobal);
@@ -731,13 +825,15 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
     const mapsApi = window.google?.maps;
 
     if (mapsApi?.importLibrary) {
-      const [core, maps] = await Promise.all([
+      const [core, maps, marker] = await Promise.all([
         mapsApi.importLibrary("core"),
         mapsApi.importLibrary("maps"),
+        mapsApi.importLibrary("marker"),
       ]);
       return {
         core: core as GoogleMapsCoreLibrary,
         maps: maps as GoogleMapsMapsLibrary,
+        marker: marker as GoogleMapsMarkerLibrary,
       };
     }
 
@@ -745,11 +841,13 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
       mapsApi?.Map &&
       mapsApi.OverlayView &&
       mapsApi.InfoWindow &&
-      mapsApi.LatLng
+      mapsApi.LatLng &&
+      mapsApi.marker?.AdvancedMarkerElement
     ) {
       return {
         core: mapsApi as unknown as GoogleMapsCoreLibrary,
         maps: mapsApi as unknown as GoogleMapsMapsLibrary,
+        marker: mapsApi.marker,
       };
     }
 
@@ -974,6 +1072,14 @@ export default function SeichiMapCompleteClient({
   const mapIdleListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const infoWindowCloseClickListenerRef =
     useRef<GoogleMapsEventListener | null>(null);
+  const currentLocationMarkerRef = useRef<GoogleAdvancedMarkerElement | null>(
+    null,
+  );
+  const currentLocationMarkerLibraryRef =
+    useRef<GoogleMapsMarkerLibrary | null>(null);
+  const currentLocationControlRef = useRef<HTMLButtonElement | null>(null);
+  const cancelCurrentLocationRequestRef = useRef<(() => void) | null>(null);
+  const requestCurrentLocationRef = useRef<() => void>(() => undefined);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
@@ -1027,10 +1133,16 @@ export default function SeichiMapCompleteClient({
   const [note, setNote] = useState("");
   const [visitUrl, setVisitUrl] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [recordModalPortalTarget, setRecordModalPortalTarget] =
+    useState<HTMLElement | null>(null);
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
-  const [listMode, setListMode] = useState<"locations" | "visited">(
-    "locations",
-  );
+  const [listMode, setListMode] = useState<ListMode>("locations");
+  const [currentPosition, setCurrentPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [nearbyLocationStatus, setNearbyLocationStatus] =
+    useState<NearbyLocationStatus>("idle");
 
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const mapsMapId =
@@ -1165,6 +1277,11 @@ export default function SeichiMapCompleteClient({
         ),
     );
   }, [hiddenLayerNameSet, locations, uncategorizedLayerName]);
+
+  const nearbyLocations = useMemo(() => {
+    if (!currentPosition) return [];
+    return getNearbyLocations(currentPosition, visibleLocations);
+  }, [currentPosition, visibleLocations]);
 
   const completion = useMemo(() => {
     if (visibleLocations.length === 0) {
@@ -1492,6 +1609,52 @@ export default function SeichiMapCompleteClient({
     setVisibleVisitedCount(VISITED_PAGE_SIZE);
   }, [visitedSearchQuery]);
 
+  const requestCurrentLocation = useCallback(() => {
+    const control = currentLocationControlRef.current;
+    setListMode("nearby");
+    if (!navigator.geolocation) {
+      if (control) {
+        updateCurrentLocationControl(
+          control,
+          t("currentLocation.unsupported"),
+          false,
+        );
+      }
+      setCurrentPosition(null);
+      setNearbyLocationStatus("unavailable");
+      return;
+    }
+
+    cancelCurrentLocationRequestRef.current?.();
+    setCurrentPosition(null);
+    setNearbyLocationStatus("locating");
+    cancelCurrentLocationRequestRef.current = startCurrentLocationRequest({
+      control,
+      geolocation: navigator.geolocation,
+      labels: {
+        locating: t("currentLocation.locating"),
+        show: t("currentLocation.show"),
+        unavailable: t("currentLocation.unavailable"),
+      },
+      onSuccess: (coords) => {
+        setCurrentPosition({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        });
+        setNearbyLocationStatus("ready");
+        setListMode("nearby");
+      },
+      onUnavailable: () => {
+        setCurrentPosition(null);
+        setNearbyLocationStatus("unavailable");
+      },
+    });
+  }, [t]);
+
+  useEffect(() => {
+    requestCurrentLocationRef.current = requestCurrentLocation;
+  }, [requestCurrentLocation]);
+
   useEffect(() => {
     if (!mapsKey || !mapElementRef.current) {
       setMapLoading(false);
@@ -1505,6 +1668,7 @@ export default function SeichiMapCompleteClient({
         if (cancelled || !mapElementRef.current) {
           return;
         }
+        currentLocationMarkerLibraryRef.current = libraries.marker;
         if (!mapRef.current) {
           const { Map, InfoWindow } = libraries.maps;
           const initialViewport = readSharedMapViewport();
@@ -1529,6 +1693,13 @@ export default function SeichiMapCompleteClient({
             isVisited: (location) => isLocationVisitedRef.current(location),
             getSelectedLocationId: () => selectedLocationIdRef.current,
           });
+          currentLocationControlRef.current = createCurrentLocationControl(
+            t("currentLocation.show"),
+            () => requestCurrentLocationRef.current(),
+          );
+          mapRef.current.controls[
+            libraries.core.ControlPosition.RIGHT_BOTTOM
+          ].push(currentLocationControlRef.current);
           mapClickListenerRef.current = mapRef.current.addListener(
             "click",
             (event?: GoogleMapMouseEvent) => {
@@ -1626,6 +1797,33 @@ export default function SeichiMapCompleteClient({
   }, [mapsKey, mapsLanguage, mapsMapId, t]);
 
   useEffect(() => {
+    const currentMap = mapRef.current;
+    const markerLibrary = currentLocationMarkerLibraryRef.current;
+    if (!currentPosition || !mapReady || !currentMap || !markerLibrary) return;
+
+    const position = {
+      lat: currentPosition.latitude,
+      lng: currentPosition.longitude,
+    };
+    if (currentLocationMarkerRef.current) {
+      currentLocationMarkerRef.current.position = position;
+      currentLocationMarkerRef.current.map = currentMap;
+    } else {
+      currentLocationMarkerRef.current =
+        new markerLibrary.AdvancedMarkerElement({
+          map: currentMap,
+          position,
+          title: t("currentLocation.markerTitle"),
+          content: createCurrentLocationMarkerContent(),
+          zIndex: 1000,
+        });
+    }
+
+    currentMap.panTo(position);
+    currentMap.setZoom(CURRENT_LOCATION_MAP_ZOOM);
+  }, [currentPosition, mapReady, t]);
+
+  useEffect(() => {
     const mapElement = mapElementRef.current;
     if (!mapElement) return;
 
@@ -1648,6 +1846,16 @@ export default function SeichiMapCompleteClient({
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
       infoWindowRef.current?.close?.();
+      cancelCurrentLocationRequestRef.current?.();
+      cancelCurrentLocationRequestRef.current = null;
+      requestCurrentLocationRef.current = () => undefined;
+      currentLocationControlRef.current?.remove();
+      currentLocationControlRef.current = null;
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.map = null;
+        currentLocationMarkerRef.current = null;
+      }
+      currentLocationMarkerLibraryRef.current = null;
       mapOverlayRef.current?.setMap(null);
       mapOverlayRef.current = null;
       mapRef.current = null;
@@ -1656,6 +1864,9 @@ export default function SeichiMapCompleteClient({
 
   const openRecordModal = useCallback(
     (location: LocationOption, visitedItem?: VisitedItem) => {
+      setRecordModalPortalTarget(
+        getGoogleMapFullscreenPortalTarget(mapElementRef.current),
+      );
       setSelectedLocationId(location.id);
       setSelectedVisitedId(visitedItem?.id ?? null);
       setVisitedDate(toVisitedDateInput(visitedItem?.visitedAt ?? ""));
@@ -2001,6 +2212,17 @@ export default function SeichiMapCompleteClient({
     [openLocationInfoWindow],
   );
 
+  const handleListModeChange = useCallback(
+    (value: string) => {
+      const nextMode = value as ListMode;
+      setListMode(nextMode);
+      if (nextMode === "nearby") {
+        requestCurrentLocation();
+      }
+    },
+    [requestCurrentLocation],
+  );
+
   const onEditVisited = useCallback(
     (item: VisitedItem) => {
       const location =
@@ -2116,6 +2338,7 @@ export default function SeichiMapCompleteClient({
       }
 
       setShowModal(false);
+      setRecordModalPortalTarget(null);
       resetForm();
     } catch (error) {
       console.error(error);
@@ -2498,11 +2721,10 @@ export default function SeichiMapCompleteClient({
               {isLayerSelectorOpen ? null : (
                 <SegmentedControl
                   value={listMode}
-                  onChange={(value) =>
-                    setListMode(value as "locations" | "visited")
-                  }
+                  onChange={handleListModeChange}
                   data={[
                     { label: t("tabs.locations"), value: "locations" },
+                    { label: t("tabs.nearby"), value: "nearby" },
                     { label: t("tabs.visited"), value: "visited" },
                   ]}
                   fullWidth
@@ -2633,6 +2855,108 @@ export default function SeichiMapCompleteClient({
                     </ScrollArea>
                   </Paper>
                 </>
+              ) : listMode === "nearby" ? (
+                <Stack gap="sm" className="min-h-0 flex-1">
+                  <Group justify="space-between" gap="xs">
+                    <Text size="sm" c="dimmed">
+                      {t("list.nearbySummary")}
+                    </Text>
+                    {nearbyLocationStatus === "ready" ? (
+                      <Badge variant="light" color="blue">
+                        {t("list.nearbyCount", {
+                          count: nearbyLocations.length,
+                        })}
+                      </Badge>
+                    ) : null}
+                  </Group>
+
+                  {nearbyLocationStatus === "locating" ||
+                  nearbyLocationStatus === "idle" ? (
+                    <Center py="xl">
+                      <Stack gap="xs" align="center">
+                        <Loader size="sm" color="pink" />
+                        <Text size="sm" c="dimmed">
+                          {t("list.nearbyLoading")}
+                        </Text>
+                      </Stack>
+                    </Center>
+                  ) : nearbyLocationStatus === "unavailable" ? (
+                    <Alert
+                      color="orange"
+                      variant="light"
+                      icon={<FiAlertCircle size={16} />}
+                    >
+                      {t("currentLocation.unavailable")}
+                    </Alert>
+                  ) : nearbyLocations.length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                      {t("list.emptyNearby")}
+                    </Text>
+                  ) : (
+                    <Paper
+                      withBorder
+                      radius="md"
+                      p="xs"
+                      className="min-h-0 flex-1 bg-white/60 dark:bg-gray-950/20"
+                    >
+                      <ScrollArea h="100%" offsetScrollbars scrollbarSize={6}>
+                        <Stack gap={1}>
+                          {nearbyLocations.map(
+                            ({ location: item, distanceMeters }) => {
+                              const visitedLocation = isLocationVisited(item);
+                              return (
+                                <NavLink
+                                  key={item.key}
+                                  variant="light"
+                                  color={visitedLocation ? "green" : "pink"}
+                                  active={selectedLocationId === item.id}
+                                  onClick={() => showLocationOnMap(item)}
+                                  label={item.name}
+                                  description={
+                                    <Stack gap={0}>
+                                      <Text size="xs" c="dimmed" lineClamp={1}>
+                                        {getLocationLayerName(
+                                          item,
+                                          uncategorizedLayerName,
+                                        )}
+                                      </Text>
+                                      {item.description ? (
+                                        <Text
+                                          size="xs"
+                                          c="dimmed"
+                                          lineClamp={1}
+                                        >
+                                          {stripHtmlToLines(item.description)}
+                                        </Text>
+                                      ) : null}
+                                    </Stack>
+                                  }
+                                  leftSection={
+                                    <ThemeIcon
+                                      size={30}
+                                      radius="xl"
+                                      variant="light"
+                                      color={visitedLocation ? "green" : "pink"}
+                                    >
+                                      <FiMapPin size={14} />
+                                    </ThemeIcon>
+                                  }
+                                  rightSection={
+                                    <Badge variant="light" color="blue">
+                                      {formatStraightLineDistance(
+                                        distanceMeters,
+                                      )}
+                                    </Badge>
+                                  }
+                                />
+                              );
+                            },
+                          )}
+                        </Stack>
+                      </ScrollArea>
+                    </Paper>
+                  )}
+                </Stack>
               ) : canViewVisitedList ? (
                 <Stack gap="sm" className="min-h-0 flex-1">
                   <Group justify="space-between" align="end">
@@ -2869,8 +3193,14 @@ export default function SeichiMapCompleteClient({
         opened={showModal}
         onClose={() => {
           setShowModal(false);
+          setRecordModalPortalTarget(null);
           resetForm();
         }}
+        portalProps={
+          recordModalPortalTarget
+            ? { target: recordModalPortalTarget }
+            : undefined
+        }
         title={
           selectedVisitedId ? t("modal.editTitle") : t("modal.recordTitle")
         }
@@ -2892,7 +3222,12 @@ export default function SeichiMapCompleteClient({
                 locale={datePickerLocale}
                 firstDayOfWeek={0}
                 leftSection={<FiCalendar size={16} />}
-                popoverProps={{ withinPortal: true }}
+                popoverProps={{
+                  withinPortal: true,
+                  portalProps: recordModalPortalTarget
+                    ? { target: recordModalPortalTarget }
+                    : undefined,
+                }}
                 onChange={(value) =>
                   setVisitedDate(toLocalDateInputValue(value))
                 }
@@ -2935,6 +3270,7 @@ export default function SeichiMapCompleteClient({
                 color="gray"
                 onClick={() => {
                   setShowModal(false);
+                  setRecordModalPortalTarget(null);
                   resetForm();
                 }}
               >

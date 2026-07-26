@@ -81,14 +81,17 @@ export const RecentUpdatesSection = memo(function RecentUpdatesSection({
                       imageClassName="object-cover"
                     />
                   </Link>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <Link href={watchHref} className="block">
                       <Text size="sm" className="line-clamp-2" component="div">
                         {update.videoTitle}
                       </Text>
                     </Link>
                     {singerAvatars.length > 0 ? (
-                      <Avatar.Group className="ml-2 mt-1" spacing="xxs">
+                      <Avatar.Group
+                        className="ml-2 mt-1 flex-wrap gap-y-1"
+                        spacing="xxs"
+                      >
                         {singerAvatars.map((avatar) => {
                           const image = (
                             <Avatar
