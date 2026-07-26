@@ -1067,6 +1067,13 @@
       "editVisit": "Edit visit",
       "deleteVisited": "Delete visited status"
     },
+    "currentLocation": {
+      "show": "Show current location",
+      "locating": "Getting current location",
+      "markerTitle": "Current location",
+      "unavailable": "Current location is unavailable. Allow location access in your browser",
+      "unsupported": "Location is not supported by this browser"
+    },
     "modal": {
       "recordTitle": "Record visit",
       "editTitle": "Edit visit",

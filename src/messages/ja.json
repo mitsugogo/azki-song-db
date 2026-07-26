@@ -1058,6 +1058,13 @@
       "editVisit": "訪問を編集",
       "deleteVisited": "訪問済を削除"
     },
+    "currentLocation": {
+      "show": "現在地を表示",
+      "locating": "現在地を取得中",
+      "markerTitle": "現在地",
+      "unavailable": "現在地を取得できません。ブラウザの位置情報を許可してください",
+      "unsupported": "このブラウザでは位置情報を利用できません"
+    },
     "modal": {
       "recordTitle": "訪問を記録",
       "editTitle": "訪問を編集",

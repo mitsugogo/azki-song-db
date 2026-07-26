@@ -60,6 +60,7 @@ import { breadcrumbClasses, pageClasses } from "../theme";
 import type { ArchiveItem } from "../types/archiveItem";
 import type { SeichiMapLocation } from "../lib/seichiMap";
 import { parseXStatusDateFromUrl } from "../lib/xStatus";
+import { getGoogleMapFullscreenPortalTarget } from "./fullscreen";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
@@ -138,6 +139,10 @@ type GoogleMapsEventListener = {
   remove: () => void;
 };
 
+type GoogleMapsControlArrayLike = {
+  push: (element: HTMLElement) => number;
+};
+
 type GoogleMapMouseEvent = {
   latLng?: GoogleLatLngLike;
   domEvent?: MouseEvent;
@@ -145,6 +150,7 @@ type GoogleMapMouseEvent = {
 };
 
 type GoogleMapInstance = {
+  controls: Record<number, GoogleMapsControlArrayLike>;
   getBounds: () => GoogleMapBoundsLike | null;
   getCenter: () => GoogleLatLngLike | null;
   getZoom: () => number | undefined;
@@ -174,6 +180,9 @@ type GoogleOverlayViewBase = {
 };
 
 type GoogleMapsCoreLibrary = {
+  ControlPosition: {
+    RIGHT_BOTTOM: number;
+  };
   LatLng: new (lat: number, lng: number) => GoogleLatLngLike;
 };
 
@@ -194,8 +203,24 @@ type GoogleMapsMapsLibrary = {
   InfoWindow: new () => GoogleInfoWindow;
 };
 
+type GoogleAdvancedMarkerElement = {
+  map: GoogleMapInstance | null;
+  position: { lat: number; lng: number };
+};
+
+type GoogleMapsMarkerLibrary = {
+  AdvancedMarkerElement: new (options: {
+    map: GoogleMapInstance;
+    position: { lat: number; lng: number };
+    title: string;
+    content: HTMLElement;
+    zIndex: number;
+  }) => GoogleAdvancedMarkerElement;
+};
+
 type GoogleMapsDynamicGlobal = GoogleMapsMapsLibrary & {
   importLibrary?: (libraryName: string) => Promise<unknown>;
+  marker?: GoogleMapsMarkerLibrary;
   [key: string]: unknown;
 };
 
@@ -219,6 +244,7 @@ const defaultCenter = {
 };
 
 const DEFAULT_MAP_ZOOM = 5;
+const CURRENT_LOCATION_MAP_ZOOM = 15;
 const MIN_SHARED_MAP_ZOOM = 1;
 const MAX_SHARED_MAP_ZOOM = 21;
 const VISITED_PAGE_SIZE = 50;
@@ -232,6 +258,7 @@ const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 type GoogleMapsLibraries = {
   core: GoogleMapsCoreLibrary;
   maps: GoogleMapsMapsLibrary;
+  marker: GoogleMapsMarkerLibrary;
 };
 
 type CanvasOverlayHandle = {
@@ -258,6 +285,63 @@ const sleep = (milliseconds: number) =>
   new Promise((resolve) => {
     window.setTimeout(resolve, milliseconds);
   });
+
+const createCurrentLocationMarkerContent = () => {
+  const marker = document.createElement("div");
+  marker.setAttribute("aria-hidden", "true");
+  marker.style.width = "18px";
+  marker.style.height = "18px";
+  marker.style.border = "3px solid #fff";
+  marker.style.borderRadius = "50%";
+  marker.style.background = "#1a73e8";
+  marker.style.boxShadow =
+    "0 1px 4px rgba(0, 0, 0, 0.45), 0 0 0 8px rgba(26, 115, 232, 0.2)";
+  return marker;
+};
+
+const createCurrentLocationControl = (label: string, onClick: () => void) => {
+  const button = document.createElement("button");
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const iconPath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path",
+  );
+
+  icon.setAttribute("aria-hidden", "true");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("width", "24");
+  icon.setAttribute("height", "24");
+  icon.style.display = "block";
+  icon.style.pointerEvents = "none";
+  iconPath.setAttribute(
+    "d",
+    "M11 1h2v2.06A9.01 9.01 0 0 1 20.94 11H23v2h-2.06A9.01 9.01 0 0 1 13 20.94V23h-2v-2.06A9.01 9.01 0 0 1 3.06 13H1v-2h2.06A9.01 9.01 0 0 1 11 3.06V1Zm1 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z",
+  );
+  iconPath.setAttribute("fill", "currentColor");
+  icon.append(iconPath);
+
+  button.type = "button";
+  button.title = label;
+  button.setAttribute("aria-label", label);
+  button.style.width = "40px";
+  button.style.height = "40px";
+  button.style.margin = "10px";
+  button.style.padding = "0";
+  button.style.border = "0";
+  button.style.borderRadius = "2px";
+  button.style.background = "#fff";
+  button.style.color = "#3c4043";
+  button.style.cursor = "pointer";
+  button.style.display = "grid";
+  button.style.placeItems = "center";
+  button.style.boxShadow = "0 1px 4px rgba(0, 0, 0, 0.3)";
+  button.append(icon);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onClick();
+  });
+  return button;
+};
 
 const installGoogleMapsLoader = (apiKey: string, language: string) => {
   const googleGlobal = (window.google ??= {} as GoogleWindowGlobal);
@@ -731,13 +815,15 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
     const mapsApi = window.google?.maps;
 
     if (mapsApi?.importLibrary) {
-      const [core, maps] = await Promise.all([
+      const [core, maps, marker] = await Promise.all([
         mapsApi.importLibrary("core"),
         mapsApi.importLibrary("maps"),
+        mapsApi.importLibrary("marker"),
       ]);
       return {
         core: core as GoogleMapsCoreLibrary,
         maps: maps as GoogleMapsMapsLibrary,
+        marker: marker as GoogleMapsMarkerLibrary,
       };
     }
 
@@ -745,11 +831,13 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
       mapsApi?.Map &&
       mapsApi.OverlayView &&
       mapsApi.InfoWindow &&
-      mapsApi.LatLng
+      mapsApi.LatLng &&
+      mapsApi.marker?.AdvancedMarkerElement
     ) {
       return {
         core: mapsApi as unknown as GoogleMapsCoreLibrary,
         maps: mapsApi as unknown as GoogleMapsMapsLibrary,
+        marker: mapsApi.marker,
       };
     }
 
@@ -974,6 +1062,10 @@ export default function SeichiMapCompleteClient({
   const mapIdleListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const infoWindowCloseClickListenerRef =
     useRef<GoogleMapsEventListener | null>(null);
+  const currentLocationMarkerRef = useRef<GoogleAdvancedMarkerElement | null>(
+    null,
+  );
+  const currentLocationControlRef = useRef<HTMLButtonElement | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
@@ -1027,6 +1119,8 @@ export default function SeichiMapCompleteClient({
   const [note, setNote] = useState("");
   const [visitUrl, setVisitUrl] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [recordModalPortalTarget, setRecordModalPortalTarget] =
+    useState<HTMLElement | null>(null);
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
   const [listMode, setListMode] = useState<"locations" | "visited">(
     "locations",
@@ -1529,6 +1623,81 @@ export default function SeichiMapCompleteClient({
             isVisited: (location) => isLocationVisitedRef.current(location),
             getSelectedLocationId: () => selectedLocationIdRef.current,
           });
+          const requestCurrentLocation = () => {
+            const map = mapRef.current;
+            const control = currentLocationControlRef.current;
+            if (!map || !control) return;
+
+            if (!navigator.geolocation) {
+              control.title = t("currentLocation.unsupported");
+              control.setAttribute(
+                "aria-label",
+                t("currentLocation.unsupported"),
+              );
+              return;
+            }
+
+            control.disabled = true;
+            control.style.cursor = "wait";
+            control.style.opacity = "0.7";
+            control.title = t("currentLocation.locating");
+            control.setAttribute("aria-label", t("currentLocation.locating"));
+
+            navigator.geolocation.getCurrentPosition(
+              ({ coords }) => {
+                if (cancelled || !mapRef.current) return;
+
+                const position = {
+                  lat: coords.latitude,
+                  lng: coords.longitude,
+                };
+                if (currentLocationMarkerRef.current) {
+                  currentLocationMarkerRef.current.position = position;
+                  currentLocationMarkerRef.current.map = mapRef.current;
+                } else {
+                  currentLocationMarkerRef.current =
+                    new libraries.marker.AdvancedMarkerElement({
+                      map: mapRef.current,
+                      position,
+                      title: t("currentLocation.markerTitle"),
+                      content: createCurrentLocationMarkerContent(),
+                      zIndex: 1000,
+                    });
+                }
+
+                mapRef.current.panTo(position);
+                mapRef.current.setZoom(CURRENT_LOCATION_MAP_ZOOM);
+                control.disabled = false;
+                control.style.cursor = "pointer";
+                control.style.opacity = "1";
+                control.title = t("currentLocation.show");
+                control.setAttribute("aria-label", t("currentLocation.show"));
+              },
+              () => {
+                if (cancelled) return;
+                control.disabled = false;
+                control.style.cursor = "pointer";
+                control.style.opacity = "1";
+                control.title = t("currentLocation.unavailable");
+                control.setAttribute(
+                  "aria-label",
+                  t("currentLocation.unavailable"),
+                );
+              },
+              {
+                enableHighAccuracy: true,
+                maximumAge: 30_000,
+                timeout: 10_000,
+              },
+            );
+          };
+          currentLocationControlRef.current = createCurrentLocationControl(
+            t("currentLocation.show"),
+            requestCurrentLocation,
+          );
+          mapRef.current.controls[
+            libraries.core.ControlPosition.RIGHT_BOTTOM
+          ].push(currentLocationControlRef.current);
           mapClickListenerRef.current = mapRef.current.addListener(
             "click",
             (event?: GoogleMapMouseEvent) => {
@@ -1648,6 +1817,12 @@ export default function SeichiMapCompleteClient({
       mapMouseMoveListenerRef.current?.remove?.();
       mapClickListenerRef.current?.remove?.();
       infoWindowRef.current?.close?.();
+      currentLocationControlRef.current?.remove();
+      currentLocationControlRef.current = null;
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.map = null;
+        currentLocationMarkerRef.current = null;
+      }
       mapOverlayRef.current?.setMap(null);
       mapOverlayRef.current = null;
       mapRef.current = null;
@@ -1656,6 +1831,9 @@ export default function SeichiMapCompleteClient({
 
   const openRecordModal = useCallback(
     (location: LocationOption, visitedItem?: VisitedItem) => {
+      setRecordModalPortalTarget(
+        getGoogleMapFullscreenPortalTarget(mapElementRef.current),
+      );
       setSelectedLocationId(location.id);
       setSelectedVisitedId(visitedItem?.id ?? null);
       setVisitedDate(toVisitedDateInput(visitedItem?.visitedAt ?? ""));
@@ -2116,6 +2294,7 @@ export default function SeichiMapCompleteClient({
       }
 
       setShowModal(false);
+      setRecordModalPortalTarget(null);
       resetForm();
     } catch (error) {
       console.error(error);
@@ -2869,8 +3048,14 @@ export default function SeichiMapCompleteClient({
         opened={showModal}
         onClose={() => {
           setShowModal(false);
+          setRecordModalPortalTarget(null);
           resetForm();
         }}
+        portalProps={
+          recordModalPortalTarget
+            ? { target: recordModalPortalTarget }
+            : undefined
+        }
         title={
           selectedVisitedId ? t("modal.editTitle") : t("modal.recordTitle")
         }
@@ -2892,7 +3077,12 @@ export default function SeichiMapCompleteClient({
                 locale={datePickerLocale}
                 firstDayOfWeek={0}
                 leftSection={<FiCalendar size={16} />}
-                popoverProps={{ withinPortal: true }}
+                popoverProps={{
+                  withinPortal: true,
+                  portalProps: recordModalPortalTarget
+                    ? { target: recordModalPortalTarget }
+                    : undefined,
+                }}
                 onChange={(value) =>
                   setVisitedDate(toLocalDateInputValue(value))
                 }
@@ -2935,6 +3125,7 @@ export default function SeichiMapCompleteClient({
                 color="gray"
                 onClick={() => {
                   setShowModal(false);
+                  setRecordModalPortalTarget(null);
                   resetForm();
                 }}
               >
