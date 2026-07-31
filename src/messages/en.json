@@ -980,6 +980,9 @@
     "breadcrumb": "Seichi Map",
     "title": "Seichi Map",
     "description": "Track visited locations and completion progress for the AZKi seichi map.",
+    "ranking": {
+      "open": "Rankings"
+    },
     "credit": {
       "prefix": "Location data is provided by ",
       "linkLabel": "AZKi Seichi Map",
@@ -1115,6 +1118,29 @@
       "shareSaveFailed": "Failed to save the share URL",
       "shareDeleteFailed": "Failed to stop publishing",
       "shareCopyFailed": "Failed to copy the share URL"
+    }
+  },
+  "SeichiMapRanking": {
+    "home": "Home",
+    "map": "Seichi Map",
+    "title": "Seichi Map Rankings",
+    "description": "Rankings for the most visited locations and pioneers with the most visits.",
+    "loading": "Loading rankings...",
+    "error": "Failed to load rankings.",
+    "anonymousVisitor": "Passerby Pioneer (nickname private)",
+    "locations": {
+      "title": "Most Visited Locations",
+      "unit": "people",
+      "openSeichiMap": "Seichi Map",
+      "openGoogleMap": "Google Map",
+      "attribution": "Address information: Geospatial Information Authority of Japan (reverse geocoder and municipality data)",
+      "empty": "No locations have been visited yet."
+    },
+    "visitors": {
+      "title": "Pioneers with Most Visits",
+      "nicknameNotice": "Nicknames are displayed only for people who share their map.",
+      "unit": "visits",
+      "empty": "No visits have been recorded yet."
     }
   },
   "Statistics": {

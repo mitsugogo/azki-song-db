@@ -122,6 +122,7 @@ type ShareInfo = {
 
 type Props = {
   isSignedIn: boolean;
+  initialLocationId?: string | null;
   initialShareId?: string | null;
   userName: string;
 };
@@ -1055,6 +1056,7 @@ const syncMapViewportToUrl = (
 };
 
 export default function SeichiMapCompleteClient({
+  initialLocationId,
   initialShareId,
   isSignedIn,
   userName,
@@ -1091,6 +1093,7 @@ export default function SeichiMapCompleteClient({
     () => undefined,
   );
   const selectedLocationIdRef = useRef<string | null>(null);
+  const focusedInitialLocationIdRef = useRef<string | null>(null);
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [visited, setVisited] = useState<VisitedItem[]>([]);
@@ -2212,6 +2215,37 @@ export default function SeichiMapCompleteClient({
     [openLocationInfoWindow],
   );
 
+  useEffect(() => {
+    if (!initialLocationId || !mapReady || loading) return;
+    if (focusedInitialLocationIdRef.current === initialLocationId) return;
+
+    const location = locationById.get(initialLocationId);
+    if (!location) {
+      focusedInitialLocationIdRef.current = initialLocationId;
+      return;
+    }
+
+    const layerName = getLocationLayerName(location, uncategorizedLayerName);
+    if (hiddenLayerNameSet.has(layerName)) {
+      setHiddenLayerNames((current) =>
+        current.filter((name) => name !== layerName),
+      );
+      return;
+    }
+
+    focusedInitialLocationIdRef.current = initialLocationId;
+    setListMode("locations");
+    showLocationOnMap(location);
+  }, [
+    hiddenLayerNameSet,
+    initialLocationId,
+    loading,
+    locationById,
+    mapReady,
+    showLocationOnMap,
+    uncategorizedLayerName,
+  ]);
+
   const handleListModeChange = useCallback(
     (value: string) => {
       const nextMode = value as ListMode;
@@ -2476,16 +2510,30 @@ export default function SeichiMapCompleteClient({
           </Text>
         </Box>
         <Group gap="xs">
-          {!isSharedView && isSignedIn && (
+          {!isSharedView && (
             <Button
               variant="light"
               color="pink"
               leftSection={<FiShare2 size={16} />}
-              onClick={openShareModal}
+              onClick={() => {
+                if (isSignedIn) {
+                  openShareModal();
+                  return;
+                }
+                void signIn("google", { callbackUrl: window.location.href });
+              }}
             >
               {t("share.open")}
             </Button>
           )}
+          <Button
+            component={Link}
+            href="/seichi-map/ranking"
+            variant="light"
+            color="gray"
+          >
+            {t("ranking.open")}
+          </Button>
         </Group>
       </Group>
 

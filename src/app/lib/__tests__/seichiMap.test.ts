@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
+  parseGsiMunicipalityNames,
   parseSeichiMapKml,
   updateSeichiMapLocationIdentityRegistry,
 } from "../seichiMap";
+
+describe("parseGsiMunicipalityNames", () => {
+  it("国土地理院の自治体コード表を都道府県・市区町村の表示名へ変換する", () => {
+    expect(
+      parseGsiMunicipalityNames(
+        "GSI.MUNI_ARRAY[\"12106\"] = '12,千葉県,12106,千葉市　美浜区';",
+      ).get("12106"),
+    ).toBe("千葉県千葉市美浜区");
+  });
+});
 
 const createKml = ({
   folder,

@@ -971,6 +971,9 @@
     "breadcrumb": "聖地マップ",
     "title": "聖地マップ",
     "description": "AZKi聖地マップの訪問ログとコンプリート率を記録します。",
+    "ranking": {
+      "open": "ランキング"
+    },
     "credit": {
       "prefix": "地点情報は ",
       "linkLabel": "AZKi聖地マップ",
@@ -1106,6 +1109,29 @@
       "shareSaveFailed": "共有URLの保存に失敗しました",
       "shareDeleteFailed": "公開中止に失敗しました",
       "shareCopyFailed": "共有URLのコピーに失敗しました"
+    }
+  },
+  "SeichiMapRanking": {
+    "home": "HOME",
+    "map": "聖地マップ",
+    "title": "聖地マップランキング",
+    "description": "訪問者が多い場所と、訪問数が多い開拓者のランキングです。",
+    "loading": "ランキングを読み込み中...",
+    "error": "ランキングの取得に失敗しました。",
+    "anonymousVisitor": "通りすがりの開拓者（ニックネーム非公開）",
+    "locations": {
+      "title": "訪問者が多い場所",
+      "unit": "人",
+      "openSeichiMap": "聖地マップ",
+      "openGoogleMap": "Google Map",
+      "attribution": "住所情報：国土地理院（逆ジオコーダー・市区町村データ）",
+      "empty": "訪問記録のある場所はまだありません。"
+    },
+    "visitors": {
+      "title": "訪問数が多い開拓者",
+      "nicknameNotice": "ニックネームはマップをシェアしている方のみ表示しています",
+      "unit": "件",
+      "empty": "訪問記録はまだありません。"
     }
   },
   "Statistics": {
