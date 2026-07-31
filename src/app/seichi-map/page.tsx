@@ -37,6 +37,11 @@ const getFirstSearchParam = (
   return Array.isArray(value) ? value[0] : value;
 };
 
+const normalizeLocationId = (value?: string | null) => {
+  const locationId = value?.trim().toLowerCase();
+  return locationId && /^[0-9a-f]{16}$/.test(locationId) ? locationId : null;
+};
+
 export async function generateMetadata(
   props: SeichiMapPageProps,
 ): Promise<Metadata> {
@@ -118,6 +123,9 @@ export default async function SeichiMapCompletePage({
 
   return (
     <SeichiMapCompleteClient
+      initialLocationId={normalizeLocationId(
+        getFirstSearchParam(resolvedSearchParams, "location"),
+      )}
       initialShareId={getFirstSearchParam(resolvedSearchParams, "share")}
       isSignedIn={Boolean(session?.user?.id)}
       userName={session?.user?.name || session?.user?.email || t("userName")}

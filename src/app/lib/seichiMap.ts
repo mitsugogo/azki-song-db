@@ -14,6 +14,18 @@ export type SeichiMapLocation = {
   longitude: number;
 };
 
+type GsiReverseGeocodingResponse = {
+  results?: {
+    muniCd?: string;
+  };
+};
+
+const GSI_MUNICIPALITIES_URL = "https://maps.gsi.go.jp/js/muni.js";
+const GSI_REVERSE_GEOCODING_URL =
+  "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress";
+const administrativeAreaCache = new Map<string, Promise<string | null>>();
+let municipalityNamesPromise: Promise<Map<string, string>> | undefined;
+
 export type SeichiMapLocationIdentity = {
   id: string;
   sourceIds: string[];
@@ -395,6 +407,64 @@ export function parseSeichiMapKml(
       ...location,
     }),
   );
+}
+
+export function buildSeichiMapGoogleMapsSearchUrl(
+  location: Pick<SeichiMapLocation, "latitude" | "longitude">,
+) {
+  const query = `${location.latitude},${location.longitude}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+export function parseGsiMunicipalityNames(source: string): Map<string, string> {
+  const municipalities = new Map<string, string>();
+  for (const match of source.matchAll(
+    /GSI\.MUNI_ARRAY\["(\d+)"\]\s*=\s*'\d+,([^,]+),\d+,([^']+)';/g,
+  )) {
+    municipalities.set(match[1], `${match[2]}${match[3].replace(/\s+/g, "")}`);
+  }
+  return municipalities;
+}
+
+const loadGsiMunicipalityNames = () => {
+  municipalityNamesPromise ??= fetch(GSI_MUNICIPALITIES_URL, {
+    cache: "no-store",
+  })
+    .then(async (response) => {
+      if (!response.ok) return new Map<string, string>();
+      return parseGsiMunicipalityNames(await response.text());
+    })
+    .catch(() => new Map<string, string>());
+  return municipalityNamesPromise;
+};
+
+export function loadSeichiMapAdministrativeArea(
+  location: Pick<SeichiMapLocation, "latitude" | "longitude">,
+): Promise<string | null> {
+  const cacheKey = `${location.latitude.toFixed(6)},${location.longitude.toFixed(6)}`;
+  const cached = administrativeAreaCache.get(cacheKey);
+  if (cached) return cached;
+
+  const request = (async () => {
+    const params = new URLSearchParams({
+      lat: String(location.latitude),
+      lon: String(location.longitude),
+    });
+    const response = await fetch(
+      `${GSI_REVERSE_GEOCODING_URL}?${params.toString()}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as GsiReverseGeocodingResponse;
+    const municipalityCode = payload.results?.muniCd;
+    if (!municipalityCode) return null;
+    const municipalities = await loadGsiMunicipalityNames();
+    return municipalities.get(String(Number(municipalityCode))) ?? null;
+  })().catch(() => null);
+
+  administrativeAreaCache.set(cacheKey, request);
+  return request;
 }
 
 export function updateSeichiMapLocationIdentityRegistry(

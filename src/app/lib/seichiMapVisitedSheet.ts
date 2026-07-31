@@ -1,4 +1,7 @@
+import { join, sqltag } from "@prisma/client/runtime/client";
 import { prisma } from "./prisma";
+
+export const SEICHI_MAP_RANKING_LIMIT = 100;
 
 export type SeichiMapVisitedRow = {
   id: string;
@@ -12,6 +15,16 @@ export type SeichiMapVisitedRow = {
 };
 
 export type SeichiMapVisitedItem = Omit<SeichiMapVisitedRow, "userId">;
+
+export type SeichiMapLocationVisitorRankingRow = {
+  locationId: string;
+  uniqueVisitorCount: number;
+};
+
+export type SeichiMapVisitorRankingItem = {
+  nickname: string | null;
+  visitCount: number;
+};
 
 export type UpsertSeichiMapVisitedBody = {
   id?: string;
@@ -144,6 +157,55 @@ export async function loadSeichiMapUniqueVisitorCounts(): Promise<
       Number(uniqueVisitorCount),
     ]),
   );
+}
+
+export async function loadSeichiMapLocationVisitorRanking(): Promise<
+  SeichiMapLocationVisitorRankingRow[]
+> {
+  const rows = await prisma.$queryRaw<
+    { locationId: string; uniqueVisitorCount: bigint }[]
+  >`
+    SELECT locationId, COUNT(DISTINCT userId) AS uniqueVisitorCount
+    FROM SeichiMapVisited
+    WHERE locationId IS NOT NULL AND locationId <> ''
+    GROUP BY locationId
+  `;
+
+  return rows.map(({ locationId, uniqueVisitorCount }) => ({
+    locationId,
+    uniqueVisitorCount: Number(uniqueVisitorCount),
+  }));
+}
+
+export async function loadSeichiMapVisitorRanking(
+  currentLocationIds: readonly string[],
+): Promise<SeichiMapVisitorRankingItem[]> {
+  const locationIds = [...new Set(currentLocationIds.filter(Boolean))];
+  if (locationIds.length === 0) return [];
+
+  const rows = await prisma.$queryRaw<
+    { nickname: string | null; visitCount: bigint }[]
+  >(sqltag`
+    SELECT
+      (
+        SELECT nickname
+        FROM SeichiMapShare
+        WHERE SeichiMapShare.userId = SeichiMapVisited.userId
+        ORDER BY updatedAt DESC
+        LIMIT 1
+      ) AS nickname,
+      COUNT(DISTINCT locationId) AS visitCount
+    FROM SeichiMapVisited
+    WHERE locationId IN (${join(locationIds)})
+    GROUP BY userId
+    ORDER BY visitCount DESC, nickname ASC, userId ASC
+    LIMIT ${SEICHI_MAP_RANKING_LIMIT}
+  `);
+
+  return rows.map(({ nickname, visitCount }) => ({
+    nickname,
+    visitCount: Number(visitCount),
+  }));
 }
 
 export async function createSeichiMapVisited(
