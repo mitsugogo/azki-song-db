@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.19.0](https://github.com/mitsugogo/azki-song-db/compare/v2.18.2...v2.19.0) (2026-07-31)
+
+
+### Features
+
+* 聖地マップランキング ([bac8259](https://github.com/mitsugogo/azki-song-db/commit/bac8259ddf39d402d622e239a06395dc20a24798))
+
+
+### Bug Fixes
+
+* **seichi-map:** 初期表示の軽量化 ([4170736](https://github.com/mitsugogo/azki-song-db/commit/41707364c5f1578310e12919f94f32619def13ba))
+
 ### [2.18.2](https://github.com/mitsugogo/azki-song-db/compare/v2.18.1...v2.18.2) (2026-07-26)
 
 
