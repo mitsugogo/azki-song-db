@@ -9,12 +9,20 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const response = await fetch(AZKI_SEICHI_MAP_KML_URL, {
-      cache: "no-store",
-      headers: {
-        Accept: "application/vnd.google-earth.kml+xml,text/xml,*/*",
-      },
-    });
+    const [response, uniqueVisitorCounts] = await Promise.all([
+      fetch(AZKI_SEICHI_MAP_KML_URL, {
+        cache: "no-store",
+        headers: {
+          Accept: "application/vnd.google-earth.kml+xml,text/xml,*/*",
+        },
+      }),
+      loadSeichiMapUniqueVisitorCounts().catch<Record<string, number>>(
+        (error) => {
+          console.error("Failed to load seichi map visitor counts", error);
+          return {};
+        },
+      ),
+    ]);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -25,13 +33,6 @@ export async function GET() {
 
     const kml = await response.text();
     const items = parseSeichiMapKml(kml);
-    let uniqueVisitorCounts: Record<string, number> = {};
-
-    try {
-      uniqueVisitorCounts = await loadSeichiMapUniqueVisitorCounts();
-    } catch (error) {
-      console.error("Failed to load seichi map visitor counts", error);
-    }
 
     return NextResponse.json(
       items.map((item) => ({

@@ -269,7 +269,6 @@ const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 type GoogleMapsLibraries = {
   core: GoogleMapsCoreLibrary;
   maps: GoogleMapsMapsLibrary;
-  marker: GoogleMapsMarkerLibrary;
 };
 
 type CanvasOverlayHandle = {
@@ -599,6 +598,58 @@ const getDescriptionWithoutYouTubeLinks = (value: string) => {
 const getYouTubeThumbnailUrl = (videoId: string) =>
   `https://img.youtube.com/vi/${encodeURIComponent(videoId)}/mqdefault.jpg`;
 
+const loadArchiveVideoMeta = async (
+  locations: Pick<SeichiMapLocation, "description">[],
+): Promise<Record<string, ArchiveVideoMeta>> => {
+  const archivesResponse = await fetch("/api/archives").catch(() => null);
+  const archiveVideoMeta: Record<string, ArchiveVideoMeta> = {};
+
+  if (archivesResponse?.ok) {
+    const archivesData = (await archivesResponse
+      .json()
+      .catch(() => [])) as Partial<ArchiveItem>[];
+    archivesData.forEach((item) => {
+      const videoId = item.video_id?.trim();
+      if (!videoId || !item.title) return;
+      archiveVideoMeta[videoId] = {
+        title: item.title,
+        thumbnailUrl: getYouTubeThumbnailUrl(videoId),
+        streamDateLabel: formatArchiveStreamDateLabel(
+          item.stream_started_at || item.published_at,
+        ),
+      };
+    });
+  }
+
+  const missingYouTubeVideoIds = extractYouTubeVideoIdsFromLocations(
+    locations,
+  ).filter((videoId) => !archiveVideoMeta[videoId]);
+  if (missingYouTubeVideoIds.length === 0) return archiveVideoMeta;
+
+  const ytInfoResponse = await fetch(
+    `/api/yt/info?videoIds=${encodeURIComponent(
+      missingYouTubeVideoIds.join(","),
+    )}`,
+  ).catch(() => null);
+  if (!ytInfoResponse?.ok) return archiveVideoMeta;
+
+  const ytInfoItems = (await ytInfoResponse.json().catch(() => [])) as
+    YouTubeVideoInfo[] | null;
+  ytInfoItems?.forEach((item) => {
+    const videoId = item.videoId?.trim();
+    const title = item.title?.trim();
+    if (!videoId || !title || archiveVideoMeta[videoId]) return;
+    archiveVideoMeta[videoId] = {
+      title,
+      thumbnailUrl:
+        item.thumbnailUrl?.trim() || getYouTubeThumbnailUrl(videoId),
+      streamDateLabel: null,
+    };
+  });
+
+  return archiveVideoMeta;
+};
+
 const formatArchiveStreamDateLabel = (value?: string) => {
   if (!value) return null;
   const datePart = value.match(/\d{4}-\d{2}-\d{2}/)?.[0];
@@ -826,15 +877,13 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
     const mapsApi = window.google?.maps;
 
     if (mapsApi?.importLibrary) {
-      const [core, maps, marker] = await Promise.all([
+      const [core, maps] = await Promise.all([
         mapsApi.importLibrary("core"),
         mapsApi.importLibrary("maps"),
-        mapsApi.importLibrary("marker"),
       ]);
       return {
         core: core as GoogleMapsCoreLibrary,
         maps: maps as GoogleMapsMapsLibrary,
-        marker: marker as GoogleMapsMarkerLibrary,
       };
     }
 
@@ -842,13 +891,11 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
       mapsApi?.Map &&
       mapsApi.OverlayView &&
       mapsApi.InfoWindow &&
-      mapsApi.LatLng &&
-      mapsApi.marker?.AdvancedMarkerElement
+      mapsApi.LatLng
     ) {
       return {
         core: mapsApi as unknown as GoogleMapsCoreLibrary,
         maps: mapsApi as unknown as GoogleMapsMapsLibrary,
-        marker: mapsApi.marker,
       };
     }
 
@@ -856,6 +903,19 @@ const ensureGoogleMapsLibraries = async (): Promise<GoogleMapsLibraries> => {
   }
 
   throw new Error("google_maps_load_failed");
+};
+
+const loadGoogleMapsMarkerLibrary = async () => {
+  const mapsApi = window.google?.maps;
+  if (mapsApi?.marker?.AdvancedMarkerElement) {
+    return mapsApi.marker;
+  }
+
+  const markerLibrary = await mapsApi?.importLibrary?.("marker");
+  if (!markerLibrary) {
+    throw new Error("google_maps_marker_load_failed");
+  }
+  return markerLibrary as GoogleMapsMarkerLibrary;
 };
 
 const loadGoogleMapsScript = (apiKey: string, language: string) => {
@@ -1485,7 +1545,6 @@ export default function SeichiMapCompleteClient({
       const locationsRequest = fetch("/api/seichi-map/locations", {
         cache: "no-store",
       });
-      const archivesRequest = fetch("/api/archives").catch(() => null);
       const visitedRequest = effectiveShareId
         ? fetch(buildSeichiMapShareApiUrl(effectiveShareId), {
             cache: "no-store",
@@ -1494,8 +1553,7 @@ export default function SeichiMapCompleteClient({
           ? fetch("/api/seichi-map/visited", { cache: "no-store" })
           : Promise.resolve(null);
 
-      const [locationsResponse, archivesResponse, visitedResponse] =
-        await Promise.all([locationsRequest, archivesRequest, visitedRequest]);
+      const locationsResponse = await locationsRequest;
 
       if (!locationsResponse.ok) {
         throw new Error(t("errors.locationsFetchFailed"));
@@ -1505,10 +1563,21 @@ export default function SeichiMapCompleteClient({
         (await locationsResponse.json()) as (SeichiMapLocation & {
           uniqueVisitorCount?: number;
         })[];
-      let visitedItems: VisitedItem[] = [];
-      let archiveVideoMeta: Record<string, ArchiveVideoMeta> = {};
-      let nextSharedViewInfo: ShareInfo | null = null;
-      let visitedLoadError: string | null = null;
+
+      setLocations(
+        locationItems.map((item) => ({
+          ...item,
+          key: item.id,
+          uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
+        })),
+      );
+      setLoading(false);
+
+      void loadArchiveVideoMeta(locationItems)
+        .then(setArchiveVideoMetaById)
+        .catch((error) => console.error(error));
+
+      const visitedResponse = await visitedRequest;
 
       if (visitedResponse) {
         if (!visitedResponse.ok) {
@@ -1524,82 +1593,21 @@ export default function SeichiMapCompleteClient({
             })) as {
             error?: string;
           };
-          visitedLoadError = payload.error || fallbackMessage;
+          setErrorMessage(payload.error || fallbackMessage);
         } else {
           const visitedData = (await visitedResponse.json()) as {
             share?: ShareInfo;
             items?: VisitedItem[];
           };
-          visitedItems = visitedData.items ?? [];
-          nextSharedViewInfo = visitedData.share ?? null;
+          setVisited(visitedData.items ?? []);
+          setSharedViewInfo(visitedData.share ?? null);
         }
-      }
-
-      if (archivesResponse?.ok) {
-        const archivesData = (await archivesResponse
-          .json()
-          .catch(() => [])) as Partial<ArchiveItem>[];
-        archiveVideoMeta = archivesData.reduce<
-          Record<string, ArchiveVideoMeta>
-        >((map, item) => {
-          const videoId = item.video_id?.trim();
-          if (!videoId || !item.title) return map;
-          map[videoId] = {
-            title: item.title,
-            thumbnailUrl: getYouTubeThumbnailUrl(videoId),
-            streamDateLabel: formatArchiveStreamDateLabel(
-              item.stream_started_at || item.published_at,
-            ),
-          };
-          return map;
-        }, {});
-      }
-
-      const missingYouTubeVideoIds = extractYouTubeVideoIdsFromLocations(
-        locationItems,
-      ).filter((videoId) => !archiveVideoMeta[videoId]);
-      if (missingYouTubeVideoIds.length > 0) {
-        const ytInfoResponse = await fetch(
-          `/api/yt/info?videoIds=${encodeURIComponent(
-            missingYouTubeVideoIds.join(","),
-          )}`,
-        ).catch(() => null);
-        if (ytInfoResponse?.ok) {
-          const ytInfoItems = (await ytInfoResponse.json().catch(() => [])) as
-            YouTubeVideoInfo[] | null;
-          ytInfoItems?.forEach((item) => {
-            const videoId = item.videoId?.trim();
-            const title = item.title?.trim();
-            if (!videoId || !title || archiveVideoMeta[videoId]) return;
-            archiveVideoMeta[videoId] = {
-              title,
-              thumbnailUrl:
-                item.thumbnailUrl?.trim() || getYouTubeThumbnailUrl(videoId),
-              streamDateLabel: null,
-            };
-          });
-        }
-      }
-
-      setLocations(
-        locationItems.map((item) => ({
-          ...item,
-          key: item.id,
-          uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
-        })),
-      );
-      setVisited(visitedItems);
-      setSharedViewInfo(nextSharedViewInfo);
-      setArchiveVideoMetaById(archiveVideoMeta);
-      if (visitedLoadError) {
-        setErrorMessage(visitedLoadError);
       }
     } catch (error) {
       console.error(error);
       setErrorMessage(
         error instanceof Error ? error.message : t("errors.dataLoadFailed"),
       );
-    } finally {
       setLoading(false);
     }
   }, [effectiveShareId, isSignedIn, t]);
@@ -1628,30 +1636,55 @@ export default function SeichiMapCompleteClient({
       return;
     }
 
-    cancelCurrentLocationRequestRef.current?.();
-    setCurrentPosition(null);
-    setNearbyLocationStatus("locating");
-    cancelCurrentLocationRequestRef.current = startCurrentLocationRequest({
-      control,
-      geolocation: navigator.geolocation,
-      labels: {
-        locating: t("currentLocation.locating"),
-        show: t("currentLocation.show"),
-        unavailable: t("currentLocation.unavailable"),
-      },
-      onSuccess: (coords) => {
-        setCurrentPosition({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-        setNearbyLocationStatus("ready");
-        setListMode("nearby");
-      },
-      onUnavailable: () => {
+    const startRequest = () => {
+      cancelCurrentLocationRequestRef.current?.();
+      setCurrentPosition(null);
+      setNearbyLocationStatus("locating");
+      cancelCurrentLocationRequestRef.current = startCurrentLocationRequest({
+        control,
+        geolocation: navigator.geolocation,
+        labels: {
+          locating: t("currentLocation.locating"),
+          show: t("currentLocation.show"),
+          unavailable: t("currentLocation.unavailable"),
+        },
+        onSuccess: (coords) => {
+          setCurrentPosition({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+          setNearbyLocationStatus("ready");
+          setListMode("nearby");
+        },
+        onUnavailable: () => {
+          setCurrentPosition(null);
+          setNearbyLocationStatus("unavailable");
+        },
+      });
+    };
+
+    if (currentLocationMarkerLibraryRef.current) {
+      startRequest();
+      return;
+    }
+
+    void loadGoogleMapsMarkerLibrary()
+      .then((markerLibrary) => {
+        currentLocationMarkerLibraryRef.current = markerLibrary;
+        startRequest();
+      })
+      .catch((error) => {
+        console.error(error);
+        if (control) {
+          updateCurrentLocationControl(
+            control,
+            t("currentLocation.unavailable"),
+            false,
+          );
+        }
         setCurrentPosition(null);
         setNearbyLocationStatus("unavailable");
-      },
-    });
+      });
   }, [t]);
 
   useEffect(() => {
@@ -1671,7 +1704,6 @@ export default function SeichiMapCompleteClient({
         if (cancelled || !mapElementRef.current) {
           return;
         }
-        currentLocationMarkerLibraryRef.current = libraries.marker;
         if (!mapRef.current) {
           const { Map, InfoWindow } = libraries.maps;
           const initialViewport = readSharedMapViewport();
