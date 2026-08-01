@@ -24,6 +24,7 @@ import useChannels from "../hook/useChannels";
 import { ChannelEntry } from "../types/api/yt/channels";
 import { getCollabUnitName } from "../config/collabUnits";
 import { getYoutubeVisibleHashtagBodies } from "../lib/hashtag";
+import AdminTools from "./AdminTools";
 
 type DescriptionCollapsibleProps = {
   text: string;
@@ -1072,6 +1073,11 @@ const NowPlayingSongInfo = ({
                 changeCurrentSong={changeCurrentSong}
               />
             </div>
+            <AdminTools
+              currentSong={currentSong}
+              videoInfo={videoInfo}
+              onSongUpdated={changeCurrentSong}
+            />
           </div>
         )}
       </div>

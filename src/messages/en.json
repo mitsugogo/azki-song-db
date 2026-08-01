@@ -1515,6 +1515,8 @@
     "backToHome": "Back to home"
   },
   "Account": {
+    "adminEnable": "Enable admin tools",
+    "adminDisable": "Disable admin tools",
     "menuLabel": "Account menu",
     "guest": "Guest",
     "signIn": "Sign in with Google",
@@ -1529,6 +1531,32 @@
     "signInRequiredDescription": "Playlists and favorites are saved to your Google account.",
     "libraryErrorTitle": "Could not load your library",
     "libraryErrorMessage": "Your legacy data was not deleted. Reload the page and try again later."
+  },
+  "AdminTools": {
+    "title": "Admin tools",
+    "channelTitle": "Channel information",
+    "channelName": "Channel name",
+    "channelId": "Channel ID",
+    "channelListed": "This channel is already listed in the channels sheet.",
+    "channelMissing": "This channel is not listed in the channels sheet.",
+    "addChannel": "Add to channels sheet",
+    "addingChannel": "Adding...",
+    "channelAdded": "Added to the channels sheet",
+    "metadataTitle": "Edit metadata",
+    "titleLabel": "Title",
+    "artist": "Artist",
+    "album": "Album",
+    "singer": "Singer",
+    "videoTitle": "Video title",
+    "broadcastDate": "Broadcast date",
+    "tags": "Tags (comma separated)",
+    "extra": "Additional info",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "noSong": "There is no song record for the current video.",
+    "noChannel": "Channel information is not available.",
+    "error": "Failed to save."
   },
   "ShareModal": {
     "title": "Share",

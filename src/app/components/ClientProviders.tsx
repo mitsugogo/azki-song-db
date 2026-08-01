@@ -12,6 +12,7 @@ import ServiceWorkerCleanup from "./ServiceWorkerCleanup";
 import MiniPlayer from "./MiniPlayer";
 import { SessionProvider } from "next-auth/react";
 import { UserLibraryProvider } from "../context/UserLibraryContext";
+import { AdminModeProvider } from "../context/AdminModeContext";
 
 export default function ClientProviders({
   children,
@@ -20,20 +21,22 @@ export default function ClientProviders({
 }) {
   return (
     <SessionProvider>
-      <UserLibraryProvider>
-        <GlobalPlayerProvider>
-          <SharedYouTubePlayerProvider>
-            <LoadingProvider>
-              <Notifications position="top-right" zIndex={10000} limit={5} />
-              {children}
-              <MiniPlayer />
-              <PageTransitionHandler />
-              <LoadingOverlayIfNeeded />
-              <ServiceWorkerCleanup />
-            </LoadingProvider>
-          </SharedYouTubePlayerProvider>
-        </GlobalPlayerProvider>
-      </UserLibraryProvider>
+      <AdminModeProvider>
+        <UserLibraryProvider>
+          <GlobalPlayerProvider>
+            <SharedYouTubePlayerProvider>
+              <LoadingProvider>
+                <Notifications position="top-right" zIndex={10000} limit={5} />
+                {children}
+                <MiniPlayer />
+                <PageTransitionHandler />
+                <LoadingOverlayIfNeeded />
+                <ServiceWorkerCleanup />
+              </LoadingProvider>
+            </SharedYouTubePlayerProvider>
+          </GlobalPlayerProvider>
+        </UserLibraryProvider>
+      </AdminModeProvider>
     </SessionProvider>
   );
 }
