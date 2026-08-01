@@ -3,11 +3,19 @@
 import { Avatar, Menu, Tooltip } from "@mantine/core";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { FaGoogle, FaRightFromBracket, FaUser } from "react-icons/fa6";
+import {
+  FaCheck,
+  FaGoogle,
+  FaRightFromBracket,
+  FaUser,
+  FaWrench,
+} from "react-icons/fa6";
+import { useAdminMode } from "../context/AdminModeContext";
 
 export default function AccountMenu() {
   const { data: session, status } = useSession();
   const t = useTranslations("Account");
+  const { isAdmin, enabled, setEnabled } = useAdminMode();
 
   return (
     <Menu position="bottom-end" width={240} shadow="md" withinPortal={true}>
@@ -33,12 +41,28 @@ export default function AccountMenu() {
           <Menu.Label>{session.user.name ?? session.user.email}</Menu.Label>
         )}
         {status === "authenticated" ? (
-          <Menu.Item
-            leftSection={<FaRightFromBracket />}
-            onClick={() => void signOut({ callbackUrl: window.location.href })}
-          >
-            {t("signOut")}
-          </Menu.Item>
+          <>
+            {isAdmin && (
+              <>
+                <Menu.Item
+                  leftSection={<FaWrench />}
+                  rightSection={enabled ? <FaCheck aria-hidden /> : undefined}
+                  onClick={() => setEnabled(!enabled)}
+                >
+                  {enabled ? t("adminDisable") : t("adminEnable")}
+                </Menu.Item>
+                <Menu.Divider />
+              </>
+            )}
+            <Menu.Item
+              leftSection={<FaRightFromBracket />}
+              onClick={() =>
+                void signOut({ callbackUrl: window.location.href })
+              }
+            >
+              {t("signOut")}
+            </Menu.Item>
+          </>
         ) : (
           <Menu.Item
             leftSection={<FaGoogle />}
