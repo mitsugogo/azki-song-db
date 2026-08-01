@@ -1513,6 +1513,8 @@
     "backToHome": "ホームに戻る"
   },
   "Account": {
+    "adminEnable": "管理用機能を有効",
+    "adminDisable": "管理用機能を無効",
     "menuLabel": "アカウントメニュー",
     "guest": "ゲスト",
     "signIn": "Googleでサインイン",
@@ -1527,6 +1529,32 @@
     "signInRequiredDescription": "プレイリストとお気に入りはGoogleアカウントに保存されます。",
     "libraryErrorTitle": "ライブラリを読み込めませんでした",
     "libraryErrorMessage": "旧データは削除していません。時間をおいて再読み込みしてください。"
+  },
+  "AdminTools": {
+    "title": "管理用機能",
+    "channelTitle": "チャンネル情報",
+    "channelName": "チャンネル名",
+    "channelId": "channel ID",
+    "channelListed": "channelsシートに掲載済みです",
+    "channelMissing": "channelsシートに未掲載です",
+    "addChannel": "channelsシートに追加",
+    "addingChannel": "追加中...",
+    "channelAdded": "channelsシートに追加しました",
+    "metadataTitle": "メタ情報を編集",
+    "titleLabel": "タイトル",
+    "artist": "アーティスト名",
+    "album": "アルバム名",
+    "singer": "歌った人",
+    "videoTitle": "動画タイトル",
+    "broadcastDate": "配信日",
+    "tags": "タグ（カンマ区切り）",
+    "extra": "追加情報",
+    "save": "保存",
+    "saving": "保存中...",
+    "saved": "保存しました",
+    "noSong": "現在の動画に対応する楽曲データがありません",
+    "noChannel": "チャンネル情報を取得できません",
+    "error": "保存に失敗しました"
   },
   "ShareModal": {
     "title": "シェア",

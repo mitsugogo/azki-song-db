@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { isAdminGoogleAccountId } from "@/app/lib/adminConfig";
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -38,6 +39,9 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && typeof token.userId === "string") {
         session.user.id = token.userId;
+      }
+      if (session.user) {
+        session.user.isAdmin = isAdminGoogleAccountId(session.user.id);
       }
       return session;
     },
