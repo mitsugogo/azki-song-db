@@ -1128,6 +1128,7 @@
     "locations": {
       "title": "訪問者が多い場所",
       "unit": "人",
+      "visited": "訪問済",
       "openSeichiMap": "聖地マップ",
       "openGoogleMap": "Google Map",
       "attribution": "住所情報：国土地理院（逆ジオコーダー・市区町村データ）",
