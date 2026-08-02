@@ -1571,7 +1571,6 @@ export default function SeichiMapCompleteClient({
           uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
         })),
       );
-      setLoading(false);
 
       void loadArchiveVideoMeta(locationItems)
         .then(setArchiveVideoMetaById)
@@ -1603,6 +1602,7 @@ export default function SeichiMapCompleteClient({
           setSharedViewInfo(visitedData.share ?? null);
         }
       }
+      setLoading(false);
     } catch (error) {
       console.error(error);
       setErrorMessage(
