@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchJsonDedup } from "../lib/fetchDedup";
+import { normalizeActivityImportance } from "../lib/activityImportance";
 import { ArchiveItem } from "../types/archiveItem";
 
 const cachedArchives = new Map<string, ArchiveItem[]>();
@@ -57,6 +58,7 @@ const useArchives = () => {
             published_at: item?.published_at || "",
             stream_started_at: item?.stream_started_at || "",
             timestamp_comment: item?.timestamp_comment || "",
+            importance: normalizeActivityImportance(item?.importance),
           }))
           .filter((item: ArchiveItem) => item.title && item.video_id);
 

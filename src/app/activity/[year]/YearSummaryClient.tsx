@@ -22,10 +22,17 @@ import { siteConfig } from "@/app/config/siteConfig";
 import { isCoverSong, isPossibleOriginalSong } from "@/app/config/filters";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
+import {
+  compareActivityImportanceDesc,
+  getActivityImportanceItemClassName,
+  getHigherActivityImportance,
+  normalizeActivityImportance,
+} from "../../lib/activityImportance";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { BsGeoAlt } from "react-icons/bs";
 import SummarySongCard from "./SummarySongCard";
 import { getCollabUnitName } from "@/app/config/collabUnits";
+import type { ActivityImportance } from "../../types/activityImportance";
 
 type Props = {
   initialSongs: Song[];
@@ -57,6 +64,14 @@ const normalizeExternalMilestoneUrl = (url: string) => {
   } catch {
     return url;
   }
+};
+
+const toJstDateKey = (value: string) => {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return "";
+
+  const jstDate = new Date(timestamp + 9 * 60 * 60 * 1000);
+  return `${jstDate.getUTCFullYear()}-${String(jstDate.getUTCMonth() + 1).padStart(2, "0")}-${String(jstDate.getUTCDate()).padStart(2, "0")}`;
 };
 
 export default function YearSummaryClient({ initialSongs, year }: Props) {
@@ -337,6 +352,7 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
       url: string;
       place: string;
       place_url: string;
+      importance: ActivityImportance;
     };
 
     const milestones = new Map<number, Map<string, YearMilestone>>();
@@ -377,6 +393,10 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
         note: existing.note || candidate.note,
         place: existing.place || candidate.place,
         place_url: existing.place_url || candidate.place_url,
+        importance: getHigherActivityImportance(
+          existing.importance,
+          candidate.importance,
+        ),
       });
     };
 
@@ -401,6 +421,7 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
               url: "",
               place: "",
               place_url: "",
+              importance: "normal",
             });
           });
       });
@@ -421,16 +442,25 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
         note: m.note || "",
         place: m.place || "",
         place_url: m.place_url || "",
+        importance: normalizeActivityImportance(m.importance),
       });
     });
 
     const result: Record<number, YearMilestone[]> = {};
     for (const [year, items] of milestones.entries()) {
-      result[year] = Array.from(items.values()).sort(
-        (a, b) =>
+      result[year] = Array.from(items.values()).sort((a, b) => {
+        const dateDiff =
           new Date(a.broadcast_at).getTime() -
-          new Date(b.broadcast_at).getTime(),
-      );
+          new Date(b.broadcast_at).getTime();
+        if (toJstDateKey(a.broadcast_at) === toJstDateKey(b.broadcast_at)) {
+          const importanceDiff = compareActivityImportanceDesc(
+            a.importance,
+            b.importance,
+          );
+          if (importanceDiff !== 0) return importanceDiff;
+        }
+        return dateDiff;
+      });
     }
 
     return result;
@@ -522,7 +552,11 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
           <h2 className="text-xl font-semibold mb-4">{t("milestonesTitle")}</h2>
           <ul className="space-y-2 list-disc ml-6">
             {displayYearMilestones.map((milestone, index) => (
-              <li key={index} className="text-sm">
+              <li
+                key={index}
+                className={`text-sm ${getActivityImportanceItemClassName(milestone.importance)}`}
+                data-importance={milestone.importance}
+              >
                 <div className="font-medium">
                   {milestone.is_external ? (
                     milestone.url ? (

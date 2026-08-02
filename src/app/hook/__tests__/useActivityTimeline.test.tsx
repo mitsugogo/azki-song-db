@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildViewMilestoneItems,
   filterActivityTimelineItems,
+  sortActivityTimelineItems,
   type ActivityTimelineItem,
 } from "../useActivityTimeline";
 import type { ViewStat } from "../../types/api/stat/views";
@@ -110,6 +111,7 @@ describe("filterActivityTimelineItems", () => {
     kind: "milestone",
     occurredAt,
     href: undefined,
+    importance: "normal",
     milestone: {
       date: occurredAt,
       content: id,
@@ -170,6 +172,7 @@ describe("filterActivityTimelineItems", () => {
         note: "",
         url: "",
       },
+      importance: "normal",
     };
     const items = filterActivityTimelineItems(
       [
@@ -187,5 +190,31 @@ describe("filterActivityTimelineItems", () => {
       "newer-milestone",
       "older-milestone",
     ]);
+  });
+
+  it("keeps dates ordered while prioritizing higher importance within a JST day", () => {
+    const items = [
+      {
+        ...createActivityItem("normal", "2026-06-20T00:30:00.000Z"),
+        importance: "normal" as const,
+      },
+      {
+        ...createActivityItem("extra", "2026-06-20T09:00:00.000Z"),
+        importance: "extra_high" as const,
+      },
+      {
+        ...createActivityItem("older", "2026-06-19T14:59:59.000Z"),
+        importance: "high" as const,
+      },
+    ];
+
+    expect(filterActivityTimelineItems(items).map((item) => item.id)).toEqual([
+      "extra",
+      "normal",
+      "older",
+    ]);
+    expect(
+      sortActivityTimelineItems(items, "asc").map((item) => item.id),
+    ).toEqual(["older", "extra", "normal"]);
   });
 });

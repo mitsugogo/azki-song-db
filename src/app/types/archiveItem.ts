@@ -1,3 +1,5 @@
+import type { ActivityImportance } from "./activityImportance";
+
 export interface ArchiveItem {
   sequence: number;
   topic: string;
@@ -10,4 +12,5 @@ export interface ArchiveItem {
   published_at: string;
   stream_started_at: string;
   timestamp_comment: string;
+  importance?: ActivityImportance;
 }

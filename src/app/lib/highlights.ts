@@ -1,6 +1,12 @@
 import { AnniversaryItem } from "../types/anniversaryItem";
 import { EventItem } from "../types/eventItem";
 import { Song } from "../types/song";
+import {
+  compareActivityImportanceDesc,
+  getHigherActivityImportance,
+  normalizeActivityImportance,
+} from "./activityImportance";
+import type { ActivityImportance } from "../types/activityImportance";
 
 const dayInMs = 24 * 60 * 60 * 1000;
 const hourInMs = 60 * 60 * 1000;
@@ -16,6 +22,7 @@ export type MilestoneHighlightItem = {
   place_url?: string;
   is_external?: boolean;
   song?: Song;
+  importance?: ActivityImportance;
 };
 
 export type TimelineMilestoneHighlight = {
@@ -27,6 +34,7 @@ export type TimelineMilestoneHighlight = {
   place_url: string;
   is_external: boolean;
   song?: Song;
+  importance: ActivityImportance;
 };
 
 export const parseToJstDayStart = (input: string) => {
@@ -256,12 +264,15 @@ export const toJstMonthDayKey = (date: Date) => {
   return `${month}-${day}`;
 };
 
-const toDateKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+export const toJstDateKey = (date: Date) => {
+  const jstDate = new Date(date.getTime() + jstOffsetMs);
+  const year = jstDate.getUTCFullYear();
+  const month = String(jstDate.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(jstDate.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+const toDateKey = toJstDateKey;
 
 export const buildTimelineMilestones = (
   songs: Song[],
@@ -282,6 +293,7 @@ export const buildTimelineMilestones = (
         place_url: "",
         is_external: false,
         song: song,
+        importance: "normal" as const,
       })),
     );
 
@@ -316,6 +328,7 @@ export const buildTimelineMilestones = (
         place_url: milestone.place_url || "",
         is_external: true,
         song: milestone.song,
+        importance: normalizeActivityImportance(milestone.importance),
       },
     ];
   });
@@ -362,6 +375,11 @@ export const buildTimelineMilestones = (
     const mergedPlaceUrl =
       apiGroup.find((milestone) => Boolean(milestone.place_url))?.place_url ||
       "";
+    const mergedImportance = apiGroup.reduce(
+      (importance, milestone) =>
+        getHigherActivityImportance(importance, milestone.importance),
+      songMilestone.importance,
+    );
 
     mergedCrossSourceMilestones.push({
       ...songMilestone,
@@ -371,13 +389,26 @@ export const buildTimelineMilestones = (
       place: mergedPlace,
       place_url: mergedPlaceUrl,
       is_external: songMilestone.is_external || apiGroup.length > 0,
+      importance: mergedImportance,
     });
   }
 
   const allMilestones: TimelineMilestoneHighlight[] = [
     ...mergedCrossSourceMilestones,
     ...apiMilestones.filter((milestone) => !songByText.has(milestone.text)),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  ].sort((a, b) => {
+    const dateDiff = a.date.getTime() - b.date.getTime();
+    if (dateDiff === 0 || toDateKey(a.date) === toDateKey(b.date)) {
+      const importanceDiff = compareActivityImportanceDesc(
+        a.importance,
+        b.importance,
+      );
+      if (importanceDiff !== 0) {
+        return importanceDiff;
+      }
+    }
+    return dateDiff;
+  });
 
   const uniqueMilestones = new Map<string, TimelineMilestoneHighlight>();
   for (const milestone of allMilestones) {
@@ -396,12 +427,26 @@ export const buildTimelineMilestones = (
       place_url: previous.place_url || milestone.place_url,
       is_external: previous.is_external || milestone.is_external,
       song: previous.song || milestone.song,
+      importance: getHigherActivityImportance(
+        previous.importance,
+        milestone.importance,
+      ),
     });
   }
 
-  return Array.from(uniqueMilestones.values()).sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  );
+  return Array.from(uniqueMilestones.values()).sort((a, b) => {
+    const dateDiff = a.date.getTime() - b.date.getTime();
+    if (dateDiff === 0 || toDateKey(a.date) === toDateKey(b.date)) {
+      const importanceDiff = compareActivityImportanceDesc(
+        a.importance,
+        b.importance,
+      );
+      if (importanceDiff !== 0) {
+        return importanceDiff;
+      }
+    }
+    return dateDiff;
+  });
 };
 
 export const getTodayMilestones = <T extends MilestoneHighlightItem>(
@@ -510,6 +555,18 @@ export const getFeaturedEvents = (
           new Date(a.end_at).getTime() - new Date(b.end_at).getTime();
         if (endDiff !== 0) {
           return endDiff;
+        }
+      }
+
+      const aStartDay = toJstDateKey(new Date(a.start_at));
+      const bStartDay = toJstDateKey(new Date(b.start_at));
+      if (aStartDay === bStartDay) {
+        const importanceDiff = compareActivityImportanceDesc(
+          a.importance,
+          b.importance,
+        );
+        if (importanceDiff !== 0) {
+          return importanceDiff;
         }
       }
 

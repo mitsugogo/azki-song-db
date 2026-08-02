@@ -9,6 +9,10 @@ import { LuArrowRight } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import type { MilestoneItem } from "../hook/useMilestones";
+import {
+  getActivityImportanceItemClassName,
+  getActivityImportanceTitleClassName,
+} from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
 import {
   buildMilestoneSearchHref,
@@ -196,25 +200,31 @@ export const HomeTimelineSection = memo(function HomeTimelineSection({
                   </div>
                 ) : (
                   todayMilestones.map((milestone, index) => {
+                    const importanceItemClassName =
+                      getActivityImportanceItemClassName(milestone.importance);
+                    const importanceTitleClassName =
+                      getActivityImportanceTitleClassName(milestone.importance);
                     const milestoneContent = milestone.is_external ? (
                       milestone.url ? (
                         <Link
                           href={milestone.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                          className={`font-semibold text-primary hover:text-primary-700 dark:text-pink-200 ${importanceTitleClassName}`}
                         >
                           {milestone.text}
                         </Link>
                       ) : (
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span
+                          className={`font-semibold text-gray-900 dark:text-white ${importanceTitleClassName}`}
+                        >
                           {milestone.text}
                         </span>
                       )
                     ) : (
                       <Link
                         href={buildMilestoneSearchHref(milestone.text)}
-                        className="font-semibold text-primary hover:text-primary-700 dark:text-pink-200"
+                        className={`font-semibold text-primary hover:text-primary-700 dark:text-pink-200 ${importanceTitleClassName}`}
                       >
                         {milestone.text}
                       </Link>
@@ -223,7 +233,8 @@ export const HomeTimelineSection = memo(function HomeTimelineSection({
                     return (
                       <div
                         key={`${milestone.date.toISOString()}-${milestone.text}-${index}`}
-                        className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                        className={`rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5 ${importanceItemClassName}`}
+                        data-importance={milestone.importance}
                       >
                         <Text size="xs" c="dimmed">
                           {formatDate(milestone.date, locale)}

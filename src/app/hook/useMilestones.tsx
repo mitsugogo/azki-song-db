@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { fetchJsonDedup } from "../lib/fetchDedup";
+import { normalizeActivityImportance } from "../lib/activityImportance";
+import type { ActivityImportance } from "../types/activityImportance";
 
 export type MilestoneItem = {
   date: string; // ISO or empty
@@ -9,6 +11,7 @@ export type MilestoneItem = {
   url?: string;
   place?: string;
   place_url?: string;
+  importance?: ActivityImportance;
 };
 
 const cachedMilestonesByLocale = new Map<string, MilestoneItem[]>();
@@ -67,6 +70,7 @@ const useMilestones = () => {
           url: it?.url || "",
           place: it?.place || "",
           place_url: it?.place_url || "",
+          importance: normalizeActivityImportance(it?.importance),
         }))
         .filter((it: MilestoneItem) => it.date || it.content);
 

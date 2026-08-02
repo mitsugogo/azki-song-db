@@ -10,7 +10,14 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import { BsGeoAlt } from "react-icons/bs";
 import { useTranslations, useLocale } from "next-intl";
 import { useRef, useState, useLayoutEffect } from "react";
+import {
+  compareActivityImportanceDesc,
+  getActivityImportanceTextClassName,
+  getHigherActivityImportance,
+  normalizeActivityImportance,
+} from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
+import type { ActivityImportance } from "../types/activityImportance";
 
 type TimelineMilestone = {
   date: Date;
@@ -20,12 +27,14 @@ type TimelineMilestone = {
   place: string;
   place_url: string;
   is_external: boolean;
+  importance: ActivityImportance;
 };
 
 function toDateKey(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const y = jstDate.getUTCFullYear();
+  const m = String(jstDate.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(jstDate.getUTCDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
@@ -60,6 +69,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         place: "",
         place_url: "",
         is_external: false,
+        importance: "normal" as const,
       })),
     );
 
@@ -86,6 +96,7 @@ export default function Timeline({ songs }: { songs: Song[] }) {
       place: m.place || "",
       place_url: m.place_url || "",
       is_external: true, // APIからのマイルストーンかどうか
+      importance: normalizeActivityImportance(m.importance),
     }))
     .filter((m): m is TimelineMilestone => Boolean(m.date && m.text));
 
@@ -126,6 +137,11 @@ export default function Timeline({ songs }: { songs: Song[] }) {
     const mergedPlace = apiGroup.find((m) => Boolean(m.place))?.place || "";
     const mergedPlaceUrl =
       apiGroup.find((m) => Boolean(m.place_url))?.place_url || "";
+    const mergedImportance = apiGroup.reduce(
+      (importance, milestone) =>
+        getHigherActivityImportance(importance, milestone.importance),
+      songMilestone.importance,
+    );
 
     mergedCrossSourceMilestones.push({
       ...songMilestone,
@@ -135,13 +151,26 @@ export default function Timeline({ songs }: { songs: Song[] }) {
       place: mergedPlace,
       place_url: mergedPlaceUrl,
       is_external: songMilestone.is_external || apiGroup.length > 0,
+      importance: mergedImportance,
     });
   }
 
   const allMilestones: TimelineMilestone[] = [
     ...mergedCrossSourceMilestones,
     ...apiMilestones.filter((m) => !songByText.has(m.text)),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  ].sort((a, b) => {
+    const dateDiff = a.date.getTime() - b.date.getTime();
+    if (dateDiff === 0 || toDateKey(a.date) === toDateKey(b.date)) {
+      const importanceDiff = compareActivityImportanceDesc(
+        a.importance,
+        b.importance,
+      );
+      if (importanceDiff !== 0) {
+        return importanceDiff;
+      }
+    }
+    return dateDiff;
+  });
 
   const uniqueMilestones = (() => {
     const map = new Map<string, TimelineMilestone>();
@@ -162,11 +191,22 @@ export default function Timeline({ songs }: { songs: Song[] }) {
         place: prev.place || m.place,
         place_url: prev.place_url || m.place_url,
         is_external: prev.is_external || m.is_external,
+        importance: getHigherActivityImportance(prev.importance, m.importance),
       });
     }
-    return Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
+    return Array.from(map.values()).sort((a, b) => {
+      const dateDiff = a.date.getTime() - b.date.getTime();
+      if (dateDiff === 0 || toDateKey(a.date) === toDateKey(b.date)) {
+        const importanceDiff = compareActivityImportanceDesc(
+          a.importance,
+          b.importance,
+        );
+        if (importanceDiff !== 0) {
+          return importanceDiff;
+        }
+      }
+      return dateDiff;
+    });
   })();
 
   const locale = useLocale();
@@ -236,7 +276,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
               {todayMilestones.map((m, idx) => (
                 <div
                   key={`${toDateKey(m.date)}::${m.text}::${idx}`}
-                  className="flex items-start text-sm text-light-gray-600 dark:text-light-gray-400 rounded px-2 py-0"
+                  className="flex items-start rounded px-2 py-0 text-sm text-light-gray-600 dark:text-light-gray-400"
+                  data-importance={m.importance}
                 >
                   <div className="min-w-0 flex-1">
                     <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
@@ -246,18 +287,22 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                       m.url ? (
                         <Link
                           href={m.url}
-                          className="text-primary font-semibold"
+                          className={`text-primary font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
                           target="_blank"
                         >
                           {m.text}
                         </Link>
                       ) : (
-                        <span className="font-semibold">{m.text}</span>
+                        <span
+                          className={`font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
+                        >
+                          {m.text}
+                        </span>
                       )
                     ) : (
                       <Link
                         href={buildMilestoneSearchHref(m.text)}
-                        className="text-primary font-semibold"
+                        className={`text-primary font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
                       >
                         {m.text}
                       </Link>
@@ -552,7 +597,8 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                     <div key={idx}>
                       <div
                         data-milestone-idx={idx}
-                        className="flex items-start justify-between text-sm text-light-gray-600 dark:text-light-gray-400 hover:bg-light-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1"
+                        className="flex items-start justify-between rounded px-2 py-1 text-sm text-light-gray-600 hover:bg-light-gray-100 dark:text-light-gray-400 dark:hover:bg-gray-700"
+                        data-importance={m.importance}
                       >
                         <div className="min-w-0 flex-1">
                           <span className="text-xs text-light-gray-500 dark:text-light-gray-500 whitespace-nowrap">
@@ -562,18 +608,22 @@ export default function Timeline({ songs }: { songs: Song[] }) {
                             m.url ? (
                               <Link
                                 href={m.url}
-                                className="text-primary font-semibold"
+                                className={`text-primary font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
                                 target="_blank"
                               >
                                 {m.text}
                               </Link>
                             ) : (
-                              <span className="font-semibold">{m.text}</span>
+                              <span
+                                className={`font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
+                              >
+                                {m.text}
+                              </span>
                             )
                           ) : (
                             <Link
                               href={buildMilestoneSearchHref(m.text)}
-                              className="text-primary font-semibold"
+                              className={`text-primary font-semibold ${getActivityImportanceTextClassName(m.importance)}`}
                             >
                               {m.text}
                             </Link>
