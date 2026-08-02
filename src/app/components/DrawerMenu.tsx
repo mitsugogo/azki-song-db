@@ -90,6 +90,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
       category: t("categoryActivity"),
       items: [
         { name: t("discography"), href: "/discography" },
+        { name: t("journey"), href: "/journey" },
         { name: t("activity"), href: "/activity" },
         { name: t("anniversaries"), href: "/anniversaries" },
         { name: t("allData"), href: "/data" },
