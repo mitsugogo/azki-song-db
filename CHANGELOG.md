@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.21.2](https://github.com/mitsugogo/azki-song-db/compare/v2.21.1...v2.21.2) (2026-08-02)
+
+
+### Bug Fixes
+
+* **seichi-map:** ランキングから遷移したときに未訪問となるバグを修正 ([b877e45](https://github.com/mitsugogo/azki-song-db/commit/b877e45eb84fdb9080279eb597ffdf95a7d43d7b))
+
 ### [2.21.1](https://github.com/mitsugogo/azki-song-db/compare/v2.21.0...v2.21.1) (2026-08-02)
 
 ## [2.21.0](https://github.com/mitsugogo/azki-song-db/compare/v2.20.0...v2.21.0) (2026-08-02)
