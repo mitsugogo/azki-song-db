@@ -3,6 +3,11 @@
 import { useMemo } from "react";
 import useArchives from "./useArchives";
 import useReleaseViewCounts from "./useReleaseViewCounts";
+import {
+  compareActivityImportanceDesc,
+  DEFAULT_ACTIVITY_IMPORTANCE,
+  normalizeActivityImportance,
+} from "../lib/activityImportance";
 import type { MilestoneItem } from "./useMilestones";
 import { getDiscographyLink } from "../lib/song";
 import { buildWatchHref } from "../lib/watchUrl";
@@ -10,6 +15,7 @@ import type { ArchiveItem } from "../types/archiveItem";
 import type { Period, ViewCountStat } from "../types/api/stat/views";
 import type { EventItem } from "../types/eventItem";
 import type { Song } from "../types/song";
+import type { ActivityImportance } from "../types/activityImportance";
 
 export type ActivityTimelineKind =
   "song_update" | "archive" | "view_milestone" | "milestone" | "event";
@@ -22,6 +28,7 @@ type BaseActivityTimelineItem = {
   titleHref?: string;
   youtubeHref?: string;
   videoId?: string;
+  importance: ActivityImportance;
 };
 
 export type SongUpdateActivityTimelineItem = BaseActivityTimelineItem & {
@@ -169,6 +176,7 @@ function buildSongUpdateItems(
         count: groupedSongs.length,
         songs: groupedSongs,
         videoTitle: representative.video_title || representative.title,
+        importance: DEFAULT_ACTIVITY_IMPORTANCE,
       };
     })
     .filter((item): item is SongUpdateActivityTimelineItem => Boolean(item))
@@ -198,6 +206,7 @@ function buildArchiveItems(
         youtubeHref: getYouTubeHref(archive.video_id, archive.video_url),
         videoId: archive.video_id,
         archive,
+        importance: normalizeActivityImportance(archive.importance),
       };
     })
     .filter((item): item is ArchiveActivityTimelineItem => Boolean(item))
@@ -222,6 +231,7 @@ function buildMilestoneItems(
         occurredAt,
         href: milestone.url || undefined,
         milestone,
+        importance: normalizeActivityImportance(milestone.importance),
       };
     })
     .filter((item): item is MilestoneActivityTimelineItem => Boolean(item));
@@ -242,6 +252,7 @@ function buildEventItems(events: EventItem[]): EventActivityTimelineItem[] {
         occurredAt,
         href: event.url || undefined,
         event,
+        importance: normalizeActivityImportance(event.importance),
       };
     })
     .filter((item): item is EventActivityTimelineItem => Boolean(item));
@@ -331,6 +342,7 @@ function buildViewMilestoneItemsForVideo(
         song,
         targetCount,
         currentViewCount,
+        importance: DEFAULT_ACTIVITY_IMPORTANCE,
       });
       seenTargets.add(targetCount);
     });
@@ -387,16 +399,60 @@ export function filterActivityTimelineItems(
     ? getDateTime(options.dateRange.endExclusive)
     : Number.POSITIVE_INFINITY;
 
+  const filteredItems = items.filter((item) => {
+    const occurredAt = getDateTime(item.occurredAt);
+    return (
+      occurredAt <= now &&
+      occurredAt >= rangeStart &&
+      occurredAt < rangeEndExclusive
+    );
+  });
+
+  return sortActivityTimelineItems(filteredItems);
+}
+
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+function getJstDateKey(value: string | number | Date | null | undefined) {
+  const timestamp = getDateTime(value);
+  if (!Number.isFinite(timestamp)) {
+    return "";
+  }
+
+  const date = new Date(timestamp + JST_OFFSET_MS);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+}
+
+export function sortActivityTimelineItems(
+  items: ActivityTimelineItem[],
+  direction: "asc" | "desc" = "desc",
+) {
   return items
-    .filter((item) => {
-      const occurredAt = getDateTime(item.occurredAt);
-      return (
-        occurredAt <= now &&
-        occurredAt >= rangeStart &&
-        occurredAt < rangeEndExclusive
-      );
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const aTime = getDateTime(a.item.occurredAt);
+      const bTime = getDateTime(b.item.occurredAt);
+      const aDayKey = getJstDateKey(a.item.occurredAt);
+      const bDayKey = getJstDateKey(b.item.occurredAt);
+      const dateDiff = direction === "asc" ? aTime - bTime : bTime - aTime;
+
+      if (aDayKey === bDayKey) {
+        const importanceDiff = compareActivityImportanceDesc(
+          a.item.importance,
+          b.item.importance,
+        );
+        if (importanceDiff !== 0) {
+          return importanceDiff;
+        }
+      }
+
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+
+      return a.index - b.index;
     })
-    .sort((a, b) => getDateTime(b.occurredAt) - getDateTime(a.occurredAt));
+    .map(({ item }) => item);
 }
 
 export default function useActivityTimeline({

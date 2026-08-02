@@ -1,10 +1,13 @@
 "use client";
 
-import type { MouseEvent, Ref } from "react";
+import { useMemo, useState, type MouseEvent, type Ref } from "react";
 import {
+  ActionIcon,
   Avatar,
   Badge,
   Button,
+  Checkbox,
+  Menu,
   Skeleton,
   Text,
   Timeline,
@@ -21,8 +24,14 @@ import {
   LuTrophy,
   LuVideo,
 } from "react-icons/lu";
+import { MdFilterAlt } from "react-icons/md";
 import YoutubeThumbnail from "./YoutubeThumbnail";
+import {
+  getActivityImportanceItemClassName,
+  getActivityImportanceTitleClassName,
+} from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
+import { filterActivityTimelineItemsForDisplay } from "../lib/activityTimelineFilters";
 import type { ActivityTimelineItem } from "../hook/useActivityTimeline";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import type { Song } from "../types/song";
@@ -273,6 +282,31 @@ function buildChannelsBySingerName(channels: ChannelEntry[]) {
   return map;
 }
 
+function buildChannelsById(channels: ChannelEntry[]) {
+  const map = new Map<string, ChannelEntry>();
+
+  channels.forEach((entry) => {
+    const youtubeId = (entry.youtubeId ?? "").trim();
+    if (youtubeId && !map.has(youtubeId)) {
+      map.set(youtubeId, entry);
+    }
+  });
+
+  return map;
+}
+
+function getActivityArchiveChannel(
+  item: ActivityTimelineItem,
+  channelsById: Map<string, ChannelEntry>,
+) {
+  if (item.kind !== "archive") {
+    return null;
+  }
+
+  const channelId = item.archive.channel_id.trim();
+  return channelId ? (channelsById.get(channelId) ?? null) : null;
+}
+
 function getActivitySingerAvatars(
   item: ActivityTimelineItem,
   channelsBySingerName: Map<string, ChannelEntry>,
@@ -343,6 +377,77 @@ export default function ActivityTimelineSection({
   const t = useTranslations("Home");
   const tDrawer = useTranslations("DrawerMenu");
   const channelsBySingerName = buildChannelsBySingerName(channels);
+  const channelsById = buildChannelsById(channels);
+  const [includeShorts, setIncludeShorts] = useState(false);
+  const [includeArchives, setIncludeArchives] = useState(true);
+  const [includeSongUpdates, setIncludeSongUpdates] = useState(true);
+  const [includeViewMilestones, setIncludeViewMilestones] = useState(true);
+  const filteredItems = useMemo(
+    () =>
+      filterActivityTimelineItemsForDisplay(items, {
+        includeShorts,
+        includeArchives,
+        includeSongUpdates,
+        includeViewMilestones,
+      }),
+    [
+      includeArchives,
+      includeShorts,
+      includeSongUpdates,
+      includeViewMilestones,
+      items,
+    ],
+  );
+
+  const activityFilterMenu = (
+    <Menu withinPortal={false} position="bottom-end" withArrow shadow="md">
+      <Menu.Target>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          aria-label={t("activityFilterLabel")}
+          title={t("activityFilterLabel")}
+        >
+          <MdFilterAlt size={20} />
+        </ActionIcon>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Label>{t("activityFilterTitle")}</Menu.Label>
+        <div className="space-y-2 px-2 pb-1">
+          <Checkbox
+            size="sm"
+            checked={includeShorts}
+            label={t("activityFilterShorts")}
+            onChange={(event) => setIncludeShorts(event.currentTarget.checked)}
+          />
+          <Checkbox
+            size="sm"
+            checked={includeArchives}
+            label={t("activityFilterArchives")}
+            onChange={(event) =>
+              setIncludeArchives(event.currentTarget.checked)
+            }
+          />
+          <Checkbox
+            size="sm"
+            checked={includeSongUpdates}
+            label={t("activityFilterSongUpdates")}
+            onChange={(event) =>
+              setIncludeSongUpdates(event.currentTarget.checked)
+            }
+          />
+          <Checkbox
+            size="sm"
+            checked={includeViewMilestones}
+            label={t("activityFilterViewMilestones")}
+            onChange={(event) =>
+              setIncludeViewMilestones(event.currentTarget.checked)
+            }
+          />
+        </div>
+      </Menu.Dropdown>
+    </Menu>
+  );
 
   return (
     <section ref={sectionRef} className={className}>
@@ -356,17 +461,24 @@ export default function ActivityTimelineSection({
               {t("activityTitle")}
             </h2>
           </div>
-          {showArchivesLink ? (
-            <Link
-              href="/activity"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-            >
-              {tDrawer("activity")}
-              <LuArrowRight className="shrink-0" />
-            </Link>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {activityFilterMenu}
+            {showArchivesLink ? (
+              <Link
+                href="/activity"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
+              >
+                {tDrawer("activity")}
+                <LuArrowRight className="shrink-0" />
+              </Link>
+            ) : null}
+          </div>
         </div>
       )}
+
+      {!showTitle ? (
+        <div className="mb-3 flex justify-end">{activityFilterMenu}</div>
+      ) : null}
 
       <div className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
         {isLoading ? (
@@ -386,18 +498,22 @@ export default function ActivityTimelineSection({
               </div>
             ))}
           </div>
-        ) : items.length > 0 ? (
+        ) : filteredItems.length > 0 ? (
           <>
             <Timeline
-              active={items.length - 1}
+              active={filteredItems.length - 1}
               bulletSize={30}
               color="azki"
               lineWidth={2}
             >
-              {items.map((item) => {
+              {filteredItems.map((item) => {
                 const itemLabel = getActivityItemLabel(item, t, locale);
                 const color = activityTimelineColors[item.kind];
                 const itemClasses = getActivityItemClasses(item.kind);
+                const importanceItemClassName =
+                  getActivityImportanceItemClassName(item.importance);
+                const baseImportanceTitleClassName =
+                  getActivityImportanceTitleClassName(item.importance);
                 const titleHref = getActivityTitleHref(item);
                 const thumbnailHref = item.youtubeHref ?? item.href;
                 const descriptionHref = getActivityDescriptionHref(item);
@@ -411,6 +527,42 @@ export default function ActivityTimelineSection({
                   item,
                   channelsBySingerName,
                 );
+                const archiveChannel = getActivityArchiveChannel(
+                  item,
+                  channelsById,
+                );
+                const archiveChannelName =
+                  archiveChannel?.channelName?.trim() ||
+                  archiveChannel?.artistName?.trim() ||
+                  (item.kind === "archive"
+                    ? item.archive.channel_id.trim()
+                    : "");
+                const archiveChannelUrl = archiveChannel
+                  ? buildChannelUrl(archiveChannel)
+                  : item.kind === "archive" && item.archive.channel_id.trim()
+                    ? `https://www.youtube.com/channel/${item.archive.channel_id.trim()}`
+                    : null;
+                const hasArchiveChannel = Boolean(
+                  item.kind === "archive" &&
+                  item.archive.channel_id.trim() &&
+                  archiveChannelName,
+                );
+                const hasActivityDetails = Boolean(
+                  (item.videoId && thumbnailHref) ||
+                  itemLabel.description ||
+                  placeLabel ||
+                  activitySingerAvatars.length > 0 ||
+                  hasArchiveChannel,
+                );
+                const isVideoActivity = Boolean(item.videoId && thumbnailHref);
+                const importanceTitleClassName = [
+                  baseImportanceTitleClassName,
+                  !isVideoActivity && item.importance === "extra_high"
+                    ? "text-base leading-7 sm:text-lg"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
                 const archiveLinkProps =
                   item.kind === "archive" && titleHref === item.href
                     ? {
@@ -422,9 +574,13 @@ export default function ActivityTimelineSection({
                 return (
                   <Timeline.Item
                     key={item.id}
+                    data-importance={item.importance}
                     bullet={getActivityItemBullet(item.kind)}
                     title={
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div
+                        className="flex flex-wrap items-center gap-2"
+                        data-importance={item.importance}
+                      >
                         <Badge
                           size="xs"
                           radius="sm"
@@ -437,7 +593,7 @@ export default function ActivityTimelineSection({
                         {titleHref ? (
                           <Link
                             href={titleHref}
-                            className={itemClasses.title}
+                            className={`${itemClasses.title} ${importanceTitleClassName}`}
                             target={titleIsExternal ? "_blank" : undefined}
                             rel={
                               titleIsExternal
@@ -449,130 +605,176 @@ export default function ActivityTimelineSection({
                             {itemLabel.title}
                           </Link>
                         ) : (
-                          <span className={itemClasses.title}>
+                          <span
+                            className={`${itemClasses.title} ${importanceTitleClassName}`}
+                          >
                             {itemLabel.title}
                           </span>
                         )}
                       </div>
                     }
                   >
-                    <div className={`mt-2 ${itemClasses.item}`}>
-                      <div className="flex items-start gap-3">
-                        {item.videoId && thumbnailHref ? (
-                          <Link
-                            href={thumbnailHref}
-                            className={`relative aspect-video shrink-0 overflow-hidden rounded-md bg-black ${itemClasses.thumbnail}`}
-                            aria-label={itemLabel.title}
-                            target={thumbnailIsExternal ? "_blank" : undefined}
-                            rel={
-                              thumbnailIsExternal
-                                ? "noopener noreferrer"
-                                : undefined
-                            }
-                          >
-                            <YoutubeThumbnail
-                              videoId={item.videoId}
-                              alt={itemLabel.title}
-                              imageClassName="object-cover transition duration-300"
-                            />
-                          </Link>
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                          {itemLabel.description ? (
-                            <Text size="sm" className={itemClasses.description}>
-                              {descriptionHref ? (
-                                <Link
-                                  href={descriptionHref}
-                                  target={
-                                    descriptionIsExternal ? "_blank" : undefined
-                                  }
-                                  rel={
-                                    descriptionIsExternal
-                                      ? "noopener noreferrer"
-                                      : undefined
-                                  }
-                                  className="transition hover:text-primary dark:hover:text-pink-200"
-                                >
-                                  {descriptionHref.includes("youtube.com") ||
-                                  descriptionHref.includes("youtu.be") ? (
-                                    <FaYoutube className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-red-600 dark:text-red-500" />
-                                  ) : descriptionHref.includes("twitter.com") ||
-                                    descriptionHref.includes("x.com") ? (
-                                    <FaXTwitter className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-sky-600 dark:text-sky-500" />
-                                  ) : null}
-                                  {itemLabel.description}
-                                </Link>
-                              ) : (
-                                itemLabel.description
-                              )}
-                            </Text>
-                          ) : null}
-                          {placeLabel ? (
-                            <Text size="xs" c="dimmed" className="mt-1">
-                              <BsGeoAlt className="-mt-0.5 mr-1 inline" />
-                              {placeHref ? (
-                                <Link
-                                  href={placeHref}
-                                  target={
-                                    placeIsExternal ? "_blank" : undefined
-                                  }
-                                  rel={
-                                    placeIsExternal
-                                      ? "noopener noreferrer"
-                                      : undefined
-                                  }
-                                  className="hover:underline"
-                                >
-                                  {placeLabel}
-                                </Link>
-                              ) : (
-                                placeLabel
-                              )}
-                            </Text>
-                          ) : null}
-                          {activitySingerAvatars.length > 0 ? (
-                            <Avatar.Group
-                              className="mt-2 flex-wrap gap-y-1"
-                              spacing="xxs"
+                    {hasActivityDetails ? (
+                      <div
+                        className={`mt-2 ${itemClasses.item} ${isVideoActivity ? importanceItemClassName : ""}`}
+                        data-importance={item.importance}
+                      >
+                        <div className="flex items-start gap-3">
+                          {item.videoId && thumbnailHref ? (
+                            <Link
+                              href={thumbnailHref}
+                              className={`relative aspect-video shrink-0 overflow-hidden rounded-md bg-black ${itemClasses.thumbnail}`}
+                              aria-label={itemLabel.title}
+                              target={
+                                thumbnailIsExternal ? "_blank" : undefined
+                              }
+                              rel={
+                                thumbnailIsExternal
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
                             >
-                              {activitySingerAvatars.map((avatar) => {
-                                const image = (
-                                  <Avatar
-                                    key={`${item.id}-${avatar.name}`}
-                                    src={avatar.iconUrl}
-                                    alt={avatar.name}
-                                    radius="xl"
-                                    size="sm"
-                                    className="border-2 border-white dark:border-gray-900"
-                                  />
-                                );
-
-                                return (
-                                  <Tooltip
-                                    key={`${item.id}-${avatar.name}`}
-                                    label={avatar.name}
-                                    withArrow
-                                    arrowSize={8}
-                                  >
-                                    {avatar.channelUrl ? (
-                                      <Link
-                                        href={avatar.channelUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        {image}
-                                      </Link>
-                                    ) : (
-                                      image
-                                    )}
-                                  </Tooltip>
-                                );
-                              })}
-                            </Avatar.Group>
+                              <YoutubeThumbnail
+                                videoId={item.videoId}
+                                alt={itemLabel.title}
+                                imageClassName="object-cover transition duration-300"
+                              />
+                            </Link>
                           ) : null}
+                          <div className="min-w-0 flex-1">
+                            {itemLabel.description ? (
+                              <Text
+                                size="sm"
+                                className={itemClasses.description}
+                              >
+                                {descriptionHref ? (
+                                  <Link
+                                    href={descriptionHref}
+                                    target={
+                                      descriptionIsExternal
+                                        ? "_blank"
+                                        : undefined
+                                    }
+                                    rel={
+                                      descriptionIsExternal
+                                        ? "noopener noreferrer"
+                                        : undefined
+                                    }
+                                    className="transition hover:text-primary dark:hover:text-pink-200"
+                                  >
+                                    {descriptionHref.includes("youtube.com") ||
+                                    descriptionHref.includes("youtu.be") ? (
+                                      <FaYoutube className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-red-600 dark:text-red-500" />
+                                    ) : descriptionHref.includes(
+                                        "twitter.com",
+                                      ) || descriptionHref.includes("x.com") ? (
+                                      <FaXTwitter className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-sky-600 dark:text-sky-500" />
+                                    ) : null}
+                                    {itemLabel.description}
+                                  </Link>
+                                ) : (
+                                  itemLabel.description
+                                )}
+                              </Text>
+                            ) : null}
+                            {hasArchiveChannel ? (
+                              <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-200/70 dark:text-gray-400">
+                                {archiveChannel?.iconUrl ? (
+                                  <Avatar
+                                    src={archiveChannel.iconUrl}
+                                    alt={archiveChannelName}
+                                    radius="xl"
+                                    size="xs"
+                                    className="shrink-0"
+                                  />
+                                ) : (
+                                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
+                                    <FaYoutube className="h-3 w-3" />
+                                  </span>
+                                )}
+                                {archiveChannelUrl ? (
+                                  <Link
+                                    href={archiveChannelUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="min-w-0 truncate hover:text-primary hover:underline dark:hover:text-primary-300"
+                                  >
+                                    {archiveChannelName}
+                                  </Link>
+                                ) : (
+                                  <span className="min-w-0 truncate">
+                                    {archiveChannelName}
+                                  </span>
+                                )}
+                              </div>
+                            ) : null}
+                            {placeLabel ? (
+                              <Text size="xs" c="dimmed" className="mt-1">
+                                <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                {placeHref ? (
+                                  <Link
+                                    href={placeHref}
+                                    target={
+                                      placeIsExternal ? "_blank" : undefined
+                                    }
+                                    rel={
+                                      placeIsExternal
+                                        ? "noopener noreferrer"
+                                        : undefined
+                                    }
+                                    className="hover:underline"
+                                  >
+                                    {placeLabel}
+                                  </Link>
+                                ) : (
+                                  placeLabel
+                                )}
+                              </Text>
+                            ) : null}
+                            {activitySingerAvatars.length > 0 ? (
+                              <Avatar.Group
+                                className="mt-2 flex-wrap gap-y-1"
+                                spacing="xxs"
+                              >
+                                {activitySingerAvatars.map((avatar) => {
+                                  const image = (
+                                    <Avatar
+                                      key={`${item.id}-${avatar.name}`}
+                                      src={avatar.iconUrl}
+                                      alt={avatar.name}
+                                      radius="xl"
+                                      size="sm"
+                                      className="border-2 border-white dark:border-gray-900"
+                                    />
+                                  );
+
+                                  return (
+                                    <Tooltip
+                                      key={`${item.id}-${avatar.name}`}
+                                      label={avatar.name}
+                                      withArrow
+                                      arrowSize={8}
+                                    >
+                                      {avatar.channelUrl ? (
+                                        <Link
+                                          href={avatar.channelUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          {image}
+                                        </Link>
+                                      ) : (
+                                        image
+                                      )}
+                                    </Tooltip>
+                                  );
+                                })}
+                              </Avatar.Group>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : null}
                     <Text size="xs" c="dimmed" className="mt-1">
                       {formatDate(item.occurredAt, locale)}
                     </Text>

@@ -9,7 +9,9 @@ import { HiChevronRight } from "react-icons/hi";
 import ActivityTimelineSection from "../../../components/ActivityTimelineSection";
 import { ScrollToTopButton } from "../../../components/ScrollToTopButton";
 import ActivityMonthPickerButton from "../../ActivityMonthPickerButton";
-import useActivityTimeline from "../../../hook/useActivityTimeline";
+import useActivityTimeline, {
+  sortActivityTimelineItems,
+} from "../../../hook/useActivityTimeline";
 import useChannels from "../../../hook/useChannels";
 import useEvents from "../../../hook/useEvents";
 import useMilestones from "../../../hook/useMilestones";
@@ -76,8 +78,8 @@ export default function SummaryMonthClient({
     dateRange,
   });
 
-  const reverseActivityItems = useMemo(
-    () => [...activityItems].reverse(),
+  const orderedActivityItems = useMemo(
+    () => sortActivityTimelineItems(activityItems, "asc"),
     [activityItems],
   );
 
@@ -152,7 +154,7 @@ export default function SummaryMonthClient({
       </p>
 
       <ActivityTimelineSection
-        items={reverseActivityItems}
+        items={orderedActivityItems}
         isLoading={isActivityLoading}
         isViewMilestonesLoading={isViewMilestonesLoading}
         shouldLoadViewStatistics

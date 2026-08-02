@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { fetchJsonDedup } from "../lib/fetchDedup";
+import { normalizeActivityImportance } from "../lib/activityImportance";
 import { EventItem } from "../types/eventItem";
 
 const cachedEventsByLocale = new Map<string, EventItem[]>();
@@ -64,6 +65,7 @@ const useEvents = () => {
             place_url: item?.place_url || "",
             note: item?.note || "",
             url: item?.url || "",
+            importance: normalizeActivityImportance(item?.importance),
           }))
           .filter((item: EventItem) => Boolean(item.start_at && item.content));
 

@@ -6,6 +6,10 @@ import { memo, useMemo } from "react";
 import { BsGeoAlt } from "react-icons/bs";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { Link } from "../../i18n/navigation";
+import {
+  getActivityImportanceItemClassName,
+  getActivityImportanceTitleClassName,
+} from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
 import {
   getDaysUntil,
@@ -80,6 +84,10 @@ export const HomeEventsSection = memo(function HomeEventsSection({
               ))
             : featuredEvents.map((event, index) => {
                 const active = isEventActive(event);
+                const importanceItemClassName =
+                  getActivityImportanceItemClassName(event.importance);
+                const importanceTitleClassName =
+                  getActivityImportanceTitleClassName(event.importance);
                 const daysUntilEvent = getDaysUntil(
                   active ? event.end_at || event.start_at : event.start_at,
                 );
@@ -89,7 +97,8 @@ export const HomeEventsSection = memo(function HomeEventsSection({
                 return (
                   <div
                     key={`${event.start_at}-${event.content}-${index}`}
-                    className="rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5"
+                    className={`rounded-2xl border border-primary/10 bg-primary/5 p-3 dark:border-white/10 dark:bg-white/5 ${importanceItemClassName}`}
+                    data-importance={event.importance || "normal"}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -153,7 +162,9 @@ export const HomeEventsSection = memo(function HomeEventsSection({
                             {formatEventRange(event.start_at, event.end_at)}
                           </Text>
                         </div>
-                        <p className="mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-gray-900 dark:text-white">
+                        <p
+                          className={`mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-gray-900 dark:text-white ${importanceTitleClassName}`}
+                        >
                           {event.content}
                         </p>
                         {event.note ? (

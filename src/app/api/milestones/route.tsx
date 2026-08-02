@@ -1,9 +1,11 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
+import { normalizeActivityImportance } from "@/app/lib/activityImportance";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import { Locale } from "@/app/types/locale";
 
 type HeaderKey =
+  | "importance"
   | "date"
   | "content"
   | "content_en"
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: ["milestones!A:H"],
+      ranges: ["milestones!A:I"],
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -49,6 +51,10 @@ export async function GET(request: Request) {
         .toLowerCase();
 
     const HEADER_SCHEMA: HeaderDefinition[] = [
+      {
+        key: "importance",
+        aliases: ["重要度", "importance", "priority"],
+      },
       { key: "date", aliases: ["日付", "date", "日"] },
       { key: "content", aliases: ["内容", "content"] },
       { key: "content_en", aliases: ["内容_en", "content(en)", "content_en"] },
@@ -73,6 +79,7 @@ export async function GET(request: Request) {
     // 1行目をヘッダーとして列マップ作成
     const headerValues = rows[0]?.values || [];
     const colMap: Record<HeaderKey, number> = {
+      importance: -1,
       date: -1,
       content: -1,
       content_en: -1,
@@ -126,6 +133,16 @@ export async function GET(request: Request) {
           : "";
       };
 
+      const getImportance = (key: HeaderKey) => {
+        const i = colMap[key];
+        const cell = i !== -1 ? vals[i] : undefined;
+        return normalizeActivityImportance(
+          cell?.userEnteredValue?.numberValue ??
+            cell?.userEnteredValue?.stringValue ??
+            cell?.formattedValue,
+        );
+      };
+
       const rawDateNum = getNum("date");
       const dateStr = rawDateNum ? convertToDate(rawDateNum) : getStr("date");
       const content = getStr("content");
@@ -149,6 +166,7 @@ export async function GET(request: Request) {
         url,
         place,
         place_url: placeUrl,
+        importance: getImportance("importance"),
       });
     });
 

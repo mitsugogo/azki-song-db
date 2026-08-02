@@ -76,6 +76,7 @@ describe("archives route", () => {
             "公開日時",
             "配信開始日時",
             "タイムスタンプ",
+            "重要度",
           ],
           [
             "1",
@@ -89,6 +90,7 @@ describe("archives route", () => {
             "2026-01-02T01:30:00.000Z",
             "2026-01-02T00:00:00.000Z",
             "",
+            "2",
           ],
           [
             "2",
@@ -101,6 +103,7 @@ describe("archives route", () => {
             "description",
             "2026-01-03T01:30:00.000Z",
             "2026-01-01T23:30:00.000Z",
+            "",
             "",
           ],
         ],
@@ -116,17 +119,19 @@ describe("archives route", () => {
         title: "Valid Archive",
         channel_id: "UC1111111111111111111111",
         stream_started_at: "2026-01-02T00:00:00.000Z",
+        importance: "high",
       }),
       expect.objectContaining({
         title: "Earlier Stream Start",
         channel_id: "UC2222222222222222222222",
         stream_started_at: "2026-01-01T23:30:00.000Z",
+        importance: "normal",
       }),
     ]);
     expect(sheetsGetMock).toHaveBeenCalledWith(
       expect.objectContaining({
         spreadsheetId: "test-spreadsheet",
-        range: "配信アーカイブ!A1:K",
+        range: "配信アーカイブ!A1:L",
       }),
     );
   });

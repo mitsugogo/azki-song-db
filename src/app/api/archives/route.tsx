@@ -1,9 +1,11 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
+import { normalizeActivityImportance } from "@/app/lib/activityImportance";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import { ArchiveItem } from "@/app/types/archiveItem";
 
 type HeaderKey =
+  | "importance"
   | "sequence"
   | "topic"
   | "title"
@@ -30,6 +32,10 @@ const normalize = (s: string | undefined | null) =>
     .toLowerCase();
 
 const HEADER_SCHEMA: HeaderDefinition[] = [
+  {
+    key: "importance",
+    aliases: ["重要度", "importance", "priority"],
+  },
   { key: "sequence", aliases: ["連番", "no", "number", "sequence", "#"] },
   {
     key: "topic",
@@ -139,7 +145,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${SHEET_NAME}!A1:K`,
+      range: `${SHEET_NAME}!A1:L`,
       valueRenderOption: "FORMATTED_VALUE",
     });
 
@@ -147,6 +153,7 @@ export async function GET() {
     const headerValues = rows[0] || [];
 
     const colMap: Record<HeaderKey, number> = {
+      importance: -1,
       sequence: -1,
       topic: -1,
       title: -1,
@@ -207,6 +214,9 @@ export async function GET() {
           timestamp_comment: getCellString(
             getCell(values, "timestamp_comment"),
           ).trim(),
+          importance: normalizeActivityImportance(
+            getCell(values, "importance"),
+          ),
         };
       })
       .filter((item) => item.title && item.video_id);

@@ -1,11 +1,13 @@
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
+import { normalizeActivityImportance } from "@/app/lib/activityImportance";
 import { Locale } from "@/app/types/locale";
 import { EventItem } from "@/app/types/eventItem";
 
 type HeaderKey =
   | "enable"
+  | "importance"
   | "start"
   | "end"
   | "content"
@@ -29,6 +31,10 @@ const normalize = (s: string | undefined | null) =>
 
 const HEADER_SCHEMA: HeaderDefinition[] = [
   { key: "enable", aliases: ["enable", "enabled", "表示", "有効"] },
+  {
+    key: "importance",
+    aliases: ["重要度", "importance", "priority"],
+  },
   { key: "start", aliases: ["start", "startdate", "開始", "開始日"] },
   { key: "end", aliases: ["end", "enddate", "終了", "終了日"] },
   { key: "content", aliases: ["内容", "content"] },
@@ -123,7 +129,7 @@ export async function GET(request: Request) {
 
     const response = await sheets.spreadsheets.get({
       spreadsheetId,
-      ranges: ["events!A:M"],
+      ranges: ["events!A:N"],
       includeGridData: true,
       fields:
         "sheets(properties/title,data/rowData/values(userEnteredValue,hyperlink,formattedValue))",
@@ -135,6 +141,7 @@ export async function GET(request: Request) {
 
     const colMap: Record<HeaderKey, number> = {
       enable: -1,
+      importance: -1,
       start: -1,
       end: -1,
       content: -1,
@@ -170,6 +177,16 @@ export async function GET(request: Request) {
               values[index].formattedValue ||
               ""
           : "";
+      };
+
+      const getImportance = (key: HeaderKey) => {
+        const index = colMap[key];
+        const cell = index !== -1 ? values[index] : undefined;
+        return normalizeActivityImportance(
+          cell?.userEnteredValue?.numberValue ??
+            cell?.userEnteredValue?.stringValue ??
+            cell?.formattedValue,
+        );
       };
 
       const getNumber = (key: HeaderKey) => {
@@ -223,6 +240,7 @@ export async function GET(request: Request) {
         place_url: placeUrl,
         note: localizedNote,
         url,
+        importance: getImportance("importance"),
       });
     });
 

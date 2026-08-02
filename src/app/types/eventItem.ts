@@ -1,3 +1,5 @@
+import type { ActivityImportance } from "./activityImportance";
+
 export interface EventItem {
   start_at: string;
   end_at: string;
@@ -6,4 +8,5 @@ export interface EventItem {
   place_url?: string;
   note: string;
   url: string;
+  importance?: ActivityImportance;
 }
