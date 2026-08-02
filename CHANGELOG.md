@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.21.0](https://github.com/mitsugogo/azki-song-db/compare/v2.20.0...v2.21.0) (2026-08-02)
+
+
+### Features
+
+* **activity:** 重要度に対応 ([c413733](https://github.com/mitsugogo/azki-song-db/commit/c413733364af09e39d47f540c0bcf8776e9a698d))
+
 ## [2.20.0](https://github.com/mitsugogo/azki-song-db/compare/v2.19.1...v2.20.0) (2026-08-01)
 
 
