@@ -67,6 +67,7 @@ describe("seichi-map ranking route", () => {
     expect(data).toEqual({
       locations: [
         {
+          id: "aaaaaaaaaaaaaaaa",
           name: "地点A",
           administrativeArea: "千葉県千葉市",
           seichiMapUrl: "/seichi-map?location=aaaaaaaaaaaaaaaa",
@@ -74,6 +75,7 @@ describe("seichi-map ranking route", () => {
           uniqueVisitorCount: 2,
         },
         {
+          id: "bbbbbbbbbbbbbbbb",
           name: "地点B",
           administrativeArea: "千葉県習志野市",
           seichiMapUrl: "/seichi-map?location=bbbbbbbbbbbbbbbb",

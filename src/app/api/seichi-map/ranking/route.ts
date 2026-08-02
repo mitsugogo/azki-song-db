@@ -82,6 +82,7 @@ export async function GET() {
       });
     }
     const locations = rankedLocations.map((location, index) => ({
+      id: location.id,
       name: location.name,
       administrativeArea: administrativeAreas[index] ?? null,
       seichiMapUrl: `/seichi-map?location=${encodeURIComponent(location.id)}`,

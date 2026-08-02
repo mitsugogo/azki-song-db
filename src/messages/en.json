@@ -1137,6 +1137,7 @@
     "locations": {
       "title": "Most Visited Locations",
       "unit": "people",
+      "visited": "Visited",
       "openSeichiMap": "Seichi Map",
       "openGoogleMap": "Google Map",
       "attribution": "Address information: Geospatial Information Authority of Japan (reverse geocoder and municipality data)",

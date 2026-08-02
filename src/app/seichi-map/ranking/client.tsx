@@ -3,7 +3,9 @@
 import {
   Alert,
   Anchor,
+  Badge,
   Button,
+  Group,
   Loader,
   Paper,
   SimpleGrid,
@@ -21,6 +23,7 @@ import { addCompetitionRanks } from "./ranking";
 
 type RankingResponse = {
   locations: {
+    id: string;
     name: string;
     administrativeArea: string | null;
     seichiMapUrl: string;
@@ -30,9 +33,16 @@ type RankingResponse = {
   visitors: { nickname: string | null; visitCount: number }[];
 };
 
+type VisitedResponse = {
+  items?: { locationId?: string | null }[];
+};
+
 export default function SeichiMapRankingClient() {
   const t = useTranslations("SeichiMapRanking");
   const [data, setData] = useState<RankingResponse | null>(null);
+  const [visitedLocationIds, setVisitedLocationIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -48,6 +58,23 @@ export default function SeichiMapRankingClient() {
       })
       .catch(() => {
         if (!cancelled) setError(true);
+      });
+
+    void fetch("/api/seichi-map/visited", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return new Set<string>();
+        const payload = (await response.json()) as VisitedResponse;
+        return new Set(
+          (payload.items ?? [])
+            .map((item) => item.locationId?.trim())
+            .filter((locationId): locationId is string => Boolean(locationId)),
+        );
+      })
+      .then((locationIds) => {
+        if (!cancelled) setVisitedLocationIds(locationIds);
+      })
+      .catch(() => {
+        // Rankings remain available when the personal visit log is unavailable.
       });
 
     return () => {
@@ -79,10 +106,12 @@ export default function SeichiMapRankingClient() {
             rows={data.locations.map((item) => ({
               name: item.name,
               count: item.uniqueVisitorCount,
+              isVisited: visitedLocationIds.has(item.id),
               administrativeArea: item.administrativeArea,
               seichiMapUrl: item.seichiMapUrl,
               googleMapUrl: item.googleMapUrl,
             }))}
+            visitedLabel={t("locations.visited")}
             seichiMapButtonLabel={t("locations.openSeichiMap")}
             googleMapButtonLabel={t("locations.openGoogleMap")}
             attribution={t("locations.attribution")}
@@ -113,6 +142,7 @@ function RankingPanel({
   rows,
   seichiMapButtonLabel,
   googleMapButtonLabel,
+  visitedLabel,
   attribution,
 }: {
   icon: ReactNode;
@@ -123,12 +153,14 @@ function RankingPanel({
   rows: {
     name: string;
     count: number;
+    isVisited?: boolean;
     administrativeArea?: string | null;
     seichiMapUrl?: string;
     googleMapUrl?: string;
   }[];
   seichiMapButtonLabel?: string;
   googleMapButtonLabel?: string;
+  visitedLabel?: string;
   attribution?: string;
 }) {
   return (
@@ -158,9 +190,21 @@ function RankingPanel({
                   {row.rank}
                 </Text>
                 <Stack gap={2} className="min-w-0 flex-1">
-                  <Text fw={600} lineClamp={1}>
-                    {row.name}
-                  </Text>
+                  <Group gap={6} wrap="nowrap" className="min-w-0">
+                    <Text fw={600} lineClamp={1} className="min-w-0 flex-1">
+                      {row.name}
+                    </Text>
+                    {row.isVisited && visitedLabel ? (
+                      <Badge
+                        color="green"
+                        variant="light"
+                        size="sm"
+                        className="shrink-0"
+                      >
+                        {visitedLabel}
+                      </Badge>
+                    ) : null}
+                  </Group>
                   {row.administrativeArea ||
                   row.seichiMapUrl ||
                   row.googleMapUrl ? (
