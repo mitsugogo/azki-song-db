@@ -144,6 +144,9 @@ importers:
       googleapis:
         specifier: ^173.0.0
         version: 173.0.0
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
       motion:
         specifier: ^12.40.0
         version: 12.42.2(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -211,6 +214,9 @@ importers:
       "@types/node":
         specifier: ^26
         version: 26.1.0
+      "@types/leaflet":
+        specifier: ^1.9.22
+        version: 1.9.22
       "@types/react":
         specifier: ^19
         version: 19.2.17
@@ -2926,6 +2932,12 @@ packages:
     resolution:
       {
         integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==,
+      }
+
+  "@types/leaflet@1.9.22":
+    resolution:
+      {
+        integrity: sha512-h3lhECYEKDasG7LFHu+GiHqAvsgLuQvlJvVZzJDGONo3sEL+wUOqSFLnwkZlK0qVxnxbuGFW8iBlJNYs5wgndA==,
       }
 
   "@types/md5@2.3.6":
@@ -6273,6 +6285,12 @@ packages:
         integrity: sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==,
       }
     engines: { node: ">=0.10" }
+
+  leaflet@1.9.4:
+    resolution:
+      {
+        integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==,
+      }
 
   levn@0.4.1:
     resolution:
@@ -10641,6 +10659,10 @@ snapshots:
 
   "@types/json5@0.0.29": {}
 
+  "@types/leaflet@1.9.22":
+    dependencies:
+      "@types/geojson": 7946.0.16
+
   "@types/md5@2.3.6": {}
 
   "@types/minimist@1.2.5": {}
@@ -12749,6 +12771,8 @@ snapshots:
   language-tags@1.0.9:
     dependencies:
       language-subtag-registry: 0.3.23
+
+  leaflet@1.9.4: {}
 
   levn@0.4.1:
     dependencies:
