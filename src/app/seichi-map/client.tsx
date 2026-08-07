@@ -11,6 +11,7 @@ import {
 import "dayjs/locale/ja";
 import { useLocale, useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
+import type * as Leaflet from "leaflet";
 import {
   Alert,
   Anchor,
@@ -27,6 +28,7 @@ import {
   NavLink,
   Paper,
   Progress,
+  Radio,
   ScrollArea,
   SegmentedControl,
   Stack,
@@ -48,6 +50,7 @@ import {
   FiCopy,
   FiEdit3,
   FiExternalLink,
+  FiLayers,
   FiLogIn,
   FiMapPin,
   FiSearch,
@@ -67,6 +70,14 @@ import {
   updateCurrentLocationControl,
 } from "./currentLocation";
 import { getGoogleMapFullscreenPortalTarget } from "./fullscreen";
+import {
+  DEFAULT_SEICHI_MAP_PROVIDER,
+  getLeafletTileLayerConfig,
+  isLeafletMapProvider,
+  readSeichiMapProvider,
+  saveSeichiMapProvider,
+  type SeichiMapProvider,
+} from "./mapProvider";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
@@ -283,6 +294,11 @@ type CanvasHitPoint = {
   location: LocationOption;
   x: number;
   y: number;
+};
+
+type MapViewport = {
+  center: { lat: number; lng: number };
+  zoom: number;
 };
 
 type LayerCompletion = {
@@ -735,6 +751,7 @@ const createSeichiCanvasOverlay = ({
       this.canvas.style.pointerEvents = "none";
       this.canvas.style.zIndex = "1";
       this.getPanes?.()?.overlayLayer?.appendChild(this.canvas);
+      this.draw();
     }
 
     onRemove() {
@@ -1063,7 +1080,7 @@ const buildSeichiMapShareApiUrl = (shareId: string) => {
 };
 
 const syncMapViewportToUrl = (
-  map: GoogleMapInstance,
+  viewport: MapViewport,
   options?: { keepViewport?: boolean },
 ) => {
   if (typeof window === "undefined") return;
@@ -1088,12 +1105,8 @@ const syncMapViewportToUrl = (
     return;
   }
 
-  const center = map.getCenter?.();
-  const zoom = map.getZoom?.();
-  if (!center || typeof zoom !== "number") return;
-
-  const lat = typeof center.lat === "function" ? center.lat() : center.lat;
-  const lng = typeof center.lng === "function" ? center.lng() : center.lng;
+  const { lat, lng } = viewport.center;
+  const { zoom } = viewport;
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
   const params = new URLSearchParams(window.location.search);
@@ -1128,6 +1141,14 @@ export default function SeichiMapCompleteClient({
   const datePickerLocale = locale === "ja" ? "ja" : "en";
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<GoogleMapInstance | null>(null);
+  const leafletApiRef = useRef<typeof import("leaflet") | null>(null);
+  const leafletMapRef = useRef<Leaflet.Map | null>(null);
+  const leafletMarkerLayerRef = useRef<Leaflet.LayerGroup | null>(null);
+  const leafletCanvasRendererRef = useRef<Leaflet.Renderer | null>(null);
+  const leafletCurrentLocationMarkerRef = useRef<Leaflet.CircleMarker | null>(
+    null,
+  );
+  const leafletPopupRef = useRef<Leaflet.Popup | null>(null);
   const mapOverlayRef = useRef<CanvasOverlayHandle | null>(null);
   const mapClickListenerRef = useRef<GoogleMapsEventListener | null>(null);
   const mapMouseMoveListenerRef = useRef<GoogleMapsEventListener | null>(null);
@@ -1163,6 +1184,9 @@ export default function SeichiMapCompleteClient({
   const [loading, setLoading] = useState(true);
   const [mapLoading, setMapLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
+  const [mapProvider, setMapProvider] = useState<SeichiMapProvider>(
+    DEFAULT_SEICHI_MAP_PROVIDER,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
@@ -1199,6 +1223,7 @@ export default function SeichiMapCompleteClient({
   const [recordModalPortalTarget, setRecordModalPortalTarget] =
     useState<HTMLElement | null>(null);
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
+  const [isMapProviderMenuOpen, setIsMapProviderMenuOpen] = useState(false);
   const [listMode, setListMode] = useState<ListMode>("locations");
   const [currentPosition, setCurrentPosition] = useState<{
     latitude: number;
@@ -1210,6 +1235,25 @@ export default function SeichiMapCompleteClient({
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const mapsMapId =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || DEFAULT_GOOGLE_MAPS_MAP_ID;
+
+  useEffect(() => {
+    const storedProvider = readSeichiMapProvider(window.localStorage);
+    setMapProvider(
+      storedProvider === "google" && !mapsKey ? "gsi" : storedProvider,
+    );
+  }, [mapsKey]);
+
+  const selectMapProvider = useCallback(
+    (provider: SeichiMapProvider) => {
+      if (provider === "google" && !mapsKey) return;
+      setErrorMessage(null);
+      setMapProvider(provider);
+      setIsMapProviderMenuOpen(false);
+      saveSeichiMapProvider(window.localStorage, provider);
+    },
+    [mapsKey],
+  );
+
   const effectiveShareId = viewShareId ?? serverShareId;
   const isSharedView = Boolean(effectiveShareId);
   const canEditVisits = isSignedIn && !isSharedView;
@@ -1663,6 +1707,11 @@ export default function SeichiMapCompleteClient({
       });
     };
 
+    if (isLeafletMapProvider(mapProvider)) {
+      startRequest();
+      return;
+    }
+
     if (currentLocationMarkerLibraryRef.current) {
       startRequest();
       return;
@@ -1685,14 +1734,20 @@ export default function SeichiMapCompleteClient({
         setCurrentPosition(null);
         setNearbyLocationStatus("unavailable");
       });
-  }, [t]);
+  }, [mapProvider, t]);
 
   useEffect(() => {
     requestCurrentLocationRef.current = requestCurrentLocation;
   }, [requestCurrentLocation]);
 
   useEffect(() => {
+    if (mapProvider !== "google") {
+      return;
+    }
+
+    setMapReady(false);
     if (!mapsKey || !mapElementRef.current) {
+      setErrorMessage(t("errors.googleMapsUnavailable"));
       setMapLoading(false);
       return;
     }
@@ -1810,9 +1865,23 @@ export default function SeichiMapCompleteClient({
               if (!mapRef.current) return;
               clearHoveredLocationPreview();
               setHoveredLocation(null);
-              syncMapViewportToUrl(mapRef.current, {
-                keepViewport: !isSharedViewRef.current,
-              });
+              const center = mapRef.current.getCenter();
+              const zoom = mapRef.current.getZoom();
+              if (!center || typeof zoom !== "number") return;
+              const lat =
+                typeof center.lat === "function" ? center.lat() : center.lat;
+              const lng =
+                typeof center.lng === "function" ? center.lng() : center.lng;
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+              syncMapViewportToUrl(
+                {
+                  center: { lat, lng },
+                  zoom,
+                },
+                {
+                  keepViewport: !isSharedViewRef.current,
+                },
+              );
             },
           );
         }
@@ -1828,10 +1897,146 @@ export default function SeichiMapCompleteClient({
 
     return () => {
       cancelled = true;
+      setMapReady(false);
+      infoWindowCloseClickListenerRef.current?.remove?.();
+      infoWindowCloseClickListenerRef.current = null;
+      mapIdleListenerRef.current?.remove?.();
+      mapIdleListenerRef.current = null;
+      mapMouseMoveListenerRef.current?.remove?.();
+      mapMouseMoveListenerRef.current = null;
+      mapClickListenerRef.current?.remove?.();
+      mapClickListenerRef.current = null;
+      infoWindowRef.current?.close?.();
+      infoWindowRef.current = null;
+      const currentLocationControl = currentLocationControlRef.current;
+      if (
+        currentLocationControl &&
+        mapElementRef.current?.contains(currentLocationControl)
+      ) {
+        currentLocationControl.remove();
+        currentLocationControlRef.current = null;
+      }
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.map = null;
+        currentLocationMarkerRef.current = null;
+      }
+      currentLocationMarkerLibraryRef.current = null;
+      mapOverlayRef.current?.setMap(null);
+      mapOverlayRef.current = null;
+      mapRef.current = null;
+      mapElementRef.current?.replaceChildren();
     };
-  }, [mapsKey, mapsLanguage, mapsMapId, t]);
+  }, [mapProvider, mapsKey, mapsLanguage, mapsMapId, t]);
 
   useEffect(() => {
+    if (!isLeafletMapProvider(mapProvider) || !mapElementRef.current) {
+      return;
+    }
+
+    let cancelled = false;
+    setMapReady(false);
+    setMapLoading(true);
+    setErrorMessage(null);
+
+    void import("leaflet")
+      .then((leaflet) => {
+        if (cancelled || !mapElementRef.current) return;
+
+        leafletApiRef.current = leaflet;
+        const initialViewport = readSharedMapViewport();
+        const map = leaflet.map(mapElementRef.current, {
+          center: [initialViewport.center.lat, initialViewport.center.lng],
+          zoom: initialViewport.zoom,
+          zoomControl: true,
+        });
+        const tileLayer = getLeafletTileLayerConfig(mapProvider);
+        leaflet
+          .tileLayer(tileLayer.url, {
+            attribution: tileLayer.attribution,
+            maxZoom: tileLayer.maxZoom,
+          })
+          .addTo(map);
+        leafletCanvasRendererRef.current = leaflet
+          .canvas({ padding: 0.5 })
+          .addTo(map);
+        leafletMarkerLayerRef.current = leaflet.layerGroup().addTo(map);
+        leafletMapRef.current = map;
+
+        map.on("click", () => {
+          setSelectedLocationId(null);
+          map.closePopup();
+        });
+        map.on("movestart", () => {
+          isMapDraggingRef.current = true;
+          clearHoveredLocationPreview();
+          setHoveredLocation(null);
+        });
+        map.on("moveend", () => {
+          isMapDraggingRef.current = false;
+          clearHoveredLocationPreview();
+          setHoveredLocation(null);
+          const center = map.getCenter();
+          syncMapViewportToUrl(
+            {
+              center: { lat: center.lat, lng: center.lng },
+              zoom: map.getZoom(),
+            },
+            { keepViewport: !isSharedViewRef.current },
+          );
+        });
+        map.on("popupclose", () => setSelectedLocationId(null));
+        setMapReady(true);
+      })
+      .catch((error) => {
+        console.error(error);
+        setErrorMessage(t("errors.leafletMapLoadFailed"));
+      })
+      .finally(() => {
+        if (!cancelled) setMapLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      setMapReady(false);
+      leafletPopupRef.current = null;
+      leafletCurrentLocationMarkerRef.current = null;
+      leafletCanvasRendererRef.current = null;
+      leafletMarkerLayerRef.current = null;
+      leafletMapRef.current?.remove();
+      leafletMapRef.current = null;
+      leafletApiRef.current = null;
+      mapElementRef.current?.replaceChildren();
+    };
+  }, [clearHoveredLocationPreview, mapProvider, t]);
+
+  useEffect(() => {
+    if (isLeafletMapProvider(mapProvider)) {
+      const map = leafletMapRef.current;
+      const leaflet = leafletApiRef.current;
+      if (!currentPosition || !mapReady || !map || !leaflet) return;
+
+      const position: Leaflet.LatLngExpression = [
+        currentPosition.latitude,
+        currentPosition.longitude,
+      ];
+      if (leafletCurrentLocationMarkerRef.current) {
+        leafletCurrentLocationMarkerRef.current.setLatLng(position);
+      } else {
+        leafletCurrentLocationMarkerRef.current = leaflet
+          .circleMarker(position, {
+            radius: 9,
+            color: "#ffffff",
+            weight: 3,
+            fillColor: "#1a73e8",
+            fillOpacity: 1,
+          })
+          .bindTooltip(t("currentLocation.markerTitle"))
+          .addTo(map);
+      }
+      map.setView(position, CURRENT_LOCATION_MAP_ZOOM);
+      return;
+    }
+
     const currentMap = mapRef.current;
     const markerLibrary = currentLocationMarkerLibraryRef.current;
     if (!currentPosition || !mapReady || !currentMap || !markerLibrary) return;
@@ -1856,7 +2061,7 @@ export default function SeichiMapCompleteClient({
 
     currentMap.panTo(position);
     currentMap.setZoom(CURRENT_LOCATION_MAP_ZOOM);
-  }, [currentPosition, mapReady, t]);
+  }, [currentPosition, mapProvider, mapReady, t]);
 
   useEffect(() => {
     const mapElement = mapElementRef.current;
@@ -2188,6 +2393,20 @@ export default function SeichiMapCompleteClient({
 
   const openLocationInfoWindow = useCallback(
     (location: LocationOption) => {
+      if (isLeafletMapProvider(mapProvider)) {
+        const map = leafletMapRef.current;
+        const leaflet = leafletApiRef.current;
+        if (!map || !leaflet) return;
+
+        setSelectedLocationId(location.id);
+        leafletPopupRef.current = leaflet
+          .popup()
+          .setLatLng([location.latitude, location.longitude])
+          .setContent(createInfoWindowContent(location))
+          .openOn(map);
+        return;
+      }
+
       const map = mapRef.current;
       if (!map) return;
 
@@ -2199,7 +2418,7 @@ export default function SeichiMapCompleteClient({
       });
       infoWindowRef.current?.open({ map });
     },
-    [createInfoWindowContent],
+    [createInfoWindowContent, mapProvider],
   );
 
   useEffect(() => {
@@ -2219,7 +2438,59 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     if (!mapReady) return;
     mapOverlayRef.current?.setLocations(visibleLocations);
-  }, [mapReady, visibleLocations]);
+  }, [mapProvider, mapReady, visibleLocations]);
+
+  useEffect(() => {
+    if (!isLeafletMapProvider(mapProvider) || !mapReady) return;
+    const leaflet = leafletApiRef.current;
+    const map = leafletMapRef.current;
+    const markerLayer = leafletMarkerLayerRef.current;
+    const canvasRenderer = leafletCanvasRendererRef.current;
+    if (!leaflet || !map || !markerLayer || !canvasRenderer) return;
+
+    markerLayer.clearLayers();
+    const locationsInPaintOrder = visibleLocations
+      .map((location) => ({ location, visited: isLocationVisited(location) }))
+      .sort((left, right) => Number(left.visited) - Number(right.visited));
+
+    for (const {
+      location,
+      visited: locationVisited,
+    } of locationsInPaintOrder) {
+      const selected = location.id === selectedLocationId;
+      const marker = leaflet.circleMarker(
+        [location.latitude, location.longitude],
+        {
+          renderer: canvasRenderer,
+          radius: selected ? 8 : 6,
+          color: "#ffffff",
+          weight: selected ? 3 : 2,
+          fillColor: locationVisited ? "#d63384" : "#1c7ed6",
+          fillOpacity: 1,
+        },
+      );
+      marker.on("click", (event) => {
+        leaflet.DomEvent.stopPropagation(event);
+        openLocationInfoWindowRef.current(location);
+      });
+      marker.on("mouseover", () => {
+        if (isMapDraggingRef.current) return;
+        const point = map.latLngToContainerPoint([
+          location.latitude,
+          location.longitude,
+        ]);
+        setHoveredLocation({ name: location.name, x: point.x, y: point.y });
+      });
+      marker.on("mouseout", () => setHoveredLocation(null));
+      marker.addTo(markerLayer);
+    }
+  }, [
+    isLocationVisited,
+    mapProvider,
+    mapReady,
+    selectedLocationId,
+    visibleLocations,
+  ]);
 
   useEffect(() => {
     if (!selectedLocation) return;
@@ -2230,12 +2501,26 @@ export default function SeichiMapCompleteClient({
     ) {
       setSelectedLocationId(null);
       infoWindowRef.current?.close();
+      leafletMapRef.current?.closePopup();
       setHoveredLocation(null);
     }
   }, [hiddenLayerNameSet, selectedLocation, uncategorizedLayerName]);
 
   const showLocationOnMap = useCallback(
     (location: LocationOption) => {
+      if (isLeafletMapProvider(mapProvider)) {
+        const map = leafletMapRef.current;
+        if (!map) return;
+
+        setSelectedLocationId(location.id);
+        map.setView(
+          [location.latitude, location.longitude],
+          Math.max(map.getZoom(), 12),
+        );
+        openLocationInfoWindow(location);
+        return;
+      }
+
       const map = mapRef.current;
       if (!map) return;
 
@@ -2244,7 +2529,7 @@ export default function SeichiMapCompleteClient({
       map.setZoom(Math.max(map.getZoom() ?? DEFAULT_MAP_ZOOM, 12));
       openLocationInfoWindow(location);
     },
-    [openLocationInfoWindow],
+    [mapProvider, openLocationInfoWindow],
   );
 
   useEffect(() => {
@@ -2617,6 +2902,101 @@ export default function SeichiMapCompleteClient({
             className="relative overflow-hidden bg-white/90 dark:bg-gray-900/80"
             style={{ height: "70vh", minHeight: 460 }}
           >
+            <Box
+              className="absolute right-3 flex flex-col items-end"
+              style={{
+                top: mapProvider === "google" ? 56 : 12,
+                right: 12,
+                zIndex: 1000,
+              }}
+            >
+              <Button
+                variant="white"
+                color="gray"
+                size="sm"
+                px={0}
+                className="h-11 w-11 p-0 shadow-md"
+                aria-label={t("mapProvider.openMenu")}
+                title={t("mapProvider.openMenu")}
+                onClick={() => setIsMapProviderMenuOpen((isOpen) => !isOpen)}
+              >
+                <FiLayers size={22} aria-hidden="true" />
+              </Button>
+              {isMapProviderMenuOpen ? (
+                <Paper
+                  withBorder
+                  radius="sm"
+                  shadow="md"
+                  p="xs"
+                  mt={6}
+                  miw={230}
+                  className="bg-white/95 dark:bg-gray-900/95"
+                >
+                  <Text size="xs" fw={700} mb={4}>
+                    {t("mapProvider.title")}
+                  </Text>
+                  <Stack gap={2}>
+                    <Radio
+                      checked={mapProvider === "gsi"}
+                      label={t("mapProvider.gsi")}
+                      onChange={() => selectMapProvider("gsi")}
+                    />
+                    <Radio
+                      checked={mapProvider === "osm"}
+                      label={t("mapProvider.osm")}
+                      onChange={() => selectMapProvider("osm")}
+                    />
+                    <Radio
+                      checked={mapProvider === "google"}
+                      label={t("mapProvider.google")}
+                      disabled={!mapsKey}
+                      onChange={() => selectMapProvider("google")}
+                    />
+                  </Stack>
+                  {!mapsKey ? (
+                    <Text size="xs" c="dimmed" mt={6}>
+                      {t("mapProvider.googleUnavailable")}
+                    </Text>
+                  ) : null}
+                </Paper>
+              ) : null}
+            </Box>
+            {mapProvider === "gsi" || mapProvider === "osm" ? (
+              <Box
+                className="absolute bottom-2 left-2 rounded bg-white/90 px-1.5 py-0.5 shadow-sm dark:bg-gray-900/90"
+                style={{ zIndex: 1000 }}
+              >
+                <Text
+                  component="a"
+                  href={
+                    mapProvider === "osm"
+                      ? "https://www.openstreetmap.org/copyright"
+                      : "https://maps.gsi.go.jp/help/termsofuse.html"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="xs"
+                  c="dimmed"
+                >
+                  {mapProvider === "osm"
+                    ? t("mapProvider.osmAttribution")
+                    : t("mapProvider.gsiAttribution")}
+                </Text>
+              </Box>
+            ) : null}
+            {isLeafletMapProvider(mapProvider) ? (
+              <button
+                ref={currentLocationControlRef}
+                type="button"
+                className="absolute right-3 bottom-3 z-10 grid h-10 w-10 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md disabled:cursor-wait disabled:opacity-70"
+                style={{ zIndex: 1000 }}
+                title={t("currentLocation.show")}
+                aria-label={t("currentLocation.show")}
+                onClick={() => requestCurrentLocationRef.current()}
+              >
+                <FiMapPin size={20} aria-hidden="true" />
+              </button>
+            ) : null}
             <Box ref={mapElementRef} className="h-full w-full" />
             {hoveredLocation ? (
               <Box
@@ -2624,6 +3004,7 @@ export default function SeichiMapCompleteClient({
                 style={{
                   left: hoveredLocation.x,
                   top: hoveredLocation.y - 12,
+                  zIndex: 1000,
                 }}
               >
                 {hoveredLocation.name}
