@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.22.1](https://github.com/mitsugogo/azki-song-db/compare/v2.22.0...v2.22.1) (2026-08-07)
+
+### Bug Fixes
+
+* **seichi-map:** 訪問ダイアログが裏に出てしまう不具合を修正 ([95827be](https://github.com/mitsugogo/azki-song-db/commit/95827be305528031b788a083cdbf7ecfd8e5e8c9))
+
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ## [2.22.0](https://github.com/mitsugogo/azki-song-db/compare/v2.21.2...v2.22.0) (2026-08-07)
