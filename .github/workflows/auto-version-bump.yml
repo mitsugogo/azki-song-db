@@ -57,7 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm exec standard-version
+          pnpm exec release-it --ci
           git push origin main
           git push --tags
 
