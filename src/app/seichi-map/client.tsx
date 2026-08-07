@@ -1182,6 +1182,7 @@ export default function SeichiMapCompleteClient({
     Record<string, ArchiveVideoMeta>
   >({});
   const [loading, setLoading] = useState(true);
+  const [locationsLoading, setLocationsLoading] = useState(true);
   const [mapLoading, setMapLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
   const [mapProvider, setMapProvider] = useState<SeichiMapProvider>(
@@ -1583,6 +1584,7 @@ export default function SeichiMapCompleteClient({
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setLocationsLoading(true);
     setErrorMessage(null);
 
     try {
@@ -1615,6 +1617,7 @@ export default function SeichiMapCompleteClient({
           uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
         })),
       );
+      setLocationsLoading(false);
 
       void loadArchiveVideoMeta(locationItems)
         .then(setArchiveVideoMetaById)
@@ -1652,6 +1655,7 @@ export default function SeichiMapCompleteClient({
       setErrorMessage(
         error instanceof Error ? error.message : t("errors.dataLoadFailed"),
       );
+      setLocationsLoading(false);
       setLoading(false);
     }
   }, [effectiveShareId, isSignedIn, t]);
@@ -2436,12 +2440,12 @@ export default function SeichiMapCompleteClient({
   }, [selectedLocationId]);
 
   useEffect(() => {
-    if (!mapReady) return;
+    if (!mapReady || mapLoading) return;
     mapOverlayRef.current?.setLocations(visibleLocations);
-  }, [mapProvider, mapReady, visibleLocations]);
+  }, [mapLoading, mapProvider, mapReady, visibleLocations]);
 
   useEffect(() => {
-    if (!isLeafletMapProvider(mapProvider) || !mapReady) return;
+    if (!isLeafletMapProvider(mapProvider) || !mapReady || mapLoading) return;
     const leaflet = leafletApiRef.current;
     const map = leafletMapRef.current;
     const markerLayer = leafletMarkerLayerRef.current;
@@ -2486,6 +2490,7 @@ export default function SeichiMapCompleteClient({
     }
   }, [
     isLocationVisited,
+    mapLoading,
     mapProvider,
     mapReady,
     selectedLocationId,
@@ -2533,7 +2538,7 @@ export default function SeichiMapCompleteClient({
   );
 
   useEffect(() => {
-    if (!initialLocationId || !mapReady || loading) return;
+    if (!initialLocationId || !mapReady || locationsLoading) return;
     if (focusedInitialLocationIdRef.current === initialLocationId) return;
 
     const location = locationById.get(initialLocationId);
@@ -2556,7 +2561,7 @@ export default function SeichiMapCompleteClient({
   }, [
     hiddenLayerNameSet,
     initialLocationId,
-    loading,
+    locationsLoading,
     locationById,
     mapReady,
     showLocationOnMap,
@@ -3013,10 +3018,10 @@ export default function SeichiMapCompleteClient({
             <Box
               className="pointer-events-none absolute inset-0 bg-white/80 dark:bg-gray-900/70"
               style={{
-                display: mapLoading || loading ? "block" : "none",
+                display: mapLoading || locationsLoading ? "block" : "none",
               }}
             >
-              {mapLoading || loading ? (
+              {mapLoading || locationsLoading ? (
                 <Center h="100%">
                   <Stack align="center" gap="xs">
                     <Loader color="pink" />
@@ -3657,6 +3662,7 @@ export default function SeichiMapCompleteClient({
           setRecordModalPortalTarget(null);
           resetForm();
         }}
+        zIndex={2000}
         portalProps={
           recordModalPortalTarget
             ? { target: recordModalPortalTarget }
@@ -3684,6 +3690,7 @@ export default function SeichiMapCompleteClient({
                 firstDayOfWeek={0}
                 leftSection={<FiCalendar size={16} />}
                 popoverProps={{
+                  zIndex: 2001,
                   withinPortal: true,
                   portalProps: recordModalPortalTarget
                     ? { target: recordModalPortalTarget }
