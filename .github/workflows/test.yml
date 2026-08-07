@@ -18,7 +18,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 #v6.0.9
         with:
-          version: 11.10.0
+          version: 11.20.0
           run_install: false
 
       # - name: Setup Takumi Guard Registry
@@ -57,7 +57,7 @@ jobs:
   #     - name: Setup pnpm
   #       uses: pnpm/action-setup@v4
   #       with:
-  #         version: 11.3.0
+  #         version: 11.20.0
   #         run_install: false
 
   #     - name: Setup Takumi Guard Registry
