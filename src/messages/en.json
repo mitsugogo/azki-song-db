@@ -986,6 +986,16 @@
     "breadcrumb": "Seichi Map",
     "title": "Seichi Map",
     "description": "Track visited locations and completion progress for the AZKi seichi map.",
+    "mapProvider": {
+      "title": "Map layers",
+      "openMenu": "Open map layers",
+      "gsi": "GSI Maps",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps",
+      "gsiAttribution": "GSI Tiles (Geospatial Information Authority of Japan)",
+      "osmAttribution": "© OpenStreetMap contributors",
+      "googleUnavailable": "Google Maps is unavailable in this environment"
+    },
     "ranking": {
       "open": "Rankings"
     },
@@ -1115,6 +1125,9 @@
       "sharedVisitedFetchFailed": "Failed to load shared visit logs",
       "dataLoadFailed": "Failed to load data",
       "googleMapsLoadFailed": "Failed to load Google Maps",
+      "googleMapsUnavailable": "Google Maps is unavailable in this environment",
+      "leafletMapLoadFailed": "Failed to load map tiles",
+      "gsiMapLoadFailed": "Failed to load GSI Maps",
       "deleteFailed": "Failed to delete",
       "locationNotSelected": "No location is selected",
       "saveFailed": "Failed to save",

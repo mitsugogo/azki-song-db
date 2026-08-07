@@ -977,6 +977,16 @@
     "breadcrumb": "聖地マップ",
     "title": "聖地マップ",
     "description": "AZKi聖地マップの訪問ログとコンプリート率を記録します。",
+    "mapProvider": {
+      "title": "地図レイヤー",
+      "openMenu": "地図レイヤーを開く",
+      "gsi": "地理院地図",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps",
+      "gsiAttribution": "地理院タイル（国土地理院）",
+      "osmAttribution": "© OpenStreetMap contributors",
+      "googleUnavailable": "Google Maps はこの環境では利用できません"
+    },
     "ranking": {
       "open": "ランキング"
     },
@@ -1106,6 +1116,9 @@
       "sharedVisitedFetchFailed": "共有された訪問ログの取得に失敗しました",
       "dataLoadFailed": "データの読み込みに失敗しました",
       "googleMapsLoadFailed": "Google Mapsの読み込みに失敗しました",
+      "googleMapsUnavailable": "Google Maps はこの環境では利用できません",
+      "leafletMapLoadFailed": "地図タイルの読み込みに失敗しました",
+      "gsiMapLoadFailed": "地理院地図の読み込みに失敗しました",
       "deleteFailed": "削除に失敗しました",
       "locationNotSelected": "場所が選択されていません",
       "saveFailed": "保存に失敗しました",
