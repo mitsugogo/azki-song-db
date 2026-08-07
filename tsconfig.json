@@ -34,6 +34,8 @@
     "node_modules",
     ".next-playwright",
     "playwright-report",
-    "test-results"
+    "test-results",
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ]
 }
