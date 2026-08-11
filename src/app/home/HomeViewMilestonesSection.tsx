@@ -12,6 +12,7 @@ import { buildViewMilestoneInfo } from "../lib/viewMilestone";
 import SongCountOverview from "../statistics/SongCountOverview";
 import type { Song } from "../types/song";
 import type { StatisticsItem } from "../types/statisticsItem";
+import { getArtTrackVideoIdsHiddenFromHomeViewMilestones } from "./viewMilestoneDisplay";
 
 type HomeViewMilestonesSectionProps = {
   isSongsLoading: boolean;
@@ -41,34 +42,44 @@ export const HomeViewMilestonesSection = memo(
       }
     }, [entry?.isIntersecting]);
 
+    const artTrackVideoIdsToHide = useMemo(
+      () => getArtTrackVideoIdsHiddenFromHomeViewMilestones(songs),
+      [songs],
+    );
+
     const milestoneStatistics = useMemo(() => {
       const attachMilestone = (items: StatisticsItem[]) =>
-        items.map((item) => {
-          const statVideoId =
-            item.song?.video_id ||
-            item.firstVideo?.video_id ||
-            item.lastVideo?.video_id ||
-            "";
-          const history = viewStatisticsByVideoId[statVideoId] || [];
-          const latestHistoryViewCount =
-            history[history.length - 1]?.viewCount ?? 0;
-          const songViewCount = Number(item.song?.view_count ?? 0);
-          const effectiveViewCount =
-            songViewCount > 0 ? songViewCount : latestHistoryViewCount;
+        items
+          .filter((item) => !artTrackVideoIdsToHide.has(item.song.video_id))
+          .map((item) => {
+            const statVideoId =
+              item.song?.video_id ||
+              item.firstVideo?.video_id ||
+              item.lastVideo?.video_id ||
+              "";
+            const history = viewStatisticsByVideoId[statVideoId] || [];
+            const latestHistoryViewCount =
+              history[history.length - 1]?.viewCount ?? 0;
+            const songViewCount = Number(item.song?.view_count ?? 0);
+            const effectiveViewCount =
+              songViewCount > 0 ? songViewCount : latestHistoryViewCount;
 
-          return {
-            ...item,
-            statVideoId,
-            effectiveViewCount,
-            viewMilestone: buildViewMilestoneInfo(effectiveViewCount, history),
-          };
-        });
+            return {
+              ...item,
+              statVideoId,
+              effectiveViewCount,
+              viewMilestone: buildViewMilestoneInfo(
+                effectiveViewCount,
+                history,
+              ),
+            };
+          });
 
       return [
         ...attachMilestone(statistics.originalSongCountsByReleaseDate),
         ...attachMilestone(statistics.coverSongCountsByReleaseDate),
       ];
-    }, [statistics, viewStatisticsByVideoId]);
+    }, [artTrackVideoIdsToHide, statistics, viewStatisticsByVideoId]);
 
     if (isSongsLoading) {
       return null;
@@ -145,6 +156,7 @@ export const HomeViewMilestonesSection = memo(
             )}
             showMilestoneHighlights
             showTopTile={false}
+            useTanMilestoneBadge
             className="pt-0"
           />
         )}

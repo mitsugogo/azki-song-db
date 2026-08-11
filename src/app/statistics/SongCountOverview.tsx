@@ -22,10 +22,27 @@ export type SongCountOverviewProps = {
   countUnit: string;
   showMilestoneHighlights?: boolean;
   showTopTile?: boolean;
+  useTanMilestoneBadge?: boolean;
   className?: string;
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isTanMilestoneTarget(targetCount: number) {
+  return (
+    targetCount === 500000 ||
+    (targetCount >= 1000000 && targetCount % 1000000 === 0)
+  );
+}
+
+function getMilestoneBadgeColor(
+  targetCount: number,
+  useTanMilestoneBadge: boolean,
+) {
+  return useTanMilestoneBadge && isTanMilestoneTarget(targetCount)
+    ? "tan"
+    : "pink";
+}
 
 function toDisplayedMilestoneDate(date: Date): Date {
   // 集計日ベースの値を表示用に1日前へ補正する
@@ -99,6 +116,7 @@ export default function SongCountOverview({
   countUnit,
   showMilestoneHighlights = false,
   showTopTile = true,
+  useTanMilestoneBadge = false,
   className = "pt-3 lg:pt-4",
 }: SongCountOverviewProps) {
   const t = useTranslations("Statistics.overview");
@@ -304,7 +322,10 @@ export default function SongCountOverview({
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-light-gray-700 dark:text-light-gray-300">
                           <span className="inline-flex items-center gap-1 leading-none">
                             <Badge
-                              color="pink"
+                              color={getMilestoneBadgeColor(
+                                item.targetCount,
+                                useTanMilestoneBadge,
+                              )}
                               size="xs"
                               radius={`xs`}
                               className="align-middle"
@@ -414,7 +435,10 @@ export default function SongCountOverview({
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-light-gray-700 dark:text-light-gray-300">
                           <span className="inline-flex items-center gap-1 leading-none">
                             <Badge
-                              color="pink"
+                              color={getMilestoneBadgeColor(
+                                item.targetCount,
+                                useTanMilestoneBadge,
+                              )}
                               size="xs"
                               radius={`xs`}
                               variant="light"
