@@ -45,6 +45,21 @@ test.describe("Discography page", () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
+  test("switches to the MusicBee-style song list", async ({ page }) => {
+    await page.goto("/discography", { waitUntil: "domcontentloaded" });
+    await waitForDiscographyTabs(page);
+
+    await page
+      .getByTestId("discography-view-mode")
+      .locator("label")
+      .nth(1)
+      .click();
+
+    await expect(page.locator("article").first()).toBeVisible({
+      timeout: 10000,
+    });
+  });
+
   test("displays album covers and titles", async ({ page }) => {
     await page.goto("/discography", { waitUntil: "domcontentloaded" });
 
@@ -383,8 +398,8 @@ test.describe("Discography page", () => {
 
     const tabs = page.getByRole("tab");
     const tabCount = await tabs.count();
-    test.skip(tabCount < 4, "not enough tabs present to assert covers tab");
-    const coverTab = tabs.nth(3);
+    test.skip(tabCount === 0, "no tabs present to assert covers tab");
+    const coverTab = tabs.last();
     await expect(coverTab).toHaveAttribute("aria-selected", "true");
   });
 });

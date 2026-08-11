@@ -2,15 +2,18 @@ import { StatisticsItem } from "../createStatistics";
 import SongItem from "../SongItem";
 import SongDetails from "../SongDetails";
 import YearGroup from "./YearGroup";
+import DiscographySongList from "./DiscographySongList";
 import { getGridCols } from "../utils/gridHelpers";
 import { getDiscographyRepresentativeYear } from "../utils/representativeDate";
 import { useTranslations } from "next-intl";
+import type { DiscographyViewMode } from "./DiscographyControls";
 
 interface ContentRendererProps {
   data: StatisticsItem[];
   tabIndex: number;
   groupByAlbum: boolean;
   groupByYear: boolean;
+  viewMode: DiscographyViewMode;
   expandedItem: string | null;
   visibleItems: boolean[];
   anchorToScroll: string | null;
@@ -26,6 +29,7 @@ export default function ContentRenderer({
   tabIndex,
   groupByAlbum,
   groupByYear,
+  viewMode,
   expandedItem,
   visibleItems,
   anchorToScroll,
@@ -33,6 +37,17 @@ export default function ContentRenderer({
   onItemClick,
 }: ContentRendererProps) {
   const t = useTranslations("Discography");
+  if (viewMode === "list") {
+    return (
+      <DiscographySongList
+        data={data}
+        groupByAlbum={groupByAlbum}
+        groupByYear={groupByYear}
+        visibleItems={visibleItems}
+      />
+    );
+  }
+
   // 年ごとに区切るオプション
   if (groupByYear) {
     const getYear = (s: StatisticsItem) => {

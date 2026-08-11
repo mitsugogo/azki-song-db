@@ -788,7 +788,10 @@
     "controls": {
       "groupByAlbum": "アルバムごとに表示",
       "groupByYear": "年ごとに区切る",
-      "onlyOriginalMV": "オリ曲MVのみ"
+      "onlyOriginalMV": "オリ曲MVのみ",
+      "viewMode": "表示形式",
+      "viewModeTile": "タイル",
+      "viewModeSongList": "楽曲リスト"
     },
     "releaseVariants": {
       "mv": "MV",
