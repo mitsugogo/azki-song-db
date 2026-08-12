@@ -797,7 +797,10 @@
     "controls": {
       "groupByAlbum": "Group by album",
       "groupByYear": "Group by year",
-      "onlyOriginalMV": "Original MVs only"
+      "onlyOriginalMV": "Original MVs only",
+      "viewMode": "View mode",
+      "viewModeTile": "Tile",
+      "viewModeSongList": "Song list"
     },
     "releaseVariants": {
       "mv": "MV",

@@ -2,7 +2,7 @@
 
 import { Skeleton } from "@mantine/core";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 
 interface YoutubeThumbnailProps {
   videoId: string;
@@ -10,6 +10,9 @@ interface YoutubeThumbnailProps {
   className?: string;
   imageClassName?: string;
   outcontainerClassName?: string;
+  objectFit?: CSSProperties["objectFit"];
+  objectPosition?: CSSProperties["objectPosition"];
+  aspectRatio?: "video" | "square";
 }
 
 const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
@@ -18,6 +21,9 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
   className,
   imageClassName,
   outcontainerClassName,
+  objectFit,
+  objectPosition,
+  aspectRatio = "video",
 }) => {
   const { imageUrl, handleError, isExhausted } =
     useYoutubeThumbnailFallback(videoId);
@@ -70,9 +76,9 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
 
   return (
     <div
-      className={`relative flex w-full h-full items-center justify-center aspect-video bg-black ${
-        outcontainerClassName || ""
-      } ${className || ""}`}
+      className={`relative flex h-full w-full items-center justify-center ${
+        aspectRatio === "square" ? "aspect-square" : "aspect-video"
+      } bg-black ${outcontainerClassName || ""} ${className || ""}`}
     >
       <Skeleton
         visible={loading}
@@ -98,6 +104,8 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
             onLoad={handleOnLoad}
             onError={handleError}
             style={{
+              objectFit,
+              objectPosition,
               opacity: loading ? 0 : 1,
               transition: "opacity 0.5s",
             }}

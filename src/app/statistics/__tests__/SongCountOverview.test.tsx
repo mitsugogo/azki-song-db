@@ -5,6 +5,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import SongCountOverview from "../SongCountOverview";
 import type { Song } from "../../types/song";
 import type { StatisticsItem } from "../../types/statisticsItem";
+import { theme } from "../../theme";
 
 vi.mock("../../components/YoutubeThumbnail", () => ({
   default: ({ alt }: { alt: string }) => <div>{alt}</div>,
@@ -65,12 +66,82 @@ const hotLimitItem: StatisticsItem = {
 };
 
 describe("SongCountOverview", () => {
+  it("指定の大きな達成節目だけtan背景で表示する", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-16T15:33:40.000Z"));
+
+    render(
+      <MantineProvider theme={theme}>
+        <SongCountOverview
+          items={[
+            {
+              ...hotLimitItem,
+              viewMilestone: {
+                status: "achieved",
+                targetCount: 500000,
+                achievedAt: "2026-07-17T00:07:10.000Z",
+              },
+            },
+          ]}
+          primaryLabel=""
+          topLabel=""
+          totalCountLabel=""
+          countUnit=""
+          showMilestoneHighlights
+          showTopTile={false}
+          useTanMilestoneBadge
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByText("milestoneLabelJa").parentElement).toHaveAttribute(
+      "style",
+      expect.stringContaining("--badge-bg: var(--mantine-color-tan-filled)"),
+    );
+  });
+
+  it("指定の大きな見込み節目もtan背景で表示する", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-16T15:33:40.000Z"));
+
+    render(
+      <MantineProvider theme={theme}>
+        <SongCountOverview
+          items={[
+            {
+              ...hotLimitItem,
+              viewMilestone: {
+                status: "remain",
+                targetCount: 500000,
+                estimatedAt: "2026-07-17T00:07:10.000Z",
+              },
+            },
+          ]}
+          primaryLabel=""
+          topLabel=""
+          totalCountLabel=""
+          countUnit=""
+          showMilestoneHighlights
+          showTopTile={false}
+          useTanMilestoneBadge
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByText("milestoneLabelEstimateJa").parentElement,
+    ).toHaveAttribute(
+      "style",
+      expect.stringContaining("--badge-bg: var(--mantine-color-tan-light)"),
+    );
+  });
+
   it("表示用達成日が直近7日なら集計時刻が現在より後でも達成一覧に含める", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-16T15:33:40.000Z"));
 
     render(
-      <MantineProvider>
+      <MantineProvider theme={theme}>
         <SongCountOverview
           items={[hotLimitItem]}
           primaryLabel=""
@@ -79,11 +150,16 @@ describe("SongCountOverview", () => {
           countUnit=""
           showMilestoneHighlights
           showTopTile={false}
+          useTanMilestoneBadge
         />
       </MantineProvider>,
     );
 
     expect(screen.getByText("HOT LIMIT - T.M.Revolution")).toBeInTheDocument();
     expect(screen.getByText("2026/07/16")).toBeInTheDocument();
+    expect(screen.getByText("milestoneLabelJa").parentElement).toHaveAttribute(
+      "style",
+      expect.stringContaining("--badge-bg: var(--mantine-color-pink-filled)"),
+    );
   });
 });

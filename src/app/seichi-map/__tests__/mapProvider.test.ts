@@ -8,14 +8,15 @@ import {
 } from "../mapProvider";
 
 describe("seichi map provider preference", () => {
-  it("uses GSI Maps when no preference is stored", () => {
+  it("uses OpenStreetMap when no preference is stored", () => {
+    expect(DEFAULT_SEICHI_MAP_PROVIDER).toBe("osm");
     expect(readSeichiMapProvider({ getItem: () => null })).toBe(
       DEFAULT_SEICHI_MAP_PROVIDER,
     );
   });
 
   it("ignores an invalid stored preference", () => {
-    expect(readSeichiMapProvider({ getItem: () => "other-map" })).toBe("gsi");
+    expect(readSeichiMapProvider({ getItem: () => "other-map" })).toBe("osm");
   });
 
   it("restores a Google Maps preference", () => {

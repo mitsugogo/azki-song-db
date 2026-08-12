@@ -1240,7 +1240,9 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     const storedProvider = readSeichiMapProvider(window.localStorage);
     setMapProvider(
-      storedProvider === "google" && !mapsKey ? "gsi" : storedProvider,
+      storedProvider === "google" && !mapsKey
+        ? DEFAULT_SEICHI_MAP_PROVIDER
+        : storedProvider,
     );
   }, [mapsKey]);
 

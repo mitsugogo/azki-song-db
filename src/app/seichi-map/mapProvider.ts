@@ -24,7 +24,7 @@ const OSM_TILE_LAYER: LeafletTileLayerConfig = {
   maxZoom: 19,
 };
 
-export const DEFAULT_SEICHI_MAP_PROVIDER: SeichiMapProvider = "gsi";
+export const DEFAULT_SEICHI_MAP_PROVIDER: SeichiMapProvider = "osm";
 
 export const isSeichiMapProvider = (
   value: string | null,

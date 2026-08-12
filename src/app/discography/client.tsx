@@ -10,10 +10,12 @@ import { breadcrumbClasses, pageClasses } from "../theme";
 import { HiHome, HiChevronRight } from "react-icons/hi";
 import { useDiscographyData } from "./hooks/useDiscographyData";
 import DiscographyControls from "./components/DiscographyControls";
+import type { DiscographyViewMode } from "./components/DiscographyControls";
 import ContentRenderer from "./components/ContentRenderer";
 import { scrollToAnchor } from "./utils/scrollHelpers";
 import Loading from "../loading";
 import { useTranslations } from "next-intl";
+import { usePersistedDiscographyViewMode } from "./hooks/usePersistedDiscographyViewMode";
 
 const TAB_URLS = [
   "/discography",
@@ -37,7 +39,9 @@ export default function DiscographyClient({
   const [indicatorTab, setIndicatorTab] = useState(initialTab);
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [groupByYear, setGroupByYear] = useState(false);
-  const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
+  const [viewMode, setViewMode] = usePersistedDiscographyViewMode(
+    activeTab === 1,
+  );
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
   const [visibleItems, setVisibleItems] = useState<boolean[]>([]);
@@ -72,7 +76,7 @@ export default function DiscographyClient({
     overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
     tabCounts,
-  } = useDiscographyData(groupByAlbum, onlyOriginalMV);
+  } = useDiscographyData(groupByAlbum, viewMode === "originalMv");
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -146,8 +150,8 @@ export default function DiscographyClient({
     setAnchorToScroll(null);
   };
 
-  const handleOnlyOriginalMVChange = () => {
-    setOnlyOriginalMV(!onlyOriginalMV);
+  const handleViewModeChange = (mode: DiscographyViewMode) => {
+    setViewMode(mode);
     setExpandedItem(null);
     setAnchorToScroll(null);
   };
@@ -166,10 +170,6 @@ export default function DiscographyClient({
 
     setActiveTab(index);
   };
-
-  // DiscographyControls の activeTab は旧 3-tab 基準（0 = originals で "オリ曲MVのみ" 表示）
-  // 新 4-tab: tab 1 = originals → controlsActiveTab = 0、それ以外は非表示
-  const controlsActiveTab = activeTab - 1;
 
   const tabDataList = [
     allSongCountsByReleaseDate,
@@ -201,11 +201,11 @@ export default function DiscographyClient({
         <DiscographyControls
           groupByAlbum={groupByAlbum}
           groupByYear={groupByYear}
-          onlyOriginalMV={onlyOriginalMV}
-          activeTab={controlsActiveTab}
+          viewMode={viewMode}
+          showOriginalMv={activeTab === 1}
           onGroupByAlbumChange={handleGroupByAlbumChange}
           onGroupByYearChange={handleGroupByYearChange}
-          onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
+          onViewModeChange={handleViewModeChange}
         />
 
         <Tabs
@@ -272,6 +272,7 @@ export default function DiscographyClient({
           tabIndex={activeTab}
           groupByAlbum={groupByAlbum}
           groupByYear={groupByYear}
+          viewMode={viewMode}
           expandedItem={expandedItem}
           visibleItems={visibleItems}
           anchorToScroll={anchorToScroll}

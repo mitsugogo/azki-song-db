@@ -15,8 +15,10 @@ import { useDiscographyData } from "../hooks/useDiscographyData";
 import { useItemVisibility } from "../hooks/useItemVisibility";
 import { useAlbumNavigation } from "../hooks/useAlbumNavigation";
 import DiscographyControls from "./DiscographyControls";
+import type { DiscographyViewMode } from "./DiscographyControls";
 import ContentRenderer from "./ContentRenderer";
 import { scrollToAnchor } from "../utils/scrollHelpers";
+import { usePersistedDiscographyViewMode } from "../hooks/usePersistedDiscographyViewMode";
 
 const TAB_VALUES = ["0", "1", "2"] as const;
 const discographyTabClass =
@@ -30,8 +32,10 @@ export default function DiscographyPage({
   const [activeTab, setActiveTab] = useState(0);
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [groupByYear, setGroupByYear] = useState(false);
+  const [viewMode, setViewMode] = usePersistedDiscographyViewMode(
+    activeTab === 0,
+  );
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
-  const [onlyOriginalMV, setOnlyOriginalMV] = useState(false);
   const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
   const [tabsRootRef, setTabsRootRef] = useState<HTMLDivElement | null>(null);
   const [tabRefs, setTabRefs] = useState<
@@ -84,7 +88,7 @@ export default function DiscographyPage({
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
-  } = useDiscographyData(groupByAlbum, onlyOriginalMV);
+  } = useDiscographyData(groupByAlbum, viewMode === "originalMv");
 
   // アイテムの表示アニメーション管理
   const visibleItems = useItemVisibility(
@@ -139,8 +143,8 @@ export default function DiscographyPage({
     setAnchorToScroll(null);
   };
 
-  const handleOnlyOriginalMVChange = () => {
-    setOnlyOriginalMV(!onlyOriginalMV);
+  const handleViewModeChange = (mode: DiscographyViewMode) => {
+    setViewMode(mode);
     setExpandedItem(null);
     setAnchorToScroll(null);
   };
@@ -237,11 +241,11 @@ export default function DiscographyPage({
         <DiscographyControls
           groupByAlbum={groupByAlbum}
           groupByYear={groupByYear}
-          onlyOriginalMV={onlyOriginalMV}
-          activeTab={activeTab}
+          viewMode={viewMode}
+          showOriginalMv={activeTab === 0}
           onGroupByAlbumChange={handleGroupByAlbumChange}
           onGroupByYearChange={handleGroupByYearChange}
-          onOnlyOriginalMVChange={handleOnlyOriginalMVChange}
+          onViewModeChange={handleViewModeChange}
         />
 
         <Tabs
@@ -299,6 +303,7 @@ export default function DiscographyPage({
                 tabIndex={0}
                 groupByAlbum={groupByAlbum}
                 groupByYear={groupByYear}
+                viewMode={viewMode}
                 expandedItem={expandedItem}
                 visibleItems={visibleItems[0] || []}
                 anchorToScroll={anchorToScroll}
@@ -312,6 +317,7 @@ export default function DiscographyPage({
                 tabIndex={1}
                 groupByAlbum={groupByAlbum}
                 groupByYear={groupByYear}
+                viewMode={viewMode}
                 expandedItem={expandedItem}
                 visibleItems={visibleItems[1] || []}
                 anchorToScroll={anchorToScroll}
@@ -325,6 +331,7 @@ export default function DiscographyPage({
                 tabIndex={2}
                 groupByAlbum={groupByAlbum}
                 groupByYear={groupByYear}
+                viewMode={viewMode}
                 expandedItem={expandedItem}
                 visibleItems={visibleItems[2] || []}
                 anchorToScroll={anchorToScroll}

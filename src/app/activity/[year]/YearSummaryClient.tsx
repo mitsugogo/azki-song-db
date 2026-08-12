@@ -24,7 +24,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../../lib/formatDate";
 import {
   compareActivityImportanceDesc,
-  getActivityImportanceItemClassName,
   getHigherActivityImportance,
   normalizeActivityImportance,
 } from "../../lib/activityImportance";
@@ -554,7 +553,7 @@ export default function YearSummaryClient({ initialSongs, year }: Props) {
             {displayYearMilestones.map((milestone, index) => (
               <li
                 key={index}
-                className={`text-sm ${getActivityImportanceItemClassName(milestone.importance)}`}
+                className="text-sm"
                 data-importance={milestone.importance}
               >
                 <div className="font-medium">
