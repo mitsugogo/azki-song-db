@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.23.0](https://github.com/mitsugogo/azki-song-db/compare/v2.22.1...v2.23.0) (2026-08-12)
+
+### Features
+
+* **discography:** アルバム+楽曲表示ビューを追加 ([4d3f273](https://github.com/mitsugogo/azki-song-db/commit/4d3f273d0f94ff9bff05ac82b83af530996503bd))
+
+### Bug Fixes
+
+* jsdomを30.0.1に更新 ([9e970a4](https://github.com/mitsugogo/azki-song-db/commit/9e970a45792c7f31b6176660ed1bdea8be86d9e3))
+
 ## [2.22.1](https://github.com/mitsugogo/azki-song-db/compare/v2.22.0...v2.22.1) (2026-08-07)
 
 ### Bug Fixes
