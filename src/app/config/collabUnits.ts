@@ -249,10 +249,10 @@ export const collabUnits: CollabUnit[] = [
   },
   {
     members: ["AZKi", "アキ・ローゼンタール", "大神ミオ"],
-    unitName: "RosaMia",
+    unitName: "RosaMiA",
     hl: {
       en: {
-        unitName: "RosaMia",
+        unitName: "RosaMiA",
         members: ["AZKi", "Aki Rosenthal", "Ookami Mio"],
       },
     },
