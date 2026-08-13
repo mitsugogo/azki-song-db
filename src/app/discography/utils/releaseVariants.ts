@@ -172,6 +172,19 @@ export const findReleaseVariantByInstanceKey = (
   );
 };
 
+export const findReleaseVariantGroup = (songs: Song[], song: Song | null) => {
+  if (!song) return null;
+
+  const instanceKey = getSongInstanceKey(song);
+  return (
+    groupReleaseVariants(songs).find((group) =>
+      group.variants.some(
+        (variant) => getSongInstanceKey(variant) === instanceKey,
+      ),
+    ) ?? null
+  );
+};
+
 export const matchesReleaseVariantGroupKey = (song: Song, groupKey: string) =>
   getReleaseVariantGroupKey(song) === groupKey ||
   getCrossAlbumReleaseVariantGroupKey(song) === groupKey;

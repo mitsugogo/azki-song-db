@@ -25,6 +25,12 @@ import { ChannelEntry } from "../types/api/yt/channels";
 import { getCollabUnitName } from "../config/collabUnits";
 import { getYoutubeVisibleHashtagBodies } from "../lib/hashtag";
 import AdminTools from "./AdminTools";
+import ReleaseVariantSwitcher from "../discography/components/ReleaseVariantSwitcher";
+import {
+  findReleaseVariantByInstanceKey,
+  findReleaseVariantGroup,
+  getSongInstanceKey,
+} from "../discography/utils/releaseVariants";
 
 type DescriptionCollapsibleProps = {
   text: string;
@@ -784,14 +790,18 @@ const NowPlayingSongInfo = ({
     () => resolveMetaDateLabel(videoInfo, locale, t),
     [locale, t, videoInfo],
   );
+  const currentVariantGroup = useMemo(
+    () => findReleaseVariantGroup(allSongs, currentSong),
+    [allSongs, currentSong],
+  );
 
   return (
     <>
       <div className="flex mt-2 flex-col py-2 pt-0 px-2 lg:p-0 lg:pt-1 text-sm text-foreground">
         {currentSong && (
           <div className="song-info">
-            <div className="flex items-center gap-2 pb-2">
-              <div className="w-full flex-auto self-baseline min-w-0">
+            <div className="flex items-start gap-2 pb-2">
+              <div className="min-w-0 flex-1 self-baseline">
                 {currentSong.milestones && (
                   <div className="flex items-center gap-1">
                     <MilestoneBadge
@@ -821,6 +831,22 @@ const NowPlayingSongInfo = ({
                   </div>
                 )}
               </div>
+              {currentVariantGroup && (
+                <div className="shrink-0 self-start">
+                  <ReleaseVariantSwitcher
+                    variants={currentVariantGroup.variants}
+                    value={getSongInstanceKey(currentSong)}
+                    onChange={(value) => {
+                      const nextSong = findReleaseVariantByInstanceKey(
+                        currentVariantGroup.variants,
+                        value,
+                      );
+                      if (nextSong) changeCurrentSong(nextSong);
+                    }}
+                    testId="watch-release-variant"
+                  />
+                </div>
+              )}
             </div>
 
             {shouldShowChannels && (

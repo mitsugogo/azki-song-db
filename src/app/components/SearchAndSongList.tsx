@@ -33,6 +33,7 @@ import { usePlaylistActions } from "../hook/usePlaylistActions";
 import Loading from "../loading";
 import { getSongMode, type SongMode } from "./songModeMenu";
 import SongModeControls from "./SongModeControls";
+import { groupReleaseVariants } from "../discography/utils/releaseVariants";
 import {
   COMPACT_TABLETOP_TAB_HEIGHT,
   type TabletopPanes,
@@ -202,6 +203,13 @@ export default function SearchAndSongList({
 
     return sortSongsByBroadcastOrder(songs, sortOrder);
   }, [isPlaylistMode, songs, sortOrder]);
+  const displayedSongs = useMemo(
+    () =>
+      currentSongMode === "original-songs" && !isPlaylistMode
+        ? groupReleaseVariants(sortedSongs).map((group) => group.representative)
+        : sortedSongs,
+    [currentSongMode, isPlaylistMode, sortedSongs],
+  );
 
   const { playPlaylist, disablePlaylistMode, decodePlaylistFromUrl } =
     usePlaylistActions({
@@ -334,7 +342,7 @@ export default function SearchAndSongList({
               <SongModeControls
                 currentSongMode={currentSongMode}
                 onSelectSongMode={setSearchTerm}
-                onSurprise={() => playRandomSong(songs)}
+                onSurprise={() => playRandomSong(displayedSongs)}
                 onPlaylist={() => setShowPlaylistSelector(true)}
                 sizeClassName="text-sm"
               />
@@ -346,7 +354,7 @@ export default function SearchAndSongList({
               <SongModeControls
                 currentSongMode={currentSongMode}
                 onSelectSongMode={setSearchTerm}
-                onSurprise={() => playRandomSong(songs)}
+                onSurprise={() => playRandomSong(displayedSongs)}
                 onPlaylist={() => setShowPlaylistSelector(true)}
                 sizeClassName="text-xs"
               />
@@ -373,7 +381,7 @@ export default function SearchAndSongList({
           </div>
           <div className="watch-song-list-summary mb-2 flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground dark:text-white">
-              {t("songList")} ({songs.length}
+              {t("songList")} ({displayedSongs.length}
               {t("songsUnit_w/o_en")}/{allSongs.length}
               {t("songsUnit_w/o_en")})
             </p>
@@ -405,7 +413,7 @@ export default function SearchAndSongList({
           >
             <Suspense fallback={<Loading />}>
               <SongsList
-                songs={sortedSongs}
+                songs={displayedSongs}
                 currentSong={currentSong}
                 changeCurrentSong={changeCurrentSong as any}
                 hideFutureSongs={hideFutureSongs}
@@ -468,7 +476,7 @@ export default function SearchAndSongList({
                 <SongModeControls
                   currentSongMode={currentSongMode}
                   onSelectSongMode={setSearchTerm}
-                  onSurprise={() => playRandomSong(songs)}
+                  onSurprise={() => playRandomSong(displayedSongs)}
                   onPlaylist={() => setShowPlaylistSelector(true)}
                   sizeClassName="text-xs"
                 />
@@ -476,7 +484,7 @@ export default function SearchAndSongList({
 
               <div className="px-3 py-0 flex items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground dark:text-white">
-                  {t("songList")} ({songs.length}
+                  {t("songList")} ({displayedSongs.length}
                   {t("songsUnit")}/{allSongs.length}
                   {t("songsUnit")})
                 </p>
@@ -503,7 +511,7 @@ export default function SearchAndSongList({
                 <div className="h-full">
                   <Suspense fallback={<Loading />}>
                     <SongsList
-                      songs={sortedSongs}
+                      songs={displayedSongs}
                       currentSong={currentSong}
                       changeCurrentSong={changeCurrentSong as any}
                       hideFutureSongs={hideFutureSongs}
