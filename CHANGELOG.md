@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.24.1](https://github.com/mitsugogo/azki-song-db/compare/v2.24.0...v2.24.1) (2026-08-14)
+
+### Bug Fixes
+
+* **seichi-map:** 地図レイヤーがメニューより前に出る不具合を修正 ([820e9f6](https://github.com/mitsugogo/azki-song-db/commit/820e9f6f2450f18a276dee3578d86c021aa754d1))
+
 ## [2.24.0](https://github.com/mitsugogo/azki-song-db/compare/v2.23.0...v2.24.0) (2026-08-14)
 
 ### Features
