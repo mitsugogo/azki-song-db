@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Song } from "../../../types/song";
 import {
   chooseReleaseRepresentative,
+  findReleaseVariantGroup,
   getReleaseVariantKind,
   getSelectableReleaseVariants,
   groupReleaseVariants,
@@ -223,5 +224,20 @@ describe("releaseVariants", () => {
     expect(groups).toHaveLength(2);
     expect(getReleaseVariantKind(groups[0].representative)).toBe("mv");
     expect(getReleaseVariantKind(groups[1].representative)).toBe("art-track");
+  });
+
+  it("同じリリースグループを動画インスタンスから取得できる", () => {
+    const musicVideo = baseSong({
+      video_id: "music-video",
+      tags: ["オリ曲MV"],
+    });
+    const artTrack = baseSong({
+      video_id: "art-track",
+      tags: ["オリ曲", "アートトラック"],
+    });
+
+    expect(
+      findReleaseVariantGroup([musicVideo, artTrack], artTrack)?.variants,
+    ).toEqual([musicVideo, artTrack]);
   });
 });

@@ -286,6 +286,44 @@ describe("usePlayerControls", () => {
     expect(result.current.nextSong?.video_id).toBe("vid3");
   });
 
+  it("オリ曲モードではMVとアートトラックを1曲として次の一覧曲へ進む", () => {
+    const musicVideo = {
+      ...mockSongs[0],
+      video_id: "music-video",
+      start: "0",
+      title: "Original Song",
+      tags: ["オリ曲MV"],
+    };
+    const artTrack = {
+      ...musicVideo,
+      video_id: "art-track",
+      tags: ["オリ曲", "アートトラック"],
+    };
+    const nextOriginal = {
+      ...mockSongs[1],
+      video_id: "next-original",
+      start: "0",
+      title: "Next Original",
+      tags: ["オリ曲"],
+    };
+    const originalSongs = [musicVideo, artTrack, nextOriginal];
+    const { result } = renderHook(() =>
+      usePlayerControls(originalSongs, originalSongs, mockGlobalPlayer, true),
+    );
+
+    act(() => {
+      result.current.setPreviousAndNextSongs(musicVideo, originalSongs);
+    });
+
+    expect(result.current.nextSong).toBe(nextOriginal);
+
+    act(() => {
+      result.current.setPreviousAndNextSongs(artTrack, originalSongs);
+    });
+
+    expect(result.current.nextSong).toBe(nextOriginal);
+  });
+
   it("先頭の曲ではpreviousSongがnull", () => {
     const { result } = renderHook(() =>
       usePlayerControls(mockSongs, mockSongs, mockGlobalPlayer),

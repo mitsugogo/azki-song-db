@@ -138,7 +138,14 @@ const oldOriginal = makeSong({
   video_id: "orig-old",
   title: "Old Original",
   broadcast_at: "2024-01-01T00:00:00.000Z",
-  tags: ["オリ曲"],
+  tags: ["オリ曲", "MV"],
+});
+
+const oldOriginalArtTrack = makeSong({
+  video_id: "orig-old-art-track",
+  title: "Old Original",
+  broadcast_at: "2024-01-02T00:00:00.000Z",
+  tags: ["オリ曲", "アートトラック"],
 });
 
 const newOriginal = makeSong({
@@ -324,6 +331,22 @@ describe("SearchAndSongList", () => {
       expect(
         screen.getAllByRole("button", { name: "sortAscending" }).length,
       ).toBeGreaterThan(0);
+    });
+  });
+
+  it("オリ曲モードではMVを優先してアートトラックとの重複を表示しない", async () => {
+    render(
+      <SearchAndSongList
+        {...baseProps}
+        songs={[newOriginal, oldOriginalArtTrack, oldOriginal]}
+        searchTerm="original-songs"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("songs-list-order")[0]).toHaveTextContent(
+        "Old Original|New Original",
+      );
     });
   });
 
