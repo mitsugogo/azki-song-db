@@ -2906,7 +2906,7 @@ export default function SeichiMapCompleteClient({
             withBorder
             radius="md"
             shadow="sm"
-            className="relative overflow-hidden bg-white/90 dark:bg-gray-900/80"
+            className="relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80"
             style={{ height: "70vh", minHeight: 460 }}
           >
             <Box
