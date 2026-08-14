@@ -17,6 +17,7 @@ type UseMainPlayerControlsOptions = {
   songs: Song[];
   allSongs: Song[];
   globalPlayer: GlobalPlayerContextType;
+  isOriginalSongsMode?: boolean;
 };
 
 /**
@@ -30,6 +31,7 @@ export default function useMainPlayerControls({
   songs,
   allSongs,
   globalPlayer,
+  isOriginalSongsMode = false,
 }: UseMainPlayerControlsOptions) {
   const initialCurrentTime = Number.isFinite(globalPlayer.currentTime)
     ? Math.max(globalPlayer.currentTime, 0)
@@ -84,7 +86,7 @@ export default function useMainPlayerControls({
     handlePlayerOnReady: originalHandlePlayerOnReady,
     handleStateChange: originalHandleStateChange,
     setPreviousAndNextSongs,
-  } = usePlayerControls(songs, allSongs, globalPlayer);
+  } = usePlayerControls(songs, allSongs, globalPlayer, isOriginalSongsMode);
 
   // keep a mutable ref with the latest videoId so callbacks can read it
   const latestVideoIdRef = useRef<string | null>(videoId ?? null);

@@ -11,6 +11,7 @@ import useSongPlayCounts, {
 import { siteConfig } from "../config/siteConfig";
 import historyHelper from "../lib/history";
 import { WATCH_PATH, normalizeWatchTimeParam } from "../lib/watchUrl";
+import { groupReleaseVariants } from "../discography/utils/releaseVariants";
 
 // サーバ側のルーティング設定と同期するため、クライアント上の現在の URL
 // にロケールプレフィックスが付いているかを検出して付与するヘルパー。
@@ -55,11 +56,13 @@ const normalizePlaybackSeconds = (value: unknown) => {
  * @param songs - 表示中の曲リスト（フィルタ後）
  * @param allSongs - 全ての曲のリスト
  * @param globalPlayer - グローバルプレイヤーコンテキスト
+ * @param isOriginalSongsMode - MV優先でリリース版をまとめて表示するモードか
  */
 const usePlayerControls = (
   songs: Song[],
   allSongs: Song[],
   globalPlayer: GlobalPlayerContextType,
+  isOriginalSongsMode = false,
 ) => {
   // === 曲の状態管理 ===
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -147,6 +150,27 @@ const usePlayerControls = (
   // === 前後の曲を計算・設定 ===
   const setPreviousAndNextSongs = useCallback(
     (song: Song, songsList: Song[]) => {
+      if (isOriginalSongsMode) {
+        const releaseGroups = groupReleaseVariants(songsList);
+        const currentIndex = releaseGroups.findIndex((group) =>
+          group.variants.some(
+            (variant) =>
+              variant.video_id === song.video_id &&
+              variant.start === song.start,
+          ),
+        );
+        const previousGroup =
+          currentIndex > 0 ? releaseGroups[currentIndex - 1] : null;
+        const nextGroup =
+          currentIndex >= 0 && currentIndex < releaseGroups.length - 1
+            ? releaseGroups[currentIndex + 1]
+            : null;
+
+        setPreviousSong(previousGroup?.representative ?? null);
+        setNextSong(nextGroup?.representative ?? null);
+        return;
+      }
+
       const currentIndex = songsList.findIndex(
         (s) => s.video_id === song.video_id && s.start === song.start,
       );
@@ -159,7 +183,7 @@ const usePlayerControls = (
       setPreviousSong(prev);
       setNextSong(next);
     },
-    [],
+    [isOriginalSongsMode],
   );
 
   // URL操作ヘルパは外部ライブラリに移譲

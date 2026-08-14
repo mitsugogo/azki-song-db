@@ -11,6 +11,7 @@ import { useGlobalPlayer } from "../hook/useGlobalPlayer";
 import useMainPlayerControls from "../hook/useMainPlayerControls";
 import { usePathname } from "next/navigation";
 import { isWatchPagePath } from "../lib/watchUrl";
+import { getSongMode } from "./songModeMenu";
 
 // Components
 import PlayerSection from "./PlayerSection";
@@ -49,6 +50,7 @@ export default function MainPlayer({
 
   const { songs, setSongs, searchTerm, setSearchTerm, searchSongs } =
     useSearch(allSongs);
+  const isOriginalSongsMode = getSongMode(searchTerm) === "original-songs";
 
   const {
     currentSong,
@@ -80,6 +82,7 @@ export default function MainPlayer({
     songs,
     allSongs,
     globalPlayer,
+    isOriginalSongsMode,
   });
 
   const previousPathnameRef = useRef(pathname);
