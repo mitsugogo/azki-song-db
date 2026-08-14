@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.24.0](https://github.com/mitsugogo/azki-song-db/compare/v2.23.0...v2.24.0) (2026-08-14)
+
+### Features
+
+* オリ曲モードでリリースバリアントを統合して再生 ([7b7d56b](https://github.com/mitsugogo/azki-song-db/commit/7b7d56b660d1c63c34b5888c06e690a0854d4920))
+
+### Bug Fixes
+
+* オリ曲のMVとアートトラックが重複して出ていたのを修正 ([e43e8c7](https://github.com/mitsugogo/azki-song-db/commit/e43e8c70537d0e38ac8b7d8fddb7c7bb6dbbd23c))
+
 ## [2.23.0](https://github.com/mitsugogo/azki-song-db/compare/v2.22.1...v2.23.0) (2026-08-12)
 
 ### Features
