@@ -20,7 +20,7 @@ vi.mock("googleapis", () => ({
   },
 }));
 
-import { GET } from "../route";
+import { GET, HEAD } from "../route";
 import {
   createMembersOnlyAccessToken,
   isMembersOnlySongSheetTitle,
@@ -67,6 +67,26 @@ describe("songs route", () => {
       "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300",
     );
     expect(response.headers.get("vary")).toBeNull();
+    expect(response.headers.get("etag")).toMatch(/^"[A-Za-z0-9_-]+"$/);
+    expect(response.headers.get("x-songs-version")).toBeTruthy();
+  });
+
+  it("公開HEADはGETと同じ世代・キャッシュヘッダーを本文なしで返す", async () => {
+    const request = new Request("http://localhost/api/songs?hl=ja");
+    const getResponse = await GET(request.clone());
+    const headResponse = await HEAD(request.clone());
+
+    expect(headResponse.status).toBe(200);
+    expect(await headResponse.text()).toBe("");
+    expect(headResponse.headers.get("etag")).toBe(
+      getResponse.headers.get("etag"),
+    );
+    expect(headResponse.headers.get("x-songs-version")).toBe(
+      getResponse.headers.get("x-songs-version"),
+    );
+    expect(headResponse.headers.get("cache-control")).toBe(
+      getResponse.headers.get("cache-control"),
+    );
   });
 
   it("正しいCookieがあるとメン限シートを取得する", async () => {
@@ -93,6 +113,8 @@ describe("songs route", () => {
       "private, no-store, max-age=0, must-revalidate",
     );
     expect(response.headers.get("vary")).toBe("Cookie");
+    expect(response.headers.get("etag")).toBeNull();
+    expect(response.headers.get("x-songs-version")).toBeNull();
   });
 
   it("正しいCookieがあっても明示指定なしではメン限シートを取得しない", async () => {

@@ -2,8 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { Breadcrumbs, Button } from "@mantine/core";
-import { FaHome } from "react-icons/fa";
-import { HiChevronRight } from "react-icons/hi";
+import { HiChevronRight, HiHome } from "react-icons/hi";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import SummaryTopClient from "./client";
 import { useLocale, useTranslations } from "next-intl";
@@ -33,7 +32,7 @@ export default function SummaryPageClient() {
         separator={<HiChevronRight className={breadcrumbClasses.separator} />}
       >
         <Link href="/" className={breadcrumbClasses.link}>
-          <FaHome className="inline mr-1" /> {t("homeLabel")}
+          <HiHome className="w-4 h-4 mr-1.5" /> {t("homeLabel")}
         </Link>
         <Link href="/activity" className={breadcrumbClasses.link}>
           {t("page.title")}

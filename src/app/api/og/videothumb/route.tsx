@@ -1,9 +1,8 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { FaCalendar } from "react-icons/fa6";
-import { Song } from "@/app/types/song";
 import { formatDate } from "@/app/lib/formatDate";
-import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import { fetchSongMetadataLookup } from "@/app/lib/server/fetchSongs";
 import {
   fetchOgFonts,
   normalizeOgText,
@@ -15,7 +14,8 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const requestUrl = new URL(req.url);
+    const { searchParams } = requestUrl;
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const v = searchParams.get("v");
     const t = searchParams.get("t");
@@ -29,14 +29,17 @@ export async function GET(req: NextRequest) {
 
     const video_id = v;
     const start = t?.toString().replace("s", "");
-    const songs = await fetchSongsFromApiCached({ locale: hl }).catch(() => []);
-    const songsByVideoId = songs.filter((s: Song) => s.video_id === video_id);
+    const songs = await fetchSongMetadataLookup({
+      locale: hl,
+      videoId: video_id,
+      baseUrlOverride: requestUrl.origin,
+    }).catch(() => []);
+    const songsByVideoId = songs.filter((s) => s.video_id === video_id);
 
     const song =
       start !== undefined
-        ? (songsByVideoId.find(
-            (s: Song) => Number(s.start) === Number(start),
-          ) ?? songsByVideoId[0])
+        ? (songsByVideoId.find((s) => Number(s.start) === Number(start)) ??
+          songsByVideoId[0])
         : songsByVideoId[0];
 
     if (!song) {
@@ -62,6 +65,7 @@ export async function GET(req: NextRequest) {
         : `${songsByVideoId.length} songs in this stream archive`;
     const fonts = await fetchOgFonts(
       `${title}${subTitle}${tagsText}${dateText}${archiveSummaryText}`,
+      "detail",
     );
 
     return new ImageResponse(

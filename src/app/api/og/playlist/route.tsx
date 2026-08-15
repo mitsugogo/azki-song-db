@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig } from "@/app/config/siteConfig";
-import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import { fetchSongsFromApiWithRecentFallback } from "@/app/lib/server/fetchSongs";
 import {
   decodePlaylistOgPayload,
   getPlaylistOgGridSize,
@@ -95,7 +95,7 @@ const createCells = (payload: PlaylistOgPayload, songs: Song[]) => {
 };
 
 const fallbackOgImage = async (width: number, height: number) => {
-  const fonts = await fetchOgFonts("Playlist AZKi Song Database");
+  const fonts = await fetchOgFonts("Playlist AZKi Song Database", "playlist");
 
   return new ImageResponse(
     <div
@@ -168,13 +168,22 @@ export async function GET(req: NextRequest) {
       return await fallbackOgImage(imageWidth, imageHeight);
     }
 
-    const songs = await fetchSongsFromApiCached({
-      locale: hl,
-      baseUrlOverride: requestUrl.origin,
-    }).catch(() => []);
-    const { gridSize, rows } = createCells(payload, songs);
+    const gridSize = getPlaylistOgGridSize(payload.c);
+    const expectedEntries = payload.s.slice(0, gridSize * gridSize);
+    const songs = await fetchSongsFromApiWithRecentFallback(
+      {
+        locale: hl,
+        baseUrlOverride: requestUrl.origin,
+      },
+      (candidateSongs) =>
+        expectedEntries.every((entry) => resolveSong(candidateSongs, entry)),
+    ).catch(() => []);
+    const { rows } = createCells(payload, songs);
     const titleText = normalizeOgText(payload.n);
-    const fonts = await fetchOgFonts(`${titleText}${payload.c} Playlist`);
+    const fonts = await fetchOgFonts(
+      `${titleText}${payload.c} Playlist`,
+      "playlist",
+    );
     const cellGap = gridSize >= 4 ? 0 : 2;
 
     return new ImageResponse(

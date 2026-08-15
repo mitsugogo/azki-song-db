@@ -22,15 +22,68 @@ const googleFontBase =
 const googleFallbackFontBase =
   "https://fonts.googleapis.com/css2?family=Noto+Sans+JP";
 
+export type OgFontProfile = "generic" | "detail" | "playlist" | "best-nine";
+type OgFontWeight = 400 | 700 | 900;
+
+const fontProfiles: Record<
+  OgFontProfile,
+  { name: string; familyBase: string; weights: OgFontWeight[] }[]
+> = {
+  generic: [
+    {
+      name: ogFontFamily,
+      familyBase: googleFontBase,
+      weights: [400, 700],
+    },
+    {
+      name: fallbackFontFamily,
+      familyBase: googleFallbackFontBase,
+      weights: [400, 700],
+    },
+  ],
+  detail: [
+    {
+      name: fallbackFontFamily,
+      familyBase: googleFallbackFontBase,
+      weights: [400, 700],
+    },
+  ],
+  playlist: [
+    {
+      name: ogFontFamily,
+      familyBase: googleFontBase,
+      weights: [700, 900],
+    },
+    {
+      name: fallbackFontFamily,
+      familyBase: googleFallbackFontBase,
+      weights: [700, 900],
+    },
+  ],
+  "best-nine": [
+    {
+      name: ogFontFamily,
+      familyBase: googleFontBase,
+      weights: [400, 700],
+    },
+    {
+      name: fallbackFontFamily,
+      familyBase: googleFallbackFontBase,
+      weights: [400, 700],
+    },
+  ],
+};
+
 export const normalizeOgText = (value: string) => value.replace(/～/g, "〜");
 
 const fetchGoogleFont = async (
   familyBase: string,
-  weight: 400 | 700 | 900,
+  weight: OgFontWeight,
   text: string,
 ) => {
   const css = await fetch(
     `${familyBase}:wght@${weight}&text=${encodeURIComponent(text)}`,
+    { cache: "force-cache" },
   ).then((res) => res.text());
   const url = css
     .match(
@@ -40,10 +93,13 @@ const fetchGoogleFont = async (
 
   if (!url) throw new Error("OG font not found");
 
-  return fetch(url).then((res) => res.arrayBuffer());
+  return fetch(url, { cache: "force-cache" }).then((res) => res.arrayBuffer());
 };
 
-export const fetchOgFonts = async (textSeed: string) => {
+export const fetchOgFonts = async (
+  textSeed: string,
+  profile: OgFontProfile = "generic",
+) => {
   const seed = [
     siteConfig.siteName,
     siteConfig.siteSlug,
@@ -58,54 +114,16 @@ export const fetchOgFonts = async (textSeed: string) => {
     normalizeOgText(textSeed),
   ].join("");
 
-  const [regular, bold, black, fallbackRegular, fallbackBold, fallbackBlack] =
-    await Promise.all([
-      fetchGoogleFont(googleFontBase, 400, seed),
-      fetchGoogleFont(googleFontBase, 700, seed),
-      fetchGoogleFont(googleFontBase, 900, seed),
-      fetchGoogleFont(googleFallbackFontBase, 400, seed),
-      fetchGoogleFont(googleFallbackFontBase, 700, seed),
-      fetchGoogleFont(googleFallbackFontBase, 900, seed),
-    ]);
-
-  return [
-    {
-      name: ogFontFamily,
-      data: regular,
-      style: "normal" as const,
-      weight: 400 as const,
-    },
-    {
-      name: ogFontFamily,
-      data: bold,
-      style: "normal" as const,
-      weight: 700 as const,
-    },
-    {
-      name: ogFontFamily,
-      data: black,
-      style: "normal" as const,
-      weight: 900 as const,
-    },
-    {
-      name: fallbackFontFamily,
-      data: fallbackRegular,
-      style: "normal" as const,
-      weight: 400 as const,
-    },
-    {
-      name: fallbackFontFamily,
-      data: fallbackBold,
-      style: "normal" as const,
-      weight: 700 as const,
-    },
-    {
-      name: fallbackFontFamily,
-      data: fallbackBlack,
-      style: "normal" as const,
-      weight: 900 as const,
-    },
-  ];
+  return Promise.all(
+    fontProfiles[profile].flatMap(({ name, familyBase, weights }) =>
+      weights.map(async (weight) => ({
+        name,
+        data: await fetchGoogleFont(familyBase, weight, seed),
+        style: "normal" as const,
+        weight,
+      })),
+    ),
+  );
 };
 
 export const ogImageHeaders = {

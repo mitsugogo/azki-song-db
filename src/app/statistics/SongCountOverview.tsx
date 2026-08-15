@@ -350,6 +350,7 @@ export default function SongCountOverview({
                             color="gray"
                             component={Link}
                             href={getDiscographyLink(item.song) || "#"}
+                            prefetch={false}
                             leftSection={<FaChartBar className="h-3 w-3" />}
                             radius="xs"
                             size="xs"
@@ -362,6 +363,7 @@ export default function SongCountOverview({
                             color="pink"
                             component={Link}
                             href={"/watch?v=" + item.videoId}
+                            prefetch={false}
                             leftSection={<FaPlayCircle />}
                             radius="xs"
                             size="xs"
@@ -397,6 +399,7 @@ export default function SongCountOverview({
                       {item.videoId ? (
                         <Link
                           href={getDiscographyLink(item.song) || "#"}
+                          prefetch={false}
                           className="mt-0.5 block w-16 shrink-0 overflow-hidden rounded"
                           aria-label={t("openThumbnailOnYoutube", {
                             title: item.title,
@@ -469,6 +472,7 @@ export default function SongCountOverview({
                             color="gray"
                             component={Link}
                             href={getDiscographyLink(item.song) || "#"}
+                            prefetch={false}
                             leftSection={<FaChartBar className="h-3 w-3" />}
                             radius="xs"
                             size="xs"
@@ -481,6 +485,7 @@ export default function SongCountOverview({
                             color="pink"
                             component={Link}
                             href={"/watch?v=" + item.videoId}
+                            prefetch={false}
                             leftSection={<FaPlayCircle />}
                             radius="xs"
                             size="xs"

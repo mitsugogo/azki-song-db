@@ -6,6 +6,7 @@ import { useLoading } from "../context/LoadingContext";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDate } from "../lib/formatDate";
 import { Badge } from "@mantine/core";
+import { getActivityMonthHref } from "./monthActivity";
 
 export default function YearsTile({ songs }: { songs: Song[] }) {
   const { setLoading } = useLoading();
@@ -110,7 +111,8 @@ export default function YearsTile({ songs }: { songs: Song[] }) {
                   return (
                     <Badge
                       component={Link}
-                      href={`/activity/${year}/${month}`}
+                      href={getActivityMonthHref({ year, month })}
+                      prefetch={false}
                       color="gray"
                       variant="light"
                       size="xs"

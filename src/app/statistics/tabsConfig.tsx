@@ -266,6 +266,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
           return (
             <Link
               href={href}
+              prefetch={false}
               className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
             >
               {t("columns.detail")}
@@ -280,6 +281,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
+            prefetch={false}
             className="font-semibold text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
@@ -293,6 +295,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
+            prefetch={false}
             className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
@@ -360,6 +363,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
           return (
             <Link
               href={href}
+              prefetch={false}
               className="inline-flex items-center whitespace-nowrap rounded-md border border-primary-300 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/10 dark:border-primary-700"
             >
               {t("columns.detail")}
@@ -374,6 +378,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         cell: (info) => (
           <Link
             href={`/?q=title:${info.getValue<string>()}`}
+            prefetch={false}
             className="font-semibold text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
@@ -387,6 +392,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         cell: (info) => (
           <Link
             href={`/?q=artist:${info.getValue<string>()}`}
+            prefetch={false}
             className="text-primary hover:text-primary-700 dark:text-pink-400 dark:hover:text-pink-500"
           >
             {info.getValue<string>()}
