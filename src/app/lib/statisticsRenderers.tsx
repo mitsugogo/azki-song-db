@@ -96,6 +96,7 @@ function LastVideoCell({
             </a>
             <Link
               href={appPlayUrl}
+              prefetch={false}
               className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-primary-700"
             >
               <BsPlayCircleFill size={12} />

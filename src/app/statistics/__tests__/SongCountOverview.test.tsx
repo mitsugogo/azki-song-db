@@ -12,8 +12,14 @@ vi.mock("../../components/YoutubeThumbnail", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: ComponentProps<"a">) => (
-    <a {...props}>{children}</a>
+  default: ({
+    children,
+    prefetch,
+    ...props
+  }: ComponentProps<"a"> & { prefetch?: boolean }) => (
+    <a {...props} data-prefetch={String(prefetch)}>
+      {children}
+    </a>
   ),
 }));
 
@@ -104,7 +110,7 @@ describe("SongCountOverview", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-16T15:33:40.000Z"));
 
-    render(
+    const { container } = render(
       <MantineProvider theme={theme}>
         <SongCountOverview
           items={[
@@ -134,13 +140,22 @@ describe("SongCountOverview", () => {
       "style",
       expect.stringContaining("--badge-bg: var(--mantine-color-tan-light)"),
     );
+    const internalActionLinks = container.querySelectorAll(
+      'a[href^="/discography/"], a[href^="/watch?"]',
+    );
+    expect(internalActionLinks.length).toBeGreaterThan(0);
+    expect(
+      Array.from(internalActionLinks)
+        .filter((link) => link.getAttribute("data-prefetch") !== "false")
+        .map((link) => link.outerHTML),
+    ).toEqual([]);
   });
 
   it("表示用達成日が直近7日なら集計時刻が現在より後でも達成一覧に含める", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-16T15:33:40.000Z"));
 
-    render(
+    const { container } = render(
       <MantineProvider theme={theme}>
         <SongCountOverview
           items={[hotLimitItem]}
@@ -161,5 +176,14 @@ describe("SongCountOverview", () => {
       "style",
       expect.stringContaining("--badge-bg: var(--mantine-color-pink-filled)"),
     );
+    const internalActionLinks = container.querySelectorAll(
+      'a[href^="/discography/"], a[href^="/watch?"]',
+    );
+    expect(internalActionLinks.length).toBeGreaterThan(0);
+    expect(
+      Array.from(internalActionLinks)
+        .filter((link) => link.getAttribute("data-prefetch") !== "false")
+        .map((link) => link.outerHTML),
+    ).toEqual([]);
   });
 });
