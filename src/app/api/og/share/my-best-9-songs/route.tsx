@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { Song } from "@/app/types/song";
 import { siteConfig } from "@/app/config/siteConfig";
-import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import { fetchSongsFromApiWithRecentFallback } from "@/app/lib/server/fetchSongs";
 import {
   fetchOgFonts,
   normalizeOgText,
@@ -34,8 +34,36 @@ const normalizeStart = (value: unknown): string | null => {
   return withoutSuffix;
 };
 
+const resolveSelectedSongs = (
+  songs: Song[],
+  entries: { v: string; s: string }[],
+) =>
+  entries
+    .map((entry) => {
+      const normalizedEntryStart = normalizeStart(entry.s);
+      if (!normalizedEntryStart) return undefined;
+
+      const exact = songs.find((song) => {
+        const normalizedSongStart = normalizeStart(song.start);
+        return (
+          song.video_id === entry.v &&
+          normalizedSongStart !== null &&
+          normalizedSongStart === normalizedEntryStart
+        );
+      });
+      if (exact) return exact;
+
+      const sameVideoSongs = songs.filter((song) => song.video_id === entry.v);
+      return sameVideoSongs.length === 1 ? sameVideoSongs[0] : undefined;
+    })
+    .filter((song): song is Song => song !== undefined)
+    .slice(0, 9);
+
 const fallbackOgImage = async () => {
-  const fonts = await fetchOgFonts("好きな曲9選 AZKi Song Database");
+  const fonts = await fetchOgFonts(
+    "好きな曲9選 AZKi Song Database",
+    "best-nine",
+  );
 
   return new ImageResponse(
     <div
@@ -123,39 +151,19 @@ export async function GET(req: NextRequest) {
     }
 
     // 曲データを取得
-    const songs = await fetchSongsFromApiCached({
-      locale: hl,
-      baseUrlOverride: origin,
-    }).catch(() => []);
+    const expectedEntries = selection.songs.slice(0, 9);
+    const songs = await fetchSongsFromApiWithRecentFallback(
+      {
+        locale: hl,
+        baseUrlOverride: origin,
+      },
+      (candidateSongs) =>
+        resolveSelectedSongs(candidateSongs, expectedEntries).length ===
+        expectedEntries.length,
+    ).catch(() => []);
 
     // 厳選した曲を取得
-    const selectedSongs = selection.songs
-      .map((entry: { v: string; s: string }) => {
-        const normalizedEntryStart = normalizeStart(entry.s);
-        if (!normalizedEntryStart) return undefined;
-
-        const exact = songs.find((s: Song) => {
-          const normalizedSongStart = normalizeStart(s.start);
-          return (
-            s.video_id === entry.v &&
-            normalizedSongStart !== null &&
-            normalizedSongStart === normalizedEntryStart
-          );
-        });
-        if (exact) return exact;
-
-        // 旧データ向け: 同じ動画IDが1件だけなら安全にフォールバック
-        const sameVideoSongs = songs.filter(
-          (s: Song) => s.video_id === entry.v,
-        );
-        if (sameVideoSongs.length === 1) {
-          return sameVideoSongs[0];
-        }
-
-        return undefined;
-      })
-      .filter((s: Song | undefined) => s !== undefined)
-      .slice(0, 9) as Song[];
+    const selectedSongs = resolveSelectedSongs(songs, expectedEntries);
 
     const titleText = normalizeOgText(selection.title.trim() || "好きな曲9選");
     const authorText = selection.author?.trim()
@@ -192,7 +200,7 @@ export async function GET(req: NextRequest) {
       .map((card) => `${card.title}${card.artist}`)
       .join("")}...…,:・`;
 
-    const fonts = await fetchOgFonts(fontTextSeed);
+    const fonts = await fetchOgFonts(fontTextSeed, "best-nine");
 
     return new ImageResponse(
       <div

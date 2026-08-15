@@ -80,6 +80,7 @@ const SongListItem = React.memo(
         >
           <Link
             href={`/watch?v=${song.video_id}${Number(song.start) > 0 ? `&t=${song.start}` : ""}`}
+            prefetch={false}
             className="flex w-full min-w-0 lg:block"
             onClick={(e) => {
               // デフォルトのLinkナビゲーションを防ぎ、

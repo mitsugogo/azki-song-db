@@ -3,11 +3,13 @@ import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import WatchPageClient from "./client";
 import { metadata } from "../layout";
-import { Song } from "../types/song";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
-import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import {
+  fetchSongMetadataLookup,
+  fetchSongsFromApiCached,
+} from "@/app/lib/server/fetchSongs";
 import {
   encodePlaylistOgPayload,
   tryDecodePlaylistUrlParam,
@@ -51,12 +53,23 @@ export async function generateMetadata({
   let ogImageHeight = 630;
   let twitterCard: "summary" | "summary_large_image" = "summary_large_image";
 
-  const fetchSongs = async () => {
+  const fetchSongs = async (
+    videoId: string,
+    start?: string | number | null,
+  ) => {
     const cookie = requestHeaders.get("cookie") ?? "";
+
+    if (!cookie) {
+      return fetchSongMetadataLookup({
+        locale,
+        videoId,
+        start,
+      });
+    }
 
     return fetchSongsFromApiCached({
       locale,
-      includeMembersOnly: Boolean(cookie),
+      includeMembersOnly: true,
       cookie,
     });
   };
@@ -118,9 +131,9 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("t", t);
     ogImageUrl.searchParams.set("hl", locale);
 
-    const songs = await fetchSongs();
+    const songs = await fetchSongs(v, tSeconds ?? t);
     const song = songs.find(
-      (s: Song) =>
+      (s) =>
         s.video_id === v &&
         (tSeconds === null
           ? Number(s.start) === Number(t)
@@ -143,8 +156,8 @@ export async function generateMetadata({
       });
     }
   } else if (v) {
-    const songs = await fetchSongs();
-    const filteredSongs = songs.filter((s: Song) => s.video_id === v);
+    const songs = await fetchSongs(v);
+    const filteredSongs = songs.filter((s) => s.video_id === v);
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];
       if (filteredSongs.length === 1) {

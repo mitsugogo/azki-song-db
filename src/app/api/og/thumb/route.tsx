@@ -1,9 +1,8 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { FaCalendar } from "react-icons/fa6";
-import { Song } from "@/app/types/song";
 import { formatDate } from "@/app/lib/formatDate";
-import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
+import { fetchSongMetadataLookup } from "@/app/lib/server/fetchSongs";
 import {
   fetchOgFonts,
   normalizeOgText,
@@ -15,7 +14,8 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const requestUrl = new URL(req.url);
+    const { searchParams } = requestUrl;
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const v = searchParams.get("v");
     const t = searchParams.get("t") || "0";
@@ -29,9 +29,14 @@ export async function GET(req: NextRequest) {
 
     const video_id = v;
     const start = t.toString().replace("s", "");
-    const songs = await fetchSongsFromApiCached({ locale: hl }).catch(() => []);
+    const songs = await fetchSongMetadataLookup({
+      locale: hl,
+      videoId: video_id,
+      start,
+      baseUrlOverride: requestUrl.origin,
+    }).catch(() => []);
     const song = songs.find(
-      (s: Song) => s.video_id === video_id && Number(s.start) === Number(start),
+      (s) => s.video_id === video_id && Number(s.start) === Number(start),
     );
     if (!song) {
       return new Response("Song not found", { status: 404 });
@@ -46,6 +51,7 @@ export async function GET(req: NextRequest) {
     const tagsText = song.tags.join(" / ");
     const fonts = await fetchOgFonts(
       `${songTitle}${artist}${subTitle}${tagsText}${dateText}`,
+      "detail",
     );
 
     return new ImageResponse(

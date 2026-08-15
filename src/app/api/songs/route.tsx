@@ -1,7 +1,13 @@
+import { createHash } from "node:crypto";
 import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import slugify, { slugifyV2 } from "../../lib/slugify";
-import { songsMembersOnlyQueryParamKey } from "../../lib/songsApi";
+import {
+  privateSongsCacheControl,
+  publicSongsCacheControl,
+  songsMembersOnlyQueryParamKey,
+  songsVersionHeader,
+} from "../../lib/songsApi";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import {
   hasMembersOnlyAccess,
@@ -11,11 +17,8 @@ import {
 } from "@/app/lib/membersOnlyAccess";
 import { Song } from "@/app/types/song";
 
-const publicCacheControl =
-  "public, max-age=0, must-revalidate, s-maxage=86400, stale-while-revalidate=300";
-const privateCacheControl = "private, no-store, max-age=0, must-revalidate";
 const membersOnlyResponseHeaders = {
-  "Cache-Control": privateCacheControl,
+  "Cache-Control": privateSongsCacheControl,
   Vary: "Cookie",
 } as const;
 
@@ -491,7 +494,7 @@ export async function GET(request: Request) {
     const responseHeaders: Record<string, string> = {
       "Cache-Control": includeMembersOnlyRequested
         ? membersOnlyResponseHeaders["Cache-Control"]
-        : publicCacheControl,
+        : publicSongsCacheControl,
       "Vercel-Cache-Tag": buildVercelCacheTagHeader([
         cacheTags.coreDataset,
         cacheTags.songs,
@@ -506,7 +509,7 @@ export async function GET(request: Request) {
       responseHeaders.Vary = membersOnlyResponseHeaders.Vary;
     }
 
-    return NextResponse.json(
+    const responseSongs =
       // 日本語以外の場合、取得が終わったsongsから英語が既に設定されているものがあればそれで上書きして返却する
       !isEnglish
         ? songs
@@ -584,11 +587,22 @@ export async function GET(request: Request) {
                 },
               },
             };
-          }),
-      {
-        headers: responseHeaders,
-      },
-    );
+          });
+
+    const responseBody = JSON.stringify(responseSongs);
+    responseHeaders["Content-Type"] = "application/json; charset=utf-8";
+
+    if (!includeMembersOnlyRequested) {
+      const version = createHash("sha256")
+        .update(responseBody)
+        .digest("base64url");
+      responseHeaders.ETag = `"${version}"`;
+      responseHeaders[songsVersionHeader] = version;
+    }
+
+    return new NextResponse(responseBody, {
+      headers: responseHeaders,
+    });
   } catch (error) {
     console.error("Error fetching data from Google Sheets:", error);
     return NextResponse.json(
@@ -596,4 +610,12 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
+}
+
+export async function HEAD(request: Request) {
+  const response = await GET(request);
+  return new NextResponse(null, {
+    status: response.status,
+    headers: response.headers,
+  });
 }
