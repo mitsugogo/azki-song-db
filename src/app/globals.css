@@ -139,6 +139,13 @@ body {
   padding-block-start: 10px;
 }
 
+.seichi-map-list-actions {
+  background: light-dark(#fff, var(--mantine-color-dark-7));
+  border-block-start: 1px solid var(--mantine-color-default-border);
+  margin-block-end: 6px;
+  margin-inline: 8px;
+}
+
 .gm-style-iw-c:has(.seichi-map-popup),
 .gm-style-iw-d:has(.seichi-map-popup) {
   max-block-size: none !important;

@@ -205,7 +205,7 @@ type GoogleInfoWindow = {
 type GoogleOverlayViewBase = {
   setMap(map: GoogleMapInstance | null): void;
   getProjection?(): GoogleMapProjectionLike | null;
-  getPanes?(): { overlayLayer: Element } | null;
+  getPanes?(): { overlayMouseTarget: Element } | null;
 };
 
 type GoogleMapsCoreLibrary = {
@@ -274,6 +274,7 @@ const defaultCenter = {
 
 const DEFAULT_MAP_ZOOM = 5;
 const CURRENT_LOCATION_MAP_ZOOM = 15;
+const LEAFLET_CURRENT_LOCATION_PANE = "seichi-current-location";
 const MIN_SHARED_MAP_ZOOM = 1;
 const MAX_SHARED_MAP_ZOOM = 21;
 const VISITED_PAGE_SIZE = 50;
@@ -327,6 +328,7 @@ const createCurrentLocationMarkerContent = () => {
   marker.style.border = "3px solid #fff";
   marker.style.borderRadius = "50%";
   marker.style.background = "#1a73e8";
+  marker.style.pointerEvents = "none";
   marker.style.boxShadow =
     "0 1px 4px rgba(0, 0, 0, 0.45), 0 0 0 8px rgba(26, 115, 232, 0.2)";
   return marker;
@@ -726,6 +728,11 @@ const styleInfoWindowButton = (
   element.style.color = "#343a40";
 };
 
+const buildGoogleMapsSearchUrl = (location: LocationOption) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${location.latitude},${location.longitude}`,
+  )}`;
+
 const createSeichiCanvasOverlay = ({
   coreApi,
   mapsApi,
@@ -757,7 +764,8 @@ const createSeichiCanvasOverlay = ({
       this.canvas.style.position = "absolute";
       this.canvas.style.pointerEvents = "none";
       this.canvas.style.zIndex = "1";
-      this.getPanes?.()?.overlayLayer?.appendChild(this.canvas);
+      // 聖地ピンは現在地マーカーより手前、情報ウィンドウより奥に置く。
+      this.getPanes?.()?.overlayMouseTarget?.appendChild(this.canvas);
       this.draw();
     }
 
@@ -2013,6 +2021,10 @@ export default function SeichiMapCompleteClient({
           .canvas({ padding: 0.5 })
           .addTo(map);
         leafletMarkerLayerRef.current = leaflet.layerGroup().addTo(map);
+        const currentLocationPane = map.createPane(
+          LEAFLET_CURRENT_LOCATION_PANE,
+        );
+        currentLocationPane.style.zIndex = "390";
         leafletMapRef.current = map;
 
         map.on("click", () => {
@@ -2037,7 +2049,12 @@ export default function SeichiMapCompleteClient({
             { keepViewport: !isSharedViewRef.current },
           );
         });
-        map.on("popupclose", () => setSelectedLocationId(null));
+        map.on("popupclose", (event) => {
+          if (leafletPopupRef.current !== event.popup) return;
+
+          leafletPopupRef.current = null;
+          setSelectedLocationId(null);
+        });
         setMapReady(true);
       })
       .catch((error) => {
@@ -2082,6 +2099,7 @@ export default function SeichiMapCompleteClient({
             weight: 3,
             fillColor: "#1a73e8",
             fillOpacity: 1,
+            pane: LEAFLET_CURRENT_LOCATION_PANE,
           })
           .bindTooltip(t("currentLocation.markerTitle"))
           .addTo(map);
@@ -2200,6 +2218,18 @@ export default function SeichiMapCompleteClient({
       }
     },
     [t],
+  );
+
+  const recordLocationVisit = useCallback(
+    (location: LocationOption, visitedItem?: VisitedItem) => {
+      if (!isSignedIn) {
+        void signIn("google", { callbackUrl: "/seichi-map" });
+        return;
+      }
+
+      openRecordModal(location, visitedItem);
+    },
+    [isSignedIn, openRecordModal],
   );
 
   const createInfoWindowContent = useCallback(
@@ -2386,9 +2416,7 @@ export default function SeichiMapCompleteClient({
       actions.className = "seichi-map-popup__actions";
 
       const mapsLink = document.createElement("a");
-      mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${location.latitude},${location.longitude}`,
-      )}`;
+      mapsLink.href = buildGoogleMapsSearchUrl(location);
       mapsLink.target = "_blank";
       mapsLink.rel = "noopener noreferrer";
       mapsLink.textContent = t("popup.googleMaps");
@@ -2412,12 +2440,7 @@ export default function SeichiMapCompleteClient({
         recordButton.style.cursor = "pointer";
         styleInfoWindowButton(recordButton, visitedItem ? "light" : "filled");
         recordButton.addEventListener("click", () => {
-          if (!isSignedIn) {
-            void signIn("google", { callbackUrl: "/seichi-map" });
-            return;
-          }
-
-          openRecordModal(location, visitedItem);
+          recordLocationVisit(location, visitedItem);
         });
         actions.appendChild(recordButton);
       }
@@ -2443,9 +2466,8 @@ export default function SeichiMapCompleteClient({
       canEditVisits,
       deleteVisited,
       getVisitedItemForLocation,
-      isSignedIn,
       isSharedView,
-      openRecordModal,
+      recordLocationVisit,
       t,
     ],
   );
@@ -2457,12 +2479,13 @@ export default function SeichiMapCompleteClient({
         const leaflet = leafletApiRef.current;
         if (!map || !leaflet) return;
 
-        setSelectedLocationId(location.id);
-        leafletPopupRef.current = leaflet
+        const popup = leaflet
           .popup()
           .setLatLng([location.latitude, location.longitude])
-          .setContent(createInfoWindowContent(location))
-          .openOn(map);
+          .setContent(createInfoWindowContent(location));
+        leafletPopupRef.current = popup;
+        popup.openOn(map);
+        setSelectedLocationId(location.id);
         return;
       }
 
@@ -2855,6 +2878,61 @@ export default function SeichiMapCompleteClient({
     }
   }, [t]);
 
+  const renderMobileLocationActions = (location: LocationOption) => {
+    const visitedItem = getVisitedItemForLocation(location);
+
+    return (
+      <Group
+        className="seichi-map-list-actions"
+        gap="xs"
+        hiddenFrom="sm"
+        p="xs"
+        wrap="wrap"
+      >
+        <Button
+          component="a"
+          href={buildGoogleMapsSearchUrl(location)}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="default"
+          size="compact-sm"
+        >
+          {t("popup.googleMaps")}
+        </Button>
+        <Button
+          component="a"
+          href={buildDokoAzPostUrl(location.name)}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="default"
+          size="compact-sm"
+        >
+          {t("popup.postDokoAz")}
+        </Button>
+        {!isSharedView ? (
+          <Button
+            variant={visitedItem ? "light" : "filled"}
+            color="pink"
+            size="compact-sm"
+            onClick={() => recordLocationVisit(location, visitedItem)}
+          >
+            {visitedItem ? t("popup.editVisit") : t("popup.recordVisit")}
+          </Button>
+        ) : null}
+        {canEditVisits && visitedItem ? (
+          <Button
+            variant="outline"
+            color="red"
+            size="compact-sm"
+            onClick={() => void deleteVisited(visitedItem.id)}
+          >
+            {t("popup.deleteVisited")}
+          </Button>
+        ) : null}
+      </Group>
+    );
+  };
+
   return (
     <main className={pageClasses.shellFlushBottom}>
       <Breadcrumbs
@@ -3021,29 +3099,6 @@ export default function SeichiMapCompleteClient({
                 </Paper>
               ) : null}
             </Box>
-            {mapProvider === "gsi" || mapProvider === "osm" ? (
-              <Box
-                className="absolute bottom-2 left-2 rounded bg-white/90 px-1.5 py-0.5 shadow-sm dark:bg-gray-900/90"
-                style={{ zIndex: 1000 }}
-              >
-                <Text
-                  component="a"
-                  href={
-                    mapProvider === "osm"
-                      ? "https://www.openstreetmap.org/copyright"
-                      : "https://maps.gsi.go.jp/help/termsofuse.html"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  size="xs"
-                  c="dimmed"
-                >
-                  {mapProvider === "osm"
-                    ? t("mapProvider.osmAttribution")
-                    : t("mapProvider.gsiAttribution")}
-                </Text>
-              </Box>
-            ) : null}
             {isLeafletMapProvider(mapProvider) ? (
               <>
                 {isIosMapDevice === false ? (
@@ -3340,58 +3395,62 @@ export default function SeichiMapCompleteClient({
                                       const visitedLocation =
                                         isLocationVisited(item);
                                       return (
-                                        <NavLink
-                                          key={item.key}
-                                          variant="light"
-                                          color={
-                                            visitedLocation ? "green" : "pink"
-                                          }
-                                          active={
-                                            selectedLocationId === item.id
-                                          }
-                                          onClick={() =>
-                                            showLocationOnMap(item)
-                                          }
-                                          label={item.name}
-                                          description={
-                                            item.description ? (
-                                              <Text
-                                                size="xs"
-                                                c="dimmed"
-                                                lineClamp={1}
-                                              >
-                                                {stripHtmlToLines(
-                                                  item.description,
-                                                )}
-                                              </Text>
-                                            ) : undefined
-                                          }
-                                          leftSection={
-                                            <ThemeIcon
-                                              size={30}
-                                              radius="xl"
-                                              variant="light"
-                                              color={
-                                                visitedLocation
-                                                  ? "green"
-                                                  : "pink"
-                                              }
-                                            >
-                                              <FiMapPin size={14} />
-                                            </ThemeIcon>
-                                          }
-                                          rightSection={
-                                            visitedLocation ? (
-                                              <Badge
+                                        <Box key={item.key}>
+                                          <NavLink
+                                            variant="light"
+                                            color={
+                                              visitedLocation ? "green" : "pink"
+                                            }
+                                            active={
+                                              selectedLocationId === item.id
+                                            }
+                                            onClick={() =>
+                                              showLocationOnMap(item)
+                                            }
+                                            label={item.name}
+                                            description={
+                                              item.description ? (
+                                                <Text
+                                                  size="xs"
+                                                  c="dimmed"
+                                                  lineClamp={1}
+                                                >
+                                                  {stripHtmlToLines(
+                                                    item.description,
+                                                  )}
+                                                </Text>
+                                              ) : undefined
+                                            }
+                                            leftSection={
+                                              <ThemeIcon
+                                                size={30}
+                                                radius="xl"
                                                 variant="light"
-                                                color="green"
-                                                size="xs"
+                                                color={
+                                                  visitedLocation
+                                                    ? "green"
+                                                    : "pink"
+                                                }
                                               >
-                                                {t("list.visitedBadge")}
-                                              </Badge>
-                                            ) : null
-                                          }
-                                        />
+                                                <FiMapPin size={14} />
+                                              </ThemeIcon>
+                                            }
+                                            rightSection={
+                                              visitedLocation ? (
+                                                <Badge
+                                                  variant="light"
+                                                  color="green"
+                                                  size="xs"
+                                                >
+                                                  {t("list.visitedBadge")}
+                                                </Badge>
+                                              ) : null
+                                            }
+                                          />
+                                          {selectedLocationId === item.id
+                                            ? renderMobileLocationActions(item)
+                                            : null}
+                                        </Box>
                                       );
                                     })}
                                   </Stack>
@@ -3453,50 +3512,60 @@ export default function SeichiMapCompleteClient({
                             ({ location: item, distanceMeters }) => {
                               const visitedLocation = isLocationVisited(item);
                               return (
-                                <NavLink
-                                  key={item.key}
-                                  variant="light"
-                                  color={visitedLocation ? "green" : "pink"}
-                                  active={selectedLocationId === item.id}
-                                  onClick={() => showLocationOnMap(item)}
-                                  label={item.name}
-                                  description={
-                                    <Stack gap={0}>
-                                      <Text size="xs" c="dimmed" lineClamp={1}>
-                                        {getLocationLayerName(
-                                          item,
-                                          uncategorizedLayerName,
-                                        )}
-                                      </Text>
-                                      {item.description ? (
+                                <Box key={item.key}>
+                                  <NavLink
+                                    variant="light"
+                                    color={visitedLocation ? "green" : "pink"}
+                                    active={selectedLocationId === item.id}
+                                    onClick={() => showLocationOnMap(item)}
+                                    label={item.name}
+                                    description={
+                                      <Stack gap={0}>
                                         <Text
                                           size="xs"
                                           c="dimmed"
                                           lineClamp={1}
                                         >
-                                          {stripHtmlToLines(item.description)}
+                                          {getLocationLayerName(
+                                            item,
+                                            uncategorizedLayerName,
+                                          )}
                                         </Text>
-                                      ) : null}
-                                    </Stack>
-                                  }
-                                  leftSection={
-                                    <ThemeIcon
-                                      size={30}
-                                      radius="xl"
-                                      variant="light"
-                                      color={visitedLocation ? "green" : "pink"}
-                                    >
-                                      <FiMapPin size={14} />
-                                    </ThemeIcon>
-                                  }
-                                  rightSection={
-                                    <Badge variant="light" color="blue">
-                                      {formatStraightLineDistance(
-                                        distanceMeters,
-                                      )}
-                                    </Badge>
-                                  }
-                                />
+                                        {item.description ? (
+                                          <Text
+                                            size="xs"
+                                            c="dimmed"
+                                            lineClamp={1}
+                                          >
+                                            {stripHtmlToLines(item.description)}
+                                          </Text>
+                                        ) : null}
+                                      </Stack>
+                                    }
+                                    leftSection={
+                                      <ThemeIcon
+                                        size={30}
+                                        radius="xl"
+                                        variant="light"
+                                        color={
+                                          visitedLocation ? "green" : "pink"
+                                        }
+                                      >
+                                        <FiMapPin size={14} />
+                                      </ThemeIcon>
+                                    }
+                                    rightSection={
+                                      <Badge variant="light" color="blue">
+                                        {formatStraightLineDistance(
+                                          distanceMeters,
+                                        )}
+                                      </Badge>
+                                    }
+                                  />
+                                  {selectedLocationId === item.id
+                                    ? renderMobileLocationActions(item)
+                                    : null}
+                                </Box>
                               );
                             },
                           )}
