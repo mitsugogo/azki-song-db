@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.25.0](https://github.com/mitsugogo/azki-song-db/compare/v2.24.1...v2.25.0) (2026-08-16)
+
+### Features
+
+* **seichi-map:** OSM、GSIで全画面表示もできるように ([a8e6111](https://github.com/mitsugogo/azki-song-db/commit/a8e61110b8af96752944ae30545459d6461d3047))
+
 ## [2.24.1](https://github.com/mitsugogo/azki-song-db/compare/v2.24.0...v2.24.1) (2026-08-14)
 
 ### Bug Fixes
