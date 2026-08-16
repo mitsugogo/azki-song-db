@@ -95,6 +95,13 @@ body {
   font-family: var(--font-sans) !important;
 }
 
+.seichi-map-fullscreen-surface:fullscreen {
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  border-radius: 0;
+}
+
 .outfit-image {
   object-fit: contain;
   position: relative !important;
