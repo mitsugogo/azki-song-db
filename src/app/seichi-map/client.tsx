@@ -73,6 +73,7 @@ import {
 } from "./currentLocation";
 import {
   getGoogleMapFullscreenPortalTarget,
+  isIosDevice,
   toggleElementFullscreen,
 } from "./fullscreen";
 import {
@@ -1232,6 +1233,7 @@ export default function SeichiMapCompleteClient({
     useState<HTMLElement | null>(null);
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
   const [isMapProviderMenuOpen, setIsMapProviderMenuOpen] = useState(false);
+  const [isIosMapDevice, setIsIosMapDevice] = useState<boolean | null>(null);
   const [isLeafletFullscreen, setIsLeafletFullscreen] = useState(false);
   const [listMode, setListMode] = useState<ListMode>("locations");
   const [currentPosition, setCurrentPosition] = useState<{
@@ -1244,6 +1246,10 @@ export default function SeichiMapCompleteClient({
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const mapsMapId =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || DEFAULT_GOOGLE_MAPS_MAP_ID;
+
+  useEffect(() => {
+    setIsIosMapDevice(isIosDevice());
+  }, []);
 
   useEffect(() => {
     const storedProvider = readSeichiMapProvider(window.localStorage);
@@ -1788,7 +1794,7 @@ export default function SeichiMapCompleteClient({
   }, [requestCurrentLocation]);
 
   useEffect(() => {
-    if (mapProvider !== "google") {
+    if (mapProvider !== "google" || isIosMapDevice === null) {
       return;
     }
 
@@ -1815,7 +1821,7 @@ export default function SeichiMapCompleteClient({
             mapId: mapsMapId,
             mapTypeControl: false,
             clickableIcons: false,
-            fullscreenControl: true,
+            fullscreenControl: !isIosMapDevice,
             streetViewControl: true,
           });
           infoWindowRef.current = new InfoWindow();
@@ -1973,7 +1979,7 @@ export default function SeichiMapCompleteClient({
       mapRef.current = null;
       mapElementRef.current?.replaceChildren();
     };
-  }, [mapProvider, mapsKey, mapsLanguage, mapsMapId, t]);
+  }, [isIosMapDevice, mapProvider, mapsKey, mapsLanguage, mapsMapId, t]);
 
   useEffect(() => {
     if (!isLeafletMapProvider(mapProvider) || !mapElementRef.current) {
@@ -2205,15 +2211,16 @@ export default function SeichiMapCompleteClient({
         location.description,
       );
       const content = document.createElement("div");
+      content.className = "seichi-map-popup";
       content.style.color = "#212529";
       content.style.fontFamily =
         "var(--mantine-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif)";
       content.style.fontSize = "13px";
       content.style.fontWeight = "500";
       content.style.lineHeight = "1.55";
-      content.style.maxWidth = "350px";
-      content.style.minWidth = "280px";
-      content.style.padding = "2px 2px 4px";
+
+      const body = document.createElement("div");
+      body.className = "seichi-map-popup__body";
 
       const title = document.createElement("strong");
       title.style.color = "#1a1b1e";
@@ -2222,7 +2229,7 @@ export default function SeichiMapCompleteClient({
       title.style.fontWeight = "700";
       title.style.lineHeight = "1.45";
       title.textContent = location.name;
-      content.appendChild(title);
+      body.appendChild(title);
 
       const folder = document.createElement("div");
       folder.textContent = location.folder;
@@ -2230,7 +2237,7 @@ export default function SeichiMapCompleteClient({
       folder.style.fontSize = "12px";
       folder.style.fontWeight = "600";
       folder.style.color = "#868e96";
-      content.appendChild(folder);
+      body.appendChild(folder);
 
       if (location.uniqueVisitorCount > 0) {
         const visitorCount = document.createElement("div");
@@ -2241,7 +2248,7 @@ export default function SeichiMapCompleteClient({
         visitorCount.style.fontSize = "12px";
         visitorCount.style.fontWeight = "700";
         visitorCount.style.marginTop = "2px";
-        content.appendChild(visitorCount);
+        body.appendChild(visitorCount);
       }
 
       if (visitedItem) {
@@ -2256,7 +2263,7 @@ export default function SeichiMapCompleteClient({
         visitedStatus.textContent = visitedDateLabel
           ? t("popup.visitedAt", { date: visitedDateLabel })
           : t("popup.visited");
-        content.appendChild(visitedStatus);
+        body.appendChild(visitedStatus);
       }
 
       if (displayDescription) {
@@ -2267,7 +2274,7 @@ export default function SeichiMapCompleteClient({
         description.style.lineHeight = "1.55";
         description.style.whiteSpace = "normal";
         appendLinkedText(description, displayDescription);
-        content.appendChild(description);
+        body.appendChild(description);
       }
 
       youtubeReferences.forEach((reference) => {
@@ -2372,14 +2379,11 @@ export default function SeichiMapCompleteClient({
 
         card.appendChild(thumbnailWrap);
         card.appendChild(cardBody);
-        content.appendChild(card);
+        body.appendChild(card);
       });
 
       const actions = document.createElement("div");
-      actions.style.display = "flex";
-      actions.style.flexWrap = "wrap";
-      actions.style.gap = "8px";
-      actions.style.marginTop = "14px";
+      actions.className = "seichi-map-popup__actions";
 
       const mapsLink = document.createElement("a");
       mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -2431,7 +2435,7 @@ export default function SeichiMapCompleteClient({
         actions.appendChild(deleteButton);
       }
 
-      content.appendChild(actions);
+      content.append(body, actions);
       return content;
     },
     [
@@ -2957,7 +2961,6 @@ export default function SeichiMapCompleteClient({
             radius="md"
             shadow="sm"
             className="seichi-map-fullscreen-surface relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80"
-            style={{ height: "70vh", minHeight: 460 }}
           >
             <Box
               className="absolute right-3 flex flex-col items-end"
@@ -3043,29 +3046,31 @@ export default function SeichiMapCompleteClient({
             ) : null}
             {isLeafletMapProvider(mapProvider) ? (
               <>
-                <button
-                  type="button"
-                  className="absolute top-3 right-16 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50"
-                  style={{ zIndex: 1000 }}
-                  title={
-                    isLeafletFullscreen
-                      ? t("fullscreen.exit")
-                      : t("fullscreen.enter")
-                  }
-                  aria-label={
-                    isLeafletFullscreen
-                      ? t("fullscreen.exit")
-                      : t("fullscreen.enter")
-                  }
-                  aria-pressed={isLeafletFullscreen}
-                  onClick={() => void toggleLeafletFullscreen()}
-                >
-                  {isLeafletFullscreen ? (
-                    <FiMinimize size={20} aria-hidden="true" />
-                  ) : (
-                    <FiMaximize size={20} aria-hidden="true" />
-                  )}
-                </button>
+                {isIosMapDevice === false ? (
+                  <button
+                    type="button"
+                    className="absolute top-3 right-16 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50"
+                    style={{ zIndex: 1000 }}
+                    title={
+                      isLeafletFullscreen
+                        ? t("fullscreen.exit")
+                        : t("fullscreen.enter")
+                    }
+                    aria-label={
+                      isLeafletFullscreen
+                        ? t("fullscreen.exit")
+                        : t("fullscreen.enter")
+                    }
+                    aria-pressed={isLeafletFullscreen}
+                    onClick={() => void toggleLeafletFullscreen()}
+                  >
+                    {isLeafletFullscreen ? (
+                      <FiMinimize size={20} aria-hidden="true" />
+                    ) : (
+                      <FiMaximize size={20} aria-hidden="true" />
+                    )}
+                  </button>
+                ) : null}
                 <button
                   ref={currentLocationControlRef}
                   type="button"

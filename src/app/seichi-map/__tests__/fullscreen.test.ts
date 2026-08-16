@@ -1,8 +1,48 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   getGoogleMapFullscreenPortalTarget,
+  isIosDevice,
   toggleElementFullscreen,
 } from "../fullscreen";
+
+describe("isIosDevice", () => {
+  it("iPhoneをiOS端末として判定する", () => {
+    expect(
+      isIosDevice({
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+        maxTouchPoints: 5,
+      }),
+    ).toBe(true);
+  });
+
+  it("デスクトップ表示のiPadOSをiOS端末として判定する", () => {
+    expect(
+      isIosDevice({
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.5 Safari/605.1.15",
+        maxTouchPoints: 5,
+      }),
+    ).toBe(true);
+  });
+
+  it("タッチ非対応のmacOSとAndroidはiOS端末として扱わない", () => {
+    expect(
+      isIosDevice({
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.5 Safari/605.1.15",
+        maxTouchPoints: 0,
+      }),
+    ).toBe(false);
+    expect(
+      isIosDevice({
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/136.0 Mobile Safari/537.36",
+        maxTouchPoints: 5,
+      }),
+    ).toBe(false);
+  });
+});
 
 describe("toggleElementFullscreen", () => {
   it("通常表示から対象要素を全画面表示にする", async () => {
