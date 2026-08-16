@@ -25,7 +25,7 @@ import {
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
 import {
   OverlayScrollbarsComponent,
   OverlayScrollbarsComponentRef,
@@ -82,6 +82,7 @@ import {
 } from "./archiveSearch";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
+import { ScrollToTopButton } from "../components/ScrollToTopButton";
 
 type ArchiveGroup = {
   key: string;
@@ -1135,7 +1136,11 @@ export default function ArchivesPageClient() {
     string | null
   >(null);
   const [isActivityVisible, setIsActivityVisible] = useState(false);
+  const [areMobileFiltersOpen, setAreMobileFiltersOpen] = useState(false);
+  const [mobileScrollMargin, setMobileScrollMargin] = useState(0);
   const [archiveScrollTop, setArchiveScrollTop] = useState(0);
+  const [archiveScrollViewport, setArchiveScrollViewport] =
+    useState<HTMLElement | null>(null);
   const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
     string | null
   >(null);
@@ -1143,6 +1148,7 @@ export default function ArchivesPageClient() {
   const [sortState, setSortState] =
     useState<ArchiveSortState>(DEFAULT_ARCHIVE_SORT);
   const archiveScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
   const isFilterInputFocusedRef = useRef(false);
 
   const normalizedQuery = useMemo(
@@ -1270,19 +1276,30 @@ export default function ArchivesPageClient() {
     });
   }, [archiveActivitySummary]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: viewMode === "list" ? archiveEntries.length : 0,
+  const desktopRowVirtualizer = useVirtualizer({
+    count: isDesktop && viewMode === "list" ? archiveEntries.length : 0,
     getScrollElement: () =>
       archiveScrollRef.current?.osInstance()?.elements().viewport as Element,
     estimateSize: (index) => {
       const entry = archiveEntries[index];
-      if (entry?.type === "group") {
-        return isDesktop ? 74 : 68;
-      }
-      return isDesktop ? 132 : 440;
+      return entry?.type === "group" ? 74 : 132;
     },
     overscan: 8,
   });
+
+  const mobileRowVirtualizer = useWindowVirtualizer({
+    count: !isDesktop && viewMode === "list" ? archiveEntries.length : 0,
+    estimateSize: (index) => {
+      const entry = archiveEntries[index];
+      return entry?.type === "group" ? 68 : 440;
+    },
+    scrollMargin: mobileScrollMargin,
+    overscan: 8,
+  });
+
+  const rowVirtualizer = isDesktop
+    ? desktopRowVirtualizer
+    : mobileRowVirtualizer;
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
@@ -1356,6 +1373,56 @@ export default function ArchivesPageClient() {
   }, []);
 
   useEffect(() => {
+    if (isDesktop || viewMode !== "list") {
+      return;
+    }
+
+    let frameId: number | null = null;
+    const updateScrollMargin = () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        const listElement = mobileListRef.current;
+        if (!listElement) {
+          return;
+        }
+
+        const nextScrollMargin =
+          listElement.getBoundingClientRect().top + window.scrollY;
+        setMobileScrollMargin((current) =>
+          Math.abs(current - nextScrollMargin) < 1 ? current : nextScrollMargin,
+        );
+      });
+    };
+
+    updateScrollMargin();
+    window.addEventListener("resize", updateScrollMargin);
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      window.removeEventListener("resize", updateScrollMargin);
+    };
+  }, [
+    archiveEntries.length,
+    areMobileFiltersOpen,
+    isActivityVisible,
+    isDesktop,
+    isLoading,
+    selectedActivityYear,
+    viewMode,
+  ]);
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setArchiveScrollTop(0);
+      setArchiveScrollViewport(null);
+      return;
+    }
+
     let viewport: HTMLElement | null = null;
     let bindFrameId: number | null = null;
     let animationFrameId: number | null = null;
@@ -1389,6 +1456,7 @@ export default function ArchivesPageClient() {
       }
 
       viewport = nextViewport;
+      setArchiveScrollViewport(nextViewport);
       updateScrollTop();
       viewport.addEventListener("scroll", scheduleUpdateScrollTop, {
         passive: true,
@@ -1621,7 +1689,7 @@ export default function ArchivesPageClient() {
   }, []);
 
   return (
-    <div className={pageClasses.shellFlushBottom}>
+    <div className={`${pageClasses.shellFlushBottom} max-md:overflow-visible`}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -1636,11 +1704,28 @@ export default function ArchivesPageClient() {
       </Breadcrumbs>
 
       <div>
-        <h1 className={pageClasses.heading}>{t("title")}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className={pageClasses.heading}>{t("title")}</h1>
+          <Button
+            variant="subtle"
+            color="green"
+            size="compact-sm"
+            leftSection={<HiChartBar className="h-4 w-4" />}
+            aria-label={
+              isActivityVisible ? t("activityHide") : t("activityShow")
+            }
+            aria-expanded={isActivityVisible}
+            aria-controls="archive-activity"
+            onClick={() => setIsActivityVisible((current) => !current)}
+            className="shrink-0"
+          >
+            {t("activityLabel")}
+          </Button>
+        </div>
         <p className={pageClasses.description}>{t("description")}</p>
       </div>
 
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 md:static md:mx-0 md:mb-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
         <SegmentedControl
           value={viewMode}
           aria-label={t("viewModeSwitchAriaLabel")}
@@ -1649,101 +1734,119 @@ export default function ArchivesPageClient() {
             { value: "list", label: t("videoListViewLabel") },
           ]}
           onChange={handleViewModeChange}
-          className="w-full md:w-auto"
+          className="mb-3 w-full md:mb-4 md:w-auto"
         />
-        <Button
-          variant="light"
-          color="green"
-          leftSection={<HiChartBar />}
-          onClick={() => setIsActivityVisible((current) => !current)}
-          className="md:ml-auto"
-        >
-          {isActivityVisible ? t("activityHide") : t("activityShow")}
-        </Button>
+
+        <div className="md:mb-4">
+          <Button
+            variant="light"
+            color="gray"
+            leftSection={<HiSearch />}
+            rightSection={
+              <HiChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  areMobileFiltersOpen ? "rotate-180" : ""
+                }`}
+              />
+            }
+            aria-expanded={areMobileFiltersOpen}
+            aria-controls="archive-search-filters"
+            onClick={() => setAreMobileFiltersOpen((current) => !current)}
+            className="mb-3 w-full md:hidden"
+          >
+            {t("filterToggleLabel")}
+          </Button>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div
+              id="archive-search-filters"
+              className={`${
+                areMobileFiltersOpen ? "grid" : "hidden"
+              } flex-1 grid-cols-1 gap-3 md:grid ${
+                viewMode === "list"
+                  ? "lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]"
+                  : "lg:grid-cols-[minmax(240px,1.4fr)_minmax(260px,1fr)_auto_auto]"
+              }`}
+            >
+              <TextInput
+                value={filterQuery}
+                placeholder={t("searchPlaceholder")}
+                leftSection={<HiSearch />}
+                onChange={handleFilterQueryChange}
+                onFocus={handleFilterQueryFocus}
+                onBlur={handleFilterQueryBlur}
+              />
+              {viewMode === "list" && (
+                <Select
+                  data={seriesOptions}
+                  value={selectedSeriesKey}
+                  placeholder={t("seriesPlaceholder")}
+                  leftSection={<BiSolidVideos />}
+                  searchable
+                  clearable
+                  maxDropdownHeight={320}
+                  nothingFoundMessage={t("seriesNothingFound")}
+                  onChange={handleSeriesKeyChange}
+                />
+              )}
+              <DatePickerInput
+                type="range"
+                value={dateRange}
+                placeholder={t("dateRangePlaceholder")}
+                leftSection={<HiCalendar />}
+                clearable
+                valueFormat="YYYY/MM/DD"
+                onChange={handleDateRangeChange}
+              />
+              <Checkbox
+                checked={includeShorts}
+                label={t("includeShortsLabel")}
+                className="self-center"
+                onChange={handleIncludeShortsChange}
+              />
+              {hasDetailedFilters && (
+                <Button
+                  variant="light"
+                  color="gray"
+                  leftSection={<HiX />}
+                  onClick={handleClearDetailedFilters}
+                >
+                  {t("clearFilters")}
+                </Button>
+              )}
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 md:justify-end">
+              <p>
+                {t("resultCount", { count: displayCount, total: totalCount })}
+              </p>
+              <p>{t("seriesCount", { count: displayGroupCount })}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {!isLoading && isActivityVisible && (
-        <ArchiveContributionHeatmap
-          summary={archiveActivitySummary}
-          selectedYear={selectedActivityYear}
-          locale={locale}
-          labels={{
-            title: t("activityTitle"),
-            totalDuration: (duration) =>
-              t("activityTotalDuration", { duration }),
-            yearLabel: t("activityYearLabel"),
-            legendLess: t("activityLegendLess"),
-            legendMore: t("activityLegendMore"),
-            cellLabel: (date, duration, count) =>
-              t("activityCellLabel", { date, duration, count }),
-            emptyCellLabel: (date) => t("activityEmptyCellLabel", { date }),
-            noData: t("activityNoData"),
-          }}
-          onSelectedYearChange={setSelectedActivityYear}
-          onDateClick={handleActivityDateClick}
-        />
+        <div id="archive-activity">
+          <ArchiveContributionHeatmap
+            summary={archiveActivitySummary}
+            selectedYear={selectedActivityYear}
+            locale={locale}
+            labels={{
+              title: t("activityTitle"),
+              totalDuration: (duration) =>
+                t("activityTotalDuration", { duration }),
+              yearLabel: t("activityYearLabel"),
+              legendLess: t("activityLegendLess"),
+              legendMore: t("activityLegendMore"),
+              cellLabel: (date, duration, count) =>
+                t("activityCellLabel", { date, duration, count }),
+              emptyCellLabel: (date) => t("activityEmptyCellLabel", { date }),
+              noData: t("activityNoData"),
+            }}
+            onSelectedYearChange={setSelectedActivityYear}
+            onDateClick={handleActivityDateClick}
+          />
+        </div>
       )}
-
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div
-          className={`grid flex-1 grid-cols-1 gap-3 ${
-            viewMode === "list"
-              ? "lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]"
-              : "lg:grid-cols-[minmax(240px,1.4fr)_minmax(260px,1fr)_auto_auto]"
-          }`}
-        >
-          <TextInput
-            value={filterQuery}
-            placeholder={t("searchPlaceholder")}
-            leftSection={<HiSearch />}
-            onChange={handleFilterQueryChange}
-            onFocus={handleFilterQueryFocus}
-            onBlur={handleFilterQueryBlur}
-          />
-          {viewMode === "list" && (
-            <Select
-              data={seriesOptions}
-              value={selectedSeriesKey}
-              placeholder={t("seriesPlaceholder")}
-              leftSection={<BiSolidVideos />}
-              searchable
-              clearable
-              maxDropdownHeight={320}
-              nothingFoundMessage={t("seriesNothingFound")}
-              onChange={handleSeriesKeyChange}
-            />
-          )}
-          <DatePickerInput
-            type="range"
-            value={dateRange}
-            placeholder={t("dateRangePlaceholder")}
-            leftSection={<HiCalendar />}
-            clearable
-            valueFormat="YYYY/MM/DD"
-            onChange={handleDateRangeChange}
-          />
-          <Checkbox
-            checked={includeShorts}
-            label={t("includeShortsLabel")}
-            className="self-center"
-            onChange={handleIncludeShortsChange}
-          />
-          {hasDetailedFilters && (
-            <Button
-              variant="light"
-              color="gray"
-              leftSection={<HiX />}
-              onClick={handleClearDetailedFilters}
-            >
-              {t("clearFilters")}
-            </Button>
-          )}
-        </div>
-        <div className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 md:justify-end">
-          <p>{t("resultCount", { count: displayCount, total: totalCount })}</p>
-          <p>{t("seriesCount", { count: displayGroupCount })}</p>
-        </div>
-      </div>
 
       {isLoading ? (
         <LoadingOverlay
@@ -1939,75 +2042,76 @@ export default function ArchivesPageClient() {
           </OverlayScrollbarsComponent>
         </div>
       ) : (
-        <OverlayScrollbarsComponent
-          ref={archiveScrollRef}
-          className="h-[calc(100dvh-490px)] pr-1 md:h-[calc(100dvh-290px)]"
+        <div
+          ref={mobileListRef}
+          className="relative pr-1"
+          style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
         >
-          <div
-            className="relative"
-            style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
-          >
-            {virtualRows.map((virtualRow) => {
-              const entry = archiveEntries[virtualRow.index];
-              if (!entry) {
-                return null;
+          {virtualRows.map((virtualRow) => {
+            const entry = archiveEntries[virtualRow.index];
+            if (!entry) {
+              return null;
+            }
+
+            let rowElement: HTMLDivElement | null = null;
+            const measureRowElement = (element: HTMLDivElement | null) => {
+              rowElement = element;
+              if (element) {
+                rowVirtualizer.measureElement(element);
               }
-
-              let rowElement: HTMLDivElement | null = null;
-              const measureRowElement = (element: HTMLDivElement | null) => {
-                rowElement = element;
-                if (element) {
-                  rowVirtualizer.measureElement(element);
+            };
+            const scheduleRowMeasure = () => {
+              window.requestAnimationFrame(() => {
+                if (rowElement) {
+                  rowVirtualizer.measureElement(rowElement);
                 }
-              };
-              const scheduleRowMeasure = () => {
-                window.requestAnimationFrame(() => {
-                  if (rowElement) {
-                    rowVirtualizer.measureElement(rowElement);
-                  }
-                });
-              };
+              });
+            };
 
-              return (
-                <div
-                  key={entry.key}
-                  ref={measureRowElement}
-                  data-index={virtualRow.index}
-                  className="absolute left-0 top-0 w-full"
-                  style={{
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  {entry.type === "group" ? (
-                    <MobileGroupHeader
-                      group={entry.group}
-                      locale={locale}
-                      highlightQuery={deferredFilterQuery}
-                      itemsCountLabel={t("itemsCount", {
-                        count: entry.group.items.length,
-                      })}
-                    />
-                  ) : (
-                    <MobileArchiveCard
-                      item={entry.item}
-                      locale={locale}
-                      appWatchLabel={t("appWatchLabel")}
-                      timestampLabel={t("timestampLabel")}
-                      anchorLinkLabel={t("anchorLinkLabel")}
-                      anchorCopiedLabel={t("anchorCopiedLabel")}
-                      highlightQuery={deferredFilterQuery}
-                      isAnchored={
-                        activeArchiveAnchorVideoId === entry.item.video_id
-                      }
-                      onTimestampResize={scheduleRowMeasure}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </OverlayScrollbarsComponent>
+            return (
+              <div
+                key={entry.key}
+                ref={measureRowElement}
+                data-index={virtualRow.index}
+                className="absolute left-0 top-0 w-full"
+                style={{
+                  transform: `translateY(${
+                    virtualRow.start - mobileScrollMargin
+                  }px)`,
+                }}
+              >
+                {entry.type === "group" ? (
+                  <MobileGroupHeader
+                    group={entry.group}
+                    locale={locale}
+                    highlightQuery={deferredFilterQuery}
+                    itemsCountLabel={t("itemsCount", {
+                      count: entry.group.items.length,
+                    })}
+                  />
+                ) : (
+                  <MobileArchiveCard
+                    item={entry.item}
+                    locale={locale}
+                    appWatchLabel={t("appWatchLabel")}
+                    timestampLabel={t("timestampLabel")}
+                    anchorLinkLabel={t("anchorLinkLabel")}
+                    anchorCopiedLabel={t("anchorCopiedLabel")}
+                    highlightQuery={deferredFilterQuery}
+                    isAnchored={
+                      activeArchiveAnchorVideoId === entry.item.video_id
+                    }
+                    onTimestampResize={scheduleRowMeasure}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
+      <ScrollToTopButton
+        scrollElement={isDesktop ? archiveScrollViewport : null}
+      />
     </div>
   );
 }
