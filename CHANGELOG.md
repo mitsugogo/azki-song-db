@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.25.1](https://github.com/mitsugogo/azki-song-db/compare/v2.25.0...v2.25.1) (2026-08-16)
+
+### Bug Fixes
+
+* **archive:** スマホレイアウト調整 ([a81eb88](https://github.com/mitsugogo/azki-song-db/commit/a81eb880e67e4632ffdcf290a7d81032ece6f43f))
+* **seichi-map:** DPIの低いスマホで吹き出し内の訪問済が押せなかったのを修正 ([0cea480](https://github.com/mitsugogo/azki-song-db/commit/0cea480e649916a2f053faff2a125c2e1b91fcb0))
+* **seichi-map:** スマホでの操作感を改善 ([eae884a](https://github.com/mitsugogo/azki-song-db/commit/eae884af10ead3302097bd950f01d7a628bc7aff))
+
 ## [2.25.0](https://github.com/mitsugogo/azki-song-db/compare/v2.24.1...v2.25.0) (2026-08-16)
 
 ### Features
