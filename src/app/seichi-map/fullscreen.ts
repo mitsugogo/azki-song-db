@@ -1,5 +1,22 @@
 type FullscreenDocument = Pick<Document, "fullscreenElement">;
 
+type FullscreenController = Pick<
+  Document,
+  "exitFullscreen" | "fullscreenElement"
+>;
+
+export const toggleElementFullscreen = async (
+  element: HTMLElement,
+  fullscreenDocument: FullscreenController = document,
+) => {
+  if (fullscreenDocument.fullscreenElement === element) {
+    await fullscreenDocument.exitFullscreen();
+    return;
+  }
+
+  await element.requestFullscreen();
+};
+
 export const getGoogleMapFullscreenPortalTarget = (
   mapElement: HTMLElement | null,
   fullscreenDocument: FullscreenDocument = document,

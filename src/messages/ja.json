@@ -990,6 +990,10 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps はこの環境では利用できません"
     },
+    "fullscreen": {
+      "enter": "地図を全画面表示",
+      "exit": "全画面表示を終了"
+    },
     "ranking": {
       "open": "ランキング"
     },
@@ -1121,6 +1125,7 @@
       "googleMapsLoadFailed": "Google Mapsの読み込みに失敗しました",
       "googleMapsUnavailable": "Google Maps はこの環境では利用できません",
       "leafletMapLoadFailed": "地図タイルの読み込みに失敗しました",
+      "fullscreenFailed": "地図を全画面表示できませんでした",
       "gsiMapLoadFailed": "地理院地図の読み込みに失敗しました",
       "deleteFailed": "削除に失敗しました",
       "locationNotSelected": "場所が選択されていません",

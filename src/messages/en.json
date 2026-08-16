@@ -999,6 +999,10 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps is unavailable in this environment"
     },
+    "fullscreen": {
+      "enter": "View map fullscreen",
+      "exit": "Exit fullscreen"
+    },
     "ranking": {
       "open": "Rankings"
     },
@@ -1130,6 +1134,7 @@
       "googleMapsLoadFailed": "Failed to load Google Maps",
       "googleMapsUnavailable": "Google Maps is unavailable in this environment",
       "leafletMapLoadFailed": "Failed to load map tiles",
+      "fullscreenFailed": "Failed to display the map fullscreen",
       "gsiMapLoadFailed": "Failed to load GSI Maps",
       "deleteFailed": "Failed to delete",
       "locationNotSelected": "No location is selected",
