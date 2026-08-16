@@ -102,6 +102,70 @@ body {
   border-radius: 0;
 }
 
+.seichi-map-fullscreen-surface {
+  height: 70vh;
+  min-height: 460px;
+}
+
+.seichi-map-popup {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-block-size: min(420px, calc(100dvh - 160px));
+  max-inline-size: min(350px, calc(100dvw - 64px));
+  min-inline-size: min(280px, calc(100dvw - 64px));
+  overflow: hidden;
+  padding: 2px 2px 4px;
+}
+
+.seichi-map-popup__body {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline-end: 2px;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.seichi-map-popup__actions {
+  align-items: center;
+  background: #fff;
+  border-block-start: 1px solid #e9ecef;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+}
+
+.seichi-map-list-actions {
+  background: light-dark(#fff, var(--mantine-color-dark-7));
+  border-block-start: 1px solid var(--mantine-color-default-border);
+  margin-block-end: 6px;
+  margin-inline: 8px;
+}
+
+.gm-style-iw-c:has(.seichi-map-popup),
+.gm-style-iw-d:has(.seichi-map-popup) {
+  max-block-size: none !important;
+}
+
+.gm-style-iw-d:has(.seichi-map-popup) {
+  overflow: hidden !important;
+}
+
+@media (max-width: 61.99em) {
+  .seichi-map-fullscreen-surface {
+    height: clamp(280px, calc(100dvh - 304px), 70dvh);
+    min-height: 280px;
+  }
+
+  .seichi-map-popup {
+    max-block-size: clamp(160px, calc(100dvh - 396px), 420px);
+  }
+}
+
 .outfit-image {
   object-fit: contain;
   position: relative !important;

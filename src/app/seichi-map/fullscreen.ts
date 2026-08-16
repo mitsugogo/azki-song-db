@@ -5,6 +5,22 @@ type FullscreenController = Pick<
   "exitFullscreen" | "fullscreenElement"
 >;
 
+type IosNavigator = Pick<Navigator, "maxTouchPoints" | "userAgent">;
+
+export const isIosDevice = (
+  navigatorValue: IosNavigator | undefined = typeof navigator === "undefined"
+    ? undefined
+    : navigator,
+) => {
+  if (!navigatorValue) return false;
+
+  const userAgent = navigatorValue.userAgent || "";
+  return (
+    /iP(ad|hone|od)/i.test(userAgent) ||
+    (/Macintosh/i.test(userAgent) && navigatorValue.maxTouchPoints > 1)
+  );
+};
+
 export const toggleElementFullscreen = async (
   element: HTMLElement,
   fullscreenDocument: FullscreenController = document,
