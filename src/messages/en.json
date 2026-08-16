@@ -1094,6 +1094,7 @@
       "streamedAt": "Streamed on {date}",
       "playFrom": "Play from {timestamp}",
       "googleMaps": "Google Maps",
+      "postDokoAz": "Post with #どこAZ",
       "recordVisit": "Record visit",
       "editVisit": "Edit visit",
       "deleteVisited": "Delete visited status"

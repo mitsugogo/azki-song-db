@@ -1085,6 +1085,7 @@
       "streamedAt": "{date} 配信",
       "playFrom": "{timestamp} から再生",
       "googleMaps": "Google Maps",
+      "postDokoAz": "#どこAZ でポスト",
       "recordVisit": "訪問を記録",
       "editVisit": "訪問を編集",
       "deleteVisited": "訪問済を削除"

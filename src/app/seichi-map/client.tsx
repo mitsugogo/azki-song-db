@@ -83,6 +83,7 @@ import {
   saveSeichiMapProvider,
   type SeichiMapProvider,
 } from "./mapProvider";
+import { buildDokoAzPostUrl } from "./xShare";
 
 type LocationOption = SeichiMapLocation & {
   key: string;
@@ -2389,6 +2390,14 @@ export default function SeichiMapCompleteClient({
       mapsLink.textContent = t("popup.googleMaps");
       styleInfoWindowButton(mapsLink, "outline");
       actions.appendChild(mapsLink);
+
+      const xPostLink = document.createElement("a");
+      xPostLink.href = buildDokoAzPostUrl(location.name);
+      xPostLink.target = "_blank";
+      xPostLink.rel = "noopener noreferrer";
+      xPostLink.textContent = t("popup.postDokoAz");
+      styleInfoWindowButton(xPostLink, "outline");
+      actions.appendChild(xPostLink);
 
       if (!isSharedView) {
         const recordButton = document.createElement("button");
