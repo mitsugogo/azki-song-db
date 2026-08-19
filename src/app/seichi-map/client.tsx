@@ -84,6 +84,18 @@ import {
   saveSeichiMapProvider,
   type SeichiMapProvider,
 } from "./mapProvider";
+import {
+  buildSettingsCallbackUrl,
+  consumeSettingsRequestFromUrl,
+} from "./profileSettingsUrl";
+import {
+  SeichiMapHeaderActions,
+  shouldShowNicknameRegistrationPrompt,
+} from "./SeichiMapHeaderActions";
+import {
+  resolveSeichiMapNicknameDraft,
+  SeichiMapNicknameSettingsFields,
+} from "./SeichiMapNicknameSettingsFields";
 import { buildDokoAzPostUrl } from "./xShare";
 
 type LocationOption = SeichiMapLocation & {
@@ -138,11 +150,17 @@ type ShareInfo = {
   updatedAt: string;
 };
 
+type ProfileInfo = {
+  nickname: string;
+  showNicknameInRanking: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type Props = {
   isSignedIn: boolean;
   initialLocationId?: string | null;
   initialShareId?: string | null;
-  userName: string;
 };
 
 type GoogleLatLngLike = {
@@ -282,6 +300,8 @@ const DEFAULT_GOOGLE_MAPS_MAP_ID = "DEMO_MAP_ID";
 const GOOGLE_MAPS_LOADER_VERSION = 3;
 const LAST_VISITED_DATE_STORAGE_KEY = "azki-seichi-map:last-visited-date";
 const HIDDEN_LAYERS_STORAGE_KEY = "azki-seichi-map:hidden-layers";
+const NICKNAME_PROMPT_DISMISSED_STORAGE_KEY =
+  "azki-seichi-map:nickname-prompt-dismissed";
 const urlPattern = /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%#]+/g;
 const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 
@@ -1147,7 +1167,6 @@ export default function SeichiMapCompleteClient({
   initialLocationId,
   initialShareId,
   isSignedIn,
-  userName,
 }: Props) {
   const t = useTranslations("SeichiMapComplete");
   const locale = useLocale();
@@ -1225,10 +1244,19 @@ export default function SeichiMapCompleteClient({
   const [viewShareId, setViewShareId] = useState<string | null>(serverShareId);
   const [sharedViewInfo, setSharedViewInfo] = useState<ShareInfo | null>(null);
   const [shareInfo, setShareInfo] = useState<ShareInfo | null>(null);
+  const [profileInfo, setProfileInfo] = useState<ProfileInfo | null>(null);
+  const [profileLookupCompleted, setProfileLookupCompleted] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
-  const [shareNickname, setShareNickname] = useState(userName);
+  const [profileNickname, setProfileNickname] = useState("");
+  const [nicknamePromptDismissed, setNicknamePromptDismissed] = useState(true);
+  const [showNicknameInRanking, setShowNicknameInRanking] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [shareSubmitting, setShareSubmitting] = useState(false);
+  const [profileErrorMessage, setProfileErrorMessage] = useState<string | null>(
+    null,
+  );
   const [shareCopied, setShareCopied] = useState(false);
   const [visitedDate, setVisitedDate] = useState(
     new Date().toISOString().slice(0, 10),
@@ -1317,9 +1345,21 @@ export default function SeichiMapCompleteClient({
   const canEditVisits = isSignedIn && !isSharedView;
   const canViewVisitedList = canEditVisits || isSharedView;
   const sharedViewNickname = sharedViewInfo?.nickname ?? t("share.loadingUser");
+  const registeredNickname =
+    resolveSeichiMapNicknameDraft(profileInfo?.nickname, shareInfo?.nickname) ||
+    null;
+  const showNicknamePrompt = shouldShowNicknameRegistrationPrompt({
+    isSignedIn,
+    isSharedView,
+    profileLookupCompleted,
+    nickname: registeredNickname,
+    promptDismissed: nicknamePromptDismissed,
+  });
   const pageTitle = isSharedView
     ? t("share.sharedTitle", { nickname: sharedViewNickname })
-    : t("title");
+    : registeredNickname
+      ? t("titleWithNickname", { name: registeredNickname })
+      : t("title");
   const pageDescription = isSharedView
     ? t("share.sharedDescription")
     : t("description");
@@ -1330,6 +1370,29 @@ export default function SeichiMapCompleteClient({
     ? t("list.sharedRecordedTitle", { nickname: sharedViewNickname })
     : t("list.recordedTitle");
   const uncategorizedLayerName = t("list.uncategorized");
+
+  useEffect(() => {
+    if (!showNicknamePrompt) return;
+
+    const dismissNicknamePrompt = () => {
+      setNicknamePromptDismissed(true);
+      try {
+        window.sessionStorage.setItem(
+          NICKNAME_PROMPT_DISMISSED_STORAGE_KEY,
+          "1",
+        );
+      } catch {
+        // The prompt still stays dismissed until this page is unloaded.
+      }
+    };
+
+    document.addEventListener("pointerdown", dismissNicknamePrompt, {
+      once: true,
+    });
+    return () => {
+      document.removeEventListener("pointerdown", dismissNicknamePrompt);
+    };
+  }, [showNicknamePrompt]);
 
   useEffect(() => {
     try {
@@ -1600,8 +1663,15 @@ export default function SeichiMapCompleteClient({
   }, []);
 
   useEffect(() => {
-    setShareNickname((current) => current || userName);
-  }, [userName]);
+    try {
+      setNicknamePromptDismissed(
+        window.sessionStorage.getItem(NICKNAME_PROMPT_DISMISSED_STORAGE_KEY) ===
+          "1",
+      );
+    } catch {
+      setNicknamePromptDismissed(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!shareInfo) {
@@ -1611,24 +1681,46 @@ export default function SeichiMapCompleteClient({
     setShareUrl(buildSeichiMapShareUrl(shareInfo.shareId));
   }, [shareInfo]);
 
-  const loadShareInfo = useCallback(async () => {
+  const loadAccountSettings = useCallback(async () => {
     if (!isSignedIn || isSharedView) {
       setShareInfo(null);
+      setProfileInfo(null);
+      setProfileLookupCompleted(false);
       return;
     }
 
+    setProfileLookupCompleted(false);
     try {
-      const response = await fetch("/api/seichi-map/share", {
-        cache: "no-store",
-      });
-      if (!response.ok) return;
-
-      const payload = (await response.json().catch(() => ({}))) as {
+      const [shareResult, profileResult] = await Promise.allSettled([
+        fetch("/api/seichi-map/share", { cache: "no-store" }),
+        fetch("/api/seichi-map/profile", { cache: "no-store" }),
+      ]);
+      const shareResponse =
+        shareResult.status === "fulfilled" ? shareResult.value : null;
+      const profileResponse =
+        profileResult.status === "fulfilled" ? profileResult.value : null;
+      const sharePayload = (
+        shareResponse?.ok ? await shareResponse.json().catch(() => ({})) : {}
+      ) as {
         item?: ShareInfo | null;
       };
-      setShareInfo(payload.item ?? null);
-      if (payload.item?.nickname) {
-        setShareNickname(payload.item.nickname);
+      const profilePayload = (
+        profileResponse?.ok
+          ? await profileResponse.json().catch(() => ({}))
+          : {}
+      ) as {
+        item?: ProfileInfo | null;
+      };
+      const nextShareInfo = sharePayload.item ?? null;
+      const nextProfileInfo = profilePayload.item ?? null;
+      setShareInfo(nextShareInfo);
+      setProfileInfo(nextProfileInfo);
+      setProfileLookupCompleted(Boolean(profileResponse?.ok));
+      if (nextProfileInfo) {
+        setProfileNickname(nextProfileInfo.nickname);
+        setShowNicknameInRanking(nextProfileInfo.showNicknameInRanking);
+      } else if (nextShareInfo?.nickname) {
+        setProfileNickname(nextShareInfo.nickname);
       }
     } catch (error) {
       console.error(error);
@@ -1636,8 +1728,8 @@ export default function SeichiMapCompleteClient({
   }, [isSharedView, isSignedIn]);
 
   useEffect(() => {
-    void loadShareInfo();
-  }, [loadShareInfo]);
+    void loadAccountSettings();
+  }, [loadAccountSettings]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -2784,27 +2876,113 @@ export default function SeichiMapCompleteClient({
     }
   };
 
+  const resetProfileDraft = useCallback(() => {
+    setProfileNickname(
+      resolveSeichiMapNicknameDraft(profileInfo?.nickname, shareInfo?.nickname),
+    );
+    setShowNicknameInRanking(profileInfo?.showNicknameInRanking ?? true);
+    setProfileErrorMessage(null);
+  }, [profileInfo, shareInfo]);
+
+  const openSettingsModal = useCallback(() => {
+    resetProfileDraft();
+    setShowSettingsModal(true);
+  }, [resetProfileDraft]);
+
   const openShareModal = useCallback(() => {
-    setShareNickname(shareInfo?.nickname || userName);
+    resetProfileDraft();
     setShareUrl(shareInfo ? buildSeichiMapShareUrl(shareInfo.shareId) : "");
     setShareCopied(false);
     setShowShareModal(true);
-  }, [shareInfo, userName]);
+  }, [resetProfileDraft, shareInfo]);
+
+  const handleOpenSettings = useCallback(() => {
+    if (isSignedIn) {
+      openSettingsModal();
+      return;
+    }
+    void signIn("google", {
+      callbackUrl: buildSettingsCallbackUrl(window.location.href),
+    });
+  }, [isSignedIn, openSettingsModal]);
+
+  const handleOpenShare = useCallback(() => {
+    if (isSignedIn) {
+      openShareModal();
+      return;
+    }
+    void signIn("google", { callbackUrl: window.location.href });
+  }, [isSignedIn, openShareModal]);
+
+  useEffect(() => {
+    if (!isSignedIn || isSharedView) return;
+    const nextUrl = consumeSettingsRequestFromUrl(window.location.href);
+    if (!nextUrl) return;
+    window.history.replaceState(window.history.state, "", nextUrl);
+    openSettingsModal();
+  }, [isSharedView, isSignedIn, openSettingsModal]);
+
+  const saveProfileSettings = useCallback(async () => {
+    const nickname = profileNickname.trim();
+    if (!nickname) {
+      setProfileErrorMessage(t("errors.profileNicknameRequired"));
+      return;
+    }
+
+    setProfileSubmitting(true);
+    setProfileErrorMessage(null);
+    try {
+      const response = await fetch("/api/seichi-map/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname, showNicknameInRanking }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as {
+        item?: ProfileInfo;
+        error?: string;
+      };
+      if (!response.ok || !payload.item) {
+        throw new Error(payload.error || t("errors.profileSaveFailed"));
+      }
+
+      setProfileInfo(payload.item);
+      setProfileLookupCompleted(true);
+      setProfileNickname(payload.item.nickname);
+      setShowNicknameInRanking(payload.item.showNicknameInRanking);
+      setShareInfo((current) =>
+        current
+          ? {
+              ...current,
+              nickname: payload.item!.nickname,
+              updatedAt: payload.item!.updatedAt,
+            }
+          : current,
+      );
+      setShowSettingsModal(false);
+    } catch (error) {
+      console.error(error);
+      setProfileErrorMessage(
+        error instanceof Error ? error.message : t("errors.profileSaveFailed"),
+      );
+    } finally {
+      setProfileSubmitting(false);
+    }
+  }, [profileNickname, showNicknameInRanking, t]);
 
   const saveShareSettings = useCallback(async () => {
-    const nickname = shareNickname.trim();
+    const nickname = profileNickname.trim();
     if (!nickname) {
-      setErrorMessage(t("errors.shareNicknameRequired"));
+      setProfileErrorMessage(t("errors.profileNicknameRequired"));
       return;
     }
 
     setShareSubmitting(true);
-    setErrorMessage(null);
+    setProfileErrorMessage(null);
     try {
       const response = await fetch("/api/seichi-map/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname }),
+        body: JSON.stringify({ nickname, showNicknameInRanking }),
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => ({}))) as {
@@ -2815,23 +2993,28 @@ export default function SeichiMapCompleteClient({
 
       const payload = (await response.json().catch(() => ({}))) as {
         item?: ShareInfo;
+        profile?: ProfileInfo;
       };
-      if (!payload.item) {
+      if (!payload.item || !payload.profile) {
         throw new Error(t("errors.shareSaveFailed"));
       }
 
       setShareInfo(payload.item);
+      setProfileInfo(payload.profile);
+      setProfileLookupCompleted(true);
+      setProfileNickname(payload.profile.nickname);
+      setShowNicknameInRanking(payload.profile.showNicknameInRanking);
       setShareUrl(buildSeichiMapShareUrl(payload.item.shareId));
       setShareCopied(false);
     } catch (error) {
       console.error(error);
-      setErrorMessage(
+      setProfileErrorMessage(
         error instanceof Error ? error.message : t("errors.shareSaveFailed"),
       );
     } finally {
       setShareSubmitting(false);
     }
-  }, [shareNickname, t]);
+  }, [profileNickname, showNicknameInRanking, t]);
 
   const copyShareUrl = useCallback(async () => {
     if (!shareInfo) return;
@@ -2964,32 +3147,12 @@ export default function SeichiMapCompleteClient({
             {t("credit.suffix")}
           </Text>
         </Box>
-        <Group gap="xs">
-          {!isSharedView && (
-            <Button
-              variant="light"
-              color="pink"
-              leftSection={<FiShare2 size={16} />}
-              onClick={() => {
-                if (isSignedIn) {
-                  openShareModal();
-                  return;
-                }
-                void signIn("google", { callbackUrl: window.location.href });
-              }}
-            >
-              {t("share.open")}
-            </Button>
-          )}
-          <Button
-            component={Link}
-            href="/seichi-map/ranking"
-            variant="light"
-            color="gray"
-          >
-            {t("ranking.open")}
-          </Button>
-        </Group>
+        <SeichiMapHeaderActions
+          isSharedView={isSharedView}
+          onOpenSettings={handleOpenSettings}
+          onOpenShare={handleOpenShare}
+          showNicknamePrompt={showNicknamePrompt}
+        />
       </Group>
 
       {isSharedView ? (
@@ -3742,6 +3905,45 @@ export default function SeichiMapCompleteClient({
       </Grid>
 
       <Modal
+        opened={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        title={t("profile.title")}
+        centered
+      >
+        <Stack gap="sm">
+          <Text size="sm" c="dimmed">
+            {t("profile.description")}
+          </Text>
+          <SeichiMapNicknameSettingsFields
+            nickname={profileNickname}
+            onNicknameChange={setProfileNickname}
+            showNicknameInRanking={showNicknameInRanking}
+            onShowNicknameInRankingChange={setShowNicknameInRanking}
+          />
+          {profileErrorMessage ? (
+            <Alert color="red" variant="light">
+              {profileErrorMessage}
+            </Alert>
+          ) : null}
+          <Group justify="flex-end" mt="sm">
+            <Button
+              variant="default"
+              onClick={() => setShowSettingsModal(false)}
+            >
+              {t("profile.cancel")}
+            </Button>
+            <Button
+              color="pink"
+              onClick={() => void saveProfileSettings()}
+              loading={profileSubmitting}
+            >
+              {t("profile.save")}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal
         opened={showShareModal}
         onClose={() => setShowShareModal(false)}
         title={t("share.title")}
@@ -3751,13 +3953,18 @@ export default function SeichiMapCompleteClient({
           <Text size="sm" c="dimmed">
             {t("share.description")}
           </Text>
-          <TextInput
-            label={t("share.nicknameLabel")}
-            value={shareNickname}
-            onChange={(event) => setShareNickname(event.target.value)}
-            maxLength={40}
-            required
+          <SeichiMapNicknameSettingsFields
+            nickname={profileNickname}
+            onNicknameChange={setProfileNickname}
+            showNicknameInRanking={showNicknameInRanking}
+            onShowNicknameInRankingChange={setShowNicknameInRanking}
+            showShareNotice
           />
+          {profileErrorMessage ? (
+            <Alert color="red" variant="light">
+              {profileErrorMessage}
+            </Alert>
+          ) : null}
           {shareInfo ? (
             <TextInput
               label={t("share.urlLabel")}

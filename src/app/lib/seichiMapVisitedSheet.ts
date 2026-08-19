@@ -188,10 +188,12 @@ export async function loadSeichiMapVisitorRanking(
   >(sqltag`
     SELECT
       (
-        SELECT nickname
-        FROM SeichiMapShare
-        WHERE SeichiMapShare.userId = SeichiMapVisited.userId
-        ORDER BY updatedAt DESC
+        SELECT CASE
+          WHEN showNicknameInRanking THEN nickname
+          ELSE NULL
+        END
+        FROM SeichiMapProfile
+        WHERE SeichiMapProfile.userId = SeichiMapVisited.userId
         LIMIT 1
       ) AS nickname,
       COUNT(DISTINCT locationId) AS visitCount

@@ -980,7 +980,8 @@
   "SeichiMapComplete": {
     "userName": "ユーザー",
     "breadcrumb": "聖地マップ",
-    "title": "聖地マップ",
+    "title": "聖地訪問ログ",
+    "titleWithNickname": "{name}の聖地訪問ログ",
     "description": "AZKi聖地マップの訪問ログとコンプリート率を記録します。",
     "mapProvider": {
       "title": "地図レイヤー",
@@ -1013,6 +1014,18 @@
       "loginRequired": "Googleでログインすると訪問ログを保存できます。",
       "login": "Googleでサインイン"
     },
+    "profile": {
+      "open": "設定",
+      "registrationPrompt": "ニックネームを登録しましょう！",
+      "title": "聖地マップ設定",
+      "description": "ランキングや共有で使用するニックネームを設定します。GoogleアカウントのIDは公開されません。",
+      "nicknameLabel": "ニックネーム",
+      "rankingVisibilityLabel": "ランキングにニックネームを表示する",
+      "rankingVisibilityDescription": "オンにすると、訪問数が多い開拓者ランキングにニックネームが公開されます。",
+      "shareVisibilityNotice": "この設定をオフにしても、共有URLではニックネームが表示されます。",
+      "cancel": "キャンセル",
+      "save": "保存"
+    },
     "share": {
       "open": "共有",
       "title": "訪問状況を共有",
@@ -1027,7 +1040,7 @@
       "publicView": "共有表示",
       "viewMode": "閲覧モード",
       "loadingUser": "共有ユーザー",
-      "sharedTitle": "{nickname}さんの聖地マップコンプリート状況",
+      "sharedTitle": "{nickname}の聖地訪問ログ",
       "sharedDescription": "共有された訪問状況を閲覧しています。記録・編集・削除はできません。",
       "viewing": "{nickname} さんの訪問状況を表示しています。",
       "backToMyMap": "自分の聖地マップに戻る"
@@ -1114,7 +1127,7 @@
     },
     "confirm": {
       "deleteVisited": "訪問ログを削除しますか？ この操作は元に戻せません。",
-      "stopSharing": "訪問状況の公開を中止しますか？ 共有URLからは閲覧できなくなります。"
+      "stopSharing": "訪問状況の公開を中止しますか？ 共有URLからは閲覧できなくなります。ニックネームとランキング公開設定は維持されます。"
     },
     "aria": {
       "edit": "編集",
@@ -1135,6 +1148,8 @@
       "saveFailed": "保存に失敗しました",
       "updateFailed": "更新に失敗しました",
       "submitFailed": "保存中にエラーが発生しました",
+      "profileNicknameRequired": "ニックネームを入力してください",
+      "profileSaveFailed": "聖地マップ設定の保存に失敗しました",
       "shareNicknameRequired": "ニックネームを入力してください",
       "shareSaveFailed": "共有URLの保存に失敗しました",
       "shareDeleteFailed": "公開中止に失敗しました",
@@ -1160,7 +1175,7 @@
     },
     "visitors": {
       "title": "訪問数が多い開拓者",
-      "nicknameNotice": "ニックネームはマップをシェアしている方のみ表示しています",
+      "nicknameNotice": "ニックネームをランキングに公開設定している方のみ表示しています",
       "unit": "件",
       "empty": "訪問記録はまだありません。"
     }

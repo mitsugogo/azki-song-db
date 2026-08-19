@@ -65,7 +65,8 @@ describe("loadSeichiMapUniqueVisitorCounts", () => {
       values: readonly unknown[];
     };
     const sql = query.strings.join("?");
-    expect(sql).toContain("FROM SeichiMapShare");
+    expect(sql).toContain("FROM SeichiMapProfile");
+    expect(sql).toContain("WHEN showNicknameInRanking THEN nickname");
     expect(sql).toContain("COUNT(DISTINCT locationId)");
     expect(sql).toContain("WHERE locationId IN (?,?)");
     expect(sql).toContain("GROUP BY userId");
