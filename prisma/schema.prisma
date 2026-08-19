@@ -53,6 +53,19 @@ model SeichiMapShare {
   updatedAt DateTime
 }
 
+model SeichiMapProfile {
+  /// ユーザーの識別子
+  userId                String   @id @db.VarChar(255)
+  /// 聖地マップで使用するニックネーム
+  nickname              String   @db.VarChar(40)
+  /// ランキングにニックネームを表示するか
+  showNicknameInRanking Boolean  @default(true)
+  /// プロフィール作成日時
+  createdAt             DateTime @default(now())
+  /// プロフィール更新日時
+  updatedAt             DateTime @updatedAt
+}
+
 model Statistics {
   id           String   @id @default(uuid()) @db.Char(36)
   videoId      String?  @map("video_id") @db.VarChar(50)

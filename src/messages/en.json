@@ -989,7 +989,8 @@
   "SeichiMapComplete": {
     "userName": "User",
     "breadcrumb": "Seichi Map",
-    "title": "Seichi Map",
+    "title": "Seichi Visit Log",
+    "titleWithNickname": "{name}'s Seichi Visit Log",
     "description": "Track visited locations and completion progress for the AZKi seichi map.",
     "mapProvider": {
       "title": "Map layers",
@@ -1022,6 +1023,18 @@
       "loginRequired": "Sign in with Google to save your visited locations.",
       "login": "Sign in with Google"
     },
+    "profile": {
+      "open": "Settings",
+      "registrationPrompt": "Let's set your nickname!",
+      "title": "Seichi Map Settings",
+      "description": "Set the nickname used for rankings and sharing. Your Google account ID is not exposed.",
+      "nicknameLabel": "Nickname",
+      "rankingVisibilityLabel": "Show my nickname in rankings",
+      "rankingVisibilityDescription": "When enabled, your nickname is public in the pioneers with most visits ranking.",
+      "shareVisibilityNotice": "Your nickname is still shown on your shared URL when this setting is disabled.",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
     "share": {
       "open": "Share",
       "title": "Share Visit Status",
@@ -1036,7 +1049,7 @@
       "publicView": "Shared view",
       "viewMode": "View mode",
       "loadingUser": "Shared user",
-      "sharedTitle": "{nickname}'s Seichi Map Completion Status",
+      "sharedTitle": "{nickname}'s Seichi Visit Log",
       "sharedDescription": "You are viewing shared visit status. Recording, editing, and deleting are disabled.",
       "viewing": "Viewing {nickname}'s visit status.",
       "backToMyMap": "Back to my Seichi Map"
@@ -1123,7 +1136,7 @@
     },
     "confirm": {
       "deleteVisited": "Delete this visit log? This action cannot be undone.",
-      "stopSharing": "Stop publishing your visit status? The shared URL will no longer work."
+      "stopSharing": "Stop publishing your visit status? The shared URL will no longer work. Your nickname and ranking visibility setting will be kept."
     },
     "aria": {
       "edit": "Edit",
@@ -1144,6 +1157,8 @@
       "saveFailed": "Failed to save",
       "updateFailed": "Failed to update",
       "submitFailed": "An error occurred while saving",
+      "profileNicknameRequired": "Enter a nickname",
+      "profileSaveFailed": "Failed to save Seichi Map settings",
       "shareNicknameRequired": "Enter a nickname",
       "shareSaveFailed": "Failed to save the share URL",
       "shareDeleteFailed": "Failed to stop publishing",
@@ -1169,7 +1184,7 @@
     },
     "visitors": {
       "title": "Pioneers with Most Visits",
-      "nicknameNotice": "Nicknames are displayed only for people who share their map.",
+      "nicknameNotice": "Nicknames are displayed only for people who make them public in rankings.",
       "unit": "visits",
       "empty": "No visits have been recorded yet."
     }

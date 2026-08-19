@@ -116,8 +116,6 @@ export async function generateMetadata(
 export default async function SeichiMapCompletePage({
   searchParams,
 }: SeichiMapPageProps) {
-  const locale = await getLocale();
-  const t = await getTranslations({ namespace: "SeichiMapComplete", locale });
   const session = await getOptionalServerSession();
   const resolvedSearchParams = await searchParams;
 
@@ -128,7 +126,6 @@ export default async function SeichiMapCompletePage({
       )}
       initialShareId={getFirstSearchParam(resolvedSearchParams, "share")}
       isSignedIn={Boolean(session?.user?.id)}
-      userName={session?.user?.name || session?.user?.email || t("userName")}
     />
   );
 }
