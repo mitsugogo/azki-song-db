@@ -1,25 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { sessionMock, getProfileMock, upsertProfileMock } = vi.hoisted(() => ({
-  sessionMock: vi.fn(),
-  getProfileMock: vi.fn(),
-  upsertProfileMock: vi.fn(),
-}));
+const { sessionMock, getProfileMock, upsertProfileMock, validateProfileMock } =
+  vi.hoisted(() => ({
+    sessionMock: vi.fn(),
+    getProfileMock: vi.fn(),
+    upsertProfileMock: vi.fn(),
+    validateProfileMock: vi.fn(),
+  }));
 
 vi.mock("@/app/lib/authSession", () => ({
   getOptionalServerSession: sessionMock,
 }));
 
-vi.mock("@/app/lib/seichiMapProfile", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/app/lib/seichiMapProfile")
-  >("@/app/lib/seichiMapProfile");
-  return {
-    ...actual,
-    getSeichiMapProfileByUserId: getProfileMock,
-    upsertSeichiMapProfile: upsertProfileMock,
-  };
-});
+vi.mock("@/app/lib/seichiMapProfile", () => ({
+  getSeichiMapProfileByUserId: getProfileMock,
+  upsertSeichiMapProfile: upsertProfileMock,
+  validateSeichiMapProfileSettings: validateProfileMock,
+}));
 
 vi.mock("@/app/lib/seichiMapVisitedSheet", () => ({
   toSeichiMapVisitedWriteError: () => ({
@@ -43,6 +40,10 @@ describe("seichi-map profile route", () => {
     sessionMock.mockResolvedValue({ user: { id: "user-1" } });
     getProfileMock.mockResolvedValue(profile);
     upsertProfileMock.mockResolvedValue(profile);
+    validateProfileMock.mockReturnValue({
+      nickname: "開拓者A",
+      showNicknameInRanking: false,
+    });
   });
 
   it("未ログインではプロフィールを返さない", async () => {
@@ -77,6 +78,7 @@ describe("seichi-map profile route", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(validateProfileMock).toHaveBeenCalledWith(" 開拓者A ", false);
     expect(upsertProfileMock).toHaveBeenCalledWith({
       userId: "user-1",
       nickname: "開拓者A",
@@ -85,6 +87,8 @@ describe("seichi-map profile route", () => {
   });
 
   it("空のニックネームを拒否する", async () => {
+    validateProfileMock.mockReturnValue({ error: "nickname は必須です" });
+
     const response = await POST(
       new Request("http://localhost/api/seichi-map/profile", {
         method: "POST",
