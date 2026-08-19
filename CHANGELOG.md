@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.26.0](https://github.com/mitsugogo/azki-song-db/compare/v2.25.1...v2.26.0) (2026-08-19)
+
+### Features
+
+* **seichi-map:** ニックネーム登録を分離 ([e142dd4](https://github.com/mitsugogo/azki-song-db/commit/e142dd4649715c948d1409c269bf42d5e2e02b2a))
+
 ## [2.25.1](https://github.com/mitsugogo/azki-song-db/compare/v2.25.0...v2.25.1) (2026-08-16)
 
 ### Bug Fixes
