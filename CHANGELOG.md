@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.27.0](https://github.com/mitsugogo/azki-song-db/compare/v2.26.0...v2.27.0) (2026-08-21)
+
+### Features
+
+* 縦読みセットリスト機能 ([495ec98](https://github.com/mitsugogo/azki-song-db/commit/495ec98ad11866f685d3c2f215c061d4a301ec88))
+
 ## [2.26.0](https://github.com/mitsugogo/azki-song-db/compare/v2.25.1...v2.26.0) (2026-08-19)
 
 ### Features
