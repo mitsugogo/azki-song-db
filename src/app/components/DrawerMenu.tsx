@@ -108,6 +108,10 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
       items: [
         { name: t("myBest9Songs"), href: "/share/my-best-9-songs" },
         {
+          name: t("acrosticSetlist"),
+          href: "/share/acrostic-setlist",
+        },
+        {
           name: t("whereMyAzkichiBegan"),
           href: "/share/where-my-azkichi-began",
         },

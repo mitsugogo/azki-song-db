@@ -26,6 +26,7 @@
     "statistics": "Statistics",
     "allData": "All Data",
     "myBest9Songs": "Cloud Nine",
+    "acrosticSetlist": "Acrostic Setlist Maker",
     "mapSubtitle": "Step into the Map: AZKi's Left Hand",
     "mapTitle": "AZKi Pilgrimage Map: \"Seichi-Junrei\"",
     "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
@@ -397,6 +398,8 @@
       "ogAlt": "{siteName} - Data list"
     },
     "share": {
+      "acrosticSetlistTitleWithSite": "Acrostic Setlist Maker | {siteName}",
+      "acrosticSetlistOgTitle": "Acrostic Setlist Maker",
       "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
       "whereMyAzkichiBeganOgTitle": "Where did your AZKi journey begin?",
       "whereMyAzkichiBeganDescription": "Create a portrait image for sharing on X with your name, icon, and timeline entries",
@@ -513,6 +516,10 @@
         "title": "Cloud Nine Generator",
         "description": "Pick your favorite 9 songs from originals, covers, unit songs, and livestreams to share on social media."
       },
+      "acrosticSetlist": {
+        "title": "Acrostic Setlist Maker",
+        "description": "Choose songs performed by AZKi whose titles begin with each character in your phrase."
+      },
       "whereMyAzkichiBegan": {
         "title": "Where did your AZKi journey begin?",
         "description": "Fill in your name, icon, and timeline to generate a resume-style portrait image for sharing."
@@ -520,6 +527,60 @@
       "whereMyRobocosanBegan": {
         "title": "Where did your Roboco-san journey begin?",
         "description": "Fill in your name, icon, and timeline to generate a resume-style portrait image for sharing."
+      }
+    },
+    "acrosticSetlist": {
+      "pageTitle": "Acrostic Setlist Maker",
+      "lead": "Build an acrostic setlist with songs performed by AZKi, one song for each character in your phrase.",
+      "breadcrumbShare": "Share",
+      "defaultPlaylistName": "縦読み「{phrase}」",
+      "input": {
+        "label": "Acrostic phrase",
+        "description": "Use up to {max} letters or numbers. Spaces and punctuation are ignored.",
+        "placeholder": "e.g. AZKi",
+        "count": "Characters: {count} / {max}"
+      },
+      "button": {
+        "generate": "Generate setlist",
+        "play": "Play in this order",
+        "copy": "Copy text",
+        "save": "Save as playlist"
+      },
+      "result": {
+        "title": "Setlist",
+        "description": "Search the candidates in each row to change a song.",
+        "initialLabel": "Initial {character}",
+        "selectLabel": "Songs beginning with {character}",
+        "selectPlaceholder": "Select a song",
+        "nothingFound": "No matching songs found",
+        "matchedBy": "Matched by {source}: “{value}”"
+      },
+      "reuse": {
+        "label": "Allow the same song more than once"
+      },
+      "matchSource": {
+        "localizedTitle": "display title",
+        "japaneseTitle": "Japanese title",
+        "englishTitle": "English title",
+        "alias": "title alias"
+      },
+      "status": {
+        "loadingSongs": "Loading songs",
+        "emptyTitle": "Enter a phrase",
+        "emptyDescription": "Enter a phrase and generate a setlist to see song candidates for each character.",
+        "staleTitle": "The phrase has changed",
+        "staleDescription": "Generate the setlist again before using it.",
+        "noCandidate": "No performed song begins with this character",
+        "noUnusedCandidate": "No unused candidates remain. Enable song reuse to select one.",
+        "selectRequired": "Select a song"
+      },
+      "actions": {
+        "title": "Use the completed setlist",
+        "incomplete": "Select a song in every row to enable playback, copy, and save."
+      },
+      "notice": {
+        "copied": "Setlist copied",
+        "copyFailed": "Could not copy the setlist"
       }
     },
     "whereMyAzkichiBegan": {

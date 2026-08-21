@@ -26,6 +26,7 @@
     "statistics": "統計情報",
     "allData": "全収録データ",
     "myBest9Songs": "究極の9曲",
+    "acrosticSetlist": "縦読みセトリメーカー",
     "mapSubtitle": "AZKiさんの左手の情報はこちら",
     "mapTitle": "AZKi聖地マップ",
     "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。",
@@ -403,6 +404,8 @@
       "myBest9OgWithTopic": "お題:「{title}」",
       "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
       "myBest9Description": "AZKiさんの好きな曲をシェアしましょう",
+      "acrosticSetlistTitleWithSite": "縦読みセトリメーカー | {siteName}",
+      "acrosticSetlistOgTitle": "縦読みセトリメーカー",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
       "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して画像を生成できます",
@@ -511,6 +514,10 @@
         "title": "究極の9曲ジェネレーター",
         "description": "オリジナル曲・カバー曲・ユニット曲・歌枠の中から好きな9曲を選んで、SNSで共有できます。"
       },
+      "acrosticSetlist": {
+        "title": "縦読みセトリメーカー",
+        "description": "入力した文字から始まるAZKiさんの歌唱曲を選び、縦読みのセットリストを作成できます。"
+      },
       "whereMyAzkichiBegan": {
         "title": "あなたのあずきちはどこから？",
         "description": "名前・アイコン・年表を入力して、履歴書風の縦長画像を生成してシェアできます。"
@@ -518,6 +525,60 @@
       "whereMyRobocosanBegan": {
         "title": "あなたのロボ子さんはどこから？",
         "description": "名前・アイコン・年表を入力して、履歴書風の縦長画像を生成してシェアできます。"
+      }
+    },
+    "acrosticSetlist": {
+      "pageTitle": "縦読みセトリメーカー",
+      "lead": "AZKiさんが過去に歌唱したレパートリーから、縦読みセットリストを作成しましょう！",
+      "breadcrumbShare": "共有",
+      "defaultPlaylistName": "縦読み「{phrase}」",
+      "input": {
+        "label": "縦読みするフレーズ",
+        "description": "空白と記号を除く文字・数字を最大{max}文字まで使えます。",
+        "placeholder": "例: あずきちすき",
+        "count": "対象文字: {count} / {max}"
+      },
+      "button": {
+        "generate": "セットリストを生成",
+        "play": "この順番で再生",
+        "copy": "テキストをコピー",
+        "save": "プレイリストに保存"
+      },
+      "result": {
+        "title": "セットリスト",
+        "description": "各行の候補を検索して変更できます。",
+        "initialLabel": "頭文字 {character}",
+        "selectLabel": "{character} から始まる曲",
+        "selectPlaceholder": "曲を選択",
+        "nothingFound": "該当する曲が見つかりません",
+        "matchedBy": "{source}「{value}」で一致"
+      },
+      "reuse": {
+        "label": "同じ曲を再利用する"
+      },
+      "matchSource": {
+        "localizedTitle": "表示曲名",
+        "japaneseTitle": "日本語曲名",
+        "englishTitle": "英語曲名",
+        "alias": "読み別名"
+      },
+      "status": {
+        "loadingSongs": "楽曲を読み込み中",
+        "emptyTitle": "フレーズを入力してください",
+        "emptyDescription": "フレーズを入力して生成すると、頭文字ごとの曲候補が表示されます。",
+        "staleTitle": "入力内容が変更されています",
+        "staleDescription": "新しい入力でセットリストを再生成してください。",
+        "noCandidate": "この文字から始まる歌唱曲がありません",
+        "noUnusedCandidate": "未使用の候補がありません。曲の再利用を有効にすると選べます。",
+        "selectRequired": "曲を選択してください"
+      },
+      "actions": {
+        "title": "完成したセットリストを使う",
+        "incomplete": "すべての行で曲を選択すると、再生・コピー・保存ができます。"
+      },
+      "notice": {
+        "copied": "セットリストをコピーしました",
+        "copyFailed": "コピーに失敗しました"
       }
     },
     "whereMyAzkichiBegan": {
