@@ -58,6 +58,12 @@ function ShareIndexContent() {
                 emoji: "🎵",
               },
               {
+                href: "/share/acrostic-setlist",
+                title: t("features.acrosticSetlist.title"),
+                description: t("features.acrosticSetlist.description"),
+                emoji: "🔤",
+              },
+              {
                 href: "/share/where-my-azkichi-began",
                 title: t("features.whereMyAzkichiBegan.title"),
                 description: t("features.whereMyAzkichiBegan.description"),

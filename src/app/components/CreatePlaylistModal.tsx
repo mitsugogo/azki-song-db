@@ -1,22 +1,35 @@
 import { Button, Input, Modal } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import type { PlaylistEntry } from "@/app/lib/playlistUrl";
 import usePlaylists from "../hook/usePlaylists";
 
 interface CreatePlaylistModalProps {
   onenModal: boolean;
   setOpenModal: (value: boolean) => void;
+  initialName?: string;
+  initialSongs?: PlaylistEntry[];
 }
+
+const EMPTY_SONGS: PlaylistEntry[] = [];
 
 export default function CreatePlaylistModal({
   onenModal,
   setOpenModal,
+  initialName = "",
+  initialSongs = EMPTY_SONGS,
 }: CreatePlaylistModalProps) {
   const t = useTranslations("Watch.createPlaylistModal");
   const [newPlaylistName, setNewPlaylistName] = useState("");
 
   // プレイリスト
   const { savePlaylist, isDuplicate } = usePlaylists();
+  useEffect(() => {
+    if (onenModal) {
+      setNewPlaylistName(initialName.slice(0, 200));
+    }
+  }, [initialName, onenModal]);
+
   useEffect(() => {
     const resume = (event: Event) => {
       if (
@@ -56,7 +69,7 @@ export default function CreatePlaylistModal({
         onClick={() => {
           savePlaylist({
             name: newPlaylistName,
-            songs: [],
+            songs: initialSongs.map((song) => ({ ...song })),
           });
           setNewPlaylistName("");
           setOpenModal(false);
