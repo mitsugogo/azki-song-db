@@ -14,13 +14,14 @@ import { createPortal } from "react-dom";
 import type { YouTubeEvent } from "react-youtube";
 import YouTubePlayer from "./YouTubePlayer";
 
-type SharedYouTubePlayerSource = {
+export type SharedYouTubePlayerSource = {
   sourceId: string;
   active: boolean;
   videoId?: string;
   startTime?: number;
   playerKey?: number;
   showNativeControls?: boolean;
+  autoPlay?: boolean;
   zIndex?: number;
   // false を返す場合は、遷移途中などでこの ready 通知をまだ受理できないことを表す。
   // 次の source 更新時に同じ iframe の ready を再配送する。
@@ -46,6 +47,7 @@ type PlayerLoad = {
   startTime?: number;
   playerKey?: number;
   showNativeControls?: boolean;
+  autoPlay?: boolean;
 };
 
 type SharedYouTubePlayerContextValue = {
@@ -339,6 +341,7 @@ function SharedYouTubePlayerHost({
         startTime: activeSource.startTime,
         playerKey: activeSource.playerKey,
         showNativeControls: activeSource.showNativeControls,
+        autoPlay: activeSource.autoPlay,
       };
     });
   }, [activeSource]);
@@ -425,6 +428,7 @@ function SharedYouTubePlayerHost({
         video_id={playerLoad.videoId}
         startTime={playerLoad.startTime}
         showNativeControls={playerLoad.showNativeControls}
+        autoPlay={playerLoad.autoPlay}
         onReady={handleReady}
         onStateChange={handleStateChange}
         onError={handleError}

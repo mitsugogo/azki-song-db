@@ -9,6 +9,7 @@ interface YouTubePlayerProps {
   video_id?: string;
   startTime?: number;
   showNativeControls?: boolean;
+  autoPlay?: boolean;
   onReady: (event: YouTubeEvent<any>) => void;
   onStateChange: (event: YouTubeEvent<any>) => void;
   onError?: (event: YouTubeEvent<any>) => void;
@@ -18,6 +19,7 @@ function YouTubePlayerComponent({
   video_id,
   startTime,
   showNativeControls,
+  autoPlay = true,
   onReady,
   onStateChange,
   onError,
@@ -37,7 +39,7 @@ function YouTubePlayerComponent({
        */
       playerVars: {
         enablejsapi: 1,
-        autoplay: 1,
+        autoplay: autoPlay ? 1 : 0,
         playsinline: 1,
         controls: showControls ? 1 : 0,
         start: startTime,
@@ -47,7 +49,7 @@ function YouTubePlayerComponent({
           typeof window !== "undefined" ? window.location.origin : undefined,
       },
     } as Options;
-  }, [video_id, startTime, showNativeControls, locale]);
+  }, [video_id, startTime, showNativeControls, autoPlay, locale]);
 
   return (
     <YouTube
@@ -68,7 +70,8 @@ const YouTubePlayer = React.memo(
     return (
       prevProps.video_id === nextProps.video_id &&
       prevProps.startTime === nextProps.startTime &&
-      prevProps.showNativeControls === nextProps.showNativeControls
+      prevProps.showNativeControls === nextProps.showNativeControls &&
+      prevProps.autoPlay === nextProps.autoPlay
       // onStateChange は比較しない
     );
   },

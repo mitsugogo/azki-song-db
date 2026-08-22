@@ -55,5 +55,21 @@ describe("YouTubePlayer", () => {
     expect(div.getAttribute("data-videoid")).toBe("explicitVid");
     const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
     expect(opts.playerVars.start).toBe(5);
+    expect(opts.playerVars.autoplay).toBe(1);
+  });
+
+  it("can wait for an explicit play action", () => {
+    const { container } = render(
+      <YouTubePlayer
+        video_id="pausedVid"
+        autoPlay={false}
+        onReady={() => {}}
+        onStateChange={() => {}}
+      />,
+    );
+
+    const div = container.querySelector("div[data-videoid]")!;
+    const opts = JSON.parse(div.getAttribute("data-opts") || "{}");
+    expect(opts.playerVars.autoplay).toBe(0);
   });
 });
