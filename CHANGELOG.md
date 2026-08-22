@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.28.0](https://github.com/mitsugogo/azki-song-db/compare/v2.27.0...v2.28.0) (2026-08-22)
+
+### Features
+
+* **activity:** アクティビティのカレンダー表示に対応 ([e1ab735](https://github.com/mitsugogo/azki-song-db/commit/e1ab73527fb1a528ef7bbdf513569942966eaff9))
+
 ## [2.27.0](https://github.com/mitsugogo/azki-song-db/compare/v2.26.0...v2.27.0) (2026-08-21)
 
 ### Features
