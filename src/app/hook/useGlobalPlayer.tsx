@@ -78,11 +78,15 @@ export function GlobalPlayerProvider({ children }: { children: ReactNode }) {
 }
 
 export function useGlobalPlayer(): GlobalPlayerContextType {
-  const context = useContext(GlobalPlayerContext);
+  const context = useOptionalGlobalPlayer();
   if (context === undefined) {
     throw new Error(
       "useGlobalPlayer must be used within a GlobalPlayerProvider",
     );
   }
   return context;
+}
+
+export function useOptionalGlobalPlayer() {
+  return useContext(GlobalPlayerContext);
 }

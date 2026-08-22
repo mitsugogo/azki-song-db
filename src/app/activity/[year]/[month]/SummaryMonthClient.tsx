@@ -5,7 +5,6 @@ import { Link } from "@/i18n/navigation";
 import { Breadcrumbs, Button } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
 import { HiChevronRight, HiHome } from "react-icons/hi";
-import ActivityTimelineSection from "../../../components/ActivityTimelineSection";
 import { ScrollToTopButton } from "../../../components/ScrollToTopButton";
 import ActivityMonthPickerButton from "../../ActivityMonthPickerButton";
 import useActivityTimeline, {
@@ -16,6 +15,7 @@ import useEvents from "../../../hook/useEvents";
 import useMilestones from "../../../hook/useMilestones";
 import useSongs from "../../../hook/useSongs";
 import { breadcrumbClasses, pageClasses } from "../../../theme";
+import ActivityMonthDisplay from "../../ActivityMonthDisplay";
 import {
   formatActivityMonthLabel,
   getActivityMonthHref,
@@ -152,14 +152,12 @@ export default function SummaryMonthClient({
         {t("monthActivityDescription", { month: monthLabel })}
       </p>
 
-      <ActivityTimelineSection
+      <ActivityMonthDisplay
+        activityMonth={activityMonth}
         items={orderedActivityItems}
         isLoading={isActivityLoading}
         isViewMilestonesLoading={isViewMilestonesLoading}
-        shouldLoadViewStatistics
         channels={channels}
-        showTitle={false}
-        className="mt-8"
       />
       {/* 翌月 のアクティビティがある場合は、ページ下部にリンクを表示 */}
       {nextMonth && nextMonthLabel && (
