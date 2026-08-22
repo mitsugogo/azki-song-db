@@ -12,6 +12,7 @@ import {
   Text,
   Timeline,
   Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -31,10 +32,18 @@ import {
   getActivityImportanceTitleClassName,
 } from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
-import { filterActivityTimelineItemsForDisplay } from "../lib/activityTimelineFilters";
+import {
+  filterActivityTimelineItemsForDisplay,
+  type ActivityTimelineDisplayFilters,
+} from "../lib/activityTimelineFilters";
+import {
+  buildActivityChannelIndexes,
+  buildActivityItemPresentation,
+} from "../lib/activityItemPresentation";
 import type { ActivityTimelineItem } from "../hook/useActivityTimeline";
 import type { ChannelEntry } from "../types/api/yt/channels";
-import type { Song } from "../types/song";
+
+export { getActivityItemLabel } from "../lib/activityItemPresentation";
 
 type ActivityTimelineSectionProps = {
   items: ActivityTimelineItem[];
@@ -48,7 +57,18 @@ type ActivityTimelineSectionProps = {
   sectionRef?: Ref<HTMLElement>;
   className?: string;
   showArchivesLink?: boolean;
+  showFilter?: boolean;
+  onItemSelect?: (item: ActivityTimelineItem) => void;
+  getItemSelectAriaLabel?: (item: ActivityTimelineItem) => string;
 };
+
+export const DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS: ActivityTimelineDisplayFilters =
+  {
+    includeShorts: false,
+    includeArchives: true,
+    includeSongUpdates: true,
+    includeViewMilestones: true,
+  };
 
 const activityTimelineColors: Record<ActivityTimelineItem["kind"], string> = {
   song_update: "pink",
@@ -57,64 +77,6 @@ const activityTimelineColors: Record<ActivityTimelineItem["kind"], string> = {
   milestone: "violet",
   event: "blue",
 };
-
-function formatActivityMilestoneCount(value: number, locale: string) {
-  if (locale.startsWith("ja") && value >= 10000) {
-    return `${Math.floor(value / 10000)}万`;
-  }
-
-  return new Intl.NumberFormat(locale, {
-    notation: value >= 100000 ? "compact" : "standard",
-    maximumFractionDigits: 1,
-  }).format(value);
-}
-
-function getActivityItemLabel(
-  item: ActivityTimelineItem,
-  t: ReturnType<typeof useTranslations>,
-  locale: string,
-) {
-  if (item.kind === "song_update") {
-    return {
-      badge: t("activitySongUpdateBadge"),
-      title: t("activitySongUpdateDescription", { count: item.count }),
-      description: item.videoTitle || item.songs[0].title || "",
-    };
-  }
-
-  if (item.kind === "archive") {
-    return {
-      badge: t("activityArchiveBadge"),
-      title: t("activityArchiveTitle"),
-      description: item.archive.title,
-    };
-  }
-
-  if (item.kind === "milestone") {
-    return {
-      badge: t("activityMilestoneBadge"),
-      title: item.milestone.content,
-      description: item.milestone.note || "",
-    };
-  }
-
-  if (item.kind === "event") {
-    return {
-      badge: t("activityEventBadge"),
-      title: item.event.content,
-      description: item.event.note || "",
-    };
-  }
-
-  return {
-    badge: t("activityViewMilestoneBadge"),
-    title: t("activityViewMilestoneTitle", {
-      title: item.song.title,
-      count: formatActivityMilestoneCount(item.targetCount, locale),
-    }),
-    description: item.song.video_title || item.song.title,
-  };
-}
 
 function getActivityItemBullet(kind: ActivityTimelineItem["kind"]) {
   if (kind === "song_update") {
@@ -176,46 +138,6 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
   };
 }
 
-function getActivityTitleHref(item: ActivityTimelineItem) {
-  return item.titleHref ?? item.href;
-}
-
-function getActivityDescriptionHref(item: ActivityTimelineItem) {
-  if (
-    item.kind === "archive" ||
-    item.kind === "view_milestone" ||
-    item.kind === "song_update"
-  ) {
-    return item.youtubeHref;
-  }
-
-  return undefined;
-}
-
-function getActivityPlaceHref(item: ActivityTimelineItem) {
-  if (item.kind === "milestone") {
-    return item.milestone.place_url || undefined;
-  }
-
-  if (item.kind === "event") {
-    return item.event.place_url || undefined;
-  }
-
-  return undefined;
-}
-
-function getActivityPlaceLabel(item: ActivityTimelineItem) {
-  if (item.kind === "milestone") {
-    return item.milestone.place || "";
-  }
-
-  if (item.kind === "event") {
-    return item.event.place || "";
-  }
-
-  return "";
-}
-
 function isExternalHref(href: string | undefined) {
   return href?.startsWith("http://") || href?.startsWith("https://");
 }
@@ -235,171 +157,18 @@ function handleArchiveActivityLinkClick(
   );
 }
 
-function getSingerNamesFromSong(song: Song) {
-  const localizedSings = song.hl?.ja?.sings ?? [];
-  if (localizedSings.length > 0) {
-    return localizedSings.map((name) => name.trim()).filter(Boolean);
-  }
+type ActivityTimelineFilterMenuProps = {
+  filters: ActivityTimelineDisplayFilters;
+  onChange: (filters: ActivityTimelineDisplayFilters) => void;
+};
 
-  if (song.sings.length > 0) {
-    return song.sings.map((name) => name.trim()).filter(Boolean);
-  }
-
-  return song.sing
-    .split(/[、,]/)
-    .map((name) => name.trim())
-    .filter(Boolean);
-}
-
-function buildChannelUrl(entry: ChannelEntry) {
-  if (entry.youtubeId) {
-    return `https://www.youtube.com/channel/${entry.youtubeId}`;
-  }
-
-  const handle = (entry.handle ?? "").trim();
-  if (!handle) {
-    return null;
-  }
-
-  return `https://www.youtube.com/${handle.startsWith("@") ? handle : `@${handle}`}`;
-}
-
-function buildChannelsBySingerName(channels: ChannelEntry[]) {
-  const map = new Map<string, ChannelEntry>();
-
-  channels.forEach((entry) => {
-    const artistName = (entry.artistName ?? "").trim();
-    if (artistName && !map.has(artistName)) {
-      map.set(artistName, entry);
-    }
-
-    const channelName = (entry.channelName ?? "").trim();
-    if (channelName && !map.has(channelName)) {
-      map.set(channelName, entry);
-    }
-  });
-
-  return map;
-}
-
-function buildChannelsById(channels: ChannelEntry[]) {
-  const map = new Map<string, ChannelEntry>();
-
-  channels.forEach((entry) => {
-    const youtubeId = (entry.youtubeId ?? "").trim();
-    if (youtubeId && !map.has(youtubeId)) {
-      map.set(youtubeId, entry);
-    }
-  });
-
-  return map;
-}
-
-function getActivityArchiveChannel(
-  item: ActivityTimelineItem,
-  channelsById: Map<string, ChannelEntry>,
-) {
-  if (item.kind !== "archive") {
-    return null;
-  }
-
-  const channelId = item.archive.channel_id.trim();
-  return channelId ? (channelsById.get(channelId) ?? null) : null;
-}
-
-function getActivitySingerAvatars(
-  item: ActivityTimelineItem,
-  channelsBySingerName: Map<string, ChannelEntry>,
-) {
-  const activitySongs =
-    item.kind === "song_update"
-      ? item.songs
-      : item.kind === "view_milestone"
-        ? [item.song]
-        : [];
-
-  if (activitySongs.length === 0) {
-    return [];
-  }
-
-  const avatars: Array<{
-    name: string;
-    iconUrl: string;
-    channelUrl: string | null;
-  }> = [];
-  const seenChannels = new Set<string>();
-
-  activitySongs.forEach((song) => {
-    getSingerNamesFromSong(song).forEach((singerName) => {
-      const entry = channelsBySingerName.get(singerName);
-      const iconUrl = (entry?.iconUrl ?? "").trim();
-      if (!iconUrl) {
-        return;
-      }
-
-      const channelUrl = entry ? buildChannelUrl(entry) : null;
-      const channelKey =
-        (entry?.youtubeId ?? "").trim() ||
-        channelUrl ||
-        (entry?.channelName ?? "").trim() ||
-        iconUrl;
-
-      if (seenChannels.has(channelKey)) {
-        return;
-      }
-
-      avatars.push({
-        name: entry?.channelName || entry?.artistName || singerName,
-        iconUrl,
-        channelUrl,
-      });
-      seenChannels.add(channelKey);
-    });
-  });
-
-  return avatars;
-}
-
-export default function ActivityTimelineSection({
-  items,
-  isLoading,
-  isViewMilestonesLoading = false,
-  shouldLoadViewStatistics,
-  channels,
-  hasMoreItems = false,
-  showTitle = true,
-  onShowMore,
-  sectionRef,
-  className = "mt-16",
-  showArchivesLink = true,
-}: ActivityTimelineSectionProps) {
-  const locale = useLocale();
+export function ActivityTimelineFilterMenu({
+  filters,
+  onChange,
+}: ActivityTimelineFilterMenuProps) {
   const t = useTranslations("Home");
-  const tDrawer = useTranslations("DrawerMenu");
-  const channelsBySingerName = buildChannelsBySingerName(channels);
-  const channelsById = buildChannelsById(channels);
-  const [includeShorts, setIncludeShorts] = useState(false);
-  const [includeArchives, setIncludeArchives] = useState(true);
-  const [includeSongUpdates, setIncludeSongUpdates] = useState(true);
-  const [includeViewMilestones, setIncludeViewMilestones] = useState(true);
-  const filteredItems = useMemo(
-    () =>
-      filterActivityTimelineItemsForDisplay(items, {
-        includeShorts,
-        includeArchives,
-        includeSongUpdates,
-        includeViewMilestones,
-      }),
-    [
-      includeArchives,
-      includeShorts,
-      includeSongUpdates,
-      includeViewMilestones,
-      items,
-    ],
-  );
 
-  const activityFilterMenu = (
+  return (
     <Menu withinPortal={false} position="bottom-end" withArrow shadow="md">
       <Menu.Target>
         <ActionIcon
@@ -416,37 +185,86 @@ export default function ActivityTimelineSection({
         <div className="space-y-2 px-2 pb-1">
           <Checkbox
             size="sm"
-            checked={includeShorts}
+            checked={filters.includeShorts}
             label={t("activityFilterShorts")}
-            onChange={(event) => setIncludeShorts(event.currentTarget.checked)}
+            onChange={(event) =>
+              onChange({
+                ...filters,
+                includeShorts: event.currentTarget.checked,
+              })
+            }
           />
           <Checkbox
             size="sm"
-            checked={includeArchives}
+            checked={filters.includeArchives}
             label={t("activityFilterArchives")}
             onChange={(event) =>
-              setIncludeArchives(event.currentTarget.checked)
+              onChange({
+                ...filters,
+                includeArchives: event.currentTarget.checked,
+              })
             }
           />
           <Checkbox
             size="sm"
-            checked={includeSongUpdates}
+            checked={filters.includeSongUpdates}
             label={t("activityFilterSongUpdates")}
             onChange={(event) =>
-              setIncludeSongUpdates(event.currentTarget.checked)
+              onChange({
+                ...filters,
+                includeSongUpdates: event.currentTarget.checked,
+              })
             }
           />
           <Checkbox
             size="sm"
-            checked={includeViewMilestones}
+            checked={filters.includeViewMilestones}
             label={t("activityFilterViewMilestones")}
             onChange={(event) =>
-              setIncludeViewMilestones(event.currentTarget.checked)
+              onChange({
+                ...filters,
+                includeViewMilestones: event.currentTarget.checked,
+              })
             }
           />
         </div>
       </Menu.Dropdown>
     </Menu>
+  );
+}
+
+export default function ActivityTimelineSection({
+  items,
+  isLoading,
+  isViewMilestonesLoading = false,
+  shouldLoadViewStatistics,
+  channels,
+  hasMoreItems = false,
+  showTitle = true,
+  onShowMore,
+  sectionRef,
+  className = "mt-16",
+  showArchivesLink = true,
+  showFilter = true,
+  onItemSelect,
+  getItemSelectAriaLabel,
+}: ActivityTimelineSectionProps) {
+  const locale = useLocale();
+  const t = useTranslations("Home");
+  const tDrawer = useTranslations("DrawerMenu");
+  const channelIndexes = useMemo(
+    () => buildActivityChannelIndexes(channels),
+    [channels],
+  );
+  const [filters, setFilters] = useState<ActivityTimelineDisplayFilters>(
+    DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS,
+  );
+  const filteredItems = useMemo(
+    () =>
+      showFilter
+        ? filterActivityTimelineItemsForDisplay(items, filters)
+        : items,
+    [filters, items, showFilter],
   );
 
   return (
@@ -462,7 +280,12 @@ export default function ActivityTimelineSection({
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            {activityFilterMenu}
+            {showFilter ? (
+              <ActivityTimelineFilterMenu
+                filters={filters}
+                onChange={setFilters}
+              />
+            ) : null}
             {showArchivesLink ? (
               <Link
                 href="/activity"
@@ -476,8 +299,10 @@ export default function ActivityTimelineSection({
         </div>
       )}
 
-      {!showTitle ? (
-        <div className="mb-3 flex justify-end">{activityFilterMenu}</div>
+      {!showTitle && showFilter ? (
+        <div className="mb-3 flex justify-end">
+          <ActivityTimelineFilterMenu filters={filters} onChange={setFilters} />
+        </div>
       ) : null}
 
       <div className="rounded-xl border border-white/70 bg-white/85 p-5 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]">
@@ -507,46 +332,37 @@ export default function ActivityTimelineSection({
               lineWidth={2}
             >
               {filteredItems.map((item) => {
-                const itemLabel = getActivityItemLabel(item, t, locale);
+                const presentation = buildActivityItemPresentation(
+                  item,
+                  t,
+                  locale,
+                  channelIndexes,
+                );
+                const itemLabel = {
+                  badge: presentation.badge,
+                  title: presentation.timelineTitle,
+                  description: presentation.timelineDescription,
+                };
                 const color = activityTimelineColors[item.kind];
                 const itemClasses = getActivityItemClasses(item.kind);
                 const importanceItemClassName =
                   getActivityImportanceItemClassName(item.importance);
                 const baseImportanceTitleClassName =
                   getActivityImportanceTitleClassName(item.importance);
-                const titleHref = getActivityTitleHref(item);
-                const thumbnailHref = item.youtubeHref ?? item.href;
-                const descriptionHref = getActivityDescriptionHref(item);
-                const placeHref = getActivityPlaceHref(item);
-                const placeLabel = getActivityPlaceLabel(item);
+                const titleHref = presentation.titleHref;
+                const thumbnailHref = presentation.youtubeHref ?? item.href;
+                const descriptionHref = presentation.timelineDescriptionHref;
+                const placeHref = presentation.placeHref;
+                const placeLabel = presentation.placeLabel;
                 const titleIsExternal = isExternalHref(titleHref);
                 const thumbnailIsExternal = isExternalHref(thumbnailHref);
                 const descriptionIsExternal = isExternalHref(descriptionHref);
                 const placeIsExternal = isExternalHref(placeHref);
-                const activitySingerAvatars = getActivitySingerAvatars(
-                  item,
-                  channelsBySingerName,
-                );
-                const archiveChannel = getActivityArchiveChannel(
-                  item,
-                  channelsById,
-                );
-                const archiveChannelName =
-                  archiveChannel?.channelName?.trim() ||
-                  archiveChannel?.artistName?.trim() ||
-                  (item.kind === "archive"
-                    ? item.archive.channel_id.trim()
-                    : "");
-                const archiveChannelUrl = archiveChannel
-                  ? buildChannelUrl(archiveChannel)
-                  : item.kind === "archive" && item.archive.channel_id.trim()
-                    ? `https://www.youtube.com/channel/${item.archive.channel_id.trim()}`
-                    : null;
-                const hasArchiveChannel = Boolean(
-                  item.kind === "archive" &&
-                  item.archive.channel_id.trim() &&
-                  archiveChannelName,
-                );
+                const activitySingerAvatars = presentation.singers;
+                const archiveChannel = presentation.archiveChannel;
+                const archiveChannelName = archiveChannel?.name || "";
+                const archiveChannelUrl = archiveChannel?.channelUrl ?? null;
+                const hasArchiveChannel = Boolean(archiveChannelName);
                 const hasActivityDetails = Boolean(
                   (item.videoId && thumbnailHref) ||
                   itemLabel.description ||
@@ -570,6 +386,30 @@ export default function ActivityTimelineSection({
                           handleArchiveActivityLinkClick(event, item.href),
                       }
                     : {};
+                const itemSelectAriaLabel = getItemSelectAriaLabel?.(item);
+                const handleItemSelect = () => onItemSelect?.(item);
+                const descriptionPlatformIcon = descriptionHref ? (
+                  descriptionHref.includes("youtube.com") ||
+                  descriptionHref.includes("youtu.be") ? (
+                    <FaYoutube className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-red-600 dark:text-red-500" />
+                  ) : descriptionHref.includes("twitter.com") ||
+                    descriptionHref.includes("x.com") ? (
+                    <FaXTwitter className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-sky-600 dark:text-sky-500" />
+                  ) : null
+                ) : null;
+                const archiveChannelIcon = archiveChannel?.iconUrl ? (
+                  <Avatar
+                    src={archiveChannel.iconUrl}
+                    alt={archiveChannelName}
+                    radius="xl"
+                    size="xs"
+                    className="shrink-0"
+                  />
+                ) : (
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
+                    <FaYoutube className="h-3 w-3" />
+                  </span>
+                );
 
                 return (
                   <Timeline.Item
@@ -577,41 +417,66 @@ export default function ActivityTimelineSection({
                     data-importance={item.importance}
                     bullet={getActivityItemBullet(item.kind)}
                     title={
-                      <div
-                        className="flex flex-wrap items-center gap-2"
-                        data-importance={item.importance}
-                      >
-                        <Badge
-                          size="xs"
-                          radius="sm"
-                          color={color}
-                          variant="light"
-                          className="shrink-0"
+                      onItemSelect ? (
+                        <UnstyledButton
+                          type="button"
+                          className="flex flex-wrap items-center gap-2 rounded-sm text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                          data-importance={item.importance}
+                          aria-label={itemSelectAriaLabel}
+                          onClick={handleItemSelect}
                         >
-                          {itemLabel.badge}
-                        </Badge>
-                        {titleHref ? (
-                          <Link
-                            href={titleHref}
-                            className={`${itemClasses.title} ${importanceTitleClassName}`}
-                            target={titleIsExternal ? "_blank" : undefined}
-                            rel={
-                              titleIsExternal
-                                ? "noopener noreferrer"
-                                : undefined
-                            }
-                            {...archiveLinkProps}
+                          <Badge
+                            size="xs"
+                            radius="sm"
+                            color={color}
+                            variant="light"
+                            className="shrink-0"
                           >
-                            {itemLabel.title}
-                          </Link>
-                        ) : (
+                            {itemLabel.badge}
+                          </Badge>
                           <span
                             className={`${itemClasses.title} ${importanceTitleClassName}`}
                           >
                             {itemLabel.title}
                           </span>
-                        )}
-                      </div>
+                        </UnstyledButton>
+                      ) : (
+                        <div
+                          className="flex flex-wrap items-center gap-2"
+                          data-importance={item.importance}
+                        >
+                          <Badge
+                            size="xs"
+                            radius="sm"
+                            color={color}
+                            variant="light"
+                            className="shrink-0"
+                          >
+                            {itemLabel.badge}
+                          </Badge>
+                          {titleHref ? (
+                            <Link
+                              href={titleHref}
+                              className={`${itemClasses.title} ${importanceTitleClassName}`}
+                              target={titleIsExternal ? "_blank" : undefined}
+                              rel={
+                                titleIsExternal
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
+                              {...archiveLinkProps}
+                            >
+                              {itemLabel.title}
+                            </Link>
+                          ) : (
+                            <span
+                              className={`${itemClasses.title} ${importanceTitleClassName}`}
+                            >
+                              {itemLabel.title}
+                            </span>
+                          )}
+                        </div>
+                      )
                     }
                   >
                     {hasActivityDetails ? (
@@ -621,25 +486,40 @@ export default function ActivityTimelineSection({
                       >
                         <div className="flex items-start gap-3">
                           {item.videoId && thumbnailHref ? (
-                            <Link
-                              href={thumbnailHref}
-                              className={`relative aspect-video shrink-0 overflow-hidden rounded-md bg-black ${itemClasses.thumbnail}`}
-                              aria-label={itemLabel.title}
-                              target={
-                                thumbnailIsExternal ? "_blank" : undefined
-                              }
-                              rel={
-                                thumbnailIsExternal
-                                  ? "noopener noreferrer"
-                                  : undefined
-                              }
-                            >
-                              <YoutubeThumbnail
-                                videoId={item.videoId}
-                                alt={itemLabel.title}
-                                imageClassName="object-cover transition duration-300"
-                              />
-                            </Link>
+                            onItemSelect ? (
+                              <UnstyledButton
+                                type="button"
+                                className={`relative aspect-video shrink-0 overflow-hidden rounded-md bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${itemClasses.thumbnail}`}
+                                aria-label={itemSelectAriaLabel}
+                                onClick={handleItemSelect}
+                              >
+                                <YoutubeThumbnail
+                                  videoId={item.videoId}
+                                  alt={itemLabel.title}
+                                  imageClassName="object-cover transition duration-300"
+                                />
+                              </UnstyledButton>
+                            ) : (
+                              <Link
+                                href={thumbnailHref}
+                                className={`relative aspect-video shrink-0 overflow-hidden rounded-md bg-black ${itemClasses.thumbnail}`}
+                                aria-label={itemLabel.title}
+                                target={
+                                  thumbnailIsExternal ? "_blank" : undefined
+                                }
+                                rel={
+                                  thumbnailIsExternal
+                                    ? "noopener noreferrer"
+                                    : undefined
+                                }
+                              >
+                                <YoutubeThumbnail
+                                  videoId={item.videoId}
+                                  alt={itemLabel.title}
+                                  imageClassName="object-cover transition duration-300"
+                                />
+                              </Link>
+                            )
                           ) : null}
                           <div className="min-w-0 flex-1">
                             {itemLabel.description ? (
@@ -647,7 +527,17 @@ export default function ActivityTimelineSection({
                                 size="sm"
                                 className={itemClasses.description}
                               >
-                                {descriptionHref ? (
+                                {onItemSelect ? (
+                                  <UnstyledButton
+                                    type="button"
+                                    className="block rounded-sm text-left transition hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:hover:text-pink-200"
+                                    aria-label={itemSelectAriaLabel}
+                                    onClick={handleItemSelect}
+                                  >
+                                    {descriptionPlatformIcon}
+                                    {itemLabel.description}
+                                  </UnstyledButton>
+                                ) : descriptionHref ? (
                                   <Link
                                     href={descriptionHref}
                                     target={
@@ -662,14 +552,7 @@ export default function ActivityTimelineSection({
                                     }
                                     className="transition hover:text-primary dark:hover:text-pink-200"
                                   >
-                                    {descriptionHref.includes("youtube.com") ||
-                                    descriptionHref.includes("youtu.be") ? (
-                                      <FaYoutube className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-red-600 dark:text-red-500" />
-                                    ) : descriptionHref.includes(
-                                        "twitter.com",
-                                      ) || descriptionHref.includes("x.com") ? (
-                                      <FaXTwitter className="-mt-0.5 mr-1 w-3 h-3 inline text-[0.65rem] text-sky-600 dark:text-sky-500" />
-                                    ) : null}
+                                    {descriptionPlatformIcon}
                                     {itemLabel.description}
                                   </Link>
                                 ) : (
@@ -678,58 +561,72 @@ export default function ActivityTimelineSection({
                               </Text>
                             ) : null}
                             {hasArchiveChannel ? (
-                              <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-200/70 dark:text-gray-400">
-                                {archiveChannel?.iconUrl ? (
-                                  <Avatar
-                                    src={archiveChannel.iconUrl}
-                                    alt={archiveChannelName}
-                                    radius="xl"
-                                    size="xs"
-                                    className="shrink-0"
-                                  />
-                                ) : (
-                                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
-                                    <FaYoutube className="h-3 w-3" />
-                                  </span>
-                                )}
-                                {archiveChannelUrl ? (
-                                  <Link
-                                    href={archiveChannelUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="min-w-0 truncate hover:text-primary hover:underline dark:hover:text-primary-300"
-                                  >
-                                    {archiveChannelName}
-                                  </Link>
-                                ) : (
+                              onItemSelect ? (
+                                <UnstyledButton
+                                  type="button"
+                                  className="mt-1.5 flex min-w-0 items-center gap-1.5 rounded-sm text-left text-xs text-gray-200/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-gray-400"
+                                  aria-label={itemSelectAriaLabel}
+                                  onClick={handleItemSelect}
+                                >
+                                  {archiveChannelIcon}
                                   <span className="min-w-0 truncate">
                                     {archiveChannelName}
                                   </span>
-                                )}
-                              </div>
+                                </UnstyledButton>
+                              ) : (
+                                <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-200/70 dark:text-gray-400">
+                                  {archiveChannelIcon}
+                                  {archiveChannelUrl ? (
+                                    <Link
+                                      href={archiveChannelUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="min-w-0 truncate hover:text-primary hover:underline dark:hover:text-primary-300"
+                                    >
+                                      {archiveChannelName}
+                                    </Link>
+                                  ) : (
+                                    <span className="min-w-0 truncate">
+                                      {archiveChannelName}
+                                    </span>
+                                  )}
+                                </div>
+                              )
                             ) : null}
                             {placeLabel ? (
-                              <Text size="xs" c="dimmed" className="mt-1">
-                                <BsGeoAlt className="-mt-0.5 mr-1 inline" />
-                                {placeHref ? (
-                                  <Link
-                                    href={placeHref}
-                                    target={
-                                      placeIsExternal ? "_blank" : undefined
-                                    }
-                                    rel={
-                                      placeIsExternal
-                                        ? "noopener noreferrer"
-                                        : undefined
-                                    }
-                                    className="hover:underline"
-                                  >
-                                    {placeLabel}
-                                  </Link>
-                                ) : (
-                                  placeLabel
-                                )}
-                              </Text>
+                              onItemSelect ? (
+                                <UnstyledButton
+                                  type="button"
+                                  className="mt-1 block rounded-sm text-left text-xs text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-gray-400"
+                                  aria-label={itemSelectAriaLabel}
+                                  onClick={handleItemSelect}
+                                >
+                                  <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                  {placeLabel}
+                                </UnstyledButton>
+                              ) : (
+                                <Text size="xs" c="dimmed" className="mt-1">
+                                  <BsGeoAlt className="-mt-0.5 mr-1 inline" />
+                                  {placeHref ? (
+                                    <Link
+                                      href={placeHref}
+                                      target={
+                                        placeIsExternal ? "_blank" : undefined
+                                      }
+                                      rel={
+                                        placeIsExternal
+                                          ? "noopener noreferrer"
+                                          : undefined
+                                      }
+                                      className="hover:underline"
+                                    >
+                                      {placeLabel}
+                                    </Link>
+                                  ) : (
+                                    placeLabel
+                                  )}
+                                </Text>
+                              )
                             ) : null}
                             {activitySingerAvatars.length > 0 ? (
                               <Avatar.Group
@@ -755,7 +652,15 @@ export default function ActivityTimelineSection({
                                       withArrow
                                       arrowSize={8}
                                     >
-                                      {avatar.channelUrl ? (
+                                      {onItemSelect ? (
+                                        <UnstyledButton
+                                          type="button"
+                                          aria-label={itemSelectAriaLabel}
+                                          onClick={handleItemSelect}
+                                        >
+                                          {image}
+                                        </UnstyledButton>
+                                      ) : avatar.channelUrl ? (
                                         <Link
                                           href={avatar.channelUrl}
                                           target="_blank"
@@ -775,9 +680,20 @@ export default function ActivityTimelineSection({
                         </div>
                       </div>
                     ) : null}
-                    <Text size="xs" c="dimmed" className="mt-1">
-                      {formatDate(item.occurredAt, locale)}
-                    </Text>
+                    {onItemSelect ? (
+                      <UnstyledButton
+                        type="button"
+                        className="mt-1 block rounded-sm text-left text-xs text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-gray-400"
+                        aria-label={itemSelectAriaLabel}
+                        onClick={handleItemSelect}
+                      >
+                        {formatDate(item.occurredAt, locale)}
+                      </UnstyledButton>
+                    ) : (
+                      <Text size="xs" c="dimmed" className="mt-1">
+                        {formatDate(item.occurredAt, locale)}
+                      </Text>
+                    )}
                   </Timeline.Item>
                 );
               })}

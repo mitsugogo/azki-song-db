@@ -33,6 +33,7 @@ function Source({
   active,
   startTime,
   playerKey,
+  autoPlay,
   onReady = vi.fn(),
   onStateChange = vi.fn(),
 }: {
@@ -40,6 +41,7 @@ function Source({
   active: boolean;
   startTime: number;
   playerKey?: number;
+  autoPlay?: boolean;
   onReady?: (event: any) => boolean | void;
   onStateChange?: (event: any) => void;
 }) {
@@ -49,6 +51,7 @@ function Source({
     videoId: active ? "same-video" : undefined,
     startTime,
     playerKey,
+    autoPlay,
     onReady,
     onStateChange,
   });
@@ -135,6 +138,21 @@ describe("SharedYouTubePlayer", () => {
     await act(async () => {});
 
     expect(youtubePlayerUnmounts.current).toBe(1);
+  });
+
+  it("sourceのautoPlay設定を共有プレイヤーへ渡す", async () => {
+    render(
+      <SharedYouTubePlayerProvider>
+        <Source sourceId="detail" active startTime={0} autoPlay={false} />
+      </SharedYouTubePlayerProvider>,
+    );
+
+    await act(async () => {});
+
+    expect(youtubePlayerPropsRef.current).toMatchObject({
+      video_id: "same-video",
+      autoPlay: false,
+    });
   });
 
   it("遷移中に拒否された ready を次の source 更新で再配送する", async () => {

@@ -16,6 +16,8 @@ import type { Period, ViewCountStat } from "../types/api/stat/views";
 import type { EventItem } from "../types/eventItem";
 import type { Song } from "../types/song";
 import type { ActivityImportance } from "../types/activityImportance";
+import { getActivityJstDateKey } from "../lib/activityCalendar";
+import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
 
 export type ActivityTimelineKind =
   "song_update" | "archive" | "view_milestone" | "milestone" | "event";
@@ -45,6 +47,7 @@ export type ArchiveActivityTimelineItem = BaseActivityTimelineItem & {
   kind: "archive";
   href: string;
   youtubeHref: string;
+  databaseHref?: string;
   archive: ArchiveItem;
   videoId: string;
 };
@@ -187,9 +190,10 @@ function buildSongUpdateItems(
 function buildArchiveItems(
   archives: ArchiveItem[],
   limit: number,
+  firstSongsByVideoId: Map<string, Song>,
 ): ArchiveActivityTimelineItem[] {
   return archives
-    .map((archive) => {
+    .map((archive): ArchiveActivityTimelineItem | null => {
       const occurredAt = toIsoDate(
         archive.stream_started_at || archive.published_at,
       );
@@ -198,12 +202,20 @@ function buildArchiveItems(
         return null;
       }
 
+      const firstSong = firstSongsByVideoId.get(archive.video_id);
+
       return {
         id: `archive-${archive.video_id}-${occurredAt}`,
         kind: "archive" as const,
         occurredAt,
         href: getArchiveHref(archive.video_id),
         youtubeHref: getYouTubeHref(archive.video_id, archive.video_url),
+        databaseHref: firstSong
+          ? buildWatchHref({
+              videoId: firstSong.video_id,
+              start: firstSong.start,
+            })
+          : undefined,
         videoId: archive.video_id,
         archive,
         importance: normalizeActivityImportance(archive.importance),
@@ -411,18 +423,6 @@ export function filterActivityTimelineItems(
   return sortActivityTimelineItems(filteredItems);
 }
 
-const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
-
-function getJstDateKey(value: string | number | Date | null | undefined) {
-  const timestamp = getDateTime(value);
-  if (!Number.isFinite(timestamp)) {
-    return "";
-  }
-
-  const date = new Date(timestamp + JST_OFFSET_MS);
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-}
-
 export function sortActivityTimelineItems(
   items: ActivityTimelineItem[],
   direction: "asc" | "desc" = "desc",
@@ -432,8 +432,8 @@ export function sortActivityTimelineItems(
     .sort((a, b) => {
       const aTime = getDateTime(a.item.occurredAt);
       const bTime = getDateTime(b.item.occurredAt);
-      const aDayKey = getJstDateKey(a.item.occurredAt);
-      const bDayKey = getJstDateKey(b.item.occurredAt);
+      const aDayKey = getActivityJstDateKey(a.item.occurredAt);
+      const bDayKey = getActivityJstDateKey(b.item.occurredAt);
       const dateDiff = direction === "asc" ? aTime - bTime : bTime - aTime;
 
       if (aDayKey === bDayKey) {
@@ -485,7 +485,12 @@ export default function useActivityTimeline({
       songs,
       effectiveSongUpdateLimit,
     );
-    const archiveItems = buildArchiveItems(archives, effectiveArchiveLimit);
+    const firstSongsByVideoId = createFirstSongsByVideoId(songs);
+    const archiveItems = buildArchiveItems(
+      archives,
+      effectiveArchiveLimit,
+      firstSongsByVideoId,
+    );
     const milestoneItems = buildMilestoneItems(milestones);
     const eventItems = buildEventItems(events);
     const viewMilestoneItems = enabled

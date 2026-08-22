@@ -1,10 +1,72 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import ActivityTimelineSection from "../ActivityTimelineSection";
 import type { ActivityTimelineItem } from "../../hook/useActivityTimeline";
 
 describe("ActivityTimelineSection", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+
+  it("uses Mantine buttons for item selection without changing default links", () => {
+    const onItemSelect = vi.fn();
+    const item: ActivityTimelineItem = {
+      id: "selectable-event",
+      kind: "event",
+      occurredAt: "2026-07-01T00:00:00.000Z",
+      href: "https://example.com/selectable-event",
+      importance: "normal",
+      event: {
+        start_at: "2026-07-01T00:00:00.000Z",
+        end_at: "2026-07-01T00:00:00.000Z",
+        content: "選択できるイベント",
+        place: "テスト会場",
+        place_url: "https://example.com/place",
+        note: "",
+        url: "https://example.com/selectable-event",
+        importance: "normal",
+      },
+    };
+
+    render(
+      <MantineProvider>
+        <ActivityTimelineSection
+          items={[item]}
+          isLoading={false}
+          shouldLoadViewStatistics={false}
+          channels={[]}
+          showTitle={false}
+          onItemSelect={onItemSelect}
+          getItemSelectAriaLabel={() => "項目の詳細を表示"}
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "選択できるイベント" }),
+    ).not.toBeInTheDocument();
+    const itemButtons = screen.getAllByRole("button", {
+      name: "項目の詳細を表示",
+    });
+    expect(itemButtons.length).toBeGreaterThan(1);
+
+    fireEvent.click(itemButtons[0]);
+    expect(onItemSelect).toHaveBeenCalledWith(item);
+  });
+
   it("enlarges a text-only extra-high event and keeps its importance data attribute", () => {
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
@@ -104,6 +166,51 @@ describe("ActivityTimelineSection", () => {
 
     fireEvent.click(getFilterCheckbox("activityFilterShorts"));
     expect(getFilterCheckbox("activityFilterShorts")).toBeChecked();
+  });
+
+  it("renders prefiltered Shorts when the local filter is hidden", () => {
+    const item: ActivityTimelineItem = {
+      id: "shorts-archive",
+      kind: "archive",
+      occurredAt: "2026-06-24T00:00:00.000Z",
+      href: "/stream-archives#archive-shorts-1",
+      youtubeHref: "https://www.youtube.com/watch?v=shorts-1",
+      videoId: "shorts-1",
+      importance: "normal",
+      archive: {
+        sequence: 1,
+        topic: "#Shorts",
+        title: "Shorts配信",
+        video_id: "shorts-1",
+        channel_id: "UC-channel-1",
+        video_url: "https://www.youtube.com/watch?v=shorts-1",
+        video_duration: "00:00:30",
+        description: "",
+        published_at: "2026-06-24T00:00:00.000Z",
+        stream_started_at: "2026-06-24T00:00:00.000Z",
+        timestamp_comment: "",
+      },
+    };
+
+    render(
+      <MantineProvider>
+        <ActivityTimelineSection
+          items={[item]}
+          isLoading={false}
+          shouldLoadViewStatistics={false}
+          channels={[]}
+          showTitle={false}
+          showFilter={false}
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Shorts配信" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "activityFilterLabel" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows a small channel icon and name below an archive title", () => {

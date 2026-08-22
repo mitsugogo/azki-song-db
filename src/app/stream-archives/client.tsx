@@ -82,6 +82,7 @@ import {
 } from "./archiveSearch";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
+import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 
 type ArchiveGroup = {
@@ -323,23 +324,6 @@ const createIndexedArchives = (
         : null,
     };
   });
-
-const createFirstSongsByVideoId = (songs: Song[]) => {
-  const map = new Map<string, Song>();
-
-  songs.forEach((song) => {
-    if (!song.video_id) {
-      return;
-    }
-
-    const currentSong = map.get(song.video_id);
-    if (!currentSong || Number(song.start) < Number(currentSong.start)) {
-      map.set(song.video_id, song);
-    }
-  });
-
-  return map;
-};
 
 const createArchiveGroups = (items: IndexedArchiveItem[]) => {
   const groups = new Map<string, ArchiveGroup>();
