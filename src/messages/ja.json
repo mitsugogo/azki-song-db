@@ -1182,13 +1182,12 @@
       "unsupported": "このブラウザでは位置情報を利用できません"
     },
     "itinerary": {
-      "startLocationLabel": "出発地点",
-      "startLocationPlaceholder": "例：新大阪",
       "visitOrder": "訪問順",
       "completedCount": "{completed} / {total} 訪問",
-      "empty": "聖地リストや地図上の地点から、訪問したい場所を旅程に追加してください。",
+      "empty": "訪問予定の聖地リストをあらかじめピックアップしておくことができます。端末内に保存されるため、訪問時に利用するスマートフォンなどで設定してください。",
       "reorderHelp": "つまみをドラッグして訪問順を変更できます。",
       "markVisited": "{name}を訪問済みにする",
+      "visited": "訪問済",
       "openLocation": "{name}を地図で表示",
       "reorderStop": "訪問順を変更",
       "removeStop": "旅程から削除",
@@ -1211,7 +1210,7 @@
     },
     "confirm": {
       "deleteVisited": "訪問ログを削除しますか？ この操作は元に戻せません。",
-      "clearItinerary": "出発地点と訪問予定をすべて削除しますか？",
+      "clearItinerary": "訪問予定をすべて削除しますか？",
       "stopSharing": "訪問状況の公開を中止しますか？ 共有URLからは閲覧できなくなります。ニックネームとランキング公開設定は維持されます。"
     },
     "aria": {

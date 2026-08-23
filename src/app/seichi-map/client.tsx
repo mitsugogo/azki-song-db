@@ -745,7 +745,10 @@ const formatArchiveStreamDateLabel = (value?: string) => {
 const styleInfoWindowButton = (
   element: HTMLAnchorElement | HTMLButtonElement,
   variant: "filled" | "light" | "outline",
+  color: "pink" | "cyan" = "pink",
 ) => {
+  element.dataset.variant = variant;
+  element.dataset.color = color;
   element.style.alignItems = "center";
   element.style.borderRadius = "6px";
   element.style.boxSizing = "border-box";
@@ -769,9 +772,9 @@ const styleInfoWindowButton = (
   }
 
   if (variant === "light") {
-    element.style.background = "#fff0f6";
+    element.style.background = color === "cyan" ? "#e3fafc" : "#fff0f6";
     element.style.border = "1px solid transparent";
-    element.style.color = "#c2255c";
+    element.style.color = color === "cyan" ? "#0b7285" : "#c2255c";
     return;
   }
 
@@ -1511,10 +1514,6 @@ export default function SeichiMapCompleteClient({
     setItinerary((current) => addSeichiMapItineraryStop(current, locationId));
     setIsLayerSelectorOpen(false);
     setListMode("itinerary");
-  }, []);
-
-  const changeItineraryStartLocation = useCallback((value: string) => {
-    setItinerary((current) => ({ ...current, startLocation: value }));
   }, []);
 
   const toggleItineraryStop = useCallback((locationId: string) => {
@@ -2681,7 +2680,7 @@ export default function SeichiMapCompleteClient({
       itineraryButton.disabled = isInItinerary;
       itineraryButton.style.cursor = isInItinerary ? "default" : "pointer";
       itineraryButton.style.opacity = isInItinerary ? "0.65" : "1";
-      styleInfoWindowButton(itineraryButton, "light");
+      styleInfoWindowButton(itineraryButton, "light", "cyan");
       itineraryButton.addEventListener("click", () => {
         addLocationToItinerary(location.id);
         itineraryButton.disabled = true;
@@ -3284,7 +3283,7 @@ export default function SeichiMapCompleteClient({
         </Button>
         <Button
           variant="light"
-          color="blue"
+          color="cyan"
           size="compact-sm"
           disabled={isInItinerary}
           onClick={() => addLocationToItinerary(location.id)}
@@ -3968,7 +3967,6 @@ export default function SeichiMapCompleteClient({
                   onOpenLocation={openItineraryLocation}
                   onRemove={removeItineraryStop}
                   onReorder={reorderItineraryStops}
-                  onStartLocationChange={changeItineraryStartLocation}
                   onToggle={toggleItineraryStop}
                 />
               ) : canViewVisitedList ? (

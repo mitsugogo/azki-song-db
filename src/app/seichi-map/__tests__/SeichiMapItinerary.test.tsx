@@ -28,8 +28,7 @@ const location = {
 };
 
 describe("SeichiMapItinerary", () => {
-  it("出発地点、訪問チェック、地点表示、削除の操作を通知する", () => {
-    const onStartLocationChange = vi.fn();
+  it("訪問チェック、地点表示、削除の操作を通知する", () => {
     const onToggle = vi.fn();
     const onOpenLocation = vi.fn();
     const onRemove = vi.fn();
@@ -38,23 +37,19 @@ describe("SeichiMapItinerary", () => {
       <MantineProvider>
         <SeichiMapItinerary
           itinerary={{
-            startLocation: "新大阪",
-            stops: [{ locationId: location.id, completed: false }],
+            stops: [{ locationId: location.id, completed: true }],
           }}
           locationsById={new Map([[location.id, location]])}
           onClear={vi.fn()}
           onOpenLocation={onOpenLocation}
           onRemove={onRemove}
           onReorder={vi.fn()}
-          onStartLocationChange={onStartLocationChange}
           onToggle={onToggle}
         />
       </MantineProvider>,
     );
 
-    fireEvent.change(screen.getByLabelText("itinerary.startLocationLabel"), {
-      target: { value: "大阪駅" },
-    });
+    expect(screen.getByText("itinerary.visited")).toBeVisible();
     fireEvent.click(
       screen.getByRole("checkbox", { name: "itinerary.markVisited" }),
     );
@@ -65,7 +60,6 @@ describe("SeichiMapItinerary", () => {
       screen.getByRole("button", { name: "itinerary.removeStop" }),
     );
 
-    expect(onStartLocationChange).toHaveBeenCalledWith("大阪駅");
     expect(onToggle).toHaveBeenCalledWith(location.id);
     expect(onOpenLocation).toHaveBeenCalledWith(location.id);
     expect(onRemove).toHaveBeenCalledWith(location.id);
@@ -81,13 +75,12 @@ describe("SeichiMapItinerary", () => {
     render(
       <MantineProvider>
         <SeichiMapItinerary
-          itinerary={{ startLocation: "", stops: [] }}
+          itinerary={{ stops: [] }}
           locationsById={new Map()}
           onClear={vi.fn()}
           onOpenLocation={vi.fn()}
           onRemove={vi.fn()}
           onReorder={vi.fn()}
-          onStartLocationChange={vi.fn()}
           onToggle={vi.fn()}
         />
       </MantineProvider>,

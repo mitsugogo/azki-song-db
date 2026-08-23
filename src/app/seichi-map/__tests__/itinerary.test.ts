@@ -13,7 +13,6 @@ import {
 } from "../itinerary";
 
 const itinerary: SeichiMapItinerary = {
-  startLocation: "新大阪",
   stops: [
     { locationId: "location-a", completed: false },
     { locationId: "location-b", completed: true },
@@ -35,14 +34,12 @@ describe("seichi-map itinerary", () => {
         }),
       ),
     ).toEqual({
-      startLocation: "新大阪",
       stops: [
         { locationId: "location-a", completed: true },
         { locationId: "location-b", completed: false },
       ],
     });
     expect(parseSeichiMapItinerary("not-json")).toEqual({
-      startLocation: "",
       stops: [],
     });
   });
@@ -65,7 +62,7 @@ describe("seichi-map itinerary", () => {
           throw new Error("unavailable");
         },
       }),
-    ).toEqual({ startLocation: "", stops: [] });
+    ).toEqual({ stops: [] });
     expect(() =>
       saveSeichiMapItinerary(
         {
@@ -107,8 +104,8 @@ describe("seichi-map itinerary", () => {
     ).toEqual(["location-c", "location-b"]);
   });
 
-  it("出発地点と訪問順をGoogle Mapsの経路URLへ反映する", () => {
-    const url = buildSeichiMapItineraryGoogleMapsUrl(" 新大阪 ", [
+  it("現在地を起点として訪問順をGoogle Mapsの経路URLへ反映する", () => {
+    const url = buildSeichiMapItineraryGoogleMapsUrl([
       { latitude: 35.1, longitude: 135.1 },
       { latitude: 35.2, longitude: 135.2 },
       { latitude: 35.3, longitude: 135.3 },
@@ -118,11 +115,11 @@ describe("seichi-map itinerary", () => {
     expect(parsedUrl.origin + parsedUrl.pathname).toBe(
       "https://www.google.com/maps/dir/",
     );
-    expect(parsedUrl.searchParams.get("origin")).toBe("新大阪");
+    expect(parsedUrl.searchParams.has("origin")).toBe(false);
     expect(parsedUrl.searchParams.get("waypoints")).toBe(
       "35.1,135.1|35.2,135.2",
     );
     expect(parsedUrl.searchParams.get("destination")).toBe("35.3,135.3");
-    expect(buildSeichiMapItineraryGoogleMapsUrl("", [])).toBeNull();
+    expect(buildSeichiMapItineraryGoogleMapsUrl([])).toBeNull();
   });
 });

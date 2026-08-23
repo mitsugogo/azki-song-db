@@ -26,7 +26,6 @@ import {
   ScrollArea,
   Stack,
   Text,
-  TextInput,
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
@@ -106,6 +105,11 @@ function SortableItineraryStop({
               {location.folder}
             </Text>
           ) : null}
+          {stop.completed ? (
+            <Badge mt={4} size="xs" variant="light" color="green">
+              {t("itinerary.visited")}
+            </Badge>
+          ) : null}
         </UnstyledButton>
         <Tooltip label={t("itinerary.reorderStop")}>
           <ActionIcon
@@ -140,7 +144,6 @@ type Props = {
   onOpenLocation: (locationId: string) => void;
   onRemove: (locationId: string) => void;
   onReorder: (activeLocationId: string, overLocationId: string) => void;
-  onStartLocationChange: (value: string) => void;
   onToggle: (locationId: string) => void;
 };
 
@@ -151,7 +154,6 @@ export function SeichiMapItinerary({
   onOpenLocation,
   onRemove,
   onReorder,
-  onStartLocationChange,
   onToggle,
 }: Props) {
   const t = useTranslations("SeichiMapComplete");
@@ -168,10 +170,7 @@ export function SeichiMapItinerary({
     const location = locationsById.get(stop.locationId);
     return location ? [location] : [];
   });
-  const routeUrl = buildSeichiMapItineraryGoogleMapsUrl(
-    itinerary.startLocation,
-    routeLocations,
-  );
+  const routeUrl = buildSeichiMapItineraryGoogleMapsUrl(routeLocations);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -182,14 +181,6 @@ export function SeichiMapItinerary({
 
   return (
     <Stack gap="sm" className="min-h-0 flex-1">
-      <TextInput
-        label={t("itinerary.startLocationLabel")}
-        placeholder={t("itinerary.startLocationPlaceholder")}
-        value={itinerary.startLocation}
-        maxLength={200}
-        onChange={(event) => onStartLocationChange(event.currentTarget.value)}
-      />
-
       <Group justify="space-between" gap="xs">
         <Text fw={700}>{t("itinerary.visitOrder")}</Text>
         <Badge variant="light" color="pink">
@@ -271,7 +262,7 @@ export function SeichiMapItinerary({
         <Button
           variant="subtle"
           color="red"
-          disabled={itinerary.stops.length === 0 && !itinerary.startLocation}
+          disabled={itinerary.stops.length === 0}
           onClick={onClear}
           style={{ flex: "1 1 120px" }}
         >

@@ -8,12 +8,10 @@ export type SeichiMapItineraryStop = {
 };
 
 export type SeichiMapItinerary = {
-  startLocation: string;
   stops: SeichiMapItineraryStop[];
 };
 
 export const createEmptySeichiMapItinerary = (): SeichiMapItinerary => ({
-  startLocation: "",
   stops: [],
 });
 
@@ -24,13 +22,8 @@ export function parseSeichiMapItinerary(
 
   try {
     const parsed = JSON.parse(value) as {
-      startLocation?: unknown;
       stops?: unknown;
     };
-    const startLocation =
-      typeof parsed.startLocation === "string"
-        ? parsed.startLocation.slice(0, 200)
-        : "";
     const seenLocationIds = new Set<string>();
     const stops = Array.isArray(parsed.stops)
       ? parsed.stops.flatMap((stop) => {
@@ -56,7 +49,7 @@ export function parseSeichiMapItinerary(
         })
       : [];
 
-    return { startLocation, stops };
+    return { stops };
   } catch {
     return createEmptySeichiMapItinerary();
   }
@@ -148,18 +141,15 @@ export function reorderSeichiMapItineraryStops(
 }
 
 export function buildSeichiMapItineraryGoogleMapsUrl(
-  startLocation: string,
   stops: readonly Pick<SeichiMapLocation, "latitude" | "longitude">[],
 ) {
-  const origin = startLocation.trim();
-  if (!origin || stops.length === 0) return null;
+  if (stops.length === 0) return null;
 
   const coordinates = stops.map(
     (location) => `${location.latitude},${location.longitude}`,
   );
   const params = new URLSearchParams({
     api: "1",
-    origin,
     destination: coordinates.at(-1) ?? "",
   });
   if (coordinates.length > 1) {

@@ -1191,13 +1191,12 @@
       "unsupported": "Location is not supported by this browser"
     },
     "itinerary": {
-      "startLocationLabel": "Starting point",
-      "startLocationPlaceholder": "Example: Shin-Osaka Station",
       "visitOrder": "Visit order",
       "completedCount": "{completed} / {total} visited",
-      "empty": "Add places you want to visit from the location list or map.",
+      "empty": "You can pick out the seichi locations you plan to visit in advance. Because the itinerary is saved on this device, set it up on the smartphone or other device you will use during your visit.",
       "reorderHelp": "Drag the handle to change the visit order.",
       "markVisited": "Mark {name} as visited",
+      "visited": "Visited",
       "openLocation": "Show {name} on the map",
       "reorderStop": "Change visit order",
       "removeStop": "Remove from itinerary",
@@ -1220,7 +1219,7 @@
     },
     "confirm": {
       "deleteVisited": "Delete this visit log? This action cannot be undone.",
-      "clearItinerary": "Delete the starting point and all planned stops?",
+      "clearItinerary": "Delete all planned stops?",
       "stopSharing": "Stop publishing your visit status? The shared URL will no longer work. Your nickname and ranking visibility setting will be kept."
     },
     "aria": {
