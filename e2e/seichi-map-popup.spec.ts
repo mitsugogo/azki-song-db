@@ -94,7 +94,7 @@ const assertFixedPopupActions = async (page: Page) => {
 
   await expect(body).toBeVisible();
   await expect(actions).toBeVisible();
-  await expect(controls).toHaveCount(3);
+  await expect(controls).toHaveCount(4);
 
   const bodyMetrics = await body.evaluate((element) => ({
     clientHeight: element.clientHeight,
@@ -144,6 +144,9 @@ const assertFixedPopupActions = async (page: Page) => {
     actions.getByRole("link", { name: "Google Maps" }),
   ).toHaveAttribute("href", /google\.com\/maps\/search/);
   await expect(actions.getByRole("link", { name: /#どこAZ/ })).toBeVisible();
+  await expect(
+    actions.getByRole("button", { name: /旅程に追加|Add to itinerary/ }),
+  ).toBeVisible();
   await expect(
     actions.getByRole("button", { name: /訪問を記録|Record visit/ }),
   ).toBeVisible();
@@ -237,12 +240,17 @@ test.describe("Seichi map location popup", () => {
     const listActions = page.locator(".seichi-map-list-actions");
     await expect(listActions).toHaveCount(1);
     await expect(listActions).toBeVisible();
-    await expect(listActions.locator("a, button")).toHaveCount(3);
+    await expect(listActions.locator("a, button")).toHaveCount(4);
     await expect(
       listActions.getByRole("link", { name: "Google Maps" }),
     ).toHaveAttribute("href", /google\.com\/maps\/search/);
     await expect(
       listActions.getByRole("link", { name: /#どこAZ/ }),
+    ).toBeVisible();
+    await expect(
+      listActions.getByRole("button", {
+        name: /旅程に追加|Add to itinerary/,
+      }),
     ).toBeVisible();
     await expect(
       listActions.getByRole("button", { name: /訪問を記録|Record visit/ }),
@@ -265,6 +273,59 @@ test.describe("Seichi map location popup", () => {
     ).toBeVisible();
   });
 
+  test("builds and restores a local itinerary from a map popup", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    const popup = await openLongLocationPopup(page);
+
+    await popup
+      .getByRole("button", { name: /旅程に追加|Add to itinerary/ })
+      .click();
+
+    const startLocation = page.getByRole("textbox", {
+      name: /出発地点|Starting point/,
+    });
+    await expect(startLocation).toBeVisible();
+    await startLocation.fill("新大阪");
+    await page
+      .getByRole("checkbox", {
+        name: /低解像度端末で確認する地点.*訪問済み|Mark .* as visited/,
+      })
+      .check();
+
+    const routeLink = page.getByRole("link", {
+      name: /Google Mapsで経路を開く|Open route in Google Maps/,
+    });
+    await expect(routeLink).toHaveAttribute("href", /google\.com\/maps\/dir/);
+    const routeLabelMetrics = await routeLink
+      .locator(".mantine-Button-label")
+      .evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+      }));
+    expect(routeLabelMetrics.scrollWidth).toBeLessThanOrEqual(
+      routeLabelMetrics.clientWidth,
+    );
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          window.localStorage.getItem("azki-seichi-map:itinerary:v1"),
+        ),
+      )
+      .toContain('"startLocation":"新大阪"');
+
+    await page.reload();
+    await page.getByRole("button", { name: /^旅程$|^Itinerary$/ }).click();
+
+    await expect(startLocation).toHaveValue("新大阪");
+    await expect(
+      page.getByRole("checkbox", {
+        name: /低解像度端末で確認する地点.*訪問済み|Mark .* as visited/,
+      }),
+    ).toBeChecked();
+  });
+
   test("keeps a seichi pin clickable above the current-location marker", async ({
     context,
     page,
@@ -277,7 +338,9 @@ test.describe("Seichi map location popup", () => {
     await setupSeichiMapPopupMocks(page);
     await page.goto("/seichi-map");
 
-    const mapSurface = page.locator(".seichi-map-fullscreen-surface");
+    const mapSurface = page
+      .locator(".seichi-map-fullscreen-surface:visible")
+      .first();
     await expect(mapSurface).toBeVisible({ timeout: 15_000 });
     await mapSurface.scrollIntoViewIfNeeded();
     await page

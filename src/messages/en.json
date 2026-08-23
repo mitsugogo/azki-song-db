@@ -1140,7 +1140,8 @@
     "tabs": {
       "locations": "Location List",
       "nearby": "Nearby",
-      "visited": "Visited"
+      "visited": "Visited",
+      "itinerary": "Itinerary"
     },
     "search": {
       "locationLabel": "Search locations",
@@ -1176,6 +1177,8 @@
       "playFrom": "Play from {timestamp}",
       "googleMaps": "Google Maps",
       "postDokoAz": "Post with #どこAZ",
+      "addToItinerary": "Add to itinerary",
+      "inItinerary": "Added to itinerary",
       "recordVisit": "Record visit",
       "editVisit": "Edit visit",
       "deleteVisited": "Delete visited status"
@@ -1186,6 +1189,21 @@
       "markerTitle": "Current location",
       "unavailable": "Current location is unavailable. Allow location access in your browser",
       "unsupported": "Location is not supported by this browser"
+    },
+    "itinerary": {
+      "startLocationLabel": "Starting point",
+      "startLocationPlaceholder": "Example: Shin-Osaka Station",
+      "visitOrder": "Visit order",
+      "completedCount": "{completed} / {total} visited",
+      "empty": "Add places you want to visit from the location list or map.",
+      "reorderHelp": "Drag the handle to change the visit order.",
+      "markVisited": "Mark {name} as visited",
+      "openLocation": "Show {name} on the map",
+      "reorderStop": "Change visit order",
+      "removeStop": "Remove from itinerary",
+      "missingLocation": "Location currently unavailable",
+      "openRoute": "Open route in Google Maps",
+      "clear": "Clear itinerary"
     },
     "modal": {
       "recordTitle": "Record visit",
@@ -1202,6 +1220,7 @@
     },
     "confirm": {
       "deleteVisited": "Delete this visit log? This action cannot be undone.",
+      "clearItinerary": "Delete the starting point and all planned stops?",
       "stopSharing": "Stop publishing your visit status? The shared URL will no longer work. Your nickname and ranking visibility setting will be kept."
     },
     "aria": {

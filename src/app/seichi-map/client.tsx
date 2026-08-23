@@ -9,10 +9,12 @@ import {
   useState,
 } from "react";
 import "dayjs/locale/ja";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import type * as Leaflet from "leaflet";
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Badge,
@@ -52,6 +54,7 @@ import {
   FiExternalLink,
   FiLayers,
   FiLogIn,
+  FiMap,
   FiMaximize,
   FiMapPin,
   FiMinimize,
@@ -102,14 +105,27 @@ import {
   resolveSeichiMapNicknameDraft,
   SeichiMapNicknameSettingsFields,
 } from "./SeichiMapNicknameSettingsFields";
+import {
+  addSeichiMapItineraryStop,
+  createEmptySeichiMapItinerary,
+  readSeichiMapItinerary,
+  removeSeichiMapItineraryStop,
+  reorderSeichiMapItineraryStops,
+  saveSeichiMapItinerary,
+  toggleSeichiMapItineraryStop,
+} from "./itinerary";
 import { buildDokoAzPostUrl } from "./xShare";
+
+const SeichiMapItinerary = dynamic(() =>
+  import("./SeichiMapItinerary").then((module) => module.SeichiMapItinerary),
+);
 
 type LocationOption = SeichiMapLocation & {
   key: string;
   uniqueVisitorCount: number;
 };
 
-type ListMode = "locations" | "nearby" | "visited";
+type ListMode = "locations" | "nearby" | "visited" | "itinerary";
 
 type NearbyLocationStatus = "idle" | "locating" | "ready" | "unavailable";
 
@@ -1225,11 +1241,14 @@ export default function SeichiMapCompleteClient({
     () => undefined,
   );
   const selectedLocationIdRef = useRef<string | null>(null);
+  const itineraryLocationIdsRef = useRef<ReadonlySet<string>>(new Set());
   const focusedInitialLocationIdRef = useRef<string | null>(null);
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
   const [visited, setVisited] = useState<VisitedItem[]>([]);
+  const [itinerary, setItinerary] = useState(createEmptySeichiMapItinerary);
+  const [itineraryLoaded, setItineraryLoaded] = useState(false);
   const [archiveVideoMetaById, setArchiveVideoMetaById] = useState<
     Record<string, ArchiveVideoMeta>
   >({});
@@ -1313,6 +1332,16 @@ export default function SeichiMapCompleteClient({
         : storedProvider,
     );
   }, [mapsKey]);
+
+  useEffect(() => {
+    setItinerary(readSeichiMapItinerary(window.localStorage));
+    setItineraryLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!itineraryLoaded) return;
+    saveSeichiMapItinerary(window.localStorage, itinerary);
+  }, [itinerary, itineraryLoaded]);
 
   const selectMapProvider = useCallback(
     (provider: SeichiMapProvider) => {
@@ -1468,6 +1497,55 @@ export default function SeichiMapCompleteClient({
       // localStorage may be unavailable in private browsing contexts.
     }
   }, [hiddenLayerNames]);
+
+  const itineraryLocationIds = useMemo(
+    () => new Set(itinerary.stops.map((stop) => stop.locationId)),
+    [itinerary.stops],
+  );
+
+  useEffect(() => {
+    itineraryLocationIdsRef.current = itineraryLocationIds;
+  }, [itineraryLocationIds]);
+
+  const addLocationToItinerary = useCallback((locationId: string) => {
+    setItinerary((current) => addSeichiMapItineraryStop(current, locationId));
+    setIsLayerSelectorOpen(false);
+    setListMode("itinerary");
+  }, []);
+
+  const changeItineraryStartLocation = useCallback((value: string) => {
+    setItinerary((current) => ({ ...current, startLocation: value }));
+  }, []);
+
+  const toggleItineraryStop = useCallback((locationId: string) => {
+    setItinerary((current) =>
+      toggleSeichiMapItineraryStop(current, locationId),
+    );
+  }, []);
+
+  const removeItineraryStop = useCallback((locationId: string) => {
+    setItinerary((current) =>
+      removeSeichiMapItineraryStop(current, locationId),
+    );
+  }, []);
+
+  const reorderItineraryStops = useCallback(
+    (activeLocationId: string, overLocationId: string) => {
+      setItinerary((current) =>
+        reorderSeichiMapItineraryStops(
+          current,
+          activeLocationId,
+          overLocationId,
+        ),
+      );
+    },
+    [],
+  );
+
+  const clearItinerary = useCallback(() => {
+    if (!confirm(t("confirm.clearItinerary"))) return;
+    setItinerary(createEmptySeichiMapItinerary());
+  }, [t]);
 
   useEffect(() => {
     isSharedViewRef.current = isSharedView;
@@ -2594,6 +2672,25 @@ export default function SeichiMapCompleteClient({
       styleInfoWindowButton(xPostLink, "outline");
       actions.appendChild(xPostLink);
 
+      const itineraryButton = document.createElement("button");
+      itineraryButton.type = "button";
+      const isInItinerary = itineraryLocationIdsRef.current.has(location.id);
+      itineraryButton.textContent = isInItinerary
+        ? t("popup.inItinerary")
+        : t("popup.addToItinerary");
+      itineraryButton.disabled = isInItinerary;
+      itineraryButton.style.cursor = isInItinerary ? "default" : "pointer";
+      itineraryButton.style.opacity = isInItinerary ? "0.65" : "1";
+      styleInfoWindowButton(itineraryButton, "light");
+      itineraryButton.addEventListener("click", () => {
+        addLocationToItinerary(location.id);
+        itineraryButton.disabled = true;
+        itineraryButton.style.cursor = "default";
+        itineraryButton.style.opacity = "0.65";
+        itineraryButton.textContent = t("popup.inItinerary");
+      });
+      actions.appendChild(itineraryButton);
+
       if (!isSharedView) {
         const recordButton = document.createElement("button");
         recordButton.type = "button";
@@ -2626,6 +2723,7 @@ export default function SeichiMapCompleteClient({
     },
     [
       archiveVideoMetaById,
+      addLocationToItinerary,
       canEditVisits,
       deleteVisited,
       getVisitedItemForLocation,
@@ -2818,6 +2916,26 @@ export default function SeichiMapCompleteClient({
       }
     },
     [requestCurrentLocation],
+  );
+
+  const openItineraryLocation = useCallback(
+    (locationId: string) => {
+      const location = locationById.get(locationId);
+      if (!location) return;
+      const layerName = getLocationLayerName(location, uncategorizedLayerName);
+      if (hiddenLayerNameSet.has(layerName)) {
+        setHiddenLayerNames((current) =>
+          current.filter((name) => name !== layerName),
+        );
+      }
+      showLocationOnMap(location);
+    },
+    [
+      hiddenLayerNameSet,
+      locationById,
+      showLocationOnMap,
+      uncategorizedLayerName,
+    ],
   );
 
   const onEditVisited = useCallback(
@@ -3134,6 +3252,7 @@ export default function SeichiMapCompleteClient({
 
   const renderMobileLocationActions = (location: LocationOption) => {
     const visitedItem = getVisitedItemForLocation(location);
+    const isInItinerary = itineraryLocationIds.has(location.id);
 
     return (
       <Group
@@ -3162,6 +3281,15 @@ export default function SeichiMapCompleteClient({
           size="compact-sm"
         >
           {t("popup.postDokoAz")}
+        </Button>
+        <Button
+          variant="light"
+          color="blue"
+          size="compact-sm"
+          disabled={isInItinerary}
+          onClick={() => addLocationToItinerary(location.id)}
+        >
+          {isInItinerary ? t("popup.inItinerary") : t("popup.addToItinerary")}
         </Button>
         {!isSharedView ? (
           <Button
@@ -3564,16 +3692,32 @@ export default function SeichiMapCompleteClient({
               ) : null}
 
               {isLayerSelectorOpen ? null : (
-                <SegmentedControl
-                  value={listMode}
-                  onChange={handleListModeChange}
-                  data={[
-                    { label: t("tabs.locations"), value: "locations" },
-                    { label: t("tabs.nearby"), value: "nearby" },
-                    { label: t("tabs.visited"), value: "visited" },
-                  ]}
-                  fullWidth
-                />
+                <Group gap="xs" wrap="nowrap">
+                  <SegmentedControl
+                    className="min-w-0 flex-1"
+                    value={listMode}
+                    onChange={handleListModeChange}
+                    data={[
+                      { label: t("tabs.locations"), value: "locations" },
+                      { label: t("tabs.nearby"), value: "nearby" },
+                      { label: t("tabs.visited"), value: "visited" },
+                    ]}
+                    size="xs"
+                    fullWidth
+                  />
+                  <Tooltip label={t("tabs.itinerary")}>
+                    <ActionIcon
+                      variant={listMode === "itinerary" ? "filled" : "light"}
+                      color="pink"
+                      size="lg"
+                      aria-label={t("tabs.itinerary")}
+                      aria-pressed={listMode === "itinerary"}
+                      onClick={() => setListMode("itinerary")}
+                    >
+                      <FiMap size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
               )}
 
               {isLayerSelectorOpen ? null : listMode === "locations" ? (
@@ -3816,6 +3960,17 @@ export default function SeichiMapCompleteClient({
                     </Paper>
                   )}
                 </Stack>
+              ) : listMode === "itinerary" ? (
+                <SeichiMapItinerary
+                  itinerary={itinerary}
+                  locationsById={locationById}
+                  onClear={clearItinerary}
+                  onOpenLocation={openItineraryLocation}
+                  onRemove={removeItineraryStop}
+                  onReorder={reorderItineraryStops}
+                  onStartLocationChange={changeItineraryStartLocation}
+                  onToggle={toggleItineraryStop}
+                />
               ) : canViewVisitedList ? (
                 <Stack gap="sm" className="min-h-0 flex-1">
                   <Group justify="space-between" align="end">
