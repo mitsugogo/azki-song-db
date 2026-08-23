@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  getMapFullscreenMode,
   getGoogleMapFullscreenPortalTarget,
   isIosDevice,
+  setViewportFullscreenPageLock,
   toggleElementFullscreen,
+  VIEWPORT_FULLSCREEN_PAGE_CLASS,
 } from "../fullscreen";
 
 describe("isIosDevice", () => {
@@ -41,6 +44,34 @@ describe("isIosDevice", () => {
         maxTouchPoints: 5,
       }),
     ).toBe(false);
+  });
+});
+
+describe("getMapFullscreenMode", () => {
+  it("iOSでは画面内全画面を使う", () => {
+    expect(getMapFullscreenMode(true)).toBe("viewport");
+  });
+
+  it("iOS以外ではネイティブ全画面を使う", () => {
+    expect(getMapFullscreenMode(false)).toBe("native");
+  });
+});
+
+describe("setViewportFullscreenPageLock", () => {
+  it("画面内全画面の開始と終了に合わせてページスクロールを切り替える", () => {
+    setViewportFullscreenPageLock(true);
+
+    expect(document.documentElement).toHaveClass(
+      VIEWPORT_FULLSCREEN_PAGE_CLASS,
+    );
+    expect(document.body).toHaveClass(VIEWPORT_FULLSCREEN_PAGE_CLASS);
+
+    setViewportFullscreenPageLock(false);
+
+    expect(document.documentElement).not.toHaveClass(
+      VIEWPORT_FULLSCREEN_PAGE_CLASS,
+    );
+    expect(document.body).not.toHaveClass(VIEWPORT_FULLSCREEN_PAGE_CLASS);
   });
 });
 

@@ -95,6 +95,12 @@ body {
   font-family: var(--font-sans) !important;
 }
 
+html.seichi-map-viewport-fullscreen-open,
+body.seichi-map-viewport-fullscreen-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .seichi-map-fullscreen-surface:fullscreen {
   width: 100vw !important;
   height: 100dvh !important;
@@ -105,6 +111,55 @@ body {
 .seichi-map-fullscreen-surface {
   height: 70vh;
   min-height: 460px;
+}
+
+.seichi-map-fullscreen-surface--viewport {
+  position: fixed !important;
+  inset: 0;
+  z-index: var(--mantine-z-index-app);
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+}
+
+.seichi-map-fullscreen-surface--viewport .seichi-map-provider-control {
+  right: calc(12px + env(safe-area-inset-right)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport .seichi-map-provider-control--google {
+  top: calc(56px + env(safe-area-inset-top)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport .seichi-map-provider-control--leaflet,
+.seichi-map-fullscreen-surface--viewport .seichi-map-fullscreen-control {
+  top: calc(12px + env(safe-area-inset-top)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport
+  .seichi-map-fullscreen-control--google {
+  right: calc(12px + env(safe-area-inset-right)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport
+  .seichi-map-fullscreen-control--leaflet {
+  right: calc(64px + env(safe-area-inset-right)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport
+  .seichi-map-current-location-control--leaflet {
+  right: calc(12px + env(safe-area-inset-right)) !important;
+  bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport
+  .seichi-map-current-location-control--google {
+  margin-right: calc(10px + env(safe-area-inset-right)) !important;
+  margin-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+}
+
+.seichi-map-fullscreen-surface--viewport .seichi-map-popup {
+  max-block-size: min(420px, calc(100dvh - 160px));
 }
 
 .seichi-map-popup {
