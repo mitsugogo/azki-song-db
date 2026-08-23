@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.29.0](https://github.com/mitsugogo/azki-song-db/compare/v2.28.0...v2.29.0) (2026-08-23)
+
+### Features
+
+* **activity:** 記念日を表示内に追加 ([e3260a0](https://github.com/mitsugogo/azki-song-db/commit/e3260a07e50ff069a3a3fd8ec4face3bb11efe91))
+
 ## [2.28.0](https://github.com/mitsugogo/azki-song-db/compare/v2.27.0...v2.28.0) (2026-08-22)
 
 ### Features
