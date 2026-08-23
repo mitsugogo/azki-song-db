@@ -211,36 +211,37 @@ const getYearFromDate = (dateStr?: string | null) => {
   return jst.getUTCFullYear();
 };
 
-export const formatAnniversaryName = (
+export const getAnniversaryNumberForYear = (
+  item: AnniversaryItem,
+  occurrenceYear: number,
+) => {
+  const firstYear = getYearFromDate(item.first_date_at);
+  if (!firstYear) {
+    return null;
+  }
+
+  const anniversaryNumber = occurrenceYear - firstYear;
+  return Number.isFinite(anniversaryNumber) ? anniversaryNumber : null;
+};
+
+export const formatAnniversaryNameForYear = (
   item: AnniversaryItem,
   locale: string,
-  nowMsArg?: number,
+  occurrenceYear: number,
 ) => {
   const template = item.name || "";
   if (!template) {
     return "";
   }
 
-  const nextIso = computeNextIsoForAnniversary(item, nowMsArg);
-  if (!nextIso) {
-    return template;
-  }
-
-  const nextJst = new Date(new Date(nextIso).getTime() + jstOffsetMs);
-  const occurrenceYear = nextJst.getUTCFullYear();
   let result = template.replace(/\{year\}/g, String(occurrenceYear));
 
   if (!result.includes("{n}")) {
     return result;
   }
 
-  const firstYear = getYearFromDate(item.first_date_at || item.date);
-  if (!firstYear) {
-    return result;
-  }
-
-  const n = occurrenceYear - firstYear;
-  if (!Number.isFinite(n) || n <= 0) {
+  const anniversaryNumber = getAnniversaryNumberForYear(item, occurrenceYear);
+  if (anniversaryNumber === null || anniversaryNumber <= 0) {
     return result;
   }
 
@@ -254,7 +255,25 @@ export const formatAnniversaryName = (
     return `${value}th`;
   };
 
-  return result.replace(/\{n\}/g, isEnLocale ? ordinal(n) : String(n));
+  return result.replace(
+    /\{n\}/g,
+    isEnLocale ? ordinal(anniversaryNumber) : String(anniversaryNumber),
+  );
+};
+
+export const formatAnniversaryName = (
+  item: AnniversaryItem,
+  locale: string,
+  nowMsArg?: number,
+) => {
+  const nextIso = computeNextIsoForAnniversary(item, nowMsArg);
+  if (!nextIso) {
+    return item.name || "";
+  }
+
+  const nextJst = new Date(new Date(nextIso).getTime() + jstOffsetMs);
+  const occurrenceYear = nextJst.getUTCFullYear();
+  return formatAnniversaryNameForYear(item, locale, occurrenceYear);
 };
 
 export const toJstMonthDayKey = (date: Date) => {

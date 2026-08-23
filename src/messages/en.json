@@ -239,6 +239,7 @@
     "activityViewMilestoneBadge": "Views",
     "activityMilestoneBadge": "Milestone",
     "activityEventBadge": "Event",
+    "activityAnniversaryBadge": "Anniversary",
     "activitySongUpdateDescription": "{count} songs added",
     "activityArchiveTitle": "Stream archive added",
     "activityArchiveDescription": "Stream archive added",
@@ -254,6 +255,7 @@
     "activityFilterArchives": "Include streams",
     "activityFilterSongUpdates": "Include song additions",
     "activityFilterViewMilestones": "Include view milestones",
+    "activityFilterAnniversaries": "Include anniversaries",
     "activityShowMore": "Show more",
     "activityEmpty": "No activity to show",
     "viewMilestonesLabel": "Views",
@@ -420,7 +422,7 @@
       "yearTitle": "AZKi's song activity in {year}",
       "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals",
       "monthTitle": "{month} activity",
-      "monthDescription": "Music, streams, milestones, and events from {month}."
+      "monthDescription": "Music, streams, milestones, events, and anniversaries from {month}."
     },
     "anniversaries": {
       "title": "Anniversaries",
@@ -1070,6 +1072,9 @@
     "ranking": {
       "open": "Rankings"
     },
+    "usage": {
+      "userCount": "{count} people using the map"
+    },
     "credit": {
       "prefix": "Location data is provided by ",
       "linkLabel": "AZKi Seichi Map",
@@ -1431,7 +1436,7 @@
       "activityDays": "Days active: {days} (since 2018/11/15 — {duration})"
     },
     "monthActivityTitle": "{month}",
-    "monthActivityDescription": "Review music, streams, view milestones, records, and events from {month} in calendar or timeline view.",
+    "monthActivityDescription": "Review music, streams, view milestones, records, events, and anniversaries from {month} in calendar or timeline view.",
     "activityViewLabel": "Activity view",
     "calendarView": "Calendar",
     "timelineView": "Timeline",

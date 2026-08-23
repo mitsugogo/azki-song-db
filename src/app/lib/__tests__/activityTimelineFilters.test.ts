@@ -59,6 +59,10 @@ describe("activity timeline display filters", () => {
       makeItem("milestone", { milestone: { content: "記録" } }),
       makeItem("event", { event: { content: "イベント" } }),
       makeItem("view_milestone", { targetCount: 500000 }),
+      makeItem("anniversary", {
+        displayName: "記念日",
+        anniversary: { name: "記念日" },
+      }),
     ];
 
     expect(
@@ -67,6 +71,7 @@ describe("activity timeline display filters", () => {
         includeArchives: true,
         includeSongUpdates: true,
         includeViewMilestones: true,
+        includeAnniversaries: true,
       }).map((item) => item.kind),
     ).toEqual([
       "song_update",
@@ -74,6 +79,7 @@ describe("activity timeline display filters", () => {
       "milestone",
       "event",
       "view_milestone",
+      "anniversary",
     ]);
   });
 
@@ -90,6 +96,10 @@ describe("activity timeline display filters", () => {
       }),
       makeItem("view_milestone", { targetCount: 500000 }),
       makeItem("event", { event: { content: "イベント" } }),
+      makeItem("anniversary", {
+        displayName: "記念日",
+        anniversary: { name: "記念日" },
+      }),
     ];
 
     expect(
@@ -98,6 +108,7 @@ describe("activity timeline display filters", () => {
         includeArchives: false,
         includeSongUpdates: false,
         includeViewMilestones: false,
+        includeAnniversaries: false,
       }).map((item) => item.kind),
     ).toEqual(["event"]);
   });

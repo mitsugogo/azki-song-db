@@ -155,10 +155,21 @@ test.describe("Summary pages", () => {
   });
 
   test.describe("Month activity page", () => {
+    test.beforeEach(async ({ page }) => {
+      await page.route("**/api/anniversaries**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: "[]",
+        });
+      });
+    });
+
     const mockCalendarEvent = async (
       page: import("@playwright/test").Page,
       archives: Array<Record<string, unknown>> = [],
       songs: Array<Record<string, unknown>> = [],
+      anniversaries: Array<Record<string, unknown>> = [],
     ) => {
       await page.route("**/api/songs**", async (route) => {
         await route.fulfill({
@@ -216,6 +227,14 @@ test.describe("Summary pages", () => {
               importance: "normal",
             },
           ]),
+        });
+      });
+      await page.unroute("**/api/anniversaries**");
+      await page.route("**/api/anniversaries**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(anniversaries),
         });
       });
     };
@@ -317,6 +336,95 @@ test.describe("Summary pages", () => {
       await expect(
         page.getByRole("link", { name: "カレンダー表示確認イベント" }),
       ).toBeVisible();
+    });
+
+    test("shows and filters a highlighted anniversary in calendar and timeline views", async ({
+      page,
+    }) => {
+      await mockCalendarEvent(
+        page,
+        [
+          {
+            sequence: 1,
+            topic: "記念日配信",
+            title: "記念日のサムネイル",
+            video_id: "anniversary-calendar-stream",
+            channel_id: "UC-test",
+            video_url:
+              "https://www.youtube.com/watch?v=anniversary-calendar-stream",
+            video_duration: "01:00:00",
+            description: "",
+            published_at: "2026-06-03T01:00:00.000Z",
+            stream_started_at: "2026-06-03T01:00:00.000Z",
+            timestamp_comment: "",
+          },
+        ],
+        [],
+        [
+          {
+            date: "06/03",
+            first_date_at: "2018-06-02T15:00:00.000Z",
+            name: "活動開始{n}周年",
+            url: "https://example.com/anniversary",
+            note: "記念日の説明",
+          },
+        ],
+      );
+      await page.goto("/activity/2026/06");
+
+      const calendar = page
+        .locator('[data-testid="activity-calendar"]:visible')
+        .last();
+      await expect(calendar).toHaveAttribute("aria-busy", "false");
+      const anniversaryCell = calendar.locator(
+        'td[data-date-cell="2026-06-03"]',
+      );
+      const anniversaryPreview = anniversaryCell.locator(
+        'button[data-activity-kind="anniversary"]',
+      );
+      await expect(anniversaryPreview).toContainText("活動開始8周年");
+      const anniversaryThumbnail = anniversaryCell
+        .getByTestId("activity-calendar-thumbnail")
+        .first();
+      await expect(anniversaryThumbnail).toBeVisible();
+      expect(
+        await anniversaryCell.evaluate((cell) => {
+          const anniversary = cell.querySelector(
+            'button[data-activity-kind="anniversary"]',
+          );
+          const thumbnail = cell.querySelector(
+            '[data-testid="activity-calendar-thumbnail"]',
+          );
+
+          return Boolean(
+            anniversary &&
+            thumbnail &&
+            anniversary.compareDocumentPosition(thumbnail) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          );
+        }),
+      ).toBe(true);
+
+      await anniversaryPreview.click();
+      const drawerContent = page.getByTestId("activity-detail-content");
+      await expect(drawerContent).toContainText("記念日の説明");
+      await expect(
+        drawerContent.getByRole("link", { name: "活動開始8周年" }),
+      ).toHaveAttribute("href", "https://example.com/anniversary");
+      await page.getByRole("button", { name: "詳細を閉じる" }).click();
+
+      await page.getByText("タイムライン", { exact: true }).click();
+      await expect(
+        page.getByRole("link", { name: "活動開始8周年" }),
+      ).toBeVisible();
+
+      await page
+        .getByRole("button", { name: "アクティビティのフィルタ" })
+        .click();
+      await page.getByRole("checkbox", { name: "記念日を含める" }).uncheck();
+      await expect(
+        page.getByRole("link", { name: "活動開始8周年" }),
+      ).toBeHidden();
     });
 
     test("keeps the mobile calendar within the viewport", async ({ page }) => {

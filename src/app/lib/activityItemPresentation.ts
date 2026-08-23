@@ -140,6 +140,14 @@ export function getActivityItemLabel(
     };
   }
 
+  if (item.kind === "anniversary") {
+    return {
+      badge: t("activityAnniversaryBadge"),
+      title: item.displayName,
+      description: item.anniversary.note || "",
+    };
+  }
+
   return {
     badge: t("activityViewMilestoneBadge"),
     title: t("activityViewMilestoneTitle", {

@@ -238,6 +238,7 @@
     "activityViewMilestoneBadge": "再生数",
     "activityMilestoneBadge": "記録",
     "activityEventBadge": "イベント",
+    "activityAnniversaryBadge": "記念日",
     "activitySongUpdateDescription": "収録楽曲を追加：{count}曲",
     "activityArchiveTitle": "配信アーカイブを追加",
     "activityArchiveDescription": "配信アーカイブを追加",
@@ -253,6 +254,7 @@
     "activityFilterArchives": "配信を含める",
     "activityFilterSongUpdates": "楽曲追加情報を含める",
     "activityFilterViewMilestones": "再生数達成を含める",
+    "activityFilterAnniversaries": "記念日を含める",
     "activityShowMore": "続きを表示",
     "activityEmpty": "表示できるアクティビティはありません",
     "viewMilestonesLabel": "Views",
@@ -419,7 +421,7 @@
       "yearTitle": "AZKiさんの{year}年の歌の活動",
       "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました",
       "monthTitle": "{month}のアクティビティ",
-      "monthDescription": "{month}の音楽・配信・記録・イベントをまとめました"
+      "monthDescription": "{month}の音楽・配信・記録・イベント・記念日をまとめました"
     },
     "anniversaries": {
       "title": "記念日",
@@ -1061,6 +1063,9 @@
     "ranking": {
       "open": "ランキング"
     },
+    "usage": {
+      "userCount": "{count}人が利用中"
+    },
     "credit": {
       "prefix": "地点情報は ",
       "linkLabel": "AZKi聖地マップ",
@@ -1422,7 +1427,7 @@
       "activityDays": "活動日数: {days} 日目（2018/11/15 から {duration} 経過）"
     },
     "monthActivityTitle": "{month}",
-    "monthActivityDescription": "{month}の音楽・配信・再生数・記録・イベントをカレンダーまたは時系列で振り返ります。",
+    "monthActivityDescription": "{month}の音楽・配信・再生数・記録・イベント・記念日をカレンダーまたは時系列で振り返ります。",
     "activityViewLabel": "アクティビティの表示形式",
     "calendarView": "カレンダー",
     "timelineView": "タイムライン",

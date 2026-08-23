@@ -43,6 +43,7 @@ const activityBadgeColors: Record<ActivityTimelineItem["kind"], string> = {
   view_milestone: "yellow",
   milestone: "violet",
   event: "blue",
+  anniversary: "pink",
 };
 
 function isExternalHref(href: string | null | undefined) {

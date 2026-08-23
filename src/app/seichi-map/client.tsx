@@ -64,6 +64,10 @@ import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import type { ArchiveItem } from "../types/archiveItem";
 import type { SeichiMapLocation } from "../lib/seichiMap";
+import {
+  parseSeichiMapUserCount,
+  SEICHI_MAP_USER_COUNT_HEADER,
+} from "../lib/seichiMapHeaders";
 import { parseXStatusDateFromUrl } from "../lib/xStatus";
 import {
   formatStraightLineDistance,
@@ -1212,6 +1216,7 @@ export default function SeichiMapCompleteClient({
   const focusedInitialLocationIdRef = useRef<string | null>(null);
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
+  const [userCount, setUserCount] = useState<number | null>(null);
   const [visited, setVisited] = useState<VisitedItem[]>([]);
   const [archiveVideoMetaById, setArchiveVideoMetaById] = useState<
     Record<string, ArchiveVideoMeta>
@@ -1734,6 +1739,7 @@ export default function SeichiMapCompleteClient({
   const loadData = useCallback(async () => {
     setLoading(true);
     setLocationsLoading(true);
+    setUserCount(null);
     setErrorMessage(null);
 
     try {
@@ -1753,6 +1759,12 @@ export default function SeichiMapCompleteClient({
       if (!locationsResponse.ok) {
         throw new Error(t("errors.locationsFetchFailed"));
       }
+
+      setUserCount(
+        parseSeichiMapUserCount(
+          locationsResponse.headers.get(SEICHI_MAP_USER_COUNT_HEADER),
+        ),
+      );
 
       const locationItems =
         (await locationsResponse.json()) as (SeichiMapLocation & {
@@ -3152,6 +3164,7 @@ export default function SeichiMapCompleteClient({
           onOpenSettings={handleOpenSettings}
           onOpenShare={handleOpenShare}
           showNicknamePrompt={showNicknamePrompt}
+          userCount={userCount}
         />
       </Group>
 

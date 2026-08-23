@@ -53,6 +53,24 @@ function makeArchive(id: string, occurredAt: string): ActivityTimelineItem {
   };
 }
 
+function makeAnniversary(id: string, occurredAt: string): ActivityTimelineItem {
+  return {
+    id,
+    kind: "anniversary",
+    occurredAt,
+    href: "/anniversaries",
+    importance: "high",
+    displayName: id,
+    anniversary: {
+      date: "01/03",
+      first_date_at: "",
+      name: id,
+      url: "",
+      note: "",
+    },
+  };
+}
+
 describe("activityCalendar", () => {
   it("uses JST when grouping timestamps around midnight", () => {
     expect(getActivityJstDateKey("2026-01-31T14:59:59.000Z")).toBe(
@@ -140,6 +158,25 @@ describe("activityCalendar", () => {
       "event-2",
     ]);
     expect(preview.remainingCount).toBe(0);
+  });
+
+  it("pins anniversaries before archive thumbnails and other text", () => {
+    const items = [
+      makeEvent("event-1", "2026-01-03T00:00:00.000Z"),
+      makeArchive("archive-1", "2026-01-03T01:00:00.000Z"),
+      makeArchive("archive-2", "2026-01-03T02:00:00.000Z"),
+      makeArchive("archive-3", "2026-01-03T03:00:00.000Z"),
+      makeAnniversary("anniversary", "2026-01-02T15:00:00.000Z"),
+    ];
+
+    const preview = getActivityCalendarCellPreview(items);
+
+    expect(preview.textItems.map((item) => item.id)).toEqual(["anniversary"]);
+    expect(preview.thumbnailItems.map((item) => item.id)).toEqual([
+      "archive-1",
+      "archive-2",
+    ]);
+    expect(preview.remainingCount).toBe(2);
   });
 
   it("selects today when it has activity, otherwise the first activity day", () => {

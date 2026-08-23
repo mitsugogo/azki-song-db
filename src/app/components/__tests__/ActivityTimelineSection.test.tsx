@@ -156,6 +156,13 @@ describe("ActivityTimelineSection", () => {
     const getFilterCheckbox = (name: string) =>
       screen.getByRole("checkbox", { name, hidden: true });
 
+    expect(
+      screen.queryByRole("checkbox", {
+        name: "activityFilterAnniversaries",
+        hidden: true,
+      }),
+    ).not.toBeInTheDocument();
+
     await waitFor(() =>
       expect(getFilterCheckbox("activityFilterShorts")).toBeInTheDocument(),
     );

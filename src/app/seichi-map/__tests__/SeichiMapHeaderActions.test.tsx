@@ -5,24 +5,30 @@ import jaMessages from "@/messages/ja.json";
 
 vi.mock("@mantine/core", () => {
   const Group = ({ children }: any) => <div>{children}</div>;
+  const Badge = ({ children }: any) => <span>{children}</span>;
   const Tooltip = ({ children, label, opened }: any) => (
     <>
       {children}
       {opened ? <span role="status">{label}</span> : null}
     </>
   );
-  const Button = ({ children, leftSection, ...props }: any) => (
-    <button type="button" {...props}>
+  const Button = ({
+    children,
+    component: Component = "button",
+    leftSection,
+    ...props
+  }: any) => (
+    <Component {...props}>
       {leftSection}
       {children}
-    </button>
+    </Component>
   );
   const ActionIcon = ({
     children,
     component: Component = "button",
     ...props
   }: any) => <Component {...props}>{children}</Component>;
-  return { ActionIcon, Button, Group, Tooltip };
+  return { ActionIcon, Badge, Button, Group, Tooltip };
 });
 
 import {
@@ -40,6 +46,9 @@ describe("SeichiMapHeaderActions", () => {
     expect(messages.title).toBe("聖地訪問ログ");
     expect(messages.titleWithNickname.replace("{name}", "開拓者A")).toBe(
       "開拓者Aの聖地訪問ログ",
+    );
+    expect(messages.usage.userCount.replace("{count}", "12")).toBe(
+      "12人が利用中",
     );
   });
 
@@ -80,6 +89,7 @@ describe("SeichiMapHeaderActions", () => {
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
         showNicknamePrompt
+        userCount={null}
       />,
     );
 
@@ -88,14 +98,15 @@ describe("SeichiMapHeaderActions", () => {
     );
   });
 
-  it("自分のマップでは設定と共有を表示し、共有・ランキングをアイコン操作にする", () => {
+  it("自分のマップではBadge、ランキング、共有、設定の順に表示する", () => {
     const onOpenSettings = vi.fn();
     const onOpenShare = vi.fn();
-    render(
+    const { container } = render(
       <SeichiMapHeaderActions
         isSharedView={false}
         onOpenSettings={onOpenSettings}
         onOpenShare={onOpenShare}
+        userCount={12}
       />,
     );
 
@@ -104,10 +115,22 @@ describe("SeichiMapHeaderActions", () => {
 
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
     expect(onOpenShare).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("link", { name: "ranking.open" })).toHaveAttribute(
-      "href",
-      "/seichi-map/ranking",
-    );
+    expect(screen.getByText("usage.userCount")).toBeVisible();
+    const rankingLink = screen.getByRole("link", { name: "ranking.open" });
+    expect(rankingLink).toHaveAttribute("href", "/seichi-map/ranking");
+    expect(Array.from(container.firstElementChild?.children ?? [])).toEqual([
+      screen.getByText("usage.userCount"),
+      rankingLink,
+      screen.getByRole("button", { name: "share.open" }),
+      screen.getByRole("button", { name: "profile.open" }),
+    ]);
+    expect(rankingLink).toHaveTextContent("ranking.open");
+    expect(
+      screen.getByRole("button", { name: "share.open" }),
+    ).not.toHaveTextContent("share.open");
+    expect(
+      screen.getByRole("button", { name: "profile.open" }),
+    ).not.toHaveTextContent("profile.open");
   });
 
   it("共有マップでは編集操作を隠してランキングだけを残す", () => {
@@ -116,6 +139,7 @@ describe("SeichiMapHeaderActions", () => {
         isSharedView
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
+        userCount={null}
       />,
     );
 

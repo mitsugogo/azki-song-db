@@ -2,14 +2,18 @@ import {
   AZKI_SEICHI_MAP_KML_URL,
   parseSeichiMapKml,
 } from "@/app/lib/seichiMap";
-import { loadSeichiMapUniqueVisitorCounts } from "@/app/lib/seichiMapVisitedSheet";
+import { SEICHI_MAP_USER_COUNT_HEADER } from "@/app/lib/seichiMapHeaders";
+import {
+  loadSeichiMapUniqueVisitorCounts,
+  loadSeichiMapUserCount,
+} from "@/app/lib/seichiMapVisitedSheet";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const [response, uniqueVisitorCounts] = await Promise.all([
+    const [response, uniqueVisitorCounts, userCount] = await Promise.all([
       fetch(AZKI_SEICHI_MAP_KML_URL, {
         cache: "no-store",
         headers: {
@@ -22,6 +26,10 @@ export async function GET() {
           return {};
         },
       ),
+      loadSeichiMapUserCount().catch<number | null>((error) => {
+        console.error("Failed to load seichi map user count", error);
+        return null;
+      }),
     ]);
 
     if (!response.ok) {
@@ -34,16 +42,17 @@ export async function GET() {
     const kml = await response.text();
     const items = parseSeichiMapKml(kml);
 
+    const headers = new Headers({ "Cache-Control": "no-store" });
+    if (userCount !== null) {
+      headers.set(SEICHI_MAP_USER_COUNT_HEADER, String(userCount));
+    }
+
     return NextResponse.json(
       items.map((item) => ({
         ...item,
         uniqueVisitorCount: uniqueVisitorCounts[item.id] ?? 0,
       })),
-      {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
+      { headers },
     );
   } catch (error) {
     console.error("Failed to fetch AZKi seichi map KML", error);

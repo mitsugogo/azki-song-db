@@ -74,6 +74,24 @@ function makeMilestone(id: string, occurredAt: string): ActivityTimelineItem {
   };
 }
 
+function makeAnniversary(id: string, occurredAt: string): ActivityTimelineItem {
+  return {
+    id,
+    kind: "anniversary",
+    occurredAt,
+    href: "https://example.com/anniversary",
+    importance: "high",
+    displayName: "8周年",
+    anniversary: {
+      date: "01/02",
+      first_date_at: "2018-01-01T15:00:00.000Z",
+      name: "{n}周年",
+      url: "https://example.com/anniversary",
+      note: "記念日のメモ",
+    },
+  };
+}
+
 function mockMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
@@ -352,6 +370,86 @@ describe("ActivityMonthDisplay", () => {
     expect(screen.getByRole("link", { name: "mobile-event" })).toHaveAttribute(
       "href",
       "https://example.com/mobile-event",
+    );
+  });
+
+  it("highlights anniversaries, opens their details, and filters them", async () => {
+    const { container } = render(
+      <MantineProvider>
+        <ActivityMonthDisplay
+          activityMonth={{ year: 2026, month: 1 }}
+          items={[
+            makeEvent("first-day", "2026-01-01T00:00:00.000Z"),
+            makeAnniversary("anniversary", "2026-01-01T15:00:00.000Z"),
+            makeArchive("anniversary-day", "2026-01-02T01:00:00.000Z"),
+          ]}
+          isLoading={false}
+          isViewMilestonesLoading={false}
+          channels={[]}
+        />
+      </MantineProvider>,
+    );
+
+    const anniversaryDayButton = container.querySelector(
+      'button[data-date="2026-01-02"]',
+    )!;
+    const anniversaryDayCell = anniversaryDayButton.closest("td")!;
+    const anniversaryPreview = anniversaryDayCell.querySelector(
+      'button[data-activity-kind="anniversary"]',
+    )!;
+    const anniversaryThumbnail = within(anniversaryDayCell).getByTestId(
+      "activity-calendar-thumbnail",
+    );
+    const mobileMarker = anniversaryDayCell.querySelector(
+      'span[data-activity-kind="anniversary"]',
+    );
+
+    expect(anniversaryDayButton).toHaveClass("from-pink-50/90");
+    expect(anniversaryPreview).toHaveClass("border-pink-200/90");
+    expect(
+      anniversaryPreview.compareDocumentPosition(anniversaryThumbnail) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+    expect(mobileMarker).toHaveClass("h-2", "w-2");
+
+    fireEvent.click(anniversaryPreview);
+    const drawer = await screen.findByTestId("activity-detail-content");
+    expect(drawer).toHaveAttribute("data-activity-id", "anniversary");
+    expect(within(drawer).getByText("記念日のメモ")).toBeInTheDocument();
+    expect(within(drawer).getByRole("link", { name: "8周年" })).toHaveAttribute(
+      "href",
+      "https://example.com/anniversary",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "calendarActivityDetailClose" }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("activity-detail-content"),
+      ).not.toBeInTheDocument(),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "activityFilterLabel" }),
+    );
+    const anniversaryFilter = await screen.findByRole("checkbox", {
+      name: "activityFilterAnniversaries",
+      hidden: true,
+    });
+    expect(anniversaryFilter).toBeChecked();
+    fireEvent.click(anniversaryFilter);
+    expect(
+      anniversaryDayCell.querySelector(
+        'button[data-activity-kind="anniversary"]',
+      ),
+    ).toBeNull();
+
+    fireEvent.click(anniversaryFilter);
+    fireEvent.click(screen.getByText("timelineView"));
+    expect(screen.getByRole("link", { name: "8周年" })).toHaveAttribute(
+      "href",
+      "https://example.com/anniversary",
     );
   });
 });

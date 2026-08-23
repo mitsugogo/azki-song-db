@@ -10,11 +10,13 @@ import ActivityMonthPickerButton from "../../ActivityMonthPickerButton";
 import useActivityTimeline, {
   sortActivityTimelineItems,
 } from "../../../hook/useActivityTimeline";
+import useAnniversaries from "../../../hook/useAnniversaries";
 import useChannels from "../../../hook/useChannels";
 import useEvents from "../../../hook/useEvents";
 import useMilestones from "../../../hook/useMilestones";
 import useSongs from "../../../hook/useSongs";
 import { breadcrumbClasses, pageClasses } from "../../../theme";
+import { buildAnniversaryActivityItems } from "../../../lib/activityAnniversaries";
 import ActivityMonthDisplay from "../../ActivityMonthDisplay";
 import {
   formatActivityMonthLabel,
@@ -38,6 +40,8 @@ export default function SummaryMonthClient({
   const locale = useLocale();
   const t = useTranslations("Summary");
   const { allSongs, isLoading: isSongsLoading } = useSongs();
+  const { items: anniversaries, isLoading: isAnniversariesLoading } =
+    useAnniversaries();
   const { items: eventItems, isLoading: isEventsLoading } = useEvents();
   const { items: milestoneItems, isLoading: isMilestonesLoading } =
     useMilestones();
@@ -77,9 +81,14 @@ export default function SummaryMonthClient({
     dateRange,
   });
 
+  const anniversaryItems = useMemo(
+    () => buildAnniversaryActivityItems(anniversaries, activityMonth, locale),
+    [activityMonth, anniversaries, locale],
+  );
   const orderedActivityItems = useMemo(
-    () => sortActivityTimelineItems(activityItems, "asc"),
-    [activityItems],
+    () =>
+      sortActivityTimelineItems([...activityItems, ...anniversaryItems], "asc"),
+    [activityItems, anniversaryItems],
   );
 
   return (
@@ -155,7 +164,7 @@ export default function SummaryMonthClient({
       <ActivityMonthDisplay
         activityMonth={activityMonth}
         items={orderedActivityItems}
-        isLoading={isActivityLoading}
+        isLoading={isActivityLoading || isAnniversariesLoading}
         isViewMilestonesLoading={isViewMilestonesLoading}
         channels={channels}
       />
