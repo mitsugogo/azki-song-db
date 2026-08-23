@@ -171,4 +171,29 @@ describe("activityItemPresentation", () => {
     expect(result.youtubeHref).toContain("song-video");
     expect(result.singers).toHaveLength(1);
   });
+
+  it("resolves anniversary title, note, and link", () => {
+    const item = {
+      id: "anniversary",
+      kind: "anniversary",
+      occurredAt: "2026-06-02T15:00:00.000Z",
+      href: "https://example.com/anniversary",
+      importance: "high",
+      displayName: "8周年",
+      anniversary: {
+        date: "06/03",
+        first_date_at: "2018-06-02T15:00:00.000Z",
+        name: "{n}周年",
+        url: "https://example.com/anniversary",
+        note: "記念日のメモ",
+      },
+    } as ActivityTimelineItem;
+
+    const result = buildActivityItemPresentation(item, t, "ja", indexes);
+
+    expect(result.badge).toBe("activityAnniversaryBadge");
+    expect(result.timelineTitle).toBe("8周年");
+    expect(result.detailDescription).toBe("記念日のメモ");
+    expect(result.titleHref).toBe("https://example.com/anniversary");
+  });
 });

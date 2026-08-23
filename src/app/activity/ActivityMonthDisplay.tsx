@@ -58,6 +58,7 @@ export default function ActivityMonthDisplay({
         <ActivityTimelineFilterMenu
           filters={displayFilters}
           onChange={setDisplayFilters}
+          showAnniversaries
         />
       </div>
 

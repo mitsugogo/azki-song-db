@@ -21,6 +21,7 @@ import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import {
   LuArrowRight,
   LuMusic,
+  LuPartyPopper,
   LuSparkles,
   LuTrophy,
   LuVideo,
@@ -68,6 +69,7 @@ export const DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS: ActivityTimelineDisplayF
     includeArchives: true,
     includeSongUpdates: true,
     includeViewMilestones: true,
+    includeAnniversaries: true,
   };
 
 const activityTimelineColors: Record<ActivityTimelineItem["kind"], string> = {
@@ -76,6 +78,7 @@ const activityTimelineColors: Record<ActivityTimelineItem["kind"], string> = {
   view_milestone: "yellow",
   milestone: "violet",
   event: "blue",
+  anniversary: "pink",
 };
 
 function getActivityItemBullet(kind: ActivityTimelineItem["kind"]) {
@@ -95,10 +98,24 @@ function getActivityItemBullet(kind: ActivityTimelineItem["kind"]) {
     return <BsGeoAlt size={14} />;
   }
 
+  if (kind === "anniversary") {
+    return <LuPartyPopper size={14} />;
+  }
+
   return <LuTrophy size={14} />;
 }
 
 function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
+  if (kind === "anniversary") {
+    return {
+      item: "rounded-lg border border-pink-200/80 bg-gradient-to-r from-pink-50/90 to-amber-50/80 p-3 shadow-[0_10px_28px_rgba(219,39,119,0.12)] dark:border-pink-300/20 dark:from-pink-300/10 dark:to-amber-300/10",
+      title:
+        "min-w-0 text-sm font-bold leading-6 text-pink-900 transition hover:text-primary dark:text-pink-100 dark:hover:text-pink-200",
+      thumbnail: "",
+      description: "text-sm text-gray-700 dark:text-gray-100",
+    };
+  }
+
   if (kind === "view_milestone") {
     return {
       item: "rounded-lg border border-yellow-300/50 bg-yellow-50/80 p-3 shadow-[0_12px_34px_rgba(202,138,4,0.16)] dark:border-yellow-300/25 dark:bg-yellow-300/10",
@@ -160,11 +177,13 @@ function handleArchiveActivityLinkClick(
 type ActivityTimelineFilterMenuProps = {
   filters: ActivityTimelineDisplayFilters;
   onChange: (filters: ActivityTimelineDisplayFilters) => void;
+  showAnniversaries?: boolean;
 };
 
 export function ActivityTimelineFilterMenu({
   filters,
   onChange,
+  showAnniversaries = false,
 }: ActivityTimelineFilterMenuProps) {
   const t = useTranslations("Home");
 
@@ -227,6 +246,19 @@ export function ActivityTimelineFilterMenu({
               })
             }
           />
+          {showAnniversaries ? (
+            <Checkbox
+              size="sm"
+              checked={filters.includeAnniversaries}
+              label={t("activityFilterAnniversaries")}
+              onChange={(event) =>
+                onChange({
+                  ...filters,
+                  includeAnniversaries: event.currentTarget.checked,
+                })
+              }
+            />
+          ) : null}
         </div>
       </Menu.Dropdown>
     </Menu>

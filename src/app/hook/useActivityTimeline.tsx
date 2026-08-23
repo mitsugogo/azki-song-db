@@ -16,11 +16,17 @@ import type { Period, ViewCountStat } from "../types/api/stat/views";
 import type { EventItem } from "../types/eventItem";
 import type { Song } from "../types/song";
 import type { ActivityImportance } from "../types/activityImportance";
+import type { AnniversaryItem } from "../types/anniversaryItem";
 import { getActivityJstDateKey } from "../lib/activityCalendar";
 import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
 
 export type ActivityTimelineKind =
-  "song_update" | "archive" | "view_milestone" | "milestone" | "event";
+  | "song_update"
+  | "archive"
+  | "view_milestone"
+  | "milestone"
+  | "event"
+  | "anniversary";
 
 type BaseActivityTimelineItem = {
   id: string;
@@ -72,12 +78,19 @@ export type EventActivityTimelineItem = BaseActivityTimelineItem & {
   event: EventItem;
 };
 
+export type AnniversaryActivityTimelineItem = BaseActivityTimelineItem & {
+  kind: "anniversary";
+  anniversary: AnniversaryItem;
+  displayName: string;
+};
+
 export type ActivityTimelineItem =
   | SongUpdateActivityTimelineItem
   | ArchiveActivityTimelineItem
   | ViewMilestoneActivityTimelineItem
   | MilestoneActivityTimelineItem
-  | EventActivityTimelineItem;
+  | EventActivityTimelineItem
+  | AnniversaryActivityTimelineItem;
 
 type UseActivityTimelineOptions = {
   songs: Song[];

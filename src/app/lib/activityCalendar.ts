@@ -91,15 +91,30 @@ export function getActivityCalendarCellPreview(
     resolvedItemLimit,
     Math.max(0, thumbnailLimit),
   );
+  const anniversaryItems = items
+    .filter((item) => item.kind === "anniversary")
+    .slice(0, resolvedItemLimit);
+  const anniversaryItemIds = new Set(anniversaryItems.map((item) => item.id));
   const thumbnailItems = items
     .filter(
-      (item): item is ActivityCalendarArchiveItem => item.kind === "archive",
+      (item): item is ActivityCalendarArchiveItem =>
+        item.kind === "archive" && !anniversaryItemIds.has(item.id),
     )
-    .slice(0, resolvedThumbnailLimit);
+    .slice(
+      0,
+      Math.min(
+        resolvedThumbnailLimit,
+        resolvedItemLimit - anniversaryItems.length,
+      ),
+    );
   const thumbnailItemIds = new Set(thumbnailItems.map((item) => item.id));
-  const textItems = items
-    .filter((item) => !thumbnailItemIds.has(item.id))
-    .slice(0, resolvedItemLimit - thumbnailItems.length);
+  const textItems = [
+    ...anniversaryItems,
+    ...items.filter(
+      (item) =>
+        !anniversaryItemIds.has(item.id) && !thumbnailItemIds.has(item.id),
+    ),
+  ].slice(0, resolvedItemLimit - thumbnailItems.length);
 
   return {
     thumbnailItems,

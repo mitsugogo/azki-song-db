@@ -5,6 +5,7 @@ export type ActivityTimelineDisplayFilters = {
   includeArchives: boolean;
   includeSongUpdates: boolean;
   includeViewMilestones: boolean;
+  includeAnniversaries: boolean;
 };
 
 const isShortsText = (value: string | undefined) =>
@@ -60,6 +61,10 @@ export function filterActivityTimelineItemsForDisplay(
     }
 
     if (!filters.includeViewMilestones && item.kind === "view_milestone") {
+      return false;
+    }
+
+    if (!filters.includeAnniversaries && item.kind === "anniversary") {
       return false;
     }
 

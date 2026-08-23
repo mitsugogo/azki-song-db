@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useLocale, useTranslations } from "next-intl";
+import { LuPartyPopper } from "react-icons/lu";
 import ActivityItemDetail from "../components/ActivityItemDetail";
 import ActivityTimelineSection from "../components/ActivityTimelineSection";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
@@ -32,6 +33,7 @@ const activityKindDotClasses: Record<ActivityTimelineItem["kind"], string> = {
   view_milestone: "bg-yellow-500",
   milestone: "bg-violet-500",
   event: "bg-blue-500",
+  anniversary: "bg-pink-500 ring-1 ring-amber-300",
 };
 
 type ActivityCalendarSectionProps = {
@@ -76,6 +78,47 @@ function getCalendarItemTitle(
   }
 
   return label.title;
+}
+
+type CalendarTextPreviewProps = {
+  item: ActivityTimelineItem;
+  title: string;
+  ariaLabel: string;
+  onClick: () => void;
+};
+
+function CalendarTextPreview({
+  item,
+  title,
+  ariaLabel,
+  onClick,
+}: CalendarTextPreviewProps) {
+  return (
+    <UnstyledButton
+      type="button"
+      data-activity-kind={item.kind}
+      className={`pointer-events-auto flex w-full min-w-0 items-center gap-1 rounded px-1.5 py-1 text-left text-[0.7rem] leading-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+        item.kind === "anniversary"
+          ? "border border-pink-200/90 bg-gradient-to-r from-pink-100/95 to-amber-50/95 font-semibold text-pink-800 shadow-sm dark:border-pink-300/25 dark:from-pink-300/15 dark:to-amber-300/10 dark:text-pink-100"
+          : "bg-light-gray-100/80 text-gray-700 dark:bg-white/5 dark:text-gray-200"
+      }`}
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
+      {item.kind === "anniversary" ? (
+        <LuPartyPopper
+          className="h-3 w-3 shrink-0 text-pink-600 dark:text-pink-200"
+          aria-hidden="true"
+        />
+      ) : (
+        <span
+          className={`h-2 w-2 shrink-0 rounded-full ${activityKindDotClasses[item.kind]}`}
+          aria-hidden="true"
+        />
+      )}
+      <span className="truncate">{title}</span>
+    </UnstyledButton>
+  );
 }
 
 export default function ActivityCalendarSection({
@@ -187,12 +230,37 @@ export default function ActivityCalendarSection({
                     }
 
                     const dayItems = groupedItems.get(day.dateKey) ?? [];
+                    const hasAnniversary = dayItems.some(
+                      (item) => item.kind === "anniversary",
+                    );
                     const isSelected = day.dateKey === selectedDateKey;
                     const { thumbnailItems, textItems, remainingCount } =
                       getActivityCalendarCellPreview(
                         dayItems,
                         CALENDAR_ITEM_LIMIT,
                       );
+                    const anniversaryTextItems = textItems.filter(
+                      (item) => item.kind === "anniversary",
+                    );
+                    const otherTextItems = textItems.filter(
+                      (item) => item.kind !== "anniversary",
+                    );
+
+                    const renderTextPreview = (item: ActivityTimelineItem) => {
+                      const title = getCalendarItemTitle(item, tHome, locale);
+
+                      return (
+                        <CalendarTextPreview
+                          key={item.id}
+                          item={item}
+                          title={title}
+                          ariaLabel={getItemSelectAriaLabel(item)}
+                          onClick={() =>
+                            handleOpenActivityDetail(item, day.dateKey)
+                          }
+                        />
+                      );
+                    };
 
                     return (
                       <td
@@ -207,7 +275,9 @@ export default function ActivityCalendarSection({
                             className={`absolute inset-0 w-full text-left transition focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary ${
                               isSelected
                                 ? "bg-primary/10 ring-2 ring-inset ring-primary dark:bg-primary/15"
-                                : "hover:bg-light-gray-100/50 dark:hover:bg-white/5"
+                                : hasAnniversary
+                                  ? "bg-gradient-to-br from-pink-50/90 via-white/60 to-amber-50/80 hover:from-pink-100/90 hover:to-amber-100/70 dark:from-pink-400/10 dark:via-white/[0.03] dark:to-amber-300/10 dark:hover:from-pink-400/15 dark:hover:to-amber-300/15"
+                                  : "hover:bg-light-gray-100/50 dark:hover:bg-white/5"
                             }`}
                             aria-label={t("calendarDayAriaLabel", {
                               date: formatCalendarDate(day.dateKey, locale),
@@ -220,11 +290,13 @@ export default function ActivityCalendarSection({
                           <div className="pointer-events-none relative z-10 flex min-h-16 w-full min-w-0 flex-col p-1 text-left sm:min-h-36 sm:p-2">
                             <span
                               className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold sm:text-sm ${
-                                weekdayIndex === 0
-                                  ? "text-red-600 dark:text-red-300"
-                                  : weekdayIndex === 6
-                                    ? "text-blue-600 dark:text-blue-300"
-                                    : "text-gray-700 dark:text-gray-200"
+                                hasAnniversary
+                                  ? "bg-pink-100 text-pink-700 ring-1 ring-pink-200 dark:bg-pink-300/15 dark:text-pink-200 dark:ring-pink-300/25"
+                                  : weekdayIndex === 0
+                                    ? "text-red-600 dark:text-red-300"
+                                    : weekdayIndex === 6
+                                      ? "text-blue-600 dark:text-blue-300"
+                                      : "text-gray-700 dark:text-gray-200"
                               }`}
                             >
                               {day.day}
@@ -238,6 +310,7 @@ export default function ActivityCalendarSection({
                             ) : (
                               <>
                                 <div className="mt-1 hidden w-full min-w-0 space-y-1 sm:block">
+                                  {anniversaryTextItems.map(renderTextPreview)}
                                   {thumbnailItems.length > 0 ? (
                                     <div
                                       className={`grid w-full gap-1 ${
@@ -281,38 +354,7 @@ export default function ActivityCalendarSection({
                                       })}
                                     </div>
                                   ) : null}
-                                  {textItems.map((item) => {
-                                    const title = getCalendarItemTitle(
-                                      item,
-                                      tHome,
-                                      locale,
-                                    );
-
-                                    return (
-                                      <UnstyledButton
-                                        key={item.id}
-                                        type="button"
-                                        className="pointer-events-auto flex w-full min-w-0 items-center gap-1 rounded bg-light-gray-100/80 px-1.5 py-1 text-left text-[0.7rem] leading-4 text-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:bg-white/5 dark:text-gray-200"
-                                        aria-label={getItemSelectAriaLabel(
-                                          item,
-                                        )}
-                                        onClick={() =>
-                                          handleOpenActivityDetail(
-                                            item,
-                                            day.dateKey,
-                                          )
-                                        }
-                                      >
-                                        <span
-                                          className={`h-2 w-2 shrink-0 rounded-full ${activityKindDotClasses[item.kind]}`}
-                                          aria-hidden="true"
-                                        />
-                                        <span className="truncate">
-                                          {title}
-                                        </span>
-                                      </UnstyledButton>
-                                    );
-                                  })}
+                                  {otherTextItems.map(renderTextPreview)}
                                   {remainingCount > 0 ? (
                                     <div className="px-1 text-[0.7rem] font-medium text-gray-500 dark:text-gray-400">
                                       {t("calendarMoreItems", {
@@ -335,7 +377,12 @@ export default function ActivityCalendarSection({
                                       ).map((kind) => (
                                         <span
                                           key={kind}
-                                          className={`h-1.5 w-1.5 rounded-full ${activityKindDotClasses[kind]}`}
+                                          data-activity-kind={kind}
+                                          className={`${
+                                            kind === "anniversary"
+                                              ? "h-2 w-2"
+                                              : "h-1.5 w-1.5"
+                                          } rounded-full ${activityKindDotClasses[kind]}`}
                                         />
                                       ))}
                                     </span>
