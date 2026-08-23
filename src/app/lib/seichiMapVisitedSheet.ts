@@ -159,6 +159,15 @@ export async function loadSeichiMapUniqueVisitorCounts(): Promise<
   );
 }
 
+export async function loadSeichiMapUserCount(): Promise<number> {
+  const [row] = await prisma.$queryRaw<{ userCount: bigint }[]>`
+    SELECT COUNT(DISTINCT userId) AS userCount
+    FROM SeichiMapVisited
+  `;
+
+  return Number(row?.userCount ?? 0);
+}
+
 export async function loadSeichiMapLocationVisitorRanking(): Promise<
   SeichiMapLocationVisitorRankingRow[]
 > {

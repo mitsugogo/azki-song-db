@@ -1063,6 +1063,9 @@
     "ranking": {
       "open": "ランキング"
     },
+    "usage": {
+      "userCount": "{count}人が利用中"
+    },
     "credit": {
       "prefix": "地点情報は ",
       "linkLabel": "AZKi聖地マップ",

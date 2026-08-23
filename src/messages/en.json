@@ -1072,6 +1072,9 @@
     "ranking": {
       "open": "Rankings"
     },
+    "usage": {
+      "userCount": "{count} people using the map"
+    },
     "credit": {
       "prefix": "Location data is provided by ",
       "linkLabel": "AZKi Seichi Map",

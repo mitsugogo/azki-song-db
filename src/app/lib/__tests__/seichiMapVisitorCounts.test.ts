@@ -10,6 +10,7 @@ import { prisma } from "../prisma";
 import {
   loadSeichiMapLocationVisitorRanking,
   loadSeichiMapUniqueVisitorCounts,
+  loadSeichiMapUserCount,
   loadSeichiMapVisitorRanking,
   SEICHI_MAP_RANKING_LIMIT,
 } from "../seichiMapVisitedSheet";
@@ -45,6 +46,22 @@ describe("loadSeichiMapUniqueVisitorCounts", () => {
     await expect(loadSeichiMapLocationVisitorRanking()).resolves.toEqual([
       { locationId: "location-a", uniqueVisitorCount: 4 },
     ]);
+  });
+
+  it("1地点以上を登録した利用者をuserIdユニークで数える", async () => {
+    queryRaw.mockResolvedValue([{ userCount: 3n }]);
+
+    await expect(loadSeichiMapUserCount()).resolves.toBe(3);
+
+    const sql = (queryRaw.mock.calls[0][0] as TemplateStringsArray).join("?");
+    expect(sql).toContain("COUNT(DISTINCT userId)");
+    expect(sql).toContain("FROM SeichiMapVisited");
+  });
+
+  it("訪問記録がなければ利用者数を0人として返す", async () => {
+    queryRaw.mockResolvedValue([]);
+
+    await expect(loadSeichiMapUserCount()).resolves.toBe(0);
   });
 
   it("開拓者ランキングをニックネーム付きで上位100件に限定する", async () => {

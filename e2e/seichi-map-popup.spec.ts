@@ -16,6 +16,7 @@ const setupSeichiMapPopupMocks = async (page: Page) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "X-Seichi-Map-User-Count": "12" },
       body: JSON.stringify([
         {
           id: LOCATION_ID,
@@ -151,6 +152,38 @@ const assertFixedPopupActions = async (page: Page) => {
 };
 
 test.describe("Seichi map location popup", () => {
+  test("shows the number of users with at least one recorded location", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await setupSeichiMapPopupMocks(page);
+    await page.goto("/seichi-map");
+
+    const badge = page.getByText(/12人が利用中|12 people using the map/);
+    const ranking = page.getByRole("link", { name: /ランキング|Rankings/ });
+    const share = page.getByRole("button", { name: /共有|Share/ });
+    const settings = page.getByRole("button", { name: /設定|Settings/ });
+
+    await expect(badge).toBeVisible();
+    await expect(ranking).toContainText(/ランキング|Rankings/);
+    await expect(share).toHaveText("");
+    await expect(settings).toHaveText("");
+
+    const [badgeBox, rankingBox, shareBox, settingsBox] = await Promise.all([
+      badge.boundingBox(),
+      ranking.boundingBox(),
+      share.boundingBox(),
+      settings.boundingBox(),
+    ]);
+    expect(badgeBox).not.toBeNull();
+    expect(rankingBox).not.toBeNull();
+    expect(shareBox).not.toBeNull();
+    expect(settingsBox).not.toBeNull();
+    expect(badgeBox!.x).toBeLessThan(rankingBox!.x);
+    expect(rankingBox!.x).toBeLessThan(shareBox!.x);
+    expect(shareBox!.x).toBeLessThan(settingsBox!.x);
+  });
+
   for (const { name, viewport } of [
     { name: "small portrait", viewport: { width: 320, height: 568 } },
     { name: "small landscape", viewport: { width: 568, height: 320 } },
