@@ -50,6 +50,7 @@ type SortableItineraryStopProps = {
   onRemove: (locationId: string) => void;
   onToggle: (locationId: string) => void;
   stop: SeichiMapItineraryStop;
+  visited: boolean;
 };
 
 function SortableItineraryStop({
@@ -59,6 +60,7 @@ function SortableItineraryStop({
   onRemove,
   onToggle,
   stop,
+  visited,
 }: SortableItineraryStopProps) {
   const t = useTranslations("SeichiMapComplete");
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -72,16 +74,16 @@ function SortableItineraryStop({
       radius="md"
       p="xs"
       style={{
-        opacity: stop.completed ? 0.72 : 1,
+        opacity: stop.checked ? 0.72 : 1,
         transform: CSS.Transform.toString(transform),
         transition,
       }}
     >
       <Group gap="xs" wrap="nowrap">
         <Checkbox
-          checked={stop.completed}
+          checked={stop.checked}
           onChange={() => onToggle(stop.locationId)}
-          aria-label={t("itinerary.markVisited", { name: locationName })}
+          aria-label={t("itinerary.toggleCheck", { name: locationName })}
         />
         <Badge variant="light" color="pink" circle>
           {index + 1}
@@ -96,7 +98,7 @@ function SortableItineraryStop({
             fw={600}
             size="sm"
             lineClamp={2}
-            td={stop.completed ? "line-through" : undefined}
+            td={stop.checked ? "line-through" : undefined}
           >
             {locationName}
           </Text>
@@ -105,7 +107,7 @@ function SortableItineraryStop({
               {location.folder}
             </Text>
           ) : null}
-          {stop.completed ? (
+          {visited ? (
             <Badge mt={4} size="xs" variant="light" color="green">
               {t("itinerary.visited")}
             </Badge>
@@ -145,6 +147,7 @@ type Props = {
   onRemove: (locationId: string) => void;
   onReorder: (activeLocationId: string, overLocationId: string) => void;
   onToggle: (locationId: string) => void;
+  visitedLocationIds: ReadonlySet<string>;
 };
 
 export function SeichiMapItinerary({
@@ -155,6 +158,7 @@ export function SeichiMapItinerary({
   onRemove,
   onReorder,
   onToggle,
+  visitedLocationIds,
 }: Props) {
   const t = useTranslations("SeichiMapComplete");
   const sensors = useSensors(
@@ -163,9 +167,7 @@ export function SeichiMapItinerary({
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
-  const completedCount = itinerary.stops.filter(
-    (stop) => stop.completed,
-  ).length;
+  const checkedCount = itinerary.stops.filter((stop) => stop.checked).length;
   const routeLocations = itinerary.stops.flatMap((stop) => {
     const location = locationsById.get(stop.locationId);
     return location ? [location] : [];
@@ -184,8 +186,8 @@ export function SeichiMapItinerary({
       <Group justify="space-between" gap="xs">
         <Text fw={700}>{t("itinerary.visitOrder")}</Text>
         <Badge variant="light" color="pink">
-          {t("itinerary.completedCount", {
-            completed: completedCount,
+          {t("itinerary.checkedCount", {
+            checked: checkedCount,
             total: itinerary.stops.length,
           })}
         </Badge>
@@ -226,6 +228,7 @@ export function SeichiMapItinerary({
                       onRemove={onRemove}
                       onToggle={onToggle}
                       stop={stop}
+                      visited={visitedLocationIds.has(stop.locationId)}
                     />
                   ))}
                 </Stack>

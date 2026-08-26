@@ -1192,10 +1192,10 @@
     },
     "itinerary": {
       "visitOrder": "Visit order",
-      "completedCount": "{completed} / {total} visited",
+      "checkedCount": "{checked} / {total} checked",
       "empty": "You can pick out the seichi locations you plan to visit in advance. Because the itinerary is saved on this device, set it up on the smartphone or other device you will use during your visit.",
       "reorderHelp": "Drag the handle to change the visit order.",
-      "markVisited": "Mark {name} as visited",
+      "toggleCheck": "Toggle check for {name}",
       "visited": "Visited",
       "openLocation": "Show {name} on the map",
       "reorderStop": "Change visit order",

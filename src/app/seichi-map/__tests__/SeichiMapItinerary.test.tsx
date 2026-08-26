@@ -28,7 +28,7 @@ const location = {
 };
 
 describe("SeichiMapItinerary", () => {
-  it("訪問チェック、地点表示、削除の操作を通知する", () => {
+  it("チェック、地点表示、削除の操作を通知する", () => {
     const onToggle = vi.fn();
     const onOpenLocation = vi.fn();
     const onRemove = vi.fn();
@@ -37,7 +37,7 @@ describe("SeichiMapItinerary", () => {
       <MantineProvider>
         <SeichiMapItinerary
           itinerary={{
-            stops: [{ locationId: location.id, completed: true }],
+            stops: [{ locationId: location.id, checked: true }],
           }}
           locationsById={new Map([[location.id, location]])}
           onClear={vi.fn()}
@@ -45,13 +45,14 @@ describe("SeichiMapItinerary", () => {
           onRemove={onRemove}
           onReorder={vi.fn()}
           onToggle={onToggle}
+          visitedLocationIds={new Set()}
         />
       </MantineProvider>,
     );
 
-    expect(screen.getByText("itinerary.visited")).toBeVisible();
+    expect(screen.queryByText("itinerary.visited")).not.toBeInTheDocument();
     fireEvent.click(
-      screen.getByRole("checkbox", { name: "itinerary.markVisited" }),
+      screen.getByRole("checkbox", { name: "itinerary.toggleCheck" }),
     );
     fireEvent.click(
       screen.getByRole("button", { name: "itinerary.openLocation" }),
@@ -71,6 +72,30 @@ describe("SeichiMapItinerary", () => {
     );
   });
 
+  it("訪問済ラベルをチェック状態ではなく訪問記録から表示する", () => {
+    render(
+      <MantineProvider>
+        <SeichiMapItinerary
+          itinerary={{
+            stops: [{ locationId: location.id, checked: false }],
+          }}
+          locationsById={new Map([[location.id, location]])}
+          onClear={vi.fn()}
+          onOpenLocation={vi.fn()}
+          onRemove={vi.fn()}
+          onReorder={vi.fn()}
+          onToggle={vi.fn()}
+          visitedLocationIds={new Set([location.id])}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByText("itinerary.visited")).toBeVisible();
+    expect(
+      screen.getByRole("checkbox", { name: "itinerary.toggleCheck" }),
+    ).not.toBeChecked();
+  });
+
   it("地点が空のときは経路を無効化し、追加方法を表示する", () => {
     render(
       <MantineProvider>
@@ -82,6 +107,7 @@ describe("SeichiMapItinerary", () => {
           onRemove={vi.fn()}
           onReorder={vi.fn()}
           onToggle={vi.fn()}
+          visitedLocationIds={new Set()}
         />
       </MantineProvider>,
     );

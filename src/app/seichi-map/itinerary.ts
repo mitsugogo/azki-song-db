@@ -4,7 +4,7 @@ export const SEICHI_MAP_ITINERARY_STORAGE_KEY = "azki-seichi-map:itinerary:v1";
 
 export type SeichiMapItineraryStop = {
   locationId: string;
-  completed: boolean;
+  checked: boolean;
 };
 
 export type SeichiMapItinerary = {
@@ -30,6 +30,7 @@ export function parseSeichiMapItinerary(
           if (!stop || typeof stop !== "object") return [];
           const candidate = stop as {
             locationId?: unknown;
+            checked?: unknown;
             completed?: unknown;
           };
           if (
@@ -43,7 +44,10 @@ export function parseSeichiMapItinerary(
           return [
             {
               locationId: candidate.locationId,
-              completed: candidate.completed === true,
+              checked:
+                typeof candidate.checked === "boolean"
+                  ? candidate.checked
+                  : candidate.completed === true,
             },
           ];
         })
@@ -93,7 +97,7 @@ export function addSeichiMapItineraryStop(
   }
   return {
     ...itinerary,
-    stops: [...itinerary.stops, { locationId, completed: false }],
+    stops: [...itinerary.stops, { locationId, checked: false }],
   };
 }
 
@@ -105,7 +109,7 @@ export function toggleSeichiMapItineraryStop(
     ...itinerary,
     stops: itinerary.stops.map((stop) =>
       stop.locationId === locationId
-        ? { ...stop, completed: !stop.completed }
+        ? { ...stop, checked: !stop.checked }
         : stop,
     ),
   };

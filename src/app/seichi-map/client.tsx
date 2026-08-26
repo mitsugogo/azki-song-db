@@ -1587,6 +1587,10 @@ export default function SeichiMapCompleteClient({
     });
     return map;
   }, [visited]);
+  const visitedLocationIds = useMemo(
+    () => new Set(visitedByLocationId.keys()),
+    [visitedByLocationId],
+  );
 
   const getVisitedItemForLocation = useCallback(
     (location: LocationOption) => visitedByLocationId.get(location.id),
@@ -3968,6 +3972,7 @@ export default function SeichiMapCompleteClient({
                   onRemove={removeItineraryStop}
                   onReorder={reorderItineraryStops}
                   onToggle={toggleItineraryStop}
+                  visitedLocationIds={visitedLocationIds}
                 />
               ) : canViewVisitedList ? (
                 <Stack gap="sm" className="min-h-0 flex-1">

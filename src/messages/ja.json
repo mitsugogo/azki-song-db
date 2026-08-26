@@ -1183,10 +1183,10 @@
     },
     "itinerary": {
       "visitOrder": "訪問順",
-      "completedCount": "{completed} / {total} 訪問",
+      "checkedCount": "{checked} / {total} チェック済",
       "empty": "訪問予定の聖地リストをあらかじめピックアップしておくことができます。端末内に保存されるため、訪問時に利用するスマートフォンなどで設定してください。",
       "reorderHelp": "つまみをドラッグして訪問順を変更できます。",
-      "markVisited": "{name}を訪問済みにする",
+      "toggleCheck": "{name}のチェックを切り替える",
       "visited": "訪問済",
       "openLocation": "{name}を地図で表示",
       "reorderStop": "訪問順を変更",

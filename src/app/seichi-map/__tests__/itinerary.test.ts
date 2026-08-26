@@ -14,8 +14,8 @@ import {
 
 const itinerary: SeichiMapItinerary = {
   stops: [
-    { locationId: "location-a", completed: false },
-    { locationId: "location-b", completed: true },
+    { locationId: "location-a", checked: false },
+    { locationId: "location-b", checked: true },
   ],
 };
 
@@ -26,21 +26,39 @@ describe("seichi-map itinerary", () => {
         JSON.stringify({
           startLocation: "新大阪",
           stops: [
-            { locationId: "location-a", completed: true, name: "保存しない" },
-            { locationId: "location-a", completed: false },
-            { locationId: "location-b", completed: "yes" },
+            { locationId: "location-a", checked: true, name: "保存しない" },
+            { locationId: "location-a", checked: false },
+            { locationId: "location-b", checked: "yes" },
             { completed: true },
           ],
         }),
       ),
     ).toEqual({
       stops: [
-        { locationId: "location-a", completed: true },
-        { locationId: "location-b", completed: false },
+        { locationId: "location-a", checked: true },
+        { locationId: "location-b", checked: false },
       ],
     });
     expect(parseSeichiMapItinerary("not-json")).toEqual({
       stops: [],
+    });
+  });
+
+  it("旧completedフィールドをチェック状態として引き継ぐ", () => {
+    expect(
+      parseSeichiMapItinerary(
+        JSON.stringify({
+          stops: [
+            { locationId: "location-a", completed: true },
+            { locationId: "location-b", completed: false },
+          ],
+        }),
+      ),
+    ).toEqual({
+      stops: [
+        { locationId: "location-a", checked: true },
+        { locationId: "location-b", checked: false },
+      ],
     });
   });
 
@@ -79,12 +97,12 @@ describe("seichi-map itinerary", () => {
     const added = addSeichiMapItineraryStop(itinerary, "location-c");
     expect(added.stops).toEqual([
       ...itinerary.stops,
-      { locationId: "location-c", completed: false },
+      { locationId: "location-c", checked: false },
     ]);
     expect(addSeichiMapItineraryStop(added, "location-c")).toBe(added);
 
     const toggled = toggleSeichiMapItineraryStop(added, "location-a");
-    expect(toggled.stops[0].completed).toBe(true);
+    expect(toggled.stops[0].checked).toBe(true);
 
     const reordered = reorderSeichiMapItineraryStops(
       toggled,
