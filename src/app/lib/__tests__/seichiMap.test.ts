@@ -251,6 +251,93 @@ describe("parseSeichiMapKml", () => {
     expect(registry[0].sourceIds).toHaveLength(2);
   });
 
+  it("uses the pre-prefix ID for locations in the holomember map layer", () => {
+    const oldKml = createKml({
+      folder: "ホロメンマップ",
+      name: "香港飲茶 星街（星街すいせい）",
+      latitude: 35.0063084,
+      longitude: 135.7581479,
+    });
+    const renamedKml = createKml({
+      folder: "ホロメンマップ",
+      name: "香港飲茶 星街（ホロメンマップ／星街すいせい）",
+      latitude: 35.0063084,
+      longitude: 135.7581479,
+    });
+    const oldId = parseSeichiMapKml(oldKml, [])[0].id;
+
+    expect(parseSeichiMapKml(renamedKml, [])[0]).toMatchObject({
+      id: oldId,
+      name: "香港飲茶 星街（ホロメンマップ／星街すいせい）",
+    });
+  });
+
+  it("keeps IDs when nearby locations are renamed without moving their pins", () => {
+    const before = `
+      <kml><Document><Folder><name>ホロメンマップ</name>
+        <Placemark>
+          <name>香港飲茶 星街（星街すいせい）</name>
+          <Point><coordinates>135.7581479,35.0063084,0</coordinates></Point>
+        </Placemark>
+        <Placemark>
+          <name>HAIRWIN（リスのマーク）（アユンダ・リス）</name>
+          <Point><coordinates>135.7580195,35.0062533,0</coordinates></Point>
+        </Placemark>
+      </Folder></Document></kml>
+    `;
+    const identities = updateSeichiMapLocationIdentityRegistry(before, []);
+    const oldIds = parseSeichiMapKml(before, identities).map(({ id }) => id);
+    const after = `
+      <kml><Document><Folder><name>ホロメンマップ</name>
+        <Placemark>
+          <name>香港飲茶 星街（改名後）</name>
+          <Point><coordinates>135.7581479,35.0063084,0</coordinates></Point>
+        </Placemark>
+        <Placemark>
+          <name>HAIRWIN（リスのマーク）（改名後）</name>
+          <Point><coordinates>135.7580195,35.0062533,0</coordinates></Point>
+        </Placemark>
+      </Folder></Document></kml>
+    `;
+
+    expect(parseSeichiMapKml(after, identities).map(({ id }) => id)).toEqual(
+      oldIds,
+    );
+  });
+
+  it("keeps IDs when nearby same-name locations move to renamed layers", () => {
+    const before = `
+      <kml><Document>
+        <Folder><name>旧レイヤーA</name><Placemark>
+          <name>同名地点</name>
+          <Point><coordinates>135.7581479,35.0063084,0</coordinates></Point>
+        </Placemark></Folder>
+        <Folder><name>旧レイヤーB</name><Placemark>
+          <name>同名地点</name>
+          <Point><coordinates>135.7580195,35.0062533,0</coordinates></Point>
+        </Placemark></Folder>
+      </Document></kml>
+    `;
+    const identities = updateSeichiMapLocationIdentityRegistry(before, []);
+    const oldIds = parseSeichiMapKml(before, identities).map(({ id }) => id);
+    const after = `
+      <kml><Document>
+        <Folder><name>新レイヤーA</name><Placemark>
+          <name>同名地点</name>
+          <Point><coordinates>135.7581479,35.0063084,0</coordinates></Point>
+        </Placemark></Folder>
+        <Folder><name>新レイヤーB</name><Placemark>
+          <name>同名地点</name>
+          <Point><coordinates>135.7580195,35.0062533,0</coordinates></Point>
+        </Placemark></Folder>
+      </Document></kml>
+    `;
+
+    expect(parseSeichiMapKml(after, identities).map(({ id }) => id)).toEqual(
+      oldIds,
+    );
+  });
+
   it("does not strip existing archive labels from ended collaboration locations", () => {
     const kml = createKml({
       folder: "LiVE開催・出演会場、過去のコラボ情報アーカイブ",

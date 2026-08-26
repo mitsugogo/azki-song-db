@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import locationIdentityRegistry from "./seichiMapLocationIdentities.json";
+import locationIdentityRegistry from "./seichiMapLocationIdentities.json" with { type: "json" };
 
 export const AZKI_SEICHI_MAP_KML_URL =
   "https://www.google.com/maps/d/u/0/kml?mid=1YiIPd5jbM-dPhMHAE-RnItvMoKOEV5E&forcekml=1";
@@ -48,6 +48,9 @@ const LIVE_ARCHIVE_LAYER_NAME =
   "LiVE開催・出演会場、過去のコラボ情報アーカイブ";
 const TRAILING_PARENTHESIZED_LABEL_PATTERN = /\s*[（(][^（）()]+[）)]\s*$/u;
 const ENDED_LOCATION_PREFIX_PATTERN = /^\s*[（(]終了[）)]/u;
+const HOLOMEMBER_MAP_LAYER_NAME = "ホロメンマップ";
+const HOLOMEMBER_MAP_NAME_PATTERN =
+  /\s*([（(])ホロメンマップ[／/]([^（）()]+)([）)])\s*$/u;
 const POSITION_MATCH_DISTANCE_METERS = 50;
 const EARTH_RADIUS_METERS = 6_371_000;
 
@@ -107,6 +110,20 @@ const getCompatibleLocationNames = (folder: string, name: string) => {
   ) {
     names.unshift(
       name.replace(TRAILING_PARENTHESIZED_LABEL_PATTERN, "").trim(),
+    );
+  }
+  if (
+    normalizedFolder === HOLOMEMBER_MAP_LAYER_NAME &&
+    HOLOMEMBER_MAP_NAME_PATTERN.test(name)
+  ) {
+    names.unshift(
+      name
+        .replace(
+          HOLOMEMBER_MAP_NAME_PATTERN,
+          (_match, opening, memberName, closing) =>
+            `${opening}${memberName}${closing}`,
+        )
+        .trim(),
     );
   }
   return [...new Set(names)];
@@ -276,6 +293,20 @@ const resolveLocationIdentityIds = (
         .filter((id): id is string => Boolean(id)),
     );
     return candidates.size === 1 ? [...candidates][0] : null;
+  });
+
+  // 地点名だけが変わった場合は座標が不変なので、近隣地点より先に完全一致を使う。
+  // 近接した複数地点が同時に改名されても、互いを候補に含めず旧IDを維持できる。
+  claimMatches((location) => {
+    const candidates = identities.filter(
+      (identity) =>
+        !claimedIdentityIds.has(identity.id) &&
+        identity.positions.some(
+          ([latitude, longitude]) =>
+            latitude === location.latitude && longitude === location.longitude,
+        ),
+    );
+    return candidates.length === 1 ? candidates[0].id : null;
   });
 
   const nameIndex = buildUniqueIdentityIndex(
