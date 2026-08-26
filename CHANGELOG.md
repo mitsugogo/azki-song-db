@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.1](https://github.com/mitsugogo/azki-song-db/compare/v2.29.0...v2.29.1) (2026-08-26)
+
+### Bug Fixes
+
+* **deps:** React Tableをv8系に戻す ([8ab0cb3](https://github.com/mitsugogo/azki-song-db/commit/8ab0cb318a75b567fc44df26034c8cebdf728155))
+* **seichi-map:** 地点名変更・レイヤー変更に耐えるデータの更新漏れ ([821b999](https://github.com/mitsugogo/azki-song-db/commit/821b99918d6f0a11204f07f05f40e35948b8741e))
+* **seichi-map:** 聖地マップでiOS全画面表示に対応 ([f6b7d67](https://github.com/mitsugogo/azki-song-db/commit/f6b7d678946ae3efdb3b0f9c816ef428d97a5567))
+
 ## [2.29.0](https://github.com/mitsugogo/azki-song-db/compare/v2.28.0...v2.29.0) (2026-08-23)
 
 ### Features
