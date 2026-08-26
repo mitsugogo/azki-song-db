@@ -48,7 +48,7 @@
     "@mui/styled-engine-sc": "^9.3.0",
     "@prisma/adapter-mariadb": "^7.9.1",
     "@prisma/client": "^7.9.1",
-    "@tanstack/react-table": "^9.1.2",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.14.9",
     "@tiptap/extension-link": "^3.29.2",
     "@tiptap/pm": "^3.29.2",

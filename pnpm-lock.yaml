@@ -100,8 +100,8 @@ importers:
         specifier: ^7.9.1
         version: 7.9.1(prisma@7.9.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(typescript@7.0.2)
       "@tanstack/react-table":
-        specifier: ^9.1.2
-        version: 9.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^8.21.3
+        version: 8.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       "@tanstack/react-virtual":
         specifier: ^3.14.9
         version: 3.14.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -2754,23 +2754,15 @@ packages:
         integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==,
       }
 
-  "@tanstack/react-store@0.11.1":
+  "@tanstack/react-table@8.21.3":
     resolution:
       {
-        integrity: sha512-HaIGKI3YLmjBYIvy5DFDY23oNaYZIsTZfngey07Uh5iLVJgM3bIGCnZeOFOqzjFld9JHWcaHJnasD/bKoGKwJQ==,
+        integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==,
       }
+    engines: { node: ">=12" }
     peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  "@tanstack/react-table@9.1.2":
-    resolution:
-      {
-        integrity: sha512-YQPZFJ1nIi/bjjwsPZVouABgahDcl7Gdm33CdTStUJBn0DjEVJ2uhSTVmIoWt9MVKdQziXGAsXipSzy949Hygg==,
-      }
-    engines: { node: ">=20" }
-    peerDependencies:
-      react: ">=18"
+      react: ">=16.8"
+      react-dom: ">=16.8"
 
   "@tanstack/react-virtual@3.14.9":
     resolution:
@@ -2781,18 +2773,12 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  "@tanstack/store@0.11.1":
+  "@tanstack/table-core@8.21.3":
     resolution:
       {
-        integrity: sha512-mzTOBhypOuDJAy/D8n2MfUZ1HFkXnmSETviRyhqEC8LUE7/IZQExOTxMANj3KjTofYTkFNpBY67qaVrT41YccA==,
+        integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==,
       }
-
-  "@tanstack/table-core@9.1.2":
-    resolution:
-      {
-        integrity: sha512-ONpWQeass1sfg80CWF1NSwQ8r3GiqxA2lT/EdqIcrDEPZ0Z+0mM94eQoFYLPN0Kztzj8TQVb2+PrSZSItqA61g==,
-      }
-    engines: { node: ">=20" }
+    engines: { node: ">=12" }
 
   "@tanstack/virtual-core@3.17.7":
     resolution:
@@ -11038,20 +11024,11 @@ snapshots:
       postcss: 8.5.26
       tailwindcss: 4.3.3
 
-  "@tanstack/react-store@0.11.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)":
+  "@tanstack/react-table@8.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)":
     dependencies:
-      "@tanstack/store": 0.11.1
+      "@tanstack/table-core": 8.21.3
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
-      use-sync-external-store: 1.6.0(react@19.2.8)
-
-  "@tanstack/react-table@9.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)":
-    dependencies:
-      "@tanstack/react-store": 0.11.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      "@tanstack/table-core": 9.1.2
-      react: 19.2.8
-    transitivePeerDependencies:
-      - react-dom
 
   "@tanstack/react-virtual@3.14.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)":
     dependencies:
@@ -11059,11 +11036,7 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  "@tanstack/store@0.11.1": {}
-
-  "@tanstack/table-core@9.1.2":
-    dependencies:
-      "@tanstack/store": 0.11.1
+  "@tanstack/table-core@8.21.3": {}
 
   "@tanstack/virtual-core@3.17.7": {}
 
