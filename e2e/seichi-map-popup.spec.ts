@@ -325,17 +325,83 @@ test.describe("Seichi map location popup", () => {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
     });
 
-    test("hides the Leaflet fullscreen control", async ({ page }) => {
-      await page.setViewportSize({ width: 320, height: 568 });
-      await setupSeichiMapPopupMocks(page);
-      await page.goto(`/seichi-map?location=${LOCATION_ID}`);
+    for (const { name, viewport } of [
+      { name: "portrait", viewport: { width: 320, height: 568 } },
+      { name: "landscape", viewport: { width: 568, height: 320 } },
+    ]) {
+      test(`uses viewport fullscreen in ${name}`, async ({ page }) => {
+        await page.setViewportSize(viewport);
+        await setupSeichiMapPopupMocks(page);
+        await page.goto(`/seichi-map?location=${LOCATION_ID}`);
 
-      await expect(page.locator(".leaflet-container")).toBeVisible({
-        timeout: 15_000,
+        const mapSurface = page.locator(".seichi-map-fullscreen-surface");
+        const popup = page.locator(".seichi-map-popup");
+        await expect(page.locator(".leaflet-container")).toBeVisible({
+          timeout: 15_000,
+        });
+        await mapSurface.scrollIntoViewIfNeeded();
+        await expect(popup).toBeVisible();
+
+        const enterFullscreen = page.getByRole("button", {
+          name: /地図を全画面表示|View map fullscreen/,
+        });
+        await expect(enterFullscreen).toBeVisible();
+        await enterFullscreen.click();
+
+        await expect(mapSurface).toHaveAttribute(
+          "data-viewport-fullscreen",
+          "true",
+        );
+        await expect(page.locator("html")).toHaveClass(
+          /seichi-map-viewport-fullscreen-open/,
+        );
+        await expect(page.locator("body")).toHaveClass(
+          /seichi-map-viewport-fullscreen-open/,
+        );
+        await expect(
+          page.getByRole("button", {
+            name: /全画面表示を終了|Exit fullscreen/,
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: /地図レイヤーを開く|Open map layers/,
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: /現在地を表示|Show current location/,
+          }),
+        ).toBeVisible();
+        await expect(popup.locator(".seichi-map-popup__actions")).toBeVisible();
+
+        const fullscreenBox = await mapSurface.boundingBox();
+        expect(fullscreenBox).not.toBeNull();
+        expect(fullscreenBox?.x).toBeCloseTo(0, 0);
+        expect(fullscreenBox?.y).toBeCloseTo(0, 0);
+        expect(fullscreenBox?.width).toBeCloseTo(viewport.width, 0);
+        expect(fullscreenBox?.height).toBeCloseTo(viewport.height, 0);
+
+        await page
+          .getByRole("button", {
+            name: /全画面表示を終了|Exit fullscreen/,
+          })
+          .click();
+
+        await expect(mapSurface).not.toHaveAttribute(
+          "data-viewport-fullscreen",
+          "true",
+        );
+        await expect(page.locator("html")).not.toHaveClass(
+          /seichi-map-viewport-fullscreen-open/,
+        );
+        await expect(page.locator("body")).not.toHaveClass(
+          /seichi-map-viewport-fullscreen-open/,
+        );
+        await expect(
+          popup.getByText("低解像度端末で確認する地点"),
+        ).toBeVisible();
       });
-      await expect(
-        page.getByRole("button", { name: /全画面表示|Enter fullscreen/ }),
-      ).toHaveCount(0);
-    });
+    }
   });
 });

@@ -76,8 +76,10 @@ import {
   updateCurrentLocationControl,
 } from "./currentLocation";
 import {
+  getMapFullscreenMode,
   getGoogleMapFullscreenPortalTarget,
   isIosDevice,
+  setViewportFullscreenPageLock,
   toggleElementFullscreen,
 } from "./fullscreen";
 import {
@@ -190,6 +192,14 @@ type GoogleMapsEventListener = {
   remove: () => void;
 };
 
+type GoogleMapsEventApi = {
+  trigger: (
+    instance: object,
+    eventName: string,
+    ...eventArguments: unknown[]
+  ) => void;
+};
+
 type GoogleMapsControlArrayLike = {
   push: (element: HTMLElement) => number;
 };
@@ -270,6 +280,7 @@ type GoogleMapsMarkerLibrary = {
 };
 
 type GoogleMapsDynamicGlobal = GoogleMapsMapsLibrary & {
+  event?: GoogleMapsEventApi;
   importLibrary?: (libraryName: string) => Promise<unknown>;
   marker?: GoogleMapsMarkerLibrary;
   [key: string]: unknown;
@@ -380,6 +391,7 @@ const createCurrentLocationControl = (label: string, onClick: () => void) => {
   icon.append(iconPath);
 
   button.type = "button";
+  button.className = "seichi-map-current-location-control--google";
   button.title = label;
   button.setAttribute("aria-label", label);
   button.style.width = "40px";
@@ -1275,7 +1287,8 @@ export default function SeichiMapCompleteClient({
   const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
   const [isMapProviderMenuOpen, setIsMapProviderMenuOpen] = useState(false);
   const [isIosMapDevice, setIsIosMapDevice] = useState<boolean | null>(null);
-  const [isLeafletFullscreen, setIsLeafletFullscreen] = useState(false);
+  const [isNativeMapFullscreen, setIsNativeMapFullscreen] = useState(false);
+  const [isViewportMapFullscreen, setIsViewportMapFullscreen] = useState(false);
   const [listMode, setListMode] = useState<ListMode>("locations");
   const [currentPosition, setCurrentPosition] = useState<{
     latitude: number;
@@ -1312,15 +1325,31 @@ export default function SeichiMapCompleteClient({
     [mapsKey],
   );
 
+  const refreshMapViewport = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      leafletMapRef.current?.invalidateSize({ pan: false });
+
+      const currentMap = mapRef.current;
+      if (!currentMap) return;
+
+      const center = currentMap.getCenter();
+      window.google?.maps?.event?.trigger(currentMap, "resize");
+      if (!center) return;
+
+      const lat = typeof center.lat === "function" ? center.lat() : center.lat;
+      const lng = typeof center.lng === "function" ? center.lng() : center.lng;
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      currentMap.panTo({ lat, lng });
+    });
+  }, []);
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isFullscreen =
         document.fullscreenElement === mapContainerRef.current;
-      setIsLeafletFullscreen(isFullscreen);
-
-      window.requestAnimationFrame(() => {
-        leafletMapRef.current?.invalidateSize();
-      });
+      setIsNativeMapFullscreen(isFullscreen);
+      refreshMapViewport();
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -1331,11 +1360,36 @@ export default function SeichiMapCompleteClient({
       document.removeEventListener("visibilitychange", handleFullscreenChange);
       window.removeEventListener("focus", handleFullscreenChange);
     };
-  }, []);
+  }, [refreshMapViewport]);
 
-  const toggleLeafletFullscreen = useCallback(async () => {
+  useEffect(() => {
+    const mapContainer = mapContainerRef.current;
+    if (!mapContainer || typeof ResizeObserver === "undefined") return;
+
+    const resizeObserver = new ResizeObserver(refreshMapViewport);
+    resizeObserver.observe(mapContainer);
+    return () => resizeObserver.disconnect();
+  }, [refreshMapViewport]);
+
+  useEffect(() => {
+    if (!isViewportMapFullscreen) return;
+
+    setViewportFullscreenPageLock(true);
+    refreshMapViewport();
+    return () => {
+      setViewportFullscreenPageLock(false);
+      refreshMapViewport();
+    };
+  }, [isViewportMapFullscreen, refreshMapViewport]);
+
+  const toggleMapFullscreen = useCallback(async () => {
     const mapContainer = mapContainerRef.current;
     if (!mapContainer) return;
+
+    if (getMapFullscreenMode(isIosMapDevice === true) === "viewport") {
+      setIsViewportMapFullscreen((isFullscreen) => !isFullscreen);
+      return;
+    }
 
     try {
       await toggleElementFullscreen(mapContainer);
@@ -1343,7 +1397,12 @@ export default function SeichiMapCompleteClient({
       console.error(error);
       setErrorMessage(t("errors.fullscreenFailed"));
     }
-  }, [t]);
+  }, [isIosMapDevice, t]);
+
+  const isMapFullscreen = isNativeMapFullscreen || isViewportMapFullscreen;
+  const showCustomFullscreenControl =
+    isIosMapDevice === true ||
+    (isIosMapDevice === false && isLeafletMapProvider(mapProvider));
 
   const effectiveShareId = viewShareId ?? serverShareId;
   const isSharedView = Boolean(effectiveShareId);
@@ -3214,10 +3273,19 @@ export default function SeichiMapCompleteClient({
             withBorder
             radius="md"
             shadow="sm"
-            className="seichi-map-fullscreen-surface relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80"
+            className={`seichi-map-fullscreen-surface relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80${
+              isViewportMapFullscreen
+                ? " seichi-map-fullscreen-surface--viewport"
+                : ""
+            }`}
+            data-viewport-fullscreen={
+              isViewportMapFullscreen ? "true" : undefined
+            }
           >
             <Box
-              className="absolute right-3 flex flex-col items-end"
+              className={`seichi-map-provider-control seichi-map-provider-control--${
+                mapProvider === "google" ? "google" : "leaflet"
+              } absolute right-3 flex flex-col items-end`}
               style={{
                 top: mapProvider === "google" ? 56 : 12,
                 right: 12,
@@ -3275,45 +3343,43 @@ export default function SeichiMapCompleteClient({
                 </Paper>
               ) : null}
             </Box>
+            {showCustomFullscreenControl ? (
+              <button
+                type="button"
+                className={`seichi-map-fullscreen-control seichi-map-fullscreen-control--${
+                  mapProvider === "google" ? "google" : "leaflet"
+                } absolute top-3 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50 ${
+                  mapProvider === "google" ? "right-3" : "right-16"
+                }`}
+                style={{ zIndex: 1000 }}
+                title={
+                  isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
+                }
+                aria-label={
+                  isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
+                }
+                aria-pressed={isMapFullscreen}
+                onClick={() => void toggleMapFullscreen()}
+              >
+                {isMapFullscreen ? (
+                  <FiMinimize size={20} aria-hidden="true" />
+                ) : (
+                  <FiMaximize size={20} aria-hidden="true" />
+                )}
+              </button>
+            ) : null}
             {isLeafletMapProvider(mapProvider) ? (
-              <>
-                {isIosMapDevice === false ? (
-                  <button
-                    type="button"
-                    className="absolute top-3 right-16 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50"
-                    style={{ zIndex: 1000 }}
-                    title={
-                      isLeafletFullscreen
-                        ? t("fullscreen.exit")
-                        : t("fullscreen.enter")
-                    }
-                    aria-label={
-                      isLeafletFullscreen
-                        ? t("fullscreen.exit")
-                        : t("fullscreen.enter")
-                    }
-                    aria-pressed={isLeafletFullscreen}
-                    onClick={() => void toggleLeafletFullscreen()}
-                  >
-                    {isLeafletFullscreen ? (
-                      <FiMinimize size={20} aria-hidden="true" />
-                    ) : (
-                      <FiMaximize size={20} aria-hidden="true" />
-                    )}
-                  </button>
-                ) : null}
-                <button
-                  ref={currentLocationControlRef}
-                  type="button"
-                  className="absolute right-3 bottom-3 z-10 grid h-10 w-10 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md disabled:cursor-wait disabled:opacity-70"
-                  style={{ zIndex: 1000 }}
-                  title={t("currentLocation.show")}
-                  aria-label={t("currentLocation.show")}
-                  onClick={() => requestCurrentLocationRef.current()}
-                >
-                  <FiMapPin size={20} aria-hidden="true" />
-                </button>
-              </>
+              <button
+                ref={currentLocationControlRef}
+                type="button"
+                className="seichi-map-current-location-control--leaflet absolute right-3 bottom-3 z-10 grid h-10 w-10 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md disabled:cursor-wait disabled:opacity-70"
+                style={{ zIndex: 1000 }}
+                title={t("currentLocation.show")}
+                aria-label={t("currentLocation.show")}
+                onClick={() => requestCurrentLocationRef.current()}
+              >
+                <FiMapPin size={20} aria-hidden="true" />
+              </button>
             ) : null}
             <Box ref={mapElementRef} className="h-full w-full" />
             {hoveredLocation ? (

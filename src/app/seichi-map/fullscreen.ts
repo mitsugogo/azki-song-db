@@ -7,6 +7,13 @@ type FullscreenController = Pick<
 
 type IosNavigator = Pick<Navigator, "maxTouchPoints" | "userAgent">;
 
+type ViewportFullscreenDocument = Pick<Document, "body" | "documentElement">;
+
+export const VIEWPORT_FULLSCREEN_PAGE_CLASS =
+  "seichi-map-viewport-fullscreen-open";
+
+export type MapFullscreenMode = "native" | "viewport";
+
 export const isIosDevice = (
   navigatorValue: IosNavigator | undefined = typeof navigator === "undefined"
     ? undefined
@@ -18,6 +25,23 @@ export const isIosDevice = (
   return (
     /iP(ad|hone|od)/i.test(userAgent) ||
     (/Macintosh/i.test(userAgent) && navigatorValue.maxTouchPoints > 1)
+  );
+};
+
+export const getMapFullscreenMode = (isIos: boolean): MapFullscreenMode =>
+  isIos ? "viewport" : "native";
+
+export const setViewportFullscreenPageLock = (
+  locked: boolean,
+  fullscreenDocument: ViewportFullscreenDocument = document,
+) => {
+  fullscreenDocument.documentElement.classList.toggle(
+    VIEWPORT_FULLSCREEN_PAGE_CLASS,
+    locked,
+  );
+  fullscreenDocument.body.classList.toggle(
+    VIEWPORT_FULLSCREEN_PAGE_CLASS,
+    locked,
   );
 };
 
