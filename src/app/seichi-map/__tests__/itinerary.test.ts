@@ -122,11 +122,9 @@ describe("seichi-map itinerary", () => {
     ).toEqual(["location-c", "location-b"]);
   });
 
-  it("現在地を起点として訪問順をGoogle Mapsの経路URLへ反映する", () => {
+  it("現在地を起点に次の地点だけをGoogle Mapsの目的地にする", () => {
     const url = buildSeichiMapItineraryGoogleMapsUrl([
-      { latitude: 35.1, longitude: 135.1 },
       { latitude: 35.2, longitude: 135.2 },
-      { latitude: 35.3, longitude: 135.3 },
     ]);
     const parsedUrl = new URL(url ?? "");
 
@@ -134,10 +132,8 @@ describe("seichi-map itinerary", () => {
       "https://www.google.com/maps/dir/",
     );
     expect(parsedUrl.searchParams.has("origin")).toBe(false);
-    expect(parsedUrl.searchParams.get("waypoints")).toBe(
-      "35.1,135.1|35.2,135.2",
-    );
-    expect(parsedUrl.searchParams.get("destination")).toBe("35.3,135.3");
+    expect(parsedUrl.searchParams.has("waypoints")).toBe(false);
+    expect(parsedUrl.searchParams.get("destination")).toBe("35.2,135.2");
     expect(buildSeichiMapItineraryGoogleMapsUrl([])).toBeNull();
   });
 });

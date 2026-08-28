@@ -1202,6 +1202,7 @@
       "removeStop": "Remove from itinerary",
       "missingLocation": "Location currently unavailable",
       "openRoute": "Open route in Google Maps",
+      "nextRouteHelp": "Provides a route from your current location to the next seichi location.",
       "clear": "Clear itinerary"
     },
     "modal": {

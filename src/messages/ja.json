@@ -1193,6 +1193,7 @@
       "removeStop": "旅程から削除",
       "missingLocation": "現在は利用できない地点",
       "openRoute": "Google Mapsで経路を開く",
+      "nextRouteHelp": "現在地から次の聖地までのルートを案内します",
       "clear": "旅程をクリア"
     },
     "modal": {

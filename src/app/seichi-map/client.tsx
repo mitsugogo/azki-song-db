@@ -1542,9 +1542,8 @@ export default function SeichiMapCompleteClient({
   );
 
   const clearItinerary = useCallback(() => {
-    if (!confirm(t("confirm.clearItinerary"))) return;
     setItinerary(createEmptySeichiMapItinerary());
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     isSharedViewRef.current = isSharedView;

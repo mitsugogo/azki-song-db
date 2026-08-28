@@ -22,6 +22,7 @@ import {
   Button,
   Checkbox,
   Group,
+  Modal,
   Paper,
   ScrollArea,
   Stack,
@@ -30,6 +31,7 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { FiExternalLink, FiMenu, FiTrash2 } from "react-icons/fi";
 import type { SeichiMapLocation } from "../lib/seichiMap";
 import {
@@ -161,6 +163,7 @@ export function SeichiMapItinerary({
   visitedLocationIds,
 }: Props) {
   const t = useTranslations("SeichiMapComplete");
+  const [isClearDialogOpen, setClearDialogOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, {
@@ -168,11 +171,13 @@ export function SeichiMapItinerary({
     }),
   );
   const checkedCount = itinerary.stops.filter((stop) => stop.checked).length;
-  const routeLocations = itinerary.stops.flatMap((stop) => {
-    const location = locationsById.get(stop.locationId);
-    return location ? [location] : [];
-  });
-  const routeUrl = buildSeichiMapItineraryGoogleMapsUrl(routeLocations);
+  const nextStop = itinerary.stops.find((stop) => !stop.checked);
+  const nextLocation = nextStop
+    ? locationsById.get(nextStop.locationId)
+    : undefined;
+  const routeUrl = nextLocation
+    ? buildSeichiMapItineraryGoogleMapsUrl([nextLocation])
+    : null;
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -238,40 +243,72 @@ export function SeichiMapItinerary({
         </>
       )}
 
-      <Group gap="xs" align="stretch">
+      <Stack gap={4}>
+        <Group gap="xs" align="stretch">
+          {routeUrl ? (
+            <Button
+              component="a"
+              href={routeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="light"
+              color="pink"
+              leftSection={<FiExternalLink size={14} />}
+              style={{ flex: "2 1 240px" }}
+            >
+              {t("itinerary.openRoute")}
+            </Button>
+          ) : (
+            <Button
+              disabled
+              variant="light"
+              color="pink"
+              style={{ flex: "2 1 240px" }}
+            >
+              {t("itinerary.openRoute")}
+            </Button>
+          )}
+          <Button
+            variant="subtle"
+            color="red"
+            disabled={itinerary.stops.length === 0}
+            onClick={() => setClearDialogOpen(true)}
+            style={{ flex: "1 1 120px" }}
+          >
+            {t("itinerary.clear")}
+          </Button>
+        </Group>
         {routeUrl ? (
-          <Button
-            component="a"
-            href={routeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="light"
-            color="pink"
-            leftSection={<FiExternalLink size={14} />}
-            style={{ flex: "2 1 240px" }}
-          >
-            {t("itinerary.openRoute")}
-          </Button>
-        ) : (
-          <Button
-            disabled
-            variant="light"
-            color="pink"
-            style={{ flex: "2 1 240px" }}
-          >
-            {t("itinerary.openRoute")}
-          </Button>
-        )}
-        <Button
-          variant="subtle"
-          color="red"
-          disabled={itinerary.stops.length === 0}
-          onClick={onClear}
-          style={{ flex: "1 1 120px" }}
-        >
-          {t("itinerary.clear")}
-        </Button>
-      </Group>
+          <Text size="xs" c="dimmed">
+            {t("itinerary.nextRouteHelp")}
+          </Text>
+        ) : null}
+      </Stack>
+
+      <Modal
+        opened={isClearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        title={t("itinerary.clear")}
+        centered
+      >
+        <Stack gap="sm">
+          <Text size="sm">{t("confirm.clearItinerary")}</Text>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setClearDialogOpen(false)}>
+              {t("modal.cancel")}
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                setClearDialogOpen(false);
+                onClear();
+              }}
+            >
+              {t("itinerary.clear")}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }
