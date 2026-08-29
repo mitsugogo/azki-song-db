@@ -1056,6 +1056,19 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps はこの環境では利用できません"
     },
+    "pointLayer": {
+      "title": "地点レイヤー",
+      "self": "自分",
+      "everyone": "みんな",
+      "legend": {
+        "title": "凡例",
+        "unvisited": "未訪問",
+        "visited": "訪問済",
+        "none": "0人",
+        "one": "1人",
+        "multiple": "2人以上"
+      }
+    },
     "fullscreen": {
       "enter": "地図を全画面表示",
       "exit": "全画面表示を終了"
@@ -1131,7 +1144,8 @@
     "tabs": {
       "locations": "聖地リスト",
       "nearby": "近所の聖地",
-      "visited": "訪問済"
+      "visited": "訪問済",
+      "itinerary": "旅程"
     },
     "search": {
       "locationLabel": "場所検索",
@@ -1157,6 +1171,7 @@
     },
     "popup": {
       "uniqueVisitors": "{count}人が訪問済",
+      "singleVisitorAccessibleLabel": "訪問者: {nickname}",
       "visitedAt": "{date} に訪問済",
       "visited": "訪問済",
       "youtube": "YouTube",
@@ -1167,6 +1182,8 @@
       "playFrom": "{timestamp} から再生",
       "googleMaps": "Google Maps",
       "postDokoAz": "#どこAZ でポスト",
+      "addToItinerary": "旅程に追加",
+      "inItinerary": "旅程に追加済み",
       "recordVisit": "訪問を記録",
       "editVisit": "訪問を編集",
       "deleteVisited": "訪問済を削除"
@@ -1177,6 +1194,21 @@
       "markerTitle": "現在地",
       "unavailable": "現在地を取得できません。ブラウザの位置情報を許可してください",
       "unsupported": "このブラウザでは位置情報を利用できません"
+    },
+    "itinerary": {
+      "visitOrder": "訪問順",
+      "checkedCount": "{checked} / {total} チェック済",
+      "empty": "訪問予定の聖地リストをあらかじめピックアップしておくことができます。端末内に保存されるため、訪問時に利用するスマートフォンなどで設定してください。",
+      "reorderHelp": "つまみをドラッグして訪問順を変更できます。",
+      "toggleCheck": "{name}のチェックを切り替える",
+      "visited": "訪問済",
+      "openLocation": "{name}を地図で表示",
+      "reorderStop": "訪問順を変更",
+      "removeStop": "旅程から削除",
+      "missingLocation": "現在は利用できない地点",
+      "openRoute": "Google Mapsで経路を開く",
+      "nextRouteHelp": "現在地から次の聖地までのルートを案内します",
+      "clear": "旅程をクリア"
     },
     "modal": {
       "recordTitle": "訪問を記録",
@@ -1193,6 +1225,7 @@
     },
     "confirm": {
       "deleteVisited": "訪問ログを削除しますか？ この操作は元に戻せません。",
+      "clearItinerary": "訪問予定をすべて削除しますか？",
       "stopSharing": "訪問状況の公開を中止しますか？ 共有URLからは閲覧できなくなります。ニックネームとランキング公開設定は維持されます。"
     },
     "aria": {

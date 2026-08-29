@@ -194,6 +194,14 @@ body.seichi-map-viewport-fullscreen-open {
   padding-block-start: 10px;
 }
 
+.seichi-map-popup__actions > a,
+.seichi-map-popup__actions > button {
+  max-inline-size: 100%;
+  min-block-size: 32px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
 .seichi-map-list-actions {
   background: light-dark(#fff, var(--mantine-color-dark-7));
   border-block-start: 1px solid var(--mantine-color-default-border);

@@ -1,0 +1,139 @@
+import { describe, expect, it, vi } from "vitest";
+import {
+  SEICHI_MAP_ITINERARY_STORAGE_KEY,
+  addSeichiMapItineraryStop,
+  buildSeichiMapItineraryGoogleMapsUrl,
+  parseSeichiMapItinerary,
+  readSeichiMapItinerary,
+  removeSeichiMapItineraryStop,
+  reorderSeichiMapItineraryStops,
+  saveSeichiMapItinerary,
+  toggleSeichiMapItineraryStop,
+  type SeichiMapItinerary,
+} from "../itinerary";
+
+const itinerary: SeichiMapItinerary = {
+  stops: [
+    { locationId: "location-a", checked: false },
+    { locationId: "location-b", checked: true },
+  ],
+};
+
+describe("seichi-map itinerary", () => {
+  it("保存データを必要なフィールドだけに正規化する", () => {
+    expect(
+      parseSeichiMapItinerary(
+        JSON.stringify({
+          startLocation: "新大阪",
+          stops: [
+            { locationId: "location-a", checked: true, name: "保存しない" },
+            { locationId: "location-a", checked: false },
+            { locationId: "location-b", checked: "yes" },
+            { completed: true },
+          ],
+        }),
+      ),
+    ).toEqual({
+      stops: [
+        { locationId: "location-a", checked: true },
+        { locationId: "location-b", checked: false },
+      ],
+    });
+    expect(parseSeichiMapItinerary("not-json")).toEqual({
+      stops: [],
+    });
+  });
+
+  it("旧completedフィールドをチェック状態として引き継ぐ", () => {
+    expect(
+      parseSeichiMapItinerary(
+        JSON.stringify({
+          stops: [
+            { locationId: "location-a", completed: true },
+            { locationId: "location-b", completed: false },
+          ],
+        }),
+      ),
+    ).toEqual({
+      stops: [
+        { locationId: "location-a", checked: true },
+        { locationId: "location-b", checked: false },
+      ],
+    });
+  });
+
+  it("バージョン付きキーで読み書きし、Storage例外を画面へ漏らさない", () => {
+    const getItem = vi.fn(() => JSON.stringify(itinerary));
+    expect(readSeichiMapItinerary({ getItem })).toEqual(itinerary);
+    expect(getItem).toHaveBeenCalledWith(SEICHI_MAP_ITINERARY_STORAGE_KEY);
+
+    const setItem = vi.fn();
+    saveSeichiMapItinerary({ setItem }, itinerary);
+    expect(setItem).toHaveBeenCalledWith(
+      SEICHI_MAP_ITINERARY_STORAGE_KEY,
+      JSON.stringify(itinerary),
+    );
+
+    expect(
+      readSeichiMapItinerary({
+        getItem: () => {
+          throw new Error("unavailable");
+        },
+      }),
+    ).toEqual({ stops: [] });
+    expect(() =>
+      saveSeichiMapItinerary(
+        {
+          setItem: () => {
+            throw new Error("quota exceeded");
+          },
+        },
+        itinerary,
+      ),
+    ).not.toThrow();
+  });
+
+  it("地点の追加・チェック・並べ替え・削除をlocationIdで管理する", () => {
+    const added = addSeichiMapItineraryStop(itinerary, "location-c");
+    expect(added.stops).toEqual([
+      ...itinerary.stops,
+      { locationId: "location-c", checked: false },
+    ]);
+    expect(addSeichiMapItineraryStop(added, "location-c")).toBe(added);
+
+    const toggled = toggleSeichiMapItineraryStop(added, "location-a");
+    expect(toggled.stops[0].checked).toBe(true);
+
+    const reordered = reorderSeichiMapItineraryStops(
+      toggled,
+      "location-c",
+      "location-a",
+    );
+    expect(reordered.stops.map((stop) => stop.locationId)).toEqual([
+      "location-c",
+      "location-a",
+      "location-b",
+    ]);
+
+    expect(
+      removeSeichiMapItineraryStop(reordered, "location-a").stops.map(
+        (stop) => stop.locationId,
+      ),
+    ).toEqual(["location-c", "location-b"]);
+  });
+
+  it("現在地を起点に次の地点だけをGoogle Mapsの目的地にする", () => {
+    const url = buildSeichiMapItineraryGoogleMapsUrl([
+      { latitude: 35.2, longitude: 135.2 },
+    ]);
+    const parsedUrl = new URL(url ?? "");
+
+    expect(parsedUrl.origin + parsedUrl.pathname).toBe(
+      "https://www.google.com/maps/dir/",
+    );
+    expect(parsedUrl.searchParams.has("origin")).toBe(false);
+    expect(parsedUrl.searchParams.has("waypoints")).toBe(false);
+    expect(parsedUrl.searchParams.get("destination")).toBe("35.2,135.2");
+    expect(buildSeichiMapItineraryGoogleMapsUrl([])).toBeNull();
+  });
+});

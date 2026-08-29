@@ -21,6 +21,11 @@ export type SeichiMapLocationVisitorRankingRow = {
   uniqueVisitorCount: number;
 };
 
+export type SeichiMapLocationVisitorSummary = {
+  uniqueVisitorCount: number;
+  singleVisitorNickname: string | null;
+};
+
 export type SeichiMapVisitorRankingItem = {
   nickname: string | null;
   visitCount: number;
@@ -139,23 +144,47 @@ export async function loadSeichiMapVisitedRows(
   }));
 }
 
-export async function loadSeichiMapUniqueVisitorCounts(): Promise<
-  Record<string, number>
+export async function loadSeichiMapLocationVisitorSummaries(): Promise<
+  Record<string, SeichiMapLocationVisitorSummary>
 > {
   const rows = await prisma.$queryRaw<
-    { locationId: string; uniqueVisitorCount: bigint }[]
+    {
+      locationId: string;
+      uniqueVisitorCount: bigint;
+      singleVisitorNickname: string | null;
+    }[]
   >`
-    SELECT locationId, COUNT(DISTINCT userId) AS uniqueVisitorCount
-    FROM SeichiMapVisited
-    WHERE locationId IS NOT NULL AND locationId <> ''
-    GROUP BY locationId
+    SELECT
+      visited.locationId,
+      COUNT(DISTINCT visited.userId) AS uniqueVisitorCount,
+      CASE
+        WHEN COUNT(DISTINCT visited.userId) = 1 THEN
+          MAX(
+            CASE
+              WHEN profile.showNicknameInRanking THEN profile.nickname
+              ELSE NULL
+            END
+          )
+        ELSE NULL
+      END AS singleVisitorNickname
+    FROM SeichiMapVisited AS visited
+    LEFT JOIN SeichiMapProfile AS profile ON profile.userId = visited.userId
+    WHERE visited.locationId IS NOT NULL AND visited.locationId <> ''
+    GROUP BY visited.locationId
   `;
 
   return Object.fromEntries(
-    rows.map(({ locationId, uniqueVisitorCount }) => [
-      locationId,
-      Number(uniqueVisitorCount),
-    ]),
+    rows.map(({ locationId, uniqueVisitorCount, singleVisitorNickname }) => {
+      const count = Number(uniqueVisitorCount);
+      return [
+        locationId,
+        {
+          uniqueVisitorCount: count,
+          singleVisitorNickname:
+            count === 1 ? (singleVisitorNickname ?? null) : null,
+        },
+      ];
+    }),
   );
 }
 

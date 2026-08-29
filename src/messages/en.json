@@ -1065,6 +1065,19 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps is unavailable in this environment"
     },
+    "pointLayer": {
+      "title": "Location layer",
+      "self": "Mine",
+      "everyone": "Everyone",
+      "legend": {
+        "title": "Legend",
+        "unvisited": "Unvisited",
+        "visited": "Visited",
+        "none": "0 people",
+        "one": "1 person",
+        "multiple": "2+ people"
+      }
+    },
     "fullscreen": {
       "enter": "View map fullscreen",
       "exit": "Exit fullscreen"
@@ -1140,7 +1153,8 @@
     "tabs": {
       "locations": "Location List",
       "nearby": "Nearby",
-      "visited": "Visited"
+      "visited": "Visited",
+      "itinerary": "Itinerary"
     },
     "search": {
       "locationLabel": "Search locations",
@@ -1166,6 +1180,7 @@
     },
     "popup": {
       "uniqueVisitors": "Visited by {count} people",
+      "singleVisitorAccessibleLabel": "Visitor: {nickname}",
       "visitedAt": "Visited on {date}",
       "visited": "Visited",
       "youtube": "YouTube",
@@ -1176,6 +1191,8 @@
       "playFrom": "Play from {timestamp}",
       "googleMaps": "Google Maps",
       "postDokoAz": "Post with #どこAZ",
+      "addToItinerary": "Add to itinerary",
+      "inItinerary": "Added to itinerary",
       "recordVisit": "Record visit",
       "editVisit": "Edit visit",
       "deleteVisited": "Delete visited status"
@@ -1186,6 +1203,21 @@
       "markerTitle": "Current location",
       "unavailable": "Current location is unavailable. Allow location access in your browser",
       "unsupported": "Location is not supported by this browser"
+    },
+    "itinerary": {
+      "visitOrder": "Visit order",
+      "checkedCount": "{checked} / {total} checked",
+      "empty": "You can pick out the seichi locations you plan to visit in advance. Because the itinerary is saved on this device, set it up on the smartphone or other device you will use during your visit.",
+      "reorderHelp": "Drag the handle to change the visit order.",
+      "toggleCheck": "Toggle check for {name}",
+      "visited": "Visited",
+      "openLocation": "Show {name} on the map",
+      "reorderStop": "Change visit order",
+      "removeStop": "Remove from itinerary",
+      "missingLocation": "Location currently unavailable",
+      "openRoute": "Open route in Google Maps",
+      "nextRouteHelp": "Provides a route from your current location to the next seichi location.",
+      "clear": "Clear itinerary"
     },
     "modal": {
       "recordTitle": "Record visit",
@@ -1202,6 +1234,7 @@
     },
     "confirm": {
       "deleteVisited": "Delete this visit log? This action cannot be undone.",
+      "clearItinerary": "Delete all planned stops?",
       "stopSharing": "Stop publishing your visit status? The shared URL will no longer work. Your nickname and ranking visibility setting will be kept."
     },
     "aria": {

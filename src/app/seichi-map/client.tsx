@@ -9,10 +9,12 @@ import {
   useState,
 } from "react";
 import "dayjs/locale/ja";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import type * as Leaflet from "leaflet";
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Badge,
@@ -21,6 +23,7 @@ import {
   Button,
   Center,
   Checkbox,
+  Divider,
   Grid,
   Group,
   Loader,
@@ -52,6 +55,7 @@ import {
   FiExternalLink,
   FiLayers,
   FiLogIn,
+  FiMap,
   FiMaximize,
   FiMapPin,
   FiMinimize,
@@ -91,6 +95,17 @@ import {
   type SeichiMapProvider,
 } from "./mapProvider";
 import {
+  compareSeichiMapMarkerPresentations,
+  getSeichiMapMarkerPresentation,
+  SEICHI_MAP_EVERYONE_DARK_COLOR,
+  SEICHI_MAP_EVERYONE_LIGHT_COLOR,
+  SEICHI_MAP_EVERYONE_SINGLE_VISITOR_COLOR,
+  SEICHI_MAP_SELF_VISITED_COLOR,
+  SEICHI_MAP_UNVISITED_COLOR,
+  type SeichiMapMarkerPresentation,
+  type SeichiMapPointLayer,
+} from "./pointLayer";
+import {
   buildSettingsCallbackUrl,
   consumeSettingsRequestFromUrl,
 } from "./profileSettingsUrl";
@@ -102,14 +117,28 @@ import {
   resolveSeichiMapNicknameDraft,
   SeichiMapNicknameSettingsFields,
 } from "./SeichiMapNicknameSettingsFields";
+import {
+  addSeichiMapItineraryStop,
+  createEmptySeichiMapItinerary,
+  readSeichiMapItinerary,
+  removeSeichiMapItineraryStop,
+  reorderSeichiMapItineraryStops,
+  saveSeichiMapItinerary,
+  toggleSeichiMapItineraryStop,
+} from "./itinerary";
 import { buildDokoAzPostUrl } from "./xShare";
+
+const SeichiMapItinerary = dynamic(() =>
+  import("./SeichiMapItinerary").then((module) => module.SeichiMapItinerary),
+);
 
 type LocationOption = SeichiMapLocation & {
   key: string;
   uniqueVisitorCount: number;
+  singleVisitorNickname: string | null;
 };
 
-type ListMode = "locations" | "nearby" | "visited";
+type ListMode = "locations" | "nearby" | "visited" | "itinerary";
 
 type NearbyLocationStatus = "idle" | "locating" | "ready" | "unavailable";
 
@@ -729,7 +758,10 @@ const formatArchiveStreamDateLabel = (value?: string) => {
 const styleInfoWindowButton = (
   element: HTMLAnchorElement | HTMLButtonElement,
   variant: "filled" | "light" | "outline",
+  color: "pink" | "cyan" = "pink",
 ) => {
+  element.dataset.variant = variant;
+  element.dataset.color = color;
   element.style.alignItems = "center";
   element.style.borderRadius = "6px";
   element.style.boxSizing = "border-box";
@@ -753,9 +785,9 @@ const styleInfoWindowButton = (
   }
 
   if (variant === "light") {
-    element.style.background = "#fff0f6";
+    element.style.background = color === "cyan" ? "#e3fafc" : "#fff0f6";
     element.style.border = "1px solid transparent";
-    element.style.color = "#c2255c";
+    element.style.color = color === "cyan" ? "#0b7285" : "#c2255c";
     return;
   }
 
@@ -769,17 +801,45 @@ const buildGoogleMapsSearchUrl = (location: LocationOption) =>
     `${location.latitude},${location.longitude}`,
   )}`;
 
+const createLuCrownIconElement = (): SVGSVGElement => {
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const icon = document.createElementNS(svgNamespace, "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("width", "16");
+  icon.setAttribute("height", "16");
+  icon.setAttribute("fill", "none");
+  icon.setAttribute("stroke", "#f08c00");
+  icon.setAttribute("stroke-width", "2");
+  icon.setAttribute("stroke-linecap", "round");
+  icon.setAttribute("stroke-linejoin", "round");
+  icon.setAttribute("aria-hidden", "true");
+  icon.style.flexShrink = "0";
+
+  const crown = document.createElementNS(svgNamespace, "path");
+  crown.setAttribute(
+    "d",
+    "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
+  );
+  const base = document.createElementNS(svgNamespace, "path");
+  base.setAttribute("d", "M5 21h14");
+  icon.append(crown, base);
+
+  return icon;
+};
+
 const createSeichiCanvasOverlay = ({
   coreApi,
   mapsApi,
   map,
-  isVisited,
+  getMarkerPresentation,
   getSelectedLocationId,
 }: {
   coreApi: GoogleMapsCoreLibrary;
   mapsApi: GoogleMapsMapsLibrary;
   map: GoogleMapInstance;
-  isVisited: (location: LocationOption) => boolean;
+  getMarkerPresentation: (
+    location: LocationOption,
+  ) => SeichiMapMarkerPresentation;
   getSelectedLocationId: () => string | null;
 }) => {
   class SeichiCanvasOverlay
@@ -873,10 +933,18 @@ const createSeichiCanvasOverlay = ({
       const selectedLocationId = getSelectedLocationId();
       // Canvas は後から描いたピンほど手前に表示される。
       const locationsInPaintOrder = this.locations
-        .map((location) => ({ location, visited: isVisited(location) }))
-        .sort((left, right) => Number(left.visited) - Number(right.visited));
+        .map((location) => ({
+          location,
+          presentation: getMarkerPresentation(location),
+        }))
+        .sort((left, right) =>
+          compareSeichiMapMarkerPresentations(
+            left.presentation,
+            right.presentation,
+          ),
+        );
 
-      for (const { location, visited } of locationsInPaintOrder) {
+      for (const { location, presentation } of locationsInPaintOrder) {
         const point = projection.fromLatLngToDivPixel(
           new coreApi.LatLng(location.latitude, location.longitude),
         );
@@ -889,7 +957,7 @@ const createSeichiCanvasOverlay = ({
         }
 
         const selected = location.id === selectedLocationId;
-        const markerColor = visited ? "#d63384" : "#1c7ed6";
+        const markerColor = presentation.color;
         const radius = selected ? 8 : 6;
 
         context.beginPath();
@@ -1217,19 +1285,29 @@ export default function SeichiMapCompleteClient({
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
-  const isLocationVisitedRef = useRef<(location: LocationOption) => boolean>(
-    () => false,
+  const getMarkerPresentationRef = useRef<
+    (location: LocationOption) => SeichiMapMarkerPresentation
+  >(() =>
+    getSeichiMapMarkerPresentation({
+      pointLayer: "self",
+      isVisited: false,
+      uniqueVisitorCount: 0,
+      maxUniqueVisitorCount: 0,
+    }),
   );
   const isSharedViewRef = useRef(false);
   const openLocationInfoWindowRef = useRef<(location: LocationOption) => void>(
     () => undefined,
   );
   const selectedLocationIdRef = useRef<string | null>(null);
+  const itineraryLocationIdsRef = useRef<ReadonlySet<string>>(new Set());
   const focusedInitialLocationIdRef = useRef<string | null>(null);
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
   const [visited, setVisited] = useState<VisitedItem[]>([]);
+  const [itinerary, setItinerary] = useState(createEmptySeichiMapItinerary);
+  const [itineraryLoaded, setItineraryLoaded] = useState(false);
   const [archiveVideoMetaById, setArchiveVideoMetaById] = useState<
     Record<string, ArchiveVideoMeta>
   >({});
@@ -1240,6 +1318,7 @@ export default function SeichiMapCompleteClient({
   const [mapProvider, setMapProvider] = useState<SeichiMapProvider>(
     DEFAULT_SEICHI_MAP_PROVIDER,
   );
+  const [pointLayer, setPointLayer] = useState<SeichiMapPointLayer>("self");
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
@@ -1313,6 +1392,16 @@ export default function SeichiMapCompleteClient({
         : storedProvider,
     );
   }, [mapsKey]);
+
+  useEffect(() => {
+    setItinerary(readSeichiMapItinerary(window.localStorage));
+    setItineraryLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!itineraryLoaded) return;
+    saveSeichiMapItinerary(window.localStorage, itinerary);
+  }, [itinerary, itineraryLoaded]);
 
   const selectMapProvider = useCallback(
     (provider: SeichiMapProvider) => {
@@ -1406,6 +1495,9 @@ export default function SeichiMapCompleteClient({
 
   const effectiveShareId = viewShareId ?? serverShareId;
   const isSharedView = Boolean(effectiveShareId);
+  const effectivePointLayer: SeichiMapPointLayer = isSharedView
+    ? "self"
+    : pointLayer;
   const canEditVisits = isSignedIn && !isSharedView;
   const canViewVisitedList = canEditVisits || isSharedView;
   const sharedViewNickname = sharedViewInfo?.nickname ?? t("share.loadingUser");
@@ -1469,6 +1561,50 @@ export default function SeichiMapCompleteClient({
     }
   }, [hiddenLayerNames]);
 
+  const itineraryLocationIds = useMemo(
+    () => new Set(itinerary.stops.map((stop) => stop.locationId)),
+    [itinerary.stops],
+  );
+
+  useEffect(() => {
+    itineraryLocationIdsRef.current = itineraryLocationIds;
+  }, [itineraryLocationIds]);
+
+  const addLocationToItinerary = useCallback((locationId: string) => {
+    setItinerary((current) => addSeichiMapItineraryStop(current, locationId));
+    setIsLayerSelectorOpen(false);
+    setListMode("itinerary");
+  }, []);
+
+  const toggleItineraryStop = useCallback((locationId: string) => {
+    setItinerary((current) =>
+      toggleSeichiMapItineraryStop(current, locationId),
+    );
+  }, []);
+
+  const removeItineraryStop = useCallback((locationId: string) => {
+    setItinerary((current) =>
+      removeSeichiMapItineraryStop(current, locationId),
+    );
+  }, []);
+
+  const reorderItineraryStops = useCallback(
+    (activeLocationId: string, overLocationId: string) => {
+      setItinerary((current) =>
+        reorderSeichiMapItineraryStops(
+          current,
+          activeLocationId,
+          overLocationId,
+        ),
+      );
+    },
+    [],
+  );
+
+  const clearItinerary = useCallback(() => {
+    setItinerary(createEmptySeichiMapItinerary());
+  }, []);
+
   useEffect(() => {
     isSharedViewRef.current = isSharedView;
   }, [isSharedView]);
@@ -1510,6 +1646,10 @@ export default function SeichiMapCompleteClient({
     });
     return map;
   }, [visited]);
+  const visitedLocationIds = useMemo(
+    () => new Set(visitedByLocationId.keys()),
+    [visitedByLocationId],
+  );
 
   const getVisitedItemForLocation = useCallback(
     (location: LocationOption) => visitedByLocationId.get(location.id),
@@ -1521,6 +1661,23 @@ export default function SeichiMapCompleteClient({
       return Boolean(getVisitedItemForLocation(location));
     },
     [getVisitedItemForLocation],
+  );
+
+  const maxUniqueVisitorCount = useMemo(
+    () =>
+      Math.max(0, ...locations.map((location) => location.uniqueVisitorCount)),
+    [locations],
+  );
+
+  const getMarkerPresentation = useCallback(
+    (location: LocationOption) =>
+      getSeichiMapMarkerPresentation({
+        pointLayer: effectivePointLayer,
+        isVisited: isLocationVisited(location),
+        uniqueVisitorCount: location.uniqueVisitorCount,
+        maxUniqueVisitorCount,
+      }),
+    [effectivePointLayer, isLocationVisited, maxUniqueVisitorCount],
   );
 
   const locationById = useMemo(() => {
@@ -1828,6 +1985,7 @@ export default function SeichiMapCompleteClient({
       const locationItems =
         (await locationsResponse.json()) as (SeichiMapLocation & {
           uniqueVisitorCount?: number;
+          singleVisitorNickname?: string | null;
         })[];
 
       setLocations(
@@ -1835,6 +1993,7 @@ export default function SeichiMapCompleteClient({
           ...item,
           key: item.id,
           uniqueVisitorCount: item.uniqueVisitorCount ?? 0,
+          singleVisitorNickname: item.singleVisitorNickname?.trim() || null,
         })),
       );
       setLocationsLoading(false);
@@ -2004,7 +2163,8 @@ export default function SeichiMapCompleteClient({
             coreApi: libraries.core,
             mapsApi: libraries.maps,
             map: mapRef.current,
-            isVisited: (location) => isLocationVisitedRef.current(location),
+            getMarkerPresentation: (location) =>
+              getMarkerPresentationRef.current(location),
             getSelectedLocationId: () => selectedLocationIdRef.current,
           });
           currentLocationControlRef.current = createCurrentLocationControl(
@@ -2433,15 +2593,38 @@ export default function SeichiMapCompleteClient({
       body.appendChild(folder);
 
       if (location.uniqueVisitorCount > 0) {
-        const visitorCount = document.createElement("div");
-        visitorCount.textContent = t("popup.uniqueVisitors", {
-          count: location.uniqueVisitorCount,
-        });
-        visitorCount.style.color = "#2b8a3e";
-        visitorCount.style.fontSize = "12px";
-        visitorCount.style.fontWeight = "700";
-        visitorCount.style.marginTop = "2px";
-        body.appendChild(visitorCount);
+        const visitorSummary = document.createElement("div");
+        visitorSummary.style.color = "#2b8a3e";
+        visitorSummary.style.fontSize = "12px";
+        visitorSummary.style.fontWeight = "700";
+        visitorSummary.style.marginTop = "2px";
+
+        if (
+          location.uniqueVisitorCount === 1 &&
+          location.singleVisitorNickname
+        ) {
+          visitorSummary.className = "seichi-map-popup__single-visitor";
+          visitorSummary.style.alignItems = "center";
+          visitorSummary.style.display = "flex";
+          visitorSummary.style.gap = "4px";
+          visitorSummary.setAttribute(
+            "aria-label",
+            t("popup.singleVisitorAccessibleLabel", {
+              nickname: location.singleVisitorNickname,
+            }),
+          );
+
+          const nickname = document.createElement("span");
+          nickname.textContent = location.singleVisitorNickname;
+          visitorSummary.append(createLuCrownIconElement(), nickname);
+        } else {
+          visitorSummary.className = "seichi-map-popup__visitor-count";
+          visitorSummary.textContent = t("popup.uniqueVisitors", {
+            count: location.uniqueVisitorCount,
+          });
+        }
+
+        body.appendChild(visitorSummary);
       }
 
       if (visitedItem) {
@@ -2594,6 +2777,25 @@ export default function SeichiMapCompleteClient({
       styleInfoWindowButton(xPostLink, "outline");
       actions.appendChild(xPostLink);
 
+      const itineraryButton = document.createElement("button");
+      itineraryButton.type = "button";
+      const isInItinerary = itineraryLocationIdsRef.current.has(location.id);
+      itineraryButton.textContent = isInItinerary
+        ? t("popup.inItinerary")
+        : t("popup.addToItinerary");
+      itineraryButton.disabled = isInItinerary;
+      itineraryButton.style.cursor = isInItinerary ? "default" : "pointer";
+      itineraryButton.style.opacity = isInItinerary ? "0.65" : "1";
+      styleInfoWindowButton(itineraryButton, "light", "cyan");
+      itineraryButton.addEventListener("click", () => {
+        addLocationToItinerary(location.id);
+        itineraryButton.disabled = true;
+        itineraryButton.style.cursor = "default";
+        itineraryButton.style.opacity = "0.65";
+        itineraryButton.textContent = t("popup.inItinerary");
+      });
+      actions.appendChild(itineraryButton);
+
       if (!isSharedView) {
         const recordButton = document.createElement("button");
         recordButton.type = "button";
@@ -2626,6 +2828,7 @@ export default function SeichiMapCompleteClient({
     },
     [
       archiveVideoMetaById,
+      addLocationToItinerary,
       canEditVisits,
       deleteVisited,
       getVisitedItemForLocation,
@@ -2671,9 +2874,9 @@ export default function SeichiMapCompleteClient({
   }, [openLocationInfoWindow]);
 
   useEffect(() => {
-    isLocationVisitedRef.current = isLocationVisited;
+    getMarkerPresentationRef.current = getMarkerPresentation;
     mapOverlayRef.current?.draw();
-  }, [isLocationVisited]);
+  }, [getMarkerPresentation]);
 
   useEffect(() => {
     selectedLocationIdRef.current = selectedLocationId;
@@ -2695,22 +2898,27 @@ export default function SeichiMapCompleteClient({
 
     markerLayer.clearLayers();
     const locationsInPaintOrder = visibleLocations
-      .map((location) => ({ location, visited: isLocationVisited(location) }))
-      .sort((left, right) => Number(left.visited) - Number(right.visited));
+      .map((location) => ({
+        location,
+        presentation: getMarkerPresentation(location),
+      }))
+      .sort((left, right) =>
+        compareSeichiMapMarkerPresentations(
+          left.presentation,
+          right.presentation,
+        ),
+      );
 
-    for (const {
-      location,
-      visited: locationVisited,
-    } of locationsInPaintOrder) {
+    for (const { location, presentation } of locationsInPaintOrder) {
       const selected = location.id === selectedLocationId;
       const marker = leaflet.circleMarker(
         [location.latitude, location.longitude],
         {
           renderer: canvasRenderer,
           radius: selected ? 8 : 6,
-          color: "#ffffff",
+          color: selected ? presentation.color : "#ffffff",
           weight: selected ? 3 : 2,
-          fillColor: locationVisited ? "#d63384" : "#1c7ed6",
+          fillColor: presentation.color,
           fillOpacity: 1,
         },
       );
@@ -2730,7 +2938,7 @@ export default function SeichiMapCompleteClient({
       marker.addTo(markerLayer);
     }
   }, [
-    isLocationVisited,
+    getMarkerPresentation,
     mapLoading,
     mapProvider,
     mapReady,
@@ -2818,6 +3026,26 @@ export default function SeichiMapCompleteClient({
       }
     },
     [requestCurrentLocation],
+  );
+
+  const openItineraryLocation = useCallback(
+    (locationId: string) => {
+      const location = locationById.get(locationId);
+      if (!location) return;
+      const layerName = getLocationLayerName(location, uncategorizedLayerName);
+      if (hiddenLayerNameSet.has(layerName)) {
+        setHiddenLayerNames((current) =>
+          current.filter((name) => name !== layerName),
+        );
+      }
+      showLocationOnMap(location);
+    },
+    [
+      hiddenLayerNameSet,
+      locationById,
+      showLocationOnMap,
+      uncategorizedLayerName,
+    ],
   );
 
   const onEditVisited = useCallback(
@@ -3134,6 +3362,7 @@ export default function SeichiMapCompleteClient({
 
   const renderMobileLocationActions = (location: LocationOption) => {
     const visitedItem = getVisitedItemForLocation(location);
+    const isInItinerary = itineraryLocationIds.has(location.id);
 
     return (
       <Group
@@ -3162,6 +3391,15 @@ export default function SeichiMapCompleteClient({
           size="compact-sm"
         >
           {t("popup.postDokoAz")}
+        </Button>
+        <Button
+          variant="light"
+          color="cyan"
+          size="compact-sm"
+          disabled={isInItinerary}
+          onClick={() => addLocationToItinerary(location.id)}
+        >
+          {isInItinerary ? t("popup.inItinerary") : t("popup.addToItinerary")}
         </Button>
         {!isSharedView ? (
           <Button
@@ -3281,6 +3519,7 @@ export default function SeichiMapCompleteClient({
             data-viewport-fullscreen={
               isViewportMapFullscreen ? "true" : undefined
             }
+            data-point-layer={effectivePointLayer}
           >
             <Box
               className={`seichi-map-provider-control seichi-map-provider-control--${
@@ -3339,6 +3578,122 @@ export default function SeichiMapCompleteClient({
                     <Text size="xs" c="dimmed" mt={6}>
                       {t("mapProvider.googleUnavailable")}
                     </Text>
+                  ) : null}
+                  {!isSharedView ? (
+                    <>
+                      <Divider my="xs" />
+                      <Text size="xs" fw={700} mb={4}>
+                        {t("pointLayer.title")}
+                      </Text>
+                      <Radio.Group
+                        name="seichi-map-point-layer"
+                        value={pointLayer}
+                        aria-label={t("pointLayer.title")}
+                        onChange={(value) => {
+                          if (value === "self" || value === "everyone") {
+                            setPointLayer(value);
+                          }
+                        }}
+                      >
+                        <Stack gap={2}>
+                          <Radio value="self" label={t("pointLayer.self")} />
+                          <Radio
+                            value="everyone"
+                            label={t("pointLayer.everyone")}
+                          />
+                        </Stack>
+                      </Radio.Group>
+                      <Stack
+                        gap={4}
+                        mt="xs"
+                        aria-label={t("pointLayer.legend.title")}
+                      >
+                        <Text size="xs" fw={600} c="dimmed">
+                          {t("pointLayer.legend.title")}
+                        </Text>
+                        <Group gap="xs" wrap="wrap">
+                          {pointLayer === "self" ? (
+                            <>
+                              <Group gap={4} wrap="nowrap">
+                                <Box
+                                  w={10}
+                                  h={10}
+                                  aria-hidden="true"
+                                  style={{
+                                    borderRadius: "50%",
+                                    backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
+                                  }}
+                                />
+                                <Text size="xs" c="dimmed">
+                                  {t("pointLayer.legend.unvisited")}
+                                </Text>
+                              </Group>
+                              <Group gap={4} wrap="nowrap">
+                                <Box
+                                  w={10}
+                                  h={10}
+                                  aria-hidden="true"
+                                  style={{
+                                    borderRadius: "50%",
+                                    backgroundColor:
+                                      SEICHI_MAP_SELF_VISITED_COLOR,
+                                  }}
+                                />
+                                <Text size="xs" c="dimmed">
+                                  {t("pointLayer.legend.visited")}
+                                </Text>
+                              </Group>
+                            </>
+                          ) : (
+                            <>
+                              <Group gap={4} wrap="nowrap">
+                                <Box
+                                  w={10}
+                                  h={10}
+                                  aria-hidden="true"
+                                  style={{
+                                    borderRadius: "50%",
+                                    backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
+                                  }}
+                                />
+                                <Text size="xs" c="dimmed">
+                                  {t("pointLayer.legend.none")}
+                                </Text>
+                              </Group>
+                              <Group gap={4} wrap="nowrap">
+                                <Box
+                                  w={10}
+                                  h={10}
+                                  aria-hidden="true"
+                                  style={{
+                                    borderRadius: "50%",
+                                    backgroundColor:
+                                      SEICHI_MAP_EVERYONE_SINGLE_VISITOR_COLOR,
+                                  }}
+                                />
+                                <Text size="xs" c="dimmed">
+                                  {t("pointLayer.legend.one")}
+                                </Text>
+                              </Group>
+                              <Group gap={4} wrap="nowrap">
+                                <Box
+                                  w={24}
+                                  h={10}
+                                  aria-hidden="true"
+                                  style={{
+                                    borderRadius: 999,
+                                    background: `linear-gradient(90deg, ${SEICHI_MAP_EVERYONE_LIGHT_COLOR}, ${SEICHI_MAP_EVERYONE_DARK_COLOR})`,
+                                  }}
+                                />
+                                <Text size="xs" c="dimmed">
+                                  {t("pointLayer.legend.multiple")}
+                                </Text>
+                              </Group>
+                            </>
+                          )}
+                        </Group>
+                      </Stack>
+                    </>
                   ) : null}
                 </Paper>
               ) : null}
@@ -3564,16 +3919,32 @@ export default function SeichiMapCompleteClient({
               ) : null}
 
               {isLayerSelectorOpen ? null : (
-                <SegmentedControl
-                  value={listMode}
-                  onChange={handleListModeChange}
-                  data={[
-                    { label: t("tabs.locations"), value: "locations" },
-                    { label: t("tabs.nearby"), value: "nearby" },
-                    { label: t("tabs.visited"), value: "visited" },
-                  ]}
-                  fullWidth
-                />
+                <Group gap="xs" wrap="nowrap">
+                  <SegmentedControl
+                    className="min-w-0 flex-1"
+                    value={listMode}
+                    onChange={handleListModeChange}
+                    data={[
+                      { label: t("tabs.locations"), value: "locations" },
+                      { label: t("tabs.nearby"), value: "nearby" },
+                      { label: t("tabs.visited"), value: "visited" },
+                    ]}
+                    size="xs"
+                    fullWidth
+                  />
+                  <Tooltip label={t("tabs.itinerary")}>
+                    <ActionIcon
+                      variant={listMode === "itinerary" ? "filled" : "light"}
+                      color="pink"
+                      size="lg"
+                      aria-label={t("tabs.itinerary")}
+                      aria-pressed={listMode === "itinerary"}
+                      onClick={() => setListMode("itinerary")}
+                    >
+                      <FiMap size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
               )}
 
               {isLayerSelectorOpen ? null : listMode === "locations" ? (
@@ -3816,6 +4187,17 @@ export default function SeichiMapCompleteClient({
                     </Paper>
                   )}
                 </Stack>
+              ) : listMode === "itinerary" ? (
+                <SeichiMapItinerary
+                  itinerary={itinerary}
+                  locationsById={locationById}
+                  onClear={clearItinerary}
+                  onOpenLocation={openItineraryLocation}
+                  onRemove={removeItineraryStop}
+                  onReorder={reorderItineraryStops}
+                  onToggle={toggleItineraryStop}
+                  visitedLocationIds={visitedLocationIds}
+                />
               ) : canViewVisitedList ? (
                 <Stack gap="sm" className="min-h-0 flex-1">
                   <Group justify="space-between" align="end">
