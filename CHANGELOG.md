@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.30.0](https://github.com/mitsugogo/azki-song-db/compare/v2.29.1...v2.30.0) (2026-08-29)
+
+### Features
+
+* **seichi-map:** みんなの訪問ログ ([79c9d34](https://github.com/mitsugogo/azki-song-db/commit/79c9d346cbc95726c929a2099c901aac9e2671f0))
+* **seichi-map:** 旅程から出発地点入力を削除 ([17ee209](https://github.com/mitsugogo/azki-song-db/commit/17ee209c3ad6e0aa9c7e92e9c8b17337deb8fbdb))
+* **seichi-map:** 現在地からの経路案内 ([c3d6b45](https://github.com/mitsugogo/azki-song-db/commit/c3d6b45e0d0311d900fb9a415a600bb09547c836))
+* **seichi-map:** 行程のチェック状態と訪問記録を分離 ([d4cf1ad](https://github.com/mitsugogo/azki-song-db/commit/d4cf1ad2dfc635e8a1262fb94781fe826a1864c6))
+* ルートプランニング機能 ([ac0a3e6](https://github.com/mitsugogo/azki-song-db/commit/ac0a3e69949eb1223d7d6107a878d476ece23a48))
+
 ## [2.29.1](https://github.com/mitsugogo/azki-song-db/compare/v2.29.0...v2.29.1) (2026-08-26)
 
 ### Bug Fixes
