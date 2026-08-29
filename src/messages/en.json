@@ -1065,6 +1065,19 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps is unavailable in this environment"
     },
+    "pointLayer": {
+      "title": "Location layer",
+      "self": "Mine",
+      "everyone": "Everyone",
+      "legend": {
+        "title": "Legend",
+        "unvisited": "Unvisited",
+        "visited": "Visited",
+        "none": "0 people",
+        "one": "1 person",
+        "multiple": "2+ people"
+      }
+    },
     "fullscreen": {
       "enter": "View map fullscreen",
       "exit": "Exit fullscreen"
@@ -1167,6 +1180,7 @@
     },
     "popup": {
       "uniqueVisitors": "Visited by {count} people",
+      "singleVisitorAccessibleLabel": "Visitor: {nickname}",
       "visitedAt": "Visited on {date}",
       "visited": "Visited",
       "youtube": "YouTube",

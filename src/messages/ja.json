@@ -1056,6 +1056,19 @@
       "osmAttribution": "© OpenStreetMap contributors",
       "googleUnavailable": "Google Maps はこの環境では利用できません"
     },
+    "pointLayer": {
+      "title": "地点レイヤー",
+      "self": "自分",
+      "everyone": "みんな",
+      "legend": {
+        "title": "凡例",
+        "unvisited": "未訪問",
+        "visited": "訪問済",
+        "none": "0人",
+        "one": "1人",
+        "multiple": "2人以上"
+      }
+    },
     "fullscreen": {
       "enter": "地図を全画面表示",
       "exit": "全画面表示を終了"
@@ -1158,6 +1171,7 @@
     },
     "popup": {
       "uniqueVisitors": "{count}人が訪問済",
+      "singleVisitorAccessibleLabel": "訪問者: {nickname}",
       "visitedAt": "{date} に訪問済",
       "visited": "訪問済",
       "youtube": "YouTube",
