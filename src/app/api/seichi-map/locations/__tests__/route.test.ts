@@ -6,14 +6,14 @@ vi.mock("@/app/lib/seichiMap", () => ({
 }));
 
 vi.mock("@/app/lib/seichiMapVisitedSheet", () => ({
-  loadSeichiMapUniqueVisitorCounts: vi.fn(),
+  loadSeichiMapLocationVisitorSummaries: vi.fn(),
   loadSeichiMapUserCount: vi.fn(),
 }));
 
 import { parseSeichiMapKml } from "@/app/lib/seichiMap";
 import { SEICHI_MAP_USER_COUNT_HEADER } from "@/app/lib/seichiMapHeaders";
 import {
-  loadSeichiMapUniqueVisitorCounts,
+  loadSeichiMapLocationVisitorSummaries,
   loadSeichiMapUserCount,
 } from "@/app/lib/seichiMapVisitedSheet";
 import { GET } from "../route";
@@ -41,8 +41,11 @@ describe("GET /api/seichi-map/locations", () => {
         longitude: 139,
       },
     ]);
-    vi.mocked(loadSeichiMapUniqueVisitorCounts).mockResolvedValue({
-      aaaaaaaaaaaaaaaa: 2,
+    vi.mocked(loadSeichiMapLocationVisitorSummaries).mockResolvedValue({
+      aaaaaaaaaaaaaaaa: {
+        uniqueVisitorCount: 1,
+        singleVisitorNickname: "開拓者A",
+      },
     });
     vi.mocked(loadSeichiMapUserCount).mockResolvedValue(3);
   });
@@ -56,7 +59,8 @@ describe("GET /api/seichi-map/locations", () => {
     await expect(response.json()).resolves.toEqual([
       expect.objectContaining({
         id: "aaaaaaaaaaaaaaaa",
-        uniqueVisitorCount: 2,
+        uniqueVisitorCount: 1,
+        singleVisitorNickname: "開拓者A",
       }),
     ]);
   });
@@ -71,5 +75,21 @@ describe("GET /api/seichi-map/locations", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get(SEICHI_MAP_USER_COUNT_HEADER)).toBeNull();
     await expect(response.json()).resolves.toHaveLength(1);
+  });
+
+  it("地点別集計に失敗した場合は人数0・ニックネームなしで地点一覧を返す", async () => {
+    vi.mocked(loadSeichiMapLocationVisitorSummaries).mockRejectedValue(
+      new Error("database unavailable"),
+    );
+
+    const response = await GET();
+
+    await expect(response.json()).resolves.toEqual([
+      expect.objectContaining({
+        id: "aaaaaaaaaaaaaaaa",
+        uniqueVisitorCount: 0,
+        singleVisitorNickname: null,
+      }),
+    ]);
   });
 });

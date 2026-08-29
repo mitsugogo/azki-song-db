@@ -4,8 +4,9 @@ import {
 } from "@/app/lib/seichiMap";
 import { SEICHI_MAP_USER_COUNT_HEADER } from "@/app/lib/seichiMapHeaders";
 import {
-  loadSeichiMapUniqueVisitorCounts,
+  loadSeichiMapLocationVisitorSummaries,
   loadSeichiMapUserCount,
+  type SeichiMapLocationVisitorSummary,
 } from "@/app/lib/seichiMapVisitedSheet";
 import { NextResponse } from "next/server";
 
@@ -13,19 +14,19 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const [response, uniqueVisitorCounts, userCount] = await Promise.all([
+    const [response, visitorSummaries, userCount] = await Promise.all([
       fetch(AZKI_SEICHI_MAP_KML_URL, {
         cache: "no-store",
         headers: {
           Accept: "application/vnd.google-earth.kml+xml,text/xml,*/*",
         },
       }),
-      loadSeichiMapUniqueVisitorCounts().catch<Record<string, number>>(
-        (error) => {
-          console.error("Failed to load seichi map visitor counts", error);
-          return {};
-        },
-      ),
+      loadSeichiMapLocationVisitorSummaries().catch<
+        Record<string, SeichiMapLocationVisitorSummary>
+      >((error) => {
+        console.error("Failed to load seichi map visitor counts", error);
+        return {};
+      }),
       loadSeichiMapUserCount().catch<number | null>((error) => {
         console.error("Failed to load seichi map user count", error);
         return null;
@@ -48,10 +49,14 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      items.map((item) => ({
-        ...item,
-        uniqueVisitorCount: uniqueVisitorCounts[item.id] ?? 0,
-      })),
+      items.map((item) => {
+        const visitorSummary = visitorSummaries[item.id];
+        return {
+          ...item,
+          uniqueVisitorCount: visitorSummary?.uniqueVisitorCount ?? 0,
+          singleVisitorNickname: visitorSummary?.singleVisitorNickname ?? null,
+        };
+      }),
       { headers },
     );
   } catch (error) {

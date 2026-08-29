@@ -9,33 +9,59 @@ vi.mock("../prisma", () => ({
 import { prisma } from "../prisma";
 import {
   loadSeichiMapLocationVisitorRanking,
-  loadSeichiMapUniqueVisitorCounts,
+  loadSeichiMapLocationVisitorSummaries,
   loadSeichiMapUserCount,
   loadSeichiMapVisitorRanking,
   SEICHI_MAP_RANKING_LIMIT,
 } from "../seichiMapVisitedSheet";
 
-describe("loadSeichiMapUniqueVisitorCounts", () => {
+describe("loadSeichiMapLocationVisitorSummaries", () => {
   const queryRaw = prisma.$queryRaw as unknown as ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryRaw.mockReset();
   });
 
-  it("地点ごとのユニーク訪問者数だけを返す", async () => {
+  it("地点ごとのユニーク訪問者数と公開中の単独訪問者名を返す", async () => {
     queryRaw.mockResolvedValue([
-      { locationId: "location-a", uniqueVisitorCount: 2n },
-      { locationId: "location-b", uniqueVisitorCount: 1n },
+      {
+        locationId: "location-a",
+        uniqueVisitorCount: 2n,
+        singleVisitorNickname: null,
+      },
+      {
+        locationId: "location-b",
+        uniqueVisitorCount: 1n,
+        singleVisitorNickname: "開拓者A",
+      },
+      {
+        locationId: "location-c",
+        uniqueVisitorCount: 1n,
+        singleVisitorNickname: null,
+      },
     ]);
 
-    await expect(loadSeichiMapUniqueVisitorCounts()).resolves.toEqual({
-      "location-a": 2,
-      "location-b": 1,
+    await expect(loadSeichiMapLocationVisitorSummaries()).resolves.toEqual({
+      "location-a": {
+        uniqueVisitorCount: 2,
+        singleVisitorNickname: null,
+      },
+      "location-b": {
+        uniqueVisitorCount: 1,
+        singleVisitorNickname: "開拓者A",
+      },
+      "location-c": {
+        uniqueVisitorCount: 1,
+        singleVisitorNickname: null,
+      },
     });
 
     const sql = (queryRaw.mock.calls[0][0] as TemplateStringsArray).join("?");
-    expect(sql).toContain("COUNT(DISTINCT userId)");
-    expect(sql).toContain("GROUP BY locationId");
+    expect(sql).toContain("COUNT(DISTINCT visited.userId)");
+    expect(sql).toContain("LEFT JOIN SeichiMapProfile AS profile");
+    expect(sql).toContain("WHEN profile.showNicknameInRanking");
+    expect(sql).toContain("GROUP BY visited.locationId");
+    expect(sql).not.toContain("SELECT visited.userId");
   });
 
   it("地点ランキング用にlocationIdとユニーク訪問者数を返す", async () => {

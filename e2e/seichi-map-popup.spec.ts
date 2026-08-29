@@ -6,6 +6,7 @@ const LOCATION_LATITUDE = 35.681236;
 const LOCATION_LONGITUDE = 139.767125;
 const SECOND_LOCATION_LATITUDE = 34.693725;
 const SECOND_LOCATION_LONGITUDE = 135.502254;
+const SHARE_ID = "11111111-1111-4111-8111-111111111111";
 
 const setupSeichiMapPopupMocks = async (page: Page) => {
   await page.addInitScript(() => {
@@ -29,7 +30,8 @@ const setupSeichiMapPopupMocks = async (page: Page) => {
           styleUrl: "#icon-1899-DB4436",
           latitude: LOCATION_LATITUDE,
           longitude: LOCATION_LONGITUDE,
-          uniqueVisitorCount: 3,
+          uniqueVisitorCount: 1,
+          singleVisitorNickname: "開拓者A",
         },
         {
           id: "bbbbbbbbbbbbbbbb",
@@ -39,7 +41,8 @@ const setupSeichiMapPopupMocks = async (page: Page) => {
           styleUrl: "#icon-1899-DB4436",
           latitude: SECOND_LOCATION_LATITUDE,
           longitude: SECOND_LOCATION_LONGITUDE,
-          uniqueVisitorCount: 0,
+          uniqueVisitorCount: 1,
+          singleVisitorNickname: null,
         },
       ]),
     });
@@ -190,6 +193,86 @@ test.describe("Seichi map location popup", () => {
     expect(badgeBox!.x).toBeLessThan(rankingBox!.x);
     expect(rankingBox!.x).toBeLessThan(shareBox!.x);
     expect(shareBox!.x).toBeLessThan(settingsBox!.x);
+  });
+
+  test("switches the point layer and shows a public single visitor", async ({
+    page,
+  }) => {
+    const popup = await openLongLocationPopup(page);
+    const mapSurface = page.locator(".seichi-map-fullscreen-surface").first();
+
+    await expect(popup.locator(".seichi-map-popup__single-visitor")).toHaveText(
+      "開拓者A",
+    );
+    await expect(
+      popup.locator(".seichi-map-popup__single-visitor"),
+    ).toHaveAttribute("aria-label", "訪問者: 開拓者A");
+    await expect(
+      popup.locator(".seichi-map-popup__single-visitor svg"),
+    ).toHaveCount(1);
+    await expect(mapSurface).toHaveAttribute("data-point-layer", "self");
+
+    await page
+      .getByRole("button", {
+        name: /地図レイヤーを開く|Open map layers/,
+      })
+      .click();
+    const selfLayer = page.getByRole("radio", { name: /自分|Mine/ });
+    const everyoneLayer = page.getByRole("radio", {
+      name: /みんな|Everyone/,
+    });
+    await expect(page.getByText(/地点レイヤー|Location layer/)).toBeVisible();
+    await expect(selfLayer).toBeChecked();
+    await expect(everyoneLayer).not.toBeChecked();
+    const legend = page.getByLabel(/凡例|Legend/);
+    await expect(legend).toContainText(/未訪問|Unvisited/);
+    await expect(legend).toContainText(/訪問済|Visited/);
+
+    await everyoneLayer.check();
+    await expect(mapSurface).toHaveAttribute("data-point-layer", "everyone");
+    await expect(legend).toContainText(/0人|0 people/);
+    await expect(legend).toContainText(/1人|1 person/);
+    await expect(legend).toContainText(/2人以上|2\+ people/);
+
+    await page.route("**/api/seichi-map/share?shareId=*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          share: {
+            shareId: SHARE_ID,
+            nickname: "共有ユーザー",
+            createdAt: "2026-08-29T00:00:00.000Z",
+            updatedAt: "2026-08-29T00:00:00.000Z",
+          },
+          items: [],
+        }),
+      });
+    });
+    await page.evaluate((shareId) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("share", shareId);
+      window.history.pushState(window.history.state, "", url);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }, SHARE_ID);
+
+    await expect(mapSurface).toHaveAttribute("data-point-layer", "self");
+    await expect(selfLayer).toHaveCount(0);
+    await expect(everyoneLayer).toHaveCount(0);
+  });
+
+  test("keeps the anonymous single-visitor count", async ({ page }) => {
+    await setupSeichiMapPopupMocks(page);
+    await page.goto("/seichi-map?location=bbbbbbbbbbbbbbbb");
+
+    const popup = page.locator(".seichi-map-popup");
+    await expect(popup).toBeVisible({ timeout: 15_000 });
+    await expect(popup.locator(".seichi-map-popup__visitor-count")).toHaveText(
+      "1人が訪問済",
+    );
+    await expect(
+      popup.locator(".seichi-map-popup__single-visitor"),
+    ).toHaveCount(0);
   });
 
   for (const { name, viewport } of [
