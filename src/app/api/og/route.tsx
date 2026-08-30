@@ -1,15 +1,15 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/app/config/siteConfig";
-import {
-  fetchOgFonts,
-  ogColors,
-  ogImageHeaders,
-  OgShell,
-  normalizeOgText,
-} from "./ogDesign";
+import { fetchOgFonts, ogColors, OgShell, normalizeOgText } from "./ogDesign";
 
 export const runtime = "edge";
+
+const genericOgImageHeaders = {
+  "Content-Type": "image/png",
+  "Cache-Control": "public, max-age=604800, stale-while-revalidate=900",
+  "Vercel-CDN-Cache-Control": "public, max-age=31536000",
+};
 
 export async function GET(req: NextRequest) {
   try {
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
         width: parseInt(width),
         height: parseInt(height),
         fonts,
-        headers: ogImageHeaders,
+        headers: genericOgImageHeaders,
       },
     );
   } catch (e) {

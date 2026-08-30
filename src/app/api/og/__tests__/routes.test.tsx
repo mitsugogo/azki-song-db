@@ -30,6 +30,7 @@ vi.mock("@/app/api/og/ogDesign", async (importOriginal) => {
 });
 
 import { GET as getThumb } from "../thumb/route";
+import { GET as getGeneric } from "../route";
 import { GET as getVideoThumb } from "../videothumb/route";
 import { GET as getPlaylist } from "../playlist/route";
 import { GET as getBestNine } from "../share/my-best-9-songs/route";
@@ -67,6 +68,30 @@ const lookupSong = {
   broadcast_at: song.broadcast_at,
   tags: song.tags,
 };
+
+describe("generic OG cache", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fetchFontsMock.mockResolvedValue([]);
+  });
+
+  it("従来URLをそのまま描画し、ブラウザ7日・Vercel CDN 1年でキャッシュする", async () => {
+    const response = await getGeneric(
+      new Request(
+        "https://example.test/api/og?title=タイトル&subtitle=説明&w=1200&h=630",
+      ) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, max-age=604800, stale-while-revalidate=900",
+    );
+    expect(response.headers.get("Vercel-CDN-Cache-Control")).toBe(
+      "public, max-age=31536000",
+    );
+    expect(fetchFontsMock).toHaveBeenCalledOnce();
+  });
+});
 
 describe("OG song freshness routes", () => {
   beforeEach(() => {
