@@ -76,6 +76,9 @@ const fontProfiles: Record<
 
 export const normalizeOgText = (value: string) => value.replace(/～/g, "〜");
 
+const uniqueCharacters = (value: string) =>
+  Array.from(new Set(Array.from(value))).join("");
+
 const fetchGoogleFont = async (
   familyBase: string,
   weight: OgFontWeight,
@@ -100,19 +103,21 @@ export const fetchOgFonts = async (
   textSeed: string,
   profile: OgFontProfile = "generic",
 ) => {
-  const seed = [
-    siteConfig.siteName,
-    siteConfig.siteSlug,
-    "AZKi Song Database",
-    "Song Database",
-    "Music Archive",
-    "Songs",
-    "Streamed",
-    "配信",
-    "好きな曲9選",
-    "♪ 1234567890-/.,:・...…",
-    normalizeOgText(textSeed),
-  ].join("");
+  const seed = uniqueCharacters(
+    [
+      siteConfig.siteName,
+      siteConfig.siteSlug,
+      "AZKi Song Database",
+      "Song Database",
+      "Music Archive",
+      "Songs",
+      "Streamed",
+      "配信",
+      "好きな曲9選",
+      "♪ 1234567890-/.,:・...…",
+      normalizeOgText(textSeed),
+    ].join(""),
+  );
 
   return Promise.all(
     fontProfiles[profile].flatMap(({ name, familyBase, weights }) =>

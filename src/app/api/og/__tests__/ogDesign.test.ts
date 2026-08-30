@@ -35,6 +35,15 @@ describe("fetchOgFonts", () => {
     expect(
       fetchMock.mock.calls.every(([, init]) => init?.cache === "force-cache"),
     ).toBe(true);
+    const requestedText = new URL(
+      String(fetchMock.mock.calls[0][0]),
+    ).searchParams.get("text");
+    expect(requestedText).not.toBeNull();
+    expect(Array.from(requestedText ?? "")).toEqual([
+      ...new Set(Array.from(requestedText ?? "")),
+    ]);
+    expect(requestedText).toContain("新");
+    expect(requestedText).toContain("曲");
   });
 
   it("generic画像では両フォントの400/700を維持する", async () => {
