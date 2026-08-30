@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.30.1](https://github.com/mitsugogo/azki-song-db/compare/v2.30.0...v2.30.1) (2026-08-30)
+
+### Bug Fixes
+
+* OGP画像の最適化 ([07adb99](https://github.com/mitsugogo/azki-song-db/commit/07adb99347adac55912183aa3c1d9c0e51f66b16))
+
 ## [2.30.0](https://github.com/mitsugogo/azki-song-db/compare/v2.29.1...v2.30.0) (2026-08-29)
 
 ### Features
