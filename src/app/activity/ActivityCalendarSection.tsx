@@ -42,6 +42,7 @@ type ActivityCalendarSectionProps = {
   isLoading: boolean;
   isViewMilestonesLoading: boolean;
   channels: ChannelEntry[];
+  showDetails?: boolean;
 };
 
 function formatCalendarDate(dateKey: string, locale: string) {
@@ -99,7 +100,7 @@ function CalendarTextPreview({
       data-activity-kind={item.kind}
       className={`pointer-events-auto flex w-full min-w-0 items-center gap-1 rounded px-1.5 py-1 text-left text-[0.7rem] leading-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
         item.kind === "anniversary"
-          ? "border border-pink-200/90 bg-gradient-to-r from-pink-100/95 to-amber-50/95 font-semibold text-pink-800 shadow-sm dark:border-pink-300/25 dark:from-pink-300/15 dark:to-amber-300/10 dark:text-pink-100"
+          ? "border border-pink-200/90 bg-pink-100/95 font-semibold text-pink-800 shadow-sm dark:border-pink-300/25 dark:bg-pink-300/15 dark:text-pink-100"
           : "bg-light-gray-100/80 text-gray-700 dark:bg-white/5 dark:text-gray-200"
       }`}
       aria-label={ariaLabel}
@@ -127,6 +128,7 @@ export default function ActivityCalendarSection({
   isLoading,
   isViewMilestonesLoading,
   channels,
+  showDetails = true,
 }: ActivityCalendarSectionProps) {
   const locale = useLocale();
   const t = useTranslations("Summary");
@@ -276,7 +278,7 @@ export default function ActivityCalendarSection({
                               isSelected
                                 ? "bg-primary/10 ring-2 ring-inset ring-primary dark:bg-primary/15"
                                 : hasAnniversary
-                                  ? "bg-linear-to-br from-pink-50/90 via-white/60 to-amber-50/80 hover:from-pink-100/90 hover:to-amber-100/70 dark:from-pink-400/10 dark:via-white/3 dark:to-amber-300/10 dark:hover:from-pink-400/15 dark:hover:to-amber-300/15"
+                                  ? "bg-pink-50/90 hover:bg-pink-100/90 dark:bg-pink-400/10 dark:hover:bg-pink-400/15"
                                   : "hover:bg-light-gray-100/50 dark:hover:bg-white/5"
                             }`}
                             aria-label={t("calendarDayAriaLabel", {
@@ -309,18 +311,22 @@ export default function ActivityCalendarSection({
                               </div>
                             ) : (
                               <>
-                                <div className="mt-1 hidden w-full min-w-0 space-y-1 sm:block">
-                                  {anniversaryTextItems.map(renderTextPreview)}
+                                <div className="mt-1 w-full min-w-0 space-y-1">
+                                  <div className="hidden space-y-1 sm:block">
+                                    {anniversaryTextItems.map(
+                                      renderTextPreview,
+                                    )}
+                                  </div>
                                   {thumbnailItems.length > 0 ? (
                                     <div
                                       className={`grid w-full gap-1 ${
                                         thumbnailItems.length === 1
                                           ? "grid-cols-1"
-                                          : "grid-cols-2"
+                                          : "grid-cols-1 sm:grid-cols-2"
                                       }`}
                                       data-testid="activity-calendar-thumbnails"
                                     >
-                                      {thumbnailItems.map((item) => {
+                                      {thumbnailItems.map((item, index) => {
                                         const title = getCalendarItemTitle(
                                           item,
                                           tHome,
@@ -331,7 +337,7 @@ export default function ActivityCalendarSection({
                                           <UnstyledButton
                                             key={item.id}
                                             type="button"
-                                            className="pointer-events-auto aspect-video min-w-0 overflow-hidden rounded bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                            className={`pointer-events-auto aspect-video min-w-0 overflow-hidden rounded bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${index > 0 ? "hidden sm:block" : ""}`}
                                             data-testid="activity-calendar-thumbnail"
                                             data-video-id={item.videoId}
                                             title={title}
@@ -354,14 +360,16 @@ export default function ActivityCalendarSection({
                                       })}
                                     </div>
                                   ) : null}
-                                  {otherTextItems.map(renderTextPreview)}
-                                  {remainingCount > 0 ? (
-                                    <div className="px-1 text-[0.7rem] font-medium text-gray-500 dark:text-gray-400">
-                                      {t("calendarMoreItems", {
-                                        count: remainingCount,
-                                      })}
-                                    </div>
-                                  ) : null}
+                                  <div className="hidden space-y-1 sm:block">
+                                    {otherTextItems.map(renderTextPreview)}
+                                    {remainingCount > 0 ? (
+                                      <div className="px-1 text-[0.7rem] font-medium text-gray-500 dark:text-gray-400">
+                                        {t("calendarMoreItems", {
+                                          count: remainingCount,
+                                        })}
+                                      </div>
+                                    ) : null}
+                                  </div>
                                 </div>
 
                                 {dayItems.length > 0 ? (
@@ -406,7 +414,7 @@ export default function ActivityCalendarSection({
         </table>
       </div>
 
-      {isLoading ? (
+      {showDetails && isLoading ? (
         <ActivityTimelineSection
           items={[]}
           isLoading
@@ -416,7 +424,7 @@ export default function ActivityCalendarSection({
           showFilter={false}
           className="mt-6"
         />
-      ) : isDesktop || selectedDateKey ? (
+      ) : showDetails && (isDesktop || selectedDateKey) ? (
         <div
           className="mt-6"
           data-testid="activity-selected-day-details"
@@ -442,11 +450,11 @@ export default function ActivityCalendarSection({
             getItemSelectAriaLabel={getItemSelectAriaLabel}
           />
         </div>
-      ) : (
+      ) : showDetails ? (
         <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
           {t("calendarSelectDay")}
         </p>
-      )}
+      ) : null}
 
       <Drawer
         opened={drawerOpened}

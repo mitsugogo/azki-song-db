@@ -242,7 +242,12 @@ describe("ActivityMonthDisplay", () => {
     );
 
     expect(thumbnails).toHaveLength(2);
-    expect(thumbnails[0].parentElement).toHaveClass("grid-cols-2");
+    expect(thumbnails[0].parentElement).toHaveClass(
+      "grid-cols-1",
+      "sm:grid-cols-2",
+    );
+    expect(thumbnails[0]).not.toHaveClass("hidden");
+    expect(thumbnails[1]).toHaveClass("hidden", "sm:block");
     expect(
       within(secondDayCell).getByAltText("archive-archive-1"),
     ).toBeInTheDocument();
@@ -404,8 +409,11 @@ describe("ActivityMonthDisplay", () => {
       'span[data-activity-kind="anniversary"]',
     );
 
-    expect(anniversaryDayButton).toHaveClass("from-pink-50/90");
+    expect(anniversaryDayButton).toHaveClass("bg-pink-50/90");
+    expect(anniversaryDayButton).not.toHaveClass("bg-linear-to-br");
     expect(anniversaryPreview).toHaveClass("border-pink-200/90");
+    expect(anniversaryPreview).toHaveClass("bg-pink-100/95");
+    expect(anniversaryPreview).not.toHaveClass("bg-gradient-to-r");
     expect(
       anniversaryPreview.compareDocumentPosition(anniversaryThumbnail) &
         Node.DOCUMENT_POSITION_FOLLOWING,
