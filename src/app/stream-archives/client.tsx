@@ -33,7 +33,6 @@ import {
 import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
-  HiChartBar,
   HiCheck,
   HiChevronRight,
   HiHome,
@@ -55,6 +54,12 @@ import useSongs from "../hook/useSongs";
 import { ArchiveItem } from "../types/archiveItem";
 import type { Song } from "../types/song";
 import type { ChannelEntry } from "../types/api/yt/channels";
+import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import {
+  createChannelsByParticipantName,
+  matchesSelectedArchiveParticipants,
+  resolveArchiveParticipants,
+} from "../lib/archiveParticipants";
 import { formatDate } from "../lib/formatDate";
 import historyHelper from "../lib/history";
 import { breadcrumbClasses, pageClasses } from "../theme";
@@ -62,9 +67,7 @@ import Image from "next/image";
 import TimestampComment from "./TimestampComment";
 import { FaInfoCircle } from "react-icons/fa";
 import { BiSolidVideos } from "react-icons/bi";
-import ArchiveContributionHeatmap from "./ArchiveContributionHeatmap";
 import {
-  createArchiveActivitySummary,
   DateRangeValue,
   getJstDateKey,
   getStreamStartedAtMs,
@@ -84,6 +87,11 @@ import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
 import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
+import ArchiveParticipantList from "./ArchiveParticipantList";
+import ArchiveCastFilter from "./ArchiveCastFilter";
+import { getArchiveCastNames, setArchiveCastNames } from "./archiveFilters";
+import { isShortsArchive } from "./archiveStats";
+import StreamArchivesNavigation from "./StreamArchivesNavigation";
 
 type ArchiveGroup = {
   key: string;
@@ -97,6 +105,7 @@ type IndexedArchiveItem = ArchiveItem & {
   seriesKey: string;
   seriesTitle: string;
   channel: ChannelEntry | null;
+  participantEntries: ArchiveParticipantEntry[];
   publishedAtMs: number;
   streamStartedAtMs: number;
   streamStartedDateKey: string;
@@ -108,6 +117,7 @@ type IndexedArchiveItem = ArchiveItem & {
 type ArchiveFilterState = {
   query: string;
   seriesKey: string | null;
+  castNames: string[];
   dateRange: DateRangeValue;
   includeShorts: boolean;
   viewMode: ArchiveViewMode;
@@ -120,6 +130,7 @@ type ArchiveSortKey =
   | "video_duration"
   | "topic"
   | "title"
+  | "participants"
   | "description"
   | "timestamp_comment";
 type ArchiveSortDirection = "asc" | "desc";
@@ -128,9 +139,10 @@ type ArchiveSortState = {
   direction: ArchiveSortDirection;
 };
 
-const DESKTOP_COLUMNS = "184px 150px 104px 160px 280px 320px 1fr";
-const DESKTOP_STICKY_SUMMARY_COLUMNS = "184px 150px 104px 160px 280px 320px";
-const DESKTOP_TABLE_MIN_WIDTH = 1724;
+const DESKTOP_COLUMNS = "184px 150px 104px 160px 280px 200px 320px 1fr";
+const DESKTOP_STICKY_SUMMARY_COLUMNS =
+  "184px 150px 104px 160px 280px 200px 320px";
+const DESKTOP_TABLE_MIN_WIDTH = 1924;
 const DESKTOP_STICKY_SUMMARY_HEIGHT = 160;
 const DESKTOP_STICKY_SUMMARY_TOP = 32;
 const DATE_PARAM_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -163,6 +175,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
     return {
       query: "",
       seriesKey: null,
+      castNames: [],
       dateRange: [null, null],
       includeShorts: false,
       viewMode: "list",
@@ -175,6 +188,7 @@ const getArchiveFilterStateFromUrl = (): ArchiveFilterState => {
   return {
     query: params.get(TEXT_QUERY_PARAM) ?? "",
     seriesKey,
+    castNames: getArchiveCastNames(params),
     dateRange: [
       normalizeDateParam(params.get("from")),
       normalizeDateParam(params.get("to")),
@@ -197,6 +211,7 @@ const isInDateRange = (
 const updateArchiveFilterUrl = ({
   query,
   seriesKey,
+  castNames,
   dateRange,
   includeShorts,
   viewMode,
@@ -221,6 +236,8 @@ const updateArchiveFilterUrl = ({
   } else {
     url.searchParams.delete("series");
   }
+
+  setArchiveCastNames(url.searchParams, castNames);
 
   if (fromDate) {
     url.searchParams.set("from", fromDate);
@@ -253,13 +270,6 @@ const getArchiveSeriesTitle = (item: ArchiveItem) => {
   return item.topic || "その他";
 };
 
-const isShortsArchive = (item: ArchiveItem) =>
-  /[#＃]\s*shorts/i.test(
-    [item.title, item.topic, item.description, item.timestamp_comment].join(
-      "\n",
-    ),
-  );
-
 const formatArchiveDate = (value: string, locale: string) => {
   if (!value) {
     return "-";
@@ -275,6 +285,7 @@ const formatArchiveDate = (value: string, locale: string) => {
 const createIndexedArchives = (
   items: ArchiveItem[],
   channelsById: Map<string, ChannelEntry>,
+  channelsByParticipantName: Map<string, ChannelEntry>,
   firstSongsByVideoId: Map<string, Song>,
 ) =>
   items.map((item) => {
@@ -302,15 +313,21 @@ const createIndexedArchives = (
         item.timestamp_comment,
         item.published_at,
         item.stream_started_at,
+        ...(item.participants ?? []),
       ].join("\n"),
     );
     const firstSong = firstSongsByVideoId.get(item.video_id);
+    const participantEntries = resolveArchiveParticipants(
+      item.participants ?? [],
+      channelsByParticipantName,
+    );
 
     return {
       ...item,
       seriesKey,
       seriesTitle,
       channel,
+      participantEntries,
       publishedAtMs: Number.isNaN(publishedAtMs) ? 0 : publishedAtMs,
       streamStartedAtMs,
       streamStartedDateKey,
@@ -382,6 +399,13 @@ const compareArchiveItems = (
       break;
     case "title":
       result = compareText(collator, left.title, right.title);
+      break;
+    case "participants":
+      result = compareText(
+        collator,
+        (left.participants ?? []).join("、"),
+        (right.participants ?? []).join("、"),
+      );
       break;
     case "description":
       result = compareText(collator, left.description, right.description);
@@ -773,6 +797,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
   locale,
   appWatchLabel,
   timestampLabel,
+  participantsLabel,
   anchorLinkLabel,
   anchorCopiedLabel,
   highlightQuery,
@@ -783,6 +808,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
   locale: string;
   appWatchLabel: string;
   timestampLabel: string;
+  participantsLabel: string;
   anchorLinkLabel: string;
   anchorCopiedLabel: string;
   highlightQuery: string;
@@ -837,6 +863,16 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
               {item.topic}
             </ArchiveTextHighlight>
           </Badge>
+        )}
+        {item.participantEntries.length > 0 && (
+          <div className="mt-3">
+            <Text c="dimmed" fz="xs" fw={600}>
+              {participantsLabel}
+            </Text>
+            <div className="mt-1">
+              <ArchiveParticipantList participants={item.participantEntries} />
+            </div>
+          </div>
         )}
         {shouldShowMatchedDescription && (
           <p className="mt-3 line-clamp-3 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
@@ -963,6 +999,9 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
           </ArchiveTextHighlight>
         </Link>
       </div>
+      <div className={cellClass}>
+        <ArchiveParticipantList participants={item.participantEntries} />
+      </div>
       <div className={mutedCellClass}>
         <p className="line-clamp-3 whitespace-pre-line leading-6">
           {item.description ? (
@@ -1066,6 +1105,9 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
           />
         </div>
       </div>
+      <div className="px-3 py-3 align-top text-gray-800 dark:text-gray-100">
+        <ArchiveParticipantList participants={item.participantEntries} />
+      </div>
       <div className="px-3 py-3 align-top text-gray-600 dark:text-gray-300">
         <p className="max-h-24 line-clamp-3 whitespace-pre-line leading-6">
           {item.description ? (
@@ -1109,6 +1151,7 @@ export default function ArchivesPageClient() {
   const [selectedSeriesKey, setSelectedSeriesKey] = useState<string | null>(
     null,
   );
+  const [selectedCastNames, setSelectedCastNames] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRangeValue>([null, null]);
   const [includeShorts, setIncludeShorts] = useState(false);
   const [isUrlFilterReady, setIsUrlFilterReady] = useState(false);
@@ -1116,10 +1159,6 @@ export default function ArchivesPageClient() {
   const [expandedTimestampVideoIds, setExpandedTimestampVideoIds] = useState<
     Set<string>
   >(() => new Set());
-  const [selectedActivityYear, setSelectedActivityYear] = useState<
-    string | null
-  >(null);
-  const [isActivityVisible, setIsActivityVisible] = useState(false);
   const [areMobileFiltersOpen, setAreMobileFiltersOpen] = useState(false);
   const [mobileScrollMargin, setMobileScrollMargin] = useState(0);
   const [archiveScrollTop, setArchiveScrollTop] = useState(0);
@@ -1150,28 +1189,29 @@ export default function ArchivesPageClient() {
     return map;
   }, [channels]);
 
+  const channelsByParticipantName = useMemo(
+    () => createChannelsByParticipantName(channels),
+    [channels],
+  );
+
   const firstSongsByVideoId = useMemo(
     () => createFirstSongsByVideoId(allSongs),
     [allSongs],
   );
 
   const indexedItems = useMemo(
-    () => createIndexedArchives(items, channelsById, firstSongsByVideoId),
-    [channelsById, firstSongsByVideoId, items],
+    () =>
+      createIndexedArchives(
+        items,
+        channelsById,
+        channelsByParticipantName,
+        firstSongsByVideoId,
+      ),
+    [channelsById, channelsByParticipantName, firstSongsByVideoId, items],
   );
   const archiveSortCollator = useMemo(
     () => new Intl.Collator(locale, { numeric: true, sensitivity: "base" }),
     [locale],
-  );
-
-  const archiveActivityItems = useMemo(
-    () => indexedItems.filter((item) => !isShortsArchive(item)),
-    [indexedItems],
-  );
-
-  const archiveActivitySummary = useMemo(
-    () => createArchiveActivitySummary(archiveActivityItems),
-    [archiveActivityItems],
   );
 
   const seriesOptions = useMemo(
@@ -1185,9 +1225,25 @@ export default function ArchivesPageClient() {
     [indexedItems],
   );
 
+  const castOptions = useMemo(() => {
+    const optionsByName = new Map<string, ArchiveParticipantEntry>();
+    indexedItems.forEach((item) => {
+      item.participantEntries.forEach((participant) => {
+        if (!optionsByName.has(participant.name)) {
+          optionsByName.set(participant.name, participant);
+        }
+      });
+    });
+
+    return Array.from(optionsByName.values()).sort((left, right) =>
+      archiveSortCollator.compare(left.name, right.name),
+    );
+  }, [archiveSortCollator, indexedItems]);
+
   const hasDateRange = Boolean(dateRange[0] || dateRange[1]);
   const hasDetailedFilters =
     (viewMode === "list" && Boolean(selectedSeriesKey)) ||
+    selectedCastNames.length > 0 ||
     hasDateRange ||
     includeShorts;
 
@@ -1197,9 +1253,19 @@ export default function ArchivesPageClient() {
         (item) =>
           (!normalizedQuery || item.searchText.includes(normalizedQuery)) &&
           (includeShorts || !isShortsArchive(item)) &&
+          matchesSelectedArchiveParticipants(
+            item.participants ?? [],
+            selectedCastNames,
+          ) &&
           isInDateRange(item, dateRange),
       ),
-    [dateRange, includeShorts, indexedItems, normalizedQuery],
+    [
+      dateRange,
+      includeShorts,
+      indexedItems,
+      normalizedQuery,
+      selectedCastNames,
+    ],
   );
 
   const filteredItems = useMemo(
@@ -1239,26 +1305,6 @@ export default function ArchivesPageClient() {
     viewMode === "series" ? seriesFilteredItems.length : filteredItems.length;
   const displayGroupCount =
     viewMode === "series" ? seriesViewGroups.length : archiveGroups.length;
-
-  useEffect(() => {
-    if (archiveActivitySummary.years.length === 0) {
-      setSelectedActivityYear(null);
-      return;
-    }
-
-    setSelectedActivityYear((currentYear) => {
-      if (
-        currentYear &&
-        archiveActivitySummary.years.includes(Number(currentYear))
-      ) {
-        return currentYear;
-      }
-
-      return archiveActivitySummary.latestYear
-        ? String(archiveActivitySummary.latestYear)
-        : String(archiveActivitySummary.years[0]);
-    });
-  }, [archiveActivitySummary]);
 
   const desktopRowVirtualizer = useVirtualizer({
     count: isDesktop && viewMode === "list" ? archiveEntries.length : 0,
@@ -1393,10 +1439,9 @@ export default function ArchivesPageClient() {
   }, [
     archiveEntries.length,
     areMobileFiltersOpen,
-    isActivityVisible,
     isDesktop,
     isLoading,
-    selectedActivityYear,
+    selectedCastNames,
     viewMode,
   ]);
 
@@ -1533,12 +1578,6 @@ export default function ArchivesPageClient() {
     [],
   );
 
-  const handleActivityDateClick = useCallback((dateKey: string) => {
-    startTransition(() => {
-      setDateRange([dateKey, dateKey]);
-    });
-  }, []);
-
   const handleSortChange = useCallback((columnKey: ArchiveSortKey) => {
     startTransition(() => {
       setSortState((current) => {
@@ -1590,6 +1629,7 @@ export default function ArchivesPageClient() {
     updateArchiveFilterUrl({
       query: filterQuery,
       seriesKey: selectedSeriesKey,
+      castNames: selectedCastNames,
       dateRange,
       includeShorts,
       viewMode,
@@ -1599,6 +1639,7 @@ export default function ArchivesPageClient() {
     filterQuery,
     includeShorts,
     isUrlFilterReady,
+    selectedCastNames,
     selectedSeriesKey,
     viewMode,
   ]);
@@ -1606,6 +1647,12 @@ export default function ArchivesPageClient() {
   const handleSeriesKeyChange = useCallback((value: string | null) => {
     startTransition(() => {
       setSelectedSeriesKey(value);
+    });
+  }, []);
+
+  const handleCastChange = useCallback((value: string[]) => {
+    startTransition(() => {
+      setSelectedCastNames(value);
     });
   }, []);
 
@@ -1627,6 +1674,7 @@ export default function ArchivesPageClient() {
   const handleClearDetailedFilters = useCallback(() => {
     startTransition(() => {
       setSelectedSeriesKey(null);
+      setSelectedCastNames([]);
       setDateRange([null, null]);
       setIncludeShorts(false);
     });
@@ -1643,6 +1691,7 @@ export default function ArchivesPageClient() {
     updateArchiveFilterUrl({
       query: debouncedFilterQuery,
       seriesKey: selectedSeriesKey,
+      castNames: selectedCastNames,
       dateRange,
       includeShorts,
       viewMode,
@@ -1652,6 +1701,7 @@ export default function ArchivesPageClient() {
     debouncedFilterQuery,
     includeShorts,
     isUrlFilterReady,
+    selectedCastNames,
     selectedSeriesKey,
     viewMode,
   ]);
@@ -1661,6 +1711,7 @@ export default function ArchivesPageClient() {
       const nextState = getArchiveFilterStateFromUrl();
       setFilterQuery(nextState.query);
       setSelectedSeriesKey(nextState.seriesKey);
+      setSelectedCastNames(nextState.castNames);
       setDateRange(nextState.dateRange);
       setIncludeShorts(nextState.includeShorts);
       setViewMode(nextState.viewMode);
@@ -1685,29 +1736,14 @@ export default function ArchivesPageClient() {
         <Link href="/stream-archives" className={breadcrumbClasses.link}>
           {t("breadcrumb")}
         </Link>
+        <span className={breadcrumbClasses.link} aria-current="page">
+          {t("listTitle")}
+        </span>
       </Breadcrumbs>
 
-      <div>
-        <div className="flex items-start justify-between gap-3">
-          <h1 className={pageClasses.heading}>{t("title")}</h1>
-          <Button
-            variant="subtle"
-            color="green"
-            size="compact-sm"
-            leftSection={<HiChartBar className="h-4 w-4" />}
-            aria-label={
-              isActivityVisible ? t("activityHide") : t("activityShow")
-            }
-            aria-expanded={isActivityVisible}
-            aria-controls="archive-activity"
-            onClick={() => setIsActivityVisible((current) => !current)}
-            className="shrink-0"
-          >
-            {t("activityLabel")}
-          </Button>
-        </div>
-        <p className={pageClasses.description}>{t("description")}</p>
-      </div>
+      <h1 className={pageClasses.heading}>{t("listTitle")}</h1>
+      <p className={pageClasses.description}>{t("listDescription")}</p>
+      <StreamArchivesNavigation active="list" />
 
       <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 md:static md:mx-0 md:mb-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
         <SegmentedControl
@@ -1740,15 +1776,15 @@ export default function ArchivesPageClient() {
           >
             {t("filterToggleLabel")}
           </Button>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div
               id="archive-search-filters"
               className={`${
                 areMobileFiltersOpen ? "grid" : "hidden"
-              } flex-1 grid-cols-1 gap-3 md:grid ${
+              } flex-1 grid-cols-1 gap-3 md:grid lg:grid-cols-2 ${
                 viewMode === "list"
-                  ? "lg:grid-cols-[minmax(240px,1fr)_minmax(260px,1fr)_minmax(260px,1fr)_auto_auto]"
-                  : "lg:grid-cols-[minmax(240px,1.4fr)_minmax(260px,1fr)_auto_auto]"
+                  ? "xl:grid-cols-[minmax(180px,1fr)_minmax(160px,1fr)_minmax(180px,1fr)_minmax(170px,1fr)_max-content_max-content]"
+                  : "xl:grid-cols-[minmax(200px,1.4fr)_minmax(180px,1fr)_minmax(170px,1fr)_max-content_max-content]"
               }`}
             >
               <TextInput
@@ -1772,6 +1808,16 @@ export default function ArchivesPageClient() {
                   onChange={handleSeriesKeyChange}
                 />
               )}
+              <ArchiveCastFilter
+                options={castOptions}
+                value={selectedCastNames}
+                placeholder={t("castFilterPlaceholder")}
+                nothingFoundMessage={t("castNothingFound")}
+                selectedCountLabel={t("castSelectedCount", {
+                  count: selectedCastNames.length,
+                })}
+                onChange={handleCastChange}
+              />
               <DatePickerInput
                 type="range"
                 value={dateRange}
@@ -1798,7 +1844,7 @@ export default function ArchivesPageClient() {
                 </Button>
               )}
             </div>
-            <div className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 md:justify-end">
+            <div className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 md:min-h-9 md:items-center md:justify-end">
               <p>
                 {t("resultCount", { count: displayCount, total: totalCount })}
               </p>
@@ -1807,30 +1853,6 @@ export default function ArchivesPageClient() {
           </div>
         </div>
       </div>
-
-      {!isLoading && isActivityVisible && (
-        <div id="archive-activity">
-          <ArchiveContributionHeatmap
-            summary={archiveActivitySummary}
-            selectedYear={selectedActivityYear}
-            locale={locale}
-            labels={{
-              title: t("activityTitle"),
-              totalDuration: (duration) =>
-                t("activityTotalDuration", { duration }),
-              yearLabel: t("activityYearLabel"),
-              legendLess: t("activityLegendLess"),
-              legendMore: t("activityLegendMore"),
-              cellLabel: (date, duration, count) =>
-                t("activityCellLabel", { date, duration, count }),
-              emptyCellLabel: (date) => t("activityEmptyCellLabel", { date }),
-              noData: t("activityNoData"),
-            }}
-            onSelectedYearChange={setSelectedActivityYear}
-            onDateClick={handleActivityDateClick}
-          />
-        </div>
-      )}
 
       {isLoading ? (
         <LoadingOverlay
@@ -1912,6 +1934,15 @@ export default function ArchivesPageClient() {
                     onSortChange={handleSortChange}
                   >
                     {t("titleLabel")}
+                  </SortableArchiveHeader>
+                </div>
+                <div className="px-3 py-2">
+                  <SortableArchiveHeader
+                    columnKey="participants"
+                    sortState={sortState}
+                    onSortChange={handleSortChange}
+                  >
+                    {t("castLabel")}
                   </SortableArchiveHeader>
                 </div>
                 <div className="px-3 py-2">
@@ -2079,6 +2110,7 @@ export default function ArchivesPageClient() {
                     locale={locale}
                     appWatchLabel={t("appWatchLabel")}
                     timestampLabel={t("timestampLabel")}
+                    participantsLabel={t("castLabel")}
                     anchorLinkLabel={t("anchorLinkLabel")}
                     anchorCopiedLabel={t("anchorCopiedLabel")}
                     highlightQuery={deferredFilterQuery}

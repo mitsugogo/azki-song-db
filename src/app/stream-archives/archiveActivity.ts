@@ -250,3 +250,14 @@ export const formatActivityDuration = (seconds: number) => {
 
   return `${hours}h ${minutes}m`;
 };
+
+// hh:mm:ss 形式（各値を2桁0埋め）
+export const formatDurationHms = (seconds: number) => {
+  const totalSeconds = Math.max(0, Math.round(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+};

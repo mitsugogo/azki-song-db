@@ -61,6 +61,12 @@ describe("ArchiveContributionHeatmap", () => {
 
     expect(screen.getByText("配信開始日の活動時間")).toBeInTheDocument();
     expect(screen.getByText("合計 1h 30m")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "配信開始日の活動時間" }),
+    ).toHaveClass("max-w-full", "min-w-0");
+    expect(
+      screen.getByRole("region", { name: "配信開始日の活動時間" }),
+    ).not.toHaveClass("overflow-x-auto");
 
     fireEvent.click(
       screen.getByRole("button", { name: "2026-01-02: 1h 30m（2 件）" }),
