@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.31.0](https://github.com/mitsugogo/azki-song-db/compare/v2.30.1...v2.31.0) (2026-09-02)
+
+### Features
+
+* **stream-archives:** 配信アーカイブの拡充 ([580fb32](https://github.com/mitsugogo/azki-song-db/commit/580fb323d8cba10e06ebc57f4a6dab08f1312782))
+* アーカイブランキングとヒートマップの表示を改善 ([093b7b6](https://github.com/mitsugogo/azki-song-db/commit/093b7b634ac815e1be6ee69b500904fb099e56b4))
+
 ## [2.30.1](https://github.com/mitsugogo/azki-song-db/compare/v2.30.0...v2.30.1) (2026-08-30)
 
 ### Bug Fixes
