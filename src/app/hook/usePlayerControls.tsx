@@ -96,6 +96,9 @@ const usePlayerControls = (
   // (see src/app/lib/history.ts)
   const lastManualChangeRef = useRef<number>(0);
   const isManualChangeInProgressRef = useRef<boolean>(false);
+  // 選択した曲が実際に再生開始するまで、読み込み中の ENDED / 0秒位置を
+  // 再生終了とみなして次曲へ進まないようにする。
+  const hasReachedCurrentSongPlaybackRef = useRef(false);
   const lastEndClampRef = useRef<number>(0);
 
   // === ライブコール関連 ===
@@ -379,6 +382,7 @@ const usePlayerControls = (
       resetSongPlayCountSession();
 
       if (!options?.skipSeek) {
+        hasReachedCurrentSongPlaybackRef.current = false;
         setGlobalCurrentTime(targetStartTime);
       }
 
@@ -653,7 +657,47 @@ const usePlayerControls = (
         }
       }
 
+      const getPlayerDurationSeconds = () => {
+        try {
+          return Number(player.getDuration?.() ?? 0);
+        } catch (_) {
+          return 0;
+        }
+      };
+
+      const getPlayerCurrentTimeSeconds = () => {
+        try {
+          return Number(player.getCurrentTime?.() ?? NaN);
+        } catch (_) {
+          return NaN;
+        }
+      };
+
+      const markPlaybackReachedIfReady = (
+        currentTime?: number,
+        duration?: number,
+      ) => {
+        const song = currentSongRef.current;
+        if (!song) return;
+
+        const playingVideoId = player.getVideoData?.()?.video_id;
+        if (playingVideoId && playingVideoId !== song.video_id) return;
+
+        const time = currentTime ?? getPlayerCurrentTimeSeconds();
+        const videoDuration = duration ?? getPlayerDurationSeconds();
+        const songStart = Number(song.start ?? 0);
+        if (!Number.isFinite(time) || time < songStart - 1) return;
+
+        const hasLoadedMetadata =
+          Number.isFinite(videoDuration) && videoDuration > 0;
+        const hasProgressedPastStart = time >= songStart + 1;
+        if (!hasLoadedMetadata && !hasProgressedPastStart) return;
+
+        hasReachedCurrentSongPlaybackRef.current = true;
+      };
+
       const handlePlayingState = () => {
+        markPlaybackReachedIfReady();
         if (intervalRef.current) return;
 
         // ループ内でtimedMessagesをチェック
@@ -765,6 +809,21 @@ const usePlayerControls = (
             }
           } catch (_) {}
 
+          markPlaybackReachedIfReady(
+            currentTime,
+            Number(player.getDuration?.() ?? 0),
+          );
+
+          // 選択した曲の開始位置へ到達する前は、読み込み中の 0:00 を別曲として
+          // 判定して次曲へ進まない。
+          const selectedSongStart = Number(currentSongRef.current?.start ?? 0);
+          if (
+            Number.isFinite(currentTime) &&
+            currentTime < selectedSongStart - 1
+          ) {
+            return;
+          }
+
           // 自動切替: 同一動画内で再生位置が次の曲に移った場合、曲名を自動で更新する
           const currentPlayingVideoId = currentSongRef.current?.video_id;
           const isSameVideoPlaying =
@@ -827,6 +886,52 @@ const usePlayerControls = (
       const handleEndedState = () => {
         clearMonitorInterval();
         resetSongPlayCountSession();
+        setTimedLiveCallText(null);
+
+        const song = currentSongRef.current;
+        const playingVideoId = fetchedVideoData?.video_id;
+        if (
+          playingVideoId &&
+          song?.video_id &&
+          playingVideoId !== song.video_id
+        ) {
+          return;
+        }
+
+        // 読み込み未完了やシーク前の ENDED は再生終了ではない。
+        if (!hasReachedCurrentSongPlaybackRef.current) {
+          return;
+        }
+
+        const endedCurrentTime = getPlayerCurrentTimeSeconds();
+        const endedDuration = getPlayerDurationSeconds();
+        const songStart = Number(song?.start ?? 0);
+        const songEnd = Number(song?.end ?? 0);
+        if (
+          Number.isFinite(endedCurrentTime) &&
+          endedCurrentTime < songStart - 1
+        ) {
+          return;
+        }
+
+        const isNearVideoEnd =
+          Number.isFinite(endedDuration) &&
+          endedDuration > 0 &&
+          Number.isFinite(endedCurrentTime) &&
+          endedCurrentTime >= endedDuration - 2;
+        const isNearSongEnd =
+          songEnd > songStart &&
+          Number.isFinite(endedCurrentTime) &&
+          endedCurrentTime >= songEnd - 2;
+        if (
+          Number.isFinite(endedDuration) &&
+          endedDuration > 0 &&
+          !isNearVideoEnd &&
+          !isNearSongEnd
+        ) {
+          return;
+        }
+
         const nextSongInVideo = getNextSongInVideo(currentSongRef.current);
         // ended 時はまず同一動画内の次曲を探し、なければ filtered songs の次、最後に全体の先頭を再生
         let autoNextSong: Song | null = null;
@@ -859,8 +964,6 @@ const usePlayerControls = (
             changeCurrentSongRef.current(first);
           }
         }
-        // 再生終了時にメッセージをリセット
-        setTimedLiveCallText(null);
       };
       switch (event.data) {
         case YouTube.PlayerState.UNSTARTED:

@@ -1111,7 +1111,7 @@ describe("usePlayerControls", () => {
         ...filteredSongs,
         { ...mockSongs[2], video_id: "qVid", start: 200 },
       ];
-      const player = createMockPlayer("qVid", 350);
+      const player = createMockPlayer("qVid", 400, 400);
 
       const { result } = renderHook(() =>
         usePlayerControls(filteredSongs, allSongs, mockGlobalPlayer),
@@ -1124,12 +1124,98 @@ describe("usePlayerControls", () => {
       act(() => {
         result.current.handleStateChange({
           target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(500);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
           data: YouTube.PlayerState.ENDED,
         } as any);
       });
 
       expect(result.current.currentSong?.start).toBe(300);
       expect(result.current.currentSong?.start).not.toBe(200);
+    });
+
+    it("曲選択直後の読み込み中ENDEDでは次曲へ遷移しない", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "loadVid", start: 0 },
+        { ...mockSongs[1], video_id: "loadVid", start: 100 },
+      ];
+      const player = createMockPlayer("loadVid", 0, 0);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.ENDED,
+        } as any);
+      });
+
+      expect(result.current.currentSong?.start).toBe(0);
+      expect(result.current.currentSong?.title).toBe(songs[0].title);
+    });
+
+    it("開始位置へシークする前の0秒再生では次曲へ遷移しない", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "seekVid", start: 0 },
+        { ...mockSongs[1], video_id: "seekVid", start: 100 },
+      ];
+      const player = createMockPlayer("seekVid", 0, 200);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[1]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.PLAYING,
+        } as any);
+        vi.advanceTimersByTime(3001);
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(result.current.currentSong?.start).toBe(100);
+    });
+
+    it("本再生開始前のENDEDは動画メタデータがあっても次曲へ遷移しない", () => {
+      const songs: Song[] = [
+        { ...mockSongs[0], video_id: "metaVid", start: 0 },
+        { ...mockSongs[1], video_id: "metaVid", start: 100 },
+      ];
+      const player = createMockPlayer("metaVid", 0, 180);
+
+      const { result } = renderHook(() =>
+        usePlayerControls(songs, songs, mockGlobalPlayer),
+      );
+
+      act(() => {
+        result.current.changeCurrentSong(songs[0]);
+      });
+
+      act(() => {
+        result.current.handleStateChange({
+          target: player,
+          data: YouTube.PlayerState.ENDED,
+        } as any);
+      });
+
+      expect(result.current.currentSong?.start).toBe(0);
     });
 
     it("自動遷移ではskipSeekが使われる", () => {
