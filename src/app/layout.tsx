@@ -9,7 +9,7 @@ import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { MantineProvider } from "@mantine/core";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import { theme } from "./theme";
 import ClientProviders from "./components/ClientProviders";
 import { siteConfig, baseUrl } from "./config/siteConfig";
@@ -96,7 +96,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = (await import(`../messages/${locale}.json`)).default;
+  const messages = await getMessages();
   const shouldInjectToolbar = process.env.NODE_ENV === "development";
   return (
     <html
