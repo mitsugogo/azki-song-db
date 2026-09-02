@@ -115,8 +115,8 @@ export default function ArchiveLongestStreamRanking({
                   </div>
                   <Text
                     lineClamp={2}
-                    size="sm"
-                    className="min-w-0 break-words leading-tight transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
+                    size="xs"
+                    className="min-w-0 wrap-break-word leading-tight transition group-hover:text-primary dark:group-hover:text-primary-200"
                   >
                     {item.title}
                   </Text>

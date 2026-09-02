@@ -111,7 +111,7 @@ export default function ArchiveCategoryRanking({
                   </Text>
                   <Text
                     fw={500}
-                    className="min-w-0 break-words transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
+                    className="min-w-0 wrap-break-word transition group-hover:text-primary dark:group-hover:text-primary-200"
                   >
                     {item.name}
                   </Text>
