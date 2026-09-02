@@ -3,6 +3,7 @@ import {
   buildArchiveActivityYear,
   createArchiveActivitySummary,
   formatActivityDuration,
+  formatDurationHms,
   getArchiveActivityLevel,
   getJstDateKey,
   getStreamStartedAtMs,
@@ -106,5 +107,12 @@ describe("archiveActivity", () => {
     expect(formatActivityDuration(30 * 60)).toBe("30m");
     expect(formatActivityDuration(60 * 60)).toBe("1h");
     expect(formatActivityDuration(90 * 60)).toBe("1h 30m");
+  });
+
+  it("formats duration as hh:mm:ss", () => {
+    expect(formatDurationHms(0)).toBe("00:00:00");
+    expect(formatDurationHms(59)).toBe("00:00:59");
+    expect(formatDurationHms(60 * 60 + 19 * 60)).toBe("01:19:00");
+    expect(formatDurationHms(140 * 3600 + 4 * 60)).toBe("140:04:00");
   });
 });

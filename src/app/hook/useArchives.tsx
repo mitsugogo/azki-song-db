@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchJsonDedup } from "../lib/fetchDedup";
 import { normalizeActivityImportance } from "../lib/activityImportance";
 import { ArchiveItem } from "../types/archiveItem";
+import { parseArchiveParticipants } from "../lib/archiveParticipants";
 
 const cachedArchives = new Map<string, ArchiveItem[]>();
 const cachedFetchedAt = new Map<string, string>();
@@ -58,6 +59,7 @@ const useArchives = () => {
             published_at: item?.published_at || "",
             stream_started_at: item?.stream_started_at || "",
             timestamp_comment: item?.timestamp_comment || "",
+            participants: parseArchiveParticipants(item?.participants),
             importance: normalizeActivityImportance(item?.importance),
           }))
           .filter((item: ArchiveItem) => item.title && item.video_id);

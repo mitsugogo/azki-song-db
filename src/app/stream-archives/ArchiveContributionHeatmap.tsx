@@ -72,14 +72,14 @@ const ArchiveContributionHeatmap = memo(function ArchiveContributionHeatmap({
 
   if (!yearData || !numericSelectedYear) {
     return (
-      <section className="mb-4 rounded-xl border border-light-gray-200/50 bg-white/70 p-4 text-sm text-gray-600 shadow-sm dark:border-white/10 dark:bg-gray-900/50 dark:text-gray-300">
+      <section className="h-full rounded-xl border border-light-gray-200/50 bg-white/70 p-4 text-sm text-gray-600 shadow-sm dark:border-white/10 dark:bg-gray-900/50 dark:text-gray-300">
         {labels.noData}
       </section>
     );
   }
 
   return (
-    <section className="mb-4 rounded-xl border border-light-gray-200/50 bg-white/70 p-4 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
+    <section className="h-full rounded-xl border border-light-gray-200/50 bg-white/70 p-4 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-bold leading-tight text-gray-900 dark:text-gray-100">

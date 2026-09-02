@@ -276,7 +276,7 @@ export default function ActivityCalendarSection({
                               isSelected
                                 ? "bg-primary/10 ring-2 ring-inset ring-primary dark:bg-primary/15"
                                 : hasAnniversary
-                                  ? "bg-gradient-to-br from-pink-50/90 via-white/60 to-amber-50/80 hover:from-pink-100/90 hover:to-amber-100/70 dark:from-pink-400/10 dark:via-white/[0.03] dark:to-amber-300/10 dark:hover:from-pink-400/15 dark:hover:to-amber-300/15"
+                                  ? "bg-linear-to-br from-pink-50/90 via-white/60 to-amber-50/80 hover:from-pink-100/90 hover:to-amber-100/70 dark:from-pink-400/10 dark:via-white/3 dark:to-amber-300/10 dark:hover:from-pink-400/15 dark:hover:to-amber-300/15"
                                   : "hover:bg-light-gray-100/50 dark:hover:bg-white/5"
                             }`}
                             aria-label={t("calendarDayAriaLabel", {

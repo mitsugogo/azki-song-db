@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { normalizeActivityImportance } from "@/app/lib/activityImportance";
 import { buildVercelCacheTagHeader, cacheTags } from "@/app/lib/cacheTags";
 import { ArchiveItem } from "@/app/types/archiveItem";
+import { parseArchiveParticipants } from "@/app/lib/archiveParticipants";
 
 type HeaderKey =
   | "importance"
@@ -16,7 +17,8 @@ type HeaderKey =
   | "description"
   | "published_at"
   | "stream_started_at"
-  | "timestamp_comment";
+  | "timestamp_comment"
+  | "participants";
 
 type HeaderDefinition = {
   key: HeaderKey;
@@ -98,6 +100,10 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
       "timestamps",
     ],
   },
+  {
+    key: "participants",
+    aliases: ["参加者", "participant", "participants", "guest", "guests"],
+  },
 ];
 
 const getCellString = (cell: unknown) =>
@@ -145,7 +151,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${SHEET_NAME}!A1:L`,
+      range: `${SHEET_NAME}!A1:M`,
       valueRenderOption: "FORMATTED_VALUE",
     });
 
@@ -165,6 +171,7 @@ export async function GET() {
       published_at: -1,
       stream_started_at: -1,
       timestamp_comment: -1,
+      participants: -1,
     };
 
     HEADER_SCHEMA.forEach((def) => {
@@ -214,6 +221,9 @@ export async function GET() {
           timestamp_comment: getCellString(
             getCell(values, "timestamp_comment"),
           ).trim(),
+          participants: parseArchiveParticipants(
+            getCell(values, "participants"),
+          ),
           importance: normalizeActivityImportance(
             getCell(values, "importance"),
           ),
