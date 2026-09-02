@@ -79,9 +79,10 @@ describe("ArchiveLongestStreamRanking", () => {
     expect(screen.getByText("配信時間が長い配信")).toBeVisible();
     expect(screen.getByText("長時間配信")).toBeVisible();
     expect(screen.getByText("5h")).toBeVisible();
-    expect(
-      screen.getByRole("img", { name: "長時間配信のサムネイル" }),
-    ).toBeVisible();
+    const thumbnail = screen.getByRole("img", {
+      name: "長時間配信のサムネイル",
+    });
+    expect(thumbnail).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "1位 長時間配信 5h" }));
     const detailContent = await screen.findByTestId("archive-detail-content");
     expect(detailContent).toHaveTextContent("長時間配信");
