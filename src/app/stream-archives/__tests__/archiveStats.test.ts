@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ArchiveStatsItem } from "../archiveStats";
-import { createArchiveStatsSummary } from "../archiveStats";
+import {
+  createArchiveLongestStreamRanking,
+  createArchiveStatsSummary,
+} from "../archiveStats";
 
 const createItem = (
   overrides: Partial<ArchiveStatsItem> = {},
@@ -136,5 +139,72 @@ describe("createArchiveStatsSummary", () => {
         (cell) => cell.weekday === 4 && cell.startHour === 0,
       )?.streamCount,
     ).toBe(1);
+  });
+});
+
+describe("createArchiveLongestStreamRanking", () => {
+  it("ranks valid non-Shorts durations and filters by JST year", () => {
+    const items = [
+      createItem({
+        video_id: "five-hours",
+        title: "5時間配信",
+        video_duration: "PT5H",
+        stream_started_at: "2025-12-31T14:59:00.000Z",
+      }),
+      createItem({
+        video_id: "three-hours",
+        title: "3時間配信",
+        video_duration: "PT3H",
+        stream_started_at: "2025-12-31T15:00:00.000Z",
+      }),
+      createItem({
+        video_id: "shorts",
+        title: "10時間 #shorts",
+        video_duration: "PT10H",
+      }),
+      createItem({
+        video_id: "unknown",
+        title: "時間不明",
+        video_duration: "unknown",
+      }),
+    ];
+
+    expect(
+      createArchiveLongestStreamRanking(items, null, "ja").map(
+        ({ videoId, durationSeconds }) => ({ videoId, durationSeconds }),
+      ),
+    ).toEqual([
+      { videoId: "five-hours", durationSeconds: 18_000 },
+      { videoId: "three-hours", durationSeconds: 10_800 },
+    ]);
+    expect(
+      createArchiveLongestStreamRanking(items, "2026", "ja").map(
+        ({ videoId }) => videoId,
+      ),
+    ).toEqual(["three-hours"]);
+  });
+
+  it("uses newer streams as the stable tie-breaker and respects the limit", () => {
+    const ranking = createArchiveLongestStreamRanking(
+      [
+        createItem({
+          video_id: "older",
+          title: "古い配信",
+          video_duration: "PT2H",
+          stream_started_at: "2026-01-01T00:00:00.000Z",
+        }),
+        createItem({
+          video_id: "newer",
+          title: "新しい配信",
+          video_duration: "PT2H",
+          stream_started_at: "2026-02-01T00:00:00.000Z",
+        }),
+      ],
+      null,
+      "ja",
+      1,
+    );
+
+    expect(ranking.map(({ videoId }) => videoId)).toEqual(["newer"]);
   });
 });

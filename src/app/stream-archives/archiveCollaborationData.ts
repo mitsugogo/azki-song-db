@@ -2,6 +2,7 @@ import { siteConfig } from "../config/siteConfig";
 import { getCollabUnitName } from "../config/collabUnits";
 import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
+import type { ChannelEntry } from "../types/api/yt/channels";
 import { getJstDateKey } from "./archiveActivity";
 
 export type ArchiveCollaborationSource = {
@@ -26,6 +27,34 @@ const normalizeValue = (value: string) =>
 const normalizeBranch = (value: string) =>
   normalizeValue(value).replace(/[\s_'’-]+/gu, "");
 
+const INACTIVE_GENERATION_MARKERS = ["卒業生", "活動終了"] as const;
+
+export type ArchiveHololiveMemberMetadata = {
+  generation: string;
+  status: string | null;
+};
+
+export const getArchiveHololiveMemberMetadata = (
+  participant: ArchiveParticipantEntry | undefined,
+): ArchiveHololiveMemberMetadata => {
+  const generationParts = (participant?.channel?.generation ?? "")
+    .split(/[、,]/u)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const statusParts = generationParts.filter((part) =>
+    INACTIVE_GENERATION_MARKERS.some((marker) => part.includes(marker)),
+  );
+  const activeGenerationParts = generationParts.filter(
+    (part) =>
+      !INACTIVE_GENERATION_MARKERS.some((marker) => part.includes(marker)),
+  );
+
+  return {
+    generation: activeGenerationParts.join("・"),
+    status: statusParts.length > 0 ? statusParts.join("・") : null,
+  };
+};
+
 const isHololiveMember = (participant: ArchiveParticipantEntry) => {
   const branch = normalizeBranch(participant.channel?.branch ?? "");
 
@@ -49,8 +78,32 @@ const isAzki = (participant: ArchiveParticipantEntry) => {
   ].some((name) => normalizeValue(name) === azkiName);
 };
 
+const isActiveHololiveMember = (participant: ArchiveParticipantEntry) => {
+  const { status } = getArchiveHololiveMemberMetadata(participant);
+
+  return status === null;
+};
+
 const getParticipantKey = (participant: ArchiveParticipantEntry) =>
   participant.channel?.youtubeId || normalizeValue(participant.name);
+
+const getParticipantIdentityKeys = (participant: ArchiveParticipantEntry) =>
+  [
+    participant.channel?.youtubeId
+      ? `channel:${normalizeValue(participant.channel.youtubeId)}`
+      : "",
+    ...[
+      participant.name,
+      participant.channel?.talentName ?? "",
+      participant.channel?.artistName ?? "",
+    ].flatMap((value) => {
+      if (!value) {
+        return [];
+      }
+
+      return [`name:${normalizeValue(value)}`];
+    }),
+  ].filter(Boolean);
 
 const getFirstCollaborationDate = (
   currentDate: string | null | undefined,
@@ -145,6 +198,61 @@ export const createArchiveCollaborationRanking = (
   });
 
   return sortRanking(Array.from(countsByParticipant.values()), locale, limit);
+};
+
+export const createArchiveMembersWithoutCollaboration = (
+  items: ArchiveCollaborationSource[],
+  channels: ChannelEntry[],
+  locale: string,
+): ArchiveParticipantEntry[] => {
+  const collaboratedIdentityKeys = new Set<string>();
+
+  items.forEach((item) => {
+    getHololiveCollaborators(item).forEach((participant) => {
+      getParticipantIdentityKeys(participant).forEach((key) =>
+        collaboratedIdentityKeys.add(key),
+      );
+    });
+  });
+
+  const membersByName = new Map<string, ArchiveParticipantEntry>();
+
+  channels.forEach((channel) => {
+    const name =
+      channel.talentName || channel.artistName || channel.channelName.trim();
+    const participant = { name, channel };
+
+    if (
+      !name ||
+      !isHololiveMember(participant) ||
+      !isActiveHololiveMember(participant) ||
+      isAzki(participant)
+    ) {
+      return;
+    }
+
+    if (
+      getParticipantIdentityKeys(participant).some((key) =>
+        collaboratedIdentityKeys.has(key),
+      )
+    ) {
+      return;
+    }
+
+    const memberKey = normalizeValue(name);
+    if (!membersByName.has(memberKey)) {
+      membersByName.set(memberKey, participant);
+    }
+  });
+
+  const collator = new Intl.Collator(locale, {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  return Array.from(membersByName.values()).sort((left, right) =>
+    collator.compare(left.name, right.name),
+  );
 };
 
 export const createArchiveCollaborationCombinationRanking = (

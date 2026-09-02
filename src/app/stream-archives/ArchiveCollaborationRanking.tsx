@@ -2,6 +2,7 @@
 
 import {
   Avatar,
+  Badge,
   Progress,
   SegmentedControl,
   Select,
@@ -9,10 +10,14 @@ import {
   Tooltip,
   VisuallyHidden,
 } from "@mantine/core";
-import { memo, useId, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { HiUser, HiUserGroup } from "react-icons/hi";
-import type { ArchiveCollaborationRankingItem } from "./archiveCollaborationData";
+import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import {
+  getArchiveHololiveMemberMetadata,
+  type ArchiveCollaborationRankingItem,
+} from "./archiveCollaborationData";
 
 const ALL_TIME_VALUE = "all";
 const MAX_VISIBLE_AVATARS = 3;
@@ -21,6 +26,7 @@ export type ArchiveCollaborationRankingMode = "member" | "combination";
 
 type ArchiveCollaborationRankingProps = {
   items: ArchiveCollaborationRankingItem[];
+  membersWithoutCollaboration: ArchiveParticipantEntry[];
   years: number[];
   selectedYear: string | null;
   mode: ArchiveCollaborationRankingMode;
@@ -35,10 +41,9 @@ type ArchiveCollaborationRankingProps = {
     modeSwitchAriaLabel: string;
     memberModeLabel: string;
     combinationModeLabel: string;
-    firstCollaboration: (date: string, duration: string) => string;
+    noCollaboration: string;
   };
   formatDuration: (seconds: number) => string;
-  formatDate: (dateKey: string) => string;
   getHref?: (name: string) => string;
   onSelectedYearChange: (year: string | null) => void;
   onModeChange: (mode: ArchiveCollaborationRankingMode) => void;
@@ -52,17 +57,16 @@ const getArchiveCastHref = (castNames: string[]) => {
 
 const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
   items,
+  membersWithoutCollaboration,
   years,
   selectedYear,
   mode,
   labels,
   formatDuration,
-  formatDate,
   getHref,
   onSelectedYearChange,
   onModeChange,
 }: ArchiveCollaborationRankingProps) {
-  const rankingId = useId();
   const maxCount = items[0]?.count ?? 0;
   const yearOptions = useMemo(
     () => [
@@ -142,9 +146,19 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
           {items.map((item, index) => {
             const rank = index + 1;
             const itemLabel = labels.itemLabel(rank, item.name, item.count);
-            const detailId = `${rankingId}-${index}-details`;
-            const showFirstCollaboration =
-              selectedYear === null && item.firstCollaborationDate;
+            const memberMetadata =
+              mode === "member"
+                ? getArchiveHololiveMemberMetadata(item.participantEntries[0])
+                : { generation: "", status: null };
+            const duration = formatDuration(item.totalDurationSeconds);
+            const accessibleLabel = [
+              itemLabel,
+              memberMetadata.generation ? `[${memberMetadata.generation}]` : "",
+              memberMetadata.status ? `(${memberMetadata.status})` : "",
+              duration,
+            ]
+              .filter(Boolean)
+              .join(" ");
 
             return (
               <li key={item.key}>
@@ -152,12 +166,11 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                   href={
                     getHref?.(item.name) ?? getArchiveCastHref(item.castNames)
                   }
-                  aria-label={itemLabel}
-                  aria-describedby={detailId}
+                  aria-label={accessibleLabel}
                   className={`group grid items-center gap-x-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                     mode === "combination"
-                      ? "grid-cols-[1.5rem_4rem_minmax(0,1fr)_auto]"
-                      : "grid-cols-[1.5rem_1.625rem_minmax(0,1fr)_auto]"
+                      ? "grid-cols-[1.5rem_7.25rem_minmax(0,1fr)]"
+                      : "grid-cols-[1.5rem_2.5rem_minmax(0,1fr)]"
                   }`}
                 >
                   <Text c="dimmed" ta="right" size="sm" fw={600}>
@@ -173,7 +186,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                           }
                           src={participant.channel?.iconUrl || null}
                           alt={participant.name}
-                          size="sm"
+                          size="md"
                           radius="xl"
                         >
                           {participant.name.slice(0, 1)}
@@ -185,43 +198,96 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                       </Avatar>
                     ) : null}
                   </Avatar.Group>
-                  <Text
-                    truncate
-                    fw={500}
-                    className="transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
-                  >
-                    {item.name}
-                  </Text>
-                  <Text fw={600} className="tabular-nums">
-                    {labels.count(item.count)}
-                  </Text>
-                  <div
-                    id={detailId}
-                    className="col-start-3 col-end-5 mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 text-[0.7rem] leading-tight text-gray-500 dark:text-gray-400"
-                  >
-                    <span>
-                      {showFirstCollaboration
-                        ? labels.firstCollaboration(
-                            formatDate(item.firstCollaborationDate!),
-                            formatDuration(item.totalDurationSeconds),
-                          )
-                        : formatDuration(item.totalDurationSeconds)}
-                    </span>
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                      <Text
+                        component="span"
+                        fw={500}
+                        className="min-w-0 break-words transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
+                      >
+                        {item.name}
+                      </Text>
+                      {memberMetadata.generation ? (
+                        <Badge
+                          size="xs"
+                          variant="filled"
+                          color="hololive.2"
+                          autoContrast
+                        >
+                          {memberMetadata.generation}
+                        </Badge>
+                      ) : null}
+                      {memberMetadata.status ? (
+                        <Text component="span" c="dimmed" size="xs">
+                          {memberMetadata.status}
+                        </Text>
+                      ) : null}
+                      <Text
+                        component="span"
+                        c="dimmed"
+                        size="xs"
+                        className="whitespace-nowrap tabular-nums"
+                      >
+                        {duration}
+                      </Text>
+                    </div>
+                    <div className="mt-1 flex min-w-0 items-center gap-2">
+                      <Progress
+                        value={maxCount > 0 ? (item.count / maxCount) * 100 : 0}
+                        aria-label={itemLabel}
+                        color="hololive.2"
+                        size="sm"
+                        radius="xl"
+                        className="min-w-0 flex-1"
+                      />
+                      <Text
+                        fw={600}
+                        size="xs"
+                        className="shrink-0 tabular-nums"
+                      >
+                        {labels.count(item.count)}
+                      </Text>
+                    </div>
                   </div>
-                  <Progress
-                    value={maxCount > 0 ? (item.count / maxCount) * 100 : 0}
-                    aria-label={itemLabel}
-                    color="cyan"
-                    size="sm"
-                    radius="xl"
-                    className="col-start-3 col-end-5 mt-1"
-                  />
                 </Link>
               </li>
             );
           })}
         </ol>
       )}
+
+      {mode === "member" && membersWithoutCollaboration.length > 0 ? (
+        <div
+          role="group"
+          aria-label={labels.noCollaboration}
+          className="mt-4 min-w-0 border-t border-light-gray-200/70 pt-3 dark:border-white/10"
+        >
+          <Text c="dimmed" size="xs" fw={500} mb={8}>
+            {labels.noCollaboration}
+          </Text>
+          <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1">
+            <Avatar.Group spacing="none" className="w-max py-0.5">
+              {membersWithoutCollaboration.map((participant, idx) => (
+                <Tooltip
+                  key={`${participant.channel?.youtubeId || participant.name}-${idx}`}
+                  label={participant.name}
+                  withArrow
+                >
+                  <Avatar
+                    src={participant.channel?.iconUrl || null}
+                    alt={participant.name}
+                    size="md"
+                    radius="xl"
+                    color="pink"
+                  >
+                    {participant.name.slice(0, 1)}
+                  </Avatar>
+                </Tooltip>
+              ))}
+            </Avatar.Group>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 });

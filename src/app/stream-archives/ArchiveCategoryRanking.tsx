@@ -59,9 +59,9 @@ export default function ArchiveCategoryRanking({
 
   return (
     <section className="h-full rounded-xl border border-light-gray-200/50 bg-white/70 p-4 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-base font-bold leading-tight text-gray-900 dark:text-gray-100">
             {labels.title}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
@@ -74,7 +74,7 @@ export default function ArchiveCategoryRanking({
               value={metric}
               onChange={(value) => setMetric(value as RankingMetric)}
               aria-label={labels.metricSwitchAriaLabel}
-              size="xs"
+              size="sm"
               data={[
                 { value: "streams", label: labels.metricStreams },
                 { value: "duration", label: labels.metricDuration },
@@ -93,30 +93,29 @@ export default function ArchiveCategoryRanking({
       </div>
 
       {items.length === 0 ? (
-        <Text c="dimmed" size="sm" mt="md">
+        <Text c="dimmed" size="sm">
           {labels.noData}
         </Text>
       ) : (
-        <ol className="mt-4 space-y-4">
+        <ol className="space-y-3.5">
           {sortedItems.map((item, index) => {
             const duration = formatDuration(item.totalDurationSeconds);
             return (
               <li key={item.key}>
                 <Link
                   href={`/stream-archives/list?series=${encodeURIComponent(item.key)}`}
-                  className="group grid grid-cols-[1.5rem_minmax(0,1fr)] items-baseline gap-x-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="group grid grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-x-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/40"
                 >
-                  <Text c="dimmed" ta="right" fw={600}>
+                  <Text c="dimmed" ta="right" size="sm" fw={600}>
                     {index + 1}
                   </Text>
                   <Text
-                    truncate
-                    fw={600}
-                    className="transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
+                    fw={500}
+                    className="min-w-0 break-words transition group-hover:text-primary group-hover:underline dark:group-hover:text-primary-200"
                   >
                     {item.name}
                   </Text>
-                  <div className="col-start-2 mt-0.5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2">
+                  <div className="col-start-2 mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2">
                     {metric === "streams" ? (
                       <>
                         <Progress
@@ -129,11 +128,15 @@ export default function ArchiveCategoryRanking({
                             item.name,
                             item.streamCount,
                           )}
-                          color="cyan"
+                          color="hololive.2"
                           size="sm"
                           radius="xl"
                         />
-                        <Text c="dimmed" size="xs">
+                        <Text
+                          fw={600}
+                          size="xs"
+                          className="shrink-0 tabular-nums"
+                        >
                           {labels.streams(item.streamCount)}
                         </Text>
                       </>
@@ -146,11 +149,15 @@ export default function ArchiveCategoryRanking({
                               : 0
                           }
                           aria-label={labels.durationGauge(item.name, duration)}
-                          color="pink"
+                          color="hololive.2"
                           size="sm"
                           radius="xl"
                         />
-                        <Text c="dimmed" size="xs">
+                        <Text
+                          fw={600}
+                          size="xs"
+                          className="shrink-0 tabular-nums"
+                        >
                           {labels.duration(duration)}
                         </Text>
                       </>

@@ -31,6 +31,16 @@ export type ArchiveTimeHeatmapCell = {
   streamCount: number;
 };
 
+export type ArchiveLongestStreamRankingItem = {
+  key: string;
+  title: string;
+  videoId: string;
+  videoUrl: string;
+  streamStartedAt: string;
+  durationSeconds: number;
+  item: ArchiveStatsItem;
+};
+
 export type ArchiveStatsSummary = {
   items: ArchiveStatsItem[];
   streamCount: number;
@@ -80,6 +90,59 @@ const getJstDateTime = (value: string) => {
     weekday: new Date(Date.UTC(year, month - 1, day)).getUTCDay(),
     startHour: Math.floor(hour / 2) * 2,
   };
+};
+
+export const createArchiveLongestStreamRanking = (
+  sourceItems: ArchiveStatsItem[],
+  selectedYear: string | null,
+  locale: string,
+  limit = 10,
+): ArchiveLongestStreamRankingItem[] => {
+  const collator = new Intl.Collator(locale, {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  return sourceItems
+    .flatMap((item) => {
+      if (isShortsArchive(item)) {
+        return [];
+      }
+
+      const durationSeconds = parseVideoDurationSeconds(item.video_duration);
+      if (!durationSeconds || durationSeconds <= 0) {
+        return [];
+      }
+
+      if (
+        selectedYear &&
+        !getJstDateTime(item.stream_started_at)?.dateKey.startsWith(
+          `${selectedYear}-`,
+        )
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          key: item.video_id,
+          title: item.title,
+          videoId: item.video_id,
+          videoUrl: item.video_url,
+          streamStartedAt: item.stream_started_at,
+          durationSeconds,
+          item,
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.durationSeconds - left.durationSeconds ||
+        new Date(right.streamStartedAt).getTime() -
+          new Date(left.streamStartedAt).getTime() ||
+        collator.compare(left.title, right.title),
+    )
+    .slice(0, Math.max(0, limit));
 };
 
 export const createArchiveStatsSummary = (

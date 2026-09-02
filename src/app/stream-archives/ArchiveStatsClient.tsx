@@ -19,6 +19,7 @@ import ArchiveCollaborationRanking, {
   type ArchiveCollaborationRankingMode,
 } from "./ArchiveCollaborationRanking";
 import ArchiveContributionHeatmap from "./ArchiveContributionHeatmap";
+import ArchiveLongestStreamRanking from "./ArchiveLongestStreamRanking";
 import ArchiveMonthlyCalendar from "./ArchiveMonthlyCalendar";
 import ArchiveOverviewCards from "./ArchiveOverviewCards";
 import ArchiveTimeHeatmap from "./ArchiveTimeHeatmap";
@@ -26,9 +27,13 @@ import { formatActivityDuration, formatDurationHms } from "./archiveActivity";
 import {
   createArchiveCollaborationCombinationRanking,
   createArchiveCollaborationRanking,
+  createArchiveMembersWithoutCollaboration,
 } from "./archiveCollaborationData";
 import { getLegacyArchiveListUrl } from "./archiveFilters";
-import { createArchiveStatsSummary } from "./archiveStats";
+import {
+  createArchiveLongestStreamRanking,
+  createArchiveStatsSummary,
+} from "./archiveStats";
 import StreamArchivesNavigation from "./StreamArchivesNavigation";
 
 const getWeekdayLabels = (locale: string) => {
@@ -40,6 +45,9 @@ const getWeekdayLabels = (locale: string) => {
     formatter.format(new Date(Date.UTC(2024, 0, 7 + index))),
   );
 };
+
+const formatCompactActivityDuration = (seconds: number) =>
+  formatActivityDuration(seconds).replaceAll(" ", "");
 
 export default function ArchiveStatsClient() {
   const t = useTranslations("Archives");
@@ -55,6 +63,9 @@ export default function ArchiveStatsClient() {
     string | null
   >(null);
   const [selectedCategoryYear, setSelectedCategoryYear] = useState<
+    string | null
+  >(null);
+  const [selectedLongestStreamYear, setSelectedLongestStreamYear] = useState<
     string | null
   >(null);
   const [selectedTimeHeatmapYear, setSelectedTimeHeatmapYear] = useState<
@@ -124,6 +135,15 @@ export default function ArchiveStatsClient() {
         : summary,
     [locale, selectedTimeHeatmapYear, summary, t],
   );
+  const longestStreams = useMemo(
+    () =>
+      createArchiveLongestStreamRanking(
+        summary.items,
+        selectedLongestStreamYear,
+        locale,
+      ),
+    [locale, selectedLongestStreamYear, summary.items],
+  );
   const collaborationRanking = useMemo(() => {
     if (collaborationMode === "combination") {
       return createArchiveCollaborationCombinationRanking(
@@ -146,20 +166,10 @@ export default function ArchiveStatsClient() {
     selectedCollaborationYear,
     summary.items,
   ]);
-  const collaborationDateFormatter = useMemo(
+  const membersWithoutCollaboration = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale.startsWith("ja") ? "ja-JP" : locale, {
-        year: "numeric",
-        month: locale.startsWith("ja") ? "2-digit" : "short",
-        day: locale.startsWith("ja") ? "2-digit" : "numeric",
-        timeZone: "Asia/Tokyo",
-      }),
-    [locale],
-  );
-  const formatCollaborationDate = useCallback(
-    (dateKey: string) =>
-      collaborationDateFormatter.format(new Date(`${dateKey}T00:00:00+09:00`)),
-    [collaborationDateFormatter],
+      createArchiveMembersWithoutCollaboration(summary.items, channels, locale),
+    [channels, locale, summary.items],
   );
   const weekdayLabels = useMemo(() => getWeekdayLabels(locale), [locale]);
 
@@ -267,34 +277,34 @@ export default function ArchiveStatsClient() {
               }}
             />
 
-            <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]">
-              <ArchiveContributionHeatmap
-                summary={summary.activity}
-                selectedYear={selectedActivityYear}
-                locale={locale}
-                labels={{
-                  title: t("activityLabel"),
-                  totalDuration: (duration) =>
-                    t("activityTotalDuration", { duration }),
-                  yearLabel: t("activityYearLabel"),
-                  legendLess: t("activityLegendLess"),
-                  legendMore: t("activityLegendMore"),
-                  cellLabel: (date, duration, count) =>
-                    t("activityCellLabel", { date, duration, count }),
-                  emptyCellLabel: (date) =>
-                    t("activityEmptyCellLabel", { date }),
-                  noData: t("activityNoData"),
-                }}
-                onSelectedYearChange={setSelectedActivityYear}
-                onDateClick={handleActivityDateClick}
-              />
+            <ArchiveContributionHeatmap
+              summary={summary.activity}
+              selectedYear={selectedActivityYear}
+              locale={locale}
+              labels={{
+                title: t("activityLabel"),
+                totalDuration: (duration) =>
+                  t("activityTotalDuration", { duration }),
+                yearLabel: t("activityYearLabel"),
+                legendLess: t("activityLegendLess"),
+                legendMore: t("activityLegendMore"),
+                cellLabel: (date, duration, count) =>
+                  t("activityCellLabel", { date, duration, count }),
+                emptyCellLabel: (date) => t("activityEmptyCellLabel", { date }),
+                noData: t("activityNoData"),
+              }}
+              onSelectedYearChange={setSelectedActivityYear}
+              onDateClick={handleActivityDateClick}
+            />
+
+            <div className="grid items-stretch gap-4 xl:grid-cols-3">
               <ArchiveCollaborationRanking
                 items={collaborationRanking}
+                membersWithoutCollaboration={membersWithoutCollaboration}
                 years={summary.activity.years}
                 selectedYear={selectedCollaborationYear}
                 mode={collaborationMode}
-                formatDuration={formatActivityDuration}
-                formatDate={formatCollaborationDate}
+                formatDuration={formatCompactActivityDuration}
                 labels={{
                   title: t("collaborationRankingTitle"),
                   subtitle: t("collaborationRankingSubtitle"),
@@ -311,15 +321,11 @@ export default function ArchiveStatsClient() {
                   combinationModeLabel: t(
                     "collaborationRankingCombinationMode",
                   ),
-                  firstCollaboration: (date, duration) =>
-                    t("collaborationFirstDate", { date, duration }),
+                  noCollaboration: t("collaborationNoHistory"),
                 }}
                 onSelectedYearChange={setSelectedCollaborationYear}
                 onModeChange={setCollaborationMode}
               />
-            </div>
-
-            <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(20rem,1fr)_minmax(0,2fr)]">
               <ArchiveCategoryRanking
                 items={categorySummary.categories}
                 years={summary.activity.years}
@@ -345,25 +351,55 @@ export default function ArchiveStatsClient() {
                 }}
                 onSelectedYearChange={setSelectedCategoryYear}
               />
-              <ArchiveTimeHeatmap
-                cells={timeHeatmapSummary.timeHeatmap}
-                maxCount={timeHeatmapSummary.maxTimeHeatmapCount}
+              <ArchiveLongestStreamRanking
+                items={longestStreams}
                 years={summary.activity.years}
-                selectedYear={selectedTimeHeatmapYear}
-                weekdayLabels={weekdayLabels}
+                selectedYear={selectedLongestStreamYear}
+                locale={locale}
+                formatDuration={formatCompactActivityDuration}
                 labels={{
-                  title: t("timeHeatmapTitle"),
-                  subtitle: t("timeHeatmapSubtitle"),
-                  cell: (weekday, time, count) =>
-                    t("timeHeatmapCell", { weekday, time, count }),
-                  less: t("activityLegendLess"),
-                  more: t("activityLegendMore"),
+                  title: t("longestStreamRankingTitle"),
+                  subtitle: t("longestStreamRankingSubtitle"),
+                  noData: t("longestStreamRankingNoData"),
                   allTimeOptionLabel: t("collaborationRankingAllTime"),
-                  yearSelectAriaLabel: t("timeHeatmapPeriodLabel"),
+                  yearSelectAriaLabel: t("longestStreamRankingPeriodLabel"),
+                  itemLabel: (rank, title, duration) =>
+                    t("longestStreamRankingItemLabel", {
+                      rank,
+                      title,
+                      duration,
+                    }),
+                  gauge: (title, duration) =>
+                    t("longestStreamRankingGauge", { title, duration }),
+                  thumbnail: (title) =>
+                    t("longestStreamRankingThumbnail", { title }),
+                  detailCloseLabel: t("monthlyCalendarDetailClose"),
+                  appWatchLabel: t("appWatchLabel"),
+                  castLabel: t("castLabel"),
+                  timestampLabel: t("timestampLabel"),
                 }}
-                onSelectedYearChange={setSelectedTimeHeatmapYear}
+                onSelectedYearChange={setSelectedLongestStreamYear}
               />
             </div>
+
+            <ArchiveTimeHeatmap
+              cells={timeHeatmapSummary.timeHeatmap}
+              maxCount={timeHeatmapSummary.maxTimeHeatmapCount}
+              years={summary.activity.years}
+              selectedYear={selectedTimeHeatmapYear}
+              weekdayLabels={weekdayLabels}
+              labels={{
+                title: t("timeHeatmapTitle"),
+                subtitle: t("timeHeatmapSubtitle"),
+                cell: (weekday, time, count) =>
+                  t("timeHeatmapCell", { weekday, time, count }),
+                less: t("activityLegendLess"),
+                more: t("activityLegendMore"),
+                allTimeOptionLabel: t("collaborationRankingAllTime"),
+                yearSelectAriaLabel: t("timeHeatmapPeriodLabel"),
+              }}
+              onSelectedYearChange={setSelectedTimeHeatmapYear}
+            />
           </div>
         )}
       </div>

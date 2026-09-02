@@ -3,6 +3,8 @@ import type { ChannelEntry } from "../../types/api/yt/channels";
 import {
   createArchiveCollaborationCombinationRanking,
   createArchiveCollaborationRanking,
+  createArchiveMembersWithoutCollaboration,
+  getArchiveHololiveMemberMetadata,
 } from "../archiveCollaborationData";
 
 const channel = (
@@ -22,6 +24,23 @@ const channel = (
 });
 
 describe("createArchiveCollaborationRanking", () => {
+  it("separates generation labels from inactive status", () => {
+    const graduate = channel("夜空メル");
+    graduate.generation = "1期生、卒業生";
+    const endedActivity = channel("沙花叉クロヱ");
+    endedActivity.generation = "6期生、holoX、活動終了";
+
+    expect(
+      getArchiveHololiveMemberMetadata({ name: "夜空メル", channel: graduate }),
+    ).toEqual({ generation: "1期生", status: "卒業生" });
+    expect(
+      getArchiveHololiveMemberMetadata({
+        name: "沙花叉クロヱ",
+        channel: endedActivity,
+      }),
+    ).toEqual({ generation: "6期生・holoX", status: "活動終了" });
+  });
+
   it("counts hololive collaborators for the selected JST year", () => {
     const suisei = channel("星街すいせい");
     const iroha = channel("風真いろは", "DEV_IS");
@@ -107,6 +126,54 @@ describe("createArchiveCollaborationRanking", () => {
       totalDurationSeconds: 10_800,
       firstCollaborationDate: "2025-01-01",
     });
+  });
+
+  it("finds hololive members with no collaboration across all archives", () => {
+    const azki = channel("AZKi");
+    const suisei = channel("星街すいせい");
+    const iroha = channel("風真いろは", "DEV_IS");
+    const duplicateIroha = channel("風真いろは", "DEV_IS", "UC-iroha-2");
+    const guest = channel("外部ゲスト", "guest");
+    const graduate = channel("夜空メル");
+    graduate.generation = "1期生、卒業生";
+    const endedActivity = channel("沙花叉クロヱ");
+    endedActivity.generation = "6期生、holoX、活動終了";
+
+    const members = createArchiveMembersWithoutCollaboration(
+      [
+        {
+          stream_started_at: "2026-01-01T00:00:00.000Z",
+          participantEntries: [
+            { name: "AZKi", channel: azki },
+            { name: "すいちゃん", channel: suisei },
+          ],
+        },
+      ],
+      [azki, suisei, iroha, duplicateIroha, guest, graduate, endedActivity],
+      "ja",
+    );
+
+    expect(members.map(({ name }) => name)).toEqual(["風真いろは"]);
+  });
+
+  it("treats all talents on a shared channel as collaborated", () => {
+    const fuwawa = channel("フワワアビスガード", "EN", "UC-fuwamoco");
+    const mococo = channel("モココアビスガード", "EN", "UC-fuwamoco");
+    fuwawa.channelName = "FUWAMOCO Ch. hololive-EN";
+    mococo.channelName = "FUWAMOCO Ch. hololive-EN";
+
+    const members = createArchiveMembersWithoutCollaboration(
+      [
+        {
+          stream_started_at: "2026-01-01T00:00:00.000Z",
+          participantEntries: [{ name: "フワワ", channel: fuwawa }],
+        },
+      ],
+      [fuwawa, mococo],
+      "ja",
+    );
+
+    expect(members).toEqual([]);
   });
 
   it("counts exact hololive combinations and uses official unit names", () => {
