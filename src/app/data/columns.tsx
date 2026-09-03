@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@mantine/core";
 import { Song } from "../types/song";
 import MilestoneBadge from "../components/MilestoneBadge";
@@ -7,6 +7,7 @@ import { BsPlayCircle } from "react-icons/bs";
 type TFuncLike = (key: string, values?: Record<string, any>) => string;
 import { formatDate } from "../lib/formatDate";
 import { FaCircleCheck } from "react-icons/fa6";
+import type { AppTableFeatures } from "../lib/tanstackTable";
 const formatTimeFromSeconds = (s?: string) => {
   if (!s) return "-";
   const n = parseInt(s || "0");
@@ -38,7 +39,7 @@ const renderArrayBadges = (items?: string[], queryKey?: string) => {
 export const getColumns = (
   t: TFuncLike,
   locale?: string,
-): ColumnDef<Song>[] => [
+): ColumnDef<AppTableFeatures, Song>[] => [
   {
     id: "index",
     header: t("table.index"),

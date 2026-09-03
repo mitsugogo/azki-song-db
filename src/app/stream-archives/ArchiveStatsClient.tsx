@@ -23,7 +23,7 @@ import ArchiveLongestStreamRanking from "./ArchiveLongestStreamRanking";
 import ArchiveMonthlyCalendar from "./ArchiveMonthlyCalendar";
 import ArchiveOverviewCards from "./ArchiveOverviewCards";
 import ArchiveTimeHeatmap from "./ArchiveTimeHeatmap";
-import { formatActivityDuration, formatDurationHms } from "./archiveActivity";
+import { formatActivityDuration } from "./archiveActivity";
 import {
   createArchiveCollaborationCombinationRanking,
   createArchiveCollaborationRanking,
@@ -252,28 +252,18 @@ export default function ArchiveStatsClient() {
 
             <ArchiveMonthlyCalendar
               days={summary.calendarDays}
+              archives={summary.items}
               latestMonth={summary.latestMonth}
               locale={locale}
               songs={allSongs}
               channels={channels}
-              formatDuration={formatDurationHms}
               labels={{
                 title: t("monthlyCalendarTitle"),
                 subtitle: t("monthlyCalendarSubtitle"),
                 monthLabel: t("monthlyCalendarMonthLabel"),
                 previousMonth: t("monthlyCalendarPreviousMonth"),
                 nextMonth: t("monthlyCalendarNextMonth"),
-                streams: (count) => t("statsStreamCount", { count }),
-                duration: (duration) => duration,
-                more: (count) => t("monthlyCalendarMore", { count }),
-                openDate: (date) => t("monthlyCalendarOpenDate", { date }),
                 empty: t("statsNoData"),
-                detailAriaLabel: (title) =>
-                  t("monthlyCalendarOpenDetail", { title }),
-                detailCloseLabel: t("monthlyCalendarDetailClose"),
-                appWatchLabel: t("appWatchLabel"),
-                castLabel: t("castLabel"),
-                timestampLabel: t("timestampLabel"),
               }}
             />
 

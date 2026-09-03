@@ -985,6 +985,37 @@ describe("useMainPlayerControls", () => {
     expect(mockPlayer.seekTo).toHaveBeenLastCalledWith(10, true);
   });
 
+  it("0:00開始の曲が読み込み中にENDEDしても次の楽曲へ遷移しない", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+
+    const mockPlayer = createMockPlayer("vid1", "Song 1");
+    mockPlayer.getCurrentTime.mockReturnValue(0);
+    mockPlayer.getDuration.mockReturnValue(0);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[0]);
+    });
+
+    act(() => {
+      result.current.handlePlayerOnReady({ target: mockPlayer } as any);
+    });
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: mockPlayer,
+        data: 0,
+      } as any);
+    });
+
+    expect(result.current.currentSong).toEqual(mockSongs[0]);
+  });
+
   it("0:00から再生開始した場合の補正シークは1回だけ試みる", () => {
     const { result } = renderHook(() =>
       useMainPlayerControls({

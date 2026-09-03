@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, useTable } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -21,6 +15,8 @@ import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import historyHelper from "../lib/history";
 import { useTranslations } from "next-intl";
 import { Badge } from "@mantine/core";
+import { appTableFeatures } from "../lib/tanstackTable";
+import type { AppTableFeatures } from "../lib/tanstackTable";
 
 export default function DataTable<
   T extends
@@ -42,7 +38,7 @@ export default function DataTable<
   data: T[];
   caption: string;
   description: string;
-  columns: ColumnDef<T, unknown>[];
+  columns: ColumnDef<AppTableFeatures, T, unknown>[];
   minWidth?: number | string;
   initialSortColumnId?: string;
   initialSortDirection?: "asc" | "desc";
@@ -98,7 +94,8 @@ export default function DataTable<
     });
   }, [columns, initialSorting]);
 
-  const table = useReactTable({
+  const table = useTable({
+    features: appTableFeatures,
     data,
     columns,
     initialState: {
@@ -126,9 +123,6 @@ export default function DataTable<
 
       setSorting(updater);
     },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, columnId, filterValue) => {
       const query = filterValue.toLowerCase();
       return row.getVisibleCells().some((cell) => {

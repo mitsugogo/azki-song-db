@@ -1,8 +1,34 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveMonthlyCalendar from "../ArchiveMonthlyCalendar";
 import type { ArchiveCalendarDayStats } from "../archiveStats";
+
+vi.mock("../../hook/useActivityTimeline", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../hook/useActivityTimeline")>();
+
+  return {
+    ...actual,
+    default: () => ({
+      items: [],
+      isLoading: false,
+      isViewMilestonesLoading: false,
+    }),
+  };
+});
+
+vi.mock("../../hook/useAnniversaries", () => ({
+  default: () => ({ items: [], isLoading: false }),
+}));
+
+vi.mock("../../hook/useEvents", () => ({
+  default: () => ({ items: [], isLoading: false }),
+}));
+
+vi.mock("../../hook/useMilestones", () => ({
+  default: () => ({ items: [], isLoading: false }),
+}));
 
 describe("ArchiveMonthlyCalendar", () => {
   beforeAll(() => {
@@ -21,7 +47,7 @@ describe("ArchiveMonthlyCalendar", () => {
     });
   });
 
-  it("links a day to the filtered archive list and opens a detail drawer for each stream", async () => {
+  it("reuses the activity calendar and filters without rendering a timeline", async () => {
     const day: ArchiveCalendarDayStats = {
       dateKey: "2026-01-02",
       streamCount: 1,
@@ -50,7 +76,7 @@ describe("ArchiveMonthlyCalendar", () => {
       items: [],
     };
 
-    render(
+    const { container } = render(
       <MantineProvider>
         <ArchiveMonthlyCalendar
           days={
@@ -59,6 +85,7 @@ describe("ArchiveMonthlyCalendar", () => {
               [day.dateKey, day],
             ])
           }
+          archives={day.items}
           latestMonth="2026-01"
           locale="ja"
           songs={[]}
@@ -69,29 +96,28 @@ describe("ArchiveMonthlyCalendar", () => {
             monthLabel: "表示月",
             previousMonth: "前月を表示",
             nextMonth: "次月を表示",
-            streams: (count) => `${count}件`,
-            duration: (duration) => `配信時間 ${duration}`,
-            more: (count) => `ほか${count}件`,
-            openDate: (date) => `${date}のアーカイブを表示`,
             empty: "データなし",
-            detailAriaLabel: (title) => `${title}の詳細を表示`,
-            detailCloseLabel: "詳細を閉じる",
-            appWatchLabel: "再生",
-            castLabel: "出演",
-            timestampLabel: "タイムスタンプ",
           }}
-          formatDuration={() => "1h"}
         />
       </MantineProvider>,
     );
 
+    expect(screen.getByTestId("activity-calendar")).toBeInTheDocument();
     expect(
-      await screen.findByRole("link", {
-        name: "2026-01-02のアーカイブを表示",
-      }),
+      container.querySelector('button[data-date="2026-01-02"]'),
+    ).toBeInTheDocument();
+    expect(screen.getByAltText("新年配信")).toBeInTheDocument();
+    expect(screen.queryByText("timelineView")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("activity-selected-day-details"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("activity-calendar-thumbnail"));
+    expect(
+      await screen.findByTestId("activity-detail-content"),
     ).toHaveAttribute(
-      "href",
-      "/stream-archives/list?from=2026-01-02&to=2026-01-02",
+      "data-activity-id",
+      "archive-video-1-2026-01-01T15:00:00.000Z",
     );
 
     const previousMonthButton = screen.getByRole("button", {
@@ -105,30 +131,25 @@ describe("ArchiveMonthlyCalendar", () => {
 
     fireEvent.click(previousMonthButton);
     expect(
-      await screen.findByRole("link", {
-        name: "2025-12-31のアーカイブを表示",
-      }),
+      container.querySelector('button[data-date="2025-12-31"]'),
     ).toBeInTheDocument();
+    expect(screen.queryByAltText("新年配信")).not.toBeInTheDocument();
     expect(nextMonthButton).toBeEnabled();
 
     fireEvent.click(nextMonthButton);
-    await screen.findByRole("link", {
-      name: "2026-01-02のアーカイブを表示",
-    });
+    expect(
+      container.querySelector('button[data-date="2026-01-02"]'),
+    ).toBeInTheDocument();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "新年配信の詳細を表示" }),
+      screen.getByRole("button", { name: "activityFilterLabel" }),
     );
-
-    const detailContent = await screen.findByTestId("archive-detail-content");
-    expect(
-      within(detailContent).getByRole("heading", {
-        level: 2,
-        name: "新年配信",
+    fireEvent.click(
+      await screen.findByRole("checkbox", {
+        name: "activityFilterArchives",
+        hidden: true,
       }),
-    ).toBeInTheDocument();
-    expect(
-      within(detailContent).getByRole("link", { name: "再生" }),
-    ).toHaveAttribute("href", "https://www.youtube.com/watch?v=video-1");
+    );
+    expect(screen.queryByAltText("新年配信")).not.toBeInTheDocument();
   });
 });

@@ -239,6 +239,14 @@ function buildArchiveItems(
     .slice(0, limit);
 }
 
+export function buildArchiveActivityItems(
+  archives: ArchiveItem[],
+  limit: number,
+  songs: readonly Song[] = [],
+) {
+  return buildArchiveItems(archives, limit, createFirstSongsByVideoId(songs));
+}
+
 function buildMilestoneItems(
   milestones: MilestoneItem[],
 ): MilestoneActivityTimelineItem[] {
@@ -498,11 +506,10 @@ export default function useActivityTimeline({
       songs,
       effectiveSongUpdateLimit,
     );
-    const firstSongsByVideoId = createFirstSongsByVideoId(songs);
-    const archiveItems = buildArchiveItems(
+    const archiveItems = buildArchiveActivityItems(
       archives,
       effectiveArchiveLimit,
-      firstSongsByVideoId,
+      songs,
     );
     const milestoneItems = buildMilestoneItems(milestones);
     const eventItems = buildEventItems(events);

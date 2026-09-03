@@ -29,7 +29,7 @@ export default function ArchiveOverviewCards({
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       {cards.map(({ key, icon: Icon, color }) => (
-        <Paper key={key} withBorder radius="lg" p="md" shadow="xs">
+        <Paper key={key} withBorder radius="md" p="md" shadow="none">
           <div className="flex items-center gap-3">
             <span
               className={`rounded-full bg-light-gray-100 p-2 dark:bg-white/10 ${color}`}

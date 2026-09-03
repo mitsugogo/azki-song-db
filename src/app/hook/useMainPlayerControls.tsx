@@ -477,6 +477,10 @@ export default function useMainPlayerControls({
         typeof event.target.getCurrentTime === "function"
           ? event.target.getCurrentTime()
           : NaN;
+      const duration =
+        typeof event.target.getDuration === "function"
+          ? Number(event.target.getDuration())
+          : NaN;
       const initialPlaybackTarget = initialPlaybackTargetRef.current;
       const isBeforeInitialPlaybackTarget =
         initialPlaybackTarget !== null &&
@@ -485,11 +489,22 @@ export default function useMainPlayerControls({
         typeof currentTime === "number" &&
         Number.isFinite(currentTime) &&
         currentTime < initialPlaybackTarget - 1;
+      const isUnloadedVideo = !Number.isFinite(duration) || duration <= 0;
+      const isEndedBeforeVideoEnd =
+        event.data === 0 &&
+        Number.isFinite(duration) &&
+        duration > 0 &&
+        typeof currentTime === "number" &&
+        Number.isFinite(currentTime) &&
+        currentTime < duration - 2;
       const shouldDeferPlaybackState =
-        isBeforeInitialPlaybackTarget && (event.data === 1 || event.data === 0);
+        (isBeforeInitialPlaybackTarget &&
+          (event.data === 1 || event.data === 0)) ||
+        (event.data === 0 && (isUnloadedVideo || isEndedBeforeVideoEnd));
 
-      // 開始位置へ到達する前の PLAYING / ENDED を通常の再生監視へ渡すと、
-      // 0:00 を別の曲として判定して次曲へ進んでしまうため、シーク完了まで保留する。
+      // 開始位置へ到達する前、または動画未ロード時の PLAYING / ENDED を
+      // 通常の再生監視へ渡すと、読み込み中の 0:00 を再生終了とみなして
+      // 次曲へ進んでしまうため、シーク完了・本再生開始まで保留する。
       if (!shouldDeferPlaybackState) {
         originalHandleStateChange(event);
       }

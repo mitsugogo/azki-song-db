@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@mantine/core";
 import { HiMusicNote, HiUserCircle, HiPlay, HiTag } from "react-icons/hi";
 import { FaStar, FaYoutube, FaCompactDisc, FaDatabase } from "react-icons/fa6";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { formatDate } from "../lib/formatDate";
 import { getDiscographyLink } from "../lib/song";
 import {
@@ -14,6 +14,7 @@ import {
 import { Song } from "../types/song";
 import { StatisticsItem } from "../types/statisticsItem";
 import { FC, SVGProps, use } from "react";
+import type { AppTableFeatures } from "../lib/tanstackTable";
 
 type TabConfig = {
   title: string;
@@ -25,7 +26,7 @@ type TabConfig = {
   description: string;
   initialSort: { id: string; direction: "asc" | "desc" };
   minWidth?: number | string;
-  columns: ColumnDef<StatisticsItem, any>[];
+  columns: ColumnDef<AppTableFeatures, StatisticsItem, any>[];
 };
 
 type Translate = (key: string) => string;
@@ -221,7 +222,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
         id: "lastVideo.video_title",
         accessorKey: "lastVideo",
         header: t("columns.video"),
-        sortingFn: (rowA, rowB) => {
+        sortFn: (rowA, rowB) => {
           const a = rowA.original.lastVideo?.video_title || "";
           const b = rowB.original.lastVideo?.video_title || "";
           return a.localeCompare(b);
@@ -324,7 +325,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
             info.getValue<number>(),
             info.row.original.viewMilestone,
           ),
-        sortingFn: viewCountSortFn,
+        sortFn: viewCountSortFn,
         size: 180,
       },
       {
@@ -426,7 +427,7 @@ export const getTabsConfig = (t: Translate): TabConfig[] => [
             info.getValue<number>(),
             info.row.original.viewMilestone,
           ),
-        sortingFn: viewCountSortFn,
+        sortFn: viewCountSortFn,
         size: 180,
       },
       {

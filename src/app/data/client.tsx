@@ -4,14 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { Song } from "../types/song";
 import { Link } from "@/i18n/navigation";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-  SortingState,
-} from "@tanstack/react-table";
+import { flexRender, useTable } from "@tanstack/react-table";
+import type { SortingState } from "@tanstack/react-table";
 import { HiChevronUp, HiChevronDown, HiArrowsUpDown } from "react-icons/hi2";
 import Loading from "../loading";
 import useSongs from "../hook/useSongs";
@@ -26,6 +20,7 @@ import { getColumns } from "./columns";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { pageClasses } from "../theme";
+import { appTableFeatures } from "../lib/tanstackTable";
 
 export default function ClientTable() {
   const { allSongs, isLoading } = useSongs();
@@ -41,7 +36,8 @@ export default function ClientTable() {
 
   const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
-  const table = useReactTable({
+  const table = useTable({
+    features: appTableFeatures,
     data: songs,
     columns: getColumns(t, locale),
     enableColumnResizing: true,
@@ -52,9 +48,6 @@ export default function ClientTable() {
     },
     onGlobalFilterChange: setFilterQuery,
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   });
 
   useEffect(() => {
