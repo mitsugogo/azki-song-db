@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.31.2](https://github.com/mitsugogo/azki-song-db/compare/v2.31.1...v2.31.2) (2026-09-03)
+
+### Bug Fixes
+
+* **stream-archives:** カテゴリ変更に伴って表示できなくなっていたのを修正 ([084e4f3](https://github.com/mitsugogo/azki-song-db/commit/084e4f3fe1fdc8af58c0d878af797db5607ab802))
+
 ## [2.31.1](https://github.com/mitsugogo/azki-song-db/compare/v2.31.0...v2.31.1) (2026-09-03)
 
 ### Bug Fixes
