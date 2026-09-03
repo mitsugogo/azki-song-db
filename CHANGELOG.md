@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.31.1](https://github.com/mitsugogo/azki-song-db/compare/v2.31.0...v2.31.1) (2026-09-03)
+
+### Bug Fixes
+
+* **deps:** React Table v9へ移行 ([f219dce](https://github.com/mitsugogo/azki-song-db/commit/f219dce464fe8bb4b20277836bf8cd008c9951f0))
+* 曲の読み込み中に次曲へスキップする不具合を修正 ([a06b6d8](https://github.com/mitsugogo/azki-song-db/commit/a06b6d8a29495075ebcb968c5ef03e27a633e080)), closes [#491](https://github.com/mitsugogo/azki-song-db/issues/491)
+
 ## [2.31.0](https://github.com/mitsugogo/azki-song-db/compare/v2.30.1...v2.31.0) (2026-09-02)
 
 ### Features
