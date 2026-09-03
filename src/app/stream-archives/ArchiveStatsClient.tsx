@@ -367,6 +367,8 @@ export default function ArchiveStatsClient() {
                   appWatchLabel: t("appWatchLabel"),
                   castLabel: t("castLabel"),
                   timestampLabel: t("timestampLabel"),
+                  memberOnlyBadge: t("memberOnlyBadge"),
+                  publicInfoOnlyNote: t("publicInfoOnlyNote"),
                 }}
                 onSelectedYearChange={setSelectedLongestStreamYear}
               />

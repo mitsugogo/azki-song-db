@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { formatDate } from "../lib/formatDate";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import ArchiveParticipantList from "./ArchiveParticipantList";
+import ArchiveMembersOnlyNotice from "./ArchiveMembersOnlyNotice";
 import TimestampComment from "./TimestampComment";
 import type { ArchiveStatsItem } from "./archiveStats";
 
@@ -16,6 +17,8 @@ type ArchiveItemDetailProps = {
     appWatchLabel: string;
     castLabel: string;
     timestampLabel: string;
+    memberOnlyBadge: string;
+    publicInfoOnlyNote: string;
   };
 };
 
@@ -51,6 +54,13 @@ export default function ArchiveItemDetail({
           {item.video_duration ? ` · ${item.video_duration}` : ""}
         </Text>
       </div>
+
+      {item.member_only ? (
+        <ArchiveMembersOnlyNotice
+          badgeLabel={labels.memberOnlyBadge}
+          publicInfoNote={labels.publicInfoOnlyNote}
+        />
+      ) : null}
 
       <Link
         href={item.video_url}

@@ -35,6 +35,8 @@ type ArchiveLongestStreamRankingProps = {
     appWatchLabel: string;
     castLabel: string;
     timestampLabel: string;
+    memberOnlyBadge: string;
+    publicInfoOnlyNote: string;
   };
   formatDuration: (seconds: number) => string;
   onSelectedYearChange: (year: string | null) => void;
@@ -167,6 +169,8 @@ export default function ArchiveLongestStreamRanking({
                 appWatchLabel: labels.appWatchLabel,
                 castLabel: labels.castLabel,
                 timestampLabel: labels.timestampLabel,
+                memberOnlyBadge: labels.memberOnlyBadge,
+                publicInfoOnlyNote: labels.publicInfoOnlyNote,
               }}
             />
           </div>

@@ -17,6 +17,8 @@ const labels = {
   appWatchLabel: "再生",
   castLabel: "出演",
   timestampLabel: "タイムスタンプ",
+  memberOnlyBadge: "メンバー限定",
+  publicInfoOnlyNote: "公開情報のみ掲載しています",
 };
 
 describe("ArchiveLongestStreamRanking", () => {
@@ -49,6 +51,7 @@ describe("ArchiveLongestStreamRanking", () => {
       published_at: "2026-01-01T00:00:00.000Z",
       stream_started_at: "2026-01-01T00:00:00.000Z",
       timestamp_comment: "",
+      member_only: true,
       participantEntries: [],
     };
 
@@ -86,6 +89,11 @@ describe("ArchiveLongestStreamRanking", () => {
     fireEvent.click(screen.getByRole("button", { name: "1位 長時間配信 5h" }));
     const detailContent = await screen.findByTestId("archive-detail-content");
     expect(detailContent).toHaveTextContent("長時間配信");
+    expect(detailContent).toHaveTextContent("メンバー限定");
+    expect(detailContent).toHaveTextContent("公開情報のみ掲載しています");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "公開情報のみ掲載しています",
+    );
     expect(screen.getByRole("link", { name: "再生" })).toHaveAttribute(
       "href",
       "https://www.youtube.com/watch?v=longest-1",

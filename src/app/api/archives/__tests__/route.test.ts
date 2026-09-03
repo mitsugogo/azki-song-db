@@ -66,7 +66,7 @@ describe("archives route", () => {
         values: [
           [
             "連番",
-            "配信内容",
+            "カテゴリ",
             "配信タイトル",
             "動画ID",
             "チャンネルID",
@@ -78,6 +78,7 @@ describe("archives route", () => {
             "タイムスタンプ",
             "重要度",
             "参加者",
+            "メン限",
           ],
           [
             "1",
@@ -93,6 +94,7 @@ describe("archives route", () => {
             "",
             "2",
             "AZKi、鷹嶺ルイ",
+            "TRUE",
           ],
           [
             "2",
@@ -108,6 +110,7 @@ describe("archives route", () => {
             "",
             "",
             "名前だけのゲスト",
+            "FALSE",
           ],
         ],
       },
@@ -120,23 +123,27 @@ describe("archives route", () => {
     expect(data).toEqual([
       expect.objectContaining({
         title: "Valid Archive",
+        topic: "ゲーム",
         channel_id: "UC1111111111111111111111",
         stream_started_at: "2026-01-02T00:00:00.000Z",
         importance: "high",
         participants: ["AZKi", "鷹嶺ルイ"],
+        member_only: true,
       }),
       expect.objectContaining({
         title: "Earlier Stream Start",
+        topic: "雑談",
         channel_id: "UC2222222222222222222222",
         stream_started_at: "2026-01-01T23:30:00.000Z",
         importance: "normal",
         participants: ["名前だけのゲスト"],
+        member_only: false,
       }),
     ]);
     expect(sheetsGetMock).toHaveBeenCalledWith(
       expect.objectContaining({
         spreadsheetId: "test-spreadsheet",
-        range: "配信アーカイブ!A1:M",
+        range: "配信アーカイブ!A1:N",
       }),
     );
   });

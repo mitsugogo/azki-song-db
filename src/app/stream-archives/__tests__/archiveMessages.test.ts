@@ -28,6 +28,10 @@ describe("stream archive messages", () => {
     expect(jaMessages.Archives.longestStreamRankingTitle).toBe(
       "配信時間が長い配信",
     );
+    expect(jaMessages.Archives.memberOnlyBadge).toBe("メンバー限定");
+    expect(jaMessages.Archives.publicInfoOnlyNote).toBe(
+      "公開情報のみ掲載しています",
+    );
     expect(enMessages.Archives.activityLabel).toBe("Activity");
     expect(enMessages.Archives.filterToggleLabel).toBe("Search filters");
     expect(enMessages.Archives.castLabel).toBe("Cast");
@@ -45,6 +49,10 @@ describe("stream archive messages", () => {
     expect(enMessages.Archives.collaborationNoHistory).toBe("No collabs yet");
     expect(enMessages.Archives.longestStreamRankingTitle).toBe(
       "Longest streams",
+    );
+    expect(enMessages.Archives.memberOnlyBadge).toBe("Members only");
+    expect(enMessages.Archives.publicInfoOnlyNote).toBe(
+      "Only publicly available information is shown.",
     );
     expect(enMessages.Archives.statsTabLabel).toBe("Statistics");
     expect(enMessages.Archives.listTitle).toBe("Archive List");

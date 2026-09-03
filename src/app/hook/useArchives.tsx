@@ -59,6 +59,7 @@ const useArchives = () => {
             published_at: item?.published_at || "",
             stream_started_at: item?.stream_started_at || "",
             timestamp_comment: item?.timestamp_comment || "",
+            member_only: item?.member_only === true,
             participants: parseArchiveParticipants(item?.participants),
             importance: normalizeActivityImportance(item?.importance),
           }))

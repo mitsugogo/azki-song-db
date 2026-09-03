@@ -23,6 +23,7 @@ import {
 import { getActivityItemLabel } from "../lib/activityItemPresentation";
 import type { ActivityTimelineItem } from "../hook/useActivityTimeline";
 import type { ChannelEntry } from "../types/api/yt/channels";
+import { ArchiveMembersOnlyBadge } from "../stream-archives/ArchiveMembersOnlyNotice";
 import type { ActivityMonth } from "./monthActivity";
 
 const CALENDAR_ITEM_LIMIT = 3;
@@ -133,6 +134,7 @@ export default function ActivityCalendarSection({
   const locale = useLocale();
   const t = useTranslations("Summary");
   const tHome = useTranslations("Home");
+  const tWatch = useTranslations("Watch.nowPlayingSongInfo");
   const [userSelectedDateKey, setUserSelectedDateKey] = useState<string | null>(
     null,
   );
@@ -337,7 +339,7 @@ export default function ActivityCalendarSection({
                                           <UnstyledButton
                                             key={item.id}
                                             type="button"
-                                            className={`pointer-events-auto aspect-video min-w-0 overflow-hidden rounded bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${index > 0 ? "hidden sm:block" : ""}`}
+                                            className={`pointer-events-auto w-full min-w-0 rounded text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${index > 0 ? "hidden sm:block" : ""}`}
                                             data-testid="activity-calendar-thumbnail"
                                             data-video-id={item.videoId}
                                             title={title}
@@ -351,10 +353,30 @@ export default function ActivityCalendarSection({
                                               )
                                             }
                                           >
-                                            <YoutubeThumbnail
-                                              videoId={item.videoId}
-                                              alt={title}
-                                            />
+                                            <div className="relative aspect-video overflow-hidden rounded bg-black">
+                                              <YoutubeThumbnail
+                                                videoId={item.videoId}
+                                                alt={title}
+                                              />
+                                              {isDesktop &&
+                                              item.kind === "archive" &&
+                                              item.archive.video_duration.trim() ? (
+                                                <span
+                                                  className="absolute right-1 bottom-1 rounded bg-black/80 px-1.5 py-0.5 text-[0.625rem] leading-none font-semibold text-white shadow-sm"
+                                                  data-testid="activity-calendar-video-duration"
+                                                >
+                                                  {item.archive.video_duration}
+                                                </span>
+                                              ) : null}
+                                            </div>
+                                            {item.kind === "archive" &&
+                                            item.archive.member_only ? (
+                                              <ArchiveMembersOnlyBadge
+                                                label={tWatch("membersOnly")}
+                                                showIcon={isDesktop}
+                                                className="mt-1 max-w-full px-1 text-[0.5rem]"
+                                              />
+                                            ) : null}
                                           </UnstyledButton>
                                         );
                                       })}

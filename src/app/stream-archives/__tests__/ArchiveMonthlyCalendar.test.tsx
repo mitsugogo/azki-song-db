@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveMonthlyCalendar from "../ArchiveMonthlyCalendar";
 import type { ArchiveCalendarDayStats } from "../archiveStats";
@@ -65,6 +65,7 @@ describe("ArchiveMonthlyCalendar", () => {
           published_at: "2026-01-01T15:00:00.000Z",
           stream_started_at: "2026-01-01T15:00:00.000Z",
           timestamp_comment: "",
+          member_only: true,
           participantEntries: [],
         },
       ],
@@ -118,6 +119,15 @@ describe("ArchiveMonthlyCalendar", () => {
     ).toHaveAttribute(
       "data-activity-id",
       "archive-video-1-2026-01-01T15:00:00.000Z",
+    );
+    expect(screen.getByText("memberOnlyBadge")).toBeInTheDocument();
+    const drawerOverlay = document.querySelector(".mantine-Drawer-overlay");
+    expect(drawerOverlay).toBeInTheDocument();
+    fireEvent.click(drawerOverlay!);
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("activity-detail-content"),
+      ).not.toBeInTheDocument(),
     );
 
     const previousMonthButton = screen.getByRole("button", {
