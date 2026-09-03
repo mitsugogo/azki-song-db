@@ -1108,6 +1108,8 @@
     "anchorLinkLabel": "Copy link to this item",
     "anchorCopiedLabel": "Copied",
     "timestampTooltip": "This is the time stamp of the volunteer in the broadcast comment.",
+    "memberOnlyBadge": "Members only",
+    "publicInfoOnlyNote": "Only publicly available information is shown.",
     "TimestampComment": {
       "more": "See more",
       "close": "fold"

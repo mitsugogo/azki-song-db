@@ -18,6 +18,7 @@ type HeaderKey =
   | "published_at"
   | "stream_started_at"
   | "timestamp_comment"
+  | "member_only"
   | "participants";
 
 type HeaderDefinition = {
@@ -45,6 +46,7 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
       "推測ゲーム配信内容",
       "推測ゲーム・配信内容",
       "配信内容",
+      "カテゴリ",
       "topic",
       "category",
     ],
@@ -101,6 +103,10 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
     ],
   },
   {
+    key: "member_only",
+    aliases: ["メン限", "メンバー限定", "memberonly", "member_only"],
+  },
+  {
     key: "participants",
     aliases: ["参加者", "participant", "participants", "guest", "guests"],
   },
@@ -110,6 +116,16 @@ const getCellString = (cell: unknown) =>
   cell === undefined || cell === null ? "" : String(cell);
 
 const getCellNumber = (cell: unknown) => Number(getCellString(cell)) || 0;
+
+const getCellBoolean = (cell: unknown) => {
+  if (typeof cell === "boolean") {
+    return cell;
+  }
+
+  return ["true", "1", "yes", "メン限", "メンバー限定"].includes(
+    getCellString(cell).trim().toLowerCase(),
+  );
+};
 
 const getSheetsClient = () => {
   const spreadsheetId =
@@ -151,7 +167,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${SHEET_NAME}!A1:M`,
+      range: `${SHEET_NAME}!A1:N`,
       valueRenderOption: "FORMATTED_VALUE",
     });
 
@@ -171,6 +187,7 @@ export async function GET() {
       published_at: -1,
       stream_started_at: -1,
       timestamp_comment: -1,
+      member_only: -1,
       participants: -1,
     };
 
@@ -221,6 +238,7 @@ export async function GET() {
           timestamp_comment: getCellString(
             getCell(values, "timestamp_comment"),
           ).trim(),
+          member_only: getCellBoolean(getCell(values, "member_only")),
           participants: parseArchiveParticipants(
             getCell(values, "participants"),
           ),

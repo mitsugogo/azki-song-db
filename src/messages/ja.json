@@ -1099,6 +1099,8 @@
     "anchorLinkLabel": "この項目へのリンクをコピー",
     "anchorCopiedLabel": "コピーしました",
     "timestampTooltip": "配信コメント内の有志のタイムスタンプです",
+    "memberOnlyBadge": "メンバー限定",
+    "publicInfoOnlyNote": "公開情報のみ掲載しています",
     "TimestampComment": {
       "close": "折りたたむ",
       "more": "もっとみる"

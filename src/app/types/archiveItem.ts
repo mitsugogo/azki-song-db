@@ -12,6 +12,7 @@ export interface ArchiveItem {
   published_at: string;
   stream_started_at: string;
   timestamp_comment: string;
+  member_only?: boolean;
   participants?: string[];
   importance?: ActivityImportance;
 }

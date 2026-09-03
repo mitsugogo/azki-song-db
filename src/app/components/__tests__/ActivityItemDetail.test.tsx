@@ -29,6 +29,7 @@ vi.mock("../../hook/useGlobalPlayer", () => ({
 function makeArchive(
   timestampComment = "",
   databaseHref?: string,
+  memberOnly = false,
 ): ActivityTimelineItem {
   return {
     id: "archive-detail",
@@ -51,6 +52,7 @@ function makeArchive(
       published_at: "2026-06-01T00:00:00.000Z",
       stream_started_at: "2026-06-01T00:00:00.000Z",
       timestamp_comment: timestampComment,
+      member_only: memberOnly,
     },
   };
 }
@@ -78,7 +80,7 @@ describe("ActivityItemDetail", () => {
     const { container, rerender } = render(
       <MantineProvider>
         <ActivityItemDetail
-          item={makeArchive("", "/watch?v=video-1&t=15s")}
+          item={makeArchive("", "/watch?v=video-1&t=15s", true)}
           channels={[
             {
               branch: "hololive",
@@ -114,6 +116,9 @@ describe("ActivityItemDetail", () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(screen.getByText("Test Channel")).toBeInTheDocument();
+    expect(screen.getByText("memberOnlyBadge")).toBeInTheDocument();
+    expect(screen.getByText("publicInfoOnlyNote")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("publicInfoOnlyNote");
     expect(screen.getByTestId("activity-detail-description")).toHaveTextContent(
       "配信の詳しい説明",
     );
@@ -141,7 +146,12 @@ describe("ActivityItemDetail", () => {
     expect(globalPlayerMock.setCurrentSong).toHaveBeenCalledWith(null);
     expect(globalPlayerMock.setIsPlaying).toHaveBeenCalledWith(false);
 
-    const player = { pauseVideo: vi.fn(), stopVideo: vi.fn() };
+    const player = {
+      pauseVideo: vi.fn(),
+      stopVideo: vi.fn(() => {
+        throw new Error("The YouTube player is not attached to the DOM");
+      }),
+    };
     act(() => sharedSourceRef.current.onReady({ target: player }));
     expect(player.pauseVideo).toHaveBeenCalled();
 
@@ -150,7 +160,11 @@ describe("ActivityItemDetail", () => {
         <ActivityItemDetail item={makeArchive()} channels={[]} active={false} />
       </MantineProvider>,
     );
-    expect(player.stopVideo).toHaveBeenCalled();
+    expect(sharedSourceRef.current).toMatchObject({
+      sourceId: "activity-detail",
+      active: false,
+    });
+    expect(player.stopVideo).not.toHaveBeenCalled();
   });
 
   it("uses a thumbnail link when the shared player reports an error", () => {

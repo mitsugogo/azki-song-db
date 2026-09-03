@@ -30,7 +30,12 @@ function makeEvent(id: string, occurredAt: string): ActivityTimelineItem {
   };
 }
 
-function makeArchive(id: string, occurredAt: string): ActivityTimelineItem {
+function makeArchive(
+  id: string,
+  occurredAt: string,
+  memberOnly = false,
+  videoDuration = "01:00:00",
+): ActivityTimelineItem {
   return {
     id,
     kind: "archive",
@@ -46,11 +51,12 @@ function makeArchive(id: string, occurredAt: string): ActivityTimelineItem {
       video_id: id,
       channel_id: "UC-test",
       video_url: `https://www.youtube.com/watch?v=${id}`,
-      video_duration: "01:00:00",
+      video_duration: videoDuration,
       description: "",
       published_at: occurredAt,
       stream_started_at: occurredAt,
       timestamp_comment: "",
+      member_only: memberOnly,
     },
   };
 }
@@ -221,7 +227,7 @@ describe("ActivityMonthDisplay", () => {
           items={[
             makeEvent("first-day", "2026-01-01T00:00:00.000Z"),
             makeEvent("event-2", "2026-01-02T00:00:00.000Z"),
-            makeArchive("archive-1", "2026-01-02T01:00:00.000Z"),
+            makeArchive("archive-1", "2026-01-02T01:00:00.000Z", true),
             makeArchive("archive-2", "2026-01-02T02:00:00.000Z"),
             makeArchive("archive-3", "2026-01-02T03:00:00.000Z"),
           ]}
@@ -248,6 +254,17 @@ describe("ActivityMonthDisplay", () => {
     );
     expect(thumbnails[0]).not.toHaveClass("hidden");
     expect(thumbnails[1]).toHaveClass("hidden", "sm:block");
+    const membersOnlyBadge = within(thumbnails[0]).getByText("membersOnly");
+    expect(membersOnlyBadge).toBeVisible();
+    expect(
+      within(thumbnails[1]).queryByText("membersOnly"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(thumbnails[0])
+        .getByAltText("archive-archive-1")
+        .compareDocumentPosition(membersOnlyBadge) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(
       within(secondDayCell).getByAltText("archive-archive-1"),
     ).toBeInTheDocument();
@@ -274,9 +291,9 @@ describe("ActivityMonthDisplay", () => {
       drawer.querySelector('a[href="/stream-archives#archive-archive-1"]'),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "calendarActivityDetailClose" }),
-    );
+    const drawerOverlay = document.querySelector(".mantine-Drawer-overlay");
+    expect(drawerOverlay).toBeInTheDocument();
+    fireEvent.click(drawerOverlay!);
     await waitFor(() =>
       expect(
         screen.queryByTestId("activity-detail-content"),
@@ -331,6 +348,49 @@ describe("ActivityMonthDisplay", () => {
 
     expect(thumbnailGrid).toHaveClass("w-full", "grid-cols-1");
     expect(thumbnailGrid).not.toHaveClass("grid-cols-2");
+    expect(
+      screen.queryByTestId("activity-calendar-video-duration"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows available archive durations inside thumbnails only on desktop", async () => {
+    mockMatchMedia(true);
+    render(
+      <MantineProvider>
+        <ActivityMonthDisplay
+          activityMonth={{ year: 2026, month: 1 }}
+          items={[
+            makeArchive(
+              "with-duration",
+              "2026-01-02T01:00:00.000Z",
+              false,
+              "01:23:45",
+            ),
+            makeArchive(
+              "without-duration",
+              "2026-01-02T02:00:00.000Z",
+              false,
+              "",
+            ),
+          ]}
+          isLoading={false}
+          isViewMilestonesLoading={false}
+          channels={[]}
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      await screen.findByTestId("activity-calendar-video-duration"),
+    ).toHaveTextContent("01:23:45");
+    expect(
+      screen.getAllByTestId("activity-calendar-video-duration"),
+    ).toHaveLength(1);
+    expect(
+      within(
+        screen.getByTestId("activity-calendar-video-duration").parentElement!,
+      ).getByAltText("archive-with-duration"),
+    ).toBeInTheDocument();
   });
 
   it("opens the drawer from selected-day details and keeps timeline links direct", async () => {

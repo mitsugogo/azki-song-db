@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AspectRatio,
   Avatar,
@@ -28,6 +28,7 @@ import { formatDate } from "../lib/formatDate";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import { normalizeArchiveSeriesKey } from "../stream-archives/archiveSearch";
 import TimestampComment from "../stream-archives/TimestampComment";
+import ArchiveMembersOnlyNotice from "../stream-archives/ArchiveMembersOnlyNotice";
 import YoutubeThumbnail from "./YoutubeThumbnail";
 import {
   SharedYouTubePlayerSlot,
@@ -68,35 +69,21 @@ function ActivityDetailPlayer({
   const setCurrentSong = globalPlayer?.setCurrentSong;
   const setIsPlaying = globalPlayer?.setIsPlaying;
   const setIsMinimized = globalPlayer?.setIsMinimized;
-  const playerRef = useRef<any>(null);
   const [playerFailed, setPlayerFailed] = useState(false);
 
   useEffect(() => {
-    if (!active) {
-      playerRef.current?.stopVideo?.();
-      return;
-    }
+    if (!active) return;
 
     setIsPlaying?.(false);
     setCurrentSong?.(null);
     setIsMinimized?.(false);
   }, [active, setCurrentSong, setIsMinimized, setIsPlaying, videoId]);
 
-  useEffect(
-    () => () => {
-      playerRef.current?.stopVideo?.();
-      playerRef.current = null;
-    },
-    [],
-  );
-
   const handleReady = useCallback((event: YouTubeEvent<any>) => {
-    playerRef.current = event.target;
     event.target?.pauseVideo?.();
   }, []);
   const handleStateChange = useCallback((_event: YouTubeEvent<any>) => {}, []);
   const handleError = useCallback((_event: YouTubeEvent<any>) => {
-    playerRef.current?.stopVideo?.();
     setPlayerFailed(true);
   }, []);
   const sharedPlayerSource = useMemo(
@@ -225,6 +212,14 @@ export default function ActivityItemDetail({
           >
             {presentation.badge}
           </Badge>
+          {item.kind === "archive" && item.archive.member_only ? (
+            <div className="mb-3">
+              <ArchiveMembersOnlyNotice
+                badgeLabel={tArchives("memberOnlyBadge")}
+                publicInfoNote={tArchives("publicInfoOnlyNote")}
+              />
+            </div>
+          ) : null}
           <Title
             order={2}
             className="w-full text-xl leading-snug text-gray-950 sm:text-2xl dark:text-white"
