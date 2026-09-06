@@ -26,10 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ namespace: "Metadata.home", locale });
 
   const description = t("description");
-  const ogSubtitle = t("ogSubtitle");
   const ogAlt = t("ogAlt", { siteName: siteConfig.siteName });
-
-  const ogImagePath = `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`;
+  const ogImagePath = "/top_ogp_az.png";
   const canonical = new URL("/", baseUrl).toString();
 
   return {
@@ -47,8 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [
         {
           url: ogImagePath,
-          width: 1200,
-          height: 630,
+          width: 1731,
+          height: 909,
           alt: ogAlt,
         },
       ],

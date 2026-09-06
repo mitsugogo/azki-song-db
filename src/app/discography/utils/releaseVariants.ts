@@ -21,7 +21,7 @@ export const isMusicVideo = (song: Song) =>
 export const isAnimatedAz = (song: Song) =>
   (song.tags || []).includes("アニAZ");
 
-export const isArtTrack = (song: Song) =>
+export const isArtTrack = (song: Pick<Song, "tags">) =>
   (song.tags || []).includes("アートトラック");
 
 export const getReleaseVariantKind = (song: Song): ReleaseVariantKind => {
