@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.32.0](https://github.com/mitsugogo/azki-song-db/compare/v2.31.2...v2.32.0) (2026-09-06)
+
+### Features
+
+* **ogp:** OGPリニューアル ([5ef5b3c](https://github.com/mitsugogo/azki-song-db/commit/5ef5b3ccba6bf55e6002d7160fd94e60e5b940eb))
+
 ## [2.31.2](https://github.com/mitsugogo/azki-song-db/compare/v2.31.1...v2.31.2) (2026-09-03)
 
 ### Bug Fixes
