@@ -2,18 +2,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import { encodePlaylistOgPayload } from "@/app/lib/playlistUrl";
 
-const { fetchLookupMock, fetchWithFallbackMock, fetchFontsMock } = vi.hoisted(
-  () => ({
-    fetchLookupMock: vi.fn(),
-    fetchWithFallbackMock: vi.fn(),
-    fetchFontsMock: vi.fn().mockResolvedValue([]),
-  }),
-);
+const {
+  fetchLookupMock,
+  fetchWithFallbackMock,
+  fetchFontsMock,
+  imageResponseElements,
+} = vi.hoisted(() => ({
+  fetchLookupMock: vi.fn(),
+  fetchWithFallbackMock: vi.fn(),
+  fetchFontsMock: vi.fn().mockResolvedValue([]),
+  imageResponseElements: [] as unknown[],
+}));
 
 vi.mock("next/og", () => ({
   ImageResponse: class extends Response {
-    constructor(_element: unknown, options?: { headers?: HeadersInit }) {
+    constructor(element: unknown, options?: { headers?: HeadersInit }) {
       super("png", { status: 200, headers: options?.headers });
+      imageResponseElements.push(element);
     }
   },
 }));
@@ -69,9 +74,47 @@ const lookupSong = {
   tags: song.tags,
 };
 
+type ElementNode = {
+  props?: {
+    children?: unknown;
+    src?: string;
+    style?: Record<string, unknown>;
+  };
+};
+
+const collectText = (node: unknown): string[] => {
+  if (typeof node === "string") return [node];
+  if (Array.isArray(node)) return node.flatMap(collectText);
+  if (
+    node &&
+    typeof node === "object" &&
+    "props" in node &&
+    typeof node.props === "object" &&
+    node.props
+  ) {
+    return collectText(node.props.children);
+  }
+  return [];
+};
+
+const collectElements = (node: unknown): ElementNode[] => {
+  if (Array.isArray(node)) return node.flatMap(collectElements);
+  if (
+    node &&
+    typeof node === "object" &&
+    "props" in node &&
+    typeof node.props === "object" &&
+    node.props
+  ) {
+    return [node, ...collectElements(node.props.children)];
+  }
+  return [];
+};
+
 describe("generic OG cache", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    imageResponseElements.length = 0;
     fetchFontsMock.mockResolvedValue([]);
   });
 
@@ -90,12 +133,25 @@ describe("generic OG cache", () => {
       "public, max-age=31536000",
     );
     expect(fetchFontsMock).toHaveBeenCalledOnce();
+    const image = imageResponseElements.at(-1);
+    const elements = collectElements(image);
+
+    expect(collectText(image)).toEqual(
+      expect.arrayContaining(["タイトル", "説明"]),
+    );
+    expect(
+      elements.some(
+        (item) =>
+          item.props?.src === "https://example.test/default_ogp_bg_az.png",
+      ),
+    ).toBe(true);
   });
 });
 
 describe("OG song freshness routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    imageResponseElements.length = 0;
     fetchFontsMock.mockResolvedValue([]);
   });
 
@@ -116,6 +172,29 @@ describe("OG song freshness routes", () => {
       baseUrlOverride: "https://example.test",
     });
     expect(fetchFontsMock).toHaveBeenCalledWith(expect.any(String), "detail");
+    const image = imageResponseElements.at(-1);
+    const elements = collectElements(image);
+    const thumbnail = elements.find(
+      (item) =>
+        item.props?.src ===
+        "https://img.youtube.com/vi/new-video/maxresdefault.jpg",
+    );
+
+    expect(collectText(image)).toEqual(
+      expect.arrayContaining(["新曲", "AZKi"]),
+    );
+    expect(thumbnail?.props?.style).toEqual(
+      expect.objectContaining({ objectFit: "contain" }),
+    );
+    expect(
+      elements.some(
+        (item) =>
+          item.props?.style?.width === 480 && item.props?.style?.height === 270,
+      ),
+    ).toBe(true);
+    expect(
+      elements.some((item) => item.props?.style?.padding === "192px 58px 72px"),
+    ).toBe(true);
   });
 
   it("videothumbはlookupで見つかった新曲を200で描画する", async () => {
@@ -134,6 +213,73 @@ describe("OG song freshness routes", () => {
       baseUrlOverride: "https://example.test",
     });
     expect(fetchFontsMock).toHaveBeenCalledWith(expect.any(String), "detail");
+    const image = imageResponseElements.at(-1);
+    const elements = collectElements(image);
+    const thumbnail = elements.find(
+      (item) =>
+        item.props?.src ===
+        "https://img.youtube.com/vi/new-video/maxresdefault.jpg",
+    );
+
+    expect(collectText(image)).toEqual(expect.arrayContaining(["新曲"]));
+    expect(collectText(image)).not.toContain("Song detail");
+    expect(thumbnail?.props?.style).toEqual(
+      expect.objectContaining({ objectFit: "contain" }),
+    );
+    expect(
+      elements.some((item) => item.props?.style?.padding === "192px 58px 72px"),
+    ).toBe(true);
+  });
+
+  it("配信アーカイブには収録曲数を表示する", async () => {
+    fetchLookupMock.mockResolvedValue([
+      lookupSong,
+      { ...lookupSong, title: "次の収録曲", start: 120 },
+    ]);
+
+    const response = await getVideoThumb(
+      new Request(
+        "https://example.test/api/og/videothumb?v=new-video&hl=ja",
+      ) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(collectText(imageResponseElements.at(-1))).toEqual(
+      expect.arrayContaining(["新曲配信", "2曲収録の配信アーカイブ"]),
+    );
+  });
+
+  it("アートトラックは正方形トリミング用レイアウトを選ぶ", async () => {
+    fetchLookupMock.mockResolvedValue([
+      { ...lookupSong, tags: ["オリ曲", "アートトラック"] },
+    ]);
+
+    const response = await getThumb(
+      new Request(
+        "https://example.test/api/og/thumb?v=new-video&t=10s&hl=ja",
+      ) as never,
+    );
+
+    expect(response.status).toBe(200);
+    const elements = collectElements(imageResponseElements.at(-1));
+    const thumbnail = elements.find(
+      (item) =>
+        item.props?.src ===
+        "https://img.youtube.com/vi/new-video/maxresdefault.jpg",
+    );
+
+    expect(thumbnail?.props?.style).toEqual(
+      expect.objectContaining({ objectFit: "cover" }),
+    );
+    expect(
+      elements.some(
+        (item) =>
+          item.props?.style?.width === 410 && item.props?.style?.height === 410,
+      ),
+    ).toBe(true);
+    expect(
+      elements.some((item) => item.props?.style?.padding === "152px 58px 72px"),
+    ).toBe(true);
   });
 
   it("playlistは通常ミス後のrecent曲で画像を200描画する", async () => {

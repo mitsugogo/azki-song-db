@@ -1,10 +1,12 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
-import { FaCalendar } from "react-icons/fa6";
-import { formatDate } from "@/app/lib/formatDate";
+import { isArtTrack } from "@/app/discography/utils/releaseVariants";
 import { fetchSongMetadataLookup } from "@/app/lib/server/fetchSongs";
 import {
   fetchOgFonts,
+  getOgBackgroundImageUrl,
+  getOgDetailContentTopPadding,
+  getOgDetailThumbnailLayout,
   normalizeOgText,
   ogColors,
   ogImageHeaders,
@@ -17,40 +19,46 @@ export async function GET(req: NextRequest) {
     const requestUrl = new URL(req.url);
     const { searchParams } = requestUrl;
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
-    const v = searchParams.get("v");
-    const t = searchParams.get("t") || "0";
+    const videoId = searchParams.get("v");
+    const timestamp = searchParams.get("t") || "0";
 
-    if (!v) {
+    if (!videoId) {
       return new Response("Missing required parameters", { status: 404 });
     }
 
     const width = searchParams.get("w") || "1200";
     const height = searchParams.get("h") || "630";
-
-    const video_id = v;
-    const start = t.toString().replace("s", "");
+    const start = timestamp.replace("s", "");
     const songs = await fetchSongMetadataLookup({
       locale: hl,
-      videoId: video_id,
+      videoId,
       start,
       baseUrlOverride: requestUrl.origin,
     }).catch(() => []);
     const song = songs.find(
-      (s) => s.video_id === video_id && Number(s.start) === Number(start),
+      (item) =>
+        item.video_id === videoId && Number(item.start) === Number(start),
     );
+
     if (!song) {
       return new Response("Song not found", { status: 404 });
     }
 
     const songTitle = normalizeOgText(song.title);
     const artist = normalizeOgText(song.artist);
-    const title = `♪ ${songTitle} - ${artist}`;
-    const subTitle = normalizeOgText(`${song.video_title}`);
-    const dateText = formatDate(song.broadcast_at, hl);
-    const thumbnailUrl = `https://img.youtube.com/vi/${video_id}/maxresdefault.jpg`;
-    const tagsText = song.tags.join(" / ");
+    const tags = Array.from(
+      new Set(
+        song.tags.map((tag) => normalizeOgText(tag.trim())).filter(Boolean),
+      ),
+    ).slice(0, 3);
+    const titleLength = Array.from(songTitle).length;
+    const titleFontSize = titleLength > 48 ? 38 : titleLength > 36 ? 44 : 52;
+    const thumbnailKind = isArtTrack(song) ? "artwork" : "video";
+    const thumbnail = getOgDetailThumbnailLayout(thumbnailKind);
+    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    const backgroundUrl = getOgBackgroundImageUrl(requestUrl.origin);
     const fonts = await fetchOgFonts(
-      `${songTitle}${artist}${subTitle}${tagsText}${dateText}`,
+      `${songTitle}${artist}${tags.join("")}`,
       "detail",
     );
 
@@ -62,18 +70,20 @@ export async function GET(req: NextRequest) {
           display: "flex",
           position: "relative",
           overflow: "hidden",
-          backgroundColor: ogColors.background,
+          backgroundColor: "#fff6fa",
           color: ogColors.ink,
           fontFamily: '"Noto Sans JP", "Noto Sans", sans-serif',
         }}
       >
-        <div
+        <img
+          src={backgroundUrl}
+          alt=""
           style={{
             position: "absolute",
-            inset: 28,
-            display: "flex",
-            borderRadius: 34,
-            border: "2px solid rgba(255, 255, 255, 0.28)",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
           }}
         />
         <div
@@ -82,207 +92,101 @@ export async function GET(req: NextRequest) {
             width: "100%",
             height: "100%",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            gap: 58,
-            padding: "42px 54px 42px",
+            alignItems: "flex-start",
+            gap: 62,
+            padding: `${getOgDetailContentTopPadding(thumbnailKind)}px 58px 72px`,
           }}
         >
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 24,
+              width: thumbnail.width,
+              minWidth: thumbnail.width,
+              height: thumbnail.height,
+              borderRadius: 18,
+              overflow: "hidden",
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              boxShadow: "0 8px 22px rgba(92, 38, 66, 0.08)",
             }}
           >
-            <div
+            <img
+              src={thumbnailUrl}
+              alt="YouTube Thumbnail"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                padding: "12px 18px",
-                borderRadius: 18,
-                backgroundColor: "rgba(255, 250, 252, 0.9)",
-                color: ogColors.primaryDeep,
-                fontSize: 22,
-                fontWeight: 600,
+                width: "100%",
+                height: "100%",
+                objectFit: thumbnail.objectFit,
               }}
-            >
-              <div style={{ display: "flex" }}>AZKi Song Database</div>
-              <div
-                style={{
-                  display: "flex",
-                  width: 1,
-                  height: 24,
-                  backgroundColor: ogColors.line,
-                }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  color: ogColors.primary,
-                  fontSize: 18,
-                }}
-              >
-                Song detail
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                color: ogColors.primaryDeep,
-                fontSize: 22,
-                fontWeight: 600,
-                padding: "12px 18px",
-                borderRadius: 18,
-                backgroundColor: "rgba(255, 250, 252, 0.9)",
-              }}
-            >
-              <div style={{ display: "flex", color: ogColors.primary }}>
-                <FaCalendar size={20} />
-              </div>
-              <div style={{ display: "flex" }}>{dateText}</div>
-            </div>
+            />
           </div>
-
           <div
             style={{
               display: "flex",
+              flex: 1,
+              minWidth: 0,
+              maxWidth: 612,
               flexDirection: "column",
-              gap: 30,
-              padding: "36px 40px 34px",
-              borderRadius: 16,
-              backgroundColor: "rgba(255, 255, 255, 1)",
-              border: "2px solid rgba(255, 255, 255, 0.5)",
-              boxShadow: "0 18px 32px rgba(45, 36, 48, 0.18)",
-              width: "100%",
+              alignItems: "flex-start",
+              paddingTop: 22,
             }}
           >
             <div
               style={{
-                display: "flex",
-                gap: 30,
-                alignItems: "stretch",
+                display: "block",
+                width: "100%",
+                lineClamp: 3,
+                overflow: "hidden",
+                fontSize: titleFontSize,
+                fontWeight: 700,
+                color: "#5b173a",
+                lineHeight: 1.18,
+                letterSpacing: -1.2,
+                paddingBottom: 12,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  width: 320,
-                  minWidth: 320,
-                  height: 180,
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  border: `1px solid ${ogColors.line}`,
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                }}
-              >
-                <img
-                  src={thumbnailUrl}
-                  alt="YouTube Thumbnail"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 26,
-                  flex: 1,
-                  minWidth: 0,
-                }}
-              >
-                <div
-                  style={{
-                    display: "block",
-                    lineClamp: 2,
-                    overflow: "hidden",
-                    fontSize: 42,
-                    fontWeight: 700,
-                    color: ogColors.ink,
-                    lineHeight: 1.22,
-                    letterSpacing: -1,
-                    paddingBottom: 6,
-                  }}
-                >
-                  {songTitle}
-                </div>
-                <div
-                  style={{
-                    display: "block",
-                    lineClamp: 1,
-                    overflow: "hidden",
-                    fontSize: 30,
-                    color: ogColors.primaryDeep,
-                    fontWeight: 500,
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {artist}
-                </div>
-              </div>
+              {songTitle}
             </div>
             <div
               style={{
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: 24,
-                paddingTop: 10,
-                borderTop: `1px solid ${ogColors.line}`,
+                display: "block",
+                width: "100%",
+                lineClamp: 1,
+                overflow: "hidden",
+                marginTop: 24,
+                color: ogColors.primaryDeep,
+                fontSize: 40,
+                fontWeight: 700,
+                lineHeight: 1.25,
               }}
             >
-              <div
-                style={{
-                  display: tagsText ? "flex" : "none",
-                  flex: 1,
-                  minWidth: 0,
-                  maxWidth: "48%",
-                }}
-              >
+              {artist}
+            </div>
+            <div
+              style={{
+                display: tags.length ? "flex" : "none",
+                flexWrap: "wrap",
+                gap: 16,
+                marginTop: 26,
+                maxWidth: "100%",
+              }}
+            >
+              {tags.map((tag) => (
                 <div
+                  key={tag}
                   style={{
-                    display: "block",
-                    padding: "10px 16px",
-                    borderRadius: 14,
-                    backgroundColor: "rgba(255, 255, 255, 0.84)",
+                    display: "flex",
+                    padding: "11px 22px",
+                    borderRadius: 999,
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
                     color: ogColors.primary,
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: 700,
-                    lineHeight: 1.35,
-                    maxWidth: "100%",
-                    lineClamp: 2,
+                    lineHeight: 1.25,
                   }}
                 >
-                  {tagsText}
+                  {tag}
                 </div>
-              </div>
-              <div
-                style={{
-                  display: "block",
-                  lineClamp: 2,
-                  flex: 1,
-                  minWidth: 0,
-                  maxWidth: "48%",
-                  overflow: "hidden",
-                  textAlign: "right",
-                  color: ogColors.muted,
-                  fontSize: 20,
-                  fontWeight: 700,
-                  lineHeight: 1.35,
-                  paddingBottom: 4,
-                }}
-              >
-                {subTitle}
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -298,7 +202,7 @@ export async function GET(req: NextRequest) {
     if (e instanceof Error) {
       console.log(`${e.message}`);
     }
-    return new Response(`Failed to generate the image`, {
+    return new Response("Failed to generate the image", {
       status: 500,
     });
   }

@@ -136,6 +136,11 @@ export const ogImageHeaders = {
   "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
 };
 
+export const ogBackgroundImagePath = "/default_ogp_bg_az.png";
+
+export const getOgBackgroundImageUrl = (origin: string) =>
+  new URL(ogBackgroundImagePath, origin).toString();
+
 export const OgBackground = () => (
   <>
     <div
@@ -187,6 +192,24 @@ export const OgShell = ({
     {children}
   </div>
 );
+
+export type OgDetailThumbnailKind = "artwork" | "video";
+
+export const getOgDetailThumbnailLayout = (kind: OgDetailThumbnailKind) =>
+  kind === "artwork"
+    ? {
+        width: 410,
+        height: 410,
+        objectFit: "cover" as const,
+      }
+    : {
+        width: 480,
+        height: 270,
+        objectFit: "contain" as const,
+      };
+
+export const getOgDetailContentTopPadding = (kind: OgDetailThumbnailKind) =>
+  kind === "artwork" ? 152 : 192;
 
 export const BrandBadge = ({ label = "Song Database" }: { label?: string }) => (
   <div

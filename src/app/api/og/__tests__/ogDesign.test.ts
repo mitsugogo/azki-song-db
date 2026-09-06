@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchOgFonts } from "../ogDesign";
+import {
+  fetchOgFonts,
+  getOgBackgroundImageUrl,
+  getOgDetailContentTopPadding,
+  getOgDetailThumbnailLayout,
+} from "../ogDesign";
 
 const installFontFetchMock = () =>
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
@@ -70,5 +75,31 @@ describe("fetchOgFonts", () => {
       ["Noto Sans JP", 700],
       ["Noto Sans JP", 900],
     ]);
+  });
+});
+
+describe("OG共通レイアウト", () => {
+  it("配布済みの背景画像を同一オリジンの絶対URLとして参照する", () => {
+    expect(getOgBackgroundImageUrl("https://example.test")).toBe(
+      "https://example.test/default_ogp_bg_az.png",
+    );
+  });
+
+  it("アートトラックは正方形へトリミングし、通常動画は16:9を欠けずに配置する", () => {
+    expect(getOgDetailThumbnailLayout("artwork")).toMatchObject({
+      width: 410,
+      height: 410,
+      objectFit: "cover",
+    });
+    expect(getOgDetailThumbnailLayout("video")).toMatchObject({
+      width: 480,
+      height: 270,
+      objectFit: "contain",
+    });
+  });
+
+  it("16:9サムネイルはサイトタイトルから十分に離れるよう下へ配置する", () => {
+    expect(getOgDetailContentTopPadding("artwork")).toBe(152);
+    expect(getOgDetailContentTopPadding("video")).toBe(192);
   });
 });
