@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.33.0](https://github.com/mitsugogo/azki-song-db/compare/v2.32.0...v2.33.0) (2026-09-07)
+
+### Features
+
+* hololive next対応 ([ec50c5d](https://github.com/mitsugogo/azki-song-db/commit/ec50c5d78c6f674e6ad9535776c70f4d3e14b2f4))
+
 ## [2.32.0](https://github.com/mitsugogo/azki-song-db/compare/v2.31.2...v2.32.0) (2026-09-06)
 
 ### Features
