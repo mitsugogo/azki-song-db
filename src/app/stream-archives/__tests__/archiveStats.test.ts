@@ -112,6 +112,22 @@ describe("createArchiveStatsSummary", () => {
     });
   });
 
+  it("excludes the members-only category from the category ranking only", () => {
+    const summary = createArchiveStatsSummary(
+      [
+        createItem({ video_id: "member-1", topic: "メン限" }),
+        createItem({ video_id: "member-2", topic: "メン限" }),
+        createItem({ video_id: "singing", topic: "歌枠", member_only: true }),
+      ],
+      "ja",
+    );
+
+    expect(summary.streamCount).toBe(3);
+    expect(summary.categories.map((category) => category.name)).toEqual([
+      "歌枠",
+    ]);
+  });
+
   it("filters category and start-time statistics by the JST stream year", () => {
     const summary = createArchiveStatsSummary(
       [

@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { useState } from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveCastFilter from "../ArchiveCastFilter";
 
@@ -89,6 +90,125 @@ describe("ArchiveCastFilter", () => {
     const unknownOption = screen.getByRole("option", { name: "ゲスト" });
     expect(knownOption.querySelector("img")).toBeVisible();
     expect(unknownOption.querySelector("img")).not.toBeInTheDocument();
+  });
+
+  it("uses the official hololive headings in the cast combobox", () => {
+    const createChannel = (branch: string, generation: string) => ({
+      branch,
+      generation,
+      talentName: "テストメンバー",
+      artistName: "テストメンバー",
+      youtubeId: "UC-test",
+      channelName: "Test Channel",
+      handle: "@test",
+      subscriberCount: 0,
+      iconUrl: "",
+    });
+
+    render(
+      <MantineProvider>
+        <ArchiveCastFilter
+          options={[
+            {
+              name: "ラプラス・ダークネス",
+              channel: createChannel("DEV_IS", "holoX"),
+            },
+            {
+              name: "ホロロメンバー",
+              channel: createChannel("ID", "2期生"),
+            },
+            {
+              name: "Promiseメンバー",
+              channel: createChannel("hololive", "Promise"),
+            },
+          ]}
+          value={[]}
+          placeholder="出演者"
+          nothingFoundMessage="該当する出演者はいません"
+          selectedCountLabel="0人選択中"
+          onChange={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
+
+    expect(screen.getByText("秘密結社holoX")).toBeVisible();
+    expect(screen.getByText("holoro")).toBeVisible();
+    expect(screen.getByText("Promise")).toBeVisible();
+  });
+
+  it("shows duplicate memberships in every group while selecting one cast value", () => {
+    const createChannel = (branch: string, generation: string) => ({
+      branch,
+      generation,
+      talentName: "テストメンバー",
+      artistName: "テストメンバー",
+      youtubeId: "UC-test",
+      channelName: "Test Channel",
+      handle: "@test",
+      subscriberCount: 0,
+      iconUrl: "",
+    });
+    const onChange = vi.fn();
+
+    function ControlledArchiveCastFilter() {
+      const [value, setValue] = useState<string[]>([]);
+
+      return (
+        <ArchiveCastFilter
+          options={[
+            {
+              name: "白上フブキ",
+              channel: createChannel("JP", "1期生、ゲーマーズ"),
+            },
+            {
+              name: "オーロ・クロニー",
+              channel: createChannel("hololive", "Council、Promise"),
+            },
+          ]}
+          value={value}
+          placeholder="出演者"
+          nothingFoundMessage="該当する出演者はいません"
+          selectedCountLabel={`${value.length}人選択中`}
+          onChange={(nextValue) => {
+            onChange(nextValue);
+            setValue(nextValue);
+          }}
+        />
+      );
+    }
+
+    render(
+      <MantineProvider>
+        <ControlledArchiveCastFilter />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
+
+    expect(screen.getByText("1期生")).toBeVisible();
+    expect(screen.getByText("ホロライブゲーマーズ")).toBeVisible();
+    expect(screen.getByText("Council")).toBeVisible();
+    expect(screen.getByText("Promise")).toBeVisible();
+
+    const fubukiOptions = screen.getAllByRole("option", {
+      name: "白上フブキ",
+    });
+    const kroniiOptions = screen.getAllByRole("option", {
+      name: "オーロ・クロニー",
+    });
+    expect(fubukiOptions).toHaveLength(2);
+    expect(kroniiOptions).toHaveLength(2);
+
+    fireEvent.click(fubukiOptions[1]);
+
+    expect(onChange).toHaveBeenCalledWith(["白上フブキ"]);
+    screen
+      .getAllByRole("option", { name: "白上フブキ" })
+      .forEach((option) =>
+        expect(option).toHaveAttribute("aria-selected", "true"),
+      );
   });
 
   it("keeps up to two selected cast members as removable pills", () => {

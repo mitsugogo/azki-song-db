@@ -50,6 +50,311 @@ export const collabUnits: CollabUnit[] = [
       },
     },
   },
+  // hololive の公式タレント期・ユニット
+  {
+    members: ["アキ・ローゼンタール", "赤井はあと", "白上フブキ", "夏色まつり"],
+    unitName: "1期生",
+    hl: {
+      en: {
+        unitName: "Gen 1",
+        members: [
+          "Aki Rosenthal",
+          "Akai Haato",
+          "Shirakami Fubuki",
+          "Natsuiro Matsuri",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "百鬼あやめ",
+      "癒月ちょこ",
+      "大空スバル",
+      "湊あくあ",
+      "紫咲シオン",
+    ],
+    unitName: "2期生",
+    hl: {
+      en: {
+        unitName: "Gen 2",
+        members: [
+          "Nakiri Ayame",
+          "Yuzuki Choco",
+          "Oozora Subaru",
+          "Minato Aqua",
+          "Murasaki Shion",
+        ],
+      },
+    },
+  },
+  {
+    members: ["白上フブキ", "大神ミオ", "猫又おかゆ", "戌神ころね"],
+    unitName: "ホロライブゲーマーズ",
+    hl: {
+      en: {
+        unitName: "hololive GAMERS",
+        members: [
+          "Shirakami Fubuki",
+          "Ookami Mio",
+          "Nekomata Okayu",
+          "Inugami Korone",
+        ],
+      },
+    },
+  },
+  {
+    members: ["兎田ぺこら", "不知火フレア", "白銀ノエル", "宝鐘マリン"],
+    unitName: "3期生",
+    hl: {
+      en: {
+        unitName: "Gen 3",
+        members: [
+          "Usada Pekora",
+          "Shiranui Flare",
+          "Shirogane Noel",
+          "Houshou Marine",
+        ],
+      },
+    },
+  },
+  {
+    members: ["角巻わため", "常闇トワ", "姫森ルーナ", "天音かなた", "桐生ココ"],
+    unitName: "4期生",
+    hl: {
+      en: {
+        unitName: "Gen 4",
+        members: [
+          "Tsunomaki Watame",
+          "Tokoyami Towa",
+          "Himemori Luna",
+          "Amane Kanata",
+          "Kiryu Coco",
+        ],
+      },
+    },
+  },
+  {
+    members: ["雪花ラミィ", "桃鈴ねね", "獅白ぼたん", "尾丸ポルカ"],
+    unitName: "5期生",
+    hl: {
+      en: {
+        unitName: "Gen 5",
+        members: [
+          "Yukihana Lamy",
+          "Momosuzu Nene",
+          "Shishiro Botan",
+          "Omaru Polka",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "ラプラス・ダークネス",
+      "鷹嶺ルイ",
+      "博衣こより",
+      "風真いろは",
+      "沙花叉クロヱ",
+    ],
+    unitName: "秘密結社holoX",
+    hl: {
+      en: {
+        unitName: "Secret Society holoX",
+        members: [
+          "La+ Darknesss",
+          "Takane Lui",
+          "Hakui Koyori",
+          "Kazama Iroha",
+          "Sakamata Chloe",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "アユンダ・リス",
+      "ムーナ・ホシノヴァ",
+      "アイラニ・イオフィフティーン",
+    ],
+    unitName: "AREA15",
+    hl: {
+      en: {
+        unitName: "AREA15",
+        members: ["Ayunda Risu", "Moona Hoshinova", "Airani Iofifteen"],
+      },
+    },
+  },
+  {
+    members: [
+      "クレイジー・オリー",
+      "アーニャ・メルフィッサ",
+      "パヴォリア・レイネ",
+    ],
+    unitName: "holoro",
+    hl: {
+      en: {
+        unitName: "holoro",
+        members: ["Kureiji Ollie", "Anya Melfissa", "Pavolia Reine"],
+      },
+    },
+  },
+  {
+    members: ["ベスティア・ゼータ", "カエラ・コヴァルスキア", "こぼ・かなえる"],
+    unitName: "holoh3ro",
+    hl: {
+      en: {
+        unitName: "holoh3ro",
+        members: ["Vestia Zeta", "Kaela Kovalskia", "Kobo Kanaeru"],
+      },
+    },
+  },
+  {
+    members: [
+      "森カリオペ",
+      "小鳥遊キアラ",
+      "一伊那尓栖",
+      "ワトソン・アメリア",
+      "がうる・ぐら",
+    ],
+    unitName: "Myth",
+    hl: {
+      en: {
+        unitName: "Myth",
+        members: [
+          "Mori Calliope",
+          "Takanashi Kiara",
+          "Ninomae Ina'nis",
+          "Watson Amelia",
+          "Gawr Gura",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "オーロ・クロニー",
+      "ハコス・ベールズ",
+      "九十九佐命",
+      "セレス・ファウナ",
+      "七詩ムメイ",
+    ],
+    unitName: "Council",
+    hl: {
+      en: {
+        unitName: "Council",
+        members: [
+          "Ouro Kronii",
+          "Hakos Baelz",
+          "Tsukumo Sana",
+          "Ceres Fauna",
+          "Nanashi Mumei",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "IRyS",
+      "オーロ・クロニー",
+      "ハコス・ベールズ",
+      "セレス・ファウナ",
+      "七詩ムメイ",
+    ],
+    unitName: "Promise",
+    hl: {
+      en: {
+        unitName: "Promise",
+        members: [
+          "IRyS",
+          "Ouro Kronii",
+          "Hakos Baelz",
+          "Ceres Fauna",
+          "Nanashi Mumei",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "シオリ・ノヴェラ",
+      "古石ビジュー",
+      "ネリッサ・レイヴンクロフト",
+      "フワワ・アビスガード",
+      "モココ・アビスガード",
+    ],
+    unitName: "Advent",
+    hl: {
+      en: {
+        unitName: "Advent",
+        members: [
+          "Shiori Novella",
+          "Koseki Bijou",
+          "Nerissa Ravencroft",
+          "Fuwawa Abyssgard",
+          "Mococo Abyssgard",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "エリザベス・ローズ・ブラッドフレイム",
+      "ジジ・ムリン",
+      "セシリア・イマーグリーン",
+      "ラオーラ・パンテーラ",
+    ],
+    unitName: "Justice",
+    hl: {
+      en: {
+        unitName: "Justice",
+        members: [
+          "Elizabeth Rose Bloodflame",
+          "Gigi Murin",
+          "Cecilia Immergreen",
+          "Raora Panthera",
+        ],
+      },
+    },
+  },
+  {
+    members: ["音乃瀬奏", "一条莉々華", "儒烏風亭らでん", "轟はじめ", "火威青"],
+    unitName: "ReGLOSS",
+    hl: {
+      en: {
+        unitName: "ReGLOSS",
+        members: [
+          "Otonose Kanade",
+          "Ichijou Ririka",
+          "Juufuutei Raden",
+          "Todoroki Hajime",
+          "Hiodoshi Ao",
+        ],
+      },
+    },
+  },
+  {
+    members: [
+      "響咲リオナ",
+      "虎金妃笑虎",
+      "水宮枢",
+      "輪堂千速",
+      "綺々羅々ヴィヴィ",
+    ],
+    unitName: "FLOW GLOW",
+    hl: {
+      en: {
+        unitName: "FLOW GLOW",
+        members: [
+          "Isaki Riona",
+          "Koganei Niko",
+          "Mizumiya Su",
+          "Rindo Chihaya",
+          "Kikirara Vivi",
+        ],
+      },
+    },
+  },
   {
     members: ["ときのそら", "AZKi"],
     unitName: "SorAZ",

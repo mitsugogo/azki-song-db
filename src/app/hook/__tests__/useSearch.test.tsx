@@ -635,6 +635,28 @@ describe("useSearch", () => {
         video_uri: "",
         milestones: [],
       },
+      {
+        video_id: "vid3",
+        title: "Song 3",
+        artist: "Advent",
+        album: "Album 3",
+        sing: "シオリ・ノヴェラ、古石ビジュー、ネリッサ・レイヴンクロフト、フワワ・アビスガード、モココ・アビスガード",
+        tags: [],
+        video_title: "Video 3",
+        broadcast_at: "2024-01-03",
+        start: "0",
+        end: "100",
+        year: 2024,
+        extra: "",
+        lyricist: "",
+        composer: "",
+        arranger: "",
+        album_list_uri: "",
+        album_release_at: "",
+        album_is_compilation: false,
+        video_uri: "",
+        milestones: [],
+      },
     ];
     const { result } = renderHook(() => useSearch(songs));
 
@@ -654,6 +676,18 @@ describe("useSearch", () => {
       () => {
         expect(result.current.songs.length).toBe(1);
         expect(result.current.songs[0].sing).toBe("AZKi、風真いろは");
+      },
+      { timeout: 1000 },
+    );
+
+    result.current.setSearchTerm("unit:Advent");
+
+    await waitFor(
+      () => {
+        expect(result.current.songs.length).toBe(1);
+        expect(result.current.songs[0].sing).toBe(
+          "シオリ・ノヴェラ、古石ビジュー、ネリッサ・レイヴンクロフト、フワワ・アビスガード、モココ・アビスガード",
+        );
       },
       { timeout: 1000 },
     );

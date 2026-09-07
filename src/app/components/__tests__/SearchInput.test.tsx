@@ -136,6 +136,31 @@ describe("SearchInput", () => {
     });
   });
 
+  it("公式タレントユニットは該当する歌唱曲があると候補から選択できる", async () => {
+    const { onSearchChange } = renderSearchInput([
+      createSong({
+        sing: "シオリ・ノヴェラ、古石ビジュー、ネリッサ・レイヴンクロフト、フワワ・アビスガード、モココ・アビスガード",
+        sings: [
+          "シオリ・ノヴェラ",
+          "古石ビジュー",
+          "ネリッサ・レイヴンクロフト",
+          "フワワ・アビスガード",
+          "モココ・アビスガード",
+        ],
+      }),
+    ]);
+
+    fireEvent.change(screen.getByPlaceholderText("search"), {
+      target: { value: "Advent" },
+    });
+
+    fireEvent.click(await screen.findByText("Advent"));
+
+    await waitFor(() => {
+      expect(onSearchChange).toHaveBeenCalledWith(["unit:Advent"]);
+    });
+  });
+
   it("曲名別名で候補を出し、選択値は登録曲名に寄せる", async () => {
     const { onSearchChange } = renderSearchInput([
       createSong({

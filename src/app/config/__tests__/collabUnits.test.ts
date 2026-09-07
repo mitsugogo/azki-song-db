@@ -42,6 +42,54 @@ describe("collabUnits utilities", () => {
     expect(name).toBe("BAKATARE CIRCUS");
   });
 
+  it("公式の複数人タレント期・ユニットを定義する", () => {
+    expect(collabUnits.map((unit) => unit.unitName)).toEqual(
+      expect.arrayContaining([
+        "1期生",
+        "2期生",
+        "ホロライブゲーマーズ",
+        "3期生",
+        "4期生",
+        "5期生",
+        "秘密結社holoX",
+        "AREA15",
+        "holoro",
+        "holoh3ro",
+        "Myth",
+        "Council",
+        "Promise",
+        "Advent",
+        "Justice",
+        "ReGLOSS",
+        "FLOW GLOW",
+      ]),
+    );
+  });
+
+  it("Advent は日本語・英語どちらのメンバー表記でも解決する", () => {
+    const japaneseMembers = [
+      "シオリ・ノヴェラ",
+      "古石ビジュー",
+      "ネリッサ・レイヴンクロフト",
+      "フワワ・アビスガード",
+      "モココ・アビスガード",
+    ];
+    const englishMembers = [
+      "Shiori Novella",
+      "Koseki Bijou",
+      "Nerissa Ravencroft",
+      "Fuwawa Abyssgard",
+      "Mococo Abyssgard",
+    ];
+
+    expect(getCollabUnitName([...japaneseMembers].reverse())).toBe("Advent");
+    expect(getCollabUnitName([...englishMembers].reverse(), "en")).toBe(
+      "Advent",
+    );
+    expect(getCollabMembers("advent")).toEqual(japaneseMembers);
+    expect(getCollabMembers("ADVENT", "en")).toEqual(englishMembers);
+  });
+
   it("getCollabUnitName はぺこマリを返す", () => {
     expect(getCollabUnitName(["宝鐘マリン", "兎田ぺこら"])).toBe("ぺこマリ");
     expect(getCollabUnitName(["Houshou marine", "Usada Pekora"], "en")).toBe(
