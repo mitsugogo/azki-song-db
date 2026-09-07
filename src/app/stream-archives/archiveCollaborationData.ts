@@ -1,5 +1,6 @@
 import { siteConfig } from "../config/siteConfig";
 import { getCollabUnitName } from "../config/collabUnits";
+import { resolveHoloGenerationGroups } from "../config/holoGenerations";
 import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import type { ChannelEntry } from "../types/api/yt/channels";
@@ -48,9 +49,20 @@ export const getArchiveHololiveMemberMetadata = (
     (part) =>
       !INACTIVE_GENERATION_MARKERS.some((marker) => part.includes(marker)),
   );
+  const groups = resolveHoloGenerationGroups(
+    participant?.channel
+      ? {
+          ...participant.channel,
+          generation: activeGenerationParts.join("、"),
+        }
+      : undefined,
+  );
 
   return {
-    generation: activeGenerationParts.join("・"),
+    generation:
+      groups[0]?.key === "other"
+        ? activeGenerationParts.join("・")
+        : groups.map((group) => group.label).join("・"),
     status: statusParts.length > 0 ? statusParts.join("・") : null,
   };
 };
