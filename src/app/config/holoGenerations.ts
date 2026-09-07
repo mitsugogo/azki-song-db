@@ -1,6 +1,6 @@
 import type { ChannelEntry } from "../types/api/yt/channels";
 
-// ホロライブの「期生」グループ定義。並び順はデビュー順（0期生→…→EN4期生→HOLOSTARS→公式→その他）
+// hololive 公式サイトの所属タレント区分。公式サイトと同じ順序で表示する。
 export type HoloGenerationGroup = {
   key: string;
   label: string;
@@ -12,121 +12,228 @@ type HoloGenerationGroupDefinition = HoloGenerationGroup & {
   matches: (branch: string, generation: string) => boolean;
 };
 
-// branch/generation はスプレッドシート由来の自由記述（複数タグをカンマ区切りで含む）のため部分一致で判定する
-// 並び順: JP -> ReGLOSS/FLOW GLOW -> EN -> ID の順にブランチをまとめ、各ブランチ内はデビュー順
+// channels シートは移行前の JP / EN / ID と、移行後の統合された hololive の
+// どちらの表記も含み得る。世代は自由記述で複数のタグを含むため、正規化した部分一致で扱う。
+const normalizeValue = (value: string) =>
+  value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
+
+const normalizeBranch = (value: string) =>
+  normalizeValue(value).replace(/[\s_'’-]+/gu, "");
+
+const normalizeGeneration = (value: string) =>
+  normalizeValue(value).replace(/[\s:_'’-]+/gu, "");
+
+const hasGeneration = (generation: string, ...values: string[]) => {
+  const normalizedGeneration = normalizeGeneration(generation);
+
+  return values.some((value) =>
+    normalizedGeneration.includes(normalizeGeneration(value)),
+  );
+};
+
+const isHololiveBranch = (branch: string) => {
+  const normalizedBranch = normalizeBranch(branch);
+
+  return (
+    ["jp", "en", "id", "devis", "hololive", "ホロライブ"].includes(
+      normalizedBranch,
+    ) || normalizedBranch.includes("hololive")
+  );
+};
+
+const isJapaneseBranch = (branch: string) => {
+  const normalizedBranch = normalizeBranch(branch);
+
+  return ["jp", "hololive", "ホロライブ", "hololivejp"].includes(
+    normalizedBranch,
+  );
+};
+
+const isIndonesianBranch = (branch: string) => {
+  const normalizedBranch = normalizeBranch(branch);
+
+  return (
+    normalizedBranch === "id" ||
+    normalizedBranch === "hololiveid" ||
+    normalizedBranch.includes("indonesia")
+  );
+};
+
+const isEnglishBranch = (branch: string) => {
+  const normalizedBranch = normalizeBranch(branch);
+
+  return (
+    normalizedBranch === "en" ||
+    normalizedBranch === "hololiveen" ||
+    normalizedBranch.includes("english")
+  );
+};
+
+const isDevIsBranch = (branch: string) =>
+  normalizeBranch(branch).includes("devis");
+
 const HOLO_GENERATION_GROUPS: HoloGenerationGroupDefinition[] = [
   {
-    key: "jp-0",
+    key: "hololive-0",
     label: "0期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("0期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "0期生"),
   },
   {
-    key: "jp-1",
+    key: "hololive-1",
     label: "1期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("1期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "1期生"),
   },
   {
-    key: "jp-2",
+    key: "hololive-2",
     label: "2期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("2期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "2期生"),
   },
   {
-    key: "jp-gamers",
-    label: "ゲーマーズ",
+    key: "hololive-gamers",
+    label: "ホロライブゲーマーズ",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("ゲーマーズ"),
+      isJapaneseBranch(branch) &&
+      hasGeneration(generation, "ホロライブゲーマーズ", "ゲーマーズ"),
   },
   {
-    key: "jp-3",
+    key: "hololive-3",
     label: "3期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("3期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "3期生"),
   },
   {
-    key: "jp-4",
+    key: "hololive-4",
     label: "4期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("4期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "4期生"),
   },
   {
-    key: "jp-5",
+    key: "hololive-5",
     label: "5期生",
     matches: (branch, generation) =>
-      branch === "JP" && generation.includes("5期生"),
+      isJapaneseBranch(branch) && hasGeneration(generation, "5期生"),
   },
   {
-    key: "jp-6",
-    label: "holoX(6期生)",
+    key: "hololive-holox",
+    label: "秘密結社holoX",
     matches: (branch, generation) =>
-      branch === "JP" &&
-      (generation.includes("6期生") || generation.includes("holoX")),
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "秘密結社holoX", "holoX") ||
+        ((isJapaneseBranch(branch) || isDevIsBranch(branch)) &&
+          hasGeneration(generation, "6期生"))),
   },
   {
-    key: "devis-regloss",
+    key: "area15",
+    label: "AREA15",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "AREA15") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "1期生"))),
+  },
+  {
+    key: "holoro",
+    label: "holoro",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "holoro") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "2期生"))),
+  },
+  {
+    key: "holoh3ro",
+    label: "holoh3ro",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "holoh3ro", "holo3ro") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "3期生"))),
+  },
+  {
+    key: "myth",
+    label: "Myth",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "Myth") ||
+        (isEnglishBranch(branch) && hasGeneration(generation, "1期生"))),
+  },
+  {
+    key: "project-hope",
+    label: "Project: HOPE",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "Project: HOPE", "1.5期生") ||
+        (isEnglishBranch(branch) && hasGeneration(generation, "HOPE"))),
+  },
+  {
+    key: "council",
+    label: "Council",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "Council") ||
+        (isEnglishBranch(branch) && hasGeneration(generation, "2期生"))),
+  },
+  {
+    key: "promise",
+    label: "Promise",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) && hasGeneration(generation, "Promise"),
+  },
+  {
+    key: "advent",
+    label: "Advent",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "Advent") ||
+        (isEnglishBranch(branch) && hasGeneration(generation, "3期生"))),
+  },
+  {
+    key: "justice",
+    label: "Justice",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "Justice") ||
+        (isEnglishBranch(branch) && hasGeneration(generation, "4期生"))),
+  },
+  {
+    key: "regloss",
     label: "ReGLOSS",
     matches: (branch, generation) =>
-      branch === "DEV_IS" && generation.includes("ReGLOSS"),
+      isHololiveBranch(branch) && hasGeneration(generation, "ReGLOSS"),
   },
   {
-    key: "devis-flowglow",
+    key: "flow-glow",
     label: "FLOW GLOW",
     matches: (branch, generation) =>
-      branch === "DEV_IS" && generation.includes("FLOW GLOW"),
+      isHololiveBranch(branch) && hasGeneration(generation, "FLOW GLOW"),
   },
   {
-    key: "en-1",
-    label: "EN1期生",
+    key: "graduates",
+    label: "卒業生",
     matches: (branch, generation) =>
-      branch === "EN" && generation.includes("1期生"),
+      isHololiveBranch(branch) && hasGeneration(generation, "卒業生"),
   },
   {
-    key: "en-2",
-    label: "EN2期生",
+    key: "holoan",
+    label: "holoAN",
     matches: (branch, generation) =>
-      branch === "EN" && generation.includes("2期生"),
+      isHololiveBranch(branch) && hasGeneration(generation, "holoAN"),
   },
   {
-    key: "en-3",
-    label: "EN3期生",
+    key: "office-staff",
+    label: "事務所スタッフ",
     matches: (branch, generation) =>
-      branch === "EN" && generation.includes("3期生"),
-  },
-  {
-    key: "en-4",
-    label: "EN4期生",
-    matches: (branch, generation) =>
-      branch === "EN" && generation.includes("4期生"),
-  },
-  {
-    key: "id-1",
-    label: "ID1期生",
-    matches: (branch, generation) =>
-      branch === "ID" && generation.includes("1期生"),
-  },
-  {
-    key: "id-2",
-    label: "ID2期生",
-    matches: (branch, generation) =>
-      branch === "ID" && generation.includes("2期生"),
-  },
-  {
-    key: "id-3",
-    label: "ID3期生",
-    matches: (branch, generation) =>
-      branch === "ID" && generation.includes("3期生"),
+      isHololiveBranch(branch) && hasGeneration(generation, "事務所スタッフ"),
   },
   {
     key: "holostars",
     label: "HOLOSTARS",
-    matches: (branch) => branch === "HOLOSTARS",
+    matches: (branch) => normalizeBranch(branch) === "holostars",
   },
   {
     key: "official",
     label: "公式",
-    matches: (branch) => branch === "公式",
+    matches: (branch) => normalizeBranch(branch) === "公式",
   },
 ];
 
@@ -135,16 +242,34 @@ export const holoGenerationGroupOrder: string[] = [
   OTHER_GROUP.key,
 ];
 
-export const resolveHoloGenerationGroup = (
+const toHoloGenerationGroup = (
+  group: HoloGenerationGroup,
+): HoloGenerationGroup => ({
+  key: group.key,
+  label: group.label,
+});
+
+export const resolveHoloGenerationGroups = (
   channel: Pick<ChannelEntry, "branch" | "generation"> | null | undefined,
-): HoloGenerationGroup => {
+): HoloGenerationGroup[] => {
   if (!channel) {
-    return OTHER_GROUP;
+    return [toHoloGenerationGroup(OTHER_GROUP)];
   }
 
-  const matched = HOLO_GENERATION_GROUPS.find((group) =>
+  const matched = HOLO_GENERATION_GROUPS.filter((group) =>
     group.matches(channel.branch, channel.generation),
   );
 
-  return matched ? { key: matched.key, label: matched.label } : OTHER_GROUP;
+  return matched.length > 0
+    ? matched.map(toHoloGenerationGroup)
+    : [toHoloGenerationGroup(OTHER_GROUP)];
+};
+
+export const resolveHoloGenerationGroup = (
+  channel: Pick<ChannelEntry, "branch" | "generation"> | null | undefined,
+): HoloGenerationGroup => {
+  return (
+    resolveHoloGenerationGroups(channel)[0] ??
+    toHoloGenerationGroup(OTHER_GROUP)
+  );
 };

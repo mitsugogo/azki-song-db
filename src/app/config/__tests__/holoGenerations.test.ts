@@ -2,50 +2,33 @@ import { describe, expect, it } from "vitest";
 import {
   holoGenerationGroupOrder,
   resolveHoloGenerationGroup,
+  resolveHoloGenerationGroups,
 } from "../holoGenerations";
 
 describe("resolveHoloGenerationGroup", () => {
-  it("groups JP branch channels by numbered generation", () => {
-    expect(
-      resolveHoloGenerationGroup({ branch: "JP", generation: "0期生" }).label,
-    ).toBe("0期生");
-    expect(
-      resolveHoloGenerationGroup({
-        branch: "JP",
-        generation: "1期生、ゲーマーズ",
-      }).label,
-    ).toBe("1期生");
-    expect(
-      resolveHoloGenerationGroup({ branch: "JP", generation: "ゲーマーズ" })
-        .label,
-    ).toBe("ゲーマーズ");
-    expect(
-      resolveHoloGenerationGroup({
-        branch: "JP",
-        generation: "6期生、holoX、活動終了",
-      }).label,
-    ).toBe("holoX(6期生)");
-  });
-
-  it("groups ID/EN branch channels with a branch-prefixed label", () => {
-    expect(
-      resolveHoloGenerationGroup({ branch: "ID", generation: "2期生" }).label,
-    ).toBe("ID2期生");
-    expect(
-      resolveHoloGenerationGroup({ branch: "EN", generation: "1期生、卒業生" })
-        .label,
-    ).toBe("EN1期生");
-  });
-
-  it("groups DEV_IS units by unit name", () => {
-    expect(
-      resolveHoloGenerationGroup({ branch: "DEV_IS", generation: "ReGLOSS" })
-        .label,
-    ).toBe("ReGLOSS");
-    expect(
-      resolveHoloGenerationGroup({ branch: "DEV_IS", generation: "FLOW GLOW" })
-        .label,
-    ).toBe("FLOW GLOW");
+  it.each([
+    ["JP", "0期生", "0期生"],
+    ["JP", "1期生、ゲーマーズ", "1期生"],
+    ["JP", "ゲーマーズ", "ホロライブゲーマーズ"],
+    ["JP", "6期生、holoX、活動終了", "秘密結社holoX"],
+    ["ID", "1期生", "AREA15"],
+    ["ID", "2期生", "holoro"],
+    ["ID", "3期生", "holoh3ro"],
+    ["EN", "1期生、卒業生", "Myth"],
+    ["EN", "1.5期生", "Project: HOPE"],
+    ["EN", "2期生", "Council"],
+    ["EN", "3期生", "Advent"],
+    ["EN", "4期生", "Justice"],
+    ["DEV_IS", "ReGLOSS", "ReGLOSS"],
+    ["DEV_IS", "FLOW GLOW", "FLOW GLOW"],
+    ["hololive", "Promise", "Promise"],
+    ["hololive", "卒業生", "卒業生"],
+    ["hololive", "holoAN", "holoAN"],
+    ["hololive", "事務所スタッフ", "事務所スタッフ"],
+  ])("maps %s / %s to the official %s group", (branch, generation, label) => {
+    expect(resolveHoloGenerationGroup({ branch, generation }).label).toBe(
+      label,
+    );
   });
 
   it("falls back to その他 for non-hololive channels or missing channel data", () => {
@@ -56,13 +39,54 @@ describe("resolveHoloGenerationGroup", () => {
     expect(resolveHoloGenerationGroup(null).label).toBe("その他");
   });
 
-  it("orders debut generations before その他", () => {
-    expect(holoGenerationGroupOrder.at(-1)).toBe("other");
-    expect(holoGenerationGroupOrder.indexOf("jp-0")).toBeLessThan(
-      holoGenerationGroupOrder.indexOf("jp-1"),
-    );
-    expect(holoGenerationGroupOrder.indexOf("jp-6")).toBeLessThan(
-      holoGenerationGroupOrder.indexOf("en-2"),
-    );
+  it("returns every matching official group in official order", () => {
+    expect(
+      resolveHoloGenerationGroups({
+        branch: "JP",
+        generation: "1期生、ゲーマーズ",
+      }),
+    ).toEqual([
+      { key: "hololive-1", label: "1期生" },
+      { key: "hololive-gamers", label: "ホロライブゲーマーズ" },
+    ]);
+    expect(
+      resolveHoloGenerationGroups({
+        branch: "hololive",
+        generation: "Council、Promise",
+      }),
+    ).toEqual([
+      { key: "council", label: "Council" },
+      { key: "promise", label: "Promise" },
+    ]);
+  });
+
+  it("keeps the official talent group order before supplementary groups", () => {
+    expect(holoGenerationGroupOrder).toEqual([
+      "hololive-0",
+      "hololive-1",
+      "hololive-2",
+      "hololive-gamers",
+      "hololive-3",
+      "hololive-4",
+      "hololive-5",
+      "hololive-holox",
+      "area15",
+      "holoro",
+      "holoh3ro",
+      "myth",
+      "project-hope",
+      "council",
+      "promise",
+      "advent",
+      "justice",
+      "regloss",
+      "flow-glow",
+      "graduates",
+      "holoan",
+      "office-staff",
+      "holostars",
+      "official",
+      "other",
+    ]);
   });
 });

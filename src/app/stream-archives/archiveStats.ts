@@ -54,6 +54,10 @@ export type ArchiveStatsSummary = {
   maxTimeHeatmapCount: number;
 };
 
+const EXCLUDED_CATEGORY_RANKING_KEYS = new Set([
+  normalizeArchiveSeriesKey("メン限"),
+]);
+
 const JST_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZone: "Asia/Tokyo",
   year: "numeric",
@@ -217,6 +221,7 @@ export const createArchiveStatsSummary = (
     sensitivity: "base",
   });
   const categories = Array.from(categoriesByKey.values())
+    .filter((category) => !EXCLUDED_CATEGORY_RANKING_KEYS.has(category.key))
     .sort(
       (left, right) =>
         right.streamCount - left.streamCount ||
