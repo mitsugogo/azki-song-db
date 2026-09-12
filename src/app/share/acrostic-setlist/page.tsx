@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     openGraph: {
-      title: ogTitle,
+      title,
       description,
       url: pageUrl.toString(),
       type: "website",

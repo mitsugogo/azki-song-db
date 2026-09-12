@@ -17,21 +17,20 @@ export async function generateMetadata({
   const tMeta = await getTranslations({ namespace: "Metadata.share", locale });
 
   const pageTitle = normalizedTitle
-    ? `${tMeta("myBest9WithTopic", {
+    ? tMeta("myBest9WithTopic", {
         title: normalizedTitle,
         siteName: siteConfig.siteName,
-      })}
-    `
+      })
     : tMeta("myBest9TitleWithSite", { siteName: siteConfig.siteName });
 
   const ogTitle = normalizedTitle
     ? tMeta("myBest9OgWithTopic", { title: normalizedTitle })
     : tMeta("myBest9OgTitle");
-  const ogDescription = tMeta("myBest9OgDescription");
+  const description = tMeta("myBest9OgDescription");
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
-  ogImageUrl.searchParams.set("subtitle", tMeta("myBest9OgTitle"));
+  ogImageUrl.searchParams.set("subtitle", description);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
 
@@ -43,10 +42,10 @@ export async function generateMetadata({
 
   return {
     title: pageTitle,
-    description: ogDescription,
+    description,
     openGraph: {
-      title: ogTitle,
-      description: ogDescription,
+      title: pageTitle,
+      description,
       url: pageUrl.toString(),
       type: "website",
       siteName: siteConfig.siteName,
@@ -62,8 +61,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
-      description: ogDescription,
+      title: pageTitle,
+      description,
       images: [ogImagePath],
     },
     alternates: {

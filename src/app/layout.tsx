@@ -41,37 +41,36 @@ const notoSans = Noto_Sans_JP({
   adjustFontFallback: false,
 });
 
+const rootDescription =
+  "ホロライブ所属のVirtual DiVA AZKiさんが歌枠・オリジナル曲・ライブ等で歌唱した楽曲とセットリストのデータベース";
+const rootOgImagePath = `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent(rootDescription)}&w=1200&h=630`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: `${siteConfig.siteName}`,
-  description:
-    "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+  description: rootDescription,
   keywords: ["AZKi", "歌", "歌枠", "オリ曲", "ライブ", "ホロライブ"],
   openGraph: {
     title: `${siteConfig.siteName}`,
-    description:
-      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+    description: rootDescription,
     url: siteConfig.siteUrl,
     siteName: `${siteConfig.siteName}`,
     locale: "ja_JP",
     type: "website",
     images: [
       {
-        url: `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
+        url: rootOgImagePath,
         width: 1200,
         height: 630,
-        alt: `${siteConfig.siteName} - AZKiさんの歌のデータベース`,
+        alt: `${siteConfig.siteName} - ${rootDescription}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.siteName}`,
-    description:
-      "ホロライブのAZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
-    images: [
-      `/api/og?title=${encodeURIComponent(siteConfig.siteName)}&subtitle=${encodeURIComponent("AZKiさんの歌のデータベース")}&w=1200&h=630`,
-    ],
+    description: rootDescription,
+    images: [rootOgImagePath],
   },
   icons: {
     icon: "/favicon.ico",

@@ -2,15 +2,17 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 
-const { fetchLookupMock, fetchSongsMock, headersMock } = vi.hoisted(() => ({
-  fetchLookupMock: vi.fn(),
-  fetchSongsMock: vi.fn(),
-  headersMock: vi.fn(),
-}));
+const { fetchLookupMock, fetchSongsMock, headersMock, localeState } =
+  vi.hoisted(() => ({
+    fetchLookupMock: vi.fn(),
+    fetchSongsMock: vi.fn(),
+    headersMock: vi.fn(),
+    localeState: { current: "ja" },
+  }));
 
 vi.mock("next/headers", () => ({ headers: headersMock }));
 vi.mock("next-intl/server", () => ({
-  getLocale: () => Promise.resolve("ja"),
+  getLocale: () => Promise.resolve(localeState.current),
   getTranslations: () =>
     Promise.resolve((key: string) => (key === "keywords" ? "AZKi,Song" : key)),
 }));
@@ -65,6 +67,7 @@ const song: Song = {
 describe("watch generateMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localeState.current = "ja";
     headersMock.mockResolvedValue(new Headers());
     fetchLookupMock.mockResolvedValue([song]);
     fetchSongsMock.mockResolvedValue([song]);
@@ -100,5 +103,19 @@ describe("watch generateMetadata", () => {
       includeMembersOnly: true,
       cookie: "session=value",
     });
+  });
+
+  it("英語表示ではOpen Graph localeをen_USにする", async () => {
+    localeState.current = "en";
+
+    const result = await generateMetadata({
+      searchParams: Promise.resolve({}),
+    });
+
+    expect(result.openGraph?.locale).toBe("en_US");
+    expect(result.openGraph?.title).toBe(result.title);
+    expect(result.twitter?.title).toBe(result.title);
+    expect(result.openGraph?.description).toBe(result.description);
+    expect(result.twitter?.description).toBe(result.description);
   });
 });

@@ -154,7 +154,7 @@ export async function generateMetadata({
     "title",
     `${matched.album} / ${matched.representativeSong.artist}`,
   );
-  ogImageUrl.searchParams.set("subtitle", `${matched.songs.length} tracks`);
+  ogImageUrl.searchParams.set("subtitle", description);
   ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");

@@ -90,11 +90,11 @@ export async function generateMetadata(
   return {
     ...metadata,
     title: `${title} | ${siteConfig.siteName}`,
-    description: baseDescription,
+    description: ogSubtitle,
     openGraph: {
       ...metadata.openGraph,
       title: `${title} | ${siteConfig.siteName}`,
-      description: baseDescription,
+      description: ogSubtitle,
       url: canonical,
       siteName: siteConfig.siteName,
       locale: locale === "ja" ? "ja_JP" : "en_US",
@@ -104,7 +104,7 @@ export async function generateMetadata(
     twitter: {
       card: "summary_large_image",
       title: `${title} | ${siteConfig.siteName}`,
-      description: baseDescription,
+      description: ogSubtitle,
       images: [ogImagePath],
     },
     alternates: {

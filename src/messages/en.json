@@ -391,6 +391,7 @@
     },
     "search": {
       "description": "Search songs by title, artist, tag and more.",
+      "summary": "Song search across {countSongs} songs and {countVideos} videos",
       "ogSubtitle": "Search results - {siteName}",
       "ogAlt": "{siteName} - Search results"
     },
@@ -400,6 +401,7 @@
       "ogAlt": "{siteName} - Data list"
     },
     "share": {
+      "indexDescription": "Features for sharing song selections on social media",
       "acrosticSetlistTitleWithSite": "Acrostic Setlist Maker | {siteName}",
       "acrosticSetlistOgTitle": "Acrostic Setlist Maker",
       "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
@@ -447,13 +449,20 @@
       "title": "Seichi Map",
       "description": "Record your visits and completion rate of the AZKi Seichi Map."
     },
+    "seichiMapRanking": {
+      "description": "Rankings of the most-visited locations and explorers with the most visits"
+    },
     "seichiMapCompleteShared": {
       "title": "Seichi Map",
       "descriptionTemplate": "{nickname}'s Seichi Map Visit Log"
     },
     "playlist": {
       "title": "Playlist",
-      "description": "AZKi's original and cover songs collection"
+      "description": "AZKi's original and cover songs collection",
+      "sharedDescription": "A playlist containing {count} songs"
+    },
+    "statistics": {
+      "description": "Statistics for karaoke setlists, original songs, cover songs, and more"
     },
     "membersOnlyAccess": {
       "title": "Unlock Members-only Data | {siteName}",

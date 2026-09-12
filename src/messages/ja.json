@@ -266,14 +266,14 @@
   },
   "Metadata": {
     "home": {
-      "description": "仮想世界の歌姫、ホロライブ所属のVirtual DiVA AZKiさんの歌を楽しむためのデータベース。歌枠やオリ曲、ライブ等で歌唱した楽曲やセトリをまとめています。",
+      "description": "ホロライブ所属のVirtual DiVA AZKiさんが歌枠・オリジナル曲・ライブ等で歌唱した楽曲とセットリストのデータベース",
       "ogSubtitle": "AZKiさんの歌の素晴らしさを伝えるサイト",
       "ogAlt": "{siteName} - AZKiさんの歌の素晴らしさを伝えるサイト"
     },
     "watch": {
       "keywords": "AZKi,歌,まとめ,楽曲,Discography,オリジナル曲,コラボ曲,カバー曲,歌枠,ライブ,セトリ,ホロライブ",
-      "description": "楽曲の視聴・検索ページです",
-      "ogSubtitle": "視聴ページ - {siteName}",
+      "description": "楽曲の視聴・検索ページ",
+      "ogSubtitle": "楽曲の視聴・検索ページ",
       "ogAlt": "{siteName} - 視聴ページ",
       "mode": {
         "original": {
@@ -366,84 +366,89 @@
     },
     "discography": {
       "title": "楽曲一覧 | {siteName}",
-      "description": "これまでに配信・公開された楽曲の一覧ページです。",
+      "description": "これまでに配信・公開された楽曲の一覧",
       "ogSubtitle": "楽曲一覧 - {siteName}",
       "ogAlt": "{siteName} - 楽曲一覧",
       "category": {
         "originals": {
           "title": "オリジナル楽曲 | {siteName}",
-          "description": "AZKiのオリジナル楽曲一覧です。"
+          "description": "AZKiのオリジナル楽曲一覧"
         },
         "collab": {
           "title": "コラボ・ユニット楽曲 | {siteName}",
-          "description": "AZKiが参加したコラボ・ユニット楽曲一覧です。"
+          "description": "AZKiが参加したコラボ・ユニット楽曲一覧"
         },
         "overall": {
           "title": "全体曲 | {siteName}",
-          "description": "AZKiが参加した全体曲・公式ソングの一覧です。"
+          "description": "AZKiが参加した全体曲・公式ソングの一覧"
         },
         "covers": {
           "title": "カバー楽曲 | {siteName}",
-          "description": "AZKiが歌唱したカバー楽曲一覧です。"
+          "description": "AZKiが歌唱したカバー楽曲一覧"
         }
       }
     },
     "search": {
-      "description": "曲名、アーティスト、タグなどで楽曲を検索できます。",
+      "description": "曲名・アーティスト・タグなどによる楽曲検索",
+      "summary": "全{countSongs}曲・{countVideos}動画からの楽曲検索",
       "ogSubtitle": "検索結果 - {siteName}",
       "ogAlt": "{siteName} - 検索結果"
     },
     "data": {
-      "description": "データベースに収録された情報を一覧表示します。",
+      "description": "データベースに収録された情報の一覧",
       "ogSubtitle": "データ一覧 - {siteName}",
       "ogAlt": "{siteName} - データ一覧"
     },
     "share": {
+      "indexDescription": "楽曲の選択結果をSNSで共有する機能の一覧",
       "myBest9Title": "究極の9曲ジェネレーター | {siteName}",
       "myBest9TitleWithSite": "究極の9曲ジェネレーター | {siteName}",
       "myBest9WithTopic": "お題:「{title}」 | 究極の9曲ジェネレーター | {siteName}",
       "myBest9OgTitle": "究極の9曲ジェネレーター",
       "myBest9OgWithTopic": "お題:「{title}」",
-      "myBest9OgDescription": "AZKiさんの楽曲で究極の9曲を作成して共有しましょう！",
-      "myBest9Description": "AZKiさんの好きな曲をシェアしましょう",
+      "myBest9OgDescription": "AZKiさんの楽曲から選ぶ究極の9曲の作成・共有",
+      "myBest9Description": "AZKiさんの好きな曲の共有",
       "acrosticSetlistTitleWithSite": "縦読みセトリメーカー | {siteName}",
       "acrosticSetlistOgTitle": "縦読みセトリメーカー",
       "whereMyAzkichiBeganTitleWithSite": "あなたのあずきちはどこから？ | {siteName}",
       "whereMyAzkichiBeganOgTitle": "あなたのあずきちはどこから？",
-      "whereMyAzkichiBeganDescription": "名前、アイコン、年表を入力して画像を生成できます",
+      "whereMyAzkichiBeganDescription": "名前・アイコン・年表を使った共有画像の作成",
       "whereMyRobocosanBeganTitleWithSite": "あなたのロボ子さんはどこから？ | {siteName}",
       "whereMyRobocosanBeganOgTitle": "あなたのロボ子さんはどこから？",
-      "whereMyRobocosanBeganDescription": "名前、アイコン、年表を入力して画像を生成できます"
+      "whereMyRobocosanBeganDescription": "名前・アイコン・年表を使った共有画像の作成"
     },
     "summary": {
       "title": "活動記録",
-      "description": "その年のAZKiさんの活動（収録楽曲数・カバー/オリ曲など）をまとめています",
+      "description": "年ごとのAZKiさんの活動記録（収録楽曲数・カバー・オリジナル曲など）",
       "yearTitle": "AZKiさんの{year}年の歌の活動",
-      "yearDescription": "{year}年の歌枠・カバー/オリ曲など歌に関連した活動をまとめました",
+      "yearDescription": "{year}年の歌枠・カバー・オリジナル曲など、歌に関連した活動記録",
       "monthTitle": "{month}のアクティビティ",
-      "monthDescription": "{month}の音楽・配信・記録・イベント・記念日をまとめました"
+      "monthDescription": "{month}の音楽・配信・記録・イベント・記念日"
     },
     "anniversaries": {
       "title": "記念日",
-      "description": "AZKiさんの活動や楽曲に関する記念日を一覧表示します。",
+      "description": "AZKiさんの活動や楽曲に関する記念日の一覧",
       "ogSubtitle": "記念日一覧 - {siteName}",
       "ogAlt": "{siteName} - 記念日一覧"
     },
     "archives": {
       "title": "配信アーカイブ",
-      "description": "AZKiさんの配信活動、コラボ、シリーズの統計を表示します。",
+      "description": "AZKiさんの配信活動・コラボ・シリーズの統計",
       "ogSubtitle": "配信アーカイブ - {siteName}",
       "ogAlt": "{siteName} - 配信アーカイブ"
     },
     "archiveList": {
       "title": "アーカイブ一覧",
-      "description": "AZKiさんの配信アーカイブを検索・絞り込みできます。",
+      "description": "AZKiさんの配信アーカイブの検索・絞り込み",
       "ogSubtitle": "アーカイブ一覧 - {siteName}",
       "ogAlt": "{siteName} - アーカイブ一覧"
     },
     "seichiMapComplete": {
       "title": "聖地マップ",
-      "description": "AZKi聖地マップの訪問ログとコンプリート率を記録できます。"
+      "description": "AZKi聖地マップの訪問ログとコンプリート率"
+    },
+    "seichiMapRanking": {
+      "description": "訪問者が多い場所と訪問数が多い開拓者のランキング"
     },
     "seichiMapCompleteShared": {
       "title": "聖地マップ",
@@ -451,11 +456,15 @@
     },
     "playlist": {
       "title": "プレイリスト",
-      "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲"
+      "description": "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲",
+      "sharedDescription": "{count}曲のプレイリスト"
+    },
+    "statistics": {
+      "description": "歌枠のセットリスト・オリジナル楽曲・カバー楽曲などの統計"
     },
     "membersOnlyAccess": {
       "title": "メンバー限定コンテンツ解除 | {siteName}",
-      "description": "所定のパスワードを入力して、メンバー限定シートを含むデータをこの端末で閲覧できるようにします。"
+      "description": "所定のパスワードで有効化する、メンバー限定シートを含むデータの端末内閲覧"
     }
   },
   "MembersOnlyAccess": {
@@ -945,7 +954,7 @@
   "DiscographyAlbum": {
     "notFoundTitle": "アルバムが見つかりません | {site}",
     "notFoundDescription": "指定されたアルバムの収録曲を取得できませんでした。",
-    "descriptionPattern": "{album} の収録曲 {count} 曲を表示します。"
+    "descriptionPattern": "{album} の収録曲 {count} 曲"
   },
   "Data": {
     "homeLabel": "HOME",

@@ -33,6 +33,9 @@ describe("acrostic setlist generateMetadata", () => {
     )}&subtitle=${encodeURIComponent(expectedDescription)}&w=1200&h=630`;
 
     expect(result.description).toBe(expectedDescription);
+    expect(result.openGraph?.title).toBe(
+      "縦読みセトリメーカー | AZKi Song Database",
+    );
     expect(result.openGraph?.description).toBe(expectedDescription);
     expect(result.openGraph?.images).toEqual([
       {

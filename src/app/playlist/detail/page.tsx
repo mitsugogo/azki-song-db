@@ -12,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = tMeta("title") ?? "プレイリスト";
   const subtitle =
     tMeta("description") ?? "AZKiさんのこれまでのオリジナル楽曲やカバー楽曲";
+  const pageTitle = `${title} | ${siteConfig.siteName}`;
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
   ogImageUrl.searchParams.set("subtitle", subtitle);
@@ -22,10 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
-    title: `${title} | ${siteConfig.siteName}`,
+    title: pageTitle,
     description: subtitle,
     openGraph: {
-      title,
+      title: pageTitle,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: pageTitle,
       description: subtitle,
       images: [ogImagePath],
     },

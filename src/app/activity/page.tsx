@@ -12,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
   const title = tMeta("title");
   const subtitle = tMeta("description");
+  const pageTitle = `${title} | ${siteConfig.siteName}`;
 
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
@@ -23,11 +24,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `${title} | ${siteConfig.siteName}`,
+    title: pageTitle,
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
-      title,
+      title: pageTitle,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
@@ -37,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: pageTitle,
       description: subtitle,
       images: [ogImagePath],
     },

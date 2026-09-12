@@ -11,12 +11,12 @@ const getSearchSummary = async (locale: string): Promise<string | null> => {
     const countVideos = new Set(
       songs.map((song) => song.video_id).filter(Boolean),
     ).size.toLocaleString(locale);
-    const tBrowse = await getTranslations({
-      namespace: "SearchBrowse",
+    const tMetadata = await getTranslations({
+      namespace: "Metadata.search",
       locale,
     });
 
-    return tBrowse("summary", {
+    return tMetadata("summary", {
       countSongs,
       countVideos,
     });
@@ -89,7 +89,6 @@ export async function generateMetadata({
     : "categories";
 
   let ogTitle = messages.SearchBrowse?.title ?? "検索";
-  let ogSubtitle = tMeta("ogSubtitle", { siteName: siteConfig.siteName });
   let displayTerm = searchTerm;
 
   if (searchTerm) {
@@ -102,7 +101,6 @@ export async function generateMetadata({
           ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm)
           : `「${displayTerm}」の検索結果`;
         ogTitle = `${icon} ${label}`;
-        ogSubtitle = `${siteConfig.siteName}`;
         matched = true;
         break;
       }
@@ -112,7 +110,6 @@ export async function generateMetadata({
       ogTitle = messages.SearchResults?.labelWithQuery
         ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm)
         : `「${displayTerm}」の検索結果`;
-      ogSubtitle = `${siteConfig.siteName}`;
     }
   } else if (normalizedTab !== "categories") {
     const tabLabelKey = tabLabelKeyMap[normalizedTab];
@@ -120,7 +117,6 @@ export async function generateMetadata({
     if (tabLabel) {
       const tabIcon = tabIconMap[normalizedTab] ?? "";
       ogTitle = tabIcon ? `${tabIcon} ${tabLabel}` : tabLabel;
-      ogSubtitle = `${siteConfig.siteName}`;
     }
   }
 
@@ -131,22 +127,28 @@ export async function generateMetadata({
   if (normalizedTab !== "categories") {
     canonical.searchParams.set("tab", normalizedTab);
   }
-  const ogImagePath = `/api/og?title=${encodeURIComponent(ogTitle)}&subtitle=${encodeURIComponent(ogSubtitle)}&w=1200&h=630`;
 
   const tabLabelForTitle =
     normalizedTab !== "categories"
       ? messages.SearchBrowse?.filters?.[tabLabelKeyMap[normalizedTab]]
       : "";
+  const pageTitle = searchTerm
+    ? `${messages.SearchResults?.labelWithQuery ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm) : `${displayTerm}の検索結果`} | ${siteConfig.siteName}`
+    : tabLabelForTitle
+      ? `${tabLabelForTitle} | ${siteConfig.siteName}`
+      : `${messages.SearchBrowse?.title ?? "検索"} | ${siteConfig.siteName}`;
+  const ogImageUrl = new URL("/api/og", baseUrl);
+  ogImageUrl.searchParams.set("title", ogTitle);
+  ogImageUrl.searchParams.set("subtitle", summary);
+  ogImageUrl.searchParams.set("w", "1200");
+  ogImageUrl.searchParams.set("h", "630");
+  const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
-    title: searchTerm
-      ? `${messages.SearchResults?.labelWithQuery ? messages.SearchResults.labelWithQuery.replace("{term}", displayTerm) : `${displayTerm}の検索結果`} | ${siteConfig.siteName}`
-      : tabLabelForTitle
-        ? `${tabLabelForTitle} | ${siteConfig.siteName}`
-        : `${messages.SearchBrowse?.title ?? "検索"} | ${siteConfig.siteName}`,
+    title: pageTitle,
     description: summary,
     openGraph: {
-      title: ogTitle,
+      title: pageTitle,
       description: summary,
       url: canonical.toString(),
       type: "website",
@@ -163,7 +165,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
+      title: pageTitle,
       description: summary,
       images: [ogImagePath],
     },
