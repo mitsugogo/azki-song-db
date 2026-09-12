@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Toolchain and Validation
 
-- Use Node.js 24.x and pnpm 11.20.0, matching `package.json`. Prefer `corepack pnpm ...` when the globally installed pnpm differs.
+- Use Node.js 24.x and pnpm 12.4.0, matching `package.json`. Prefer `corepack pnpm ...` when the globally installed pnpm differs.
 - Install dependencies with `pnpm install --frozen-lockfile`. Keep the pnpm version in `.github/workflows/` synchronized with `package.json`; pin GitHub Actions to full commit SHAs.
 - Run `pnpm lint` for the repository-wide Prettier check, `pnpm test -- --run` for CI-style unit tests, and `pnpm test:e2e` for Playwright tests. `pnpm build` also runs `scripts/pre-build.js` and Prisma generation.
 - Environment variables and data-source setup are documented in [README.md](README.md) and [README_ja.md](README_ja.md). Do not expose `.env.local` values in code, logs, or test output.

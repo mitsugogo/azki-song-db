@@ -50,7 +50,7 @@ https://docs.google.com/spreadsheets/d/1ktXlGFx0xZaCjUxuSRaM6SqIX4_mz8Cm8GpzwqSa
 ## Requirements
 
 - Node.js: 24.x
-- pnpm: 11.x
+- pnpm: 12.x
 
 ## Development
 
