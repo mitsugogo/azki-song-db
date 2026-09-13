@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.34.0](https://github.com/mitsugogo/azki-song-db/compare/v2.33.0...v2.34.0) (2026-09-13)
+
+### Features
+
+* **activity:** show upcoming streams in monthly calendar ([ed44578](https://github.com/mitsugogo/azki-song-db/commit/ed44578b2cff73b46cc8507284b0d50c33340cd3))
+* 出演者フィルターに動画件数と別名対応を追加 ([fa400a5](https://github.com/mitsugogo/azki-song-db/commit/fa400a53fbfb1e4ad63ec2d7513dae6a14b30020))
+* 検索とディスコグラフィー機能を改善 ([052864f](https://github.com/mitsugogo/azki-song-db/commit/052864f7e675ef7301a7c3f3f24f5b92fbffba46))
+
+### Bug Fixes
+
+* **metadata:** SNSタイトルとOGP情報を統一 ([10cd8ad](https://github.com/mitsugogo/azki-song-db/commit/10cd8adc061b7b815e102a5209d3dff04794523a))
+* source_orderでリリースバリアントのキーを一意化 ([c9e03d2](https://github.com/mitsugogo/azki-song-db/commit/c9e03d2329f98c3b794d3817205a10dbc6adcbd2))
+* グラフの目盛りとマイルストーン表示を改善 ([26e9c22](https://github.com/mitsugogo/azki-song-db/commit/26e9c2272be14bbbce494ecf6300c473ea6d79af))
+
 ## [2.33.0](https://github.com/mitsugogo/azki-song-db/compare/v2.32.0...v2.33.0) (2026-09-07)
 
 ### Features
