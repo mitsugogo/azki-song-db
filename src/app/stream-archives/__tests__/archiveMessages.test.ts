@@ -12,6 +12,12 @@ describe("stream archive messages", () => {
     expect(jaMessages.Archives.collaborationRankingTitle).toBe(
       "よくコラボしたホロメン",
     );
+    expect(jaMessages.Archives.collaborationRankingSubtitle).toBe(
+      "一緒に出演した合計時間",
+    );
+    expect(jaMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
+      "同じ組み合わせで出演した回数",
+    );
     expect(jaMessages.Archives.collaborationCount).toBe("{count}件");
     expect(jaMessages.Archives.collaborationRankingCombinationMode).toBe(
       "組み合わせ別",
@@ -20,6 +26,9 @@ describe("stream archive messages", () => {
       "初コラボ {date}・{duration}",
     );
     expect(jaMessages.Archives.collaborationNoHistory).toBe("未コラボ");
+    expect(jaMessages.Archives.collaborationNoKaraokeHistory).toBe(
+      "歌枠未コラボ",
+    );
     expect(jaMessages.Archives.statsTabLabel).toBe("統計");
     expect(jaMessages.Archives.listTitle).toBe("アーカイブ一覧");
     expect(jaMessages.Archives.categoryRankingTitle).toBe(
@@ -40,6 +49,12 @@ describe("stream archive messages", () => {
       "{count} cast members selected",
     );
     expect(enMessages.Archives.collaborationRankingTitle).toBe("Top collabs");
+    expect(enMessages.Archives.collaborationRankingSubtitle).toBe(
+      "Total time streamed together",
+    );
+    expect(enMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
+      "Appearances with the same combination",
+    );
     expect(enMessages.Archives.collaborationRankingMemberMode).toBe(
       "By member",
     );
@@ -47,6 +62,9 @@ describe("stream archive messages", () => {
       "First collab {date} · {duration}",
     );
     expect(enMessages.Archives.collaborationNoHistory).toBe("No collabs yet");
+    expect(enMessages.Archives.collaborationNoKaraokeHistory).toBe(
+      "No singing-stream collabs yet",
+    );
     expect(enMessages.Archives.longestStreamRankingTitle).toBe(
       "Longest streams",
     );

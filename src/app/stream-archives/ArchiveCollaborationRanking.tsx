@@ -27,12 +27,14 @@ export type ArchiveCollaborationRankingMode = "member" | "combination";
 type ArchiveCollaborationRankingProps = {
   items: ArchiveCollaborationRankingItem[];
   membersWithoutCollaboration: ArchiveParticipantEntry[];
+  membersWithoutKaraokeCollaboration: ArchiveParticipantEntry[];
   years: number[];
   selectedYear: string | null;
   mode: ArchiveCollaborationRankingMode;
   labels: {
     title: string;
     subtitle: string;
+    combinationSubtitle: string;
     count: (count: number) => string;
     itemLabel: (rank: number, name: string, count: number) => string;
     noData: string;
@@ -42,6 +44,7 @@ type ArchiveCollaborationRankingProps = {
     memberModeLabel: string;
     combinationModeLabel: string;
     noCollaboration: string;
+    noKaraokeCollaboration: string;
   };
   formatDuration: (seconds: number) => string;
   getHref?: (name: string) => string;
@@ -58,6 +61,7 @@ const getArchiveCastHref = (castNames: string[]) => {
 const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
   items,
   membersWithoutCollaboration,
+  membersWithoutKaraokeCollaboration,
   years,
   selectedYear,
   mode,
@@ -67,7 +71,20 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
   onSelectedYearChange,
   onModeChange,
 }: ArchiveCollaborationRankingProps) {
-  const maxCount = items[0]?.count ?? 0;
+  const isDurationRanking = mode === "member";
+  const maxMetricValue = isDurationRanking
+    ? (items[0]?.totalDurationSeconds ?? 0)
+    : (items[0]?.count ?? 0);
+  const noCollaborationGroups = [
+    {
+      label: labels.noCollaboration,
+      participants: membersWithoutCollaboration,
+    },
+    {
+      label: labels.noKaraokeCollaboration,
+      participants: membersWithoutKaraokeCollaboration,
+    },
+  ].filter(({ participants }) => participants.length > 0);
   const yearOptions = useMemo(
     () => [
       { value: ALL_TIME_VALUE, label: labels.allTimeOptionLabel },
@@ -84,7 +101,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
             {labels.title}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            {labels.subtitle}
+            {isDurationRanking ? labels.subtitle : labels.combinationSubtitle}
           </p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
@@ -228,13 +245,23 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                         size="xs"
                         className="whitespace-nowrap tabular-nums"
                       >
-                        {duration}
+                        {isDurationRanking
+                          ? labels.count(item.count)
+                          : duration}
                       </Text>
                     </div>
                     <div className="mt-1 flex min-w-0 items-center gap-2">
                       <Progress
-                        value={maxCount > 0 ? (item.count / maxCount) * 100 : 0}
-                        aria-label={itemLabel}
+                        value={
+                          maxMetricValue > 0
+                            ? ((isDurationRanking
+                                ? item.totalDurationSeconds
+                                : item.count) /
+                                maxMetricValue) *
+                              100
+                            : 0
+                        }
+                        aria-label={accessibleLabel}
                         color="hololive.2"
                         size="sm"
                         radius="xl"
@@ -245,7 +272,9 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                         size="xs"
                         className="shrink-0 tabular-nums"
                       >
-                        {labels.count(item.count)}
+                        {isDurationRanking
+                          ? duration
+                          : labels.count(item.count)}
                       </Text>
                     </div>
                   </div>
@@ -256,36 +285,51 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
         </ol>
       )}
 
-      {mode === "member" && membersWithoutCollaboration.length > 0 ? (
-        <div
-          role="group"
-          aria-label={labels.noCollaboration}
-          className="mt-4 min-w-0 border-t border-light-gray-200/70 pt-3 dark:border-white/10"
-        >
-          <Text c="dimmed" size="xs" fw={500} mb={8}>
-            {labels.noCollaboration}
-          </Text>
-          <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1">
-            <Avatar.Group spacing="none" className="w-max py-0.5">
-              {membersWithoutCollaboration.map((participant, idx) => (
-                <Tooltip
-                  key={`${participant.channel?.youtubeId || participant.name}-${idx}`}
-                  label={participant.name}
-                  withArrow
+      {mode === "member" && noCollaborationGroups.length > 0 ? (
+        <div className="mt-4 min-w-0 border-t border-light-gray-200/70 pt-3 dark:border-white/10">
+          {noCollaborationGroups.map(({ label, participants }, groupIndex) => (
+            <div
+              key={label}
+              role="group"
+              aria-label={label}
+              className={groupIndex > 0 ? "mt-3" : undefined}
+            >
+              <Text c="dimmed" size="xs" fw={500} mb={8}>
+                {label}
+              </Text>
+              <div className="w-full max-w-full overflow-x-auto overscroll-x-contain pb-1">
+                <Avatar.Group
+                  spacing="none"
+                  data-max-rows="2"
+                  className="w-max py-0.5"
+                  style={{
+                    display: "grid",
+                    gridAutoFlow: "column",
+                    gridTemplateRows: "repeat(2, auto)",
+                    rowGap: 4,
+                  }}
                 >
-                  <Avatar
-                    src={participant.channel?.iconUrl || null}
-                    alt={participant.name}
-                    size="md"
-                    radius="xl"
-                    color="pink"
-                  >
-                    {participant.name.slice(0, 1)}
-                  </Avatar>
-                </Tooltip>
-              ))}
-            </Avatar.Group>
-          </div>
+                  {participants.map((participant, idx) => (
+                    <Tooltip
+                      key={`${participant.channel?.youtubeId || participant.name}-${idx}`}
+                      label={participant.name}
+                      withArrow
+                    >
+                      <Avatar
+                        src={participant.channel?.iconUrl || null}
+                        alt={participant.name}
+                        size="md"
+                        radius="xl"
+                        color="pink"
+                      >
+                        {participant.name.slice(0, 1)}
+                      </Avatar>
+                    </Tooltip>
+                  ))}
+                </Avatar.Group>
+              </div>
+            </div>
+          ))}
         </div>
       ) : null}
     </section>

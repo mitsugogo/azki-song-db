@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, ReactNode, UIEvent } from "react";
 import {
   Badge,
   Breadcrumbs,
@@ -24,12 +24,12 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { useDebouncedValue } from "@mantine/hooks";
-import { useVirtualizer, useWindowVirtualizer } from "@tanstack/react-virtual";
 import {
-  OverlayScrollbarsComponent,
-  OverlayScrollbarsComponentRef,
-} from "overlayscrollbars-react";
+  useDebouncedValue,
+  useElementSize,
+  useMergedRef,
+} from "@mantine/hooks";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
@@ -144,7 +144,6 @@ const DESKTOP_STICKY_SUMMARY_COLUMNS =
   "184px 150px 104px 160px 280px 200px 320px";
 const DESKTOP_TABLE_MIN_WIDTH = 1924;
 const DESKTOP_STICKY_SUMMARY_HEIGHT = 160;
-const DESKTOP_STICKY_SUMMARY_TOP = 32;
 const DATE_PARAM_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TEXT_QUERY_PARAM = "keyword";
 const INCLUDE_SHORTS_PARAM = "includeShorts";
@@ -1160,19 +1159,26 @@ export default function ArchivesPageClient() {
     Set<string>
   >(() => new Set());
   const [areMobileFiltersOpen, setAreMobileFiltersOpen] = useState(false);
-  const [mobileScrollMargin, setMobileScrollMargin] = useState(0);
-  const [archiveScrollTop, setArchiveScrollTop] = useState(0);
-  const [archiveScrollViewport, setArchiveScrollViewport] =
-    useState<HTMLElement | null>(null);
+  const [archiveScrollMargin, setArchiveScrollMargin] = useState(0);
   const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
     string | null
   >(null);
   const [viewMode, setViewMode] = useState<ArchiveViewMode>("list");
   const [sortState, setSortState] =
     useState<ArchiveSortState>(DEFAULT_ARCHIVE_SORT);
-  const archiveScrollRef = useRef<OverlayScrollbarsComponentRef>(null);
-  const mobileListRef = useRef<HTMLDivElement>(null);
+  const archiveListRef = useRef<HTMLDivElement>(null);
+  const desktopHeaderScrollRef = useRef<HTMLDivElement>(null);
+  const desktopBodyScrollRef = useRef<HTMLDivElement>(null);
+  const desktopStickySummaryRef = useRef<HTMLDivElement>(null);
   const isFilterInputFocusedRef = useRef(false);
+  const { ref: stickyControlsRef, height: stickyControlsHeight } =
+    useElementSize<HTMLDivElement>();
+  const { ref: desktopStickyHeaderRef, height: desktopStickyHeaderHeight } =
+    useElementSize<HTMLDivElement>();
+  const desktopArchiveListRef = useMergedRef(
+    archiveListRef,
+    desktopBodyScrollRef,
+  );
 
   const normalizedQuery = useMemo(
     () => normalizeArchiveSearchText(deferredFilterQuery),
@@ -1306,30 +1312,18 @@ export default function ArchivesPageClient() {
   const displayGroupCount =
     viewMode === "series" ? seriesViewGroups.length : archiveGroups.length;
 
-  const desktopRowVirtualizer = useVirtualizer({
-    count: isDesktop && viewMode === "list" ? archiveEntries.length : 0,
-    getScrollElement: () =>
-      archiveScrollRef.current?.osInstance()?.elements().viewport as Element,
+  const rowVirtualizer = useWindowVirtualizer({
+    count: viewMode === "list" ? archiveEntries.length : 0,
     estimateSize: (index) => {
       const entry = archiveEntries[index];
-      return entry?.type === "group" ? 74 : 132;
-    },
-    overscan: 8,
-  });
-
-  const mobileRowVirtualizer = useWindowVirtualizer({
-    count: !isDesktop && viewMode === "list" ? archiveEntries.length : 0,
-    estimateSize: (index) => {
-      const entry = archiveEntries[index];
+      if (isDesktop) {
+        return entry?.type === "group" ? 74 : 132;
+      }
       return entry?.type === "group" ? 68 : 440;
     },
-    scrollMargin: mobileScrollMargin,
+    scrollMargin: archiveScrollMargin,
     overscan: 8,
   });
-
-  const rowVirtualizer = isDesktop
-    ? desktopRowVirtualizer
-    : mobileRowVirtualizer;
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
@@ -1371,7 +1365,10 @@ export default function ArchivesPageClient() {
       return null;
     }
 
-    const stickyOffset = archiveScrollTop + DESKTOP_STICKY_SUMMARY_TOP;
+    const stickyOffset =
+      (rowVirtualizer.scrollOffset ?? 0) +
+      stickyControlsHeight +
+      desktopStickyHeaderHeight;
     const activeVirtualRow = virtualRows.find((virtualRow) => {
       const entry = archiveEntries[virtualRow.index];
       return (
@@ -1387,11 +1384,50 @@ export default function ArchivesPageClient() {
     return activeEntry?.type === "item" ? activeEntry.item : null;
   }, [
     archiveEntries,
-    archiveScrollTop,
+    desktopStickyHeaderHeight,
     expandedTimestampVideoIds,
     isDesktop,
+    rowVirtualizer.scrollOffset,
+    stickyControlsHeight,
     virtualRows,
   ]);
+
+  const updateDesktopHorizontalScroll = useCallback((scrollLeft: number) => {
+    const summary = desktopStickySummaryRef.current;
+    if (summary) {
+      summary.style.transform = `translate3d(${-scrollLeft}px, 0, 0)`;
+    }
+  }, []);
+
+  const handleDesktopHeaderScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
+      const scrollLeft = event.currentTarget.scrollLeft;
+      const body = desktopBodyScrollRef.current;
+      if (body && Math.abs(body.scrollLeft - scrollLeft) >= 1) {
+        body.scrollLeft = scrollLeft;
+      }
+      updateDesktopHorizontalScroll(scrollLeft);
+    },
+    [updateDesktopHorizontalScroll],
+  );
+
+  const handleDesktopBodyScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
+      const scrollLeft = event.currentTarget.scrollLeft;
+      const header = desktopHeaderScrollRef.current;
+      if (header && Math.abs(header.scrollLeft - scrollLeft) >= 1) {
+        header.scrollLeft = scrollLeft;
+      }
+      updateDesktopHorizontalScroll(scrollLeft);
+    },
+    [updateDesktopHorizontalScroll],
+  );
+
+  useEffect(() => {
+    updateDesktopHorizontalScroll(
+      desktopHeaderScrollRef.current?.scrollLeft ?? 0,
+    );
+  }, [activeStickyArchiveItem, updateDesktopHorizontalScroll]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 768px)");
@@ -1403,7 +1439,7 @@ export default function ArchivesPageClient() {
   }, []);
 
   useEffect(() => {
-    if (isDesktop || viewMode !== "list") {
+    if (viewMode !== "list") {
       return;
     }
 
@@ -1415,14 +1451,14 @@ export default function ArchivesPageClient() {
 
       frameId = window.requestAnimationFrame(() => {
         frameId = null;
-        const listElement = mobileListRef.current;
+        const listElement = archiveListRef.current;
         if (!listElement) {
           return;
         }
 
         const nextScrollMargin =
           listElement.getBoundingClientRect().top + window.scrollY;
-        setMobileScrollMargin((current) =>
+        setArchiveScrollMargin((current) =>
           Math.abs(current - nextScrollMargin) < 1 ? current : nextScrollMargin,
         );
       });
@@ -1439,71 +1475,13 @@ export default function ArchivesPageClient() {
   }, [
     archiveEntries.length,
     areMobileFiltersOpen,
+    desktopStickyHeaderHeight,
     isDesktop,
     isLoading,
     selectedCastNames,
+    stickyControlsHeight,
     viewMode,
   ]);
-
-  useEffect(() => {
-    if (!isDesktop) {
-      setArchiveScrollTop(0);
-      setArchiveScrollViewport(null);
-      return;
-    }
-
-    let viewport: HTMLElement | null = null;
-    let bindFrameId: number | null = null;
-    let animationFrameId: number | null = null;
-
-    const updateScrollTop = () => {
-      if (viewport) {
-        const nextScrollTop = viewport.scrollTop;
-        startTransition(() => {
-          setArchiveScrollTop(nextScrollTop);
-        });
-      }
-    };
-    const scheduleUpdateScrollTop = () => {
-      if (animationFrameId !== null) {
-        return;
-      }
-
-      animationFrameId = window.requestAnimationFrame(() => {
-        animationFrameId = null;
-        updateScrollTop();
-      });
-    };
-
-    const bindViewport = () => {
-      const nextViewport = archiveScrollRef.current
-        ?.osInstance()
-        ?.elements().viewport;
-      if (!(nextViewport instanceof HTMLElement)) {
-        bindFrameId = window.requestAnimationFrame(bindViewport);
-        return;
-      }
-
-      viewport = nextViewport;
-      setArchiveScrollViewport(nextViewport);
-      updateScrollTop();
-      viewport.addEventListener("scroll", scheduleUpdateScrollTop, {
-        passive: true,
-      });
-    };
-
-    bindViewport();
-
-    return () => {
-      if (bindFrameId !== null) {
-        window.cancelAnimationFrame(bindFrameId);
-      }
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId);
-      }
-      viewport?.removeEventListener("scroll", scheduleUpdateScrollTop);
-    };
-  }, [isDesktop]);
 
   useEffect(() => {
     rowVirtualizer.measure();
@@ -1724,7 +1702,7 @@ export default function ArchivesPageClient() {
   }, []);
 
   return (
-    <div className={`${pageClasses.shellFlushBottom} max-md:overflow-visible`}>
+    <div className={`${pageClasses.shellFlushBottom} overflow-visible`}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -1745,7 +1723,10 @@ export default function ArchivesPageClient() {
       <p className={pageClasses.description}>{t("listDescription")}</p>
       <StreamArchivesNavigation active="list" />
 
-      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 md:static md:mx-0 md:mb-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+      <div
+        ref={stickyControlsRef}
+        className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 sm:-mx-6 sm:px-6"
+      >
         <SegmentedControl
           value={viewMode}
           aria-label={t("viewModeSwitchAriaLabel")}
@@ -1889,15 +1870,23 @@ export default function ArchivesPageClient() {
           {t("empty")}
         </p>
       ) : isDesktop ? (
-        <div className="w-full max-w-full overflow-hidden rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
-          <OverlayScrollbarsComponent
-            ref={archiveScrollRef}
-            className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-440px)] lg:h-[calc(100dvh-383px)]"
+        <div className="relative w-full max-w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
+          <div
+            ref={desktopStickyHeaderRef}
+            className="sticky z-10"
+            style={{ top: stickyControlsHeight }}
           >
-            <div style={{ minWidth: DESKTOP_TABLE_MIN_WIDTH }}>
+            <div
+              ref={desktopHeaderScrollRef}
+              className="overflow-x-auto overscroll-x-contain rounded-t-xl"
+              onScroll={handleDesktopHeaderScroll}
+            >
               <div
-                className="sticky top-0 z-10 grid bg-light-gray-100 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                style={{ gridTemplateColumns: DESKTOP_COLUMNS }}
+                className="grid bg-light-gray-100 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                style={{
+                  gridTemplateColumns: DESKTOP_COLUMNS,
+                  minWidth: DESKTOP_TABLE_MIN_WIDTH,
+                }}
               >
                 <div className="px-3 py-2">{t("thumbnailLabel")}</div>
                 <div className="px-3 py-2">
@@ -1971,18 +1960,29 @@ export default function ArchivesPageClient() {
                   </SortableArchiveHeader>
                 </div>
               </div>
-              {activeStickyArchiveItem && (
-                <div className="pointer-events-none sticky top-8 z-9 h-0">
-                  <div className="pointer-events-auto w-fit">
-                    <DesktopStickyArchiveSummary
-                      item={activeStickyArchiveItem}
-                      locale={locale}
-                      highlightQuery={deferredFilterQuery}
-                      appWatchLabel={t("appWatchLabel")}
-                    />
-                  </div>
+            </div>
+            {activeStickyArchiveItem && (
+              <div className="pointer-events-none absolute left-0 top-full h-40 w-full overflow-clip">
+                <div
+                  ref={desktopStickySummaryRef}
+                  className="pointer-events-auto w-fit will-change-transform"
+                >
+                  <DesktopStickyArchiveSummary
+                    item={activeStickyArchiveItem}
+                    locale={locale}
+                    highlightQuery={deferredFilterQuery}
+                    appWatchLabel={t("appWatchLabel")}
+                  />
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+          <div
+            ref={desktopArchiveListRef}
+            className="overflow-x-auto overscroll-x-contain rounded-b-xl"
+            onScroll={handleDesktopBodyScroll}
+          >
+            <div style={{ minWidth: DESKTOP_TABLE_MIN_WIDTH }}>
               <div
                 className="relative"
                 style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
@@ -2017,7 +2017,9 @@ export default function ArchivesPageClient() {
                       data-index={virtualRow.index}
                       className="absolute left-0 top-0 w-full"
                       style={{
-                        transform: `translateY(${virtualRow.start}px)`,
+                        transform: `translateY(${
+                          virtualRow.start - archiveScrollMargin
+                        }px)`,
                       }}
                     >
                       {entry.type === "group" ? (
@@ -2054,11 +2056,11 @@ export default function ArchivesPageClient() {
                 })}
               </div>
             </div>
-          </OverlayScrollbarsComponent>
+          </div>
         </div>
       ) : (
         <div
-          ref={mobileListRef}
+          ref={archiveListRef}
           className="relative pr-1"
           style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
         >
@@ -2091,7 +2093,7 @@ export default function ArchivesPageClient() {
                 className="absolute left-0 top-0 w-full"
                 style={{
                   transform: `translateY(${
-                    virtualRow.start - mobileScrollMargin
+                    virtualRow.start - archiveScrollMargin
                   }px)`,
                 }}
               >
@@ -2125,9 +2127,7 @@ export default function ArchivesPageClient() {
           })}
         </div>
       )}
-      <ScrollToTopButton
-        scrollElement={isDesktop ? archiveScrollViewport : null}
-      />
+      <ScrollToTopButton />
     </div>
   );
 }
