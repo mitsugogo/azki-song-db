@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChannelEntry } from "../../types/api/yt/channels";
 import {
   createChannelsByParticipantName,
+  matchesSelectedArchiveParticipantEntries,
   matchesSelectedArchiveParticipants,
   parseArchiveParticipants,
   resolveArchiveParticipants,
@@ -69,5 +70,27 @@ describe("archive participants", () => {
       ]),
     ).toBe(false);
     expect(matchesSelectedArchiveParticipants(participants, [])).toBe(true);
+  });
+
+  it("matches a canonical channel name against a participant alias", () => {
+    const lui = channel({
+      talentName: "鷹嶺ルイ",
+      artistName: "Takane Lui",
+      youtubeId: "UC-lui",
+      channelName: "Lui ch. 鷹嶺ルイ - holoX -",
+    });
+
+    expect(
+      matchesSelectedArchiveParticipantEntries(
+        [{ name: "Takane Lui", channel: lui }],
+        ["鷹嶺ルイ"],
+      ),
+    ).toBe(true);
+    expect(
+      matchesSelectedArchiveParticipantEntries(
+        [{ name: "Takane Lui", channel: lui }],
+        ["星街すいせい"],
+      ),
+    ).toBe(false);
   });
 });

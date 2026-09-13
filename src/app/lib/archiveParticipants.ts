@@ -67,3 +67,16 @@ export const matchesSelectedArchiveParticipants = (
     participantKeys.has(normalizeParticipantName(name)),
   );
 };
+
+export const matchesSelectedArchiveParticipantEntries = (
+  participants: ArchiveParticipantEntry[],
+  selectedParticipants: string[],
+) =>
+  matchesSelectedArchiveParticipants(
+    participants.flatMap((participant) => [
+      participant.name,
+      participant.channel?.talentName ?? "",
+      participant.channel?.artistName ?? "",
+    ]),
+    selectedParticipants,
+  );

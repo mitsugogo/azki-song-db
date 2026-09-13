@@ -57,7 +57,7 @@ import type { ChannelEntry } from "../types/api/yt/channels";
 import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
 import {
   createChannelsByParticipantName,
-  matchesSelectedArchiveParticipants,
+  matchesSelectedArchiveParticipantEntries,
   resolveArchiveParticipants,
 } from "../lib/archiveParticipants";
 import { formatDate } from "../lib/formatDate";
@@ -89,6 +89,7 @@ import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import ArchiveParticipantList from "./ArchiveParticipantList";
 import ArchiveCastFilter from "./ArchiveCastFilter";
+import { createArchiveCastOptions } from "./archiveCastOptions";
 import { getArchiveCastNames, setArchiveCastNames } from "./archiveFilters";
 import { isShortsArchive } from "./archiveStats";
 import StreamArchivesNavigation from "./StreamArchivesNavigation";
@@ -1231,20 +1232,10 @@ export default function ArchivesPageClient() {
     [indexedItems],
   );
 
-  const castOptions = useMemo(() => {
-    const optionsByName = new Map<string, ArchiveParticipantEntry>();
-    indexedItems.forEach((item) => {
-      item.participantEntries.forEach((participant) => {
-        if (!optionsByName.has(participant.name)) {
-          optionsByName.set(participant.name, participant);
-        }
-      });
-    });
-
-    return Array.from(optionsByName.values()).sort((left, right) =>
-      archiveSortCollator.compare(left.name, right.name),
-    );
-  }, [archiveSortCollator, indexedItems]);
+  const castOptions = useMemo(
+    () => createArchiveCastOptions(indexedItems, channels, locale),
+    [channels, indexedItems, locale],
+  );
 
   const hasDateRange = Boolean(dateRange[0] || dateRange[1]);
   const hasDetailedFilters =
@@ -1259,8 +1250,8 @@ export default function ArchivesPageClient() {
         (item) =>
           (!normalizedQuery || item.searchText.includes(normalizedQuery)) &&
           (includeShorts || !isShortsArchive(item)) &&
-          matchesSelectedArchiveParticipants(
-            item.participants ?? [],
+          matchesSelectedArchiveParticipantEntries(
+            item.participantEntries,
             selectedCastNames,
           ) &&
           isInDateRange(item, dateRange),
