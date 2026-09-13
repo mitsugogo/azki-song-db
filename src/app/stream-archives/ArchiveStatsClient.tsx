@@ -263,6 +263,8 @@ export default function ArchiveStatsClient() {
                 monthLabel: t("monthlyCalendarMonthLabel"),
                 previousMonth: t("monthlyCalendarPreviousMonth"),
                 nextMonth: t("monthlyCalendarNextMonth"),
+                scheduledTime: (time) =>
+                  t("monthlyCalendarScheduledTime", { time }),
                 empty: t("statsNoData"),
               }}
             />

@@ -44,6 +44,8 @@ type ActivityCalendarSectionProps = {
   isViewMilestonesLoading: boolean;
   channels: ChannelEntry[];
   showDetails?: boolean;
+  defaultSelectedDateKey?: string;
+  upcomingArchiveTimeLabel?: (time: string) => string;
 };
 
 function formatCalendarDate(dateKey: string, locale: string) {
@@ -66,6 +68,19 @@ function getWeekdayLabels(locale: string) {
   return Array.from({ length: 7 }, (_, index) =>
     formatter.format(new Date(Date.UTC(2024, 0, 7 + index))),
   );
+}
+
+function formatCalendarTime(value: string, locale: string) {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(locale.startsWith("ja") ? "ja-JP" : locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tokyo",
+  }).format(timestamp);
 }
 
 function getCalendarItemTitle(
@@ -130,6 +145,8 @@ export default function ActivityCalendarSection({
   isViewMilestonesLoading,
   channels,
   showDetails = true,
+  defaultSelectedDateKey,
+  upcomingArchiveTimeLabel,
 }: ActivityCalendarSectionProps) {
   const locale = useLocale();
   const t = useTranslations("Summary");
@@ -156,7 +173,8 @@ export default function ActivityCalendarSection({
     () => getInitialActivityCalendarDateKey(activityMonth, groupedItems),
     [activityMonth, groupedItems],
   );
-  const selectedDateKey = userSelectedDateKey ?? initialDateKey;
+  const selectedDateKey =
+    userSelectedDateKey ?? defaultSelectedDateKey ?? initialDateKey;
   const selectedItems = selectedDateKey
     ? (groupedItems.get(selectedDateKey) ?? [])
     : [];
@@ -334,6 +352,24 @@ export default function ActivityCalendarSection({
                                           tHome,
                                           locale,
                                         );
+                                        const scheduledTime =
+                                          upcomingArchiveTimeLabel &&
+                                          new Date(item.occurredAt).getTime() >
+                                            Date.now()
+                                            ? formatCalendarTime(
+                                                item.occurredAt,
+                                                locale,
+                                              )
+                                            : "";
+                                        const thumbnailBadge =
+                                          scheduledTime &&
+                                          upcomingArchiveTimeLabel
+                                            ? upcomingArchiveTimeLabel(
+                                                scheduledTime,
+                                              )
+                                            : isDesktop
+                                              ? item.archive.video_duration.trim()
+                                              : "";
 
                                         return (
                                           <UnstyledButton
@@ -358,14 +394,16 @@ export default function ActivityCalendarSection({
                                                 videoId={item.videoId}
                                                 alt={title}
                                               />
-                                              {isDesktop &&
-                                              item.kind === "archive" &&
-                                              item.archive.video_duration.trim() ? (
+                                              {thumbnailBadge ? (
                                                 <span
                                                   className="absolute right-1 bottom-1 rounded bg-black/80 px-1.5 py-0.5 text-[0.625rem] leading-none font-semibold text-white shadow-sm"
-                                                  data-testid="activity-calendar-video-duration"
+                                                  data-testid={
+                                                    scheduledTime
+                                                      ? "activity-calendar-scheduled-time"
+                                                      : "activity-calendar-video-duration"
+                                                  }
                                                 >
-                                                  {item.archive.video_duration}
+                                                  {thumbnailBadge}
                                                 </span>
                                               ) : null}
                                             </div>

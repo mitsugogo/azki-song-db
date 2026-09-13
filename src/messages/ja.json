@@ -1026,6 +1026,7 @@
     "monthlyCalendarMonthLabel": "表示月",
     "monthlyCalendarPreviousMonth": "前月を表示",
     "monthlyCalendarNextMonth": "次月を表示",
+    "monthlyCalendarScheduledTime": "配信予定 {time}",
     "monthlyCalendarMore": "ほか{count}件",
     "monthlyCalendarOpenDate": "{date}のアーカイブを表示",
     "monthlyCalendarOpenDetail": "{title}の詳細を表示",

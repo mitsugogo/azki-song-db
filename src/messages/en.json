@@ -1035,6 +1035,7 @@
     "monthlyCalendarMonthLabel": "Month",
     "monthlyCalendarPreviousMonth": "Show previous month",
     "monthlyCalendarNextMonth": "Show next month",
+    "monthlyCalendarScheduledTime": "Scheduled for {time}",
     "monthlyCalendarMore": "{count} more",
     "monthlyCalendarOpenDate": "View archives from {date}",
     "monthlyCalendarOpenDetail": "View details for {title}",
