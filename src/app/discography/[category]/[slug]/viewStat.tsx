@@ -290,26 +290,6 @@ export default function ViewStat({ videoId }: { videoId: string }) {
   }) => {
     const values = data.map((d: any) => Number(d[dataKey] ?? 0));
     const [nmin, nmax] = getNiceExtent(values, sfz);
-    const xAxisTicks = (() => {
-      if (data.length <= 2) {
-        return data.map((d: any) => d.date);
-      }
-
-      const targetTickCount = 7;
-      const tickCount = Math.min(targetTickCount, data.length);
-      const indexSet = new Set<number>();
-
-      for (let i = 0; i < tickCount; i += 1) {
-        const idx = Math.round((i * (data.length - 1)) / (tickCount - 1));
-        indexSet.add(idx);
-      }
-
-      return Array.from(indexSet)
-        .sort((a, b) => a - b)
-        .map((idx) => data[idx]?.date)
-        .filter((d): d is string => Boolean(d));
-    })();
-
     const chartStyle = {
       "--chart-text-color": isDarkMode ? "#d1d5db" : "#374151",
       "--chart-grid-color": isDarkMode
@@ -366,9 +346,10 @@ export default function ViewStat({ videoId }: { videoId: string }) {
             domain: [nmin, nmax],
           }}
           xAxisProps={{
+            allowDuplicatedCategory: false,
             tick: { fontSize: 12, fill: axisTickFill },
-            ticks: xAxisTicks,
-            interval: 0,
+            interval: "preserveStartEnd",
+            minTickGap: 24,
             padding: { left: 8, right: 24 },
           }}
           areaChartProps={{
@@ -379,9 +360,12 @@ export default function ViewStat({ videoId }: { videoId: string }) {
               ? [
                   {
                     x: milestone.date,
-                    label: milestone.label,
+                    label: { value: milestone.label, fontWeight: 600 },
+                    labelPosition: "insideTopLeft",
                     color,
                     strokeDasharray: "4 4",
+                    strokeWidth: 2,
+                    zIndex: 1000,
                   },
                 ]
               : undefined
