@@ -50,11 +50,6 @@ export async function GET(req: NextRequest) {
     const title = normalizeOgText(
       isStreamArchive ? song.video_title : song.title,
     );
-    const summary = isStreamArchive
-      ? hl === "ja"
-        ? `${songsByVideoId.length}曲収録の配信アーカイブ`
-        : `${songsByVideoId.length} songs in this stream archive`
-      : "";
     const tags = Array.from(
       new Set(
         song.tags.map((tag) => normalizeOgText(tag.trim())).filter(Boolean),
@@ -67,10 +62,7 @@ export async function GET(req: NextRequest) {
     const thumbnail = getOgDetailThumbnailLayout(thumbnailKind);
     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     const backgroundUrl = getOgBackgroundImageUrl(requestUrl.origin);
-    const fonts = await fetchOgFonts(
-      `${title}${summary}${tags.join("")}`,
-      "detail",
-    );
+    const fonts = await fetchOgFonts(`${title}${tags.join("")}`, "detail");
 
     return new ImageResponse(
       <div
@@ -137,7 +129,7 @@ export async function GET(req: NextRequest) {
               maxWidth: 612,
               flexDirection: "column",
               alignItems: "flex-start",
-              paddingTop: 22,
+              paddingTop: 0,
             }}
           >
             <div
@@ -156,23 +148,6 @@ export async function GET(req: NextRequest) {
             >
               {title}
             </div>
-            {summary ? (
-              <div
-                style={{
-                  display: "block",
-                  width: "100%",
-                  lineClamp: 1,
-                  overflow: "hidden",
-                  marginTop: 24,
-                  color: ogColors.primaryDeep,
-                  fontSize: 36,
-                  fontWeight: 700,
-                  lineHeight: 1.25,
-                }}
-              >
-                {summary}
-              </div>
-            ) : null}
             <div
               style={{
                 display: tags.length ? "flex" : "none",

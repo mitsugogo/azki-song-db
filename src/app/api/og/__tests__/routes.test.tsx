@@ -227,11 +227,18 @@ describe("OG song freshness routes", () => {
       expect.objectContaining({ objectFit: "contain" }),
     );
     expect(
+      elements.some(
+        (item) =>
+          item.props?.style?.maxWidth === 612 &&
+          item.props?.style?.paddingTop === 0,
+      ),
+    ).toBe(true);
+    expect(
       elements.some((item) => item.props?.style?.padding === "192px 58px 72px"),
     ).toBe(true);
   });
 
-  it("配信アーカイブには収録曲数を表示する", async () => {
+  it("配信アーカイブには収録曲数を表示しない", async () => {
     fetchLookupMock.mockResolvedValue([
       lookupSong,
       { ...lookupSong, title: "次の収録曲", start: 120 },
@@ -244,9 +251,9 @@ describe("OG song freshness routes", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(collectText(imageResponseElements.at(-1))).toEqual(
-      expect.arrayContaining(["新曲配信", "2曲収録の配信アーカイブ"]),
-    );
+    const text = collectText(imageResponseElements.at(-1));
+    expect(text).toEqual(expect.arrayContaining(["新曲配信"]));
+    expect(text).not.toContain("2曲収録の配信アーカイブ");
   });
 
   it("アートトラックは正方形トリミング用レイアウトを選ぶ", async () => {
