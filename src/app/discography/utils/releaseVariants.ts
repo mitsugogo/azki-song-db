@@ -32,7 +32,9 @@ export const getReleaseVariantKind = (song: Song): ReleaseVariantKind => {
 };
 
 export const getSongInstanceKey = (song: Song) =>
-  `${song.video_id || "video"}__${Number(song.start ?? 0)}__${song.slugv2 || ""}`;
+  Number.isFinite(song.source_order)
+    ? `source-order:${song.source_order}`
+    : `${song.video_id || "video"}__${Number(song.start ?? 0)}__${song.slugv2 || ""}`;
 
 const isReleaseVariantCandidate = (song: Song) =>
   isMusicVideo(song) || isArtTrack(song);

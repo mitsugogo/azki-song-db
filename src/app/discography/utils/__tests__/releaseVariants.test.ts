@@ -5,6 +5,7 @@ import {
   findReleaseVariantGroup,
   getReleaseVariantKind,
   getSelectableReleaseVariants,
+  getSongInstanceKey,
   groupReleaseVariants,
   hasMultipleReleaseVariants,
 } from "../releaseVariants";
@@ -45,6 +46,35 @@ const baseSong = (overrides: Partial<Song>): Song =>
   }) as Song;
 
 describe("releaseVariants", () => {
+  it("動画情報が同じでもsource_orderが異なる行は別インスタンスとして扱う", () => {
+    const first = baseSong({
+      video_id: "duplicate-video",
+      start: 12,
+      slugv2: "duplicate-video-12",
+      source_order: 51,
+    });
+    const second = baseSong({
+      video_id: "duplicate-video",
+      start: 12,
+      slugv2: "duplicate-video-12",
+      source_order: 52,
+    });
+
+    expect(getSongInstanceKey(first)).toBe("source-order:51");
+    expect(getSongInstanceKey(second)).toBe("source-order:52");
+  });
+
+  it("source_orderがないデータでは動画情報からインスタンスキーを作る", () => {
+    const song = baseSong({
+      video_id: "legacy-video",
+      start: 12,
+      slugv2: "legacy-video-12",
+      source_order: undefined,
+    });
+
+    expect(getSongInstanceKey(song)).toBe("legacy-video__12__legacy-video-12");
+  });
+
   it("同一アルバム・同一曲・同一アーティストのMVとアートトラックを1グループにする", () => {
     const groups = groupReleaseVariants([
       baseSong({

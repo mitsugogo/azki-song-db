@@ -1,11 +1,18 @@
 "use client";
 
-import { Text } from "@mantine/core";
+import { ActionIcon, Text, Tooltip } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
 import { Zen_Maru_Gothic } from "next/font/google";
-import { type CSSProperties, memo, useEffect, useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { FaYoutube } from "react-icons/fa6";
-import { LuSparkles, LuVolumeX } from "react-icons/lu";
+import { LuPlay, LuSparkles, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
 import { isAzkiBirthday } from "../lib/birthday";
 import { formatDate } from "../lib/formatDate";
@@ -15,7 +22,7 @@ import {
   buildHeroBackgroundVideoUrl,
   pickHeroBackgroundSong,
 } from "./homeData";
-import { HomeHeroBackground } from "./HomeHeroBackground";
+import { HomeHeroBackground, type HomeHeroPlayer } from "./HomeHeroBackground";
 import { HomeSearchPanel } from "./HomeSearchPanel";
 
 const zenMaruGothic = Zen_Maru_Gothic({
@@ -70,6 +77,27 @@ export const HomeHeroSection = memo(function HomeHeroSection({
 }: HomeHeroSectionProps) {
   const locale = useLocale();
   const t = useTranslations("Home");
+  const tControls = useTranslations("Watch.playerControls");
+  const [backgroundPlayer, setBackgroundPlayer] =
+    useState<HomeHeroPlayer | null>(null);
+  const [isMuted, setMuted] = useState(true);
+  const handlePlayerChange = useCallback((player: HomeHeroPlayer | null) => {
+    setBackgroundPlayer(player);
+    setMuted(true);
+  }, []);
+  const toggleMute = () => {
+    if (!backgroundPlayer) {
+      return;
+    }
+
+    const wasMuted = backgroundPlayer.isMuted();
+    if (wasMuted) {
+      backgroundPlayer.unMute();
+    } else {
+      backgroundPlayer.mute();
+    }
+    setMuted(!wasMuted);
+  };
   const [showBirthdayHero, setShowBirthdayHero] = useState(false);
   const backgroundSong = useMemo(() => pickHeroBackgroundSong(songs), [songs]);
   const backgroundVideoUrl = useMemo(
@@ -90,7 +118,10 @@ export const HomeHeroSection = memo(function HomeHeroSection({
 
   return (
     <section className="relative left-1/2 isolate flex min-h-[48dvh] w-screen -translate-x-1/2 flex-col items-center justify-center overflow-hidden py-10 text-center sm:py-16">
-      <HomeHeroBackground song={backgroundSong} />
+      <HomeHeroBackground
+        song={backgroundSong}
+        onPlayerChange={handlePlayerChange}
+      />
       <div
         className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.72),rgba(255,255,255,0.42)_42%,rgba(253,242,248,0.9)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.42),rgba(15,23,42,0.72)_50%,rgba(15,23,42,0.94)_100%)]"
         style={{
@@ -154,14 +185,40 @@ export const HomeHeroSection = memo(function HomeHeroSection({
                 : null}
             </Text>
           </Link>
-          <Link
-            href={backgroundWatchHref}
-            aria-label={t("heroWatchFromBeginning")}
-            title={t("heroWatchFromBeginning")}
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:size-8"
-          >
-            <LuVolumeX className="text-sm sm:text-base" />
-          </Link>
+          <Tooltip label={t("heroWatchFromBeginning")}>
+            <ActionIcon
+              component={Link}
+              href={backgroundWatchHref}
+              aria-label={t("heroWatchFromBeginning")}
+              variant="subtle"
+              radius="xl"
+              className="size-7! shrink-0 border border-white/10 bg-white/10 text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:size-8!"
+            >
+              <LuPlay className="text-sm sm:text-base" aria-hidden="true" />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={tControls(isMuted ? "unmute" : "mute")}>
+            <ActionIcon
+              onClick={toggleMute}
+              disabled={!backgroundPlayer}
+              aria-label={tControls(isMuted ? "unmute" : "mute")}
+              variant="subtle"
+              radius="xl"
+              className="size-7! shrink-0 border border-white/10 bg-white/10 text-gray-800 shadow-lg shadow-gray-900/10 backdrop-blur transition hover:border-gray/40 hover:bg-white disabled:opacity-40 dark:border-white/10 dark:bg-gray-900/70 dark:text-white dark:shadow-black/20 dark:hover:border-pink-200/30 dark:hover:bg-gray-900/85 sm:size-8!"
+            >
+              {isMuted ? (
+                <LuVolumeX
+                  className="text-sm sm:text-base"
+                  aria-hidden="true"
+                />
+              ) : (
+                <LuVolume2
+                  className="text-sm sm:text-base"
+                  aria-hidden="true"
+                />
+              )}
+            </ActionIcon>
+          </Tooltip>
         </div>
       ) : null}
       <div className="relative z-10 flex w-full select-none flex-col items-center px-4 sm:px-6 lg:px-8">

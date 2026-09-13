@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: pageTitle,
     description: ogDescription,
     openGraph: {
-      title: ogTitle,
+      title: pageTitle,
       description: ogDescription,
       url: canonical.toString(),
       siteName: siteConfig.siteName,
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
+      title: pageTitle,
       description: ogDescription,
       images: [ogImagePath],
     },

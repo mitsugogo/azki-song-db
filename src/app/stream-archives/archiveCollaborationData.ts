@@ -1,16 +1,32 @@
 import { siteConfig } from "../config/siteConfig";
 import { getCollabUnitName } from "../config/collabUnits";
-import { resolveHoloGenerationGroups } from "../config/holoGenerations";
-import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import {
+  holoGenerationGroupOrder,
+  resolveHoloGenerationGroups,
+} from "../config/holoGenerations";
+import {
+  createChannelsByParticipantName,
+  resolveArchiveParticipants,
+  type ArchiveParticipantEntry,
+} from "../lib/archiveParticipants";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import type { ChannelEntry } from "../types/api/yt/channels";
+import type { Song } from "../types/song";
 import { getJstDateKey } from "./archiveActivity";
+import { normalizeArchiveSeriesKey } from "./archiveSearch";
 
 export type ArchiveCollaborationSource = {
   stream_started_at: string;
   video_duration?: string;
+  video_id?: string;
+  topic?: string;
   participantEntries: ArchiveParticipantEntry[];
 };
+
+export type ArchiveSongCollaborationSource = Pick<
+  Song,
+  "video_id" | "sing" | "sings" | "hl" | "tags"
+>;
 
 export type ArchiveCollaborationRankingItem = {
   key: string;
@@ -28,7 +44,35 @@ const normalizeValue = (value: string) =>
 const normalizeBranch = (value: string) =>
   normalizeValue(value).replace(/[\s_'’-]+/gu, "");
 
+const normalizeTalentIdentity = (value: string) =>
+  normalizeValue(value).replace(/[\s・._'’\-]+/gu, "");
+
 const INACTIVE_GENERATION_MARKERS = ["卒業生", "活動終了"] as const;
+const KARAOKE_SERIES_KEY = normalizeArchiveSeriesKey("歌枠");
+const FUWAMOCO_GROUP_KEY = "unit:fuwamoco";
+// AZKi以外の出演者が4グループ以内の配信をコラボ履歴に算入する。
+const MAX_COLLABORATOR_GROUPS_FOR_HISTORY = 4;
+// 歌枠は AZKi を含む4人以下の配信だけをコラボ履歴に算入する。
+const MAX_KARAOKE_COLLABORATOR_GROUPS_FOR_HISTORY = 3;
+
+const getSongSingerNames = (song: ArchiveSongCollaborationSource) => {
+  const localizedSings = song.hl?.ja?.sings ?? [];
+  const canonicalSings = song.sings ?? [];
+  const canonicalSing = song.hl?.ja?.sing || song.sing || "";
+  const singers =
+    localizedSings.length > 0
+      ? localizedSings
+      : canonicalSings.length > 0
+        ? canonicalSings
+        : canonicalSing.split(/[、,]/u);
+
+  return [...new Set(singers.map((name) => name.trim()).filter(Boolean))];
+};
+
+const isKaraokeSong = (song: ArchiveSongCollaborationSource) =>
+  (song.tags ?? []).some((tag) =>
+    normalizeArchiveSeriesKey(tag).includes(KARAOKE_SERIES_KEY),
+  );
 
 export type ArchiveHololiveMemberMetadata = {
   generation: string;
@@ -99,8 +143,42 @@ const isActiveHololiveMember = (participant: ArchiveParticipantEntry) => {
 const getParticipantKey = (participant: ArchiveParticipantEntry) =>
   participant.channel?.youtubeId || normalizeValue(participant.name);
 
+const isFuwamocoParticipant = (participant: ArchiveParticipantEntry) =>
+  [
+    participant.name,
+    participant.channel?.talentName ?? "",
+    participant.channel?.artistName ?? "",
+    participant.channel?.channelName ?? "",
+  ].some((value) => {
+    const normalized = normalizeTalentIdentity(value);
+    return (
+      normalized.includes("fuwamoco") ||
+      normalized.startsWith("fuwawa") ||
+      normalized.startsWith("mococo") ||
+      normalized.startsWith("フワワ") ||
+      normalized.startsWith("モココ")
+    );
+  });
+
+const getCollaboratorGroupKey = (participant: ArchiveParticipantEntry) => {
+  if (isFuwamocoParticipant(participant)) {
+    return FUWAMOCO_GROUP_KEY;
+  }
+
+  const talentName =
+    participant.channel?.talentName || participant.channel?.artistName;
+  if (talentName) {
+    return `talent:${normalizeTalentIdentity(talentName)}`;
+  }
+
+  return participant.channel?.youtubeId
+    ? `channel:${normalizeValue(participant.channel.youtubeId)}`
+    : `name:${normalizeTalentIdentity(participant.name)}`;
+};
+
 const getParticipantIdentityKeys = (participant: ArchiveParticipantEntry) =>
   [
+    isFuwamocoParticipant(participant) ? FUWAMOCO_GROUP_KEY : "",
     participant.channel?.youtubeId
       ? `channel:${normalizeValue(participant.channel.youtubeId)}`
       : "",
@@ -152,10 +230,52 @@ const getHololiveCollaborators = (item: ArchiveCollaborationSource) => {
   return Array.from(participantsByKey.values());
 };
 
+const getEligibleHololiveCollaborators = (
+  item: ArchiveCollaborationSource,
+  {
+    maxCollaboratorGroups = MAX_COLLABORATOR_GROUPS_FOR_HISTORY,
+    requireAzki = false,
+  }: {
+    maxCollaboratorGroups?: number;
+    requireAzki?: boolean;
+  } = {},
+) => {
+  const collaboratorGroups = new Map<string, ArchiveParticipantEntry[]>();
+  let hasAzki = false;
+
+  item.participantEntries.forEach((participant) => {
+    if (isAzki(participant)) {
+      hasAzki = true;
+      return;
+    }
+
+    const key = getCollaboratorGroupKey(participant);
+    if (key) {
+      collaboratorGroups.set(key, [
+        ...(collaboratorGroups.get(key) ?? []),
+        participant,
+      ]);
+    }
+  });
+
+  if (
+    (requireAzki && !hasAzki) ||
+    collaboratorGroups.size === 0 ||
+    collaboratorGroups.size > maxCollaboratorGroups
+  ) {
+    return [];
+  }
+
+  return Array.from(collaboratorGroups.values())
+    .flat()
+    .filter(isHololiveMember);
+};
+
 const sortRanking = (
   items: ArchiveCollaborationRankingItem[],
   locale: string,
   limit: number,
+  metric: "count" | "duration",
 ) => {
   const collator = new Intl.Collator(locale, {
     numeric: true,
@@ -163,10 +283,18 @@ const sortRanking = (
   });
 
   return items
-    .sort(
-      (left, right) =>
-        right.count - left.count || collator.compare(left.name, right.name),
-    )
+    .sort((left, right) => {
+      const metricDifference =
+        metric === "duration"
+          ? right.totalDurationSeconds - left.totalDurationSeconds
+          : right.count - left.count;
+
+      return (
+        metricDifference ||
+        right.count - left.count ||
+        collator.compare(left.name, right.name)
+      );
+    })
     .slice(0, limit);
 };
 
@@ -209,24 +337,19 @@ export const createArchiveCollaborationRanking = (
     });
   });
 
-  return sortRanking(Array.from(countsByParticipant.values()), locale, limit);
+  return sortRanking(
+    Array.from(countsByParticipant.values()),
+    locale,
+    limit,
+    "duration",
+  );
 };
 
-export const createArchiveMembersWithoutCollaboration = (
-  items: ArchiveCollaborationSource[],
+const listActiveHololiveMembersWithoutIdentities = (
   channels: ChannelEntry[],
   locale: string,
+  collaboratedIdentityKeys: Set<string>,
 ): ArchiveParticipantEntry[] => {
-  const collaboratedIdentityKeys = new Set<string>();
-
-  items.forEach((item) => {
-    getHololiveCollaborators(item).forEach((participant) => {
-      getParticipantIdentityKeys(participant).forEach((key) =>
-        collaboratedIdentityKeys.add(key),
-      );
-    });
-  });
-
   const membersByName = new Map<string, ArchiveParticipantEntry>();
 
   channels.forEach((channel) => {
@@ -262,8 +385,87 @@ export const createArchiveMembersWithoutCollaboration = (
     sensitivity: "base",
   });
 
-  return Array.from(membersByName.values()).sort((left, right) =>
-    collator.compare(left.name, right.name),
+  return Array.from(membersByName.values()).sort((left, right) => {
+    const leftGroupKey = resolveHoloGenerationGroups(left.channel)[0]?.key;
+    const rightGroupKey = resolveHoloGenerationGroups(right.channel)[0]?.key;
+    const groupOrderDifference =
+      holoGenerationGroupOrder.indexOf(leftGroupKey ?? "other") -
+      holoGenerationGroupOrder.indexOf(rightGroupKey ?? "other");
+
+    return groupOrderDifference || collator.compare(left.name, right.name);
+  });
+};
+
+export const createArchiveMembersWithoutCollaboration = (
+  items: ArchiveCollaborationSource[],
+  channels: ChannelEntry[],
+  locale: string,
+): ArchiveParticipantEntry[] => {
+  const collaboratedIdentityKeys = new Set<string>();
+
+  items.forEach((item) => {
+    getEligibleHololiveCollaborators(item).forEach((participant) => {
+      getParticipantIdentityKeys(participant).forEach((key) =>
+        collaboratedIdentityKeys.add(key),
+      );
+    });
+  });
+
+  return listActiveHololiveMembersWithoutIdentities(
+    channels,
+    locale,
+    collaboratedIdentityKeys,
+  );
+};
+
+export const createArchiveMembersWithoutKaraokeCollaboration = (
+  channels: ChannelEntry[],
+  locale: string,
+  songs: ArchiveSongCollaborationSource[] = [],
+) => {
+  const channelsByParticipantName = createChannelsByParticipantName(channels);
+  const singersByVideoId = new Map<string, Set<string>>();
+
+  songs.forEach((song) => {
+    if (!song.video_id || !isKaraokeSong(song)) {
+      return;
+    }
+
+    const current = singersByVideoId.get(song.video_id) ?? new Set<string>();
+    getSongSingerNames(song).forEach((name) => current.add(name));
+    singersByVideoId.set(song.video_id, current);
+  });
+
+  const collaboratedIdentityKeys = new Set<string>();
+
+  singersByVideoId.forEach((singerNames) => {
+    if (singerNames.size === 0) {
+      return;
+    }
+
+    getEligibleHololiveCollaborators(
+      {
+        stream_started_at: "",
+        participantEntries: resolveArchiveParticipants(
+          [...singerNames],
+          channelsByParticipantName,
+        ),
+      },
+      {
+        maxCollaboratorGroups: MAX_KARAOKE_COLLABORATOR_GROUPS_FOR_HISTORY,
+        requireAzki: true,
+      },
+    ).forEach((participant) => {
+      getParticipantIdentityKeys(participant).forEach((key) =>
+        collaboratedIdentityKeys.add(key),
+      );
+    });
+  });
+
+  return listActiveHololiveMembersWithoutIdentities(
+    channels,
+    locale,
+    collaboratedIdentityKeys,
   );
 };
 
@@ -324,5 +526,10 @@ export const createArchiveCollaborationCombinationRanking = (
     });
   });
 
-  return sortRanking(Array.from(countsByCombination.values()), locale, limit);
+  return sortRanking(
+    Array.from(countsByCombination.values()),
+    locale,
+    limit,
+    "count",
+  );
 };

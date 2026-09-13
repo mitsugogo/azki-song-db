@@ -44,7 +44,7 @@ export async function generateMetadata({
   let description = tMeta("description");
 
   let ogTitle = `${siteConfig.siteName}`;
-  let ogSubtitle = tMeta("ogSubtitle", { siteName: siteConfig.siteName });
+  let ogSubtitle = description;
 
   let ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
@@ -217,6 +217,7 @@ export async function generateMetadata({
     }
   }
 
+  description = ogSubtitle;
   ogImageUrl.searchParams.set("w", String(ogImageWidth));
   ogImageUrl.searchParams.set("h", String(ogImageHeight));
 
@@ -233,11 +234,11 @@ export async function generateMetadata({
     keywords: (tMeta("keywords") || "AZKi").split(",").map((s) => s.trim()),
     openGraph: {
       ...metadata.openGraph,
-      title: ogTitle,
-      description: ogSubtitle,
+      title,
+      description,
       url: canonical.toString(),
       siteName: siteConfig.siteName,
-      locale: "ja_JP",
+      locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
       images: [
         {
@@ -250,8 +251,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: twitterCard,
-      title: ogTitle,
-      description: ogSubtitle,
+      title,
+      description,
       images: [`${ogImageUrl.pathname}${ogImageUrl.search}`],
     },
     alternates: {

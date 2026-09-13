@@ -6,7 +6,8 @@ import ArchiveCollaborationRanking from "../ArchiveCollaborationRanking";
 
 const labels = {
   title: "よくコラボしたホロメン",
-  subtitle: "一緒に配信した回数",
+  subtitle: "一緒に出演した合計時間",
+  combinationSubtitle: "同じ組み合わせで出演した回数",
   count: (count: number) => `${count}件`,
   itemLabel: (rank: number, name: string, count: number) =>
     `${rank}位 ${name} ${count}件`,
@@ -17,6 +18,7 @@ const labels = {
   memberModeLabel: "ホロメン別",
   combinationModeLabel: "組み合わせ別",
   noCollaboration: "未コラボ",
+  noKaraokeCollaboration: "歌枠未コラボ",
 };
 
 const formatDuration = (seconds: number) => `${seconds / 3_600}h`;
@@ -88,6 +90,22 @@ describe("ArchiveCollaborationRanking", () => {
               },
             },
           ]}
+          membersWithoutKaraokeCollaboration={[
+            {
+              name: "白上フブキ",
+              channel: {
+                branch: "JP",
+                generation: "1期生",
+                talentName: "白上フブキ",
+                artistName: "白上フブキ",
+                youtubeId: "UC-fubuki",
+                channelName: "フブキCh。白上フブキ",
+                handle: "@shirakamifubuki",
+                subscriberCount: 0,
+                iconUrl: "https://example.com/fubuki.png",
+              },
+            },
+          ]}
           years={[2025, 2024]}
           selectedYear={null}
           mode="member"
@@ -100,21 +118,55 @@ describe("ArchiveCollaborationRanking", () => {
     );
 
     expect(screen.getByText("よくコラボしたホロメン")).toBeInTheDocument();
+    expect(screen.getByText("一緒に出演した合計時間")).toBeVisible();
     expect(screen.getByRole("img", { name: "星街すいせい" })).toBeVisible();
     expect(screen.getByText("0期生")).toBeVisible();
     expect(screen.getByText("8h")).toBeVisible();
     expect(screen.getByText("8件")).toBeVisible();
     expect(screen.getByText("未コラボ")).toBeVisible();
     expect(screen.getByRole("img", { name: "風真いろは" })).toBeVisible();
+    expect(screen.getByText("歌枠未コラボ")).toBeVisible();
+    expect(screen.getByRole("img", { name: "白上フブキ" })).toBeVisible();
+    expect(
+      within(screen.getByRole("group", { name: "未コラボ" })).getByRole("img", {
+        name: "風真いろは",
+      }),
+    ).toBeVisible();
+    expect(
+      within(screen.getByRole("group", { name: "歌枠未コラボ" })).getByRole(
+        "img",
+        { name: "白上フブキ" },
+      ),
+    ).toBeVisible();
+    const noCollaborationLayout = screen
+      .getByRole("group", { name: "未コラボ" })
+      .querySelector<HTMLElement>('[data-max-rows="2"]');
+    expect(noCollaborationLayout).toHaveStyle({
+      display: "grid",
+      gridAutoFlow: "column",
+      gridTemplateRows: "repeat(2, auto)",
+    });
+    expect(noCollaborationLayout?.parentElement).toHaveClass("overflow-x-auto");
     const suiseiLink = screen.getByRole("link", { name: /星街すいせい/ });
     expect(suiseiLink).toHaveAttribute(
       "href",
       "/stream-archives/list?cast=%E6%98%9F%E8%A1%97%E3%81%99%E3%81%84%E3%81%9B%E3%81%84",
     );
     expect(suiseiLink).toHaveClass("grid-cols-[1.5rem_2.5rem_minmax(0,1fr)]");
+    const progress = screen.getByRole("progressbar", {
+      name: "1位 星街すいせい 8件 [0期生] 8h",
+    });
+    const count = within(suiseiLink).getByText("8件");
+    const duration = within(suiseiLink).getByText("8h");
+    expect(progress).toHaveAttribute("aria-valuenow", "100");
     expect(
-      screen.getByRole("progressbar", { name: "1位 星街すいせい 8件" }),
-    ).toHaveAttribute("aria-valuenow", "100");
+      count.compareDocumentPosition(progress) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      progress.compareDocumentPosition(duration) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("shows graduation status beside the member name", () => {
@@ -148,6 +200,7 @@ describe("ArchiveCollaborationRanking", () => {
             },
           ]}
           membersWithoutCollaboration={[]}
+          membersWithoutKaraokeCollaboration={[]}
           years={[2026]}
           selectedYear={null}
           mode="member"
@@ -201,6 +254,7 @@ describe("ArchiveCollaborationRanking", () => {
             },
           ]}
           membersWithoutCollaboration={[]}
+          membersWithoutKaraokeCollaboration={[]}
           years={[2026]}
           selectedYear={null}
           mode="combination"
@@ -217,6 +271,7 @@ describe("ArchiveCollaborationRanking", () => {
     expect(screen.getByRole("img", { name: "博衣こより" })).toBeVisible();
     expect(screen.getByText("5h")).toBeVisible();
     expect(screen.getByText("5件")).toBeVisible();
+    expect(screen.getByText("同じ組み合わせで出演した回数")).toBeVisible();
     const combinationLink = screen.getByRole("link", { name: /KoZMy/ });
     expect(combinationLink).toHaveAttribute(
       "href",
@@ -225,6 +280,19 @@ describe("ArchiveCollaborationRanking", () => {
     expect(combinationLink).toHaveClass(
       "grid-cols-[1.5rem_7.25rem_minmax(0,1fr)]",
     );
+    const progress = screen.getByRole("progressbar", {
+      name: "1位 KoZMy 5件 5h",
+    });
+    const duration = within(combinationLink).getByText("5h");
+    const count = within(combinationLink).getByText("5件");
+    expect(
+      duration.compareDocumentPosition(progress) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      progress.compareDocumentPosition(count) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("lets the user switch between all-time and a specific year", () => {
@@ -236,6 +304,7 @@ describe("ArchiveCollaborationRanking", () => {
         <ArchiveCollaborationRanking
           items={[]}
           membersWithoutCollaboration={[]}
+          membersWithoutKaraokeCollaboration={[]}
           years={[2025, 2024]}
           selectedYear={null}
           mode="member"

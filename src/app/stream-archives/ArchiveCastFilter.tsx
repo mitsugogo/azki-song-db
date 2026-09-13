@@ -17,10 +17,10 @@ import {
   holoGenerationGroupOrder,
   resolveHoloGenerationGroups,
 } from "../config/holoGenerations";
-import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import type { ArchiveCastOption } from "./archiveCastOptions";
 
 type ArchiveCastFilterProps = {
-  options: ArchiveParticipantEntry[];
+  options: ArchiveCastOption[];
   value: string[];
   placeholder: string;
   nothingFoundMessage: string;
@@ -28,7 +28,7 @@ type ArchiveCastFilterProps = {
   onChange: (value: string[]) => void;
 };
 
-type GroupedCastOption = ArchiveParticipantEntry & {
+type GroupedCastOption = ArchiveCastOption & {
   value: string;
 };
 
@@ -56,7 +56,7 @@ function ArchiveCastFilter({
   const data = useMemo(() => {
     const itemsByGroupKey = new Map<
       string,
-      { label: string; items: Map<string, ArchiveParticipantEntry> }
+      { label: string; items: Map<string, ArchiveCastOption> }
     >();
 
     options.forEach((participant) => {
@@ -102,6 +102,14 @@ function ArchiveCastFilter({
 
     return result;
   }, [data]);
+  const countsByName = useMemo(
+    () => new Map(options.map((option) => [option.name, option.count])),
+    [options],
+  );
+  const formatOptionLabel = useCallback(
+    (name: string) => `${name} (${countsByName.get(name) ?? 0})`,
+    [countsByName],
+  );
   const filteredData = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("ja-JP");
 
@@ -118,7 +126,7 @@ function ArchiveCastFilter({
   const handleOptionSubmit = useCallback(
     (optionValue: string) => {
       const option = optionsByValue.get(optionValue);
-      if (!option) {
+      if (!option || option.count === 0) {
         return;
       }
 
@@ -140,7 +148,7 @@ function ArchiveCastFilter({
   const pills =
     value.length >= 3 ? (
       <Tooltip
-        label={value.join(", ")}
+        label={value.map(formatOptionLabel).join(", ")}
         multiline
         maw={320}
         withArrow
@@ -148,7 +156,9 @@ function ArchiveCastFilter({
       >
         <Pill
           tabIndex={0}
-          aria-label={`${selectedCountLabel}: ${value.join(", ")}`}
+          aria-label={`${selectedCountLabel}: ${value
+            .map(formatOptionLabel)
+            .join(", ")}`}
           style={{ flex: "0 1 auto", maxWidth: "calc(100% - 44px)" }}
         >
           {selectedCountLabel}
@@ -161,7 +171,7 @@ function ArchiveCastFilter({
           withRemoveButton
           onRemove={() => handleValueRemove(name)}
         >
-          {name}
+          {formatOptionLabel(name)}
         </Pill>
       ))
     );
@@ -239,6 +249,7 @@ function ArchiveCastFilter({
               <Combobox.Group key={group.key} label={group.label}>
                 {group.items.map((option) => {
                   const selected = value.includes(option.name);
+                  const disabled = option.count === 0;
 
                   return (
                     <Combobox.Option
@@ -246,6 +257,8 @@ function ArchiveCastFilter({
                       value={option.value}
                       active={selected}
                       aria-selected={selected}
+                      aria-disabled={disabled || undefined}
+                      disabled={disabled}
                     >
                       <Group justify="space-between" gap="sm" wrap="nowrap">
                         <Group gap="sm" wrap="nowrap">
@@ -261,7 +274,9 @@ function ArchiveCastFilter({
                               {Array.from(option.name)[0]}
                             </Avatar>
                           ) : null}
-                          <Text size="sm">{option.name}</Text>
+                          <Text size="sm" c={disabled ? "dimmed" : undefined}>
+                            {formatOptionLabel(option.name)}
+                          </Text>
                         </Group>
                         {selected ? (
                           <HiCheck

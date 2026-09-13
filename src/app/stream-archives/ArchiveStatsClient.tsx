@@ -28,6 +28,7 @@ import {
   createArchiveCollaborationCombinationRanking,
   createArchiveCollaborationRanking,
   createArchiveMembersWithoutCollaboration,
+  createArchiveMembersWithoutKaraokeCollaboration,
 } from "./archiveCollaborationData";
 import { getLegacyArchiveListUrl } from "./archiveFilters";
 import {
@@ -55,7 +56,7 @@ export default function ArchiveStatsClient() {
   const router = useRouter();
   const { items, isLoading: areArchivesLoading } = useArchives();
   const { channels, isLoading: areChannelsLoading } = useChannels();
-  const { allSongs } = useSongs();
+  const { allSongs, isLoading: areSongsLoading } = useSongs();
   const [selectedActivityYear, setSelectedActivityYear] = useState<
     string | null
   >(null);
@@ -171,6 +172,17 @@ export default function ArchiveStatsClient() {
       createArchiveMembersWithoutCollaboration(summary.items, channels, locale),
     [channels, locale, summary.items],
   );
+  const membersWithoutKaraokeCollaboration = useMemo(
+    () =>
+      allSongs.length > 0
+        ? createArchiveMembersWithoutKaraokeCollaboration(
+            channels,
+            locale,
+            allSongs,
+          )
+        : [],
+    [allSongs, channels, locale],
+  );
   const weekdayLabels = useMemo(() => getWeekdayLabels(locale), [locale]);
 
   useEffect(() => {
@@ -196,7 +208,10 @@ export default function ArchiveStatsClient() {
   );
 
   const isLoading =
-    areArchivesLoading || areChannelsLoading || isLegacyRedirecting;
+    areArchivesLoading ||
+    areChannelsLoading ||
+    areSongsLoading ||
+    isLegacyRedirecting;
 
   return (
     <div className={pageClasses.shell}>
@@ -263,6 +278,8 @@ export default function ArchiveStatsClient() {
                 monthLabel: t("monthlyCalendarMonthLabel"),
                 previousMonth: t("monthlyCalendarPreviousMonth"),
                 nextMonth: t("monthlyCalendarNextMonth"),
+                scheduledTime: (time) =>
+                  t("monthlyCalendarScheduledTime", { time }),
                 empty: t("statsNoData"),
               }}
             />
@@ -291,6 +308,9 @@ export default function ArchiveStatsClient() {
               <ArchiveCollaborationRanking
                 items={collaborationRanking}
                 membersWithoutCollaboration={membersWithoutCollaboration}
+                membersWithoutKaraokeCollaboration={
+                  membersWithoutKaraokeCollaboration
+                }
                 years={summary.activity.years}
                 selectedYear={selectedCollaborationYear}
                 mode={collaborationMode}
@@ -298,6 +318,9 @@ export default function ArchiveStatsClient() {
                 labels={{
                   title: t("collaborationRankingTitle"),
                   subtitle: t("collaborationRankingSubtitle"),
+                  combinationSubtitle: t(
+                    "collaborationCombinationRankingSubtitle",
+                  ),
                   count: (count) => t("collaborationCount", { count }),
                   itemLabel: (rank, name, count) =>
                     t("collaborationRankingItemLabel", { rank, name, count }),
@@ -312,6 +335,7 @@ export default function ArchiveStatsClient() {
                     "collaborationRankingCombinationMode",
                   ),
                   noCollaboration: t("collaborationNoHistory"),
+                  noKaraokeCollaboration: t("collaborationNoKaraokeHistory"),
                 }}
                 onSelectedYearChange={setSelectedCollaborationYear}
                 onModeChange={setCollaborationMode}

@@ -391,6 +391,7 @@
     },
     "search": {
       "description": "Search songs by title, artist, tag and more.",
+      "summary": "Song search across {countSongs} songs and {countVideos} videos",
       "ogSubtitle": "Search results - {siteName}",
       "ogAlt": "{siteName} - Search results"
     },
@@ -400,6 +401,7 @@
       "ogAlt": "{siteName} - Data list"
     },
     "share": {
+      "indexDescription": "Features for sharing song selections on social media",
       "acrosticSetlistTitleWithSite": "Acrostic Setlist Maker | {siteName}",
       "acrosticSetlistOgTitle": "Acrostic Setlist Maker",
       "whereMyAzkichiBeganTitleWithSite": "Where did your AZKi journey begin? | {siteName}",
@@ -447,13 +449,20 @@
       "title": "Seichi Map",
       "description": "Record your visits and completion rate of the AZKi Seichi Map."
     },
+    "seichiMapRanking": {
+      "description": "Rankings of the most-visited locations and explorers with the most visits"
+    },
     "seichiMapCompleteShared": {
       "title": "Seichi Map",
       "descriptionTemplate": "{nickname}'s Seichi Map Visit Log"
     },
     "playlist": {
       "title": "Playlist",
-      "description": "AZKi's original and cover songs collection"
+      "description": "AZKi's original and cover songs collection",
+      "sharedDescription": "A playlist containing {count} songs"
+    },
+    "statistics": {
+      "description": "Statistics for karaoke setlists, original songs, cover songs, and more"
     },
     "membersOnlyAccess": {
       "title": "Unlock Members-only Data | {siteName}",
@@ -1026,6 +1035,7 @@
     "monthlyCalendarMonthLabel": "Month",
     "monthlyCalendarPreviousMonth": "Show previous month",
     "monthlyCalendarNextMonth": "Show next month",
+    "monthlyCalendarScheduledTime": "Scheduled for {time}",
     "monthlyCalendarMore": "{count} more",
     "monthlyCalendarOpenDate": "View archives from {date}",
     "monthlyCalendarOpenDetail": "View details for {title}",
@@ -1083,7 +1093,8 @@
     "activityEmptyCellLabel": "{date}: 0m",
     "activityNoData": "No archives have a calculable stream start date.",
     "collaborationRankingTitle": "Top collabs",
-    "collaborationRankingSubtitle": "Streams together across all time",
+    "collaborationRankingSubtitle": "Total time streamed together",
+    "collaborationCombinationRankingSubtitle": "Appearances with the same combination",
     "collaborationCount": "{count} times",
     "collaborationRankingItemLabel": "Rank {rank}, {name}, {count} times",
     "collaborationRankingNoData": "No collaboration data to display.",
@@ -1093,6 +1104,7 @@
     "collaborationRankingCombinationMode": "By combination",
     "collaborationFirstDate": "First collab {date} · {duration}",
     "collaborationNoHistory": "No collabs yet",
+    "collaborationNoKaraokeHistory": "No singing-stream collabs yet",
     "loading": "Loading stream archives...",
     "empty": "No stream archives to display.",
     "thumbnailLabel": "Thumbnail",

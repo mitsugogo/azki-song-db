@@ -86,6 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const monthLabel = formatActivityMonthLabel(activityMonth, locale);
   const title = tMeta("monthTitle", { month: monthLabel });
   const subtitle = tMeta("monthDescription", { month: monthLabel });
+  const pageTitle = `${title} | ${siteConfig.siteName}`;
   const canonical = new URL(
     getActivityMonthHref(activityMonth),
     baseUrl,
@@ -99,11 +100,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `${title} | ${siteConfig.siteName}`,
+    title: pageTitle,
     description: subtitle,
     openGraph: {
       ...metadata.openGraph,
-      title,
+      title: pageTitle,
       description: subtitle,
       url: canonical,
       siteName: siteConfig.siteName,
@@ -113,7 +114,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: pageTitle,
       description: subtitle,
       images: [ogImagePath],
     },

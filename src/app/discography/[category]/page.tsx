@@ -109,6 +109,8 @@ export async function generateMetadata({
   const ogImage = new URL("/api/og", baseUrl);
   ogImage.searchParams.set("title", title);
   ogImage.searchParams.set("subtitle", description);
+  ogImage.searchParams.set("w", "1200");
+  ogImage.searchParams.set("h", "630");
 
   return {
     title,

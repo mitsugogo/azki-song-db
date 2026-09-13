@@ -18,12 +18,14 @@ import useAnniversaries from "../hook/useAnniversaries";
 import useEvents from "../hook/useEvents";
 import useMilestones from "../hook/useMilestones";
 import { buildAnniversaryActivityItems } from "../lib/activityAnniversaries";
+import { getActivityJstDateKey } from "../lib/activityCalendar";
 import { filterActivityTimelineItemsForDisplay } from "../lib/activityTimelineFilters";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import type { Song } from "../types/song";
 import type { ArchiveCalendarDayStats, ArchiveStatsItem } from "./archiveStats";
 
 const MONTH_ACTIVITY_LIMIT = 1000;
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 type ArchiveMonthlyCalendarProps = {
   days: Map<string, ArchiveCalendarDayStats>;
@@ -38,6 +40,7 @@ type ArchiveMonthlyCalendarProps = {
     monthLabel: string;
     previousMonth: string;
     nextMonth: string;
+    scheduledTime: (time: string) => string;
     empty: string;
   };
 };
@@ -58,18 +61,39 @@ export default function ArchiveMonthlyCalendar({
   channels,
   labels,
 }: ArchiveMonthlyCalendarProps) {
+  const availableDateKeys = useMemo(
+    () => Array.from(days.keys()).sort(),
+    [days],
+  );
+  const todayDateKey = getActivityJstDateKey(new Date());
+  const todayMonth = todayDateKey.slice(0, 7);
+  const firstDataMonth = availableDateKeys[0]?.slice(0, 7);
+  const lastDataMonth = availableDateKeys.at(-1)?.slice(0, 7);
+  const minMonth = firstDataMonth
+    ? firstDataMonth < todayMonth
+      ? firstDataMonth
+      : todayMonth
+    : undefined;
+  const maxMonth = lastDataMonth
+    ? lastDataMonth > todayMonth
+      ? lastDataMonth
+      : todayMonth
+    : undefined;
+  const minDate = minMonth ? `${minMonth}-01` : undefined;
+  const maxDate = maxMonth ? `${maxMonth}-01` : undefined;
+  const defaultMonth = latestMonth ? todayMonth : null;
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [displayFilters, setDisplayFilters] = useState(
     DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS,
   );
 
   useEffect(() => {
-    if (latestMonth) {
-      setSelectedMonth((current) => current ?? `${latestMonth}-01`);
+    if (defaultMonth) {
+      setSelectedMonth((current) => current ?? `${defaultMonth}-01`);
     }
-  }, [latestMonth]);
+  }, [defaultMonth]);
 
-  const monthValue = selectedMonth?.slice(0, 7) ?? latestMonth;
+  const monthValue = selectedMonth?.slice(0, 7) ?? defaultMonth;
   const activityMonth = useMemo(() => {
     if (!monthValue) {
       return null;
@@ -84,8 +108,13 @@ export default function ArchiveMonthlyCalendar({
     }
 
     return {
-      start: new Date(activityMonth.year, activityMonth.month - 1, 1),
-      endExclusive: new Date(activityMonth.year, activityMonth.month, 1),
+      start: new Date(
+        Date.UTC(activityMonth.year, activityMonth.month - 1, 1) -
+          JST_OFFSET_MS,
+      ),
+      endExclusive: new Date(
+        Date.UTC(activityMonth.year, activityMonth.month, 1) - JST_OFFSET_MS,
+      ),
     };
   }, [activityMonth]);
   const { items: anniversaries, isLoading: isAnniversariesLoading } =
@@ -124,14 +153,19 @@ export default function ArchiveMonthlyCalendar({
   const orderedActivityItems = useMemo(
     () =>
       sortActivityTimelineItems(
-        filterActivityTimelineItems(
-          [
-            ...activityItems.filter((item) => item.kind !== "archive"),
-            ...archiveItems,
-            ...anniversaryItems,
-          ],
-          { dateRange },
-        ),
+        [
+          ...filterActivityTimelineItems(
+            [
+              ...activityItems.filter((item) => item.kind !== "archive"),
+              ...anniversaryItems,
+            ],
+            { dateRange },
+          ),
+          ...filterActivityTimelineItems(archiveItems, {
+            dateRange,
+            now: Number.POSITIVE_INFINITY,
+          }),
+        ],
         "asc",
       ),
     [activityItems, anniversaryItems, archiveItems, dateRange],
@@ -144,18 +178,6 @@ export default function ArchiveMonthlyCalendar({
       ),
     [displayFilters, orderedActivityItems],
   );
-  const availableDateKeys = useMemo(
-    () => Array.from(days.keys()).sort(),
-    [days],
-  );
-  const minDate = availableDateKeys[0]
-    ? `${availableDateKeys[0].slice(0, 7)}-01`
-    : undefined;
-  const maxDate = availableDateKeys.at(-1)
-    ? `${availableDateKeys.at(-1)!.slice(0, 7)}-01`
-    : undefined;
-  const minMonth = minDate?.slice(0, 7);
-  const maxMonth = maxDate?.slice(0, 7);
   const isPreviousMonthDisabled =
     !monthValue || Boolean(minMonth && monthValue <= minMonth);
   const isNextMonthDisabled =
@@ -256,6 +278,10 @@ export default function ArchiveMonthlyCalendar({
             isViewMilestonesLoading={isViewMilestonesLoading}
             channels={channels}
             showDetails={false}
+            defaultSelectedDateKey={
+              monthValue === todayMonth ? todayDateKey : undefined
+            }
+            upcomingArchiveTimeLabel={labels.scheduledTime}
           />
         </div>
       )}

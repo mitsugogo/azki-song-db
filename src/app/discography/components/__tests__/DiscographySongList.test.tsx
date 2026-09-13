@@ -70,7 +70,7 @@ beforeEach(() => {
   Object.values(globalPlayerMock).forEach((mock) => mock.mockClear());
 });
 
-const createSong = (videoId: string, tags: string[]): Song =>
+const createSong = (videoId: string, tags: string[], sourceOrder = 1): Song =>
   ({
     title: "テスト曲",
     artist: "AZKi",
@@ -80,7 +80,7 @@ const createSong = (videoId: string, tags: string[]): Song =>
     video_id: videoId,
     video_uri: `https://www.youtube.com/watch?v=${videoId}`,
     start: 12,
-    source_order: 1,
+    source_order: sourceOrder,
     sing: "AZKi",
     tags,
   }) as Song;
@@ -119,9 +119,46 @@ describe("DiscographySongList", () => {
     consoleError.mockRestore();
   });
 
+  it("動画情報が同じリリース行でもsource_orderで切替項目を識別する", () => {
+    const firstSong = createSong("duplicate-variant", ["オリ曲MV"], 51);
+    const secondSong = createSong("duplicate-variant", ["オリ曲MV"], 52);
+    firstSong.slugv2 = "duplicate-variant-12";
+    secondSong.slugv2 = "duplicate-variant-12";
+    const item: StatisticsItem = {
+      key: "duplicate-variant",
+      count: 2,
+      isAlbum: true,
+      song: firstSong,
+      firstVideo: firstSong,
+      lastVideo: secondSong,
+      videos: [firstSong, secondSong],
+    };
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <MantineProvider>
+        <DiscographySongList
+          data={[item]}
+          groupByAlbum
+          groupByYear={false}
+          visibleItems={[true]}
+        />
+      </MantineProvider>,
+    );
+
+    expect(consoleError.mock.calls.flat().join(" ")).not.toContain(
+      "Encountered two children with the same key",
+    );
+    expect(screen.getByText("mv①")).toBeInTheDocument();
+    expect(screen.getByText("mv②")).toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
   it("選択中の動画をMiniPlayerで再生し、MVとアートトラックを切り替えられる", () => {
     const mv = createSong("mvvideo0001", ["オリ曲MV"]);
-    const artTrack = createSong("arttrack001", ["オリ曲", "アートトラック"]);
+    const artTrack = createSong("arttrack001", ["オリ曲", "アートトラック"], 2);
     const item: StatisticsItem = {
       key: "test-album",
       count: 2,
@@ -156,7 +193,7 @@ describe("DiscographySongList", () => {
 
   it("アルバム内のアートトラックを正方形トリミングのサムネイルにする", () => {
     const musicVideo = createSong("mvvideo0001", ["オリ曲MV"]);
-    const artTrack = createSong("arttrack001", ["オリ曲", "アートトラック"]);
+    const artTrack = createSong("arttrack001", ["オリ曲", "アートトラック"], 2);
     const item: StatisticsItem = {
       key: "test-album",
       count: 2,

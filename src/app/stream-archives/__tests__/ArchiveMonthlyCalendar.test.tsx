@@ -48,6 +48,9 @@ describe("ArchiveMonthlyCalendar", () => {
   });
 
   it("reuses the activity calendar and filters without rendering a timeline", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-02T03:00:00.000Z"));
+
     const day: ArchiveCalendarDayStats = {
       dateKey: "2026-01-02",
       streamCount: 1,
@@ -97,11 +100,13 @@ describe("ArchiveMonthlyCalendar", () => {
             monthLabel: "表示月",
             previousMonth: "前月を表示",
             nextMonth: "次月を表示",
+            scheduledTime: (time) => `配信予定 ${time}`,
             empty: "データなし",
           }}
         />
       </MantineProvider>,
     );
+    vi.useRealTimers();
 
     expect(screen.getByTestId("activity-calendar")).toBeInTheDocument();
     expect(
@@ -161,5 +166,76 @@ describe("ArchiveMonthlyCalendar", () => {
       }),
     );
     expect(screen.queryByAltText("新年配信")).not.toBeInTheDocument();
+  });
+
+  it("defaults to today and shows future streams with their scheduled JST time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+
+    const futureArchive = {
+      sequence: 2,
+      topic: "ライブ",
+      title: "配信予定ライブ",
+      video_id: "upcoming-video",
+      channel_id: "channel-1",
+      video_url: "https://www.youtube.com/watch?v=upcoming-video",
+      video_duration: "",
+      description: "",
+      published_at: "2026-02-01T12:00:00.000Z",
+      stream_started_at: "2026-02-01T12:00:00.000Z",
+      timestamp_comment: "",
+      member_only: false,
+      participantEntries: [],
+    };
+
+    try {
+      const { container } = render(
+        <MantineProvider>
+          <ArchiveMonthlyCalendar
+            days={
+              new Map([
+                [
+                  "2026-02-01",
+                  {
+                    dateKey: "2026-02-01",
+                    streamCount: 1,
+                    totalDurationSeconds: 0,
+                    items: [futureArchive],
+                  },
+                ],
+              ])
+            }
+            archives={[futureArchive]}
+            latestMonth="2026-02"
+            locale="ja"
+            songs={[]}
+            channels={[]}
+            labels={{
+              title: "月間カレンダー",
+              subtitle: "日ごとの配信",
+              monthLabel: "表示月",
+              previousMonth: "前月を表示",
+              nextMonth: "次月を表示",
+              scheduledTime: (time) => `配信予定 ${time}`,
+              empty: "データなし",
+            }}
+          />
+        </MantineProvider>,
+      );
+
+      expect(
+        container.querySelector('button[data-date="2026-01-15"]'),
+      ).toHaveAttribute("aria-pressed", "true");
+      expect(screen.queryByAltText("配信予定ライブ")).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "次月を表示" }));
+
+      expect(screen.getByAltText("配信予定ライブ")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("activity-calendar-scheduled-time"),
+      ).toHaveTextContent("配信予定 21:00");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

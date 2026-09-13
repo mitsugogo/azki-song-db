@@ -11,8 +11,13 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "SeichiMapRanking", locale });
+  const tMetadata = await getTranslations({
+    namespace: "Metadata.seichiMapRanking",
+    locale,
+  });
   const title = t("title");
-  const description = t("description");
+  const description = tMetadata("description");
+  const pageTitle = `${title} | ${siteConfig.siteName}`;
   const canonical = new URL("/seichi-map/ranking", baseUrl).toString();
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", title);
@@ -23,11 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...metadata,
-    title: `${title} | ${siteConfig.siteName}`,
+    title: pageTitle,
     description,
     openGraph: {
       ...metadata.openGraph,
-      title,
+      title: pageTitle,
       description,
       url: canonical,
       siteName: siteConfig.siteName,
@@ -37,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: pageTitle,
       description,
       images: [ogImagePath],
     },

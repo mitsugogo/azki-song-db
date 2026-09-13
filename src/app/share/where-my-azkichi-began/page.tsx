@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogTitle = tMeta("whereMyAzkichiBeganOgTitle");
   const ogImageUrl = new URL("/api/og", baseUrl);
   ogImageUrl.searchParams.set("title", ogTitle);
-  ogImageUrl.searchParams.set("subtitle", siteConfig.siteName);
+  ogImageUrl.searchParams.set("subtitle", description);
   ogImageUrl.searchParams.set("w", "1200");
   ogImageUrl.searchParams.set("h", "630");
 
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     openGraph: {
-      title: ogTitle,
+      title,
       description,
       url: pageUrl.toString(),
       type: "website",
@@ -44,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
+      title,
       description,
       images: [ogImagePath],
     },
