@@ -1,10 +1,8 @@
 "use client";
 
-import { Link } from "../i18n/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Text } from "@mantine/core";
-import { useDisclosure, useSessionStorage } from "@mantine/hooks";
-import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { useLocale } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
 import DrawerMenu from "./components/DrawerMenu";
 import Footer from "./components/Footer";
@@ -12,6 +10,7 @@ import { HomeActivityTimelineSection } from "./home/HomeActivityTimelineSection"
 import { HomeHeader } from "./home/HomeHeader";
 import { HomeHeroSection } from "./home/HomeHeroSection";
 import { HomeEventsSection } from "./home/HomeEventsSection";
+import { HomeOngoingEventNotice } from "./home/HomeOngoingEventNotice";
 import { HomeLinksAndMeta } from "./home/HomeLinksAndMeta";
 import { HomeRecommendedSongsSection } from "./home/HomeRecommendedSongsSection";
 import { RecentUpdatesSection } from "./home/RecentUpdatesSection";
@@ -23,13 +22,6 @@ import useEvents from "./hook/useEvents";
 import useMilestones from "./hook/useMilestones";
 import useSongs from "./hook/useSongs";
 import { formatDate } from "./lib/formatDate";
-import { showAppNotification } from "./lib/notifications";
-import { isEventActive } from "./lib/highlights";
-import { IoInformationSharp } from "react-icons/io5";
-import { FaExternalLinkAlt } from "react-icons/fa";
-
-const ONGOING_EVENT_ALERT_DISMISSED_SESSION_KEY =
-  "ongoing-event-alert-dismissed-id";
 
 type BuildInfo = {
   buildDate?: string;
@@ -45,16 +37,8 @@ export default function ClientTop() {
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
     useAnniversaries();
   const { items: eventItems, isLoading: isEventsLoading } = useEvents();
-  const [dismissedOngoingEventAlertId, setDismissedOngoingEventAlertId] =
-    useSessionStorage<string | null>({
-      key: ONGOING_EVENT_ALERT_DISMISSED_SESSION_KEY,
-      defaultValue: null,
-      getInitialValueInEffect: false,
-    });
   const { items: externalMilestones, isLoading: isMilestonesLoading } =
     useMilestones();
-  const t = useTranslations("Home");
-  const ongoingEventNotificationIdRef = useRef<string | null>(null);
   const [buildDate, setBuildDate] = useState("N/A");
   const [appVersion, setAppVersion] = useState("N/A");
 
@@ -84,11 +68,6 @@ export default function ClientTop() {
         }
       });
   }, []);
-
-  const ongoingEvents = useMemo(
-    () => eventItems.filter((item) => isEventActive(item)),
-    [eventItems],
-  );
 
   const songsUpdatedLabel = useMemo(() => {
     if (!songsFetchedAt) {
@@ -121,63 +100,6 @@ export default function ClientTop() {
     return currentYear <= 2025 ? "2025" : `2025-${currentYear}`;
   }, []);
 
-  useEffect(() => {
-    if (ongoingEvents.length === 0) {
-      return;
-    }
-
-    const event = ongoingEvents[0];
-    const notificationId = `ongoing-event-${event.content}`;
-    if (dismissedOngoingEventAlertId === notificationId) {
-      return;
-    }
-
-    if (ongoingEventNotificationIdRef.current === notificationId) {
-      return;
-    }
-    ongoingEventNotificationIdRef.current = notificationId;
-
-    showAppNotification({
-      id: notificationId,
-      title: t("eventOngoingTitle", {
-        title: event.content,
-      }),
-      message: event.note ? (
-        <div className="space-y-2">
-          <Text size="sm" c="dimmed">
-            {event.note}
-
-            {event.url ? (
-              <Link
-                href={event.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm ml-1 font-semibold text-primary transition hover:text-primary-700 dark:text-pink-200"
-              >
-                <FaExternalLinkAlt className="text-[0.75rem]" />
-                {t("linkLabel")}
-              </Link>
-            ) : null}
-          </Text>
-        </div>
-      ) : (
-        event.content
-      ),
-      type: "warning",
-      icon: <IoInformationSharp />,
-      autoClose: false,
-      onClose: () => {
-        setDismissedOngoingEventAlertId(notificationId);
-        ongoingEventNotificationIdRef.current = null;
-      },
-    });
-  }, [
-    dismissedOngoingEventAlertId,
-    ongoingEvents,
-    setDismissedOngoingEventAlertId,
-    t,
-  ]);
-
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
       <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 sm:px-6 lg:px-8">
@@ -187,6 +109,8 @@ export default function ClientTop() {
           <HomeHeroSection songs={allSongs} />
 
           <section className="pt-8 pb-10 sm:pt-10">
+            <HomeOngoingEventNotice events={eventItems} />
+
             <HomeRecommendedSongsSection
               isLoading={isLoading}
               songs={allSongs}

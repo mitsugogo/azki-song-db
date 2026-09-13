@@ -7,12 +7,21 @@ import type { Song } from "../types/song";
 const PLAYBACK_TIMEOUT_MS = 15_000;
 const YOUTUBE_PLAYER_STATE_PLAYING = 1;
 
+// onReady の target は Promise ラッパーではなく、生の IFrame API プレイヤー。
+export type HomeHeroPlayer = {
+  mute: () => void;
+  unMute: () => void;
+  isMuted: () => boolean;
+};
+
 type HomeHeroBackgroundProps = {
   song: Song | null;
+  onPlayerChange?: (player: HomeHeroPlayer | null) => void;
 };
 
 export const HomeHeroBackground = memo(function HomeHeroBackground({
   song,
+  onPlayerChange,
 }: HomeHeroBackgroundProps) {
   const [isUnavailable, setUnavailable] = useState(false);
   const hasPlayedRef = useRef(false);
@@ -55,6 +64,10 @@ export const HomeHeroBackground = memo(function HomeHeroBackground({
     return () => window.clearTimeout(playbackTimeout);
   }, [song?.video_id]);
 
+  useEffect(() => {
+    return () => onPlayerChange?.(null);
+  }, [song?.video_id, isUnavailable, onPlayerChange]);
+
   if (!song || isUnavailable) {
     return null;
   }
@@ -63,6 +76,7 @@ export const HomeHeroBackground = memo(function HomeHeroBackground({
     try {
       event.target.mute();
       event.target.playVideo();
+      onPlayerChange?.(event.target as unknown as HomeHeroPlayer);
     } catch {
       setUnavailable(true);
     }
