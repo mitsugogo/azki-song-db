@@ -7,6 +7,7 @@ import ArchivePeriodSelect from "./ArchivePeriodSelect";
 import type { ArchiveCategoryStats } from "./archiveStats";
 
 type RankingMetric = "streams" | "duration";
+const RANKING_LIMIT = 10;
 
 type ArchiveCategoryRankingProps = {
   items: ArchiveCategoryStats[];
@@ -41,11 +42,13 @@ export default function ArchiveCategoryRanking({
   const [metric, setMetric] = useState<RankingMetric>("streams");
   const sortedItems = useMemo(
     () =>
-      [...items].sort((left, right) =>
-        metric === "streams"
-          ? right.streamCount - left.streamCount
-          : right.totalDurationSeconds - left.totalDurationSeconds,
-      ),
+      [...items]
+        .sort((left, right) =>
+          metric === "streams"
+            ? right.streamCount - left.streamCount
+            : right.totalDurationSeconds - left.totalDurationSeconds,
+        )
+        .slice(0, RANKING_LIMIT),
     [items, metric],
   );
   const maxStreams = Math.max(

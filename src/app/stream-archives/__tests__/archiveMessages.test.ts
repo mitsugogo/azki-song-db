@@ -22,6 +22,9 @@ describe("stream archive messages", () => {
     expect(jaMessages.Archives.collaborationRankingCombinationMode).toBe(
       "組み合わせ別",
     );
+    expect(jaMessages.Archives.seriesSortByDuration).toBe("総配信時間が長い順");
+    expect(jaMessages.Archives.seriesSortByVideos).toBe("動画が多い順");
+    expect(jaMessages.Archives.seriesSortByRecent).toBe("最近配信した順");
     expect(jaMessages.Archives.collaborationFirstDate).toBe(
       "初コラボ {date}・{duration}",
     );
@@ -58,6 +61,11 @@ describe("stream archive messages", () => {
     expect(enMessages.Archives.collaborationRankingMemberMode).toBe(
       "By member",
     );
+    expect(enMessages.Archives.seriesSortByDuration).toBe(
+      "Longest total duration",
+    );
+    expect(enMessages.Archives.seriesSortByVideos).toBe("Most videos");
+    expect(enMessages.Archives.seriesSortByRecent).toBe("Most recent stream");
     expect(enMessages.Archives.collaborationFirstDate).toBe(
       "First collab {date} · {duration}",
     );

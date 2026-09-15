@@ -112,6 +112,20 @@ describe("createArchiveStatsSummary", () => {
     });
   });
 
+  it("keeps all category aggregates for metric-specific ranking", () => {
+    const summary = createArchiveStatsSummary(
+      Array.from({ length: 11 }, (_, index) =>
+        createItem({
+          video_id: `category-${index}`,
+          topic: `カテゴリ${index}`,
+        }),
+      ),
+      "ja",
+    );
+
+    expect(summary.categories).toHaveLength(11);
+  });
+
   it("excludes the members-only category from the category ranking only", () => {
     const summary = createArchiveStatsSummary(
       [
