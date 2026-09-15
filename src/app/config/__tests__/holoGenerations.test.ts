@@ -9,7 +9,7 @@ describe("resolveHoloGenerationGroup", () => {
   it.each([
     ["JP", "0期生", "0期生"],
     ["JP", "1期生、ゲーマーズ", "1期生"],
-    ["JP", "ゲーマーズ", "ホロライブゲーマーズ"],
+    ["JP", "ゲーマーズ", "ゲーマーズ"],
     ["JP", "6期生、holoX、活動終了", "秘密結社holoX"],
     ["ID", "1期生", "AREA15"],
     ["ID", "2期生", "holoro"],
@@ -47,7 +47,7 @@ describe("resolveHoloGenerationGroup", () => {
       }),
     ).toEqual([
       { key: "hololive-1", label: "1期生" },
-      { key: "hololive-gamers", label: "ホロライブゲーマーズ" },
+      { key: "hololive-gamers", label: "ゲーマーズ" },
     ]);
     expect(
       resolveHoloGenerationGroups({
