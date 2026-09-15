@@ -30,6 +30,7 @@ function makeArchive(
   timestampComment = "",
   databaseHref?: string,
   memberOnly = false,
+  participants: string[] = [],
 ): ActivityTimelineItem {
   return {
     id: "archive-detail",
@@ -53,6 +54,7 @@ function makeArchive(
       stream_started_at: "2026-06-01T00:00:00.000Z",
       timestamp_comment: timestampComment,
       member_only: memberOnly,
+      participants,
     },
   };
 }
@@ -80,7 +82,10 @@ describe("ActivityItemDetail", () => {
     const { container, rerender } = render(
       <MantineProvider>
         <ActivityItemDetail
-          item={makeArchive("", "/watch?v=video-1&t=15s", true)}
+          item={makeArchive("", "/watch?v=video-1&t=15s", true, [
+            "AZKi",
+            "星街すいせい",
+          ])}
           channels={[
             {
               branch: "hololive",
@@ -92,6 +97,28 @@ describe("ActivityItemDetail", () => {
               handle: "@test",
               subscriberCount: 0,
               iconUrl: "https://example.com/channel.png",
+            },
+            {
+              branch: "hololive",
+              generation: "0期生",
+              talentName: "AZKi",
+              artistName: "AZKi",
+              youtubeId: "UC-azki",
+              channelName: "AZKi Channel",
+              handle: "@azki",
+              subscriberCount: 0,
+              iconUrl: "https://example.com/azki.png",
+            },
+            {
+              branch: "hololive",
+              generation: "0期生",
+              talentName: "星街すいせい",
+              artistName: "星街すいせい",
+              youtubeId: "UC-suisei",
+              channelName: "Suisei Channel",
+              handle: "@hoshimachisuisei",
+              subscriberCount: 0,
+              iconUrl: "https://example.com/suisei.png",
             },
           ]}
           active
@@ -116,6 +143,17 @@ describe("ActivityItemDetail", () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(screen.getByText("Test Channel")).toBeInTheDocument();
+    const participants = screen.getByTestId("activity-detail-participants");
+    expect(within(participants).getByText("castLabel")).toBeInTheDocument();
+    expect(
+      within(participants).getByRole("img", { name: "AZKi" }),
+    ).toBeInTheDocument();
+    expect(
+      within(participants).getByRole("img", { name: "星街すいせい" }),
+    ).toBeInTheDocument();
+    expect(
+      within(participants).getByTestId("activity-detail-participant-unit-name"),
+    ).toHaveTextContent("AS_tar");
     expect(screen.getByText("memberOnlyBadge")).toBeInTheDocument();
     expect(screen.getByText("publicInfoOnlyNote")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("publicInfoOnlyNote");
@@ -133,7 +171,7 @@ describe("ActivityItemDetail", () => {
       within(metadata).getByRole("link", { name: "ホロライブドリームス" }),
     ).toHaveAttribute(
       "href",
-      "/stream-archives?series=%E3%83%9B%E3%83%AD%E3%83%A9%E3%82%A4%E3%83%96%E3%83%89%E3%83%AA%E3%83%BC%E3%83%A0%E3%82%B9",
+      "/stream-archives/list?series=%E3%83%9B%E3%83%AD%E3%83%A9%E3%82%A4%E3%83%96%E3%83%89%E3%83%AA%E3%83%BC%E3%83%A0%E3%82%B9",
     );
     expect(screen.queryByTestId("activity-detail-timestamps")).toBeNull();
     expect(container.querySelector(".mantine-Timeline-root")).toBeNull();
@@ -165,6 +203,32 @@ describe("ActivityItemDetail", () => {
       active: false,
     });
     expect(player.stopVideo).not.toHaveBeenCalled();
+  });
+
+  it("omits archive participants when AZKi is the only participant", () => {
+    render(
+      <MantineProvider>
+        <ActivityItemDetail
+          item={makeArchive("", undefined, false, ["AZKi"])}
+          channels={[
+            {
+              branch: "hololive",
+              generation: "0期生",
+              talentName: "AZKi",
+              artistName: "AZKi",
+              youtubeId: "UC-azki",
+              channelName: "AZKi Channel",
+              handle: "@azki",
+              subscriberCount: 0,
+              iconUrl: "https://example.com/azki.png",
+            },
+          ]}
+          active
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.queryByTestId("activity-detail-participants")).toBeNull();
   });
 
   it("uses a thumbnail link when the shared player reports an error", () => {

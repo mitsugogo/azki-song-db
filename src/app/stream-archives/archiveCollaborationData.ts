@@ -6,6 +6,7 @@ import {
 } from "../config/holoGenerations";
 import {
   createChannelsByParticipantName,
+  isAzkiArchiveParticipant,
   resolveArchiveParticipants,
   type ArchiveParticipantEntry,
 } from "../lib/archiveParticipants";
@@ -124,16 +125,6 @@ const isHololiveMember = (participant: ArchiveParticipantEntry) => {
   );
 };
 
-const isAzki = (participant: ArchiveParticipantEntry) => {
-  const azkiName = normalizeValue(siteConfig.talentName);
-
-  return [
-    participant.name,
-    participant.channel?.talentName ?? "",
-    participant.channel?.artistName ?? "",
-  ].some((name) => normalizeValue(name) === azkiName);
-};
-
 const isActiveHololiveMember = (participant: ArchiveParticipantEntry) => {
   const { status } = getArchiveHololiveMemberMetadata(participant);
 
@@ -217,7 +208,10 @@ const getHololiveCollaborators = (item: ArchiveCollaborationSource) => {
   const participantsByKey = new Map<string, ArchiveParticipantEntry>();
 
   item.participantEntries.forEach((participant) => {
-    if (!isHololiveMember(participant) || isAzki(participant)) {
+    if (
+      !isHololiveMember(participant) ||
+      isAzkiArchiveParticipant(participant)
+    ) {
       return;
     }
 
@@ -244,7 +238,7 @@ const getEligibleHololiveCollaborators = (
   let hasAzki = false;
 
   item.participantEntries.forEach((participant) => {
-    if (isAzki(participant)) {
+    if (isAzkiArchiveParticipant(participant)) {
       hasAzki = true;
       return;
     }
@@ -361,7 +355,7 @@ const listActiveHololiveMembersWithoutIdentities = (
       !name ||
       !isHololiveMember(participant) ||
       !isActiveHololiveMember(participant) ||
-      isAzki(participant)
+      isAzkiArchiveParticipant(participant)
     ) {
       return;
     }
@@ -497,7 +491,7 @@ export const createArchiveCollaborationCombinationRanking = (
 
     const participantEntries = [azkiParticipant, ...collaborators];
     const memberNames = participantEntries.map((participant) =>
-      isAzki(participant)
+      isAzkiArchiveParticipant(participant)
         ? siteConfig.talentName
         : participant.channel?.talentName || participant.name,
     );
