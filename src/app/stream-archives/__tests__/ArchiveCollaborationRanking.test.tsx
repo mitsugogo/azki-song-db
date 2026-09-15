@@ -7,7 +7,7 @@ import ArchiveCollaborationRanking from "../ArchiveCollaborationRanking";
 const labels = {
   title: "よくコラボしたホロメン",
   subtitle: "一緒に出演した合計時間",
-  combinationSubtitle: "同じ組み合わせで出演した回数",
+  combinationSubtitle: "同じ組み合わせで出演した合計時間",
   count: (count: number) => `${count}件`,
   itemLabel: (rank: number, name: string, count: number) =>
     `${rank}位 ${name} ${count}件`,
@@ -252,6 +252,15 @@ describe("ArchiveCollaborationRanking", () => {
                 createParticipant("博衣こより", "UC-koyori"),
               ],
             },
+            {
+              key: "azuiro",
+              name: "あずいろ",
+              count: 10,
+              totalDurationSeconds: 7_200,
+              firstCollaborationDate: "2025-01-01",
+              castNames: ["風真いろは"],
+              participantEntries: [],
+            },
           ]}
           membersWithoutCollaboration={[]}
           membersWithoutKaraokeCollaboration={[]}
@@ -271,7 +280,7 @@ describe("ArchiveCollaborationRanking", () => {
     expect(screen.getByRole("img", { name: "博衣こより" })).toBeVisible();
     expect(screen.getByText("5h")).toBeVisible();
     expect(screen.getByText("5件")).toBeVisible();
-    expect(screen.getByText("同じ組み合わせで出演した回数")).toBeVisible();
+    expect(screen.getByText("同じ組み合わせで出演した合計時間")).toBeVisible();
     const combinationLink = screen.getByRole("link", { name: /KoZMy/ });
     expect(combinationLink).toHaveAttribute(
       "href",
@@ -283,16 +292,20 @@ describe("ArchiveCollaborationRanking", () => {
     const progress = screen.getByRole("progressbar", {
       name: "1位 KoZMy 5件 5h",
     });
-    const duration = within(combinationLink).getByText("5h");
+    const shorterCombinationProgress = screen.getByRole("progressbar", {
+      name: "2位 あずいろ 10件 2h",
+    });
     const count = within(combinationLink).getByText("5件");
+    const duration = within(combinationLink).getByText("5h");
     expect(
-      duration.compareDocumentPosition(progress) &
+      count.compareDocumentPosition(progress) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      progress.compareDocumentPosition(count) &
+      progress.compareDocumentPosition(duration) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(shorterCombinationProgress).toHaveAttribute("aria-valuenow", "40");
   });
 
   it("lets the user switch between all-time and a specific year", () => {

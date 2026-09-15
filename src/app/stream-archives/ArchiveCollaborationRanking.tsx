@@ -71,10 +71,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
   onSelectedYearChange,
   onModeChange,
 }: ArchiveCollaborationRankingProps) {
-  const isDurationRanking = mode === "member";
-  const maxMetricValue = isDurationRanking
-    ? (items[0]?.totalDurationSeconds ?? 0)
-    : (items[0]?.count ?? 0);
+  const maxMetricValue = items[0]?.totalDurationSeconds ?? 0;
   const noCollaborationGroups = [
     {
       label: labels.noCollaboration,
@@ -101,7 +98,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
             {labels.title}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            {isDurationRanking ? labels.subtitle : labels.combinationSubtitle}
+            {mode === "member" ? labels.subtitle : labels.combinationSubtitle}
           </p>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
@@ -245,20 +242,14 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                         size="xs"
                         className="whitespace-nowrap tabular-nums"
                       >
-                        {isDurationRanking
-                          ? labels.count(item.count)
-                          : duration}
+                        {labels.count(item.count)}
                       </Text>
                     </div>
                     <div className="mt-1 flex min-w-0 items-center gap-2">
                       <Progress
                         value={
                           maxMetricValue > 0
-                            ? ((isDurationRanking
-                                ? item.totalDurationSeconds
-                                : item.count) /
-                                maxMetricValue) *
-                              100
+                            ? (item.totalDurationSeconds / maxMetricValue) * 100
                             : 0
                         }
                         aria-label={accessibleLabel}
@@ -272,9 +263,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                         size="xs"
                         className="shrink-0 tabular-nums"
                       >
-                        {isDurationRanking
-                          ? duration
-                          : labels.count(item.count)}
+                        {duration}
                       </Text>
                     </div>
                   </div>

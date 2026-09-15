@@ -1094,7 +1094,7 @@
     "activityNoData": "No archives have a calculable stream start date.",
     "collaborationRankingTitle": "Top collabs",
     "collaborationRankingSubtitle": "Total time streamed together",
-    "collaborationCombinationRankingSubtitle": "Appearances with the same combination",
+    "collaborationCombinationRankingSubtitle": "Total time streamed with the same combination",
     "collaborationCount": "{count} times",
     "collaborationRankingItemLabel": "Rank {rank}, {name}, {count} times",
     "collaborationRankingNoData": "No collaboration data to display.",

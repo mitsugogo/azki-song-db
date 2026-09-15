@@ -524,6 +524,6 @@ export const createArchiveCollaborationCombinationRanking = (
     Array.from(countsByCombination.values()),
     locale,
     limit,
-    "count",
+    "duration",
   );
 };

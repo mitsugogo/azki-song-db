@@ -1085,7 +1085,7 @@
     "activityNoData": "配信開始日を算出できるアーカイブがありません。",
     "collaborationRankingTitle": "よくコラボしたホロメン",
     "collaborationRankingSubtitle": "一緒に出演した合計時間",
-    "collaborationCombinationRankingSubtitle": "同じ組み合わせで出演した回数",
+    "collaborationCombinationRankingSubtitle": "同じ組み合わせで出演した合計時間",
     "collaborationCount": "{count}件",
     "collaborationRankingItemLabel": "{rank}位 {name} {count}件",
     "collaborationRankingNoData": "表示できる情報がありません。",

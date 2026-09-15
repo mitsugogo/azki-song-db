@@ -16,7 +16,7 @@ describe("stream archive messages", () => {
       "一緒に出演した合計時間",
     );
     expect(jaMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
-      "同じ組み合わせで出演した回数",
+      "同じ組み合わせで出演した合計時間",
     );
     expect(jaMessages.Archives.collaborationCount).toBe("{count}件");
     expect(jaMessages.Archives.collaborationRankingCombinationMode).toBe(
@@ -53,7 +53,7 @@ describe("stream archive messages", () => {
       "Total time streamed together",
     );
     expect(enMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
-      "Appearances with the same combination",
+      "Total time streamed with the same combination",
     );
     expect(enMessages.Archives.collaborationRankingMemberMode).toBe(
       "By member",
