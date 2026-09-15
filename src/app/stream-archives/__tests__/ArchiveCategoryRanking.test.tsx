@@ -20,24 +20,29 @@ describe("ArchiveCategoryRanking", () => {
     });
   });
 
-  const renderRanking = (onSelectedYearChange = vi.fn()) =>
+  const defaultItems = [
+    {
+      name: "歌枠",
+      key: "歌枠",
+      streamCount: 10,
+      totalDurationSeconds: 3_600,
+    },
+    {
+      name: "雑談",
+      key: "雑談",
+      streamCount: 5,
+      totalDurationSeconds: 7_200,
+    },
+  ];
+
+  const renderRanking = (
+    onSelectedYearChange = vi.fn(),
+    items = defaultItems,
+  ) =>
     render(
       <MantineProvider>
         <ArchiveCategoryRanking
-          items={[
-            {
-              name: "歌枠",
-              key: "歌枠",
-              streamCount: 10,
-              totalDurationSeconds: 3_600,
-            },
-            {
-              name: "雑談",
-              key: "雑談",
-              streamCount: 5,
-              totalDurationSeconds: 7_200,
-            },
-          ]}
+          items={items}
           years={[2026, 2025]}
           selectedYear={null}
           labels={{
@@ -95,6 +100,33 @@ describe("ArchiveCategoryRanking", () => {
     expect(
       screen.queryByRole("progressbar", { name: "歌枠の配信数" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("selects the top ten after applying the active metric", () => {
+    const items = [
+      ...Array.from({ length: 10 }, (_, index) => ({
+        name: `配信数カテゴリ${index + 1}`,
+        key: `count-${index + 1}`,
+        streamCount: 20 - index,
+        totalDurationSeconds: 3_600,
+      })),
+      {
+        name: "長時間カテゴリ",
+        key: "long-duration",
+        streamCount: 1,
+        totalDurationSeconds: 360_000,
+      },
+    ];
+    renderRanking(vi.fn(), items);
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(10);
+    expect(screen.queryByText("長時間カテゴリ")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "配信時間" }));
+
+    const durationItems = screen.getAllByRole("listitem");
+    expect(durationItems).toHaveLength(10);
+    expect(durationItems[0]).toHaveTextContent("長時間カテゴリ");
   });
 
   it("lets the user select all time or a specific year", () => {

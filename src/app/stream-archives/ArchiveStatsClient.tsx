@@ -22,6 +22,7 @@ import ArchiveContributionHeatmap from "./ArchiveContributionHeatmap";
 import ArchiveLongestStreamRanking from "./ArchiveLongestStreamRanking";
 import ArchiveMonthlyCalendar from "./ArchiveMonthlyCalendar";
 import ArchiveOverviewCards from "./ArchiveOverviewCards";
+import ArchiveSeriesOverview from "./ArchiveSeriesOverview";
 import ArchiveTimeHeatmap from "./ArchiveTimeHeatmap";
 import { formatActivityDuration } from "./archiveActivity";
 import {
@@ -415,6 +416,22 @@ export default function ArchiveStatsClient() {
                 yearSelectAriaLabel: t("timeHeatmapPeriodLabel"),
               }}
               onSelectedYearChange={setSelectedTimeHeatmapYear}
+            />
+
+            <ArchiveSeriesOverview
+              items={summary.items}
+              locale={locale}
+              uncategorizedLabel={t("uncategorized")}
+              labels={{
+                title: t("seriesViewLabel"),
+                sortLabel: t("seriesSortLabel"),
+                sortByDuration: t("seriesSortByDuration"),
+                sortByVideos: t("seriesSortByVideos"),
+                sortByRecent: t("seriesSortByRecent"),
+                itemsCount: (count) => t("itemsCount", { count }),
+                openSeries: (title) => t("openSeriesLabel", { title }),
+                noData: t("empty"),
+              }}
             />
           </div>
         )}

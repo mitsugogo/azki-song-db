@@ -153,12 +153,11 @@ export const createArchiveStatsSummary = (
   sourceItems: ArchiveStatsItem[],
   locale: string,
   options: {
-    categoryLimit?: number;
     uncategorizedLabel?: string;
     year?: number;
   } = {},
 ): ArchiveStatsSummary => {
-  const { categoryLimit = 10, uncategorizedLabel = "その他", year } = options;
+  const { uncategorizedLabel = "その他", year } = options;
   const items = sourceItems.filter((item) => {
     if (isShortsArchive(item)) {
       return false;
@@ -226,8 +225,7 @@ export const createArchiveStatsSummary = (
       (left, right) =>
         right.streamCount - left.streamCount ||
         collator.compare(left.name, right.name),
-    )
-    .slice(0, categoryLimit);
+    );
   const timeHeatmap: ArchiveTimeHeatmapCell[] = [];
   let maxTimeHeatmapCount = 0;
   for (let startHour = 0; startHour < 24; startHour += 2) {

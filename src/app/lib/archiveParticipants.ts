@@ -1,3 +1,4 @@
+import { siteConfig } from "../config/siteConfig";
 import type { ChannelEntry } from "../types/api/yt/channels";
 
 export type ArchiveParticipantEntry = {
@@ -7,6 +8,18 @@ export type ArchiveParticipantEntry = {
 
 const normalizeParticipantName = (value: string) =>
   value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
+
+export const isAzkiArchiveParticipant = (
+  participant: ArchiveParticipantEntry,
+) => {
+  const azkiName = normalizeParticipantName(siteConfig.talentName);
+
+  return [
+    participant.name,
+    participant.channel?.talentName ?? "",
+    participant.channel?.artistName ?? "",
+  ].some((name) => normalizeParticipantName(name) === azkiName);
+};
 
 export const parseArchiveParticipants = (value: unknown): string[] => {
   const rawNames = Array.isArray(value)

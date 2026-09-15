@@ -220,7 +220,7 @@ describe("ArchiveCastFilter", () => {
     fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
 
     expect(screen.getByText("1期生")).toBeVisible();
-    expect(screen.getByText("ホロライブゲーマーズ")).toBeVisible();
+    expect(screen.getByText("ゲーマーズ")).toBeVisible();
     expect(screen.getByText("Council")).toBeVisible();
     expect(screen.getByText("Promise")).toBeVisible();
 

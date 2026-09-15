@@ -16,12 +16,15 @@ describe("stream archive messages", () => {
       "一緒に出演した合計時間",
     );
     expect(jaMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
-      "同じ組み合わせで出演した回数",
+      "同じ組み合わせで出演した合計時間",
     );
     expect(jaMessages.Archives.collaborationCount).toBe("{count}件");
     expect(jaMessages.Archives.collaborationRankingCombinationMode).toBe(
       "組み合わせ別",
     );
+    expect(jaMessages.Archives.seriesSortByDuration).toBe("総配信時間が長い順");
+    expect(jaMessages.Archives.seriesSortByVideos).toBe("動画が多い順");
+    expect(jaMessages.Archives.seriesSortByRecent).toBe("最近配信した順");
     expect(jaMessages.Archives.collaborationFirstDate).toBe(
       "初コラボ {date}・{duration}",
     );
@@ -53,11 +56,16 @@ describe("stream archive messages", () => {
       "Total time streamed together",
     );
     expect(enMessages.Archives.collaborationCombinationRankingSubtitle).toBe(
-      "Appearances with the same combination",
+      "Total time streamed with the same combination",
     );
     expect(enMessages.Archives.collaborationRankingMemberMode).toBe(
       "By member",
     );
+    expect(enMessages.Archives.seriesSortByDuration).toBe(
+      "Longest total duration",
+    );
+    expect(enMessages.Archives.seriesSortByVideos).toBe("Most videos");
+    expect(enMessages.Archives.seriesSortByRecent).toBe("Most recent stream");
     expect(enMessages.Archives.collaborationFirstDate).toBe(
       "First collab {date} · {duration}",
     );

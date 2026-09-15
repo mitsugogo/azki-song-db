@@ -60,7 +60,6 @@ import {
   matchesSelectedArchiveParticipantEntries,
   resolveArchiveParticipants,
 } from "../lib/archiveParticipants";
-import { formatDate } from "../lib/formatDate";
 import historyHelper from "../lib/history";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import Image from "next/image";
@@ -92,15 +91,14 @@ import ArchiveCastFilter from "./ArchiveCastFilter";
 import { createArchiveCastOptions } from "./archiveCastOptions";
 import { getArchiveCastNames, setArchiveCastNames } from "./archiveFilters";
 import { isShortsArchive } from "./archiveStats";
+import ArchiveSeriesCard from "./ArchiveSeriesCard";
+import {
+  createArchiveSeriesGroups,
+  formatArchiveDate,
+  formatArchiveSeriesDuration,
+  type ArchiveSeriesGroup,
+} from "./archiveSeries";
 import StreamArchivesNavigation from "./StreamArchivesNavigation";
-
-type ArchiveGroup = {
-  key: string;
-  title: string;
-  items: IndexedArchiveItem[];
-  latestStreamStartedAt: string;
-  latestStreamStartedAtMs: number;
-};
 
 type IndexedArchiveItem = ArchiveItem & {
   seriesKey: string;
@@ -114,6 +112,8 @@ type IndexedArchiveItem = ArchiveItem & {
   searchText: string;
   appWatchHref: string | null;
 };
+
+type ArchiveGroup = ArchiveSeriesGroup<IndexedArchiveItem>;
 
 type ArchiveFilterState = {
   query: string;
@@ -270,18 +270,6 @@ const getArchiveSeriesTitle = (item: ArchiveItem) => {
   return item.topic || "その他";
 };
 
-const formatArchiveDate = (value: string, locale: string) => {
-  if (!value) {
-    return "-";
-  }
-
-  return formatDate(value, locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Tokyo",
-  });
-};
-
 const createIndexedArchives = (
   items: ArchiveItem[],
   channelsById: Map<string, ChannelEntry>,
@@ -341,40 +329,6 @@ const createIndexedArchives = (
         : null,
     };
   });
-
-const createArchiveGroups = (items: IndexedArchiveItem[]) => {
-  const groups = new Map<string, ArchiveGroup>();
-
-  items.forEach((item) => {
-    const seriesTitle = item.seriesTitle;
-    const key = item.seriesKey;
-    const group = groups.get(key);
-
-    if (group) {
-      group.items.push(item);
-      if (item.streamStartedAtMs > group.latestStreamStartedAtMs) {
-        group.latestStreamStartedAt = item.stream_started_at;
-        group.latestStreamStartedAtMs = item.streamStartedAtMs;
-      }
-      return;
-    }
-
-    groups.set(key, {
-      key,
-      title: seriesTitle,
-      items: [item],
-      latestStreamStartedAt: item.stream_started_at,
-      latestStreamStartedAtMs: item.streamStartedAtMs,
-    });
-  });
-
-  return Array.from(groups.values());
-};
-
-const getLatestArchiveGroupItem = (group: ArchiveGroup) =>
-  group.items.reduce((latestItem, item) =>
-    item.streamStartedAtMs > latestItem.streamStartedAtMs ? item : latestItem,
-  );
 
 const compareText = (collator: Intl.Collator, left: string, right: string) =>
   collator.compare(left || "", right || "");
@@ -707,58 +661,6 @@ const ThumbnailLink = memo(function ThumbnailLink({
         </Button>
       )}
     </div>
-  );
-});
-
-const ArchiveSeriesCard = memo(function ArchiveSeriesCard({
-  group,
-  locale,
-  itemsCountLabel,
-  openSeriesLabel,
-  onSelect,
-}: {
-  group: ArchiveGroup;
-  locale: string;
-  itemsCountLabel: string;
-  openSeriesLabel: string;
-  onSelect: (seriesKey: string) => void;
-}) {
-  const latestItem = getLatestArchiveGroupItem(group);
-
-  return (
-    <button
-      type="button"
-      aria-label={openSeriesLabel}
-      onClick={() => onSelect(group.key)}
-      className="group block min-w-0 cursor-pointer text-left focus:outline-none"
-    >
-      <div className="relative pt-2">
-        <span className="absolute inset-x-7 top-0 h-3 rounded-t-lg bg-gray-300/70 dark:bg-gray-700/80" />
-        <span className="absolute inset-x-4 top-1 h-3 rounded-t-lg bg-gray-400/70 dark:bg-gray-600/80" />
-        <div className="relative overflow-hidden rounded-lg bg-black shadow-sm ring-1 ring-black/10 transition group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-primary/50 dark:ring-white/10">
-          <Image
-            src={getThumbnailUrl(latestItem.video_id)}
-            width={320}
-            height={180}
-            alt={latestItem.title}
-            loading="lazy"
-            decoding="async"
-            className="aspect-video w-full object-cover transition duration-200 group-hover:scale-[1.03]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" />
-          <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded bg-black/75 px-2 py-1 text-xs font-semibold leading-none text-white shadow-sm">
-            <BiSolidVideos className="h-3.5 w-3.5" />
-            {itemsCountLabel}
-          </span>
-        </div>
-      </div>
-      <h2 className="mt-2 line-clamp-2 text-sm font-bold leading-snug text-gray-900 transition group-hover:text-primary dark:text-gray-100 dark:group-hover:text-primary-200">
-        {group.title}
-      </h2>
-      <Text className="mt-1" c="dimmed" fz="xs">
-        {formatArchiveDate(group.latestStreamStartedAt, locale)}
-      </Text>
-    </button>
   );
 });
 
@@ -1223,7 +1125,7 @@ export default function ArchivesPageClient() {
 
   const seriesOptions = useMemo(
     () =>
-      createArchiveGroups(indexedItems)
+      createArchiveSeriesGroups(indexedItems)
         .sort((a, b) => b.latestStreamStartedAtMs - a.latestStreamStartedAtMs)
         .map((group) => ({
           value: group.key,
@@ -1280,7 +1182,7 @@ export default function ArchivesPageClient() {
   }, [archiveSortCollator, filteredItems, sortState]);
 
   const archiveGroups = useMemo(
-    () => createArchiveGroups(sortedFilteredItems),
+    () => createArchiveSeriesGroups(sortedFilteredItems),
     [sortedFilteredItems],
   );
 
@@ -1291,7 +1193,7 @@ export default function ArchivesPageClient() {
 
   const seriesViewGroups = useMemo(
     () =>
-      createArchiveGroups(seriesFilteredItems).sort(
+      createArchiveSeriesGroups(seriesFilteredItems).sort(
         (a, b) => b.latestStreamStartedAtMs - a.latestStreamStartedAtMs,
       ),
     [seriesFilteredItems],
@@ -1844,10 +1746,16 @@ export default function ArchivesPageClient() {
               <ArchiveSeriesCard
                 key={group.key}
                 group={group}
-                locale={locale}
                 itemsCountLabel={t("itemsCount", {
                   count: group.items.length,
                 })}
+                totalDurationLabel={formatArchiveSeriesDuration(
+                  group.totalDurationSeconds,
+                )}
+                latestDateLabel={formatArchiveDate(
+                  group.latestStreamStartedAt,
+                  locale,
+                )}
                 openSeriesLabel={t("openSeriesLabel", {
                   title: group.title,
                 })}

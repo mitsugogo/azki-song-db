@@ -1,5 +1,11 @@
 import { MantineProvider } from "@mantine/core";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveMonthlyCalendar from "../ArchiveMonthlyCalendar";
 import type { ArchiveCalendarDayStats } from "../archiveStats";
@@ -69,6 +75,7 @@ describe("ArchiveMonthlyCalendar", () => {
           stream_started_at: "2026-01-01T15:00:00.000Z",
           timestamp_comment: "",
           member_only: true,
+          participants: ["AZKi", "星街すいせい"],
           participantEntries: [],
         },
       ],
@@ -93,7 +100,30 @@ describe("ArchiveMonthlyCalendar", () => {
           latestMonth="2026-01"
           locale="ja"
           songs={[]}
-          channels={[]}
+          channels={[
+            {
+              branch: "hololive",
+              generation: "0期生",
+              talentName: "AZKi",
+              artistName: "AZKi",
+              youtubeId: "UC-azki",
+              channelName: "AZKi Channel",
+              handle: "@azki",
+              subscriberCount: 0,
+              iconUrl: "https://example.com/azki.png",
+            },
+            {
+              branch: "hololive",
+              generation: "0期生",
+              talentName: "星街すいせい",
+              artistName: "星街すいせい",
+              youtubeId: "UC-suisei",
+              channelName: "Suisei Channel",
+              handle: "@hoshimachisuisei",
+              subscriberCount: 0,
+              iconUrl: "https://example.com/suisei.png",
+            },
+          ]}
           labels={{
             title: "月間カレンダー",
             subtitle: "日ごとの配信",
@@ -126,6 +156,16 @@ describe("ArchiveMonthlyCalendar", () => {
       "archive-video-1-2026-01-01T15:00:00.000Z",
     );
     expect(screen.getByText("memberOnlyBadge")).toBeInTheDocument();
+    const participants = screen.getByTestId("activity-detail-participants");
+    expect(
+      within(participants).getByRole("img", { name: "AZKi" }),
+    ).toBeInTheDocument();
+    expect(
+      within(participants).getByRole("img", { name: "星街すいせい" }),
+    ).toBeInTheDocument();
+    expect(
+      within(participants).getByTestId("activity-detail-participant-unit-name"),
+    ).toHaveTextContent("AS_tar");
     const drawerOverlay = document.querySelector(".mantine-Drawer-overlay");
     expect(drawerOverlay).toBeInTheDocument();
     fireEvent.click(drawerOverlay!);

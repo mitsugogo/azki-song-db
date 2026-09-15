@@ -20,13 +20,20 @@ import { BsGeoAlt } from "react-icons/bs";
 import { FaDatabase, FaYoutube } from "react-icons/fa6";
 import { useOptionalGlobalPlayer } from "../hook/useGlobalPlayer";
 import type { ActivityTimelineItem } from "../hook/useActivityTimeline";
+import { getCollabUnitName } from "../config/collabUnits";
 import {
   buildActivityChannelIndexes,
   buildActivityItemPresentation,
 } from "../lib/activityItemPresentation";
 import { formatDate } from "../lib/formatDate";
+import {
+  createChannelsByParticipantName,
+  isAzkiArchiveParticipant,
+  resolveArchiveParticipants,
+} from "../lib/archiveParticipants";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import { normalizeArchiveSeriesKey } from "../stream-archives/archiveSearch";
+import ArchiveParticipantList from "../stream-archives/ArchiveParticipantList";
 import TimestampComment from "../stream-archives/TimestampComment";
 import ArchiveMembersOnlyNotice from "../stream-archives/ArchiveMembersOnlyNotice";
 import YoutubeThumbnail from "./YoutubeThumbnail";
@@ -173,6 +180,37 @@ export default function ActivityItemDetail({
     locale,
     channelIndexes,
   );
+  const archiveParticipantEntries = useMemo(() => {
+    if (item.kind !== "archive") {
+      return [];
+    }
+
+    return resolveArchiveParticipants(
+      item.archive.participants ?? [],
+      createChannelsByParticipantName(channels),
+    );
+  }, [channels, item]);
+  const showArchiveParticipants =
+    archiveParticipantEntries.length > 0 &&
+    !(
+      archiveParticipantEntries.length === 1 &&
+      isAzkiArchiveParticipant(archiveParticipantEntries[0])
+    );
+  const archiveParticipantUnitName = showArchiveParticipants
+    ? getCollabUnitName(
+        [
+          ...new Set(
+            archiveParticipantEntries.map(
+              ({ name, channel }) =>
+                channel?.talentName?.trim() ||
+                channel?.artistName?.trim() ||
+                name,
+            ),
+          ),
+        ],
+        locale,
+      )
+    : null;
   const titleIsExternal = isExternalHref(presentation.titleHref);
   const detailDescriptionHref =
     item.kind === "archive" ? undefined : presentation.timelineDescriptionHref;
@@ -185,7 +223,7 @@ export default function ActivityItemDetail({
       : 0;
   const archiveSeriesHref =
     item.kind === "archive" && item.archive.topic.trim()
-      ? `/stream-archives?${new URLSearchParams({
+      ? `/stream-archives/list?${new URLSearchParams({
           series: normalizeArchiveSeriesKey(item.archive.topic),
         }).toString()}`
       : null;
@@ -267,6 +305,28 @@ export default function ActivityItemDetail({
               <Text fw={600}>{presentation.archiveChannel.name}</Text>
             )}
           </Group>
+        ) : null}
+
+        {showArchiveParticipants ? (
+          <Stack gap={4} data-testid="activity-detail-participants">
+            <Text size="xs" c="dimmed" fw={600}>
+              {tArchives("castLabel")}
+            </Text>
+            <Group gap="sm" align="center">
+              <ArchiveParticipantList
+                participants={archiveParticipantEntries}
+              />
+              {archiveParticipantUnitName ? (
+                <Badge
+                  color="indigo"
+                  radius="sm"
+                  data-testid="activity-detail-participant-unit-name"
+                >
+                  {archiveParticipantUnitName}
+                </Badge>
+              ) : null}
+            </Group>
+          </Stack>
         ) : null}
 
         {presentation.singers.length > 0 ? (

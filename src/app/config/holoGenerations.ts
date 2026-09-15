@@ -93,7 +93,7 @@ const HOLO_GENERATION_GROUPS: HoloGenerationGroupDefinition[] = [
   },
   {
     key: "hololive-gamers",
-    label: "ホロライブゲーマーズ",
+    label: "ゲーマーズ",
     matches: (branch, generation) =>
       isJapaneseBranch(branch) &&
       hasGeneration(generation, "ホロライブゲーマーズ", "ゲーマーズ"),

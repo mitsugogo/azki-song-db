@@ -435,7 +435,7 @@ describe("createArchiveCollaborationRanking", () => {
     expect(members.map(({ name }) => name)).toEqual(["風真いろは"]);
   });
 
-  it("counts exact hololive combinations and uses official unit names", () => {
+  it("ranks exact hololive combinations by duration and uses official unit names", () => {
     const azki = channel("AZKi");
     const lamy = channel("雪花ラミィ");
     const koyori = channel("博衣こより");
@@ -497,18 +497,18 @@ describe("createArchiveCollaborationRanking", () => {
       ),
     ).toEqual([
       {
-        name: "KoZMy",
-        count: 2,
-        castNames: ["雪花ラミィ", "博衣こより"],
-        totalDurationSeconds: 10_800,
-        firstCollaborationDate: "2026-01-01",
-      },
-      {
         name: "あずいろ",
         count: 1,
         castNames: ["風真いろは"],
         totalDurationSeconds: 14_400,
         firstCollaborationDate: "2026-03-01",
+      },
+      {
+        name: "KoZMy",
+        count: 2,
+        castNames: ["雪花ラミィ", "博衣こより"],
+        totalDurationSeconds: 10_800,
+        firstCollaborationDate: "2026-01-01",
       },
     ]);
   });

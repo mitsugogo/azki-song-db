@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChannelEntry } from "../../types/api/yt/channels";
 import {
   createChannelsByParticipantName,
+  isAzkiArchiveParticipant,
   matchesSelectedArchiveParticipantEntries,
   matchesSelectedArchiveParticipants,
   parseArchiveParticipants,
@@ -55,6 +56,18 @@ describe("archive participants", () => {
       { name: "Lui ch. 鷹嶺ルイ - holoX -", youtubeId: "UC-lui" },
       { name: "ゲスト", youtubeId: null },
     ]);
+  });
+
+  it("identifies AZKi through either the participant name or resolved channel", () => {
+    expect(isAzkiArchiveParticipant({ name: "ＡＺＫｉ", channel: null })).toBe(
+      true,
+    );
+    expect(
+      isAzkiArchiveParticipant({ name: "別名", channel: channel({}) }),
+    ).toBe(true);
+    expect(isAzkiArchiveParticipant({ name: "鷹嶺ルイ", channel: null })).toBe(
+      false,
+    );
   });
 
   it("matches every selected cast member", () => {
