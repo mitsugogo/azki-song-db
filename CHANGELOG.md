@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.35.0](https://github.com/mitsugogo/azki-song-db/compare/v2.34.0...v2.35.0) (2026-09-15)
+
+### Features
+
+* **archives:** シリーズ別表示とカテゴリランキングを改善 ([3990f84](https://github.com/mitsugogo/azki-song-db/commit/3990f842badab3291e0a2179e5e05829b5eae1ed))
+* アーカイブ詳細に参加者情報を表示 ([98250bf](https://github.com/mitsugogo/azki-song-db/commit/98250bfece8216bd2a69b5594f79ea5748e73e87))
+* コラボランキングを合計時間順に変更 ([590567a](https://github.com/mitsugogo/azki-song-db/commit/590567a2dc06c95816545fff3e8a09c1c5c2f82c))
+
+### Bug Fixes
+
+* ゲーマーズの表示名を修正 ([353858d](https://github.com/mitsugogo/azki-song-db/commit/353858db79c3b278fdd8ee3e879bc91fc3f44221))
+
 ## [2.34.0](https://github.com/mitsugogo/azki-song-db/compare/v2.33.0...v2.34.0) (2026-09-13)
 
 ### Features
