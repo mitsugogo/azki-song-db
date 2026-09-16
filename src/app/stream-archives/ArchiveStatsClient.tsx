@@ -24,7 +24,10 @@ import ArchiveMonthlyCalendar from "./ArchiveMonthlyCalendar";
 import ArchiveOverviewCards from "./ArchiveOverviewCards";
 import ArchiveSeriesOverview from "./ArchiveSeriesOverview";
 import ArchiveTimeHeatmap from "./ArchiveTimeHeatmap";
-import { formatActivityDuration } from "./archiveActivity";
+import {
+  formatActivityDuration,
+  formatCompactActivityDuration,
+} from "./archiveActivity";
 import {
   createArchiveCollaborationCombinationRanking,
   createArchiveCollaborationRanking,
@@ -47,9 +50,6 @@ const getWeekdayLabels = (locale: string) => {
     formatter.format(new Date(Date.UTC(2024, 0, 7 + index))),
   );
 };
-
-const formatCompactActivityDuration = (seconds: number) =>
-  formatActivityDuration(seconds).replaceAll(" ", "");
 
 export default function ArchiveStatsClient() {
   const t = useTranslations("Archives");

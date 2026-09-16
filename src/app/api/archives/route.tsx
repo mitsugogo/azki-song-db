@@ -161,7 +161,7 @@ const getSheetsClient = () => {
   };
 };
 
-export async function GET() {
+export async function GET(request?: Request) {
   try {
     const { sheets, spreadsheetId } = getSheetsClient();
 
@@ -205,7 +205,7 @@ export async function GET() {
       return index !== -1 ? values[index] : undefined;
     };
 
-    const items: ArchiveItem[] = rows
+    let items: ArchiveItem[] = rows
       .slice(1)
       .map((row) => {
         const values = row || [];
@@ -248,6 +248,19 @@ export async function GET() {
         };
       })
       .filter((item) => item.title && item.video_id);
+
+    const participant = request
+      ? new URL(request.url).searchParams.get("participant")?.trim()
+      : "";
+    if (participant) {
+      const normalizedParticipant = participant.toLocaleLowerCase("ja");
+      items = items.filter((item) =>
+        (item.participants ?? []).some(
+          (name) =>
+            name.trim().toLocaleLowerCase("ja") === normalizedParticipant,
+        ),
+      );
+    }
 
     items.sort((a, b) => {
       const streamDateA = new Date(a.stream_started_at).getTime();
