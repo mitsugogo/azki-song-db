@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.36.0](https://github.com/mitsugogo/azki-song-db/compare/v2.35.0...v2.36.0) (2026-09-16)
+
+### Features
+
+* ユニット一覧・詳細（第一弾としてあずいろ）を追加 ([780eb14](https://github.com/mitsugogo/azki-song-db/commit/780eb14fcbd9ca3805549e18c668d1dbbf952a89))
+
 ## [2.35.0](https://github.com/mitsugogo/azki-song-db/compare/v2.34.0...v2.35.0) (2026-09-15)
 
 ### Features

@@ -251,6 +251,9 @@ export const formatActivityDuration = (seconds: number) => {
   return `${hours}h ${minutes}m`;
 };
 
+export const formatCompactActivityDuration = (seconds: number) =>
+  formatActivityDuration(seconds).replaceAll(" ", "");
+
 // hh:mm:ss 形式（各値を2桁0埋め）
 export const formatDurationHms = (seconds: number) => {
   const totalSeconds = Math.max(0, Math.round(seconds));

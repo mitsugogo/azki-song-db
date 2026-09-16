@@ -2,7 +2,6 @@
 
 import { ActionIcon, Text, Tooltip } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
-import { Zen_Maru_Gothic } from "next/font/google";
 import {
   type CSSProperties,
   memo,
@@ -14,6 +13,7 @@ import {
 import { FaYoutube } from "react-icons/fa6";
 import { LuPlay, LuSparkles, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
+import { zenMaruGothic } from "../fonts";
 import { isAzkiBirthday } from "../lib/birthday";
 import { formatDate } from "../lib/formatDate";
 import { buildWatchHref } from "../lib/watchUrl";
@@ -24,14 +24,6 @@ import {
 } from "./homeData";
 import { HomeHeroBackground, type HomeHeroPlayer } from "./HomeHeroBackground";
 import { HomeSearchPanel } from "./HomeSearchPanel";
-
-const zenMaruGothic = Zen_Maru_Gothic({
-  subsets: ["latin"],
-  display: "swap",
-  weight: "700",
-  preload: true,
-  adjustFontFallback: false,
-});
 
 const BIRTHDAY_BALLOONS = [
   { x: "8%", delay: "0s", duration: "13s", color: "#f472b6", size: "2.9rem" },

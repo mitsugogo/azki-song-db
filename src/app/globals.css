@@ -235,6 +235,61 @@ body.seichi-map-viewport-fullscreen-open {
   width: auto !important;
 }
 
+.unit-archive-strip-scrollbar {
+  scrollbar-color: #d1d5db transparent;
+  scrollbar-width: thin;
+}
+
+.unit-archive-strip-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.unit-archive-strip-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.unit-archive-strip-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 999px;
+}
+
+.unit-archive-strip-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #b8bec8;
+}
+
+.dark .unit-archive-strip-scrollbar {
+  scrollbar-color: #4b5563 transparent;
+}
+
+.dark .unit-archive-strip-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark .unit-archive-strip-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
+
+.dark .unit-archive-strip-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #647084;
+}
+
+.unit-archive-strip-scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
+
+.unit-hero-video-container {
+  container-type: size;
+}
+
+.unit-hero-video-player {
+  height: max(100cqh, 56.25cqw);
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100cqw, 177.78cqh);
+}
+
 .resizer {
   position: absolute;
   right: 0;
