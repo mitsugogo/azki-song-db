@@ -19,6 +19,7 @@ import type { ActivityImportance } from "../types/activityImportance";
 import type { AnniversaryItem } from "../types/anniversaryItem";
 import { getActivityJstDateKey } from "../lib/activityCalendar";
 import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
+import { buildViewMilestoneAchievements } from "../lib/viewMilestones";
 
 export type ActivityTimelineKind =
   | "song_update"
@@ -115,9 +116,6 @@ export type ActivityTimelineDateRange = {
 const DEFAULT_ACTIVITY_LIMIT = 20;
 const DEFAULT_SONG_UPDATE_LIMIT = 8;
 const DEFAULT_ARCHIVE_LIMIT = 8;
-const FIRST_VIEW_MILESTONE_TARGET = 500000;
-const MILLION_VIEW_MILESTONE_STEP = 1000000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 function getDateTime(value: string | number | Date | null | undefined) {
   if (!value) {
@@ -131,13 +129,6 @@ function getDateTime(value: string | number | Date | null | undefined) {
 function toIsoDate(value: string | number | Date | null | undefined) {
   const timestamp = getDateTime(value);
   return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
-}
-
-function toDisplayedViewMilestoneDate(
-  value: string | number | Date | null | undefined,
-) {
-  const timestamp = getDateTime(value);
-  return Number.isFinite(timestamp) ? new Date(timestamp - DAY_MS) : null;
 }
 
 function getArchiveHref(videoId: string) {
@@ -291,42 +282,6 @@ function buildEventItems(events: EventItem[]): EventActivityTimelineItem[] {
     .filter((item): item is EventActivityTimelineItem => Boolean(item));
 }
 
-function getCrossedViewMilestoneTargets(
-  previousViewCount: number,
-  currentViewCount: number,
-) {
-  if (currentViewCount < FIRST_VIEW_MILESTONE_TARGET) {
-    return [];
-  }
-
-  const targets: number[] = [];
-  const normalizedPrevious = Math.max(0, previousViewCount);
-
-  if (
-    normalizedPrevious < FIRST_VIEW_MILESTONE_TARGET &&
-    currentViewCount >= FIRST_VIEW_MILESTONE_TARGET
-  ) {
-    targets.push(FIRST_VIEW_MILESTONE_TARGET);
-  }
-
-  const firstMillionTarget = Math.max(
-    MILLION_VIEW_MILESTONE_STEP,
-    Math.floor(normalizedPrevious / MILLION_VIEW_MILESTONE_STEP) *
-      MILLION_VIEW_MILESTONE_STEP +
-      MILLION_VIEW_MILESTONE_STEP,
-  );
-
-  for (
-    let target = firstMillionTarget;
-    target <= currentViewCount;
-    target += MILLION_VIEW_MILESTONE_STEP
-  ) {
-    targets.push(target);
-  }
-
-  return targets;
-}
-
 function buildViewMilestoneItemsForVideo(
   videoId: string,
   song: Song,
@@ -338,34 +293,12 @@ function buildViewMilestoneItemsForVideo(
   const latestHistoryViewCount = sortedHistory.at(-1)?.viewCount ?? 0;
   const currentViewCount =
     Number(song.view_count ?? 0) || latestHistoryViewCount;
-  const seenTargets = new Set<number>();
-  const items: ViewMilestoneActivityTimelineItem[] = [];
-
-  for (let index = 1; index < sortedHistory.length; index += 1) {
-    const previous = sortedHistory[index - 1];
-    const current = sortedHistory[index];
-    const currentOccurredAt = toIsoDate(
-      toDisplayedViewMilestoneDate(current.datetime),
-    );
-
-    if (!currentOccurredAt) {
-      continue;
-    }
-
-    const crossedTargets = getCrossedViewMilestoneTargets(
-      previous.viewCount ?? 0,
-      current.viewCount ?? 0,
-    );
-
-    crossedTargets.forEach((targetCount) => {
-      if (seenTargets.has(targetCount)) {
-        return;
-      }
-
-      items.push({
+  return buildViewMilestoneAchievements(sortedHistory, currentViewCount).map(
+    ({ targetCount, achievedAt }) => {
+      return {
         id: `view-milestone-${videoId}-${targetCount}`,
         kind: "view_milestone" as const,
-        occurredAt: currentOccurredAt,
+        occurredAt: achievedAt,
         href: buildWatchHref({ videoId, start: song.start }),
         titleHref:
           getDiscographyLink(song) ??
@@ -376,12 +309,9 @@ function buildViewMilestoneItemsForVideo(
         targetCount,
         currentViewCount,
         importance: DEFAULT_ACTIVITY_IMPORTANCE,
-      });
-      seenTargets.add(targetCount);
-    });
-  }
-
-  return items;
+      };
+    },
+  );
 }
 
 export function buildViewMilestoneItems(
