@@ -94,7 +94,7 @@ export default async function UnitPage({
   const songs = await fetchSongsFromApiCached({ locale }).catch(() => []);
   const works = getUnitWorks(songs, unit);
   const singingStats = getUnitSingingStats(songs, unit);
-  const history = buildUnitHistory(unit, works, locale, now);
+  const history = buildUnitHistory(unit, songs, locale, now);
   const unitName = getLocalizedUnitText(unit.name, locale);
   const memberNames = unit.members.map((member) =>
     getLocalizedUnitText(member.name, locale),
