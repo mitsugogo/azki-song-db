@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.37.0](https://github.com/mitsugogo/azki-song-db/compare/v2.36.0...v2.37.0) (2026-09-17)
+
+### Features
+
+* ユニット履歴に記念日とマイルストーンを追加 ([effd32d](https://github.com/mitsugogo/azki-song-db/commit/effd32de13dcb8c007d39ade15d0ce0acb165809))
+
 ## [2.36.0](https://github.com/mitsugogo/azki-song-db/compare/v2.35.0...v2.36.0) (2026-09-16)
 
 ### Features
