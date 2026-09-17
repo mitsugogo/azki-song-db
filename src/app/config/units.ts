@@ -74,6 +74,20 @@ export const units: UnitDefinition[] = [
           en: "3rd Anniversary 3D Karaoke",
         },
       },
+      {
+        date: "2026-09-17",
+        type: "anniversary",
+        title: {
+          ja: "あずいろ4周年",
+          en: "AZUIRO 4th Anniversary",
+        },
+        description: {
+          ja: "「#あずいろ食堂」であずいろ弁当お渡し会を開催。初の記念グッズとシチュエーションボイス「あずいろルームシェアボイス」を発表。",
+          en: "AZUIRO held the “AZUIRO Cafeteria” bento handoff stream and announced their first commemorative merchandise and the “AZUIRO Roommates Voice” scenario voice pack.",
+        },
+        videoId: "Pu1uR5DSH8o",
+        url: "https://shop.hololivepro.com/products/aziro_commemorativemerch",
+      },
     ],
   },
 ];

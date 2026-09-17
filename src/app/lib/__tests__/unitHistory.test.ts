@@ -116,6 +116,88 @@ describe("unitHistory", () => {
     );
   });
 
+  it("adds the 2026 anniversary to the history with official links", () => {
+    const anniversaryEntries = buildUnitHistory(
+      unit,
+      [
+        createSong({
+          tags: ["歌枠"],
+          milestones: ["AZUIRO"],
+          video_title: "あずいろ弁当お渡し会",
+          video_id: "Pu1uR5DSH8o",
+          broadcast_at: "2026-09-16T15:00:00.000Z",
+        }),
+      ],
+      "ja",
+      new Date("2026-09-17T12:00:00.000Z"),
+    ).filter((entry) => entry.date === "2026-09-17");
+
+    expect(anniversaryEntries).toHaveLength(1);
+    expect(anniversaryEntries[0]).toEqual(
+      expect.objectContaining({
+        type: "anniversary",
+        title: "あずいろ4周年",
+        href: "https://shop.hololivepro.com/products/aziro_commemorativemerch",
+        youtubeHref: "https://www.youtube.com/watch?v=Pu1uR5DSH8o",
+      }),
+    );
+    expect(anniversaryEntries[0].description).toContain(
+      "あずいろルームシェアボイス",
+    );
+  });
+
+  it("adds an AZUIRO song milestone once per video and hides future data", () => {
+    const history = buildUnitHistory(
+      unit,
+      [
+        createSong({
+          title: "2曲目",
+          tags: ["歌枠"],
+          milestones: ["あずいろ"],
+          video_title: "あずいろ夏の歌枠",
+          video_id: "azuiro-stream",
+          start: 120,
+          broadcast_at: "2026-08-12T15:00:00.000Z",
+        }),
+        createSong({
+          title: "1曲目",
+          tags: ["歌枠"],
+          milestones: ["AZUIRO"],
+          video_title: "あずいろ夏の歌枠",
+          video_id: "azuiro-stream",
+          start: 30,
+          broadcast_at: "2026-08-12T15:00:00.000Z",
+        }),
+        createSong({
+          tags: ["歌枠"],
+          milestones: ["ソロライブ"],
+          video_title: "対象外の配信",
+          video_id: "other-stream",
+          broadcast_at: "2026-08-12T15:00:00.000Z",
+        }),
+        createSong({
+          tags: ["歌枠"],
+          milestones: ["あずいろ"],
+          video_title: "未来のあずいろ配信",
+          video_id: "future-stream",
+          broadcast_at: "2026-08-14T15:00:00.000Z",
+        }),
+      ],
+      "ja",
+      new Date("2026-08-13T12:00:00.000Z"),
+    );
+
+    const streamEntries = history.filter((entry) => entry.type === "stream");
+    expect(streamEntries).toEqual([
+      expect.objectContaining({
+        date: "2026-08-13",
+        title: "あずいろ夏の歌枠",
+        href: "/watch?v=azuiro-stream&t=30s",
+        youtubeHref: "https://www.youtube.com/watch?v=azuiro-stream",
+      }),
+    ]);
+  });
+
   it("counts unique songs and performances and ranks repeated songs", () => {
     const stats = getUnitSingingStats(
       [

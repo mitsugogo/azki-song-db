@@ -2,6 +2,7 @@ import type { UnitDefinition, UnitHighlightType } from "../config/units";
 import { getLocalizedUnitText } from "../config/units";
 import type { Song } from "../types/song";
 import { getDiscographyLink } from "./song";
+import { buildWatchHref } from "./watchUrl";
 
 export type UnitHistoryEntry = {
   id: string;
@@ -134,9 +135,66 @@ export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
   };
 }
 
+const getUnitMilestone = (song: Song, unit: UnitDefinition) =>
+  (song.milestones || []).find((milestone) =>
+    unit.tags.some(
+      (tag) =>
+        tag.localeCompare(milestone.trim(), undefined, {
+          sensitivity: "accent",
+        }) === 0,
+    ),
+  );
+
+function buildUnitMilestoneHistory(
+  unit: UnitDefinition,
+  songs: Song[],
+  nowKey: string,
+) {
+  const entriesByVideo = new Map<
+    string,
+    { song: Song; milestone: string; date: string }
+  >();
+
+  songs.forEach((song) => {
+    if (!song.broadcast_at) return;
+    const milestone = getUnitMilestone(song, unit);
+    if (!milestone) return;
+
+    const date = toJstDateKey(song.broadcast_at).slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > nowKey) return;
+
+    const title = song.video_title.trim() || milestone.trim();
+    const key = song.video_id || `${date}\u0000${title}`;
+    const previous = entriesByVideo.get(key);
+    if (
+      !previous ||
+      date < previous.date ||
+      (date === previous.date && song.start < previous.song.start)
+    ) {
+      entriesByVideo.set(key, { song, milestone, date });
+    }
+  });
+
+  return [...entriesByVideo.entries()].map(
+    ([key, { song, milestone, date }]): UnitHistoryEntry => ({
+      id: `milestone-${key}`,
+      date,
+      type: "stream",
+      title: song.video_title.trim() || milestone.trim(),
+      href: song.video_id
+        ? buildWatchHref({ videoId: song.video_id, start: song.start })
+        : undefined,
+      youtubeHref: song.video_id
+        ? `https://www.youtube.com/watch?v=${encodeURIComponent(song.video_id)}`
+        : song.video_uri || undefined,
+      videoId: song.video_id || undefined,
+    }),
+  );
+}
+
 export function buildUnitHistory(
   unit: UnitDefinition,
-  works: Song[],
+  songs: Song[],
   locale: string,
   now = new Date(),
 ) {
@@ -158,6 +216,25 @@ export function buildUnitHistory(
         : undefined,
       videoId: highlight.videoId,
     }));
+  const milestoneEntries = buildUnitMilestoneHistory(unit, songs, nowKey);
+  const mergedMilestoneIds = new Set<string>();
+  const curatedWithMilestoneData = curated.map((entry) => {
+    const milestoneEntry = milestoneEntries.find(
+      (candidate) =>
+        candidate.date === entry.date &&
+        (!entry.videoId || candidate.videoId === entry.videoId),
+    );
+    if (!milestoneEntry) return entry;
+
+    mergedMilestoneIds.add(milestoneEntry.id);
+    return {
+      ...entry,
+      href: entry.href || milestoneEntry.href,
+      youtubeHref: entry.youtubeHref || milestoneEntry.youtubeHref,
+      videoId: entry.videoId || milestoneEntry.videoId,
+    };
+  });
+  const works = getUnitWorks(songs, unit);
   const automatic: UnitHistoryEntry[] = works
     .filter((song) => getSongDate(song))
     .map((song) => ({
@@ -174,7 +251,11 @@ export function buildUnitHistory(
     }));
 
   const deduped = new Map<string, UnitHistoryEntry>();
-  [...curated, ...automatic].forEach((entry) => {
+  [
+    ...curatedWithMilestoneData,
+    ...automatic,
+    ...milestoneEntries.filter((entry) => !mergedMilestoneIds.has(entry.id)),
+  ].forEach((entry) => {
     const key = `${entry.date}\u0000${entry.title}`;
     if (!deduped.has(key)) deduped.set(key, entry);
   });
