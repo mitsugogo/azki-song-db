@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.38.0](https://github.com/mitsugogo/azki-song-db/compare/v2.37.0...v2.38.0) (2026-09-18)
+
+### Features
+
+* add あずらみころ collab unit ([b93bfc6](https://github.com/mitsugogo/azki-song-db/commit/b93bfc62c5ead3d950de48307caf5536ea3ab6e6))
+* ホロライブの新規ユニットに対応 ([d367007](https://github.com/mitsugogo/azki-song-db/commit/d3670078dd57c79789ea930fe7e2f2ee58639639))
+* 出演者件数ラベルを多言語対応 ([b075455](https://github.com/mitsugogo/azki-song-db/commit/b075455e24b63c71625f5c1e76d8d688a4f4c18b))
+
 ## [2.37.0](https://github.com/mitsugogo/azki-song-db/compare/v2.36.0...v2.37.0) (2026-09-17)
 
 ### Features
