@@ -405,11 +405,26 @@ export const collabUnits: CollabUnit[] = [
   },
   {
     members: ["AZKi", "雪花ラミィ", "戌神ころね"],
-    unitName: "あずらみころ",
+    unitName: "クリスマス☆むかえ隊",
     hl: {
       en: {
-        unitName: "AZLamyKoro",
+        unitName: "Christmas★MUKAE-TAI!",
         members: ["AZKi", "Yukihana Lamy", "Inugami Korone"],
+      },
+    },
+  },
+  {
+    members: ["百灯キョーコ", "熱千めら", "鈴鳴つづり", "宙科そぴあ"],
+    unitName: "アソビ★まわり隊！",
+    hl: {
+      en: {
+        unitName: "ASOBI★MAWARI-TAI!",
+        members: [
+          "Hyakuto Kyoko",
+          "Achichi Mela",
+          "Suzuna Tsuzuri",
+          "Sorashina Sopia",
+        ],
       },
     },
   },
