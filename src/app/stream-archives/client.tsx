@@ -85,7 +85,6 @@ import {
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
 import { createFirstSongsByVideoId } from "../lib/songVideoIndex";
-import { ScrollToTopButton } from "../components/ScrollToTopButton";
 import ArchiveParticipantList from "./ArchiveParticipantList";
 import ArchiveCastFilter from "./ArchiveCastFilter";
 import { createArchiveCastOptions } from "./archiveCastOptions";
@@ -1216,6 +1215,8 @@ export default function ArchivesPageClient() {
     },
     scrollMargin: archiveScrollMargin,
     overscan: 8,
+    // React 19では行refの計測中にTanStack VirtualのflushSyncを呼べない。
+    useFlushSync: false,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -2027,7 +2028,6 @@ export default function ArchivesPageClient() {
           })}
         </div>
       )}
-      <ScrollToTopButton />
     </div>
   );
 }
