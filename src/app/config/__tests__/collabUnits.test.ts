@@ -62,6 +62,7 @@ describe("collabUnits utilities", () => {
         "Justice",
         "ReGLOSS",
         "FLOW GLOW",
+        "アソビ★まわり隊！",
       ]),
     );
   });

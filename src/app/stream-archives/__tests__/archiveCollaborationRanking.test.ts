@@ -52,6 +52,8 @@ describe("createArchiveCollaborationRanking", () => {
     endedActivity.generation = "6期生、holoX、活動終了";
     const promise = channel("オーロ・クロニー", "hololive");
     promise.generation = "Council、Promise";
+    const asobi = channel("百灯キョーコ", "hololive");
+    asobi.generation = "アソビ★まわり隊！";
 
     expect(
       getArchiveHololiveMemberMetadata({ name: "夜空メル", channel: graduate }),
@@ -68,6 +70,12 @@ describe("createArchiveCollaborationRanking", () => {
         channel: promise,
       }),
     ).toEqual({ generation: "Council・Promise", status: null });
+    expect(
+      getArchiveHololiveMemberMetadata({
+        name: "百灯キョーコ",
+        channel: asobi,
+      }),
+    ).toEqual({ generation: "アソビ★まわり隊！", status: null });
   });
 
   it("ranks hololive collaborators by total duration for the selected JST year", () => {

@@ -107,7 +107,7 @@ function ArchiveCastFilter({
     [options],
   );
   const formatOptionLabel = useCallback(
-    (name: string) => `${name} (${countsByName.get(name) ?? 0})`,
+    (name: string) => `${name} - ${countsByName.get(name) ?? 0}件`,
     [countsByName],
   );
   const filteredData = useMemo(() => {
@@ -275,7 +275,10 @@ function ArchiveCastFilter({
                             </Avatar>
                           ) : null}
                           <Text size="sm" c={disabled ? "dimmed" : undefined}>
-                            {formatOptionLabel(option.name)}
+                            {option.name}{" "}
+                            <Text span c="dimmed">
+                              - {option.count}件
+                            </Text>
                           </Text>
                         </Group>
                         {selected ? (
