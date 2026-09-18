@@ -404,6 +404,16 @@ export const collabUnits: CollabUnit[] = [
     },
   },
   {
+    members: ["AZKi", "雪花ラミィ", "戌神ころね"],
+    unitName: "あずらみころ",
+    hl: {
+      en: {
+        unitName: "AZLamyKoro",
+        members: ["AZKi", "Yukihana Lamy", "Inugami Korone"],
+      },
+    },
+  },
+  {
     members: ["AZKi", "音乃瀬奏"],
     unitName: "あずのせ",
     hl: {
