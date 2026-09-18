@@ -1071,6 +1071,7 @@
     "castFilterPlaceholder": "Cast members",
     "castNothingFound": "No matching cast members",
     "castSelectedCount": "{count} cast members selected",
+    "castOptionCount": "{count} items",
     "viewModeSwitchAriaLabel": "View mode",
     "seriesViewLabel": "Series",
     "seriesSortLabel": "Series order",

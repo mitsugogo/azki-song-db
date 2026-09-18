@@ -10,6 +10,8 @@ import { useState } from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveCastFilter from "../ArchiveCastFilter";
 
+const formatCountLabel = (count: number) => `${count}件`;
+
 const castOptions = [
   { name: "AZKi", channel: null, count: 3 },
   { name: "さくらみこ", channel: null, count: 2 },
@@ -32,6 +34,7 @@ const renderCastFilter = ({
         placeholder="出演者"
         nothingFoundMessage="該当する出演者はいません"
         selectedCountLabel={`${value.length}人選択中`}
+        formatCountLabel={formatCountLabel}
         onChange={onChange}
       />
     </MantineProvider>,
@@ -80,6 +83,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={vi.fn()}
         />
       </MantineProvider>,
@@ -96,6 +100,29 @@ describe("ArchiveCastFilter", () => {
     });
   });
 
+  it("formats cast counts with the supplied locale label", () => {
+    render(
+      <MantineProvider>
+        <ArchiveCastFilter
+          options={[{ name: "AZKi", channel: null, count: 2 }]}
+          value={[]}
+          placeholder="Cast members"
+          nothingFoundMessage="No matching cast members"
+          selectedCountLabel="0 cast members selected"
+          formatCountLabel={(count) => `${count} items`}
+          onChange={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Cast members" }));
+
+    const option = screen.getByRole("option", { name: "AZKi - 2 items" });
+    expect(within(option).getByText("- 2 items")).toHaveStyle({
+      color: "var(--mantine-color-dimmed)",
+    });
+  });
+
   it("disables cast members without matching videos", () => {
     const onChange = vi.fn();
 
@@ -107,6 +134,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={onChange}
         />
       </MantineProvider>,
@@ -174,6 +202,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={vi.fn()}
         />
       </MantineProvider>,
@@ -234,6 +263,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel={`${value.length}人選択中`}
+          formatCountLabel={formatCountLabel}
           onChange={(nextValue) => {
             onChange(nextValue);
             setValue(nextValue);

@@ -25,6 +25,7 @@ type ArchiveCastFilterProps = {
   placeholder: string;
   nothingFoundMessage: string;
   selectedCountLabel: string;
+  formatCountLabel: (count: number) => string;
   onChange: (value: string[]) => void;
 };
 
@@ -44,6 +45,7 @@ function ArchiveCastFilter({
   placeholder,
   nothingFoundMessage,
   selectedCountLabel,
+  formatCountLabel,
   onChange,
 }: ArchiveCastFilterProps) {
   const [search, setSearch] = useState("");
@@ -107,8 +109,9 @@ function ArchiveCastFilter({
     [options],
   );
   const formatOptionLabel = useCallback(
-    (name: string) => `${name} - ${countsByName.get(name) ?? 0}件`,
-    [countsByName],
+    (name: string) =>
+      `${name} - ${formatCountLabel(countsByName.get(name) ?? 0)}`,
+    [countsByName, formatCountLabel],
   );
   const filteredData = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("ja-JP");
@@ -277,7 +280,7 @@ function ArchiveCastFilter({
                           <Text size="sm" c={disabled ? "dimmed" : undefined}>
                             {option.name}{" "}
                             <Text span c="dimmed">
-                              - {option.count}件
+                              - {formatCountLabel(option.count)}
                             </Text>
                           </Text>
                         </Group>
