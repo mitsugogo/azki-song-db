@@ -126,28 +126,22 @@ const HOLO_GENERATION_GROUPS: HoloGenerationGroupDefinition[] = [
           hasGeneration(generation, "6期生"))),
   },
   {
-    key: "area15",
-    label: "AREA15",
+    key: "regloss",
+    label: "ReGLOSS",
     matches: (branch, generation) =>
-      isHololiveBranch(branch) &&
-      (hasGeneration(generation, "AREA15") ||
-        (isIndonesianBranch(branch) && hasGeneration(generation, "1期生"))),
+      isHololiveBranch(branch) && hasGeneration(generation, "ReGLOSS"),
   },
   {
-    key: "holoro",
-    label: "holoro",
+    key: "flow-glow",
+    label: "FLOW GLOW",
     matches: (branch, generation) =>
-      isHololiveBranch(branch) &&
-      (hasGeneration(generation, "holoro") ||
-        (isIndonesianBranch(branch) && hasGeneration(generation, "2期生"))),
+      isHololiveBranch(branch) && hasGeneration(generation, "FLOW GLOW"),
   },
   {
-    key: "holoh3ro",
-    label: "holoh3ro",
+    key: "asobi-mawaritai",
+    label: "アソビ★まわり隊！",
     matches: (branch, generation) =>
-      isHololiveBranch(branch) &&
-      (hasGeneration(generation, "holoh3ro", "holo3ro") ||
-        (isIndonesianBranch(branch) && hasGeneration(generation, "3期生"))),
+      isHololiveBranch(branch) && hasGeneration(generation, "アソビ★まわり隊"),
   },
   {
     key: "myth",
@@ -196,16 +190,28 @@ const HOLO_GENERATION_GROUPS: HoloGenerationGroupDefinition[] = [
         (isEnglishBranch(branch) && hasGeneration(generation, "4期生"))),
   },
   {
-    key: "regloss",
-    label: "ReGLOSS",
+    key: "area15",
+    label: "AREA15",
     matches: (branch, generation) =>
-      isHololiveBranch(branch) && hasGeneration(generation, "ReGLOSS"),
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "AREA15") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "1期生"))),
   },
   {
-    key: "flow-glow",
-    label: "FLOW GLOW",
+    key: "holoro",
+    label: "holoro",
     matches: (branch, generation) =>
-      isHololiveBranch(branch) && hasGeneration(generation, "FLOW GLOW"),
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "holoro") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "2期生"))),
+  },
+  {
+    key: "holoh3ro",
+    label: "holoh3ro",
+    matches: (branch, generation) =>
+      isHololiveBranch(branch) &&
+      (hasGeneration(generation, "holoh3ro", "holo3ro") ||
+        (isIndonesianBranch(branch) && hasGeneration(generation, "3期生"))),
   },
   {
     key: "graduates",

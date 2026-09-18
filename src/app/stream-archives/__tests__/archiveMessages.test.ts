@@ -9,6 +9,7 @@ describe("stream archive messages", () => {
     expect(jaMessages.Archives.castLabel).toBe("出演");
     expect(jaMessages.Archives.castFilterPlaceholder).toBe("出演者");
     expect(jaMessages.Archives.castSelectedCount).toBe("{count}人選択中");
+    expect(jaMessages.Archives.castOptionCount).toBe("{count}件");
     expect(jaMessages.Archives.collaborationRankingTitle).toBe(
       "よくコラボしたホロメン",
     );
@@ -51,6 +52,7 @@ describe("stream archive messages", () => {
     expect(enMessages.Archives.castSelectedCount).toBe(
       "{count} cast members selected",
     );
+    expect(enMessages.Archives.castOptionCount).toBe("{count} items");
     expect(enMessages.Archives.collaborationRankingTitle).toBe("Top collabs");
     expect(enMessages.Archives.collaborationRankingSubtitle).toBe(
       "Total time streamed together",

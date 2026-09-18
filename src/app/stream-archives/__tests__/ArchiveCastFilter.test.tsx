@@ -10,6 +10,8 @@ import { useState } from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import ArchiveCastFilter from "../ArchiveCastFilter";
 
+const formatCountLabel = (count: number) => `${count}件`;
+
 const castOptions = [
   { name: "AZKi", channel: null, count: 3 },
   { name: "さくらみこ", channel: null, count: 2 },
@@ -32,6 +34,7 @@ const renderCastFilter = ({
         placeholder="出演者"
         nothingFoundMessage="該当する出演者はいません"
         selectedCountLabel={`${value.length}人選択中`}
+        formatCountLabel={formatCountLabel}
         onChange={onChange}
       />
     </MantineProvider>,
@@ -80,6 +83,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={vi.fn()}
         />
       </MantineProvider>,
@@ -87,10 +91,36 @@ describe("ArchiveCastFilter", () => {
 
     fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
 
-    const knownOption = screen.getByRole("option", { name: "AZKi (2)" });
-    const unknownOption = screen.getByRole("option", { name: "ゲスト (1)" });
+    const knownOption = screen.getByRole("option", { name: "AZKi - 2件" });
+    const unknownOption = screen.getByRole("option", { name: "ゲスト - 1件" });
     expect(knownOption.querySelector("img")).toBeVisible();
     expect(unknownOption.querySelector("img")).not.toBeInTheDocument();
+    expect(within(knownOption).getByText("- 2件")).toHaveStyle({
+      color: "var(--mantine-color-dimmed)",
+    });
+  });
+
+  it("formats cast counts with the supplied locale label", () => {
+    render(
+      <MantineProvider>
+        <ArchiveCastFilter
+          options={[{ name: "AZKi", channel: null, count: 2 }]}
+          value={[]}
+          placeholder="Cast members"
+          nothingFoundMessage="No matching cast members"
+          selectedCountLabel="0 cast members selected"
+          formatCountLabel={(count) => `${count} items`}
+          onChange={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Cast members" }));
+
+    const option = screen.getByRole("option", { name: "AZKi - 2 items" });
+    expect(within(option).getByText("- 2 items")).toHaveStyle({
+      color: "var(--mantine-color-dimmed)",
+    });
   });
 
   it("disables cast members without matching videos", () => {
@@ -104,6 +134,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={onChange}
         />
       </MantineProvider>,
@@ -111,7 +142,7 @@ describe("ArchiveCastFilter", () => {
 
     fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
 
-    const option = screen.getByRole("option", { name: "火威青 (0)" });
+    const option = screen.getByRole("option", { name: "火威青 - 0件" });
     expect(option).toHaveAttribute("data-combobox-disabled");
     expect(option).toHaveAttribute("aria-disabled", "true");
 
@@ -142,20 +173,36 @@ describe("ArchiveCastFilter", () => {
               channel: createChannel("DEV_IS", "holoX"),
             },
             {
+              name: "ReGLOSSメンバー",
+              count: 1,
+              channel: createChannel("hololive", "ReGLOSS"),
+            },
+            {
+              name: "FLOW GLOWメンバー",
+              count: 1,
+              channel: createChannel("hololive", "FLOW GLOW"),
+            },
+            {
+              name: "アソビメンバー",
+              count: 1,
+              channel: createChannel("hololive", "アソビ★まわり隊！"),
+            },
+            {
+              name: "Mythメンバー",
+              count: 1,
+              channel: createChannel("EN", "1期生"),
+            },
+            {
               name: "ホロロメンバー",
               count: 1,
               channel: createChannel("ID", "2期生"),
-            },
-            {
-              name: "Promiseメンバー",
-              count: 1,
-              channel: createChannel("hololive", "Promise"),
             },
           ]}
           value={[]}
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel="0人選択中"
+          formatCountLabel={formatCountLabel}
           onChange={vi.fn()}
         />
       </MantineProvider>,
@@ -163,9 +210,22 @@ describe("ArchiveCastFilter", () => {
 
     fireEvent.click(screen.getByRole("combobox", { name: "出演者" }));
 
-    expect(screen.getByText("秘密結社holoX")).toBeVisible();
-    expect(screen.getByText("holoro")).toBeVisible();
-    expect(screen.getByText("Promise")).toBeVisible();
+    const headings = [
+      "秘密結社holoX",
+      "ReGLOSS",
+      "FLOW GLOW",
+      "アソビ★まわり隊！",
+      "Myth",
+      "holoro",
+    ].map((label) => screen.getByText(label));
+
+    headings.forEach((heading) => expect(heading).toBeVisible());
+    headings.slice(0, -1).forEach((heading, index) => {
+      expect(
+        heading.compareDocumentPosition(headings[index + 1]) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
   });
 
   it("shows duplicate memberships in every group while selecting one cast value", () => {
@@ -203,6 +263,7 @@ describe("ArchiveCastFilter", () => {
           placeholder="出演者"
           nothingFoundMessage="該当する出演者はいません"
           selectedCountLabel={`${value.length}人選択中`}
+          formatCountLabel={formatCountLabel}
           onChange={(nextValue) => {
             onChange(nextValue);
             setValue(nextValue);
@@ -225,10 +286,10 @@ describe("ArchiveCastFilter", () => {
     expect(screen.getByText("Promise")).toBeVisible();
 
     const fubukiOptions = screen.getAllByRole("option", {
-      name: "白上フブキ (1)",
+      name: "白上フブキ - 1件",
     });
     const kroniiOptions = screen.getAllByRole("option", {
-      name: "オーロ・クロニー (1)",
+      name: "オーロ・クロニー - 1件",
     });
     expect(fubukiOptions).toHaveLength(2);
     expect(kroniiOptions).toHaveLength(2);
@@ -237,7 +298,7 @@ describe("ArchiveCastFilter", () => {
 
     expect(onChange).toHaveBeenCalledWith(["白上フブキ"]);
     screen
-      .getAllByRole("option", { name: "白上フブキ (1)" })
+      .getAllByRole("option", { name: "白上フブキ - 1件" })
       .forEach((option) =>
         expect(option).toHaveAttribute("aria-selected", "true"),
       );
@@ -251,8 +312,8 @@ describe("ArchiveCastFilter", () => {
     }).parentElement!;
     const selectedValues = within(pillsList);
 
-    expect(selectedValues.getByText("AZKi (3)")).toBeVisible();
-    expect(selectedValues.getByText("さくらみこ (2)")).toBeVisible();
+    expect(selectedValues.getByText("AZKi - 3件")).toBeVisible();
+    expect(selectedValues.getByText("さくらみこ - 2件")).toBeVisible();
     expect(selectedValues.queryByText("2人選択中")).not.toBeInTheDocument();
     expect(pillsList.querySelectorAll("button")).toHaveLength(2);
   });
@@ -280,11 +341,11 @@ describe("ArchiveCastFilter", () => {
     selectedNames.forEach((name) => {
       const count = castOptions.find((option) => option.name === name)?.count;
       expect(
-        screen.getByRole("option", { name: `${name} (${count})` }),
+        screen.getByRole("option", { name: `${name} - ${count}件` }),
       ).toHaveAttribute("aria-selected", "true");
     });
 
-    fireEvent.click(screen.getByRole("option", { name: "AZKi (3)" }));
+    fireEvent.click(screen.getByRole("option", { name: "AZKi - 3件" }));
     expect(onChange).toHaveBeenCalledWith(["さくらみこ", "ロボ子さん"]);
 
     const clearButton = container.querySelector<HTMLButtonElement>(
@@ -299,14 +360,14 @@ describe("ArchiveCastFilter", () => {
     });
     await waitFor(() => {
       expect(
-        screen.getByRole("option", { name: "星街すいせい (1)" }),
+        screen.getByRole("option", { name: "星街すいせい - 1件" }),
       ).toBeVisible();
     });
 
     fireEvent.focus(summaryPill!);
     const tooltip = await screen.findByRole("tooltip");
     expect(tooltip).toHaveTextContent(
-      "AZKi (3), さくらみこ (2), ロボ子さん (1)",
+      "AZKi - 3件, さくらみこ - 2件, ロボ子さん - 1件",
     );
   });
 });

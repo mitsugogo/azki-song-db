@@ -1690,6 +1690,7 @@ export default function ArchivesPageClient() {
                 selectedCountLabel={t("castSelectedCount", {
                   count: selectedCastNames.length,
                 })}
+                formatCountLabel={(count) => t("castOptionCount", { count })}
                 onChange={handleCastChange}
               />
               <DatePickerInput

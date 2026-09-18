@@ -1062,6 +1062,7 @@
     "castFilterPlaceholder": "出演者",
     "castNothingFound": "該当する出演者はいません",
     "castSelectedCount": "{count}人選択中",
+    "castOptionCount": "{count}件",
     "viewModeSwitchAriaLabel": "表示形式",
     "seriesViewLabel": "シリーズ別",
     "seriesSortLabel": "シリーズの並び順",
