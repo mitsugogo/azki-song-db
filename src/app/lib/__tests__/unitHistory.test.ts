@@ -87,6 +87,28 @@ describe("unitHistory", () => {
     expect(isUnitWork(taggedWithGuest, kozmy)).toBe(true);
   });
 
+  it("requires all RosaMiA members unless the work has the formal unit tag", () => {
+    const rosamia = getUnitBySlug("rosamia")!;
+    const exactLineup = createSong({
+      sings: ["アキ・ローゼンタール", "大神ミオ", "AZKi"],
+    });
+    const aliasLineup = createSong({
+      sings: ["アキロゼ", "大神ミオ", "AZKi"],
+    });
+    const missingMember = createSong({ sings: ["AZKi", "大神ミオ"] });
+    const taggedWithGuest = createSong({
+      sings: ["アキ・ローゼンタール", "大神ミオ", "AZKi", "星街すいせい"],
+      tags: ["カバー曲", "RosaMiA"],
+    });
+
+    expect(songIncludesEveryUnitMember(exactLineup, rosamia)).toBe(true);
+    expect(songIncludesEveryUnitMember(aliasLineup, rosamia)).toBe(true);
+    expect(isUnitWork(exactLineup, rosamia)).toBe(true);
+    expect(songIncludesEveryUnitMember(missingMember, rosamia)).toBe(false);
+    expect(isUnitWork(missingMember, rosamia)).toBe(false);
+    expect(isUnitWork(taggedWithGuest, rosamia)).toBe(true);
+  });
+
   it("deduplicates works and keeps the earliest JST release", () => {
     const works = getUnitWorks(
       [

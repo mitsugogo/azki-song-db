@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { getLocalizedUnitText, getUnitBySlug, units } from "../units";
+import {
+  getLocalizedUnitText,
+  getUnitBySlug,
+  getUnitHeroAccent,
+  units,
+} from "../units";
 
 describe("units", () => {
   it("defines the requested AZKi units in display order", () => {
     expect(units.map((unit) => unit.slug)).toEqual([
       "aziro",
       "kozmy",
+      "rosamia",
       "as-tar",
       "soraz",
     ]);
@@ -16,9 +22,17 @@ describe("units", () => {
       slug: "kozmy",
       name: "KoZMy",
       formedAt: "2025-08-03",
-      members: ["AZKi", "博衣こより", "雪花ラミィ"],
+      members: ["博衣こより", "AZKi", "雪花ラミィ"],
       tags: ["KoZMy"],
       videoId: "lvgC3pW-LVA",
+    },
+    {
+      slug: "rosamia",
+      name: "RosaMiA",
+      formedAt: "2026-02-19",
+      members: ["アキ・ローゼンタール", "大神ミオ", "AZKi"],
+      tags: ["RosaMiA", "RosaMia"],
+      videoId: "jRX_EeOZc-I",
     },
     {
       slug: "as-tar",
@@ -74,6 +88,34 @@ describe("units", () => {
         .filter((unit) => unit.slug !== "as-tar")
         .every((unit) => unit.legacy === undefined),
     ).toBe(true);
+  });
+
+  it("assigns hero frame colors from each unit's member colors", () => {
+    expect(getUnitHeroAccent(getUnitBySlug("aziro")!)).toEqual({
+      start: "#e55099",
+      top: "#e55099",
+      end: "#a8d8cb",
+    });
+    expect(getUnitHeroAccent(getUnitBySlug("kozmy")!)).toEqual({
+      start: "#ff66aa",
+      top: "#e55099",
+      end: "#67b2e6",
+    });
+    expect(getUnitHeroAccent(getUnitBySlug("rosamia")!)).toEqual({
+      start: "#e3b364",
+      top: "#d95c5c",
+      end: "#e55099",
+    });
+    expect(getUnitHeroAccent(getUnitBySlug("as-tar")!)).toEqual({
+      start: "#e55099",
+      top: "#e55099",
+      end: "#5b8def",
+    });
+    expect(getUnitHeroAccent(getUnitBySlug("soraz")!)).toEqual({
+      start: "#f25c78",
+      top: "#f25c78",
+      end: "#e55099",
+    });
   });
 
   it("uses a curated event-focused history only for SorAZ", () => {

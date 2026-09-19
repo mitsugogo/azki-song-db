@@ -24,15 +24,24 @@ export type UnitHighlight = {
   url?: string;
 };
 
+export type UnitMember = {
+  name: LocalizedText;
+  aliases: string[];
+  color: string;
+};
+
+export type UnitHeroAccent = {
+  start: string;
+  top: string;
+  end: string;
+};
+
 export type UnitDefinition = {
   slug: string;
   name: LocalizedText;
   cardBackgroundVideoId: string;
   cardBackgroundZoom?: boolean;
-  members: Array<{
-    name: LocalizedText;
-    aliases: string[];
-  }>;
+  members: UnitMember[];
   formedAt: string;
   legacy?: {
     name: LocalizedText;
@@ -48,6 +57,8 @@ export type UnitDefinition = {
   highlights: UnitHighlight[];
 };
 
+const AZKI_COLOR = "#e55099";
+
 export const units: UnitDefinition[] = [
   {
     slug: "aziro",
@@ -55,10 +66,15 @@ export const units: UnitDefinition[] = [
     cardBackgroundVideoId: "4tOo5oRsEnc",
     cardBackgroundZoom: true,
     members: [
-      { name: { ja: "AZKi", en: "AZKi" }, aliases: ["AZKi"] },
+      {
+        name: { ja: "AZKi", en: "AZKi" },
+        aliases: ["AZKi"],
+        color: AZKI_COLOR,
+      },
       {
         name: { ja: "風真いろは", en: "Kazama Iroha" },
         aliases: ["風真いろは", "Kazama Iroha"],
+        color: "#a8d8cb",
       },
     ],
     formedAt: "2022-09-17",
@@ -103,14 +119,20 @@ export const units: UnitDefinition[] = [
     name: { ja: "KoZMy", en: "KoZMy" },
     cardBackgroundVideoId: "lvgC3pW-LVA",
     members: [
-      { name: { ja: "AZKi", en: "AZKi" }, aliases: ["AZKi"] },
       {
         name: { ja: "博衣こより", en: "Hakui Koyori" },
         aliases: ["博衣こより", "Hakui Koyori"],
+        color: "#ff66aa",
+      },
+      {
+        name: { ja: "AZKi", en: "AZKi" },
+        aliases: ["AZKi"],
+        color: AZKI_COLOR,
       },
       {
         name: { ja: "雪花ラミィ", en: "Yukihana Lamy" },
         aliases: ["雪花ラミィ", "Yukihana Lamy"],
+        color: "#67b2e6",
       },
     ],
     formedAt: "2025-08-03",
@@ -130,14 +152,82 @@ export const units: UnitDefinition[] = [
     ],
   },
   {
+    slug: "rosamia",
+    name: { ja: "RosaMiA", en: "RosaMiA" },
+    cardBackgroundVideoId: "X0wwLISllTM",
+    members: [
+      {
+        name: { ja: "アキ・ローゼンタール", en: "Aki Rosenthal" },
+        aliases: ["アキ・ローゼンタール", "Aki Rosenthal", "アキロゼ"],
+        color: "#e3b364",
+      },
+      {
+        name: { ja: "大神ミオ", en: "Ookami Mio" },
+        aliases: ["大神ミオ", "Ookami Mio"],
+        color: "#d95c5c",
+      },
+      {
+        name: { ja: "AZKi", en: "AZKi" },
+        aliases: ["AZKi"],
+        color: AZKI_COLOR,
+      },
+    ],
+    formedAt: "2026-02-19",
+    anniversary: { month: 2, day: 19 },
+    tags: ["RosaMiA", "RosaMia"],
+    highlights: [
+      {
+        date: "2026-02-19",
+        type: "formation",
+        title: { ja: "RosaMiA結成", en: "RosaMiA is formed" },
+        description: {
+          ja: "アキ・ローゼンタール、大神ミオ、AZKiのオフコラボ歌枠で、ユニット名RosaMiAが誕生。",
+          en: "The RosaMiA name was born during an offline karaoke collab with Aki Rosenthal, Ookami Mio, and AZKi.",
+        },
+        videoId: "jRX_EeOZc-I",
+      },
+      {
+        date: "2026-08-13",
+        type: "music",
+        title: {
+          ja: "Magia / RosaMiA",
+          en: "Magia / RosaMiA",
+        },
+        description: {
+          ja: "Kalafina「Magia」のカバーを公開。3D Live映像版も公開された。",
+          en: "RosaMiA released a cover of Kalafina’s “Magia,” followed by a 3D live version.",
+        },
+        videoId: "X0wwLISllTM",
+      },
+      {
+        date: "2026-09-20",
+        type: "live",
+        title: {
+          ja: "RosaMiA 3Dアコースティックライブ",
+          en: "RosaMiA 3D Acoustic Live",
+        },
+        description: {
+          ja: "三人の生歌唱が重なる3Dアコースティックライブを開催。",
+          en: "RosaMiA held a 3D acoustic live featuring the three members singing together.",
+        },
+        videoId: "PlDgodRmrn0",
+      },
+    ],
+  },
+  {
     slug: "as-tar",
     name: { ja: "AS_tar", en: "AS_tar" },
     cardBackgroundVideoId: "fVS8qkHfBOg",
     members: [
-      { name: { ja: "AZKi", en: "AZKi" }, aliases: ["AZKi"] },
+      {
+        name: { ja: "AZKi", en: "AZKi" },
+        aliases: ["AZKi"],
+        color: AZKI_COLOR,
+      },
       {
         name: { ja: "星街すいせい", en: "Hoshimachi Suisei" },
         aliases: ["星街すいせい", "Hoshimachi Suisei"],
+        color: "#5b8def",
       },
     ],
     formedAt: "2024-06-02",
@@ -278,8 +368,13 @@ export const units: UnitDefinition[] = [
       {
         name: { ja: "ときのそら", en: "Tokino Sora" },
         aliases: ["ときのそら", "Tokino Sora"],
+        color: "#f25c78",
       },
-      { name: { ja: "AZKi", en: "AZKi" }, aliases: ["AZKi"] },
+      {
+        name: { ja: "AZKi", en: "AZKi" },
+        aliases: ["AZKi"],
+        color: AZKI_COLOR,
+      },
     ],
     formedAt: "2019-07-21",
     anniversary: { month: 7, day: 21 },
@@ -410,3 +505,20 @@ export const getUnitBySlug = (slug: string) =>
 
 export const getLocalizedUnitText = (text: LocalizedText, locale: string) =>
   locale.startsWith("ja") ? text.ja : text.en;
+
+export function getUnitHeroAccent(unit: UnitDefinition): UnitHeroAccent {
+  const colors = unit.members.map((member) => member.color);
+  const start = colors[0] ?? AZKI_COLOR;
+  const end = colors.at(-1) ?? start;
+  const top = colors.length > 2 ? (colors[1] ?? start) : start;
+  return { start, top, end };
+}
+
+export function getUnitHeroFrameVars(unit: UnitDefinition) {
+  const { start, top, end } = getUnitHeroAccent(unit);
+  return {
+    "--unit-hero-start": start,
+    "--unit-hero-top": top,
+    "--unit-hero-end": end,
+  };
+}

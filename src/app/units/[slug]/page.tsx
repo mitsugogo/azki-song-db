@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { getUnitBySlug, getLocalizedUnitText, units } from "@/app/config/units";
+import {
+  getUnitBySlug,
+  getLocalizedUnitText,
+  getUnitHeroFrameVars,
+  units,
+} from "@/app/config/units";
 import { HomeHeroBackground } from "@/app/home/HomeHeroBackground";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import { getDiscographyLink } from "@/app/lib/song";
@@ -145,7 +150,11 @@ export default async function UnitPage({
           unitName={unitName}
         />
 
-        <section className="relative isolate overflow-hidden rounded-3xl border border-t-primary-400 border-r-[#a8d8cb] border-b-[#a8d8cb] border-l-primary-400 bg-white/90 p-6 dark:border-t-primary-300/30 dark:border-r-[#b9e2d8]/30 dark:border-b-[#b9e2d8]/30 dark:border-l-primary-300/30 dark:bg-gray-900/75 dark:shadow-[-8px_-8px_28px_rgba(190,24,93,0.12),8px_8px_28px_rgba(185,226,216,0.10)] sm:p-8 lg:p-10">
+        <section
+          data-unit-hero-frame
+          className="relative isolate overflow-hidden rounded-3xl border bg-white/90 p-6 [border-top-color:var(--unit-hero-top)] [border-right-color:var(--unit-hero-end)] [border-bottom-color:var(--unit-hero-end)] [border-left-color:var(--unit-hero-start)] dark:bg-gray-900/75 dark:[border-top-color:color-mix(in_srgb,var(--unit-hero-top)_30%,transparent)] dark:[border-right-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-bottom-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-left-color:color-mix(in_srgb,var(--unit-hero-start)_30%,transparent)] dark:[box-shadow:-8px_-8px_28px_color-mix(in_srgb,var(--unit-hero-start)_12%,transparent),8px_8px_28px_color-mix(in_srgb,var(--unit-hero-end)_10%,transparent)] sm:p-8 lg:p-10"
+          style={getUnitHeroFrameVars(unit)}
+        >
           <HomeHeroBackground song={heroBackgroundSong} layout="frame" />
           <div
             className="pointer-events-none absolute inset-0 z-0 bg-white/65 dark:bg-gray-900/70"
