@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -153,7 +154,7 @@ export default async function UnitPage({
         <section
           data-unit-hero-frame
           className="relative isolate overflow-hidden rounded-3xl border bg-white/90 p-6 [border-top-color:var(--unit-hero-top)] [border-right-color:var(--unit-hero-end)] [border-bottom-color:var(--unit-hero-end)] [border-left-color:var(--unit-hero-start)] dark:bg-gray-900/75 dark:[border-top-color:color-mix(in_srgb,var(--unit-hero-top)_30%,transparent)] dark:[border-right-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-bottom-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-left-color:color-mix(in_srgb,var(--unit-hero-start)_30%,transparent)] dark:[box-shadow:-8px_-8px_28px_color-mix(in_srgb,var(--unit-hero-start)_12%,transparent),8px_8px_28px_color-mix(in_srgb,var(--unit-hero-end)_10%,transparent)] sm:p-8 lg:p-10"
-          style={getUnitHeroFrameVars(unit)}
+          style={getUnitHeroFrameVars(unit) as CSSProperties}
         >
           <HomeHeroBackground song={heroBackgroundSong} layout="frame" />
           <div
