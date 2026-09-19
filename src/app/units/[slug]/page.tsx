@@ -9,7 +9,7 @@ import {
   buildUnitHistory,
   getUnitActivityDays,
   getUnitAchievementSongs,
-  getUnitKaraokeVideoIds,
+  getUnitKaraokeStreams,
   getUnitLegacyActivityDays,
   getUnitSingingStats,
   getUnitWorks,
@@ -102,7 +102,8 @@ export default async function UnitPage({
   const songs = await fetchSongsFromApiCached({ locale }).catch(() => []);
   const works = getUnitWorks(songs, unit);
   const singingStats = getUnitSingingStats(songs, unit);
-  const karaokeVideoIds = getUnitKaraokeVideoIds(songs, unit);
+  const karaokeStreams = getUnitKaraokeStreams(songs, unit);
+  const karaokeVideoIds = karaokeStreams.map((stream) => stream.videoId);
   const history = buildUnitHistory(unit, songs, locale, now);
   const unitName = getLocalizedUnitText(unit.name, locale);
   const legacyName = unit.legacy
@@ -191,6 +192,7 @@ export default async function UnitPage({
 
         <UnitArchiveStrip
           participants={archiveParticipants}
+          karaokeVideoIds={karaokeVideoIds}
           unitName={unitName}
         />
 
@@ -215,6 +217,7 @@ export default async function UnitPage({
         <UnitStreams
           participants={archiveParticipants}
           karaokeVideoIds={karaokeVideoIds}
+          karaokeStreams={karaokeStreams}
           unitName={unitName}
         />
         <UnitMusic

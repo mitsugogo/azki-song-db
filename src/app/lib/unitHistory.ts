@@ -46,15 +46,21 @@ export function songIncludesEveryUnitMember(song: Song, unit: UnitDefinition) {
   );
 }
 
-const songHasExactUnitLineup = (song: Song, unit: UnitDefinition) => {
-  const singers = splitSingerNames(song);
+const namesHaveExactUnitLineup = (singers: string[], unit: UnitDefinition) => {
+  const names = singers.map((name) => name.trim()).filter(Boolean);
+  if (names.length === 0) return false;
   return (
-    songIncludesEveryUnitMember(song, unit) &&
-    singers.every((singer) =>
+    unit.members.every((member) =>
+      names.some((singer) => memberMatches(singer, member.aliases)),
+    ) &&
+    names.every((singer) =>
       unit.members.some((member) => memberMatches(singer, member.aliases)),
     )
   );
 };
+
+const songHasExactUnitLineup = (song: Song, unit: UnitDefinition) =>
+  namesHaveExactUnitLineup(splitSingerNames(song), unit);
 
 export function isUnitWork(song: Song, unit: UnitDefinition) {
   const isExactUnitLineup = songHasExactUnitLineup(song, unit);
@@ -149,23 +155,84 @@ export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
   };
 }
 
+const KARAOKE_KEYWORDS = ["歌枠", "カラオケ", "karaoke"] as const;
+
+const looksLikeKaraoke = (value: string) =>
+  KARAOKE_KEYWORDS.some((keyword) =>
+    value.toLocaleLowerCase("ja").includes(keyword.toLocaleLowerCase("ja")),
+  );
+
+const isKaraokePerformance = (song: Song) =>
+  song.tags.some((tag) => looksLikeKaraoke(tag)) ||
+  looksLikeKaraoke(song.video_title);
+
+const videoHasExactUnitLineup = (songs: Song[], unit: UnitDefinition) =>
+  namesHaveExactUnitLineup(songs.flatMap(splitSingerNames), unit);
+
+const pickKaraokeStreamSong = (songs: Song[]) =>
+  songs.reduce((best, song) => {
+    const bestDate = best.broadcast_at || "";
+    const songDate = song.broadcast_at || "";
+    if (songDate && (!bestDate || songDate < bestDate)) return song;
+    if (songDate === bestDate && song.start < best.start) return song;
+    return best;
+  });
+
+export type UnitKaraokeStream = {
+  videoId: string;
+  title: string;
+  videoUrl: string;
+  broadcastAt: string;
+};
+
+export function getUnitKaraokeStreams(songs: Song[], unit: UnitDefinition) {
+  const songsByVideo = new Map<string, Song[]>();
+  songs.forEach((song) => {
+    if (!song.video_id) return;
+    const current = songsByVideo.get(song.video_id);
+    if (current) current.push(song);
+    else songsByVideo.set(song.video_id, [song]);
+  });
+
+  return [...songsByVideo.values()].flatMap((videoSongs) => {
+    if (!videoSongs.some(isKaraokePerformance)) return [];
+    if (!videoHasExactUnitLineup(videoSongs, unit)) return [];
+
+    const representative = pickKaraokeStreamSong(videoSongs);
+    const videoId = representative.video_id;
+    return [
+      {
+        videoId,
+        title: representative.video_title.trim() || representative.title,
+        videoUrl:
+          representative.video_uri ||
+          `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`,
+        broadcastAt: representative.broadcast_at || "",
+      } satisfies UnitKaraokeStream,
+    ];
+  });
+}
+
 export function getUnitKaraokeVideoIds(songs: Song[], unit: UnitDefinition) {
-  return [
-    ...new Set(
-      songs
-        .filter(
-          (song) =>
-            song.video_id &&
-            songIncludesEveryUnitMember(song, unit) &&
-            song.tags.some((tag) =>
-              ["歌枠", "カラオケ", "karaoke"].some((keyword) =>
-                tag.toLocaleLowerCase("ja").includes(keyword),
-              ),
-            ),
-        )
-        .map((song) => song.video_id),
-    ),
-  ];
+  return getUnitKaraokeStreams(songs, unit).map((stream) => stream.videoId);
+}
+
+const KARAOKE_ARCHIVE_TOPIC_KEYWORDS = [...KARAOKE_KEYWORDS, "歌"] as const;
+
+export function isKaraokeArchiveTopic(topic: string) {
+  const normalized = topic.toLocaleLowerCase("ja");
+  return KARAOKE_ARCHIVE_TOPIC_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword.toLocaleLowerCase("ja")),
+  );
+}
+
+export function keepUnitArchiveItem(
+  item: { video_id: string; topic: string },
+  unitKaraokeVideoIds: ReadonlySet<string>,
+) {
+  if (unitKaraokeVideoIds.has(item.video_id)) return true;
+  if (!isKaraokeArchiveTopic(item.topic)) return true;
+  return unitKaraokeVideoIds.size === 0;
 }
 
 const getUnitMilestone = (song: Song, unit: UnitDefinition) =>

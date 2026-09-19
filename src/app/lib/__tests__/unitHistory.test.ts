@@ -5,8 +5,10 @@ import {
   buildUnitHistory,
   getUnitActivityDays,
   getUnitAchievementSongs,
+  getUnitKaraokeStreams,
   getUnitKaraokeVideoIds,
   getUnitLegacyActivityDays,
+  keepUnitArchiveItem,
   getUnitSingingStats,
   getUnitWorks,
   isUnitWork,
@@ -389,6 +391,120 @@ describe("unitHistory", () => {
         asTar,
       ),
     ).toEqual(["7kS7LNMqJOY"]);
+  });
+
+  it("treats a karaoke collab as a unit stream even when members sing separately", () => {
+    expect(
+      getUnitKaraokeVideoIds(
+        [
+          createSong({
+            video_id: "turn-taking",
+            video_title: "あずいろ歌枠",
+            sings: ["AZKi"],
+            tags: ["歌枠"],
+            broadcast_at: "2023-01-01T12:00:00+09:00",
+            start: 10,
+          }),
+          createSong({
+            video_id: "turn-taking",
+            video_title: "あずいろ歌枠",
+            sings: ["風真いろは"],
+            tags: ["歌枠"],
+            broadcast_at: "2023-01-01T12:00:00+09:00",
+            start: 80,
+          }),
+        ],
+        unit,
+      ),
+    ).toEqual(["turn-taking"]);
+  });
+
+  it("excludes karaoke streams that include singers outside the unit", () => {
+    expect(
+      getUnitKaraokeVideoIds(
+        [
+          createSong({
+            video_id: "81kUajFYkUk",
+            video_title: "はじめての縦型歌枠！Singing Stream",
+            sings: ["AZKi"],
+            tags: ["歌枠"],
+          }),
+          createSong({
+            video_id: "81kUajFYkUk",
+            video_title: "はじめての縦型歌枠！Singing Stream",
+            sings: ["AZKi", "風真いろは"],
+            tags: ["歌枠", "あずいろ"],
+          }),
+          createSong({
+            video_id: "81kUajFYkUk",
+            video_title: "はじめての縦型歌枠！Singing Stream",
+            sings: ["AZKi", "天音かなた"],
+            tags: ["歌枠", "かなあず"],
+          }),
+        ],
+        unit,
+      ),
+    ).toEqual([]);
+  });
+
+  it("drops solo karaoke archives once unit karaoke videos are known", () => {
+    const unitKaraoke = new Set(["FL4ZqehhBP0"]);
+
+    expect(
+      keepUnitArchiveItem(
+        { video_id: "gtkVOMb7vl8", topic: "歌枠" },
+        unitKaraoke,
+      ),
+    ).toBe(false);
+    expect(
+      keepUnitArchiveItem(
+        { video_id: "FL4ZqehhBP0", topic: "重大告知" },
+        unitKaraoke,
+      ),
+    ).toBe(true);
+    expect(
+      keepUnitArchiveItem(
+        { video_id: "minecraft", topic: "Minecraft" },
+        unitKaraoke,
+      ),
+    ).toBe(true);
+    expect(
+      keepUnitArchiveItem({ video_id: "solo", topic: "歌枠" }, new Set()),
+    ).toBe(true);
+  });
+
+  it("detects karaoke streams from video titles when tags omit 歌枠", () => {
+    const soraz = getUnitBySlug("soraz")!;
+    const streams = getUnitKaraokeStreams(
+      [
+        createSong({
+          video_id: "DaS44s0V9Lk",
+          video_title:
+            "【Minecraft】初！？・・・マイクラしながらアカペラ歌枠！！【#SorAZ/#ときのそら生放送】",
+          video_uri: "https://www.youtube.com/watch?v=DaS44s0V9Lk",
+          sings: ["ときのそら", "AZKi"],
+          tags: ["ゲーム", "企画", "アカペラ"],
+          broadcast_at: "2021-05-04T21:00:00+09:00",
+        }),
+        createSong({
+          video_id: "cover",
+          video_title: "【SorAZ】暁の車 歌ってみた",
+          sings: ["ときのそら", "AZKi"],
+          tags: ["カバー曲", "SorAZ"],
+        }),
+      ],
+      soraz,
+    );
+
+    expect(streams).toEqual([
+      {
+        videoId: "DaS44s0V9Lk",
+        title:
+          "【Minecraft】初！？・・・マイクラしながらアカペラ歌枠！！【#SorAZ/#ときのそら生放送】",
+        videoUrl: "https://www.youtube.com/watch?v=DaS44s0V9Lk",
+        broadcastAt: "2021-05-04T21:00:00+09:00",
+      },
+    ]);
   });
 
   it("counts activity days at JST midnight boundaries", () => {

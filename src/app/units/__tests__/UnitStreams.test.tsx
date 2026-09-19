@@ -140,4 +140,95 @@ describe("UnitStreams", () => {
       }),
     ).toBeVisible();
   });
+
+  it("shows karaoke streams from singing data even when archives omit them", () => {
+    mocks.items = [createArchive("archive-only", "SorAZ告知歌枠", "重大告知")];
+
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStreams
+          participants={["ときのそら"]}
+          karaokeVideoIds={["archive-only", "DaS44s0V9Lk"]}
+          karaokeStreams={[
+            {
+              videoId: "DaS44s0V9Lk",
+              title: "マイクラしながらアカペラ歌枠",
+              videoUrl: "https://www.youtube.com/watch?v=DaS44s0V9Lk",
+              broadcastAt: "2021-05-04T21:00:00+09:00",
+            },
+            {
+              videoId: "archive-only",
+              title: "歌唱データ側の重複タイトル",
+              videoUrl: "https://www.youtube.com/watch?v=archive-only",
+              broadcastAt: "2023-10-15T21:00:00+09:00",
+            },
+          ]}
+          unitName="SorAZ"
+        />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: "歌枠" }));
+    expect(
+      screen.getByRole("heading", { name: "マイクラしながらアカペラ歌枠" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "SorAZ告知歌枠" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "歌唱データ側の重複タイトル" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides AZKi solo karaoke when singing data shows the unit did not perform", () => {
+    mocks.items = [
+      createArchive(
+        "gtkVOMb7vl8",
+        "本日、メジャーデビュー！！！プチお披露目あり！Singing Stream",
+        "歌枠",
+      ),
+      createArchive("FL4ZqehhBP0", "SorAZ告知歌枠", "重大告知"),
+      createArchive("minecraft", "そらあずのまったりマイクラ", "Minecraft"),
+    ];
+
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStreams
+          participants={["ときのそら"]}
+          karaokeVideoIds={["FL4ZqehhBP0"]}
+          karaokeStreams={[
+            {
+              videoId: "FL4ZqehhBP0",
+              title: "SorAZ告知歌枠",
+              videoUrl: "https://www.youtube.com/watch?v=FL4ZqehhBP0",
+              broadcastAt: "2023-10-15T21:00:00+09:00",
+            },
+          ]}
+          unitName="SorAZ"
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "そらあずのまったりマイクラ" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "SorAZ告知歌枠" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", {
+        name: "本日、メジャーデビュー！！！プチお披露目あり！Singing Stream",
+      }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "歌枠" }));
+    expect(
+      screen.getByRole("heading", { name: "SorAZ告知歌枠" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", {
+        name: "本日、メジャーデビュー！！！プチお披露目あり！Singing Stream",
+      }),
+    ).not.toBeInTheDocument();
+  });
 });
