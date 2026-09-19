@@ -4,7 +4,10 @@ import { getLocale, getTranslations } from "next-intl/server";
 import WatchPageClient from "./client";
 import { metadata } from "../layout";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
-import { WATCH_PATH, normalizeWatchTimeParam } from "@/app/lib/watchUrl";
+import {
+  buildWatchCanonicalUrl,
+  normalizeWatchTimeParam,
+} from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
 import {
   fetchSongMetadataLookup,
@@ -221,11 +224,13 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("w", String(ogImageWidth));
   ogImageUrl.searchParams.set("h", String(ogImageHeight));
 
-  const canonical = new URL(WATCH_PATH, baseUrl);
-  if (q) canonical.searchParams.set("q", q);
-  if (v) canonical.searchParams.set("v", v);
-  if (t) canonical.searchParams.set("t", t);
-  if (playlist) canonical.searchParams.set("playlist", playlist);
+  const canonical = buildWatchCanonicalUrl({
+    baseUrl,
+    query: q,
+    videoId: v,
+    time: t,
+    playlist,
+  });
 
   return {
     ...metadata,
@@ -236,7 +241,7 @@ export async function generateMetadata({
       ...metadata.openGraph,
       title,
       description,
-      url: canonical.toString(),
+      url: canonical,
       siteName: siteConfig.siteName,
       locale: locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
@@ -256,7 +261,7 @@ export async function generateMetadata({
       images: [`${ogImageUrl.pathname}${ogImageUrl.search}`],
     },
     alternates: {
-      canonical: canonical.toString(),
+      canonical,
     },
   };
 }
