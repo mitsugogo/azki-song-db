@@ -147,4 +147,49 @@ describe("archives route", () => {
       }),
     );
   });
+
+  it("requires every participant when multiple participant filters are provided", async () => {
+    sheetsGetMock.mockResolvedValue({
+      data: {
+        values: [
+          ["配信タイトル", "動画ID", "参加者", "配信開始日時"],
+          [
+            "KoZMy配信",
+            "kozmy",
+            "AZKi、博衣こより、雪花ラミィ",
+            "2026-08-03T10:00:00.000Z",
+          ],
+          [
+            "こよあず配信",
+            "azkoyo",
+            "AZKi、博衣こより",
+            "2026-08-02T10:00:00.000Z",
+          ],
+          [
+            "ラミィ出演配信",
+            "lamy",
+            "AZKi、雪花ラミィ",
+            "2026-08-01T10:00:00.000Z",
+          ],
+        ],
+      },
+    });
+    const searchParams = new URLSearchParams();
+    searchParams.append("participant", "博衣こより");
+    searchParams.append("participant", "雪花ラミィ");
+
+    const response = await GET(
+      new Request(`http://localhost/api/archives?${searchParams.toString()}`),
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toHaveLength(1);
+    expect(data[0]).toEqual(
+      expect.objectContaining({
+        title: "KoZMy配信",
+        participants: ["AZKi", "博衣こより", "雪花ラミィ"],
+      }),
+    );
+  });
 });

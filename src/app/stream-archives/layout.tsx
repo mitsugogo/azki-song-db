@@ -2,6 +2,7 @@ import { Header } from "../components/Header";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { Viewport } from "next";
+import StreamArchivesScrollControls from "./StreamArchivesScrollControls";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -22,6 +23,7 @@ export default function ArchivesLayout({
         <div>{children}</div>
         <Footer />
       </div>
+      <StreamArchivesScrollControls />
       <AnalyticsWrapper />
     </>
   );

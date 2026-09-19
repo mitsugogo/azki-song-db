@@ -4,13 +4,19 @@ import { useEffect, useState } from "react";
 import { fetchJsonDedup } from "@/app/lib/fetchDedup";
 import type { ArchiveItem } from "@/app/types/archiveItem";
 
-export function useUnitArchives(participant: string) {
+export function useUnitArchives(participants: string[]) {
   const [items, setItems] = useState<ArchiveItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const endpoint = (() => {
+    const searchParams = new URLSearchParams();
+    participants.forEach((participant) =>
+      searchParams.append("participant", participant),
+    );
+    return `/api/archives?${searchParams.toString()}`;
+  })();
 
   useEffect(() => {
     let active = true;
-    const endpoint = `/api/archives?participant=${encodeURIComponent(participant)}`;
     setIsLoading(true);
     fetchJsonDedup<ArchiveItem[]>(endpoint)
       .then(({ data }) => {
@@ -22,7 +28,7 @@ export function useUnitArchives(participant: string) {
     return () => {
       active = false;
     };
-  }, [participant]);
+  }, [endpoint]);
 
   return { items, isLoading };
 }

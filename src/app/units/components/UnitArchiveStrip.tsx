@@ -6,29 +6,40 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
+import { keepUnitArchiveItem } from "@/app/lib/unitHistory";
 import { useUnitArchives } from "./useUnitArchives";
 
 export default function UnitArchiveStrip({
-  participant,
+  participants,
+  karaokeVideoIds = [],
+  unitName,
 }: {
-  participant: string;
+  participants: string[];
+  karaokeVideoIds?: string[];
+  unitName: string;
 }) {
   const t = useTranslations("Units");
-  const { items, isLoading } = useUnitArchives(participant);
+  const { items, isLoading } = useUnitArchives(participants);
   const reducedMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
   const isHoveredRef = useRef(false);
   const isInteractingRef = useRef(false);
   const isFocusWithinRef = useRef(false);
+  const karaokeVideoIdSet = useMemo(
+    () => new Set(karaokeVideoIds),
+    [karaokeVideoIds],
+  );
   const archives = useMemo(
     () =>
-      [...items].sort(
-        (a, b) =>
-          new Date(b.stream_started_at || b.published_at).getTime() -
-          new Date(a.stream_started_at || a.published_at).getTime(),
-      ),
-    [items],
+      items
+        .filter((item) => keepUnitArchiveItem(item, karaokeVideoIdSet))
+        .sort(
+          (a, b) =>
+            new Date(b.stream_started_at || b.published_at).getTime() -
+            new Date(a.stream_started_at || a.published_at).getTime(),
+        ),
+    [items, karaokeVideoIdSet],
   );
 
   useEffect(() => {
@@ -76,7 +87,10 @@ export default function UnitArchiveStrip({
   if (!isLoading && archives.length === 0) return null;
 
   return (
-    <section className="mt-4" aria-label={t("archiveStripLabel")}>
+    <section
+      className="mt-4"
+      aria-label={t("archiveStripLabel", { name: unitName })}
+    >
       <div
         ref={scrollRef}
         className="unit-archive-strip-scrollbar max-w-full overflow-x-auto overscroll-x-contain pb-3"

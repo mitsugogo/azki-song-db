@@ -1,13 +1,22 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { getUnitBySlug, getLocalizedUnitText, units } from "@/app/config/units";
+import {
+  getUnitBySlug,
+  getLocalizedUnitText,
+  getUnitHeroFrameVars,
+  units,
+} from "@/app/config/units";
 import { HomeHeroBackground } from "@/app/home/HomeHeroBackground";
 import { fetchSongsFromApiCached } from "@/app/lib/server/fetchSongs";
 import { getDiscographyLink } from "@/app/lib/song";
 import {
   buildUnitHistory,
   getUnitActivityDays,
+  getUnitAchievementSongs,
+  getUnitKaraokeStreams,
+  getUnitLegacyActivityDays,
   getUnitSingingStats,
   getUnitWorks,
   pickUnitHeroBackgroundSong,
@@ -66,12 +75,17 @@ export async function generateMetadata({
   if (!unit) return {};
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "Units", locale });
+  const memberNames = unit.members.map((member) =>
+    getLocalizedUnitText(member.name, locale),
+  );
   return buildUnitPageMetadata({
     title: getLocalizedUnitText(unit.name, locale),
     description: t("description", {
       name: getLocalizedUnitText(unit.name, locale),
-      member1: getLocalizedUnitText(unit.members[0].name, locale),
-      member2: getLocalizedUnitText(unit.members[1].name, locale),
+      members: new Intl.ListFormat(locale, {
+        style: "long",
+        type: "conjunction",
+      }).format(memberNames),
     }),
     slug,
     locale,
@@ -94,16 +108,23 @@ export default async function UnitPage({
   const songs = await fetchSongsFromApiCached({ locale }).catch(() => []);
   const works = getUnitWorks(songs, unit);
   const singingStats = getUnitSingingStats(songs, unit);
+  const karaokeStreams = getUnitKaraokeStreams(songs, unit);
+  const karaokeVideoIds = karaokeStreams.map((stream) => stream.videoId);
   const history = buildUnitHistory(unit, songs, locale, now);
   const unitName = getLocalizedUnitText(unit.name, locale);
+  const legacyName = unit.legacy
+    ? getLocalizedUnitText(unit.legacy.name, locale)
+    : null;
   const memberNames = unit.members.map((member) =>
     getLocalizedUnitText(member.name, locale),
   );
-  const participant = unit.members[1].name.ja;
+  const archiveParticipants = unit.members
+    .filter((member) => !member.aliases.includes("AZKi"))
+    .map((member) => member.name.ja);
   const heroBackgroundSong = pickUnitHeroBackgroundSong(songs, unit);
 
   const achievementsByVideo = new Map<string, UnitAchievementWork>();
-  works.forEach((song) => {
+  getUnitAchievementSongs(works).forEach((song) => {
     if (!song.video_id) return;
     const previous = achievementsByVideo.get(song.video_id);
     const currentViewCount = Math.max(
@@ -130,7 +151,11 @@ export default async function UnitPage({
           unitName={unitName}
         />
 
-        <section className="relative isolate overflow-hidden rounded-3xl border border-t-primary-400 border-r-[#a8d8cb] border-b-[#a8d8cb] border-l-primary-400 bg-white/90 p-6 dark:border-t-primary-300/30 dark:border-r-[#b9e2d8]/30 dark:border-b-[#b9e2d8]/30 dark:border-l-primary-300/30 dark:bg-gray-900/75 dark:shadow-[-8px_-8px_28px_rgba(190,24,93,0.12),8px_8px_28px_rgba(185,226,216,0.10)] sm:p-8 lg:p-10">
+        <section
+          data-unit-hero-frame
+          className="relative isolate overflow-hidden rounded-3xl border bg-white/90 p-6 [border-top-color:var(--unit-hero-top)] [border-right-color:var(--unit-hero-end)] [border-bottom-color:var(--unit-hero-end)] [border-left-color:var(--unit-hero-start)] dark:bg-gray-900/75 dark:[border-top-color:color-mix(in_srgb,var(--unit-hero-top)_30%,transparent)] dark:[border-right-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-bottom-color:color-mix(in_srgb,var(--unit-hero-end)_30%,transparent)] dark:[border-left-color:color-mix(in_srgb,var(--unit-hero-start)_30%,transparent)] dark:[box-shadow:-8px_-8px_28px_color-mix(in_srgb,var(--unit-hero-start)_12%,transparent),8px_8px_28px_color-mix(in_srgb,var(--unit-hero-end)_10%,transparent)] sm:p-8 lg:p-10"
+          style={getUnitHeroFrameVars(unit) as CSSProperties}
+        >
           <HomeHeroBackground song={heroBackgroundSong} layout="frame" />
           <div
             className="pointer-events-none absolute inset-0 z-0 bg-white/65 dark:bg-gray-900/70"
@@ -144,9 +169,20 @@ export default async function UnitPage({
               <p className="mt-3 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 {memberNames.join(" × ")}
               </p>
-              <p className="mt-4 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                Since {unit.formedAt.replaceAll("-", ".")}
-              </p>
+              <div className="mt-4 space-y-1 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+                <p>
+                  {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
+                </p>
+                {unit.legacy && legacyName ? (
+                  <p>
+                    {t("legacyPeriod", {
+                      name: legacyName,
+                      start: unit.legacy.startedAt.replaceAll("-", "."),
+                      end: unit.legacy.endedAt.replaceAll("-", "."),
+                    })}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <div className="flex justify-center">
               <UnitMemberAvatars members={memberNames} />
@@ -164,20 +200,38 @@ export default async function UnitPage({
           </div>
         </section>
 
-        <UnitArchiveStrip participant={participant} />
+        <UnitArchiveStrip
+          participants={archiveParticipants}
+          karaokeVideoIds={karaokeVideoIds}
+          unitName={unitName}
+        />
 
         <UnitStats
-          participant={participant}
+          participants={archiveParticipants}
           unitName={unitName}
           unitSearchName={unit.name.ja}
           activityDays={getUnitActivityDays(unit, now)}
+          legacyActivity={
+            legacyName
+              ? {
+                  name: legacyName,
+                  days: getUnitLegacyActivityDays(unit, now) ?? 0,
+                }
+              : undefined
+          }
           uniqueSongCount={singingStats.uniqueSongCount}
           performanceCount={singingStats.performanceCount}
         />
 
-        <UnitHistory entries={history} />
-        <UnitStreams participant={participant} />
+        <UnitHistory entries={history} legacyName={legacyName ?? undefined} />
+        <UnitStreams
+          participants={archiveParticipants}
+          karaokeVideoIds={karaokeVideoIds}
+          karaokeStreams={karaokeStreams}
+          unitName={unitName}
+        />
         <UnitMusic
+          unitName={unitName}
           works={works}
           singingStats={{
             uniqueSongCount: singingStats.uniqueSongCount,

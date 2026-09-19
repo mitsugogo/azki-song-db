@@ -1,5 +1,6 @@
 import type { UnitDefinition, UnitHighlightType } from "../config/units";
 import { getLocalizedUnitText } from "../config/units";
+import { getArtTrackVideoIdsHiddenWhenMusicVideoExists } from "../discography/utils/releaseVariants";
 import type { Song } from "../types/song";
 import { getDiscographyLink } from "./song";
 import { buildWatchHref } from "./watchUrl";
@@ -45,11 +46,24 @@ export function songIncludesEveryUnitMember(song: Song, unit: UnitDefinition) {
   );
 }
 
+const namesHaveExactUnitLineup = (singers: string[], unit: UnitDefinition) => {
+  const names = singers.map((name) => name.trim()).filter(Boolean);
+  if (names.length === 0) return false;
+  return (
+    unit.members.every((member) =>
+      names.some((singer) => memberMatches(singer, member.aliases)),
+    ) &&
+    names.every((singer) =>
+      unit.members.some((member) => memberMatches(singer, member.aliases)),
+    )
+  );
+};
+
+const songHasExactUnitLineup = (song: Song, unit: UnitDefinition) =>
+  namesHaveExactUnitLineup(splitSingerNames(song), unit);
+
 export function isUnitWork(song: Song, unit: UnitDefinition) {
-  const singers = splitSingerNames(song);
-  const isExactUnitLineup =
-    singers.length === unit.members.length &&
-    songIncludesEveryUnitMember(song, unit);
+  const isExactUnitLineup = songHasExactUnitLineup(song, unit);
   const hasUnitTag = song.tags.some((tag) => unit.tags.includes(tag));
   const hasFormalWorkTag = song.tags.some((tag) => FORMAL_WORK_TAGS.has(tag));
   return hasFormalWorkTag && (hasUnitTag || isExactUnitLineup);
@@ -90,6 +104,12 @@ export function getUnitWorks(songs: Song[], unit: UnitDefinition) {
   );
 }
 
+export function getUnitAchievementSongs(songs: Song[]) {
+  const hiddenArtTrackVideoIds =
+    getArtTrackVideoIdsHiddenWhenMusicVideoExists(songs);
+  return songs.filter((song) => !hiddenArtTrackVideoIds.has(song.video_id));
+}
+
 export function pickUnitHeroBackgroundSong(
   songs: Song[],
   unit: UnitDefinition,
@@ -117,7 +137,7 @@ export function pickUnitHeroBackgroundSong(
 
 export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
   const performances = songs.filter((song) =>
-    songIncludesEveryUnitMember(song, unit),
+    songHasExactUnitLineup(song, unit),
   );
   const counts = new Map<string, number>();
   performances.forEach((song) => {
@@ -133,6 +153,86 @@ export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
     performanceCount: performances.length,
     ranked,
   };
+}
+
+const KARAOKE_KEYWORDS = ["歌枠", "カラオケ", "karaoke"] as const;
+
+const looksLikeKaraoke = (value: string) =>
+  KARAOKE_KEYWORDS.some((keyword) =>
+    value.toLocaleLowerCase("ja").includes(keyword.toLocaleLowerCase("ja")),
+  );
+
+const isKaraokePerformance = (song: Song) =>
+  song.tags.some((tag) => looksLikeKaraoke(tag)) ||
+  looksLikeKaraoke(song.video_title);
+
+const videoHasExactUnitLineup = (songs: Song[], unit: UnitDefinition) =>
+  namesHaveExactUnitLineup(songs.flatMap(splitSingerNames), unit);
+
+const pickKaraokeStreamSong = (songs: Song[]) =>
+  songs.reduce((best, song) => {
+    const bestDate = best.broadcast_at || "";
+    const songDate = song.broadcast_at || "";
+    if (songDate && (!bestDate || songDate < bestDate)) return song;
+    if (songDate === bestDate && song.start < best.start) return song;
+    return best;
+  });
+
+export type UnitKaraokeStream = {
+  videoId: string;
+  title: string;
+  videoUrl: string;
+  broadcastAt: string;
+};
+
+export function getUnitKaraokeStreams(songs: Song[], unit: UnitDefinition) {
+  const songsByVideo = new Map<string, Song[]>();
+  songs.forEach((song) => {
+    if (!song.video_id) return;
+    const current = songsByVideo.get(song.video_id);
+    if (current) current.push(song);
+    else songsByVideo.set(song.video_id, [song]);
+  });
+
+  return [...songsByVideo.values()].flatMap((videoSongs) => {
+    if (!videoSongs.some(isKaraokePerformance)) return [];
+    if (!videoHasExactUnitLineup(videoSongs, unit)) return [];
+
+    const representative = pickKaraokeStreamSong(videoSongs);
+    const videoId = representative.video_id;
+    return [
+      {
+        videoId,
+        title: representative.video_title.trim() || representative.title,
+        videoUrl:
+          representative.video_uri ||
+          `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`,
+        broadcastAt: representative.broadcast_at || "",
+      } satisfies UnitKaraokeStream,
+    ];
+  });
+}
+
+export function getUnitKaraokeVideoIds(songs: Song[], unit: UnitDefinition) {
+  return getUnitKaraokeStreams(songs, unit).map((stream) => stream.videoId);
+}
+
+const KARAOKE_ARCHIVE_TOPIC_KEYWORDS = [...KARAOKE_KEYWORDS, "歌"] as const;
+
+export function isKaraokeArchiveTopic(topic: string) {
+  const normalized = topic.toLocaleLowerCase("ja");
+  return KARAOKE_ARCHIVE_TOPIC_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword.toLocaleLowerCase("ja")),
+  );
+}
+
+export function keepUnitArchiveItem(
+  item: { video_id: string; topic: string },
+  unitKaraokeVideoIds: ReadonlySet<string>,
+) {
+  if (unitKaraokeVideoIds.has(item.video_id)) return true;
+  if (!isKaraokeArchiveTopic(item.topic)) return true;
+  return unitKaraokeVideoIds.size === 0;
 }
 
 const getUnitMilestone = (song: Song, unit: UnitDefinition) =>
@@ -234,7 +334,8 @@ export function buildUnitHistory(
       videoId: entry.videoId || milestoneEntry.videoId,
     };
   });
-  const works = getUnitWorks(songs, unit);
+  const works =
+    unit.includeWorksInHistory === false ? [] : getUnitWorks(songs, unit);
   const automatic: UnitHistoryEntry[] = works
     .filter((song) => getSongDate(song))
     .map((song) => ({
@@ -278,9 +379,17 @@ export function getJstDateParts(date: Date) {
 }
 
 export function getUnitActivityDays(unit: UnitDefinition, now: Date) {
-  const formed = unit.formedAt.split("-").map(Number);
+  return getActivityDaysSince(unit.formedAt, now);
+}
+
+const getActivityDaysSince = (startedAt: string, now: Date) => {
+  const formed = startedAt.split("-").map(Number);
   const current = getJstDateParts(now);
   const formedTime = Date.UTC(formed[0], formed[1] - 1, formed[2]);
   const currentTime = Date.UTC(current.year, current.month - 1, current.day);
   return Math.max(0, Math.floor((currentTime - formedTime) / 86_400_000));
+};
+
+export function getUnitLegacyActivityDays(unit: UnitDefinition, now: Date) {
+  return unit.legacy ? getActivityDaysSince(unit.legacy.startedAt, now) : null;
 }

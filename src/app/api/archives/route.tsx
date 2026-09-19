@@ -249,17 +249,26 @@ export async function GET(request?: Request) {
       })
       .filter((item) => item.title && item.video_id);
 
-    const participant = request
-      ? new URL(request.url).searchParams.get("participant")?.trim()
-      : "";
-    if (participant) {
-      const normalizedParticipant = participant.toLocaleLowerCase("ja");
-      items = items.filter((item) =>
-        (item.participants ?? []).some(
-          (name) =>
-            name.trim().toLocaleLowerCase("ja") === normalizedParticipant,
-        ),
+    const participants = request
+      ? new URL(request.url).searchParams
+          .getAll("participant")
+          .map((participant) => participant.trim())
+          .filter(Boolean)
+      : [];
+    if (participants.length > 0) {
+      const normalizedParticipants = participants.map((participant) =>
+        participant.normalize("NFKC").toLocaleLowerCase("ja"),
       );
+      items = items.filter((item) => {
+        const itemParticipants = new Set(
+          (item.participants ?? []).map((name) =>
+            name.trim().normalize("NFKC").toLocaleLowerCase("ja"),
+          ),
+        );
+        return normalizedParticipants.every((participant) =>
+          itemParticipants.has(participant),
+        );
+      });
     }
 
     items.sort((a, b) => {

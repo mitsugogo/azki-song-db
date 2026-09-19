@@ -118,4 +118,53 @@ describe("watch generateMetadata", () => {
     expect(result.openGraph?.description).toBe(result.description);
     expect(result.twitter?.description).toBe(result.description);
   });
+
+  it.each([
+    {
+      searchParams: { q: "year:2020" },
+      canonical: "https://example.test/watch?q=year%3A2020",
+    },
+    {
+      searchParams: { v: "abc" },
+      canonical: "https://example.test/watch?v=abc",
+    },
+    {
+      searchParams: { v: "abc", t: "100s" },
+      canonical: "https://example.test/watch?v=abc&t=100s",
+    },
+    {
+      searchParams: { v: "abc", t: "100" },
+      canonical: "https://example.test/watch?v=abc&t=100s",
+    },
+    {
+      searchParams: { q: "year:2020", v: "abc" },
+      canonical: "https://example.test/watch?v=abc",
+    },
+    {
+      searchParams: { q: "artist:AZKi", v: "abc", t: "100s" },
+      canonical: "https://example.test/watch?v=abc&t=100s",
+    },
+    {
+      searchParams: { videoId: "abc", t: "100s" },
+      canonical: "https://example.test/watch?v=abc&t=100s",
+    },
+    {
+      searchParams: { q: "foo", v: "abc", playlist: "xyz" },
+      canonical: "https://example.test/watch?v=abc&playlist=xyz",
+    },
+    {
+      searchParams: { q: "foo", v: "abc", t: "100s", playlist: "xyz" },
+      canonical: "https://example.test/watch?v=abc&t=100s&playlist=xyz",
+    },
+  ])(
+    "canonicalとog:urlを$canonicalに正規化する",
+    async ({ searchParams, canonical }) => {
+      const result = await generateMetadata({
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      expect(result.alternates?.canonical).toBe(canonical);
+      expect(result.openGraph?.url).toBe(canonical);
+    },
+  );
 });

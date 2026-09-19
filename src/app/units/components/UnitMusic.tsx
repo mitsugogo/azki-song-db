@@ -7,9 +7,11 @@ import { getDiscographyLink } from "@/app/lib/song";
 import type { Song } from "@/app/types/song";
 
 export default async function UnitMusic({
+  unitName,
   works,
   singingStats,
 }: {
+  unitName: string;
   works: Song[];
   singingStats: {
     uniqueSongCount: number;
@@ -32,7 +34,7 @@ export default async function UnitMusic({
       <div className="mt-5 grid gap-8 lg:grid-cols-2">
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            {t("worksTitle")}
+            {t("worksTitle", { name: unitName })}
           </h3>
           {works.length === 0 ? (
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">

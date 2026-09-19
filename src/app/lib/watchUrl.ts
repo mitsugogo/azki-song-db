@@ -28,6 +28,40 @@ export function normalizeWatchTimeParam(
   return `${Math.floor(seconds)}s`;
 }
 
+type BuildWatchCanonicalUrlOptions = {
+  baseUrl: string;
+  query?: string | null;
+  videoId?: string | null;
+  time?: string | null;
+  playlist?: string | null;
+};
+
+export function buildWatchCanonicalUrl({
+  baseUrl,
+  query,
+  videoId,
+  time,
+  playlist,
+}: BuildWatchCanonicalUrlOptions) {
+  const canonical = new URL(WATCH_PATH, baseUrl);
+
+  if (videoId) {
+    canonical.searchParams.set("v", videoId);
+
+    if (time) {
+      canonical.searchParams.set("t", time);
+    }
+  } else if (query) {
+    canonical.searchParams.set("q", query);
+  }
+
+  if (playlist) {
+    canonical.searchParams.set("playlist", playlist);
+  }
+
+  return canonical.toString();
+}
+
 export function buildWatchHref({
   videoId,
   start,

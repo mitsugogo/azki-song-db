@@ -20,6 +20,7 @@ vi.mock("next-intl", () => ({
         statsTitle: `数字で見る ${values.name ?? ""}`,
         statsDaysValue: `${values.count}日`,
         statsDays: "活動期間",
+        statsLegacyDaysSub: `${values.name ?? ""}始動から ${values.count}日`,
         statsStreams: "コラボ配信",
         statsStreamDuration: "一緒に配信した時間",
         statsStreamDurationRank: `配信時間順位 ${values.rank}位`,
@@ -113,7 +114,7 @@ describe("UnitStats", () => {
     render(
       <MantineProvider theme={theme}>
         <UnitStats
-          participant="風真いろは"
+          participants={["風真いろは"]}
           unitName="あずいろ"
           unitSearchName="あずいろ"
           activityDays={1460}
@@ -142,5 +143,69 @@ describe("UnitStats", () => {
       "href",
       "/search?q=unit%3A%E3%81%82%E3%81%9A%E3%81%84%E3%82%8D",
     );
+  });
+
+  it("uses the exact member combination for a three-member unit", () => {
+    const kozmy = createArchive("kozmy", "PT5H", [
+      "AZKi",
+      "博衣こより",
+      "雪花ラミィ",
+    ]);
+    const azkoyo = createArchive("azkoyo", "PT10H", ["AZKi", "博衣こより"]);
+    mocks.unitArchives = [kozmy];
+    mocks.allArchives = [kozmy, azkoyo];
+    mocks.channels = [
+      createChannel("AZKi", "azki"),
+      createChannel("博衣こより", "koyori"),
+      createChannel("雪花ラミィ", "lamy"),
+    ];
+
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStats
+          participants={["博衣こより", "雪花ラミィ"]}
+          unitName="KoZMy"
+          unitSearchName="KoZMy"
+          activityDays={365}
+          uniqueSongCount={1}
+          performanceCount={1}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByText("5h")).toBeVisible();
+    expect(screen.getByLabelText("配信時間順位 2位")).toBeVisible();
+    const archiveHref =
+      "/stream-archives/list?cast=%E5%8D%9A%E8%A1%A3%E3%81%93%E3%82%88%E3%82%8A&cast=%E9%9B%AA%E8%8A%B1%E3%83%A9%E3%83%9F%E3%82%A3";
+    expect(screen.getByRole("link", { name: /コラボ配信/ })).toHaveAttribute(
+      "href",
+      archiveHref,
+    );
+    expect(
+      screen.getByRole("link", { name: /一緒に配信した時間/ }),
+    ).toHaveAttribute("href", archiveHref);
+  });
+
+  it("shows the AS_tar activity period alongside its INNK roots", () => {
+    mocks.unitArchives = [];
+    mocks.allArchives = [];
+    mocks.channels = [];
+
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStats
+          participants={["星街すいせい"]}
+          unitName="AS_tar"
+          unitSearchName="AS_tar"
+          activityDays={840}
+          legacyActivity={{ name: "イノナカ組", days: 2680 }}
+          uniqueSongCount={2}
+          performanceCount={2}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByText("840日")).toBeVisible();
+    expect(screen.getByText("イノナカ組始動から 2,680日")).toBeVisible();
   });
 });

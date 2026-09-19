@@ -25,17 +25,26 @@ function getScrollableAncestor(
  * 最も近いスクロール可能な祖先要素を自動検出し、そのコンテナのスクロールを監視する。
  * スクロール可能な祖先がない場合は window にフォールバックする。
  * scrollElement を指定すると、そのコンテナを直接監視する。
+ * scrollTarget="window" を指定すると、祖先要素を検出せず window を監視する。
  */
 export function ScrollToTopButton({
   scrollElement,
-}: { scrollElement?: HTMLElement | null } = {}) {
+  scrollTarget = "auto",
+  behavior = "smooth",
+}: {
+  scrollElement?: HTMLElement | null;
+  scrollTarget?: "auto" | "window";
+  behavior?: ScrollBehavior;
+} = {}) {
   const [showButton, setShowButton] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const scrollContainerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const scrollContainer =
-      scrollElement ?? getScrollableAncestor(buttonRef.current);
+      scrollTarget === "window"
+        ? null
+        : (scrollElement ?? getScrollableAncestor(buttonRef.current));
     scrollContainerRef.current = scrollContainer;
 
     const handleScroll = () => {
@@ -49,16 +58,16 @@ export function ScrollToTopButton({
     handleScroll();
     target.addEventListener("scroll", handleScroll, { passive: true });
     return () => target.removeEventListener("scroll", handleScroll);
-  }, [scrollElement]);
+  }, [scrollElement, scrollTarget]);
 
   const handleBackToTop = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      container.scrollTo({ top: 0, behavior: "smooth" });
+      container.scrollTo({ top: 0, behavior });
     } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior });
     }
-  }, []);
+  }, [behavior]);
 
   return (
     <button
