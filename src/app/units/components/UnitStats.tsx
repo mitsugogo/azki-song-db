@@ -12,7 +12,10 @@ import {
   resolveArchiveParticipants,
 } from "@/app/lib/archiveParticipants";
 import { formatCompactActivityDuration } from "@/app/stream-archives/archiveActivity";
-import { createArchiveCollaborationRanking } from "@/app/stream-archives/archiveCollaborationData";
+import {
+  createArchiveCollaborationCombinationRanking,
+  createArchiveCollaborationRanking,
+} from "@/app/stream-archives/archiveCollaborationData";
 import { isShortsArchive } from "@/app/stream-archives/archiveStats";
 import { useUnitArchives } from "./useUnitArchives";
 
@@ -32,23 +35,25 @@ const getRankingBadgeColor = (rank: number) => {
 };
 
 export default function UnitStats({
-  participant,
+  participants,
   unitName,
   unitSearchName,
   activityDays,
+  legacyActivity,
   uniqueSongCount,
   performanceCount,
 }: {
-  participant: string;
+  participants: string[];
   unitName: string;
   unitSearchName: string;
   activityDays: number;
+  legacyActivity?: { name: string; days: number };
   uniqueSongCount: number;
   performanceCount: number;
 }) {
   const t = useTranslations("Units");
   const locale = useLocale();
-  const { items: archives, isLoading } = useUnitArchives(participant);
+  const { items: archives, isLoading } = useUnitArchives(participants);
   const { items: allArchives, isLoading: areAllArchivesLoading } =
     useArchives();
   const { channels, isLoading: areChannelsLoading } = useChannels();
@@ -65,19 +70,36 @@ export default function UnitStats({
         ),
       }));
 
-    return createArchiveCollaborationRanking(
+    if (participants.length === 1) {
+      return createArchiveCollaborationRanking(
+        rankingItems,
+        null,
+        locale,
+        Number.MAX_SAFE_INTEGER,
+      );
+    }
+
+    const azkiParticipant = resolveArchiveParticipants(
+      ["AZKi"],
+      channelsByParticipantName,
+    )[0];
+    if (!azkiParticipant) return [];
+
+    return createArchiveCollaborationCombinationRanking(
       rankingItems,
       null,
       locale,
+      azkiParticipant,
       Number.MAX_SAFE_INTEGER,
     );
-  }, [allArchives, channels, locale]);
-  const participantKey = normalizeParticipantName(participant);
-  const collaborationRankIndex = collaborationRanking.findIndex((item) =>
-    item.castNames.some(
-      (name) => normalizeParticipantName(name) === participantKey,
-    ),
-  );
+  }, [allArchives, channels, locale, participants]);
+  const participantKeys = new Set(participants.map(normalizeParticipantName));
+  const collaborationRankIndex = collaborationRanking.findIndex((item) => {
+    if (item.castNames.length !== participantKeys.size) return false;
+    return item.castNames.every((name) =>
+      participantKeys.has(normalizeParticipantName(name)),
+    );
+  });
   const collaborationRank =
     collaborationRankIndex >= 0 ? collaborationRankIndex + 1 : null;
   const collaboration =
@@ -86,15 +108,26 @@ export default function UnitStats({
       : null;
   const isCollaborationRankingLoading =
     areAllArchivesLoading || areChannelsLoading;
+  const archiveSearchParams = new URLSearchParams();
+  participants.forEach((participant) =>
+    archiveSearchParams.append("cast", participant),
+  );
+  const archiveHref = `/stream-archives/list?${archiveSearchParams.toString()}`;
   const cards = [
     {
       value: t("statsDaysValue", { count: format(activityDays) }),
+      sub: legacyActivity
+        ? t("statsLegacyDaysSub", {
+            name: legacyActivity.name,
+            count: format(legacyActivity.days),
+          })
+        : undefined,
       label: t("statsDays"),
     },
     {
       value: isLoading ? null : format(archives.length),
       label: t("statsStreams"),
-      href: `/stream-archives/list?cast=${encodeURIComponent(participant)}`,
+      href: archiveHref,
     },
     {
       value: isCollaborationRankingLoading ? null : (
@@ -125,7 +158,7 @@ export default function UnitStats({
         </span>
       ),
       label: t("statsStreamDuration"),
-      href: `/stream-archives/list?cast=${encodeURIComponent(participant)}`,
+      href: archiveHref,
     },
     {
       value: format(uniqueSongCount),

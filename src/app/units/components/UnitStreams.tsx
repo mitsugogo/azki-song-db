@@ -14,8 +14,15 @@ type Category = "all" | "karaoke" | "3d" | "event";
 const getArchiveTime = (item: ArchiveItem) =>
   new Date(item.stream_started_at || item.published_at).getTime() || 0;
 
-const categoryMatches = (item: ArchiveItem, category: Category) => {
+const categoryMatches = (
+  item: ArchiveItem,
+  category: Category,
+  karaokeVideoIds: Set<string>,
+) => {
   if (category === "all") return true;
+  if (category === "karaoke" && karaokeVideoIds.has(item.video_id)) {
+    return true;
+  }
   const topic = item.topic.toLocaleLowerCase("ja");
   const matches: Record<Exclude<Category, "all">, string[]> = {
     karaoke: ["歌枠", "カラオケ", "歌", "karaoke"],
@@ -25,24 +32,36 @@ const categoryMatches = (item: ArchiveItem, category: Category) => {
   return matches[category].some((word) => topic.includes(word));
 };
 
-export default function UnitStreams({ participant }: { participant: string }) {
+export default function UnitStreams({
+  participants,
+  karaokeVideoIds,
+  unitName,
+}: {
+  participants: string[];
+  karaokeVideoIds: string[];
+  unitName: string;
+}) {
   const t = useTranslations("Units");
   const locale = useLocale();
-  const { items, isLoading } = useUnitArchives(participant);
+  const { items, isLoading } = useUnitArchives(participants);
   const [category, setCategory] = useState<Category>("all");
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [visibleCount, setVisibleCount] = useState(6);
+  const karaokeVideoIdSet = useMemo(
+    () => new Set(karaokeVideoIds),
+    [karaokeVideoIds],
+  );
 
   const filtered = useMemo(
     () =>
       items
-        .filter((item) => categoryMatches(item, category))
+        .filter((item) => categoryMatches(item, category, karaokeVideoIdSet))
         .sort((a, b) =>
           sort === "asc"
             ? getArchiveTime(a) - getArchiveTime(b)
             : getArchiveTime(b) - getArchiveTime(a),
         ),
-    [category, items, sort],
+    [category, items, karaokeVideoIdSet, sort],
   );
   const categoryOptions = (["all", "karaoke", "3d", "event"] as const).map(
     (value) => ({ value, label: t(`streamCategory.${value}`) }),
@@ -58,7 +77,7 @@ export default function UnitStreams({ participant }: { participant: string }) {
           {t("streamsTitle")}
         </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          {t("streamsDescription")}
+          {t("streamsDescription", { name: unitName })}
         </p>
       </div>
 

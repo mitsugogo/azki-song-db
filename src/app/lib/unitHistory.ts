@@ -1,5 +1,6 @@
 import type { UnitDefinition, UnitHighlightType } from "../config/units";
 import { getLocalizedUnitText } from "../config/units";
+import { getArtTrackVideoIdsHiddenWhenMusicVideoExists } from "../discography/utils/releaseVariants";
 import type { Song } from "../types/song";
 import { getDiscographyLink } from "./song";
 import { buildWatchHref } from "./watchUrl";
@@ -45,11 +46,18 @@ export function songIncludesEveryUnitMember(song: Song, unit: UnitDefinition) {
   );
 }
 
-export function isUnitWork(song: Song, unit: UnitDefinition) {
+const songHasExactUnitLineup = (song: Song, unit: UnitDefinition) => {
   const singers = splitSingerNames(song);
-  const isExactUnitLineup =
-    singers.length === unit.members.length &&
-    songIncludesEveryUnitMember(song, unit);
+  return (
+    songIncludesEveryUnitMember(song, unit) &&
+    singers.every((singer) =>
+      unit.members.some((member) => memberMatches(singer, member.aliases)),
+    )
+  );
+};
+
+export function isUnitWork(song: Song, unit: UnitDefinition) {
+  const isExactUnitLineup = songHasExactUnitLineup(song, unit);
   const hasUnitTag = song.tags.some((tag) => unit.tags.includes(tag));
   const hasFormalWorkTag = song.tags.some((tag) => FORMAL_WORK_TAGS.has(tag));
   return hasFormalWorkTag && (hasUnitTag || isExactUnitLineup);
@@ -90,6 +98,12 @@ export function getUnitWorks(songs: Song[], unit: UnitDefinition) {
   );
 }
 
+export function getUnitAchievementSongs(songs: Song[]) {
+  const hiddenArtTrackVideoIds =
+    getArtTrackVideoIdsHiddenWhenMusicVideoExists(songs);
+  return songs.filter((song) => !hiddenArtTrackVideoIds.has(song.video_id));
+}
+
 export function pickUnitHeroBackgroundSong(
   songs: Song[],
   unit: UnitDefinition,
@@ -117,7 +131,7 @@ export function pickUnitHeroBackgroundSong(
 
 export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
   const performances = songs.filter((song) =>
-    songIncludesEveryUnitMember(song, unit),
+    songHasExactUnitLineup(song, unit),
   );
   const counts = new Map<string, number>();
   performances.forEach((song) => {
@@ -133,6 +147,25 @@ export function getUnitSingingStats(songs: Song[], unit: UnitDefinition) {
     performanceCount: performances.length,
     ranked,
   };
+}
+
+export function getUnitKaraokeVideoIds(songs: Song[], unit: UnitDefinition) {
+  return [
+    ...new Set(
+      songs
+        .filter(
+          (song) =>
+            song.video_id &&
+            songIncludesEveryUnitMember(song, unit) &&
+            song.tags.some((tag) =>
+              ["歌枠", "カラオケ", "karaoke"].some((keyword) =>
+                tag.toLocaleLowerCase("ja").includes(keyword),
+              ),
+            ),
+        )
+        .map((song) => song.video_id),
+    ),
+  ];
 }
 
 const getUnitMilestone = (song: Song, unit: UnitDefinition) =>
@@ -234,7 +267,8 @@ export function buildUnitHistory(
       videoId: entry.videoId || milestoneEntry.videoId,
     };
   });
-  const works = getUnitWorks(songs, unit);
+  const works =
+    unit.includeWorksInHistory === false ? [] : getUnitWorks(songs, unit);
   const automatic: UnitHistoryEntry[] = works
     .filter((song) => getSongDate(song))
     .map((song) => ({
@@ -278,9 +312,17 @@ export function getJstDateParts(date: Date) {
 }
 
 export function getUnitActivityDays(unit: UnitDefinition, now: Date) {
-  const formed = unit.formedAt.split("-").map(Number);
+  return getActivityDaysSince(unit.formedAt, now);
+}
+
+const getActivityDaysSince = (startedAt: string, now: Date) => {
+  const formed = startedAt.split("-").map(Number);
   const current = getJstDateParts(now);
   const formedTime = Date.UTC(formed[0], formed[1] - 1, formed[2]);
   const currentTime = Date.UTC(current.year, current.month - 1, current.day);
   return Math.max(0, Math.floor((currentTime - formedTime) / 86_400_000));
+};
+
+export function getUnitLegacyActivityDays(unit: UnitDefinition, now: Date) {
+  return unit.legacy ? getActivityDaysSince(unit.legacy.startedAt, now) : null;
 }

@@ -9,12 +9,14 @@ import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 import { useUnitArchives } from "./useUnitArchives";
 
 export default function UnitArchiveStrip({
-  participant,
+  participants,
+  unitName,
 }: {
-  participant: string;
+  participants: string[];
+  unitName: string;
 }) {
   const t = useTranslations("Units");
-  const { items, isLoading } = useUnitArchives(participant);
+  const { items, isLoading } = useUnitArchives(participants);
   const reducedMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
@@ -76,7 +78,10 @@ export default function UnitArchiveStrip({
   if (!isLoading && archives.length === 0) return null;
 
   return (
-    <section className="mt-4" aria-label={t("archiveStripLabel")}>
+    <section
+      className="mt-4"
+      aria-label={t("archiveStripLabel", { name: unitName })}
+    >
       <div
         ref={scrollRef}
         className="unit-archive-strip-scrollbar max-w-full overflow-x-auto overscroll-x-contain pb-3"

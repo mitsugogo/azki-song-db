@@ -149,6 +149,20 @@ export const groupReleaseVariants = (songs: Song[]): ReleaseVariantGroup[] => {
     .map(({ firstIndex: _firstIndex, ...group }) => group);
 };
 
+export const getArtTrackVideoIdsHiddenWhenMusicVideoExists = (songs: Song[]) =>
+  new Set(
+    groupReleaseVariants(songs)
+      .filter(
+        (group) =>
+          group.variants.some(isMusicVideo) && group.variants.some(isArtTrack),
+      )
+      .flatMap((group) =>
+        group.variants
+          .filter((song) => isArtTrack(song) && !isMusicVideo(song))
+          .map((song) => song.video_id),
+      ),
+  );
+
 export const hasMultipleReleaseVariants = (variants: Song[]) => {
   const kinds = new Set(
     variants.map((variant) => getReleaseVariantKind(variant)),

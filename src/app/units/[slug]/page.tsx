@@ -8,6 +8,9 @@ import { getDiscographyLink } from "@/app/lib/song";
 import {
   buildUnitHistory,
   getUnitActivityDays,
+  getUnitAchievementSongs,
+  getUnitKaraokeVideoIds,
+  getUnitLegacyActivityDays,
   getUnitSingingStats,
   getUnitWorks,
   pickUnitHeroBackgroundSong,
@@ -66,12 +69,17 @@ export async function generateMetadata({
   if (!unit) return {};
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "Units", locale });
+  const memberNames = unit.members.map((member) =>
+    getLocalizedUnitText(member.name, locale),
+  );
   return buildUnitPageMetadata({
     title: getLocalizedUnitText(unit.name, locale),
     description: t("description", {
       name: getLocalizedUnitText(unit.name, locale),
-      member1: getLocalizedUnitText(unit.members[0].name, locale),
-      member2: getLocalizedUnitText(unit.members[1].name, locale),
+      members: new Intl.ListFormat(locale, {
+        style: "long",
+        type: "conjunction",
+      }).format(memberNames),
     }),
     slug,
     locale,
@@ -94,16 +102,22 @@ export default async function UnitPage({
   const songs = await fetchSongsFromApiCached({ locale }).catch(() => []);
   const works = getUnitWorks(songs, unit);
   const singingStats = getUnitSingingStats(songs, unit);
+  const karaokeVideoIds = getUnitKaraokeVideoIds(songs, unit);
   const history = buildUnitHistory(unit, songs, locale, now);
   const unitName = getLocalizedUnitText(unit.name, locale);
+  const legacyName = unit.legacy
+    ? getLocalizedUnitText(unit.legacy.name, locale)
+    : null;
   const memberNames = unit.members.map((member) =>
     getLocalizedUnitText(member.name, locale),
   );
-  const participant = unit.members[1].name.ja;
+  const archiveParticipants = unit.members
+    .filter((member) => !member.aliases.includes("AZKi"))
+    .map((member) => member.name.ja);
   const heroBackgroundSong = pickUnitHeroBackgroundSong(songs, unit);
 
   const achievementsByVideo = new Map<string, UnitAchievementWork>();
-  works.forEach((song) => {
+  getUnitAchievementSongs(works).forEach((song) => {
     if (!song.video_id) return;
     const previous = achievementsByVideo.get(song.video_id);
     const currentViewCount = Math.max(
@@ -144,9 +158,20 @@ export default async function UnitPage({
               <p className="mt-3 text-lg font-semibold text-gray-700 dark:text-gray-200">
                 {memberNames.join(" × ")}
               </p>
-              <p className="mt-4 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                Since {unit.formedAt.replaceAll("-", ".")}
-              </p>
+              <div className="mt-4 space-y-1 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
+                <p>
+                  {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
+                </p>
+                {unit.legacy && legacyName ? (
+                  <p>
+                    {t("legacyPeriod", {
+                      name: legacyName,
+                      start: unit.legacy.startedAt.replaceAll("-", "."),
+                      end: unit.legacy.endedAt.replaceAll("-", "."),
+                    })}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <div className="flex justify-center">
               <UnitMemberAvatars members={memberNames} />
@@ -164,20 +189,36 @@ export default async function UnitPage({
           </div>
         </section>
 
-        <UnitArchiveStrip participant={participant} />
+        <UnitArchiveStrip
+          participants={archiveParticipants}
+          unitName={unitName}
+        />
 
         <UnitStats
-          participant={participant}
+          participants={archiveParticipants}
           unitName={unitName}
           unitSearchName={unit.name.ja}
           activityDays={getUnitActivityDays(unit, now)}
+          legacyActivity={
+            legacyName
+              ? {
+                  name: legacyName,
+                  days: getUnitLegacyActivityDays(unit, now) ?? 0,
+                }
+              : undefined
+          }
           uniqueSongCount={singingStats.uniqueSongCount}
           performanceCount={singingStats.performanceCount}
         />
 
-        <UnitHistory entries={history} />
-        <UnitStreams participant={participant} />
+        <UnitHistory entries={history} legacyName={legacyName ?? undefined} />
+        <UnitStreams
+          participants={archiveParticipants}
+          karaokeVideoIds={karaokeVideoIds}
+          unitName={unitName}
+        />
         <UnitMusic
+          unitName={unitName}
           works={works}
           singingStats={{
             uniqueSongCount: singingStats.uniqueSongCount,

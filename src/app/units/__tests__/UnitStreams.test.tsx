@@ -8,22 +8,24 @@ const mocks = vi.hoisted(() => ({ items: [] as ArchiveItem[] }));
 
 vi.mock("next-intl", () => ({
   useLocale: () => "ja",
-  useTranslations: () => (key: string) => {
-    const labels: Record<string, string> = {
-      streamsTitle: "Stream Archives",
-      streamsDescription: "あずいろで配信したアーカイブ一覧",
-      "streamCategory.all": "すべて",
-      "streamCategory.karaoke": "歌枠",
-      "streamCategory.3d": "3D",
-      "streamCategory.event": "イベント",
-      streamCategoryLabel: "カテゴリ",
-      newestFirst: "新しい順",
-      oldestFirst: "古い順",
-      streamSortLabel: "並び順",
-      streamsEmpty: "該当なし",
-    };
-    return labels[key] ?? key;
-  },
+  useTranslations:
+    () =>
+    (key: string, values: Record<string, string | number> = {}) => {
+      const labels: Record<string, string> = {
+        streamsTitle: "Stream Archives",
+        streamsDescription: `${values.name ?? ""}で配信したアーカイブ一覧`,
+        "streamCategory.all": "すべて",
+        "streamCategory.karaoke": "歌枠",
+        "streamCategory.3d": "3D",
+        "streamCategory.event": "イベント",
+        streamCategoryLabel: "カテゴリ",
+        newestFirst: "新しい順",
+        oldestFirst: "古い順",
+        streamSortLabel: "並び順",
+        streamsEmpty: "該当なし",
+      };
+      return labels[key] ?? key;
+    },
 }));
 
 vi.mock("../components/useUnitArchives", () => ({
@@ -82,10 +84,15 @@ describe("UnitStreams", () => {
 
     render(
       <MantineProvider theme={theme}>
-        <UnitStreams participant="風真いろは" />
+        <UnitStreams
+          participants={["風真いろは"]}
+          karaokeVideoIds={[]}
+          unitName="あずいろ"
+        />
       </MantineProvider>,
     );
 
+    expect(screen.getByText("あずいろで配信したアーカイブ一覧")).toBeVisible();
     expect(
       screen.queryByRole("radio", { name: "ゲーム" }),
     ).not.toBeInTheDocument();
@@ -105,5 +112,32 @@ describe("UnitStreams", () => {
     expect(
       screen.queryByRole("heading", { name: "通常カラオケ" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("uses singing data to classify a collaboration archive as karaoke", () => {
+    mocks.items = [
+      createArchive(
+        "7kS7LNMqJOY",
+        "イノナカ組！ホロライブ加入5周年記念！",
+        "コラボ",
+      ),
+    ];
+
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStreams
+          participants={["星街すいせい"]}
+          karaokeVideoIds={["7kS7LNMqJOY"]}
+          unitName="AS_tar"
+        />
+      </MantineProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: "歌枠" }));
+    expect(
+      screen.getByRole("heading", {
+        name: "イノナカ組！ホロライブ加入5周年記念！",
+      }),
+    ).toBeVisible();
   });
 });
