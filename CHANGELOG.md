@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.39.0](https://github.com/mitsugogo/azki-song-db/compare/v2.38.0...v2.39.0) (2026-09-19)
+
+### Features
+
+* **units:** AS_tar、KoZMy、SorAZを追加 ([784641c](https://github.com/mitsugogo/azki-song-db/commit/784641c06fdfb69037f83002ec94632fb3a9f157))
+* **units:** RosaMiAを追加 ([0183bf4](https://github.com/mitsugogo/azki-song-db/commit/0183bf41fbc639d8710474013b6c6b1c9c41a5af))
+
+### Bug Fixes
+
+* **seo:** /watch の canonical URL を正規化 ([f559623](https://github.com/mitsugogo/azki-song-db/commit/f5596230fd578ca13508eb1636d5920bf8e82723))
+* **units:** ヒーロー枠CSS変数の型エラーを解消 ([0ae7370](https://github.com/mitsugogo/azki-song-db/commit/0ae737006449559306b1b5f62816d20cd83fe0a5))
+* **units:** 歌枠タブをユニットメンバーのみの歌唱動画に揃える ([77a89e4](https://github.com/mitsugogo/azki-song-db/commit/77a89e4d8fe242d141d4ab3be788413ca695c671))
+
 ## [2.38.0](https://github.com/mitsugogo/azki-song-db/compare/v2.37.0...v2.38.0) (2026-09-18)
 
 ### Features
