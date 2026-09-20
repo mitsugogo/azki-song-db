@@ -137,7 +137,7 @@ describe("units", () => {
             ja: "Blossom Sinfonia",
             en: "Blossom Sinfonia",
           },
-          url: "https://cover.lnk.to/MBakwO",
+          videoId: "F9Z39rz4XdI",
         }),
       ]),
     );
