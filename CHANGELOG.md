@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.40.0](https://github.com/mitsugogo/azki-song-db/compare/v2.39.0...v2.40.0) (2026-09-20)
+
+### Features
+
+* Going My Way初披露の楽曲情報を追加 ([fa8f2c3](https://github.com/mitsugogo/azki-song-db/commit/fa8f2c3d2edc51091dd07eadb1af4ba4751d4a4c))
+
 ## [2.39.0](https://github.com/mitsugogo/azki-song-db/compare/v2.38.0...v2.39.0) (2026-09-19)
 
 ### Features
