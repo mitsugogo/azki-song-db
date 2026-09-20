@@ -212,6 +212,19 @@ export const units: UnitDefinition[] = [
         },
         videoId: "PlDgodRmrn0",
       },
+      {
+        date: "2026-09-21",
+        type: "music",
+        title: {
+          ja: "Blossom Sinfonia",
+          en: "Blossom Sinfonia",
+        },
+        description: {
+          ja: "RosaMiA初のオリジナル楽曲をリリース。前日の3Dアコースティックライブで初披露された。",
+          en: "RosaMiA released their first original song, which premiered during the previous day’s 3D acoustic live.",
+        },
+        videoId: "F9Z39rz4XdI",
+      },
     ],
   },
   {
@@ -357,6 +370,20 @@ export const units: UnitDefinition[] = [
           en: "AZKi and Hoshimachi Suisei chose the unit name by viewer vote during their PlateUp! collaboration stream.",
         },
         videoId: "fVS8qkHfBOg",
+      },
+      {
+        date: "2025-11-19",
+        type: "music",
+        title: {
+          ja: "Going My Way 初披露",
+          en: '"Going My Way" premieres',
+        },
+        description: {
+          ja: "AZKi SOLO LiVE 2025 “Departure”に星街すいせいがゲスト出演し、AS_tarの新曲「Going My Way」をサプライズ初披露。",
+          en: "Hoshimachi Suisei appeared as a guest at AZKi SOLO LiVE 2025 “Departure,” where AS_tar gave a surprise premiere of their new song, “Going My Way.”",
+        },
+        videoId: "7BnkrEde27E",
+        url: "https://hololive.hololivepro.com/events/departure/",
       },
     ],
   },

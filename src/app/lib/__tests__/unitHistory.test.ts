@@ -192,7 +192,7 @@ describe("unitHistory", () => {
       asTar,
       [],
       "ja",
-      new Date("2024-06-02T12:00:00.000Z"),
+      new Date("2025-11-19T12:00:00.000Z"),
     );
 
     expect(history.map(({ date, title }) => ({ date, title }))).toEqual([
@@ -212,6 +212,7 @@ describe("unitHistory", () => {
         title: "イノナカ組・ホロライブ加入5周年記念コラボ",
       },
       { date: "2024-06-02", title: "AS_tar結成" },
+      { date: "2025-11-19", title: "Going My Way 初披露" },
     ]);
   });
 
