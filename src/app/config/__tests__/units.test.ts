@@ -126,4 +126,20 @@ describe("units", () => {
         .every((unit) => unit.includeWorksInHistory === undefined),
     ).toBe(true);
   });
+
+  it("includes RosaMiA's first original song in its history", () => {
+    expect(getUnitBySlug("rosamia")?.highlights).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          date: "2026-09-21",
+          type: "music",
+          title: {
+            ja: "Blossom Sinfonia",
+            en: "Blossom Sinfonia",
+          },
+          url: "https://cover.lnk.to/MBakwO",
+        }),
+      ]),
+    );
+  });
 });

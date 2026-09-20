@@ -212,6 +212,19 @@ export const units: UnitDefinition[] = [
         },
         videoId: "PlDgodRmrn0",
       },
+      {
+        date: "2026-09-21",
+        type: "music",
+        title: {
+          ja: "Blossom Sinfonia",
+          en: "Blossom Sinfonia",
+        },
+        description: {
+          ja: "RosaMiA初のオリジナル楽曲をリリース。前日の3Dアコースティックライブで初披露された。",
+          en: "RosaMiA released their first original song, which premiered during the previous day’s 3D acoustic live.",
+        },
+        url: "https://cover.lnk.to/MBakwO",
+      },
     ],
   },
   {
