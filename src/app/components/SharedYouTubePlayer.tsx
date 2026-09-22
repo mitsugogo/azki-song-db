@@ -165,19 +165,45 @@ export function SharedYouTubePlayerProvider({
   );
 
   useEffect(() => {
+    // ミニプレイヤーのドラッグ中は slot の rect が mousemove ごとに変わるが、
+    // ResizeObserver では検知できないため、ポインター移動でもホストを追従させる。
+    // React の state 更新が非同期のため、mousemove 時は前回確定した位置への
+    // 補正として単発で位置合わせし、mouseup 時のスナップは burst で追いかける。
+    const handlePointerMove = () => {
+      if (!activeSlotRef.current?.element?.isConnected) return;
+      positionHostElement();
+      // React の state 更新による DOM 確定は非同期のため、次のフレームでも
+      // 補正してドラッグ追従の1イベント遅延を解消する。
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(positionHostElement);
+      }
+    };
+    const handlePointerUp = () => {
+      if (!activeSlotRef.current?.element?.isConnected) return;
+      scheduleHostPosition();
+    };
+
     window.addEventListener("resize", scheduleHostPosition);
     window.addEventListener("scroll", scheduleHostPosition, true);
+    window.addEventListener("mousemove", handlePointerMove);
+    window.addEventListener("touchmove", handlePointerMove, { passive: true });
+    window.addEventListener("mouseup", handlePointerUp);
+    window.addEventListener("touchend", handlePointerUp);
 
     return () => {
       window.removeEventListener("resize", scheduleHostPosition);
       window.removeEventListener("scroll", scheduleHostPosition, true);
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("touchmove", handlePointerMove);
+      window.removeEventListener("mouseup", handlePointerUp);
+      window.removeEventListener("touchend", handlePointerUp);
       slotResizeObserverRef.current?.disconnect();
       if (positionFrameRef.current !== null) {
         window.cancelAnimationFrame(positionFrameRef.current);
       }
       positionFramesRemainingRef.current = 0;
     };
-  }, [scheduleHostPosition]);
+  }, [positionHostElement, scheduleHostPosition]);
 
   const setHostElementRef = useCallback(
     (element: HTMLDivElement | null) => {
