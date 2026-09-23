@@ -42,6 +42,7 @@ type ArchiveMonthlyCalendarProps = {
     nextMonth: string;
     scheduledTime: (time: string) => string;
     empty: string;
+    includeExternalChannels: string;
   };
 };
 
@@ -86,6 +87,7 @@ export default function ArchiveMonthlyCalendar({
   const [displayFilters, setDisplayFilters] = useState(
     DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS,
   );
+  const [includeExternalChannels, setIncludeExternalChannels] = useState(true);
 
   useEffect(() => {
     if (defaultMonth) {
@@ -173,10 +175,18 @@ export default function ArchiveMonthlyCalendar({
   const filteredActivityItems = useMemo(
     () =>
       filterActivityTimelineItemsForDisplay(
-        orderedActivityItems,
+        orderedActivityItems.filter((item) => {
+          if (includeExternalChannels || item.kind !== "archive") {
+            return true;
+          }
+          const azkiChannelId = channels.find(
+            (channel) => channel.channelName === "AZKi Channel",
+          )?.youtubeId;
+          return !azkiChannelId || item.archive.channel_id === azkiChannelId;
+        }),
         displayFilters,
       ),
-    [displayFilters, orderedActivityItems],
+    [channels, displayFilters, includeExternalChannels, orderedActivityItems],
   );
   const isPreviousMonthDisabled =
     !monthValue || Boolean(minMonth && monthValue <= minMonth);
@@ -264,6 +274,9 @@ export default function ArchiveMonthlyCalendar({
               filters={displayFilters}
               onChange={setDisplayFilters}
               showAnniversaries
+              includeExternalChannels={includeExternalChannels}
+              externalChannelsLabel={labels.includeExternalChannels}
+              onExternalChannelsChange={setIncludeExternalChannels}
             />
           </div>
           <ActivityCalendarSection
