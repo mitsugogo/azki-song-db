@@ -178,12 +178,18 @@ type ActivityTimelineFilterMenuProps = {
   filters: ActivityTimelineDisplayFilters;
   onChange: (filters: ActivityTimelineDisplayFilters) => void;
   showAnniversaries?: boolean;
+  includeExternalChannels?: boolean;
+  externalChannelsLabel?: string;
+  onExternalChannelsChange?: (checked: boolean) => void;
 };
 
 export function ActivityTimelineFilterMenu({
   filters,
   onChange,
   showAnniversaries = false,
+  includeExternalChannels,
+  externalChannelsLabel,
+  onExternalChannelsChange,
 }: ActivityTimelineFilterMenuProps) {
   const t = useTranslations("Home");
 
@@ -256,6 +262,16 @@ export function ActivityTimelineFilterMenu({
                   ...filters,
                   includeAnniversaries: event.currentTarget.checked,
                 })
+              }
+            />
+          ) : null}
+          {includeExternalChannels !== undefined && externalChannelsLabel ? (
+            <Checkbox
+              size="sm"
+              checked={includeExternalChannels}
+              label={externalChannelsLabel}
+              onChange={(event) =>
+                onExternalChannelsChange?.(event.currentTarget.checked)
               }
             />
           ) : null}

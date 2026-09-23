@@ -1031,6 +1031,7 @@
     "overviewStreamCountValue": "{count}件",
     "monthlyCalendarTitle": "月間カレンダー",
     "monthlyCalendarSubtitle": "日ごとの配信数と配信時間",
+    "monthlyCalendarIncludeExternalChannels": "チャンネル外を含む",
     "monthlyCalendarMonthLabel": "表示月",
     "monthlyCalendarPreviousMonth": "前月を表示",
     "monthlyCalendarNextMonth": "次月を表示",

@@ -1040,6 +1040,7 @@
     "overviewStreamCountValue": "{count} streams",
     "monthlyCalendarTitle": "Monthly calendar",
     "monthlyCalendarSubtitle": "Daily stream counts and total time",
+    "monthlyCalendarIncludeExternalChannels": "Include other channels",
     "monthlyCalendarMonthLabel": "Month",
     "monthlyCalendarPreviousMonth": "Show previous month",
     "monthlyCalendarNextMonth": "Show next month",
