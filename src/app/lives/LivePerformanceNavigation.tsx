@@ -42,7 +42,9 @@ export default function LivePerformanceNavigation({
               renderRoot={(props) => <Link {...props} href={path} />}
               value={performance.id}
             >
-              {performance.performance ||
+              {(locale === "en"
+                ? performance.performanceEn || performance.performance
+                : performance.performance) ||
                 formatLiveDate(performance.date, locale)}
             </Tabs.Tab>
           );

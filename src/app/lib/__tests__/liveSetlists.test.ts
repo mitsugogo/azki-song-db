@@ -68,8 +68,16 @@ const liveRows = [
 ];
 
 const setlistRows = [
-  ["備考", "歌った人", "ライブID", "楽曲タイトル", "曲順", "アーティスト名"],
-  ["", "AZKi", "LIVE-018", "昼の曲", "EN", "AZKi"],
+  [
+    "備考",
+    "歌った人",
+    "ライブID",
+    "楽曲タイトル",
+    "曲順",
+    "アーティスト名",
+    "note_en",
+  ],
+  ["", "AZKi", "LIVE-018", "昼の曲", "EN", "AZKi", "English setlist note"],
   ["分割メドレー", "AZKi", "LIVE-019", "夜の曲A", "02a", "AZKi"],
   ["", "", "LIVE-019", "Overture", "01-1", "AZKi"],
   ["", "AZKi", "LIVE-404", "孤立した曲", "01", "AZKi"],
@@ -104,6 +112,9 @@ describe("buildLiveTitleGroups", () => {
 
     expect(nightSetlist.map((entry) => entry.order)).toEqual(["02a", "01-1"]);
     expect(nightSetlist[0].note).toBe("分割メドレー");
+    expect(group.performances[0].setlist[0].noteEn).toBe(
+      "English setlist note",
+    );
     expect(nightSetlist[1].singers).toBe("");
     expect(nightSetlist.some((entry) => entry.title === "孤立した曲")).toBe(
       false,
@@ -126,6 +137,21 @@ describe("buildLiveTitleGroups", () => {
       "2026",
       "2024",
     ]);
+  });
+
+  it("セットリストの曲名・アーティスト・歌唱者で検索できる", () => {
+    const groups = buildLiveTitleGroups(liveRows, setlistRows);
+
+    expect(
+      filterLiveTitleGroups(groups, { category: "", query: "夜の曲A" }).map(
+        (group) => group.canonicalId,
+      ),
+    ).toEqual(["LIVE-018"]);
+    expect(
+      filterLiveTitleGroups(groups, { category: "", query: "AZKi" }).map(
+        (group) => group.canonicalId,
+      ),
+    ).toContain("LIVE-018");
   });
 
   it("同日の公演をIDの文字順ではなく開演時刻順に並べる", () => {

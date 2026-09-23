@@ -74,12 +74,20 @@ export default function LiveComparisonClient({
                       className="px-3 py-3 align-top font-semibold text-gray-900 dark:text-gray-100"
                     >
                       <span className="block">
-                        {performance.performance ||
+                        {(locale === "en"
+                          ? performance.performanceEn || performance.performance
+                          : performance.performance) ||
                           formatLiveDate(performance.date, locale)}
                       </span>
                       <span className="mt-1 block text-xs font-normal text-gray-500 dark:text-gray-400">
                         {formatLiveDate(performance.date, locale)}
-                        {performance.venue ? ` · ${performance.venue}` : ""}
+                        {(
+                          locale === "en"
+                            ? performance.venueEn || performance.venue
+                            : performance.venue
+                        )
+                          ? ` · ${locale === "en" ? performance.venueEn || performance.venue : performance.venue}`
+                          : ""}
                       </span>
                     </th>
                   ))}
@@ -134,11 +142,15 @@ export default function LiveComparisonClient({
                                   : "font-medium text-gray-900 dark:text-gray-100"
                               }
                             >
-                              {entry.title}
+                              {locale === "en"
+                                ? entry.titleEn || entry.title
+                                : entry.title}
                             </span>
                             {entry.artist ? (
                               <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
-                                {entry.artist}
+                                {locale === "en"
+                                  ? entry.artistEn || entry.artist
+                                  : entry.artist}
                               </span>
                             ) : null}
                           </>

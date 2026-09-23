@@ -33,7 +33,7 @@ export async function GET() {
     const { spreadsheetId, sheets } = getSheetsClient();
     const response = await sheets.spreadsheets.values.batchGet({
       spreadsheetId,
-      ranges: ["ライブ!A1:N", "ライブセトリ!A1:F"],
+      ranges: ["ライブ!A1:Z", "ライブセトリ!A1:Z"],
       valueRenderOption: "FORMATTED_VALUE",
     });
     const [liveRange, setlistRange] = response.data.valueRanges ?? [];

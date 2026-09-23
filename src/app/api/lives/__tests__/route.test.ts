@@ -105,7 +105,7 @@ describe("GET /api/lives", () => {
     expect(response.status).toBe(200);
     expect(batchGetMock).toHaveBeenCalledWith({
       spreadsheetId: "test-spreadsheet",
-      ranges: ["ライブ!A1:N", "ライブセトリ!A1:F"],
+      ranges: ["ライブ!A1:Z", "ライブセトリ!A1:Z"],
       valueRenderOption: "FORMATTED_VALUE",
     });
     expect(data[0]).toMatchObject({

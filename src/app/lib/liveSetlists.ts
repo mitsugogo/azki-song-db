@@ -14,21 +14,36 @@ type HeaderDefinition<Key extends string> = {
 type LiveHeaderKey =
   | "id"
   | "title"
+  | "titleEn"
   | "category"
   | "performance"
+  | "performanceEn"
   | "date"
   | "doorsTime"
   | "startTime"
   | "venue"
+  | "venueEn"
   | "url"
   | "performers"
+  | "performersEn"
   | "ticket"
+  | "ticketEn"
   | "note"
+  | "noteEn"
   | "pageSlug"
   | "performanceSlug";
 
 type SetlistHeaderKey =
-  "id" | "order" | "title" | "artist" | "singers" | "note";
+  | "id"
+  | "order"
+  | "title"
+  | "titleEn"
+  | "artist"
+  | "artistEn"
+  | "singers"
+  | "singersEn"
+  | "note"
+  | "noteEn";
 
 const normalizeHeader = (value: unknown) =>
   String(value ?? "")
@@ -41,16 +56,28 @@ const getString = (value: unknown) => String(value ?? "").trim();
 const liveHeaderSchema: HeaderDefinition<LiveHeaderKey>[] = [
   { key: "id", aliases: ["ライブID", "liveid", "live_id"] },
   { key: "title", aliases: ["ライブタイトル", "title", "livetitle"] },
+  { key: "titleEn", aliases: ["ライブタイトル英語", "titleen", "title_en"] },
   { key: "category", aliases: ["カテゴリ", "category"] },
   { key: "performance", aliases: ["公演", "performance", "show"] },
+  {
+    key: "performanceEn",
+    aliases: ["公演英語", "performanceen", "performance_en"],
+  },
   { key: "date", aliases: ["開催日", "date", "eventdate"] },
   { key: "doorsTime", aliases: ["開場", "doors", "doorstime"] },
   { key: "startTime", aliases: ["開演", "start", "starttime"] },
   { key: "venue", aliases: ["場所", "会場", "venue", "place"] },
+  { key: "venueEn", aliases: ["会場英語", "venueen", "venue_en"] },
   { key: "url", aliases: ["URL", "リンク", "url"] },
   { key: "performers", aliases: ["出演者", "performers", "cast"] },
+  {
+    key: "performersEn",
+    aliases: ["出演者英語", "performersen", "performers_en"],
+  },
   { key: "ticket", aliases: ["チケット", "ticket", "price"] },
+  { key: "ticketEn", aliases: ["チケット英語", "ticketen", "ticket_en"] },
   { key: "note", aliases: ["備考", "note", "extra"] },
+  { key: "noteEn", aliases: ["備考英語", "noteen", "note_en"] },
   { key: "pageSlug", aliases: ["ページslug", "pageslug"] },
   { key: "performanceSlug", aliases: ["公演slug", "performanceslug"] },
 ];
@@ -59,9 +86,19 @@ const setlistHeaderSchema: HeaderDefinition<SetlistHeaderKey>[] = [
   { key: "id", aliases: ["ライブID", "liveid", "live_id"] },
   { key: "order", aliases: ["曲順", "order", "track"] },
   { key: "title", aliases: ["楽曲タイトル", "曲名", "title"] },
+  {
+    key: "titleEn",
+    aliases: ["楽曲タイトル英語", "曲名英語", "titleen", "title_en"],
+  },
   { key: "artist", aliases: ["アーティスト名", "artist"] },
+  { key: "artistEn", aliases: ["アーティスト名英語", "artisten", "artist_en"] },
   { key: "singers", aliases: ["歌った人", "歌唱者", "singers"] },
+  {
+    key: "singersEn",
+    aliases: ["歌った人英語", "歌唱者英語", "singersen", "singers_en"],
+  },
   { key: "note", aliases: ["備考", "note", "extra"] },
+  { key: "noteEn", aliases: ["備考英語", "noteen", "note_en"] },
 ];
 
 const buildColumnMap = <Key extends string>(
@@ -107,9 +144,13 @@ export const buildLiveTitleGroups = (
     const entry: LiveSetlistEntry = {
       order: getCell(row, setlistColumns, "order"),
       title,
+      titleEn: getCell(row, setlistColumns, "titleEn"),
       artist: getCell(row, setlistColumns, "artist"),
+      artistEn: getCell(row, setlistColumns, "artistEn"),
       singers: getCell(row, setlistColumns, "singers"),
+      singersEn: getCell(row, setlistColumns, "singersEn"),
       note: getCell(row, setlistColumns, "note"),
+      noteEn: getCell(row, setlistColumns, "noteEn"),
     };
     const entries = setlistsByLiveId.get(id) ?? [];
     entries.push(entry);
@@ -128,16 +169,22 @@ export const buildLiveTitleGroups = (
       pageSlug: getCell(row, liveColumns, "pageSlug"),
       performanceSlug: getCell(row, liveColumns, "performanceSlug"),
       title,
+      titleEn: getCell(row, liveColumns, "titleEn"),
       category: getCell(row, liveColumns, "category"),
       performance: getCell(row, liveColumns, "performance"),
+      performanceEn: getCell(row, liveColumns, "performanceEn"),
       date,
       doorsTime: getCell(row, liveColumns, "doorsTime"),
       startTime: getCell(row, liveColumns, "startTime"),
       venue: getCell(row, liveColumns, "venue"),
+      venueEn: getCell(row, liveColumns, "venueEn"),
       url: getCell(row, liveColumns, "url"),
       performers: getCell(row, liveColumns, "performers"),
+      performersEn: getCell(row, liveColumns, "performersEn"),
       ticket: getCell(row, liveColumns, "ticket"),
+      ticketEn: getCell(row, liveColumns, "ticketEn"),
       note: getCell(row, liveColumns, "note"),
+      noteEn: getCell(row, liveColumns, "noteEn"),
       setlist: setlistsByLiveId.get(id) ?? [],
     };
     const performances = groupsByTitle.get(title) ?? [];
@@ -172,6 +219,7 @@ export const buildLiveTitleGroups = (
         canonicalId,
         pageSlug: hasValidHierarchy ? pageSlug : "",
         title,
+        titleEn: sortedPerformances[0]?.titleEn || "",
         category: sortedPerformances[0]?.category ?? "",
         performances: sortedPerformances,
         totalSongs: sortedPerformances.reduce(
@@ -267,6 +315,16 @@ export const filterLiveTitleGroups = (
           performance.performance,
           performance.venue,
           performance.performers,
+          ...performance.setlist.flatMap((entry) => [
+            entry.title,
+            entry.titleEn,
+            entry.artist,
+            entry.artistEn,
+            entry.singers,
+            entry.singersEn,
+            entry.note,
+            entry.noteEn,
+          ]),
         ]),
       ].join(" "),
     );

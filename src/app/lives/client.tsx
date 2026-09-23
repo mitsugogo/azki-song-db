@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Select, TextInput } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
+import { HiOutlineCalendar, HiOutlineLocationMarker } from "react-icons/hi";
 import { useSearchParams } from "next/navigation";
 import { HiArrowRight, HiSearch } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
@@ -129,7 +130,11 @@ export default function LivesClient({ groups }: { groups: LiveTitleGroup[] }) {
                   const first = group.performances[0];
                   const last = group.performances.at(-1) ?? first;
                   const venues = uniqueValues(
-                    group.performances.map((performance) => performance.venue),
+                    group.performances.map((performance) =>
+                      locale === "en"
+                        ? performance.venueEn || performance.venue
+                        : performance.venue,
+                    ),
                   );
                   const dateLabel =
                     first.date === last.date
@@ -152,16 +157,28 @@ export default function LivesClient({ groups }: { groups: LiveTitleGroup[] }) {
                         ) : null}
                       </div>
                       <h3 className="mt-3 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
-                        {group.title}
+                        {locale === "en" ? group.titleEn || group.title : group.title}
                       </h3>
                       <dl className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
                         <div>
                           <dt className="sr-only">{t("date")}</dt>
-                          <dd>{dateLabel}</dd>
+                          <dd className="flex items-center gap-2">
+                            <HiOutlineCalendar
+                              aria-hidden="true"
+                              className="shrink-0 text-gray-400 dark:text-gray-500"
+                            />
+                            <span>{dateLabel}</span>
+                          </dd>
                         </div>
                         <div>
                           <dt className="sr-only">{t("venue")}</dt>
-                          <dd>{venues.join(" / ")}</dd>
+                          <dd className="flex items-center gap-2">
+                            <HiOutlineLocationMarker
+                              aria-hidden="true"
+                              className="shrink-0 text-gray-400 dark:text-gray-500"
+                            />
+                            <span>{venues.join(" / ")}</span>
+                          </dd>
                         </div>
                         <div>
                           <dt className="sr-only">{t("songs")}</dt>

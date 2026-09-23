@@ -1,8 +1,14 @@
 "use client";
 
-import { Badge, Button } from "@mantine/core";
+import { Avatar, Badge, Button, Tooltip } from "@mantine/core";
+import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { HiExternalLink } from "react-icons/hi";
+import useChannels from "@/app/hook/useChannels";
+import {
+  createChannelsByParticipantName,
+  parseArchiveParticipants,
+} from "@/app/lib/archiveParticipants";
 import {
   formatLiveDate,
   isAzkiSungOfficialFesEntry,
@@ -32,6 +38,11 @@ export default function LiveDetailClient({
 }) {
   const t = useTranslations("Lives");
   const locale = useLocale();
+  const { channels } = useChannels();
+  const channelsByName = useMemo(
+    () => createChannelsByParticipantName(channels),
+    [channels],
+  );
   const selected =
     group.performances.find(
       (performance) => performance.id === initialPerformanceId,
@@ -48,7 +59,9 @@ export default function LiveDetailClient({
             id="live-information-heading"
             className="text-xl font-bold text-gray-900 dark:text-gray-100"
           >
-            {selected.performance || t("performanceInformation")}
+            {(locale === "en"
+              ? selected.performanceEn || selected.performance
+              : selected.performance) || t("performanceInformation")}
           </h2>
           {selected.url ? (
             <Button
@@ -70,17 +83,40 @@ export default function LiveDetailClient({
           />
           <DetailItem label={t("doorsTime")} value={selected.doorsTime} />
           <DetailItem label={t("startTime")} value={selected.startTime} />
-          <DetailItem label={t("venue")} value={selected.venue} />
-          <DetailItem label={t("performers")} value={selected.performers} />
-          <DetailItem label={t("ticket")} value={selected.ticket} />
+          <DetailItem
+            label={t("venue")}
+            value={
+              locale === "en"
+                ? selected.venueEn || selected.venue
+                : selected.venue
+            }
+          />
+          <DetailItem
+            label={t("performers")}
+            value={
+              locale === "en"
+                ? selected.performersEn || selected.performers
+                : selected.performers
+            }
+          />
+          <DetailItem
+            label={t("ticket")}
+            value={
+              locale === "en"
+                ? selected.ticketEn || selected.ticket
+                : selected.ticket
+            }
+          />
         </dl>
         {selected.note ? (
           <div className="mt-3 rounded-xl border border-light-gray-200 bg-white/70 p-4 dark:border-white/10 dark:bg-gray-900/60">
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
               {t("note")}
             </h3>
-            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
-              {selected.note}
+            <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
+              {locale === "en"
+                ? selected.noteEn || selected.note
+                : selected.note}
             </p>
           </div>
         ) : null}
@@ -116,7 +152,9 @@ export default function LiveDetailClient({
                         : "text-gray-900 dark:text-gray-100"
                     }`}
                   >
-                    {entry.title}
+                    {locale === "en"
+                      ? entry.titleEn || entry.title
+                      : entry.title}
                   </h3>
                   <dl className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
                     {entry.artist ? (
@@ -124,7 +162,11 @@ export default function LiveDetailClient({
                         <dt className="shrink-0 font-semibold">
                           {t("artist")}
                         </dt>
-                        <dd>{entry.artist}</dd>
+                        <dd>
+                          {locale === "en"
+                            ? entry.artistEn || entry.artist
+                            : entry.artist}
+                        </dd>
                       </div>
                     ) : null}
                     {entry.singers ? (
@@ -132,14 +174,71 @@ export default function LiveDetailClient({
                         <dt className="shrink-0 font-semibold">
                           {t("singers")}
                         </dt>
-                        <dd>{entry.singers}</dd>
+                        <dd className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          {parseArchiveParticipants(
+                            locale === "en"
+                              ? entry.singersEn || entry.singers
+                              : entry.singers,
+                          ).map((name) => {
+                            const channel = channelsByName.get(
+                              name
+                                .normalize("NFKC")
+                                .trim()
+                                .toLocaleLowerCase("ja-JP"),
+                            );
+                            const avatar = (
+                              <Avatar
+                                src={channel?.iconUrl || null}
+                                alt={name}
+                                size={22}
+                                radius="xl"
+                                color="pink"
+                              >
+                                {Array.from(name)[0]}
+                              </Avatar>
+                            );
+
+                            return (
+                              <span
+                                key={name}
+                                className="inline-flex items-center gap-1.5"
+                              >
+                                <Tooltip
+                                  label={channel?.channelName || name}
+                                  withArrow
+                                >
+                                  {channel?.youtubeId ? (
+                                    <a
+                                      href={`https://www.youtube.com/channel/${encodeURIComponent(channel.youtubeId)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={channel.channelName || name}
+                                      className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                    >
+                                      {avatar}
+                                    </a>
+                                  ) : (
+                                    <span>{avatar}</span>
+                                  )}
+                                </Tooltip>
+                                <span>{name}</span>
+                              </span>
+                            );
+                          })}
+                        </dd>
                       </div>
                     ) : null}
                   </dl>
-                  {entry.note ? (
-                    <p className="mt-1 whitespace-pre-line text-sm leading-6 text-gray-600 dark:border-white/10 dark:text-gray-300">
-                      {entry.note}
-                    </p>
+                  {(
+                    locale === "en" ? entry.noteEn || entry.note : entry.note
+                  ) ? (
+                    <aside className="mt-3 max-w-3xl rounded-r-lg border-l-2 border-primary-200 bg-light-gray-50/80 px-3 py-2 dark:border-primary-800 dark:bg-gray-800/50">
+                      <p className="whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
+                        {locale === "en"
+                          ? entry.noteEn || entry.note
+                          : entry.note}
+                      </p>
+                    </aside>
                   ) : null}
                 </div>
               </li>
