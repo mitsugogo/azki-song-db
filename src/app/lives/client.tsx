@@ -157,7 +157,9 @@ export default function LivesClient({ groups }: { groups: LiveTitleGroup[] }) {
                         ) : null}
                       </div>
                       <h3 className="mt-3 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100">
-                        {locale === "en" ? group.titleEn || group.title : group.title}
+                        {locale === "en"
+                          ? group.titleEn || group.title
+                          : group.title}
                       </h3>
                       <dl className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
                         <div>

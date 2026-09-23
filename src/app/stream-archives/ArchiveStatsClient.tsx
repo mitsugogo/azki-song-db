@@ -282,7 +282,9 @@ export default function ArchiveStatsClient() {
                 scheduledTime: (time) =>
                   t("monthlyCalendarScheduledTime", { time }),
                 empty: t("statsNoData"),
-                includeExternalChannels: t("monthlyCalendarIncludeExternalChannels"),
+                includeExternalChannels: t(
+                  "monthlyCalendarIncludeExternalChannels",
+                ),
               }}
             />
 
