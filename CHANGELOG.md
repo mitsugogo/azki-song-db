@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.41.0](https://github.com/mitsugogo/azki-song-db/compare/v2.40.0...v2.41.0) (2026-09-23)
+
+### Features
+
+* **lives:** 英語対応 ([a358b7d](https://github.com/mitsugogo/azki-song-db/commit/a358b7d00de6df3a46809ab52ade7342144b1cbc))
+* **streams:** 外部チャンネルを含めるオプション追加 ([f55efb3](https://github.com/mitsugogo/azki-song-db/commit/f55efb3ecc26e044178c2241fc3f4d66d61310f9))
+* ゲストライブカテゴリを追加 ([4093a5c](https://github.com/mitsugogo/azki-song-db/commit/4093a5c0a3d75b921feafcc5e070b028993180db))
+* ライブセットリスト機能 ([7a37d21](https://github.com/mitsugogo/azki-song-db/commit/7a37d21869fd574a24e25e4b6e832f3fe39c38f2))
+
+### Bug Fixes
+
+* ミニプレイヤーUIで動画フレームがUIに追従しないバグを修正 ([ae19eab](https://github.com/mitsugogo/azki-song-db/commit/ae19eaba3870f39a060faf13b450faebca4dd95c))
+
 ## [2.40.0](https://github.com/mitsugogo/azki-song-db/compare/v2.39.0...v2.40.0) (2026-09-20)
 
 ### Features
