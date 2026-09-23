@@ -1798,7 +1798,8 @@
       "special": "企画ライブ",
       "versus": "対バンライブ",
       "officialFestival": "公式fes",
-      "unit": "ユニットライブ"
+      "unit": "ユニットライブ",
+      "guest": "ゲスト"
     }
   },
   "Units": {

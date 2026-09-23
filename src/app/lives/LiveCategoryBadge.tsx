@@ -10,6 +10,7 @@ const colors: Record<string, string> = {
   versus: "orange",
   officialFestival: "cyan",
   unit: "grape",
+  guest: "teal",
 };
 
 export default function LiveCategoryBadge({ category }: { category: string }) {

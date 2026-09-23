@@ -1800,7 +1800,8 @@
       "special": "Special live",
       "versus": "Joint live",
       "officialFestival": "Official festival",
-      "unit": "Unit live"
+      "unit": "Unit live",
+      "guest": "Guest"
     }
   },
   "Units": {

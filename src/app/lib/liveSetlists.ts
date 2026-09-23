@@ -276,6 +276,7 @@ export const getLiveCategoryKey = (category: string) => {
     対バンライブ: "versus",
     公式fes: "officialFestival",
     ユニットライブ: "unit",
+    ゲスト: "guest",
   };
   return keys[category];
 };
