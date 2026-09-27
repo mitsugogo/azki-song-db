@@ -1143,6 +1143,52 @@ describe("useMainPlayerControls", () => {
     expect(result.current.isPlaying).toBe(true);
   });
 
+  it("別動画へ切替後の旧動画の通知で開始位置補正を消費しない", () => {
+    const { result } = renderHook(() =>
+      useMainPlayerControls({
+        songs: mockSongs,
+        allSongs: mockSongs,
+        globalPlayer: mockGlobalPlayer,
+      }),
+    );
+    const oldPlayer = createMockPlayer("vid1", "Song 1");
+    const newPlayer = createMockPlayer("vid2", "Song 2");
+    newPlayer.getCurrentTime.mockReturnValue(2);
+
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[0]);
+    });
+    act(() => {
+      result.current.handlePlayerOnReady({ target: oldPlayer } as any);
+    });
+    act(() => {
+      result.current.changeCurrentSong(mockSongs[1]);
+    });
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: oldPlayer,
+        data: 3,
+      } as any);
+      result.current.handlePlayerStateChange({
+        target: oldPlayer,
+        data: 3,
+      } as any);
+    });
+
+    expect(oldPlayer.seekTo).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.handlePlayerStateChange({
+        target: newPlayer,
+        data: 1,
+      } as any);
+    });
+
+    expect(newPlayer.seekTo).toHaveBeenCalledWith(10, true);
+    expect(result.current.currentSong).toEqual(mockSongs[1]);
+  });
+
   it("explicitな開始秒がある場合はcurrentSong.startより優先して補正シークされる", () => {
     const sameVideoSongs: Song[] = [
       mockSongs[0],
