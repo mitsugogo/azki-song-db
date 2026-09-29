@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.42.0](https://github.com/mitsugogo/azki-song-db/compare/v2.41.0...v2.42.0) (2026-09-29)
+
+### Features
+
+* チャンネル登録者数履歴モデルを追加 ([a419cf7](https://github.com/mitsugogo/azki-song-db/commit/a419cf76ee162b295d8e3f824897992631874386))
+* 聖地マップにGeoGuessrへのリンクを追加 ([b0d13e1](https://github.com/mitsugogo/azki-song-db/commit/b0d13e1fb9c1f9502ee07c4018b3319eb1f9813e))
+
+### Bug Fixes
+
+* 旧動画の通知による開始位置補正の消費を防ぐ (fixed [#515](https://github.com/mitsugogo/azki-song-db/issues/515)) ([0451c50](https://github.com/mitsugogo/azki-song-db/commit/0451c504de5bdf439dd812f29f2c0e97d3644887))
+
 ## [2.41.0](https://github.com/mitsugogo/azki-song-db/compare/v2.40.0...v2.41.0) (2026-09-23)
 
 ### Features
