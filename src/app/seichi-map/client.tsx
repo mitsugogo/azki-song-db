@@ -3444,17 +3444,29 @@ export default function SeichiMapCompleteClient({
         <Box>
           <h1 className={pageClasses.heading}>{pageTitle}</h1>
           <p className={pageClasses.description}>{pageDescription}</p>
-          <Text size="sm" c="dimmed" mt={-16} mb="md">
-            {t("credit.prefix")}
+          <Group gap="md" mt={-16} mb="md" wrap="wrap">
+            <Text size="sm" c="dimmed">
+              {t("credit.prefix")}
+              <Anchor
+                href="https://note.com/yspione/n/nccf2fbbdc0dc"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("credit.linkLabel")}
+              </Anchor>
+              {t("credit.suffix")}
+            </Text>
             <Anchor
-              href="https://note.com/yspione/n/nccf2fbbdc0dc"
+              href="https://www.geoguessr.com/ja/maps/69b79020d61d81a4c952ba6e"
               target="_blank"
               rel="noopener noreferrer"
+              size="sm"
+              className="inline-flex items-center gap-1"
             >
-              {t("credit.linkLabel")}
+              {t("geoguessr.open")}
+              <FiExternalLink size={14} aria-hidden="true" />
             </Anchor>
-            {t("credit.suffix")}
-          </Text>
+          </Group>
         </Box>
         <SeichiMapHeaderActions
           isSharedView={isSharedView}

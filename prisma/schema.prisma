@@ -82,6 +82,18 @@ model Statistics {
   @@map("statistics")
 }
 
+model ChannelSubscriberHistory {
+  channelId       String   @map("channel_id") @db.VarChar(64)
+  snapshotDate    DateTime @map("snapshot_date") @db.Date
+  subscriberCount BigInt   @map("subscriber_count") @db.UnsignedBigInt
+  observedAtUtc   DateTime @map("observed_at_utc") @db.DateTime(3)
+  channelName     String   @map("channel_name") @db.VarChar(255)
+
+  @@id([channelId, snapshotDate])
+  @@index([snapshotDate], map: "ChannelSubscriberHistory_snapshot_date_idx")
+  @@map("channel_subscriber_history")
+}
+
 model UserPlaylist {
   id         String                 @id @default(uuid()) @db.Char(36)
   userId     String                 @db.VarChar(255)

@@ -473,6 +473,16 @@ export default function useMainPlayerControls({
    */
   const handlePlayerStateChange = useCallback(
     (event: YouTubeEvent<number> & { target: YouTubePlayerWithVideoData }) => {
+      const playingVideoId = event.target.getVideoData?.()?.video_id;
+      if (
+        playingVideoId &&
+        currentSong?.video_id &&
+        playingVideoId !== currentSong.video_id
+      ) {
+        // 別動画への切替中に届いた旧動画の通知で、新しい曲のシークを消費しない。
+        return;
+      }
+
       const currentTime =
         typeof event.target.getCurrentTime === "function"
           ? event.target.getCurrentTime()

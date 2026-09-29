@@ -1138,6 +1138,9 @@
     "title": "聖地訪問ログ",
     "titleWithNickname": "{name}の聖地訪問ログ",
     "description": "AZKi聖地マップの訪問ログとコンプリート率を記録します。",
+    "geoguessr": {
+      "open": "GeoGuessr版で遊ぶ"
+    },
     "mapProvider": {
       "title": "地図レイヤー",
       "openMenu": "地図レイヤーを開く",

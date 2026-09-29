@@ -1147,6 +1147,9 @@
     "title": "Seichi Visit Log",
     "titleWithNickname": "{name}'s Seichi Visit Log",
     "description": "Track visited locations and completion progress for the AZKi seichi map.",
+    "geoguessr": {
+      "open": "Play on GeoGuessr"
+    },
     "mapProvider": {
       "title": "Map layers",
       "openMenu": "Open map layers",
