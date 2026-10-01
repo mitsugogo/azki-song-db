@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.43.0](https://github.com/mitsugogo/azki-song-db/compare/v2.42.0...v2.43.0) (2026-10-01)
+
+### Features
+
+* 配信カテゴリを複数いけるように拡張 ([259e02d](https://github.com/mitsugogo/azki-song-db/commit/259e02d36c6e24a00476fcf503c57e4a0718e38e))
+
+### Bug Fixes
+
+* 引用符内の配信カテゴリ名を正しく分割する ([5174e2e](https://github.com/mitsugogo/azki-song-db/commit/5174e2e3f177a72eff592f457a1cf0e59f475193))
+
 ## [2.42.0](https://github.com/mitsugogo/azki-song-db/compare/v2.41.0...v2.42.0) (2026-09-29)
 
 ### Features
