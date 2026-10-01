@@ -32,7 +32,7 @@ const getDurationSeconds = <T extends ArchiveItem>(
 export const createArchiveSeriesGroups = <T extends ArchiveItem>(
   items: T[],
   uncategorizedLabel = "その他",
-  options: { singleGroupPerItem?: boolean; seriesKey?: string | null } = {},
+  options: { seriesKey?: string | null } = {},
 ): ArchiveSeriesGroup<T>[] => {
   const groups = new Map<string, ArchiveSeriesGroup<T>>();
 
@@ -44,8 +44,6 @@ export const createArchiveSeriesGroups = <T extends ArchiveItem>(
     if (options.seriesKey) {
       topics = topics.filter(({ key }) => key === options.seriesKey);
     }
-    // 一覧では同じ動画を重複表示せず、選択中または先頭のカテゴリに配置する。
-    if (options.singleGroupPerItem) topics = topics.slice(0, 1);
     topics.forEach(({ title, key }) => {
       const group = groups.get(key);
 
