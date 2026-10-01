@@ -24,6 +24,53 @@ const createItem = (
 });
 
 describe("createArchiveStatsSummary", () => {
+  it("counts every category while keeping overall and calendar totals unduplicated", () => {
+    const summary = createArchiveStatsSummary(
+      [
+        createItem({ topic: "雑談、歌枠, 雑談,メン限" }),
+        createItem({
+          video_id: "empty",
+          topic: " 、, ",
+          video_duration: "PT30M",
+        }),
+      ],
+      "ja",
+    );
+    expect(summary.streamCount).toBe(2);
+    expect(summary.totalDurationSeconds).toBe(5400);
+    expect(summary.averageDurationSeconds).toBe(2700);
+    expect(summary.categories).toEqual(
+      expect.arrayContaining([
+        {
+          name: "雑談",
+          key: "雑談",
+          streamCount: 1,
+          totalDurationSeconds: 3600,
+        },
+        {
+          name: "歌枠",
+          key: "歌枠",
+          streamCount: 1,
+          totalDurationSeconds: 3600,
+        },
+        {
+          name: "その他",
+          key: "ソノ他",
+          streamCount: 1,
+          totalDurationSeconds: 1800,
+        },
+      ]),
+    );
+    expect(summary.categories).toHaveLength(3);
+    expect(summary.calendarDays.get("2026-01-02")?.streamCount).toBe(2);
+    expect(summary.calendarDays.get("2026-01-02")?.totalDurationSeconds).toBe(
+      5400,
+    );
+    expect(
+      summary.timeHeatmap.reduce((sum, cell) => sum + cell.streamCount, 0),
+    ).toBe(2);
+  });
+
   it("excludes shorts and calculates all-time overview values", () => {
     const summary = createArchiveStatsSummary(
       [

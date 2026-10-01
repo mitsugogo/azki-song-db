@@ -1,6 +1,7 @@
 "use client";
 
-import { Badge, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
+import ArchiveTopicBadges from "./ArchiveTopicBadges";
 import { HiPlay } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
 import { formatDate } from "../lib/formatDate";
@@ -72,11 +73,7 @@ export default function ArchiveItemDetail({
         {labels.appWatchLabel}
       </Link>
 
-      {item.topic ? (
-        <Badge color="pink" variant="light" className="w-fit">
-          {item.topic}
-        </Badge>
-      ) : null}
+      <ArchiveTopicBadges topic={item.topic} />
 
       {item.participantEntries.length > 0 ? (
         <div>

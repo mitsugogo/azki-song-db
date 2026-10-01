@@ -60,6 +60,28 @@ function makeArchive(
 }
 
 describe("ActivityItemDetail", () => {
+  it("links every archive category to its own filtered list", () => {
+    const item = makeArchive();
+    if (item.kind !== "archive") throw new Error("Expected archive");
+    item.archive.topic = "雑談、Minecraft, 雑談";
+    render(
+      <MantineProvider>
+        <ActivityItemDetail item={item} channels={[]} active />
+      </MantineProvider>,
+    );
+    const metadata = screen.getByTestId("activity-detail-archive-metadata");
+    expect(
+      within(metadata).getByRole("link", { name: "雑談" }),
+    ).toHaveAttribute(
+      "href",
+      `/stream-archives/list?series=${encodeURIComponent("雑談")}`,
+    );
+    expect(
+      within(metadata).getByRole("link", { name: "Minecraft" }),
+    ).toHaveAttribute("href", "/stream-archives/list?series=minecraft");
+    expect(within(metadata).getAllByRole("link")).toHaveLength(2);
+  });
+
   beforeEach(() => {
     sharedSourceRef.current = null;
     vi.clearAllMocks();

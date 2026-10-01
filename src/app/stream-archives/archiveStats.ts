@@ -6,6 +6,7 @@ import {
   type ArchiveActivitySummary,
 } from "./archiveActivity";
 import { normalizeArchiveSeriesKey } from "./archiveSearch";
+import { getArchiveTopics } from "./archiveTopics";
 
 export type ArchiveStatsItem = ArchiveItem & {
   participantEntries: ArchiveParticipantEntry[];
@@ -184,16 +185,18 @@ export const createArchiveStatsSummary = (
       itemsWithDuration += 1;
     }
 
-    const categoryName = item.topic.trim() || uncategorizedLabel;
-    const categoryKey = normalizeArchiveSeriesKey(categoryName);
-    const category = categoriesByKey.get(categoryKey);
-    categoriesByKey.set(categoryKey, {
-      name: category?.name ?? categoryName,
-      key: categoryKey,
-      streamCount: (category?.streamCount ?? 0) + 1,
-      totalDurationSeconds:
-        (category?.totalDurationSeconds ?? 0) + durationSeconds,
-    });
+    getArchiveTopics(item.topic, uncategorizedLabel).forEach(
+      ({ title: categoryName, key: categoryKey }) => {
+        const category = categoriesByKey.get(categoryKey);
+        categoriesByKey.set(categoryKey, {
+          name: category?.name ?? categoryName,
+          key: categoryKey,
+          streamCount: (category?.streamCount ?? 0) + 1,
+          totalDurationSeconds:
+            (category?.totalDurationSeconds ?? 0) + durationSeconds,
+        });
+      },
+    );
 
     const dateTime = getJstDateTime(item.stream_started_at);
     if (!dateTime) {

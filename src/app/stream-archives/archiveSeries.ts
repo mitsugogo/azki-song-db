@@ -2,11 +2,9 @@ import { formatDate } from "../lib/formatDate";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import type { ArchiveItem } from "../types/archiveItem";
 import { getStreamStartedAtMs } from "./archiveActivity";
-import { normalizeArchiveSeriesKey } from "./archiveSearch";
+import { getArchiveTopics } from "./archiveTopics";
 
 type IndexedSeriesFields = {
-  seriesKey?: string;
-  seriesTitle?: string;
   streamStartedAtMs?: number;
   videoDurationSeconds?: number;
 };
@@ -21,16 +19,6 @@ export type ArchiveSeriesGroup<T extends ArchiveItem = ArchiveItem> = {
   latestStreamStartedAtMs: number;
 };
 
-const getSeriesTitle = <T extends ArchiveItem>(
-  item: T & IndexedSeriesFields,
-  uncategorizedLabel: string,
-) => item.seriesTitle || item.topic || uncategorizedLabel;
-
-const getSeriesKey = <T extends ArchiveItem>(
-  item: T & IndexedSeriesFields,
-  title: string,
-) => item.seriesKey || normalizeArchiveSeriesKey(title) || "other";
-
 const getStartedAtMs = <T extends ArchiveItem>(item: T & IndexedSeriesFields) =>
   item.streamStartedAtMs ?? getStreamStartedAtMs(item.stream_started_at);
 
@@ -44,36 +32,43 @@ const getDurationSeconds = <T extends ArchiveItem>(
 export const createArchiveSeriesGroups = <T extends ArchiveItem>(
   items: T[],
   uncategorizedLabel = "その他",
+  options: { singleGroupPerItem?: boolean; seriesKey?: string | null } = {},
 ): ArchiveSeriesGroup<T>[] => {
   const groups = new Map<string, ArchiveSeriesGroup<T>>();
 
   items.forEach((sourceItem) => {
     const item = sourceItem as T & IndexedSeriesFields;
-    const title = getSeriesTitle(item, uncategorizedLabel);
-    const key = getSeriesKey(item, title);
     const streamStartedAtMs = getStartedAtMs(item);
     const durationSeconds = getDurationSeconds(item);
-    const group = groups.get(key);
-
-    if (group) {
-      group.items.push(sourceItem);
-      group.totalDurationSeconds += durationSeconds;
-      if (streamStartedAtMs > group.latestStreamStartedAtMs) {
-        group.latestItem = sourceItem;
-        group.latestStreamStartedAt = sourceItem.stream_started_at;
-        group.latestStreamStartedAtMs = streamStartedAtMs;
-      }
-      return;
+    let topics = getArchiveTopics(item.topic, uncategorizedLabel);
+    if (options.seriesKey) {
+      topics = topics.filter(({ key }) => key === options.seriesKey);
     }
+    // 一覧では同じ動画を重複表示せず、選択中または先頭のカテゴリに配置する。
+    if (options.singleGroupPerItem) topics = topics.slice(0, 1);
+    topics.forEach(({ title, key }) => {
+      const group = groups.get(key);
 
-    groups.set(key, {
-      key,
-      title,
-      items: [sourceItem],
-      totalDurationSeconds: durationSeconds,
-      latestItem: sourceItem,
-      latestStreamStartedAt: sourceItem.stream_started_at,
-      latestStreamStartedAtMs: streamStartedAtMs,
+      if (group) {
+        group.items.push(sourceItem);
+        group.totalDurationSeconds += durationSeconds;
+        if (streamStartedAtMs > group.latestStreamStartedAtMs) {
+          group.latestItem = sourceItem;
+          group.latestStreamStartedAt = sourceItem.stream_started_at;
+          group.latestStreamStartedAtMs = streamStartedAtMs;
+        }
+        return;
+      }
+
+      groups.set(key, {
+        key,
+        title,
+        items: [sourceItem],
+        totalDurationSeconds: durationSeconds,
+        latestItem: sourceItem,
+        latestStreamStartedAt: sourceItem.stream_started_at,
+        latestStreamStartedAtMs: streamStartedAtMs,
+      });
     });
   });
 

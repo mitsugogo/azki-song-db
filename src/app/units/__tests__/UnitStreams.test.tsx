@@ -73,6 +73,36 @@ describe("UnitStreams", () => {
     });
   });
 
+  it("displays multiple categories and matches secondary categories", () => {
+    mocks.items = [
+      createArchive("multi", "複数カテゴリ配信", "雑談、イベント,3D"),
+    ];
+    render(
+      <MantineProvider theme={theme}>
+        <UnitStreams
+          participants={[]}
+          karaokeVideoIds={[]}
+          unitName="ユニット"
+        />
+      </MantineProvider>,
+    );
+    const article = screen
+      .getByRole("heading", { name: "複数カテゴリ配信" })
+      .closest("article")!;
+    expect(article).toHaveTextContent("雑談");
+    expect(article).toHaveTextContent("イベント");
+    expect(article).toHaveTextContent("3D");
+    expect(screen.queryByText("雑談、イベント,3D")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "イベント" }));
+    expect(
+      screen.getByRole("heading", { name: "複数カテゴリ配信" }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("radio", { name: "3D" }));
+    expect(
+      screen.getByRole("heading", { name: "複数カテゴリ配信" }),
+    ).toBeVisible();
+  });
+
   it("groups karaoke variants under 歌枠 and omits unsupported filters", () => {
     mocks.items = [
       createArchive("karaoke", "通常カラオケ", "カラオケ"),

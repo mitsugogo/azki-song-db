@@ -13,6 +13,7 @@ import {
 } from "@/app/lib/unitHistory";
 import type { ArchiveItem } from "@/app/types/archiveItem";
 import { useUnitArchives } from "./useUnitArchives";
+import { getArchiveTopics } from "@/app/stream-archives/archiveTopics";
 
 type Category = "all" | "karaoke" | "3d" | "event";
 
@@ -173,7 +174,13 @@ export default function UnitStreams({
                         locale,
                       )}
                     </time>
-                    {item.topic && <Badge variant="light">{item.topic}</Badge>}
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {getArchiveTopics(item.topic).map(({ key, title }) => (
+                        <Badge key={key} variant="light">
+                          {title}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                   <h3 className="mt-2 line-clamp-2 text-sm font-bold leading-6 text-gray-900 dark:text-gray-100">
                     <Link

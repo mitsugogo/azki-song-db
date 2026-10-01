@@ -32,7 +32,7 @@ import {
   resolveArchiveParticipants,
 } from "../lib/archiveParticipants";
 import type { ChannelEntry } from "../types/api/yt/channels";
-import { normalizeArchiveSeriesKey } from "../stream-archives/archiveSearch";
+import { getArchiveTopics } from "../stream-archives/archiveTopics";
 import ArchiveParticipantList from "../stream-archives/ArchiveParticipantList";
 import TimestampComment from "../stream-archives/TimestampComment";
 import ArchiveMembersOnlyNotice from "../stream-archives/ArchiveMembersOnlyNotice";
@@ -215,18 +215,14 @@ export default function ActivityItemDetail({
   const detailDescriptionHref =
     item.kind === "archive" ? undefined : presentation.timelineDescriptionHref;
   const descriptionIsExternal = isExternalHref(detailDescriptionHref);
+  const archiveTopics =
+    item.kind === "archive" ? getArchiveTopics(item.archive.topic) : [];
   const archiveMetadataColumnCount =
     item.kind === "archive"
       ? 1 +
         Number(Boolean(item.archive.video_duration.trim())) +
-        Number(Boolean(item.archive.topic.trim()))
+        Number(archiveTopics.length > 0)
       : 0;
-  const archiveSeriesHref =
-    item.kind === "archive" && item.archive.topic.trim()
-      ? `/stream-archives/list?${new URLSearchParams({
-          series: normalizeArchiveSeriesKey(item.archive.topic),
-        }).toString()}`
-      : null;
 
   return (
     <div data-testid="activity-item-detail" data-activity-kind={item.kind}>
@@ -392,19 +388,22 @@ export default function ActivityItemDetail({
                   </Text>
                 </Stack>
               ) : null}
-              {item.archive.topic.trim() ? (
+              {archiveTopics.length > 0 ? (
                 <Stack gap={2}>
                   <Text size="xs" c="dimmed" fw={600}>
                     {tArchives("topicLabel")}
                   </Text>
-                  <Text size="sm" fw={600}>
-                    <Link
-                      href={archiveSeriesHref!}
-                      className="text-primary hover:underline dark:text-pink-200"
-                    >
-                      {item.archive.topic}
-                    </Link>
-                  </Text>
+                  <Group gap="xs">
+                    {archiveTopics.map(({ key, title }) => (
+                      <Link
+                        key={key}
+                        href={`/stream-archives/list?${new URLSearchParams({ series: key }).toString()}`}
+                        className="text-sm font-semibold text-primary hover:underline dark:text-pink-200"
+                      >
+                        {title}
+                      </Link>
+                    ))}
+                  </Group>
                 </Stack>
               ) : null}
             </SimpleGrid>

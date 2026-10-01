@@ -46,6 +46,7 @@ const HEADER_SCHEMA: HeaderDefinition[] = [
       "推測ゲーム配信内容",
       "推測ゲーム・配信内容",
       "配信内容",
+      "配信カテゴリ",
       "カテゴリ",
       "topic",
       "category",
