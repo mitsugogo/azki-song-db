@@ -80,7 +80,6 @@ import {
 import {
   findArchiveSearchHighlightRange,
   normalizeArchiveSearchText,
-  normalizeArchiveSeriesKey,
 } from "./archiveSearch";
 import { parseVideoDurationSeconds } from "../lib/videoDuration";
 import { buildWatchHref } from "../lib/watchUrl";
@@ -98,10 +97,11 @@ import {
   type ArchiveSeriesGroup,
 } from "./archiveSeries";
 import StreamArchivesNavigation from "./StreamArchivesNavigation";
+import { getArchiveTopics, type ArchiveTopic } from "./archiveTopics";
+import ArchiveTopicBadges from "./ArchiveTopicBadges";
 
 type IndexedArchiveItem = ArchiveItem & {
-  seriesKey: string;
-  seriesTitle: string;
+  topics: ArchiveTopic[];
   channel: ChannelEntry | null;
   participantEntries: ArchiveParticipantEntry[];
   publishedAtMs: number;
@@ -265,10 +265,6 @@ const updateArchiveFilterUrl = ({
   historyHelper.replaceUrlIfDifferent(url.href, { dispatchEvent: false });
 };
 
-const getArchiveSeriesTitle = (item: ArchiveItem) => {
-  return item.topic || "その他";
-};
-
 const createIndexedArchives = (
   items: ArchiveItem[],
   channelsById: Map<string, ChannelEntry>,
@@ -276,8 +272,7 @@ const createIndexedArchives = (
   firstSongsByVideoId: Map<string, Song>,
 ) =>
   items.map((item) => {
-    const seriesTitle = getArchiveSeriesTitle(item);
-    const seriesKey = normalizeArchiveSeriesKey(seriesTitle) || "other";
+    const topics = getArchiveTopics(item.topic, "その他");
     const channel = item.channel_id
       ? (channelsById.get(item.channel_id) ?? null)
       : null;
@@ -288,7 +283,7 @@ const createIndexedArchives = (
       parseVideoDurationSeconds(item.video_duration) ?? 0;
     const searchText = normalizeArchiveSearchText(
       [
-        seriesTitle,
+        ...topics.map(({ title }) => title),
         item.topic,
         item.title,
         item.video_id,
@@ -311,8 +306,7 @@ const createIndexedArchives = (
 
     return {
       ...item,
-      seriesKey,
-      seriesTitle,
+      topics,
       channel,
       participantEntries,
       publishedAtMs: Number.isNaN(publishedAtMs) ? 0 : publishedAtMs,
@@ -759,11 +753,15 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
         </div>
 
         {item.topic && (
-          <Badge color="pink" variant="light" className="mt-3">
-            <ArchiveTextHighlight highlight={highlightQuery}>
-              {item.topic}
-            </ArchiveTextHighlight>
-          </Badge>
+          <ArchiveTopicBadges
+            topic={item.topic}
+            className="mt-3"
+            renderTitle={(title) => (
+              <ArchiveTextHighlight highlight={highlightQuery}>
+                {title}
+              </ArchiveTextHighlight>
+            )}
+          />
         )}
         {item.participantEntries.length > 0 && (
           <div className="mt-3">
@@ -875,17 +873,7 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
         {item.video_duration || "-"}
       </div>
       <div className={cellClass}>
-        {item.topic ? (
-          <Badge
-            color="pink"
-            variant="light"
-            className="max-w-40 whitespace-normal py-1 leading-snug"
-          >
-            {item.topic}
-          </Badge>
-        ) : (
-          "-"
-        )}
+        {item.topic ? <ArchiveTopicBadges topic={item.topic} /> : "-"}
       </div>
       <div className={`${cellClass} font-semibold`}>
         <FaYoutube className="h-4 w-4 inline text-red-600" />
@@ -971,17 +959,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
         {item.video_duration || "-"}
       </div>
       <div className="px-3 py-3 align-top text-gray-800 dark:text-gray-100">
-        {item.topic ? (
-          <Badge
-            color="pink"
-            variant="light"
-            className="max-w-40 whitespace-normal py-1 leading-snug"
-          >
-            {item.topic}
-          </Badge>
-        ) : (
-          "-"
-        )}
+        {item.topic ? <ArchiveTopicBadges topic={item.topic} /> : "-"}
       </div>
       <div className="px-3 py-3 align-top font-semibold">
         <div className="flex items-start gap-2">
@@ -1169,7 +1147,9 @@ export default function ArchivesPageClient() {
   const filteredItems = useMemo(
     () =>
       seriesFilteredItems.filter(
-        (item) => !selectedSeriesKey || item.seriesKey === selectedSeriesKey,
+        (item) =>
+          !selectedSeriesKey ||
+          item.topics.some(({ key }) => key === selectedSeriesKey),
       ),
     [selectedSeriesKey, seriesFilteredItems],
   );
@@ -1181,8 +1161,12 @@ export default function ArchivesPageClient() {
   }, [archiveSortCollator, filteredItems, sortState]);
 
   const archiveGroups = useMemo(
-    () => createArchiveSeriesGroups(sortedFilteredItems),
-    [sortedFilteredItems],
+    () =>
+      createArchiveSeriesGroups(sortedFilteredItems, "その他", {
+        singleGroupPerItem: true,
+        seriesKey: selectedSeriesKey,
+      }),
+    [selectedSeriesKey, sortedFilteredItems],
   );
 
   const archiveEntries = useMemo(

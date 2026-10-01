@@ -52,6 +52,21 @@ describe("archives route", () => {
     delete process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
   });
 
+  it("reads multiple categories from 配信カテゴリ and preserves the topic string", async () => {
+    sheetsGetMock.mockResolvedValue({
+      data: {
+        values: [
+          ["配信カテゴリ", "配信タイトル", "動画ID"],
+          [" 雑談、Minecraft,歌枠 ", "複数カテゴリ配信", "multi"],
+        ],
+      },
+    });
+    const response = await GET();
+    expect(await response.json()).toEqual([
+      expect.objectContaining({ topic: "雑談、Minecraft,歌枠" }),
+    ]);
+  });
+
   afterAll(() => {
     restoreEnv("SPREADSHEET_ID", originalSpreadsheetId);
     restoreEnv("ARCHIVES_SPREADSHEET_ID", originalArchivesSpreadsheetId);

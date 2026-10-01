@@ -18,6 +18,62 @@ const createItem = (overrides: Partial<ArchiveItem> = {}): ArchiveItem => ({
 });
 
 describe("createArchiveSeriesGroups", () => {
+  it("groups and filters a quoted game title as one category", () => {
+    const items = [createItem({ topic: '雑談、"Papers, Please"' })];
+    expect(createArchiveSeriesGroups(items).map(({ title }) => title)).toEqual([
+      "雑談",
+      "Papers, Please",
+    ]);
+    const groups = createArchiveSeriesGroups(items, "その他", {
+      singleGroupPerItem: true,
+      seriesKey: "papersplease",
+    });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({
+      title: "Papers, Please",
+      items,
+      totalDurationSeconds: 3600,
+    });
+  });
+
+  it("includes a stream in every category without duplicate category counts", () => {
+    const groups = createArchiveSeriesGroups([
+      createItem({ topic: "雑談、Minecraft, 雑談" }),
+      createItem({
+        video_id: "video-2",
+        topic: "Minecraft",
+        video_duration: "PT2H",
+      }),
+    ]);
+    expect(
+      groups.map(({ title, items, totalDurationSeconds }) => ({
+        title,
+        count: items.length,
+        totalDurationSeconds,
+      })),
+    ).toEqual([
+      { title: "雑談", count: 1, totalDurationSeconds: 3600 },
+      { title: "Minecraft", count: 2, totalDurationSeconds: 10800 },
+    ]);
+  });
+
+  it("shows each video once in the list and includes secondary categories when selected", () => {
+    const items = [createItem({ topic: "雑談、Minecraft" })];
+    const allGroups = createArchiveSeriesGroups(items, "その他", {
+      singleGroupPerItem: true,
+    });
+    expect(allGroups.map(({ title }) => title)).toEqual(["雑談"]);
+    const selectedGroups = createArchiveSeriesGroups(items, "その他", {
+      singleGroupPerItem: true,
+      seriesKey: "minecraft",
+    });
+    expect(selectedGroups.map(({ title }) => title)).toEqual(["Minecraft"]);
+    expect(selectedGroups[0].items).toEqual(items);
+    expect(
+      createArchiveSeriesGroups(items, "その他", { seriesKey: "歌枠" }),
+    ).toEqual([]);
+  });
+
   it("aggregates duration and keeps the latest stream for each series", () => {
     const groups = createArchiveSeriesGroups([
       createItem(),
