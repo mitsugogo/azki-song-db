@@ -26,4 +26,17 @@ describe("ArchiveTopicBadges", () => {
     expect(screen.getByText("Minecraft")).toBeInTheDocument();
     expect(screen.queryByText("雑談、Minecraft, 雑談")).not.toBeInTheDocument();
   });
+
+  it("displays a quoted game title in one badge without surrounding quotes", () => {
+    render(
+      <MantineProvider>
+        <ArchiveTopicBadges topic={'"Papers, Please"、雑談'} />
+      </MantineProvider>,
+    );
+    expect(screen.getByText("Papers, Please")).toBeInTheDocument();
+    expect(screen.getByText("雑談")).toBeInTheDocument();
+    expect(screen.queryByText('"Papers, Please"')).not.toBeInTheDocument();
+    expect(screen.queryByText("Papers")).not.toBeInTheDocument();
+    expect(screen.queryByText("Please")).not.toBeInTheDocument();
+  });
 });

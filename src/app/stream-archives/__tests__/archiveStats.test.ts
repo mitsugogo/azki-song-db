@@ -24,6 +24,26 @@ const createItem = (
 });
 
 describe("createArchiveStatsSummary", () => {
+  it("aggregates a quoted game title as one category", () => {
+    const summary = createArchiveStatsSummary(
+      [createItem({ topic: '"Papers, Please"、雑談' })],
+      "ja",
+    );
+    expect(summary.categories).toHaveLength(2);
+    expect(summary.categories).toEqual(
+      expect.arrayContaining([
+        {
+          name: "Papers, Please",
+          key: "papersplease",
+          streamCount: 1,
+          totalDurationSeconds: 3600,
+        },
+      ]),
+    );
+    expect(summary.streamCount).toBe(1);
+    expect(summary.totalDurationSeconds).toBe(3600);
+  });
+
   it("counts every category while keeping overall and calendar totals unduplicated", () => {
     const summary = createArchiveStatsSummary(
       [

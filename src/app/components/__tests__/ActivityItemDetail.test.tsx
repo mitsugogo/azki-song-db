@@ -63,7 +63,7 @@ describe("ActivityItemDetail", () => {
   it("links every archive category to its own filtered list", () => {
     const item = makeArchive();
     if (item.kind !== "archive") throw new Error("Expected archive");
-    item.archive.topic = "雑談、Minecraft, 雑談";
+    item.archive.topic = '雑談、Minecraft, 雑談、"Papers, Please"';
     render(
       <MantineProvider>
         <ActivityItemDetail item={item} channels={[]} active />
@@ -79,7 +79,10 @@ describe("ActivityItemDetail", () => {
     expect(
       within(metadata).getByRole("link", { name: "Minecraft" }),
     ).toHaveAttribute("href", "/stream-archives/list?series=minecraft");
-    expect(within(metadata).getAllByRole("link")).toHaveLength(2);
+    expect(
+      within(metadata).getByRole("link", { name: "Papers, Please" }),
+    ).toHaveAttribute("href", "/stream-archives/list?series=papersplease");
+    expect(within(metadata).getAllByRole("link")).toHaveLength(3);
   });
 
   beforeEach(() => {

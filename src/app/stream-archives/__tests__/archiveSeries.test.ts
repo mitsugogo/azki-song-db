@@ -18,6 +18,24 @@ const createItem = (overrides: Partial<ArchiveItem> = {}): ArchiveItem => ({
 });
 
 describe("createArchiveSeriesGroups", () => {
+  it("groups and filters a quoted game title as one category", () => {
+    const items = [createItem({ topic: '雑談、"Papers, Please"' })];
+    expect(createArchiveSeriesGroups(items).map(({ title }) => title)).toEqual([
+      "雑談",
+      "Papers, Please",
+    ]);
+    const groups = createArchiveSeriesGroups(items, "その他", {
+      singleGroupPerItem: true,
+      seriesKey: "papersplease",
+    });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({
+      title: "Papers, Please",
+      items,
+      totalDurationSeconds: 3600,
+    });
+  });
+
   it("includes a stream in every category without duplicate category counts", () => {
     const groups = createArchiveSeriesGroups([
       createItem({ topic: "雑談、Minecraft, 雑談" }),
