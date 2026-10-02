@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.43.1](https://github.com/mitsugogo/azki-song-db/compare/v2.43.0...v2.43.1) (2026-10-02)
+
+### Bug Fixes
+
+* 配信検索に出ない場合があったのを修正 ([a50943b](https://github.com/mitsugogo/azki-song-db/commit/a50943b7c0efce3ff2cb3a934fe414df6d72e4fe))
+
 ## [2.43.0](https://github.com/mitsugogo/azki-song-db/compare/v2.42.0...v2.43.0) (2026-10-01)
 
 ### Features
