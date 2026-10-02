@@ -25,7 +25,6 @@ describe("createArchiveSeriesGroups", () => {
       "Papers, Please",
     ]);
     const groups = createArchiveSeriesGroups(items, "その他", {
-      singleGroupPerItem: true,
       seriesKey: "papersplease",
     });
     expect(groups).toHaveLength(1);
@@ -57,14 +56,11 @@ describe("createArchiveSeriesGroups", () => {
     ]);
   });
 
-  it("shows each video once in the list and includes secondary categories when selected", () => {
+  it("includes each category in the list and shows only the selected category when filtered", () => {
     const items = [createItem({ topic: "雑談、Minecraft" })];
-    const allGroups = createArchiveSeriesGroups(items, "その他", {
-      singleGroupPerItem: true,
-    });
-    expect(allGroups.map(({ title }) => title)).toEqual(["雑談"]);
+    const allGroups = createArchiveSeriesGroups(items, "その他");
+    expect(allGroups.map(({ title }) => title)).toEqual(["雑談", "Minecraft"]);
     const selectedGroups = createArchiveSeriesGroups(items, "その他", {
-      singleGroupPerItem: true,
       seriesKey: "minecraft",
     });
     expect(selectedGroups.map(({ title }) => title)).toEqual(["Minecraft"]);

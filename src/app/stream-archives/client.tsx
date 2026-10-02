@@ -99,6 +99,7 @@ import {
 import StreamArchivesNavigation from "./StreamArchivesNavigation";
 import { getArchiveTopics, type ArchiveTopic } from "./archiveTopics";
 import ArchiveTopicBadges from "./ArchiveTopicBadges";
+import { createArchiveEntries } from "./archiveListEntries";
 
 type IndexedArchiveItem = ArchiveItem & {
   topics: ArchiveTopic[];
@@ -417,20 +418,6 @@ const SortableArchiveHeader = memo(function SortableArchiveHeader({
   );
 });
 
-const createArchiveEntries = (groups: ArchiveGroup[]) =>
-  groups.flatMap((group) => [
-    {
-      type: "group" as const,
-      key: `group-${group.key}`,
-      group,
-    },
-    ...group.items.map((item) => ({
-      type: "item" as const,
-      key: `item-${item.video_id}`,
-      item,
-    })),
-  ]);
-
 const ArchiveTextHighlight = memo(function ArchiveTextHighlight({
   children,
   className,
@@ -689,6 +676,7 @@ const MobileGroupHeader = memo(function MobileGroupHeader({
 
 const MobileArchiveCard = memo(function MobileArchiveCard({
   item,
+  anchorId,
   locale,
   appWatchLabel,
   timestampLabel,
@@ -700,6 +688,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
   onTimestampResize,
 }: {
   item: IndexedArchiveItem;
+  anchorId: string;
   locale: string;
   appWatchLabel: string;
   timestampLabel: string;
@@ -720,7 +709,7 @@ const MobileArchiveCard = memo(function MobileArchiveCard({
 
   return (
     <article
-      id={getArchiveAnchorId(item.video_id)}
+      id={anchorId}
       tabIndex={-1}
       className={`card-glassmorphism overflow-hidden border border-primary/10 focus:outline-none ${
         isAnchored ? "ring-2 ring-primary/40" : ""
@@ -908,6 +897,7 @@ const DesktopStickyArchiveSummary = memo(function DesktopStickyArchiveSummary({
 
 const DesktopArchiveRow = memo(function DesktopArchiveRow({
   item,
+  anchorId,
   locale,
   highlightQuery,
   appWatchLabel,
@@ -919,6 +909,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
   onTimestampExpandedChange,
 }: {
   item: IndexedArchiveItem;
+  anchorId: string;
   locale: string;
   highlightQuery: string;
   appWatchLabel: string;
@@ -938,7 +929,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
 
   return (
     <div
-      id={getArchiveAnchorId(item.video_id)}
+      id={anchorId}
       tabIndex={-1}
       className={`grid border-b border-light-gray-200/50 bg-white/70 text-sm focus:outline-none dark:border-white/10 dark:bg-gray-900/50 ${
         isAnchored ? "ring-2 ring-inset ring-primary/40" : ""
@@ -1163,7 +1154,6 @@ export default function ArchivesPageClient() {
   const archiveGroups = useMemo(
     () =>
       createArchiveSeriesGroups(sortedFilteredItems, "その他", {
-        singleGroupPerItem: true,
         seriesKey: selectedSeriesKey,
       }),
     [selectedSeriesKey, sortedFilteredItems],
@@ -1919,6 +1909,7 @@ export default function ArchivesPageClient() {
                       ) : (
                         <DesktopArchiveRow
                           item={entry.item}
+                          anchorId={entry.anchorId}
                           locale={locale}
                           highlightQuery={deferredFilterQuery}
                           appWatchLabel={t("appWatchLabel")}
@@ -1994,6 +1985,7 @@ export default function ArchivesPageClient() {
                 ) : (
                   <MobileArchiveCard
                     item={entry.item}
+                    anchorId={entry.anchorId}
                     locale={locale}
                     appWatchLabel={t("appWatchLabel")}
                     timestampLabel={t("timestampLabel")}
