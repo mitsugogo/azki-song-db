@@ -1,3 +1,5 @@
+import { getActivityJstDateKey } from "../lib/activityCalendar";
+
 export const ACTIVITY_START_YEAR = 2018;
 export const ACTIVITY_START_MONTH = 11;
 
@@ -26,33 +28,47 @@ export function fromMonthIndex(index: number): ActivityMonth {
 }
 
 export function getCurrentActivityMonth(now = new Date()): ActivityMonth {
+  const [year, month] = getActivityJstDateKey(now).split("-").map(Number);
   return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
+    year,
+    month,
   };
 }
 
-export function isActivityMonthInRange(
-  activityMonth: ActivityMonth,
+export function getLatestActivityMonth(
+  dates: Array<string | Date>,
   now = new Date(),
-) {
+): ActivityMonth {
+  const latestDateKey = dates.reduce<string>((latest, date) => {
+    const dateKey = getActivityJstDateKey(date);
+    return dateKey > latest ? dateKey : latest;
+  }, getActivityJstDateKey(now));
+  const [year, month] = latestDateKey.split("-").map(Number);
+  return { year, month };
+}
+
+export function isActivityMonthInRange(activityMonth: ActivityMonth) {
   const monthIndex = toMonthIndex(activityMonth);
   return (
+    Number.isInteger(activityMonth.year) &&
+    activityMonth.year <= 9999 &&
+    Number.isInteger(activityMonth.month) &&
+    activityMonth.month >= 1 &&
+    activityMonth.month <= 12 &&
     monthIndex >=
       toMonthIndex({
         year: ACTIVITY_START_YEAR,
         month: ACTIVITY_START_MONTH,
-      }) && monthIndex <= toMonthIndex(getCurrentActivityMonth(now))
+      })
   );
 }
 
 export function getAdjacentActivityMonth(
   activityMonth: ActivityMonth,
   delta: -1 | 1,
-  now = new Date(),
 ) {
   const adjacent = fromMonthIndex(toMonthIndex(activityMonth) + delta);
-  return isActivityMonthInRange(adjacent, now) ? adjacent : null;
+  return isActivityMonthInRange(adjacent) ? adjacent : null;
 }
 
 export function formatActivityMonthLabel(

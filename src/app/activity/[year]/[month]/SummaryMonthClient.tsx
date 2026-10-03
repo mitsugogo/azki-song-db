@@ -21,6 +21,8 @@ import ActivityMonthDisplay from "../../ActivityMonthDisplay";
 import {
   formatActivityMonthLabel,
   getActivityMonthHref,
+  getLatestActivityMonth,
+  toMonthIndex,
   type ActivityMonth,
 } from "../../monthActivity";
 
@@ -35,7 +37,7 @@ type SummaryMonthClientProps = {
 export default function SummaryMonthClient({
   activityMonth,
   previousMonth,
-  nextMonth,
+  nextMonth: adjacentNextMonth,
 }: SummaryMonthClientProps) {
   const locale = useLocale();
   const t = useTranslations("Summary");
@@ -48,6 +50,15 @@ export default function SummaryMonthClient({
   const { channels } = useChannels();
 
   const monthLabel = formatActivityMonthLabel(activityMonth, locale);
+  const latestActivityMonth = getLatestActivityMonth([
+    ...eventItems.map((item) => item.start_at),
+    ...milestoneItems.map((item) => item.date),
+  ]);
+  const nextMonth =
+    adjacentNextMonth &&
+    toMonthIndex(adjacentNextMonth) <= toMonthIndex(latestActivityMonth)
+      ? adjacentNextMonth
+      : null;
   const previousMonthLabel = previousMonth
     ? formatActivityMonthLabel(previousMonth, locale)
     : null;
@@ -56,8 +67,14 @@ export default function SummaryMonthClient({
     : null;
   const dateRange = useMemo(
     () => ({
-      start: new Date(activityMonth.year, activityMonth.month - 1, 1),
-      endExclusive: new Date(activityMonth.year, activityMonth.month, 1),
+      start: new Date(
+        Date.UTC(activityMonth.year, activityMonth.month - 1, 1) -
+          9 * 60 * 60 * 1000,
+      ),
+      endExclusive: new Date(
+        Date.UTC(activityMonth.year, activityMonth.month, 1) -
+          9 * 60 * 60 * 1000,
+      ),
     }),
     [activityMonth.month, activityMonth.year],
   );
@@ -79,6 +96,7 @@ export default function SummaryMonthClient({
     archiveLimit: MONTH_ACTIVITY_LIMIT,
     viewMilestonePeriod: "all",
     dateRange,
+    includeFutureScheduledItems: true,
   });
 
   const anniversaryItems = useMemo(

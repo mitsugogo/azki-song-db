@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { renderHook } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import useActivityTimeline from "../useActivityTimeline";
 import {
   buildViewMilestoneItems,
   filterActivityTimelineItems,
@@ -7,6 +9,13 @@ import {
 } from "../useActivityTimeline";
 import type { ViewStat } from "../../types/api/stat/views";
 import type { Song } from "../../types/song";
+
+vi.mock("../useArchives", () => ({
+  default: () => ({ items: [], isLoading: false }),
+}));
+vi.mock("../useReleaseViewCounts", () => ({
+  default: () => ({ data: {}, loading: false }),
+}));
 
 const createStat = (date: string, viewCount: number): ViewStat => ({
   datetime: new Date(date),
@@ -157,6 +166,55 @@ describe("filterActivityTimelineItems", () => {
     expect(items.map((item) => item.id)).toEqual(["valid"]);
   });
 
+  it("allows future scheduled items only when opted in, within the selected JST month", () => {
+    const items = [
+      createActivityItem("start", "2026-05-31T15:00:00.000Z"),
+      createActivityItem("future", "2026-06-20T00:00:00.000Z"),
+      createActivityItem("end", "2026-06-30T15:00:00.000Z"),
+      createActivityItem("invalid", "not-a-date"),
+      {
+        ...createActivityItem("anniversary", "2026-06-21T00:00:00.000Z"),
+        kind: "anniversary",
+        anniversary: {
+          date: "06/21",
+          name: "記念日",
+          first_date_at: "",
+          url: "",
+          note: "",
+        },
+        displayName: "記念日",
+      } as ActivityTimelineItem,
+      {
+        ...createActivityItem("song", "2026-06-20T00:00:00.000Z"),
+        kind: "song_update",
+      } as ActivityTimelineItem,
+      {
+        ...createActivityItem("archive", "2026-06-20T00:00:00.000Z"),
+        kind: "archive",
+      } as ActivityTimelineItem,
+      {
+        ...createActivityItem("views", "2026-06-20T00:00:00.000Z"),
+        kind: "view_milestone",
+      } as ActivityTimelineItem,
+    ];
+    const options = {
+      now: new Date("2026-06-15T00:00:00.000Z").getTime(),
+      dateRange: {
+        start: new Date("2026-05-31T15:00:00.000Z"),
+        endExclusive: new Date("2026-06-30T15:00:00.000Z"),
+      },
+    };
+    expect(
+      filterActivityTimelineItems(items, options).map((item) => item.id),
+    ).toEqual(["start"]);
+    expect(
+      filterActivityTimelineItems(items, {
+        ...options,
+        includeFutureScheduledItems: true,
+      }).map((item) => item.id),
+    ).toEqual(["anniversary", "future", "start"]);
+  });
+
   it("eventやmilestoneも日付順に並べて表示対象に残す", () => {
     const eventItem: ActivityTimelineItem = {
       id: "event",
@@ -216,5 +274,46 @@ describe("filterActivityTimelineItems", () => {
     expect(
       sortActivityTimelineItems(items, "asc").map((item) => item.id),
     ).toEqual(["older", "extra", "normal"]);
+  });
+});
+
+describe("useActivityTimeline scheduled items", () => {
+  it("keeps the default timeline historical and includes future events and milestones for calendars", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
+    try {
+      const options = {
+        songs: [createSong(0)],
+        events: [
+          {
+            start_at: "2026-01-20T00:00:00.000Z",
+            end_at: "",
+            content: "未来のイベント",
+            place: "",
+            note: "",
+            url: "",
+          },
+        ],
+        milestones: [
+          { date: "2026-01-21T00:00:00.000Z", content: "未来のマイルストーン" },
+        ],
+      };
+      const { result, rerender } = renderHook(
+        ({ includeFutureScheduledItems }) =>
+          useActivityTimeline({ ...options, includeFutureScheduledItems }),
+        { initialProps: { includeFutureScheduledItems: false } },
+      );
+      expect(result.current.items.map((item) => item.kind)).toEqual([
+        "song_update",
+      ]);
+      rerender({ includeFutureScheduledItems: true });
+      expect(result.current.items.map((item) => item.kind)).toEqual([
+        "milestone",
+        "event",
+        "song_update",
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
