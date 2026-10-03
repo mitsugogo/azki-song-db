@@ -62,9 +62,21 @@ export default function ArchiveMonthlyCalendar({
   channels,
   labels,
 }: ArchiveMonthlyCalendarProps) {
+  const { items: anniversaries, isLoading: isAnniversariesLoading } =
+    useAnniversaries();
+  const { items: eventItems, isLoading: isEventsLoading } = useEvents();
+  const { items: milestoneItems, isLoading: isMilestonesLoading } =
+    useMilestones();
   const availableDateKeys = useMemo(
-    () => Array.from(days.keys()).sort(),
-    [days],
+    () =>
+      [
+        ...days.keys(),
+        ...eventItems.map((item) => getActivityJstDateKey(item.start_at)),
+        ...milestoneItems.map((item) => getActivityJstDateKey(item.date)),
+      ]
+        .filter(Boolean)
+        .sort(),
+    [days, eventItems, milestoneItems],
   );
   const todayDateKey = getActivityJstDateKey(new Date());
   const todayMonth = todayDateKey.slice(0, 7);
@@ -82,7 +94,8 @@ export default function ArchiveMonthlyCalendar({
     : undefined;
   const minDate = minMonth ? `${minMonth}-01` : undefined;
   const maxDate = maxMonth ? `${maxMonth}-01` : undefined;
-  const defaultMonth = latestMonth ? todayMonth : null;
+  const defaultMonth =
+    latestMonth || availableDateKeys.length ? todayMonth : null;
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [displayFilters, setDisplayFilters] = useState(
     DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS,
@@ -119,11 +132,6 @@ export default function ArchiveMonthlyCalendar({
       ),
     };
   }, [activityMonth]);
-  const { items: anniversaries, isLoading: isAnniversariesLoading } =
-    useAnniversaries();
-  const { items: eventItems, isLoading: isEventsLoading } = useEvents();
-  const { items: milestoneItems, isLoading: isMilestonesLoading } =
-    useMilestones();
   const {
     items: activityItems,
     isLoading: isActivityLoading,
@@ -140,6 +148,7 @@ export default function ArchiveMonthlyCalendar({
     archiveLimit: MONTH_ACTIVITY_LIMIT,
     viewMilestonePeriod: "all",
     dateRange,
+    includeFutureScheduledItems: true,
   });
   const archiveItems = useMemo(
     () => buildArchiveActivityItems(archives, Number.POSITIVE_INFINITY, songs),
@@ -161,7 +170,7 @@ export default function ArchiveMonthlyCalendar({
               ...activityItems.filter((item) => item.kind !== "archive"),
               ...anniversaryItems,
             ],
-            { dateRange },
+            { dateRange, includeFutureScheduledItems: true },
           ),
           ...filterActivityTimelineItems(archiveItems, {
             dateRange,

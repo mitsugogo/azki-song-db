@@ -106,6 +106,7 @@ type UseActivityTimelineOptions = {
   archiveLimit?: number;
   viewMilestonePeriod?: Period;
   dateRange?: ActivityTimelineDateRange;
+  includeFutureScheduledItems?: boolean;
 };
 
 export type ActivityTimelineDateRange = {
@@ -352,6 +353,7 @@ export function filterActivityTimelineItems(
   options: {
     dateRange?: ActivityTimelineDateRange;
     now?: number;
+    includeFutureScheduledItems?: boolean;
   } = {},
 ) {
   const now = options.now ?? Date.now();
@@ -364,8 +366,14 @@ export function filterActivityTimelineItems(
 
   const filteredItems = items.filter((item) => {
     const occurredAt = getDateTime(item.occurredAt);
+    const isFutureScheduledItem =
+      options.includeFutureScheduledItems &&
+      (item.kind === "event" ||
+        item.kind === "milestone" ||
+        item.kind === "anniversary");
     return (
-      occurredAt <= now &&
+      Number.isFinite(occurredAt) &&
+      (occurredAt <= now || isFutureScheduledItem) &&
       occurredAt >= rangeStart &&
       occurredAt < rangeEndExclusive
     );
@@ -419,6 +427,7 @@ export default function useActivityTimeline({
   archiveLimit = DEFAULT_ARCHIVE_LIMIT,
   viewMilestonePeriod = "30d",
   dateRange,
+  includeFutureScheduledItems = false,
 }: UseActivityTimelineOptions) {
   const { items: archives, isLoading: isArchivesLoading } = useArchives();
   const { data: viewStatisticsByVideoId, loading: isViewMilestonesLoading } =
@@ -458,6 +467,7 @@ export default function useActivityTimeline({
     return filterActivityTimelineItems(combinedItems, {
       dateRange,
       now,
+      includeFutureScheduledItems,
     }).slice(0, limit);
   }, [
     archiveLimit,
@@ -465,6 +475,7 @@ export default function useActivityTimeline({
     dateRange,
     enabled,
     events,
+    includeFutureScheduledItems,
     limit,
     milestones,
     songUpdateLimit,

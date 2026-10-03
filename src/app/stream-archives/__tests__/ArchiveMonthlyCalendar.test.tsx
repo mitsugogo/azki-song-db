@@ -6,37 +6,51 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import ArchiveMonthlyCalendar from "../ArchiveMonthlyCalendar";
 import type { ArchiveCalendarDayStats } from "../archiveStats";
+import type { EventItem } from "../../types/eventItem";
+import type { MilestoneItem } from "../../hook/useMilestones";
 
-vi.mock("../../hook/useActivityTimeline", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../../hook/useActivityTimeline")>();
+const scheduledItems = vi.hoisted(() => ({
+  events: [] as EventItem[],
+  milestones: [] as MilestoneItem[],
+}));
 
-  return {
-    ...actual,
-    default: () => ({
-      items: [],
-      isLoading: false,
-      isViewMilestonesLoading: false,
-    }),
-  };
-});
+vi.mock("../../hook/useArchives", () => ({
+  default: () => ({ items: [], isLoading: false }),
+}));
+
+vi.mock("../../hook/useReleaseViewCounts", () => ({
+  default: () => ({ data: {}, loading: false }),
+}));
 
 vi.mock("../../hook/useAnniversaries", () => ({
   default: () => ({ items: [], isLoading: false }),
 }));
 
 vi.mock("../../hook/useEvents", () => ({
-  default: () => ({ items: [], isLoading: false }),
+  default: () => ({ items: scheduledItems.events, isLoading: false }),
 }));
 
 vi.mock("../../hook/useMilestones", () => ({
-  default: () => ({ items: [], isLoading: false }),
+  default: () => ({ items: scheduledItems.milestones, isLoading: false }),
 }));
 
 describe("ArchiveMonthlyCalendar", () => {
+  afterEach(() => vi.useRealTimers());
+  beforeEach(() => {
+    scheduledItems.events = [];
+    scheduledItems.milestones = [];
+  });
   beforeAll(() => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -132,6 +146,7 @@ describe("ArchiveMonthlyCalendar", () => {
             nextMonth: "次月を表示",
             scheduledTime: (time) => `配信予定 ${time}`,
             empty: "データなし",
+            includeExternalChannels: "他のチャンネルも含む",
           }}
         />
       </MantineProvider>,
@@ -258,6 +273,7 @@ describe("ArchiveMonthlyCalendar", () => {
               nextMonth: "次月を表示",
               scheduledTime: (time) => `配信予定 ${time}`,
               empty: "データなし",
+              includeExternalChannels: "他のチャンネルも含む",
             }}
           />
         </MantineProvider>,
@@ -277,5 +293,66 @@ describe("ArchiveMonthlyCalendar", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("shows future events and milestones without archives and extends month navigation", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+    scheduledItems.events = [
+      {
+        start_at: "2026-01-31T15:00:00.000Z",
+        end_at: "",
+        content: "翌月のイベント",
+        place: "",
+        note: "",
+        url: "",
+      },
+    ];
+    scheduledItems.milestones = [
+      { date: "2026-01-20T00:00:00.000Z", content: "当月の予定" },
+      { date: "2026-02-02T00:00:00.000Z", content: "翌月の予定" },
+    ];
+    const { container } = render(
+      <MantineProvider>
+        <ArchiveMonthlyCalendar
+          days={new Map()}
+          archives={[]}
+          latestMonth={null}
+          locale="ja"
+          songs={[]}
+          channels={[]}
+          labels={{
+            title: "月間カレンダー",
+            subtitle: "日ごとの配信",
+            monthLabel: "表示月",
+            previousMonth: "前月を表示",
+            nextMonth: "次月を表示",
+            scheduledTime: (time) => `配信予定 ${time}`,
+            empty: "データなし",
+            includeExternalChannels: "他のチャンネルも含む",
+          }}
+        />
+      </MantineProvider>,
+    );
+    expect(screen.getByText("当月の予定")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "次月を表示" }));
+    expect(screen.getByText("翌月のイベント")).toBeInTheDocument();
+    expect(screen.getByText("翌月の予定")).toBeInTheDocument();
+    expect(screen.queryByText("当月の予定")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "次月を表示" })).toBeDisabled();
+    expect(
+      container.querySelector('button[data-date="2026-02-01"]'),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("翌月の予定"));
+    expect(
+      await screen.findByTestId("activity-detail-content"),
+    ).toHaveTextContent("翌月の予定");
+    fireEvent.click(document.querySelector(".mantine-Drawer-overlay")!);
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("activity-detail-content"),
+      ).not.toBeInTheDocument(),
+    );
   });
 });

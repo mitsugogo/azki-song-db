@@ -5,10 +5,14 @@ import { useRouter } from "@/i18n/navigation";
 import { Button, Popover } from "@mantine/core";
 import { MonthPicker } from "@mantine/dates";
 import { useLocale, useTranslations } from "next-intl";
+import useEvents from "../hook/useEvents";
+import useMilestones from "../hook/useMilestones";
 import {
   ACTIVITY_START_MONTH,
   ACTIVITY_START_YEAR,
   getActivityMonthHref,
+  getCurrentActivityMonth,
+  getLatestActivityMonth,
   isActivityMonthInRange,
   padMonth,
   type ActivityMonth,
@@ -27,16 +31,20 @@ export default function ActivityMonthPickerButton({
   const locale = useLocale();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const currentActivityMonth = new Date();
+  const { items: events } = useEvents();
+  const { items: milestones } = useMilestones();
+  const currentActivityMonth = getCurrentActivityMonth();
+  const latestActivityMonth = getLatestActivityMonth([
+    ...events.map((item) => item.start_at),
+    ...milestones.map((item) => item.date),
+  ]);
   const monthPickerMinDate = `${ACTIVITY_START_YEAR}-${padMonth(
     ACTIVITY_START_MONTH,
   )}-01`;
-  const monthPickerMaxDate = `${currentActivityMonth.getFullYear()}-${padMonth(
-    currentActivityMonth.getMonth() + 1,
-  )}-01`;
+  const monthPickerMaxDate = `${latestActivityMonth.year}-${padMonth(latestActivityMonth.month)}-01`;
   const monthPickerDefaultDate = defaultYear
     ? `${defaultYear}-01-01`
-    : monthPickerMaxDate;
+    : `${currentActivityMonth.year}-${padMonth(currentActivityMonth.month)}-01`;
 
   const getMonthPickerActivityMonth = (value: string): ActivityMonth => {
     const [yearValue, monthValue] = value.split("-");
@@ -60,7 +68,7 @@ export default function ActivityMonthPickerButton({
     if (!value) return;
 
     const activityMonth = getMonthPickerActivityMonth(value);
-    if (!isActivityMonthInRange(activityMonth, currentActivityMonth)) {
+    if (!isActivityMonthInRange(activityMonth)) {
       return;
     }
 
