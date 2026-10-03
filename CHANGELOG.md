@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.44.0](https://github.com/mitsugogo/azki-song-db/compare/v2.43.1...v2.44.0) (2026-10-03)
+
+### Features
+
+* カレンダーに未来の予定を表示 ([e29c08d](https://github.com/mitsugogo/azki-song-db/commit/e29c08d895a4737fbae7d808d61938a90d6614f3))
+
+### Bug Fixes
+
+* ロックファイルを整形対象から除外 ([82d84ce](https://github.com/mitsugogo/azki-song-db/commit/82d84ce63070c81137528b44c6560a77bb642a0d))
+
 ## [2.43.1](https://github.com/mitsugogo/azki-song-db/compare/v2.43.0...v2.43.1) (2026-10-02)
 
 ### Bug Fixes
