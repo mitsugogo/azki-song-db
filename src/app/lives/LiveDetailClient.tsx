@@ -20,7 +20,7 @@ import LiveTitleHeader from "./LiveTitleHeader";
 const DetailItem = ({ label, value }: { label: string; value: string }) =>
   value ? (
     <div className="rounded-xl border border-light-gray-200 bg-white/80 p-4 dark:border-white/10 dark:bg-gray-800/70">
-      <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      <dt className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-light-gray-400">
         {label}
       </dt>
       <dd className="mt-1 whitespace-pre-line text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -113,7 +113,7 @@ export default function LiveDetailClient({
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
               {t("note")}
             </h3>
-            <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
+            <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-light-gray-300">
               {locale === "en"
                 ? selected.noteEn || selected.note
                 : selected.note}
@@ -130,7 +130,7 @@ export default function LiveDetailClient({
           >
             {t("setlist")}
           </h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-gray-500 dark:text-light-gray-400">
             {t("songCount", { count: selected.setlist.length })}
           </span>
         </div>
@@ -139,7 +139,7 @@ export default function LiveDetailClient({
             {selected.setlist.map((entry, index) => (
               <li
                 key={`${selected.id}-${entry.order}-${index}`}
-                className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 odd:bg-white/75 even:bg-light-gray-100/50 p-3 dark:border-white/10 dark:bg-gray-900/65 sm:grid-cols-[4.5rem_minmax(0,1fr)]"
+                className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 odd:bg-white/75 even:bg-light-gray-100/50 p-3 dark:odd:bg-gray-900/65 dark:even:bg-gray-800/70 sm:grid-cols-[4.5rem_minmax(0,1fr)]"
               >
                 <div className="flex h-7 items-center justify-center rounded-xl bg-primary-50 text-sm font-bold text-primary-700 dark:bg-primary-950/50 dark:text-primary-300">
                   {entry.order || index + 1}
@@ -156,7 +156,7 @@ export default function LiveDetailClient({
                       ? entry.titleEn || entry.title
                       : entry.title}
                   </h3>
-                  <dl className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                  <dl className="mt-2 space-y-1 text-sm text-gray-600 dark:text-light-gray-300">
                     {entry.artist ? (
                       <div className="flex gap-2">
                         <dt className="shrink-0 font-semibold">
@@ -233,7 +233,7 @@ export default function LiveDetailClient({
                     locale === "en" ? entry.noteEn || entry.note : entry.note
                   ) ? (
                     <aside className="mt-3 max-w-3xl rounded-r-lg border-l-2 border-primary-200 bg-light-gray-50/80 px-3 py-2 dark:border-primary-800 dark:bg-gray-800/50">
-                      <p className="whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-gray-300">
+                      <p className="whitespace-pre-line text-sm leading-6 text-gray-600 dark:text-light-gray-300">
                         {locale === "en"
                           ? entry.noteEn || entry.note
                           : entry.note}
@@ -245,7 +245,7 @@ export default function LiveDetailClient({
             ))}
           </ol>
         ) : (
-          <div className="rounded-2xl border border-dashed border-light-gray-300 px-6 py-12 text-center text-gray-600 dark:border-gray-700 dark:text-gray-300">
+          <div className="rounded-2xl border border-dashed border-light-gray-300 px-6 py-12 text-center text-gray-600 dark:border-gray-700 dark:text-light-gray-300">
             {t("setlistEmpty")}
           </div>
         )}
