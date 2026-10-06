@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.44.1](https://github.com/mitsugogo/azki-song-db/compare/v2.44.0...v2.44.1) (2026-10-06)
+
+### Bug Fixes
+
+* **lives:** ダークモード対応が不完全だったのを修正 ([fc21d7d](https://github.com/mitsugogo/azki-song-db/commit/fc21d7d6794e3f9becf4f11017f9c94f457d06fa))
+
 ## [2.44.0](https://github.com/mitsugogo/azki-song-db/compare/v2.43.1...v2.44.0) (2026-10-03)
 
 ### Features
