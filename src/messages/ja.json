@@ -34,7 +34,8 @@
     "mapTooltip": "AZKiさんにゆかりのある場所を訪れましょう！こちらはわいすさんのまとめマップです。",
     "whereMyAzkichiBegan": "あなたのあずきちはどこから？",
     "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？",
-    "categoryArchive": "保管庫"
+    "categoryArchive": "保管庫",
+    "repertoire": "歌唱レパートリー"
   },
   "SearchInput": {
     "search": "検索",
@@ -1957,5 +1958,42 @@
     "close": "閉じる",
     "membersOnlyAlert": "メンバー限定動画です。非公開の場合があるため、SNS等へのシェアには注意してください。",
     "membersOnlyAlertTitle": "メンバー限定動画"
+  },
+  "Repertoire": {
+    "title": "歌唱レパートリー",
+    "description": "AZKiさんが歌枠・コラボ・ゲスト出演・ライブ・楽曲動画などで歌唱した楽曲を、曲名と原曲アーティストごとにまとめています。",
+    "home": "ホーム",
+    "loading": "レパートリーを読み込み中…",
+    "searchLabel": "検索",
+    "searchPlaceholder": "曲名・アーティスト・別名・タグで検索",
+    "sourceLabel": "歌唱の種類",
+    "allSources": "すべての歌唱",
+    "source": {
+      "singing": "歌枠",
+      "collaboration": "コラボ・ゲスト・ライブ等",
+      "other": "楽曲動画など"
+    },
+    "tagsLabel": "タグ（すべて一致）",
+    "tagsPlaceholder": "タグで絞り込み",
+    "noTags": "該当するタグはありません",
+    "clearFilters": "絞り込みを解除",
+    "resultCount": "{total}曲中 {count}曲",
+    "empty": "条件に一致する楽曲がありません。",
+    "performanceCountLabel": "歌唱回数",
+    "performanceCount": "{count}回",
+    "latestLabel": "最後に歌唱",
+    "unknownDate": "日付不明",
+    "play": "SongDB再生",
+    "playLabel": "{title}の最新の歌唱をSongDB内で再生",
+    "youtube": "YouTube",
+    "youtubeLabel": "{title}の最新の歌唱をYouTubeで開く",
+    "noVideo": "再生できる動画が登録されていません。",
+    "songTitle": "曲名",
+    "artistLabel": "アーティスト",
+    "tagsColumn": "タグ",
+    "playbackLabel": "最新の歌唱を再生",
+    "sortBy": "{column}で並び替え",
+    "videoPreview": "最新の歌唱動画",
+    "broadcastDate": "配信日"
   }
 }

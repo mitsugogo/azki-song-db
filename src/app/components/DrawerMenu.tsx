@@ -92,6 +92,7 @@ export default function DrawerMenu({ opened, onClose }: DrawerMenuProps) {
         { name: t("discography"), href: "/discography" },
         { name: t("units"), href: "/units" },
         { name: t("lives"), href: "/lives" },
+        { name: t("repertoire"), href: "/repertoire" },
         { name: t("activity"), href: "/activity" },
         { name: t("anniversaries"), href: "/anniversaries" },
         { name: t("allData"), href: "/data" },

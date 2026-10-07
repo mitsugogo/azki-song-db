@@ -34,7 +34,8 @@
     "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
     "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
-    "categoryArchive": "storage"
+    "categoryArchive": "storage",
+    "repertoire": "Singing Repertoire"
   },
   "SearchInput": {
     "search": "Search",
@@ -1959,5 +1960,42 @@
     "close": "Close",
     "membersOnlyAlert": "This is a member-only video. \nPlease be careful when sharing on SNS, etc. as it may be private.",
     "membersOnlyAlertTitle": "Members only video"
+  },
+  "Repertoire": {
+    "title": "Singing Repertoire",
+    "description": "Explore songs performed by AZKi in singing streams, collaborations, guest appearances, live shows and music videos, grouped by song title and original artist.",
+    "home": "Home",
+    "loading": "Loading repertoire…",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search titles, artists, aliases or tags",
+    "sourceLabel": "Performance type",
+    "allSources": "All performances",
+    "source": {
+      "singing": "Singing streams",
+      "collaboration": "Collaborations, guests & live shows",
+      "other": "Music videos & other recordings"
+    },
+    "tagsLabel": "Tags (match all)",
+    "tagsPlaceholder": "Filter by tags",
+    "noTags": "No matching tags",
+    "clearFilters": "Clear filters",
+    "resultCount": "{count} of {total} songs",
+    "empty": "No songs match your filters.",
+    "performanceCountLabel": "Performances",
+    "performanceCount": "{count}",
+    "latestLabel": "Last performed",
+    "unknownDate": "Unknown date",
+    "play": "SongDB",
+    "playLabel": "Play the latest performance of {title} in SongDB",
+    "youtube": "YouTube",
+    "youtubeLabel": "Open the latest performance of {title} on YouTube",
+    "noVideo": "No playable video is registered.",
+    "songTitle": "Song title",
+    "artistLabel": "Artist",
+    "tagsColumn": "Tags",
+    "playbackLabel": "Play latest performance",
+    "sortBy": "Sort by {column}",
+    "videoPreview": "Latest performance video",
+    "broadcastDate": "Broadcast date"
   }
 }
