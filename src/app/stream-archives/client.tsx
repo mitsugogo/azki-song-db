@@ -30,6 +30,7 @@ import {
   useMergedRef,
 } from "@mantine/hooks";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { usePageNavigationHeaderHeight } from "../components/PageNavigationLayoutContext";
 import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
@@ -1010,6 +1011,7 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
 });
 
 export default function ArchivesPageClient() {
+  const navigationHeaderHeight = usePageNavigationHeaderHeight();
   const t = useTranslations("Archives");
   const locale = useLocale();
   const { items, isLoading } = useArchives();
@@ -1235,6 +1237,7 @@ export default function ArchivesPageClient() {
 
     const stickyOffset =
       (rowVirtualizer.scrollOffset ?? 0) +
+      navigationHeaderHeight +
       stickyControlsHeight +
       desktopStickyHeaderHeight;
     const activeVirtualRow = virtualRows.find((virtualRow) => {
@@ -1255,6 +1258,7 @@ export default function ArchivesPageClient() {
     desktopStickyHeaderHeight,
     expandedTimestampVideoIds,
     isDesktop,
+    navigationHeaderHeight,
     rowVirtualizer.scrollOffset,
     stickyControlsHeight,
     virtualRows,
@@ -1594,6 +1598,7 @@ export default function ArchivesPageClient() {
       <div
         ref={stickyControlsRef}
         className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 sm:-mx-6 sm:px-6"
+        style={{ top: navigationHeaderHeight }}
       >
         <SegmentedControl
           value={viewMode}
@@ -1749,7 +1754,7 @@ export default function ArchivesPageClient() {
           <div
             ref={desktopStickyHeaderRef}
             className="sticky z-10"
-            style={{ top: stickyControlsHeight }}
+            style={{ top: stickyControlsHeight + navigationHeaderHeight }}
           >
             <div
               ref={desktopHeaderScrollRef}

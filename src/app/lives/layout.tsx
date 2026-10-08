@@ -1,5 +1,5 @@
 import type { Viewport } from "next";
-import { Header } from "../components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import Footer from "../components/Footer";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 
@@ -18,8 +18,9 @@ export default function LivesLayout({
   return (
     <>
       <div className="flex min-h-screen flex-col">
-        <Header />
-        <div className="flex grow flex-col">{children}</div>
+        <PageNavigationLayout scrollMode="window">
+          {children}
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

@@ -1,5 +1,5 @@
 import type { Viewport } from "next";
-import { Header } from "../components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import Footer from "../components/Footer";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 
@@ -18,10 +18,9 @@ export default function UnitsLayout({
   return (
     <>
       <div className="flex h-dvh flex-col">
-        <Header />
-        <div className="flex w-full grow flex-col overflow-y-auto md:flex-row">
+        <PageNavigationLayout scrollMode="scroll-area">
           {children}
-        </div>
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

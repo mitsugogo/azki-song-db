@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@mantine/core";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "@/app/theme";
-import { Header } from "@/app/components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
 import { useTranslations } from "next-intl";
@@ -14,10 +14,9 @@ export default function ShareIndexClient() {
   return (
     <>
       <div className="flex flex-col h-dvh">
-        <Header />
-        <div className="flex flex-col grow md:flex-row overflow-y-hidden w-full">
+        <PageNavigationLayout scrollMode="scroll-area">
           <ShareIndexContent />
-        </div>
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

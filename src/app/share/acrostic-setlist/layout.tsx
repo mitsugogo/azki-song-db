@@ -1,6 +1,6 @@
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
-import { Header } from "@/app/components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 
 export default function AcrosticSetlistLayout({
   children,
@@ -10,10 +10,9 @@ export default function AcrosticSetlistLayout({
   return (
     <>
       <div className="flex h-dvh flex-col">
-        <Header />
-        <div className="flex w-full grow flex-col overflow-y-hidden md:flex-row">
+        <PageNavigationLayout scrollMode="scroll-area">
           {children}
-        </div>
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

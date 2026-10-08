@@ -1,0 +1,24 @@
+.scrollContent {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-width: 100%;
+}
+
+.scrollContent > * {
+  overflow: visible;
+}
+
+.windowSidebar {
+  position: sticky;
+  top: var(--navigation-header-height);
+  align-self: flex-start;
+  flex-shrink: 0;
+  width: 18rem;
+  height: calc(100dvh - var(--navigation-header-height) - 2rem);
+}
+
+.windowContent {
+  display: flex;
+  flex-direction: column;
+}

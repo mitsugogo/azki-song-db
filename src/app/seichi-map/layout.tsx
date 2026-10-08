@@ -1,4 +1,4 @@
-import { Header } from "../components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import type { Viewport } from "next";
@@ -19,8 +19,9 @@ export default function SeichiMapLayout({
   return (
     <>
       <div className="flex min-h-screen flex-col">
-        <Header />
-        {children}
+        <PageNavigationLayout scrollMode="window">
+          {children}
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

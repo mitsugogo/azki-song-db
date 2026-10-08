@@ -1,4 +1,4 @@
-import { Header } from "@/app/components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
 import Footer from "@/app/components/Footer";
 
@@ -10,10 +10,9 @@ export default function WhereMyRobocosanBeganLayout({
   return (
     <>
       <div className="flex flex-col h-dvh">
-        <Header />
-        <div className="flex flex-col grow md:flex-row overflow-y-hidden w-full">
+        <PageNavigationLayout scrollMode="scroll-area">
           {children}
-        </div>
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

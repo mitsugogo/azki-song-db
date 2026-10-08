@@ -1,4 +1,4 @@
-import { Header } from "../components/Header";
+import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 import Footer from "../components/Footer";
 import { siteConfig } from "../config/siteConfig";
@@ -23,9 +23,10 @@ export default function StatsLayout({
 }) {
   return (
     <>
-      <div className="flex flex-col h-dvh">
-        <Header />
-        <div>{children}</div>
+      <div className="flex flex-col min-h-screen">
+        <PageNavigationLayout scrollMode="window">
+          {children}
+        </PageNavigationLayout>
         <Footer />
       </div>
       <AnalyticsWrapper />

@@ -37,6 +37,10 @@ vi.mock("@/app/components/Header", () => ({
   Header: () => <div>header</div>,
 }));
 
+vi.mock("@/app/components/PageNavigationLayout", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 vi.mock("@/app/components/Footer", () => ({
   default: () => <div>footer</div>,
 }));
