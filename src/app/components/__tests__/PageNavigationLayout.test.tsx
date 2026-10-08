@@ -8,11 +8,13 @@ import {
   within,
 } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import type { ComponentProps, ReactNode } from "react";
+import { Suspense, type ComponentProps, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ja from "@/messages/ja.json";
 import en from "@/messages/en.json";
 import PageNavigationLayout from "../PageNavigationLayout";
+import SitePageLayout from "../SitePageLayout";
+import Loading from "../../loading";
 import { ScrollToTopButton } from "../ScrollToTopButton";
 import { usePageNavigationHeaderHeight } from "../PageNavigationLayoutContext";
 
@@ -22,6 +24,7 @@ const state = vi.hoisted(() => ({
   installable: false,
   songsFetchedAt: null as string | null,
   promptInstall: vi.fn(),
+  loading: false,
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -42,8 +45,8 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("next-intl", () => ({
   useLocale: () => state.locale,
-  useTranslations: () => (key: string) => {
-    const messages = state.locale === "ja" ? ja.DrawerMenu : en.DrawerMenu;
+  useTranslations: (namespace: "DrawerMenu" | "Loading") => (key: string) => {
+    const messages = (state.locale === "ja" ? ja : en)[namespace];
     return messages[key as keyof typeof messages] ?? key;
   },
 }));
@@ -55,11 +58,24 @@ vi.mock("../Header", () => ({
     navigation: { opened: boolean; onToggle: () => void };
   }) => (
     <header>
+      <input aria-label="ヘッダーの検索" />
       <button aria-expanded={navigation.opened} onClick={navigation.onToggle}>
         ナビゲーションを開く
       </button>
     </header>
   ),
+}));
+
+vi.mock("../Footer", () => ({
+  default: () => <footer>フッター</footer>,
+}));
+
+vi.mock("../AnalyticsWrapper", () => ({
+  AnalyticsWrapper: () => null,
+}));
+
+vi.mock("../../context/LoadingContext", () => ({
+  useLoading: () => ({ loading: state.loading }),
 }));
 
 vi.mock("../../hook/useSongs", () => ({
@@ -124,6 +140,7 @@ beforeEach(() => {
   state.installable = false;
   state.songsFetchedAt = null;
   state.promptInstall.mockClear();
+  state.loading = false;
   viewportWidth = 1280;
   mediaListeners.clear();
   vi.stubGlobal(
@@ -155,6 +172,158 @@ beforeEach(() => {
         ),
     }),
   );
+});
+
+function siteLayoutTree(children: ReactNode) {
+  return (
+    <MantineProvider>
+      <SitePageLayout>{children}</SitePageLayout>
+    </MantineProvider>
+  );
+}
+
+describe("SitePageLayout", () => {
+  it.each([
+    "/activity/2026/10",
+    "/anniversaries",
+    "/discography/album/sample",
+    "/playlist/shared/sample",
+    "/share",
+    "/share/my-best-9-songs/sample",
+    "/share/acrostic-setlist",
+    "/share/where-my-azkichi-began",
+    "/share/where-my-robocosan-began",
+    "/units/sample",
+    "/unlock-members",
+  ])("%sの本文にページ内スクロールを維持する", (pathname) => {
+    state.pathname = pathname;
+    render(siteLayoutTree(<main>本文</main>));
+    expect(
+      screen.getByRole("main").closest("[data-scrollarea-viewport]"),
+    ).not.toBeNull();
+    expect(screen.getAllByRole("banner")).toHaveLength(1);
+    expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+  });
+
+  it.each([
+    "/search",
+    "/data",
+    "/lives/sample",
+    "/repertoire",
+    "/seichi-map/ranking",
+    "/statistics",
+    "/stream-archives/list",
+  ])("%sの本文を追加のスクロール領域で包まない", (pathname) => {
+    state.pathname = pathname;
+    render(siteLayoutTree(<main>本文</main>));
+    expect(
+      screen.getByRole("main").closest("[data-scrollarea-viewport]"),
+    ).toBeNull();
+    expect(screen.getByRole("banner")).toBeInTheDocument();
+  });
+
+  it.each(["/", "/watch", "/unknown", "/discography-other", "/constructor"])(
+    "%sの専用画面に通常ページのヘッダーを追加しない",
+    (pathname) => {
+      state.pathname = pathname;
+      render(siteLayoutTree(<main>専用画面</main>));
+      expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+      expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+      expect(screen.getByRole("main")).toHaveTextContent("専用画面");
+    },
+  );
+
+  it("本文が読み込み表示に切り替わってもヘッダーとメニューを残す", async () => {
+    let ready = false;
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    function PendingPage() {
+      if (!ready) throw pending;
+      return <main>レパートリーの本文</main>;
+    }
+    const view = render(siteLayoutTree(<main>Discographyの本文</main>));
+    const header = screen.getByRole("banner");
+    const menu = await screen.findByRole("navigation", { name: "メニュー" });
+    const search = screen.getByRole("textbox", { name: "ヘッダーの検索" });
+    fireEvent.change(search, { target: { value: "AZKi" } });
+    const menuViewport = menu.closest("[data-scrollarea-viewport]")!;
+    menuViewport.scrollTop = 180;
+
+    state.pathname = "/repertoire";
+    view.rerender(
+      siteLayoutTree(
+        <Suspense fallback={<Loading />}>
+          <PendingPage />
+        </Suspense>,
+      ),
+    );
+
+    expect(screen.getByRole("status", { name: "読み込み中" })).toBeVisible();
+    expect(screen.getByRole("banner")).toBe(header);
+    expect(screen.getByRole("navigation", { name: "メニュー" })).toBe(menu);
+    expect(search).toHaveValue("AZKi");
+    expect(menuViewport.scrollTop).toBe(180);
+    expect(
+      within(menu).getByRole("link", { name: "歌唱レパートリー" }),
+    ).toHaveAttribute("aria-current", "page");
+
+    await act(async () => {
+      ready = true;
+      finish();
+      await pending;
+    });
+    expect(screen.getByRole("main")).toHaveTextContent("レパートリーの本文");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("banner")).toBe(header);
+    expect(screen.getByRole("navigation", { name: "メニュー" })).toBe(menu);
+  });
+
+  it("ページ内スクロールは遷移時に戻し、メニューのスクロールを残す", async () => {
+    const view = render(siteLayoutTree(<main>Discographyの本文</main>));
+    const menu = await screen.findByRole("navigation", { name: "メニュー" });
+    const menuViewport = menu.closest("[data-scrollarea-viewport]")!;
+    const contentViewport = screen
+      .getByRole("main")
+      .closest("[data-scrollarea-viewport]")!;
+    menuViewport.scrollTop = 120;
+    contentViewport.scrollTop = 700;
+
+    // 同じページの再描画でスクロール位置を失わない。
+    view.rerender(siteLayoutTree(<main>更新後の本文</main>));
+    expect(contentViewport.scrollTop).toBe(700);
+
+    state.pathname = "/activity";
+    view.rerender(siteLayoutTree(<main>アクティビティの本文</main>));
+    expect(screen.getByRole("navigation", { name: "メニュー" })).toBe(menu);
+    expect(contentViewport.scrollTop).toBe(0);
+    expect(menuViewport.scrollTop).toBe(120);
+    expect(
+      within(menu).getByRole("link", { name: "アクティビティ" }),
+    ).toHaveAttribute("aria-current", "page");
+  });
+
+  it("手動の読み込みオーバーレイを本文内だけに表示する", async () => {
+    state.loading = true;
+    const { container } = render(siteLayoutTree(<main>本文</main>));
+    const overlay = container.querySelector(".mantine-LoadingOverlay-root");
+    const busyContent = container.querySelector('[aria-busy="true"]');
+    const menu = await screen.findByRole("navigation", { name: "メニュー" });
+    expect(overlay).toBeVisible();
+    expect(busyContent).toContainElement(overlay as HTMLElement);
+    expect(busyContent).toContainElement(screen.getByRole("main"));
+    expect(busyContent).not.toContainElement(screen.getByRole("banner"));
+    expect(busyContent).not.toContainElement(menu);
+    expect(busyContent).not.toContainElement(screen.getByRole("contentinfo"));
+  });
+
+  it("英語ページでも読み込み表示を本文内に表示する", () => {
+    state.locale = "en";
+    render(siteLayoutTree(<Loading />));
+    expect(screen.getByRole("status", { name: "Loading" })).toBeVisible();
+    expect(screen.getByRole("banner")).toBeInTheDocument();
+  });
 });
 
 afterEach(() => {

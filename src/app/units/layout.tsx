@@ -1,7 +1,4 @@
 import type { Viewport } from "next";
-import PageNavigationLayout from "@/app/components/PageNavigationLayout";
-import Footer from "../components/Footer";
-import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -15,15 +12,5 @@ export default function UnitsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <div className="flex h-dvh flex-col">
-        <PageNavigationLayout scrollMode="scroll-area">
-          {children}
-        </PageNavigationLayout>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </>
-  );
+  return children;
 }

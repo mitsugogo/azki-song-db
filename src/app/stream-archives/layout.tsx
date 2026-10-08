@@ -1,6 +1,3 @@
-import PageNavigationLayout from "@/app/components/PageNavigationLayout";
-import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
-import Footer from "../components/Footer";
 import { Viewport } from "next";
 import StreamArchivesScrollControls from "./StreamArchivesScrollControls";
 
@@ -18,14 +15,8 @@ export default function ArchivesLayout({
 }) {
   return (
     <>
-      <div className="flex flex-col min-h-screen">
-        <PageNavigationLayout scrollMode="window">
-          {children}
-        </PageNavigationLayout>
-        <Footer />
-      </div>
+      {children}
       <StreamArchivesScrollControls />
-      <AnalyticsWrapper />
     </>
   );
 }

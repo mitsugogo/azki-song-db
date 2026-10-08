@@ -1,4 +1,7 @@
 {
+  "Loading": {
+    "label": "Loading"
+  },
   "Header": {
     "toggleNavigation": "Toggle navigation",
     "searchPlaceholder": "Search by title, artist, tags",

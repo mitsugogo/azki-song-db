@@ -4,24 +4,11 @@ import { Breadcrumbs } from "@mantine/core";
 import { HiChevronRight, HiHome } from "react-icons/hi";
 import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "@/app/theme";
-import PageNavigationLayout from "@/app/components/PageNavigationLayout";
-import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
-import Footer from "@/app/components/Footer";
 import { useTranslations } from "next-intl";
 
 /** 共有ページ */
 export default function ShareIndexClient() {
-  return (
-    <>
-      <div className="flex flex-col h-dvh">
-        <PageNavigationLayout scrollMode="scroll-area">
-          <ShareIndexContent />
-        </PageNavigationLayout>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </>
-  );
+  return <ShareIndexContent />;
 }
 
 function ShareIndexContent() {

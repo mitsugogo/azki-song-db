@@ -14,9 +14,6 @@ import {
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { Options } from "youtube-player/dist/types";
 import { Link } from "@/i18n/navigation";
-import { AnalyticsWrapper } from "@/app/components/AnalyticsWrapper";
-import Footer from "@/app/components/Footer";
-import PageNavigationLayout from "@/app/components/PageNavigationLayout";
 import { breadcrumbClasses, pageClasses } from "@/app/theme";
 
 type Props = {
@@ -62,18 +59,10 @@ export default function UnlockMembersClient({
   isConfigured,
 }: Props) {
   return (
-    <>
-      <div className="flex h-dvh flex-col">
-        <PageNavigationLayout scrollMode="scroll-area">
-          <UnlockMembersContent
-            initialUnlocked={initialUnlocked}
-            isConfigured={isConfigured}
-          />
-        </PageNavigationLayout>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </>
+    <UnlockMembersContent
+      initialUnlocked={initialUnlocked}
+      isConfigured={isConfigured}
+    />
   );
 }
 
