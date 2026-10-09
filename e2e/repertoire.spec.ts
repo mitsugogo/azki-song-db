@@ -125,7 +125,7 @@ test("searches, filters, restores URLs and links to the latest performance", asy
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page.locator("tbody > tr")).toHaveCount(2);
   await page.evaluate(() => window.history.pushState(null, "", "/repertoire"));
-  await page.getByRole("combobox", { name: "歌唱の種類", exact: true }).click();
+  await page.getByRole("combobox", { name: "種類", exact: true }).click();
   await page
     .getByRole("option", {
       name: "コラボ・ゲスト・ライブ等",

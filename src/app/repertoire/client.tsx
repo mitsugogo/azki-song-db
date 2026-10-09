@@ -296,15 +296,24 @@ export default function RepertoireClient() {
                         {entry.sources.map((source) => (
                           <Badge
                             key={source}
-                            size="xs"
+                            size="sm"
+                            fz="xs"
+                            fw={500}
+                            lh={1}
+                            px={7}
                             className="max-w-full"
                             styles={{
-                              root: { height: "auto", paddingBlock: 3 },
+                              root: {
+                                height: "auto",
+                                minHeight: 22,
+                                paddingBlock: 4,
+                                letterSpacing: 0,
+                              },
                               label: { whiteSpace: "normal" },
                             }}
                             color={
                               source === "singing"
-                                ? "azki"
+                                ? "green"
                                 : source === "collaboration"
                                   ? "blue"
                                   : "gray"

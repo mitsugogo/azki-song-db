@@ -132,9 +132,20 @@ describe("RepertoireClient", () => {
       screen.getByText("コラボ・ゲスト・ライブ等", { selector: "span" }),
     ).toBeInTheDocument();
     expect(screen.getByText("2026/02/02")).toBeInTheDocument();
+    expect(screen.getByLabelText("種類")).toHaveValue("");
+    expect(screen.getByRole("option", { name: "すべて" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "最後の歌唱日" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "最新" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "曲Aの最新の歌唱をSongDB内で再生" }),
     ).toHaveAttribute("href", "/watch?v=lmnopqrstuv&t=45");
+    expect(
+      screen.getByRole("link", { name: "曲Aの最新の歌唱をSongDB内で再生" }),
+    ).toHaveTextContent("再生");
     expect(
       screen.getByRole("link", { name: "曲Aの最新の歌唱をYouTubeで開く" }),
     ).toHaveAttribute(
@@ -172,7 +183,7 @@ describe("RepertoireClient", () => {
     mocks.params = "";
     rerender(<RepertoireClient />);
     expect(screen.getByRole("heading", { name: "曲B" })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("歌唱の種類"), {
+    fireEvent.change(screen.getByLabelText("種類"), {
       target: { value: "singing" },
     });
     expect(
@@ -198,7 +209,7 @@ describe("RepertoireClient", () => {
       screen.getAllByRole("heading").map((heading) => heading.textContent),
     ).toEqual(["Alpha", "Zulu"]);
     fireEvent.click(
-      screen.getByRole("button", { name: "最後に歌唱で並び替え" }),
+      screen.getByRole("button", { name: "最後の歌唱日で並び替え" }),
     );
     expect(
       screen.getAllByRole("heading").map((heading) => heading.textContent),
@@ -282,10 +293,18 @@ describe("RepertoireClient", () => {
     mocks.songs = [song("Song A")];
     rerender(<RepertoireClient />);
     expect(screen.getByLabelText("Search")).toBeInTheDocument();
+    expect(screen.getByLabelText("Type")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "All" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Last performance date" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Latest" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
         name: "Play the latest performance of Song A in SongDB",
       }),
-    ).toHaveTextContent("SongDB");
+    ).toHaveTextContent("Play");
   });
 });
