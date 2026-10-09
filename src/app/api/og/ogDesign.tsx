@@ -1,4 +1,6 @@
 import { siteConfig } from "@/app/config/siteConfig";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import type React from "react";
 
 export const ogFontFamily = "Zen Maru Gothic";
@@ -136,10 +138,12 @@ export const ogImageHeaders = {
   "Cache-Control": "s-maxage=604800, stale-while-revalidate=900",
 };
 
-export const ogBackgroundImagePath = "/default_ogp_bg_az.png";
+let backgroundImagePromise: Promise<string> | undefined;
 
-export const getOgBackgroundImageUrl = (origin: string) =>
-  new URL(ogBackgroundImagePath, origin).toString();
+export const loadOgBackgroundImage = () =>
+  (backgroundImagePromise ??= readFile(
+    path.join(process.cwd(), "public", "default_ogp_bg_az.png"),
+  ).then((image) => `data:image/png;base64,${image.toString("base64")}`));
 
 export const OgBackground = () => (
   <>

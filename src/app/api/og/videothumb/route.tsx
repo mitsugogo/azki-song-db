@@ -4,7 +4,7 @@ import { isArtTrack } from "@/app/discography/utils/releaseVariants";
 import { fetchSongMetadataLookup } from "@/app/lib/server/fetchSongs";
 import {
   fetchOgFonts,
-  getOgBackgroundImageUrl,
+  loadOgBackgroundImage,
   getOgDetailContentTopPadding,
   getOgDetailThumbnailLayout,
   normalizeOgText,
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       !isStreamArchive && isArtTrack(song) ? "artwork" : "video";
     const thumbnail = getOgDetailThumbnailLayout(thumbnailKind);
     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-    const backgroundUrl = getOgBackgroundImageUrl(requestUrl.origin);
+    const backgroundUrl = await loadOgBackgroundImage();
     const fonts = await fetchOgFonts(`${title}${tags.join("")}`, "detail");
 
     return new ImageResponse(
