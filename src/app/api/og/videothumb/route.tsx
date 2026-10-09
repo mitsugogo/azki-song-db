@@ -12,8 +12,6 @@ import {
   ogImageHeaders,
 } from "../ogDesign";
 
-export const runtime = "edge";
-
 export async function GET(req: NextRequest) {
   try {
     const requestUrl = new URL(req.url);

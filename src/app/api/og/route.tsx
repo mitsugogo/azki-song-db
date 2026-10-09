@@ -7,8 +7,6 @@ import {
   normalizeOgText,
 } from "./ogDesign";
 
-export const runtime = "edge";
-
 const genericOgImageHeaders = {
   "Content-Type": "image/png",
   "Cache-Control": "public, max-age=604800, stale-while-revalidate=900",
