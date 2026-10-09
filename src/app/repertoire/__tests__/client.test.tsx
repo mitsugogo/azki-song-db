@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import ja from "@/messages/ja.json";
 import en from "@/messages/en.json";
+import { PageNavigationViewportContext } from "@/app/components/PageNavigationLayoutContext";
 
 const mocks = vi.hoisted(() => ({
   songs: [] as Song[],
@@ -271,10 +272,21 @@ describe("RepertoireClient", () => {
       song(`曲${String(index).padStart(2, "0")}`),
     );
     window.scrollTo = vi.fn();
-    render(<RepertoireClient />);
+    const viewport = document.createElement("div");
+    viewport.scrollTo = vi.fn();
+    render(
+      <PageNavigationViewportContext.Provider value={{ current: viewport }}>
+        <RepertoireClient />
+      </PageNavigationViewportContext.Provider>,
+    );
     expect(document.querySelectorAll("tbody > tr")).toHaveLength(100);
     fireEvent.click(screen.getByText("last page"));
     expect(document.querySelectorAll("tbody > tr")).toHaveLength(2);
+    expect(viewport.scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: "smooth",
+    });
+    expect(window.scrollTo).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("検索"), {
       target: { value: "曲00" },
     });

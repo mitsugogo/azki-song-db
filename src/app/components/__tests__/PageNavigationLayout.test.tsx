@@ -8,7 +8,12 @@ import {
   within,
 } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { Suspense, type ComponentProps, type ReactNode } from "react";
+import {
+  Suspense,
+  useEffect,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ja from "@/messages/ja.json";
 import en from "@/messages/en.json";
@@ -16,7 +21,7 @@ import PageNavigationLayout from "../PageNavigationLayout";
 import SitePageLayout from "../SitePageLayout";
 import Loading from "../../loading";
 import { ScrollToTopButton } from "../ScrollToTopButton";
-import { usePageNavigationHeaderHeight } from "../PageNavigationLayoutContext";
+import { usePageNavigationViewport } from "../PageNavigationLayoutContext";
 
 const state = vi.hoisted(() => ({
   pathname: "/discography",
@@ -127,9 +132,7 @@ function setViewportWidth(width: number) {
 function renderLayout(children: ReactNode = <main>Discographyの本文</main>) {
   return render(
     <MantineProvider>
-      <PageNavigationLayout scrollMode="scroll-area">
-        {children}
-      </PageNavigationLayout>
+      <PageNavigationLayout>{children}</PageNavigationLayout>
     </MantineProvider>,
   );
 }
@@ -195,7 +198,18 @@ describe("SitePageLayout", () => {
     "/share/where-my-robocosan-began",
     "/units/sample",
     "/unlock-members",
-  ])("%sの本文にページ内スクロールを維持する", (pathname) => {
+    "/search",
+    "/data",
+    "/lives",
+    "/lives/sample",
+    "/lives/sample/day-1",
+    "/lives/compare",
+    "/repertoire",
+    "/seichi-map/ranking",
+    "/statistics",
+    "/stream-archives",
+    "/stream-archives/list",
+  ])("%sの本文をMantineのスクロール領域に統一する", (pathname) => {
     state.pathname = pathname;
     render(siteLayoutTree(<main>本文</main>));
     expect(
@@ -203,23 +217,6 @@ describe("SitePageLayout", () => {
     ).not.toBeNull();
     expect(screen.getAllByRole("banner")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
-  });
-
-  it.each([
-    "/search",
-    "/data",
-    "/lives/sample",
-    "/repertoire",
-    "/seichi-map/ranking",
-    "/statistics",
-    "/stream-archives/list",
-  ])("%sの本文を追加のスクロール領域で包まない", (pathname) => {
-    state.pathname = pathname;
-    render(siteLayoutTree(<main>本文</main>));
-    expect(
-      screen.getByRole("main").closest("[data-scrollarea-viewport]"),
-    ).toBeNull();
-    expect(screen.getByRole("banner")).toBeInTheDocument();
   });
 
   it.each(["/", "/watch", "/unknown", "/discography-other", "/constructor"])(
@@ -295,12 +292,12 @@ describe("SitePageLayout", () => {
     expect(contentViewport.scrollTop).toBe(700);
 
     state.pathname = "/activity";
-    view.rerender(siteLayoutTree(<main>アクティビティの本文</main>));
+    view.rerender(siteLayoutTree(<main>活動の歴史の本文</main>));
     expect(screen.getByRole("navigation", { name: "メニュー" })).toBe(menu);
     expect(contentViewport.scrollTop).toBe(0);
     expect(menuViewport.scrollTop).toBe(120);
     expect(
-      within(menu).getByRole("link", { name: "アクティビティ" }),
+      within(menu).getByRole("link", { name: "活動の歴史" }),
     ).toHaveAttribute("aria-current", "page");
   });
 
@@ -324,6 +321,37 @@ describe("SitePageLayout", () => {
     expect(screen.getByRole("status", { name: "Loading" })).toBeVisible();
     expect(screen.getByRole("banner")).toBeInTheDocument();
   });
+
+  it("ライブ・配信アーカイブ・統計の遷移でも同じ本文領域を先頭へ戻す", async () => {
+    state.pathname = "/lives/sample";
+    const view = render(siteLayoutTree(<main>ライブの本文</main>));
+    const header = screen.getByRole("banner");
+    const menu = await screen.findByRole("navigation", { name: "メニュー" });
+    const menuViewport = menu.closest("[data-scrollarea-viewport]")!;
+    const contentViewport = screen
+      .getByRole("main")
+      .closest("[data-scrollarea-viewport]")!;
+    menuViewport.scrollTop = 120;
+
+    for (const pathname of [
+      "/stream-archives",
+      "/stream-archives/list",
+      "/statistics",
+    ]) {
+      contentViewport.scrollTop = 700;
+      contentViewport.scrollLeft = 50;
+      state.pathname = pathname;
+      view.rerender(siteLayoutTree(<main>{pathname}</main>));
+      expect(
+        screen.getByRole("main").closest("[data-scrollarea-viewport]"),
+      ).toBe(contentViewport);
+      expect(contentViewport.scrollTop).toBe(0);
+      expect(contentViewport.scrollLeft).toBe(0);
+      expect(menuViewport.scrollTop).toBe(120);
+      expect(screen.getByRole("banner")).toBe(header);
+      expect(screen.getByRole("navigation", { name: "メニュー" })).toBe(menu);
+    }
+  });
 });
 
 afterEach(() => {
@@ -337,7 +365,7 @@ describe("PageNavigationLayout", () => {
     ["/units/sample", "ユニット"],
     ["/lives/sample", "ライブ"],
     ["/repertoire", "歌唱レパートリー"],
-    ["/activity/2026/10", "アクティビティ"],
+    ["/activity/2026/10", "活動の歴史"],
     ["/anniversaries", "記念日"],
     ["/data", "全収録データ"],
     ["/stream-archives/list", "配信アーカイブ"],
@@ -355,44 +383,34 @@ describe("PageNavigationLayout", () => {
     );
   });
 
-  it("検索などの専用スクロール領域を包み直さずに維持する", async () => {
-    render(
-      <MantineProvider>
-        <PageNavigationLayout>
-          <main style={{ overflowY: "auto" }}>検索結果</main>
-        </PageNavigationLayout>
-      </MantineProvider>,
-    );
-    await screen.findByRole("navigation", { name: "メニュー" });
-    expect(
-      screen.getByRole("main").closest("[data-scrollarea-viewport]"),
-    ).toBeNull();
-    expect(screen.getByRole("main")).toHaveStyle({ overflowY: "auto" });
-  });
-
   it.each([390, 1440])(
-    "ウィンドウスクロールの幅%dpxでヘッダーの占有高さを伝える",
+    "幅%dpxで本文のスクロール領域を子コンポーネントに伝える",
     async (width) => {
       viewportWidth = width;
+      let observedViewport: HTMLDivElement | null = null;
       function Content() {
-        const height = usePageNavigationHeaderHeight();
-        return <main>{height}</main>;
+        const viewportRef = usePageNavigationViewport();
+        useEffect(() => {
+          observedViewport = viewportRef?.current ?? null;
+        }, [viewportRef]);
+        return <main>{viewportRef?.current ? "本文" : "準備中"}</main>;
       }
       render(
         <MantineProvider>
-          <PageNavigationLayout scrollMode="window">
+          <PageNavigationLayout>
             <Content />
           </PageNavigationLayout>
         </MantineProvider>,
       );
-      expect(
-        screen.getByRole("main").closest("[data-scrollarea-viewport]"),
-      ).toBeNull();
+      const viewport = screen
+        .getByRole("main")
+        .closest("[data-scrollarea-viewport]");
       await waitFor(() =>
-        expect(screen.getByRole("main")).toHaveTextContent(
-          width >= 1280 ? "64" : "0",
-        ),
+        expect(screen.getByRole("main")).toHaveTextContent("本文"),
       );
+      expect(viewport).not.toBeNull();
+      expect(observedViewport).toBe(viewport);
+      expect(viewport).not.toContainElement(screen.getByRole("banner"));
     },
   );
 

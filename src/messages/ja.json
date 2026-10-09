@@ -24,7 +24,7 @@
     "discography": "Discography",
     "units": "ユニット",
     "lives": "ライブ",
-    "activity": "アクティビティ",
+    "activity": "活動の歴史",
     "anniversaries": "記念日",
     "archives": "配信アーカイブ",
     "seichiMapComplete": "聖地マップ",
@@ -232,7 +232,7 @@
     "linkLabel": "リンク",
     "anniversariesTitle": "記念日",
     "viewAnniversaries": "記念日へ",
-    "viewSummary": "活動記録へ",
+    "viewSummary": "活動の歴史へ",
     "todayMilestonesEmpty": "今日は該当するできごとがありません",
     "timelineLabel": "Timeline",
     "timelineTitle": "記念日 & できごと",
@@ -240,8 +240,8 @@
     "recentUpdatesTitle": "更新情報",
     "recentUpdatesAddedCount": "{count}曲追加",
     "noRecentUpdates": "更新情報はありません",
-    "activityLabel": "Activity",
-    "activityTitle": "アクティビティ",
+    "activityLabel": "History",
+    "activityTitle": "活動の歴史",
     "activitySongUpdateBadge": "音楽",
     "activityArchiveBadge": "配信",
     "activityViewMilestoneBadge": "再生数",
@@ -427,11 +427,11 @@
       "whereMyRobocosanBeganDescription": "名前・アイコン・年表を使った共有画像の作成"
     },
     "summary": {
-      "title": "活動記録",
+      "title": "活動の歴史",
       "description": "年ごとのAZKiさんの活動記録（収録楽曲数・カバー・オリジナル曲など）",
       "yearTitle": "AZKiさんの{year}年の歌の活動",
       "yearDescription": "{year}年の歌枠・カバー・オリジナル曲など、歌に関連した活動記録",
-      "monthTitle": "{month}のアクティビティ",
+      "monthTitle": "{month}の活動の歴史",
       "monthDescription": "{month}の音楽・配信・記録・イベント・記念日"
     },
     "anniversaries": {
@@ -1558,7 +1558,7 @@
     "daysSuffix": "日",
     "homeLabel": "HOME",
     "page": {
-      "title": "活動記録",
+      "title": "活動の歴史",
       "description": "各年ごとの活動の要約ページです。年をクリックすると詳細ページへ移動します。",
       "activityDays": "活動日数: {days} 日目（2018/11/15 から {duration} 経過）"
     },

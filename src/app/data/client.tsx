@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Song } from "../types/song";
 import { Link } from "@/i18n/navigation";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
@@ -11,11 +11,7 @@ import Loading from "../loading";
 import useSongs from "../hook/useSongs";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HiSearch } from "react-icons/hi";
-import { TextInput } from "@mantine/core";
-import {
-  OverlayScrollbarsComponent,
-  OverlayScrollbarsComponentRef,
-} from "overlayscrollbars-react";
+import { ScrollArea, TextInput } from "@mantine/core";
 import { getColumns } from "./columns";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
@@ -27,14 +23,12 @@ export default function ClientTable() {
   const songs = allSongs;
   const [filterQuery, setFilterQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [scrollViewport, setScrollViewport] = useState<HTMLElement | null>(
+  const [scrollViewport, setScrollViewport] = useState<HTMLDivElement | null>(
     null,
   );
 
   const t = useTranslations("Data");
   const locale = useLocale();
-
-  const tableContainerRef = useRef<OverlayScrollbarsComponentRef>(null);
 
   const table = useTable({
     features: appTableFeatures,
@@ -50,26 +44,11 @@ export default function ClientTable() {
     onSortingChange: setSorting,
   });
 
-  useEffect(() => {
-    // songs and isLoading are provided by useSongs
-  }, [allSongs, isLoading]);
-
-  // OverlayScrollbars の viewport 要素を取得して ScrollToTopButton に渡す
-  useEffect(() => {
-    const viewport = tableContainerRef.current
-      ?.osInstance()
-      ?.elements().viewport;
-    if (viewport instanceof HTMLElement) {
-      setScrollViewport(viewport);
-    }
-  }, [isLoading]);
-
   const rows = table.getRowModel().rows;
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () =>
-      tableContainerRef.current?.osInstance()?.elements().viewport as Element,
+    getScrollElement: () => scrollViewport,
     estimateSize: () => 86,
     overscan: 15,
   });
@@ -84,7 +63,7 @@ export default function ClientTable() {
   // ブラウザの戻る/進む（popstate）で来たときに再計測
   useEffect(() => {
     const handlePop = () => {
-      // OverlayScrollbars の再初期化が終わるまで少し待つ
+      // 描画の反映後に再計測する
       setTimeout(() => {
         try {
           rowVirtualizer.measure();
@@ -117,8 +96,11 @@ export default function ClientTable() {
             leftSection={<HiSearch />}
             onChange={(e) => setFilterQuery(e.target.value)}
           />
-          <OverlayScrollbarsComponent
-            ref={tableContainerRef}
+          <ScrollArea
+            viewportRef={setScrollViewport}
+            type="auto"
+            scrollbarSize={8}
+            offsetScrollbars="present"
             className="h-[calc(100dvh-280px)] md:h-[calc(100dvh-290px)] lg:h-[calc(100dvh-353px)]"
           >
             <div className="relative">
@@ -224,7 +206,7 @@ export default function ClientTable() {
                 </div>
               </div>
             </div>
-          </OverlayScrollbarsComponent>
+          </ScrollArea>
         </div>
       </div>
       <ScrollToTopButton scrollElement={scrollViewport} />

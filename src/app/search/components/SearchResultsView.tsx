@@ -58,11 +58,7 @@ const SearchResultsView = ({
     virtualRows.length > 0 ? virtualRows[virtualRows.length - 1].end : 0;
 
   return (
-    <div
-      ref={parentRef}
-      className="grow overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 lg:p-6 lg:pb-0"
-      style={{ scrollbarGutter: "stable" }}
-    >
+    <div ref={parentRef} className="grow px-4 py-5 sm:px-6 lg:p-6 lg:pb-0">
       <SearchBreadcrumb
         currentLabel={t("labelWithQuery", { term: searchTerm })}
       />

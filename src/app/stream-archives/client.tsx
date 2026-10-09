@@ -29,8 +29,7 @@ import {
   useElementSize,
   useMergedRef,
 } from "@mantine/hooks";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { usePageNavigationHeaderHeight } from "../components/PageNavigationLayoutContext";
+import { usePageScrollVirtualizer } from "../hook/usePageScrollVirtualizer";
 import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
@@ -1011,7 +1010,6 @@ const DesktopArchiveRow = memo(function DesktopArchiveRow({
 });
 
 export default function ArchivesPageClient() {
-  const navigationHeaderHeight = usePageNavigationHeaderHeight();
   const t = useTranslations("Archives");
   const locale = useLocale();
   const { items, isLoading } = useArchives();
@@ -1032,7 +1030,6 @@ export default function ArchivesPageClient() {
     Set<string>
   >(() => new Set());
   const [areMobileFiltersOpen, setAreMobileFiltersOpen] = useState(false);
-  const [archiveScrollMargin, setArchiveScrollMargin] = useState(0);
   const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
     string | null
   >(null);
@@ -1180,7 +1177,7 @@ export default function ArchivesPageClient() {
   const displayGroupCount =
     viewMode === "series" ? seriesViewGroups.length : archiveGroups.length;
 
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = usePageScrollVirtualizer(archiveListRef, {
     count: viewMode === "list" ? archiveEntries.length : 0,
     estimateSize: (index) => {
       const entry = archiveEntries[index];
@@ -1189,7 +1186,6 @@ export default function ArchivesPageClient() {
       }
       return entry?.type === "group" ? 68 : 440;
     },
-    scrollMargin: archiveScrollMargin,
     overscan: 8,
     // React 19では行refの計測中にTanStack VirtualのflushSyncを呼べない。
     useFlushSync: false,
@@ -1237,7 +1233,6 @@ export default function ArchivesPageClient() {
 
     const stickyOffset =
       (rowVirtualizer.scrollOffset ?? 0) +
-      navigationHeaderHeight +
       stickyControlsHeight +
       desktopStickyHeaderHeight;
     const activeVirtualRow = virtualRows.find((virtualRow) => {
@@ -1258,7 +1253,6 @@ export default function ArchivesPageClient() {
     desktopStickyHeaderHeight,
     expandedTimestampVideoIds,
     isDesktop,
-    navigationHeaderHeight,
     rowVirtualizer.scrollOffset,
     stickyControlsHeight,
     virtualRows,
@@ -1309,51 +1303,6 @@ export default function ArchivesPageClient() {
     mediaQuery.addEventListener("change", updateLayoutMode);
     return () => mediaQuery.removeEventListener("change", updateLayoutMode);
   }, []);
-
-  useEffect(() => {
-    if (viewMode !== "list") {
-      return;
-    }
-
-    let frameId: number | null = null;
-    const updateScrollMargin = () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-
-      frameId = window.requestAnimationFrame(() => {
-        frameId = null;
-        const listElement = archiveListRef.current;
-        if (!listElement) {
-          return;
-        }
-
-        const nextScrollMargin =
-          listElement.getBoundingClientRect().top + window.scrollY;
-        setArchiveScrollMargin((current) =>
-          Math.abs(current - nextScrollMargin) < 1 ? current : nextScrollMargin,
-        );
-      });
-    };
-
-    updateScrollMargin();
-    window.addEventListener("resize", updateScrollMargin);
-    return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-      window.removeEventListener("resize", updateScrollMargin);
-    };
-  }, [
-    archiveEntries.length,
-    areMobileFiltersOpen,
-    desktopStickyHeaderHeight,
-    isDesktop,
-    isLoading,
-    selectedCastNames,
-    stickyControlsHeight,
-    viewMode,
-  ]);
 
   useEffect(() => {
     rowVirtualizer.measure();
@@ -1598,7 +1547,6 @@ export default function ArchivesPageClient() {
       <div
         ref={stickyControlsRef}
         className="sticky top-0 z-20 -mx-4 mb-4 bg-white/95 px-4 py-2 backdrop-blur dark:bg-gray-900/95 sm:-mx-6 sm:px-6"
-        style={{ top: navigationHeaderHeight }}
       >
         <SegmentedControl
           value={viewMode}
@@ -1754,7 +1702,7 @@ export default function ArchivesPageClient() {
           <div
             ref={desktopStickyHeaderRef}
             className="sticky z-10"
-            style={{ top: stickyControlsHeight + navigationHeaderHeight }}
+            style={{ top: stickyControlsHeight }}
           >
             <div
               ref={desktopHeaderScrollRef}
@@ -1898,7 +1846,7 @@ export default function ArchivesPageClient() {
                       className="absolute left-0 top-0 w-full"
                       style={{
                         transform: `translateY(${
-                          virtualRow.start - archiveScrollMargin
+                          virtualRow.start - rowVirtualizer.options.scrollMargin
                         }px)`,
                       }}
                     >
@@ -1974,7 +1922,7 @@ export default function ArchivesPageClient() {
                 className="absolute left-0 top-0 w-full"
                 style={{
                   transform: `translateY(${
-                    virtualRow.start - archiveScrollMargin
+                    virtualRow.start - rowVirtualizer.options.scrollMargin
                   }px)`,
                 }}
               >

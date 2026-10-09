@@ -25,6 +25,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Locale } from "@/app/types/locale";
 import { useSearchParams } from "next/navigation";
 import { isSungByAzki } from "./utils/azkiOnly";
+import { usePageNavigationViewport } from "../components/PageNavigationLayoutContext";
 
 interface TagCategory {
   label: string;
@@ -71,6 +72,7 @@ const getInitialFilterMode = (): FilterMode => {
 };
 
 const SearchPageClient = () => {
+  const viewportRef = usePageNavigationViewport();
   const { allSongs, isLoading } = useSongs({ includeMembersOnly: true });
   const [windowWidth, setWindowWidth] = useState(0);
   const [searchValue, setSearchValue] = useState<string[]>([]);
@@ -351,7 +353,7 @@ const SearchPageClient = () => {
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => viewportRef?.current ?? null,
     estimateSize: () => estimatedRowHeight,
     overscan: 5,
   });

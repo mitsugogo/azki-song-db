@@ -24,6 +24,7 @@ import RepertoireYouTubeLink from "./RepertoireYouTubeLink";
 import { Link } from "@/i18n/navigation";
 import useSongs from "@/app/hook/useSongs";
 import historyHelper from "@/app/lib/history";
+import { usePageNavigationViewport } from "@/app/components/PageNavigationLayoutContext";
 import { formatDate } from "@/app/lib/formatDate";
 import {
   buildRepertoire,
@@ -68,6 +69,7 @@ const readFilters = (params: URLSearchParams) => {
 };
 
 export default function RepertoireClient() {
+  const viewportRef = usePageNavigationViewport();
   const t = useTranslations("Repertoire");
   const locale = useLocale();
   const params = useSearchParams();
@@ -410,7 +412,7 @@ export default function RepertoireClient() {
             value={currentPage}
             onChange={(value) => {
               setPage(value);
-              window.scrollTo({ top: 0, behavior: "smooth" });
+              viewportRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
             }}
           />
         </div>

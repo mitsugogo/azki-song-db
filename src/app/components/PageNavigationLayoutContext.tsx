@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 
-export const PageNavigationHeaderHeightContext = createContext(0);
+export const PageNavigationViewportContext =
+  createContext<RefObject<HTMLDivElement | null> | null>(null);
 
-export function usePageNavigationHeaderHeight() {
-  return useContext(PageNavigationHeaderHeightContext);
+export function usePageNavigationViewport() {
+  return useContext(PageNavigationViewportContext);
 }

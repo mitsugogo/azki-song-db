@@ -24,7 +24,7 @@
     "discography": "Discography",
     "units": "Units",
     "lives": "Lives",
-    "activity": "Activity",
+    "activity": "History",
     "anniversaries": "Anniversaries",
     "archives": "Stream Archives",
     "seichiMapComplete": "Seichi Map",
@@ -233,7 +233,7 @@
     "linkLabel": "Link",
     "anniversariesTitle": "Anniversaries",
     "viewAnniversaries": "See anniversaries",
-    "viewSummary": "See activity",
+    "viewSummary": "See history",
     "todayMilestonesEmpty": "Nothing happened on this day",
     "timelineLabel": "Timeline",
     "timelineTitle": "Anniversaries & Events",
@@ -241,8 +241,8 @@
     "recentUpdatesTitle": "Updates",
     "recentUpdatesAddedCount": "{count} songs added",
     "noRecentUpdates": "No recent updates",
-    "activityLabel": "Activity",
-    "activityTitle": "Activity",
+    "activityLabel": "History",
+    "activityTitle": "History",
     "activitySongUpdateBadge": "Music",
     "activityArchiveBadge": "Stream",
     "activityViewMilestoneBadge": "Views",
@@ -428,11 +428,11 @@
       "myBest9WithTopic": "Theme: \"{title}\" | Ultimate 9 song generator | {siteName}"
     },
     "summary": {
-      "title": "Activity Summary",
+      "title": "History",
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.).",
       "yearTitle": "AZKi's song activity in {year}",
       "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals",
-      "monthTitle": "{month} activity",
+      "monthTitle": "History for {month}",
       "monthDescription": "Music, streams, milestones, events, and anniversaries from {month}."
     },
     "anniversaries": {
@@ -1567,7 +1567,7 @@
     "daysSuffix": " days",
     "homeLabel": "HOME",
     "page": {
-      "title": "Activity Summary",
+      "title": "History",
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.). Click a year for details.",
       "activityDays": "Days active: {days} (since 2018/11/15 — {duration})"
     },
