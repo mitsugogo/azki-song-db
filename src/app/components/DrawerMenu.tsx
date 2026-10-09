@@ -89,7 +89,6 @@ export default function DrawerMenu({
         { name: t("discography"), href: "/discography" },
         { name: t("units"), href: "/units" },
         { name: t("lives"), href: "/lives" },
-        { name: t("repertoire"), href: "/repertoire" },
         { name: t("activity"), href: "/activity" },
         { name: t("anniversaries"), href: "/anniversaries" },
         { name: t("seichiMapComplete"), href: "/seichi-map" },
@@ -99,6 +98,7 @@ export default function DrawerMenu({
       category: t("categoryArchive"),
       items: [
         { name: t("archives"), href: "/stream-archives" },
+        { name: t("repertoire"), href: "/repertoire" },
         { name: t("statistics"), href: "/statistics" },
         { name: t("allData"), href: "/data" },
       ],
