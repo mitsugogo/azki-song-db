@@ -8,6 +8,7 @@ import {
   getSongInstanceKey,
   groupReleaseVariants,
   hasMultipleReleaseVariants,
+  matchesReleaseVariantGroupKey,
 } from "../releaseVariants";
 
 const baseSong = (overrides: Partial<Song>): Song =>
@@ -113,6 +114,121 @@ describe("releaseVariants", () => {
     ]);
 
     expect(representative.video_id).toBe("music-video");
+  });
+
+  const magiaSong = (overrides: Partial<Song>): Song =>
+    baseSong({
+      title: "Magia",
+      artist: "Kalafina",
+      album: "",
+      sing: "アキ・ローゼンタール、大神ミオ、AZKi",
+      sings: ["アキ・ローゼンタール", "大神ミオ", "AZKi"],
+      ...overrides,
+    });
+  const magiaMv = magiaSong({
+    video_id: "Ti2ELlQbuYc",
+    video_title: "Magia / RosaMiA🌹 (cover)",
+    tags: ["カバー曲", "カバー曲MV", "歌ってみた"],
+    source_order: 1934,
+  });
+  const magiaLive = magiaSong({
+    video_id: "X0wwLISllTM",
+    video_title: "【3D Live ver.】Magia / RosaMiA🌹 (cover)",
+    tags: ["カバー曲", "歌ってみた", "公式切り抜き"],
+    source_order: 1935,
+  });
+
+  it("MagiaのMVと公式3D Live版をまとめ、ライブ本編の歌唱は別に残す", () => {
+    const birthdayLive = magiaSong({
+      video_id: "_tBlI-l8WLk",
+      video_title: "【 3DLIVE 】#アキロゼ生誕祭2026 ーLife is GAMEー",
+      tags: ["ゲスト出演", "3Dライブ"],
+      source_order: 2093,
+      start: 2787,
+    });
+    const groups = groupReleaseVariants([magiaLive, magiaMv, birthdayLive]);
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0].variants).toEqual([magiaMv, magiaLive]);
+    expect(groups[0].representative).toBe(magiaMv);
+    expect(getReleaseVariantKind(magiaLive)).toBe("3d-live");
+    expect(hasMultipleReleaseVariants(groups[0].variants)).toBe(true);
+    expect(groups[1].variants).toEqual([birthdayLive]);
+    for (const song of [magiaMv, magiaLive]) {
+      expect(matchesReleaseVariantGroupKey(song, groups[0].key)).toBe(true);
+    }
+    expect(matchesReleaseVariantGroupKey(birthdayLive, groups[0].key)).toBe(
+      false,
+    );
+    expect(
+      matchesReleaseVariantGroupKey(
+        { ...magiaLive, sing: "AZKi", sings: ["AZKi"] },
+        groups[0].key,
+      ),
+    ).toBe(false);
+  });
+
+  it.each([
+    ["別の曲名", { title: "Another Song" }],
+    ["別のアーティスト", { artist: "Another Artist" }],
+    ["別の歌唱者", { sing: "AZKi", sings: ["AZKi"] }],
+    ["別のアルバム", { album: "Another Album" }],
+    ["歌唱者が不明", { sing: "", sings: [] }],
+    ["公式切り抜きタグなし", { tags: ["カバー曲", "3Dライブ"] }],
+    ["3D Live版の表記なし", { video_title: "Magia / RosaMiA🌹 (cover)" }],
+    ["ライブ本編の表記", { video_title: "【3D Live】Birthday Live" }],
+  ] satisfies [string, Partial<Song>][])(
+    "%sの動画はMVとまとめない",
+    (_label, overrides) => {
+      const groups = groupReleaseVariants([
+        magiaMv,
+        { ...magiaLive, ...overrides },
+      ]);
+
+      expect(groups).toHaveLength(2);
+      expect(groups.every((group) => group.variants.length === 1)).toBe(true);
+    },
+  );
+
+  it("3D Live版は表記ゆれと歌唱者の順序を正規化してアートトラックともまとめる", () => {
+    const artTrack = { ...magiaMv, tags: ["カバー曲", "アートトラック"] };
+    const live = {
+      ...magiaLive,
+      title: " Ｍａｇｉａ ",
+      artist: " Ｋａｌａｆｉｎａ ",
+      sing: "AZKi、大神ミオ、アキ・ローゼンタール",
+      sings: ["AZKi", "大神ミオ", "アキ・ローゼンタール"],
+      video_title: "【３Ｄ Ｌｉｖｅ ｖｅｒ．】Magia / RosaMiA🌹 (cover)",
+    };
+    const groups = groupReleaseVariants([live, artTrack]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].variants).toEqual([artTrack, live]);
+  });
+
+  it("対応するMVやアートトラックがない3D Live動画同士はまとめない", () => {
+    const groups = groupReleaseVariants([
+      magiaLive,
+      { ...magiaLive, video_id: "another-live", source_order: 2000 },
+    ]);
+
+    expect(groups).toHaveLength(2);
+  });
+
+  it("3D Live版がない既存のMVグループでは歌唱者による集約条件を変えない", () => {
+    const soloMv = baseSong({ video_id: "solo-mv", tags: ["カバー曲MV"] });
+    const groupMv = baseSong({
+      video_id: "group-mv",
+      tags: ["カバー曲MV"],
+      sing: "hololive members",
+      sings: ["hololive members"],
+    });
+
+    expect(groupReleaseVariants([soloMv, groupMv])[0].variants).toEqual([
+      groupMv,
+      soloMv,
+    ]);
+    expect(groupReleaseVariants([soloMv, groupMv])).toHaveLength(1);
   });
 
   it("同名でも別アーティストや別アルバムは混ぜない", () => {

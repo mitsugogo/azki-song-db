@@ -85,4 +85,52 @@ describe("useDiscographyData", () => {
       ),
     ).toEqual(["unit"]);
   });
+
+  it.each([false, true])(
+    "Magiaを1曲・2動画として数え、MVを代表にする（アルバム集約: %s）",
+    (groupByAlbum) => {
+      const metadata = {
+        artist: "Kalafina",
+        sing: "アキ・ローゼンタール、大神ミオ、AZKi",
+        sings: ["アキ・ローゼンタール", "大神ミオ", "AZKi"],
+      };
+      const mv = createSong("Ti2ELlQbuYc", "Magia", {
+        ...metadata,
+        video_title: "Magia / RosaMiA🌹 (cover)",
+        tags: ["カバー曲", "カバー曲MV", "歌ってみた"],
+        source_order: 1934,
+        broadcast_at: "2026-08-12T00:00:00Z",
+      });
+      const live = createSong("X0wwLISllTM", "Magia", {
+        ...metadata,
+        video_title: "【3D Live ver.】Magia / RosaMiA🌹 (cover)",
+        tags: ["カバー曲", "歌ってみた", "公式切り抜き"],
+        source_order: 1935,
+        broadcast_at: "2026-08-13T00:00:00Z",
+      });
+      mocks.useSongs.mockReturnValue({
+        allSongs: [live, mv],
+        isLoading: false,
+      });
+
+      const { result } = renderHook(() =>
+        useDiscographyData(groupByAlbum, false),
+      );
+
+      expect(result.current.tabCounts).toMatchObject({ all: 1, covers: 1 });
+      for (const items of [
+        result.current.coverSongCountsByReleaseDate,
+        result.current.allSongCountsByReleaseDate,
+      ]) {
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+          count: 1,
+          isAlbum: false,
+          firstVideo: mv,
+          lastVideo: mv,
+        });
+        expect(items[0].videos).toHaveLength(2);
+      }
+    },
+  );
 });

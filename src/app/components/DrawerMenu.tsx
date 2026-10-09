@@ -13,7 +13,7 @@ import {
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { useHover, useMediaQuery } from "@mantine/hooks";
 import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
@@ -67,6 +67,8 @@ export default function DrawerMenu({
   const [buildDate, setBuildDate] = useState("N/A");
   const [appVersion, setAppVersion] = useState("N/A");
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
+  const { hovered: isSidebarHovered, ref: sidebarScrollAreaRef } =
+    useHover<HTMLDivElement>();
   const isMobile = useMediaQuery("(max-width: 50em)");
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
   const { songsFetchedAt } = useSongs();
@@ -394,13 +396,17 @@ export default function DrawerMenu({
       {variant === "sidebar" ? (
         <aside className="hidden xl:block h-full w-72 shrink-0 overflow-hidden border-r border-light-gray-200 bg-white px-3 py-4 dark:border-gray-600 dark:bg-gray-800/75">
           <ScrollArea
+            ref={sidebarScrollAreaRef}
             h="100%"
-            type="auto"
+            type={isSidebarHovered ? "auto" : "scroll"}
             scrollbars="y"
             scrollbarSize={8}
             offsetScrollbars="y"
             overscrollBehavior="contain"
-            styles={{ content: { display: "flex", minHeight: "100%" } }}
+            styles={{
+              content: { display: "flex", minHeight: "100%" },
+              thumb: { opacity: "calc(var(--thumb-opacity, 1) * 0.25)" },
+            }}
           >
             {menuContent}
           </ScrollArea>

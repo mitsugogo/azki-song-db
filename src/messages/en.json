@@ -899,6 +899,7 @@
       "mv": "MV",
       "animated": "AniAZ",
       "artTrack": "Art Track",
+      "live3d": "3D Live",
       "other": "Video",
       "switcherLabel": "Switch video version"
     },
