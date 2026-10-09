@@ -16,6 +16,7 @@ import SearchInput from "./SearchInput";
 import DrawerMenu from "./DrawerMenu";
 import { siteConfig } from "@/app/config/siteConfig";
 import { routing } from "../../i18n/routing";
+import ActivityDaysBadge from "./ActivityDaysBadge";
 
 type HeaderProps = {
   navigation?: {
@@ -58,7 +59,7 @@ export function Header({
     <>
       <header className="relative z-30 bg-primary-800 dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
         <div className="w-full px-2">
-          <div className="relative flex h-10 lg:h-16 items-center">
+          <div className="relative flex h-14 md:h-10 lg:h-16 items-center gap-2">
             <div
               className={`absolute inset-y-0 left-0 flex items-center z-10 ${withDesktopNavigation ? "xl:hidden" : ""}`}
             >
@@ -70,23 +71,24 @@ export function Header({
               />
             </div>
             <div
-              className={`flex flex-1 items-center justify-start ml-12 ${withDesktopNavigation ? "xl:ml-0" : ""}`}
+              className={`flex min-w-0 flex-1 items-center justify-start ml-12 ${withDesktopNavigation ? "xl:ml-0" : ""}`}
             >
-              <div className="flex shrink-0 items-center lg:ml-2">
-                <Link href="/">
+              <div className="flex min-w-0 items-center gap-1 md:shrink-0 md:gap-3 lg:ml-2">
+                <Link href="/" className="min-w-0 max-w-full">
                   <>
-                    <h1 className="hidden sm:block text-lg lg:text-lg font-semibold tracking-[0.06em]">
+                    <h1 className="hidden sm:block truncate text-lg lg:text-lg font-semibold tracking-[0.06em]">
                       {siteConfig.siteNameUpper}
                     </h1>
-                    <h1 className="sm:hidden text-md font-semibold tracking-[0.04em]">
-                      {siteConfig.siteNameUpper}
+                    <h1 className="sm:hidden truncate text-xs font-semibold tracking-[0.04em]">
+                      {siteConfig.shortName}
                     </h1>
                   </>
                 </Link>
+                <ActivityDaysBadge />
               </div>
               {/* 検索フィールド - lg以上で表示 */}
-              <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:mx-4">
-                <div className="min-w-md max-w-full">
+              <div className="hidden min-w-0 lg:flex lg:flex-1 lg:justify-center lg:mx-4">
+                <div className="w-full max-w-md">
                   <SearchInput
                     allSongs={allSongs}
                     searchValue={
@@ -179,7 +181,7 @@ export function Header({
                 </div>
               </div>
             </div>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            <div className="flex shrink-0 items-center pr-2 sm:ml-6 sm:pr-0">
               <Link
                 href={siteConfig.channelUrl}
                 target="_blank"
