@@ -5,6 +5,7 @@ import { MonthPickerInput } from "@mantine/dates";
 import { useEffect, useMemo, useState } from "react";
 import { HiCalendar, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import ActivityCalendarSection from "../activity/ActivityCalendarSection";
+import { isActivityMonthInRange } from "../activity/monthActivity";
 import {
   ActivityTimelineFilterMenu,
   DEFAULT_ACTIVITY_TIMELINE_DISPLAY_FILTERS,
@@ -20,6 +21,7 @@ import useMilestones from "../hook/useMilestones";
 import { buildAnniversaryActivityItems } from "../lib/activityAnniversaries";
 import { getActivityJstDateKey } from "../lib/activityCalendar";
 import { filterActivityTimelineItemsForDisplay } from "../lib/activityTimelineFilters";
+import historyHelper from "../lib/history";
 import type { ChannelEntry } from "../types/api/yt/channels";
 import type { Song } from "../types/song";
 import type { ArchiveCalendarDayStats, ArchiveStatsItem } from "./archiveStats";
@@ -103,9 +105,32 @@ export default function ArchiveMonthlyCalendar({
   const [includeExternalChannels, setIncludeExternalChannels] = useState(true);
 
   useEffect(() => {
-    if (defaultMonth) {
-      setSelectedMonth((current) => current ?? `${defaultMonth}-01`);
-    }
+    const restoreMonth = () => {
+      const monthParam = new URL(window.location.href).searchParams.get(
+        "month",
+      );
+      const match = monthParam?.match(/^(\d{4})-(\d{2})$/);
+      const monthFromUrl =
+        match &&
+        isActivityMonthInRange({
+          year: Number(match[1]),
+          month: Number(match[2]),
+        })
+          ? match[0]
+          : null;
+
+      setSelectedMonth(
+        monthFromUrl
+          ? `${monthFromUrl}-01`
+          : defaultMonth
+            ? `${defaultMonth}-01`
+            : null,
+      );
+    };
+
+    restoreMonth();
+    window.addEventListener("popstate", restoreMonth);
+    return () => window.removeEventListener("popstate", restoreMonth);
   }, [defaultMonth]);
 
   const monthValue = selectedMonth?.slice(0, 7) ?? defaultMonth;
@@ -201,12 +226,22 @@ export default function ArchiveMonthlyCalendar({
     !monthValue || Boolean(minMonth && monthValue <= minMonth);
   const isNextMonthDisabled =
     !monthValue || Boolean(maxMonth && monthValue >= maxMonth);
+  const handleMonthChange = (value: string | null) => {
+    setSelectedMonth(value);
+    const url = new URL(window.location.href);
+    if (value) {
+      url.searchParams.set("month", value.slice(0, 7));
+    } else {
+      url.searchParams.delete("month");
+    }
+    historyHelper.replaceUrlIfDifferent(url.href, { dispatchEvent: false });
+  };
   const handleMonthShift = (offset: number) => {
     if (!monthValue) {
       return;
     }
 
-    setSelectedMonth(`${shiftMonth(monthValue, offset)}-01`);
+    handleMonthChange(`${shiftMonth(monthValue, offset)}-01`);
   };
 
   return (
@@ -260,7 +295,7 @@ export default function ArchiveMonthlyCalendar({
           <MonthPickerInput
             aria-label={labels.monthLabel}
             value={selectedMonth}
-            onChange={setSelectedMonth}
+            onChange={handleMonthChange}
             leftSection={<HiCalendar />}
             minDate={minDate}
             maxDate={maxDate}

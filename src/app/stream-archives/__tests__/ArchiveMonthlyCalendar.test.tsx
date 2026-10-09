@@ -1,5 +1,6 @@
 import { MantineProvider } from "@mantine/core";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -45,9 +46,46 @@ vi.mock("../../hook/useMilestones", () => ({
   default: () => ({ items: scheduledItems.milestones, isLoading: false }),
 }));
 
+const renderCalendar = () =>
+  render(
+    <MantineProvider>
+      <ArchiveMonthlyCalendar
+        days={
+          new Map(
+            ["2025-11-01", "2026-02-01"].map((dateKey) => [
+              dateKey,
+              {
+                dateKey,
+                streamCount: 0,
+                totalDurationSeconds: 0,
+                items: [],
+              },
+            ]),
+          )
+        }
+        archives={[]}
+        latestMonth="2026-02"
+        locale="ja"
+        songs={[]}
+        channels={[]}
+        labels={{
+          title: "月間カレンダー",
+          subtitle: "日ごとの配信",
+          monthLabel: "表示月",
+          previousMonth: "前月を表示",
+          nextMonth: "次月を表示",
+          scheduledTime: (time) => `配信予定 ${time}`,
+          empty: "データなし",
+          includeExternalChannels: "他のチャンネルも含む",
+        }}
+      />
+    </MantineProvider>,
+  );
+
 describe("ArchiveMonthlyCalendar", () => {
   afterEach(() => vi.useRealTimers());
   beforeEach(() => {
+    window.history.replaceState(null, "", "/stream-archives");
     scheduledItems.events = [];
     scheduledItems.milestones = [];
   });
@@ -200,6 +238,7 @@ describe("ArchiveMonthlyCalendar", () => {
     expect(nextMonthButton).toBeDisabled();
 
     fireEvent.click(previousMonthButton);
+    expect(window.location.search).toBe("?month=2025-12");
     expect(
       container.querySelector('button[data-date="2025-12-31"]'),
     ).toBeInTheDocument();
@@ -207,6 +246,7 @@ describe("ArchiveMonthlyCalendar", () => {
     expect(nextMonthButton).toBeEnabled();
 
     fireEvent.click(nextMonthButton);
+    expect(window.location.search).toBe("?month=2026-01");
     expect(
       container.querySelector('button[data-date="2026-01-02"]'),
     ).toBeInTheDocument();
@@ -354,5 +394,85 @@ describe("ArchiveMonthlyCalendar", () => {
         screen.queryByTestId("activity-detail-content"),
       ).not.toBeInTheDocument(),
     );
+  });
+
+  it("restores the URL month and preserves other parameters, locale and hash on changes", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+    window.history.replaceState(
+      null,
+      "",
+      "/en/stream-archives?month=2025-12&other=keep#calendar",
+    );
+    const { container, unmount } = renderCalendar();
+    expect(
+      container.querySelector('button[data-date="2025-12-01"]'),
+    ).toBeInTheDocument();
+    const initialHistoryLength = window.history.length;
+
+    fireEvent.click(screen.getByRole("button", { name: "次月を表示" }));
+    expect(window.location.pathname).toBe("/en/stream-archives");
+    expect(window.location.search).toBe("?month=2026-01&other=keep");
+    expect(window.location.hash).toBe("#calendar");
+    expect(window.history.length).toBe(initialHistoryLength);
+
+    unmount();
+    const restored = renderCalendar();
+    expect(
+      restored.container.querySelector('button[data-date="2026-01-15"]'),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("writes the selected month from the month picker to the URL", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+    const { container } = renderCalendar();
+
+    fireEvent.click(screen.getByLabelText("表示月"));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "2月", exact: true }),
+    );
+
+    expect(window.location.search).toBe("?month=2026-02");
+    expect(
+      container.querySelector('button[data-date="2026-02-01"]'),
+    ).toBeInTheDocument();
+  });
+
+  it.each(["2026-13", "2026-00", "2018-10", "2026-2", "invalid", ""])(
+    "falls back to today for an invalid month parameter: %s",
+    (month) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+      window.history.replaceState(null, "", `/stream-archives?month=${month}`);
+      const { container } = renderCalendar();
+
+      expect(
+        container.querySelector('button[data-date="2026-01-15"]'),
+      ).toHaveAttribute("aria-pressed", "true");
+    },
+  );
+
+  it("restores the month on browser history navigation and resets to today without a parameter", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-01-15T03:00:00.000Z"));
+    const { container } = renderCalendar();
+
+    act(() => {
+      window.history.replaceState(null, "", "/stream-archives?month=2025-12");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(
+      container.querySelector('button[data-date="2025-12-01"]'),
+    ).toBeInTheDocument();
+
+    act(() => {
+      window.history.replaceState(null, "", "/stream-archives");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(
+      container.querySelector('button[data-date="2026-01-15"]'),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(window.location.search).toBe("");
   });
 });

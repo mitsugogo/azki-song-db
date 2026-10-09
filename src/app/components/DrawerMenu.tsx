@@ -92,15 +92,15 @@ export default function DrawerMenu({
         { name: t("repertoire"), href: "/repertoire" },
         { name: t("activity"), href: "/activity" },
         { name: t("anniversaries"), href: "/anniversaries" },
-        { name: t("allData"), href: "/data" },
+        { name: t("seichiMapComplete"), href: "/seichi-map" },
       ],
     },
     {
       category: t("categoryArchive"),
       items: [
         { name: t("archives"), href: "/stream-archives" },
-        { name: t("seichiMapComplete"), href: "/seichi-map" },
         { name: t("statistics"), href: "/statistics" },
+        { name: t("allData"), href: "/data" },
       ],
     },
     {
