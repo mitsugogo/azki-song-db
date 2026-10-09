@@ -3,7 +3,7 @@
 import { Skeleton } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
-import { LuPlay } from "react-icons/lu";
+import { FaPlay } from "react-icons/fa6";
 import { Link } from "../../i18n/navigation";
 import YoutubeThumbnail from "../components/YoutubeThumbnail";
 import { formatDate } from "../lib/formatDate";
@@ -67,7 +67,7 @@ export const HomeLatestVideoSection = memo(function HomeLatestVideoSection({
             </div>
           </div>
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 text-primary transition group-hover:bg-primary/5 dark:border-pink-200/20 dark:text-pink-100 dark:group-hover:bg-pink-200/10 sm:size-10">
-            <LuPlay className="size-4" aria-hidden="true" />
+            <FaPlay className="size-4" aria-hidden="true" />
           </span>
         </Link>
       ) : null}
