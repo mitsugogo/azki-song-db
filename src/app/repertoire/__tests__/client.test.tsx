@@ -36,6 +36,7 @@ vi.mock("@/i18n/navigation", () => ({
   Link: ({ prefetch, ...props }: any) => <a {...props} />,
 }));
 vi.mock("@mantine/core", () => ({
+  Anchor: ({ size, fw, ...props }: any) => <a {...props} />,
   Badge: ({ children }: any) => <span>{children}</span>,
   Loader: () => null,
   Button: ({
@@ -89,8 +90,13 @@ vi.mock("@mantine/core", () => ({
       </select>
     </label>
   ),
-  Pagination: ({ total, onChange }: any) => (
-    <button onClick={() => onChange(total)}>last page</button>
+  Pagination: ({ total, value, onChange }: any) => (
+    <button
+      aria-label={`Page ${value} of ${total}`}
+      onClick={() => onChange(total)}
+    >
+      last page
+    </button>
   ),
 }));
 
@@ -118,6 +124,47 @@ afterEach(() => {
 });
 
 describe("RepertoireClient", () => {
+  it.each([
+    ["1000%SPARKING!", "1000%25SPARKING%21"],
+    ["愛 & Love #1?", "%E6%84%9B+%26+Love+%231%3F"],
+  ])(
+    "links %s to the STREAMER search even without a playable video",
+    (title, keyword) => {
+      mocks.songs = [song(title, { video_id: "" })];
+      render(<RepertoireClient />);
+      const link = screen.getByRole("link", {
+        name: `${title}をJOYSOUND for STREAMERで検索`,
+      });
+      expect(link).toHaveTextContent(/^JOYSOUND for STREAMERで検索$/);
+      expect(link).toHaveAttribute(
+        "href",
+        `https://www.joysound.com/web/search/cross?cts013=1&match=1&keyword=${keyword}`,
+      );
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      expect(
+        screen.getByText("再生できる動画が登録されていません。"),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("searches the original Japanese title when the displayed title is English", () => {
+    mocks.locale = "en";
+    mocks.songs = [
+      song("English title", {
+        hl: { ja: { title: "原曲名", artist: "歌手", artists: ["歌手"] } },
+      }),
+    ];
+    render(<RepertoireClient />);
+    const link = screen.getByRole("link", {
+      name: "Search for English title on JOYSOUND for STREAMER",
+    });
+    expect(link).toHaveTextContent(/^Search JOYSOUND for STREAMER$/);
+    expect(
+      new URL(link.getAttribute("href")!).searchParams.get("keyword"),
+    ).toBe("原曲名");
+  });
+
   it("shows both labels, tags, JST date and latest playback links; filters and clears", () => {
     mocks.songs = [
       song("曲A", { tags: ["歌枠", "アニソン"] }),
@@ -267,31 +314,72 @@ describe("RepertoireClient", () => {
     );
   });
 
-  it("limits rendered records and resets pagination after a filter change", () => {
-    mocks.songs = Array.from({ length: 102 }, (_, index) =>
-      song(`曲${String(index).padStart(2, "0")}`),
+  it.each([0, 1])(
+    "switches pages from pager %i and resets pagination after a filter change",
+    (pagerIndex) => {
+      mocks.songs = Array.from({ length: 102 }, (_, index) =>
+        song(`曲${String(index).padStart(2, "0")}`),
+      );
+      window.scrollTo = vi.fn();
+      const viewport = document.createElement("div");
+      viewport.scrollTo = vi.fn();
+      render(
+        <PageNavigationViewportContext.Provider value={{ current: viewport }}>
+          <RepertoireClient />
+        </PageNavigationViewportContext.Provider>,
+      );
+      expect(document.querySelectorAll("tbody > tr")).toHaveLength(100);
+      const pagers = screen.getAllByRole("button", { name: "Page 1 of 2" });
+      expect(pagers).toHaveLength(2);
+      const table = screen.getByRole("table");
+      expect(
+        screen.getByText("102曲中 102曲").compareDocumentPosition(pagers[0]) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(
+        pagers[0].compareDocumentPosition(table) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(
+        table.compareDocumentPosition(pagers[1]) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      fireEvent.click(pagers[pagerIndex]);
+      expect(document.querySelectorAll("tbody > tr")).toHaveLength(2);
+      expect(
+        screen.getAllByRole("button", { name: "Page 2 of 2" }),
+      ).toHaveLength(2);
+      expect(viewport.scrollTo).toHaveBeenCalledWith({
+        top: 0,
+        behavior: "smooth",
+      });
+      expect(window.scrollTo).not.toHaveBeenCalled();
+      fireEvent.change(screen.getByLabelText("検索"), {
+        target: { value: "曲00" },
+      });
+      expect(document.querySelectorAll("tbody > tr")).toHaveLength(1);
+      expect(screen.queryByText("last page")).not.toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "曲00" })).toBeInTheDocument();
+    },
+  );
+
+  it("shows the supplied rights notices after the table", () => {
+    mocks.songs = [song("曲A")];
+    render(<RepertoireClient />);
+    const trademark = screen.getByText(
+      "「JOYSOUND」は、株式会社エクシングの登録商標です。",
     );
-    window.scrollTo = vi.fn();
-    const viewport = document.createElement("div");
-    viewport.scrollTo = vi.fn();
-    render(
-      <PageNavigationViewportContext.Provider value={{ current: viewport }}>
-        <RepertoireClient />
-      </PageNavigationViewportContext.Provider>,
+    const service = screen.getByText(
+      "「カラオケJOYSOUND for STREAMER」は、株式会社エクシングが提供するサービスです。",
     );
-    expect(document.querySelectorAll("tbody > tr")).toHaveLength(100);
-    fireEvent.click(screen.getByText("last page"));
-    expect(document.querySelectorAll("tbody > tr")).toHaveLength(2);
-    expect(viewport.scrollTo).toHaveBeenCalledWith({
-      top: 0,
-      behavior: "smooth",
-    });
-    expect(window.scrollTo).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByLabelText("検索"), {
-      target: { value: "曲00" },
-    });
-    expect(document.querySelectorAll("tbody > tr")).toHaveLength(1);
-    expect(screen.getByRole("heading", { name: "曲00" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("table").compareDocumentPosition(trademark) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      trademark.compareDocumentPosition(service) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("shows loading state and translated English controls", () => {
@@ -316,5 +404,13 @@ describe("RepertoireClient", () => {
         name: "Play the latest performance of Song A in SongDB",
       }),
     ).toHaveTextContent("Play");
+    expect(
+      screen.getByText('"JOYSOUND" is a registered trademark of XING INC.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        '"Karaoke JOYSOUND for STREAMER" is a service provided by XING INC.',
+      ),
+    ).toBeInTheDocument();
   });
 });

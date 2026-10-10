@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
+  Anchor,
   Badge,
   Button,
   Loader,
@@ -18,6 +19,7 @@ import {
   HiSelector,
   HiPlay,
   HiSearch,
+  HiExternalLink,
 } from "react-icons/hi";
 import { useMediaQuery } from "@mantine/hooks";
 import RepertoireYouTubeLink from "./RepertoireYouTubeLink";
@@ -138,6 +140,17 @@ export default function RepertoireClient() {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
+  const pagination =
+    totalPages > 1 ? (
+      <Pagination
+        total={totalPages}
+        value={currentPage}
+        onChange={(value) => {
+          setPage(value);
+          viewportRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
+    ) : null;
 
   if (isLoading)
     return (
@@ -213,6 +226,9 @@ export default function RepertoireClient() {
       >
         {t("resultCount", { count: results.length, total: entries.length })}
       </p>
+      {pagination ? (
+        <div className="mb-4 flex justify-center">{pagination}</div>
+      ) : null}
       {visible.length === 0 ? (
         <div className="border border-dashed border-light-gray-300 px-6 py-14 text-center text-gray-600 dark:border-gray-700 dark:text-gray-300">
           {t("empty")}
@@ -289,6 +305,27 @@ export default function RepertoireClient() {
                       <h2 className="break-words text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {entry.title}
                       </h2>
+                      <Anchor
+                        href={`https://www.joysound.com/web/search/cross?${new URLSearchParams(
+                          {
+                            cts013: "1",
+                            match: "1",
+                            keyword: entry.latest.hl?.ja?.title || entry.title,
+                          },
+                        ).toString()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="xs"
+                        fw={400}
+                        className="mt-1 inline-flex items-center gap-1"
+                        aria-label={t("joysoundLabel", { title: entry.title })}
+                      >
+                        <span>{t("joysound")}</span>
+                        <HiExternalLink
+                          aria-hidden="true"
+                          className="shrink-0"
+                        />
+                      </Anchor>
                     </th>
                     <td className="col-span-2 break-words text-xs text-gray-600 dark:text-gray-300 lg:w-[13%] lg:px-3 lg:py-2.5">
                       {entry.artist}
@@ -405,17 +442,12 @@ export default function RepertoireClient() {
           </table>
         </div>
       )}
-      {totalPages > 1 ? (
-        <div className="mt-5 flex justify-center">
-          <Pagination
-            total={totalPages}
-            value={currentPage}
-            onChange={(value) => {
-              setPage(value);
-              viewportRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          />
-        </div>
+      <div className="mt-3 text-xs text-gray-600 dark:text-gray-300">
+        <p>{t("joysoundTrademark")}</p>
+        <p>{t("joysoundService")}</p>
+      </div>
+      {pagination ? (
+        <div className="mt-5 flex justify-center">{pagination}</div>
       ) : null}
     </>
   );
