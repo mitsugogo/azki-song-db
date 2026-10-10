@@ -228,6 +228,7 @@
     "latestVideoPlay": "Play latest video: {title}",
     "eventsTitle": "Events",
     "eventOngoing": "Now",
+    "ongoingEventsTitle": "Ongoing events",
     "eventOngoingTitle": "Now: {title}",
     "eventsEmpty": "No current or upcoming events",
     "linkLabel": "Link",

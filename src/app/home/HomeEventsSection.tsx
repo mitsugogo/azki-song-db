@@ -10,12 +10,11 @@ import {
   getActivityImportanceItemClassName,
   getActivityImportanceTitleClassName,
 } from "../lib/activityImportance";
-import { formatDate } from "../lib/formatDate";
+import { formatEventRange } from "../lib/formatEventRange";
 import {
   getDaysUntil,
   getFeaturedEvents,
   isEventActive,
-  parseToJstDayStart,
 } from "../lib/highlights";
 import type { EventItem } from "../types/eventItem";
 
@@ -36,22 +35,6 @@ export const HomeEventsSection = memo(function HomeEventsSection({
   if (featuredEvents.length === 0) {
     return null;
   }
-
-  const formatEventRange = (startAt: string, endAt: string) => {
-    const startLabel = formatDate(startAt, locale);
-    if (!endAt) {
-      return startLabel;
-    }
-
-    const startDate = parseToJstDayStart(startAt);
-    const endDate = parseToJstDayStart(endAt);
-    if (!startDate || !endDate || startDate.getTime() === endDate.getTime()) {
-      return startLabel;
-    }
-
-    const separator = locale === "ja" ? "〜" : " - ";
-    return `${startLabel}${separator}${formatDate(endAt, locale)}`;
-  };
 
   return (
     <div className="mt-16 space-y-6">
@@ -159,7 +142,11 @@ export const HomeEventsSection = memo(function HomeEventsSection({
                                 <span className="mx-1">|</span>
                               </>
                             ) : null}
-                            {formatEventRange(event.start_at, event.end_at)}
+                            {formatEventRange(
+                              event.start_at,
+                              event.end_at,
+                              locale,
+                            )}
                           </Text>
                         </div>
                         <p

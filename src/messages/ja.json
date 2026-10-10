@@ -227,6 +227,7 @@
     "latestVideoPlay": "最新動画を再生: {title}",
     "eventsTitle": "イベント",
     "eventOngoing": "開催中",
+    "ongoingEventsTitle": "開催中イベント",
     "eventOngoingTitle": "開催中: {title}",
     "eventsEmpty": "現在表示できるイベントはありません",
     "linkLabel": "リンク",
