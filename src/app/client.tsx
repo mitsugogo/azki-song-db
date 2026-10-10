@@ -99,7 +99,7 @@ export default function ClientTop() {
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
-      <HomeNavigationLayout>
+      <HomeNavigationLayout footer={<Footer />}>
         <main className="flex flex-1 flex-col">
           <HomeHeroSection songs={allSongs} />
 
@@ -158,8 +158,6 @@ export default function ClientTop() {
             />
           </section>
         </main>
-
-        <Footer />
       </HomeNavigationLayout>
       <AnalyticsWrapper />
     </div>

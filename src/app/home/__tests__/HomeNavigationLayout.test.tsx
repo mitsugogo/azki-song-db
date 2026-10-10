@@ -93,7 +93,7 @@ function setViewportWidth(width: number) {
 function renderLayout() {
   return render(
     <MantineProvider>
-      <HomeNavigationLayout>
+      <HomeNavigationLayout footer={<footer>TOPのフッター</footer>}>
         <main>
           <input aria-label="TOPの検索" />
           <p>TOPの本文</p>
@@ -148,6 +148,40 @@ afterEach(() => {
 });
 
 describe("HomeNavigationLayout", () => {
+  it.each([390, 1440])(
+    "幅%dpxで本文を独立してスクロールし、ヘッダーの背景を切り替える",
+    async (width) => {
+      viewportWidth = width;
+      renderLayout();
+      const header = screen.getByRole("banner");
+      const viewport = screen
+        .getByRole("main")
+        .closest("[data-scrollarea-viewport]");
+      expect(viewport).not.toBeNull();
+      expect(header.closest("[data-scrollarea-viewport]")).toBeNull();
+      expect(
+        screen.getByRole("contentinfo").closest("[data-scrollarea-viewport]"),
+      ).toBeNull();
+
+      fireEvent.scroll(viewport!, { target: { scrollTop: 30 } });
+      expect(header).toHaveClass("before:bg-white/80");
+
+      if (width >= 1280) {
+        const menu = await screen.findByRole("navigation", {
+          name: "メニュー",
+        });
+        const menuViewport = menu.closest("[data-scrollarea-viewport]");
+        expect(menuViewport).not.toBeNull();
+        expect(menuViewport).not.toBe(viewport);
+        fireEvent.scroll(menuViewport!, { target: { scrollTop: 0 } });
+        expect(header).toHaveClass("before:bg-white/80");
+      }
+
+      fireEvent.scroll(viewport!, { target: { scrollTop: 0 } });
+      expect(header).toHaveClass("before:bg-transparent");
+    },
+  );
+
   it.each([1280, 1440])(
     "幅%dpxでは左メニューを常時表示し、HOMEを選択中にする",
     async (width) => {

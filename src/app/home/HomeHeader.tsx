@@ -2,7 +2,6 @@
 
 import { Burger } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
 import { siteConfig } from "../config/siteConfig";
@@ -13,28 +12,16 @@ type HomeHeaderProps = {
   drawerOpened: boolean;
   onToggleDrawer: () => void;
   sidebarVisible?: boolean;
+  isScrolled?: boolean;
 };
 
 export function HomeHeader({
   drawerOpened,
   onToggleDrawer,
   sidebarVisible = false,
+  isScrolled = false,
 }: HomeHeaderProps) {
   const tDrawer = useTranslations("DrawerMenu");
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const updateHeaderState = () => {
-      setIsScrolled(window.scrollY > 12);
-    };
-
-    updateHeaderState();
-    window.addEventListener("scroll", updateHeaderState, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", updateHeaderState);
-    };
-  }, []);
 
   return (
     <header
