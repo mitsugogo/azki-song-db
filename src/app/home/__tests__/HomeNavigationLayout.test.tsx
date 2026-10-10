@@ -210,7 +210,7 @@ describe("HomeNavigationLayout", () => {
         "page",
       );
       expect(
-        within(menu).getByRole("link", { name: "歌唱レパートリー" }),
+        within(menu).getByRole("link", { name: "歌ったことがある楽曲" }),
       ).toHaveAttribute("href", "/repertoire");
       expect(
         within(menu).getByRole("link", { name: "プレイリスト" }),

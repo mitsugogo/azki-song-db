@@ -37,7 +37,7 @@
     "whereMyAzkichiBegan": "あなたのあずきちはどこから？",
     "whereMyRobocosanBegan": "あなたのロボ子さんはどこから？",
     "categoryArchive": "保管庫",
-    "repertoire": "歌唱レパートリー"
+    "repertoire": "歌ったことがある楽曲"
   },
   "SearchInput": {
     "search": "検索",
@@ -1968,10 +1968,10 @@
     "membersOnlyAlertTitle": "メンバー限定動画"
   },
   "Repertoire": {
-    "title": "歌唱レパートリー",
+    "title": "歌ったことがある楽曲",
     "description": "AZKiさんが歌枠・コラボ・ゲスト出演・ライブ・楽曲動画などで歌唱した楽曲を、曲名と原曲アーティストごとにまとめています。",
     "home": "ホーム",
-    "loading": "レパートリーを読み込み中…",
+    "loading": "楽曲を読み込み中…",
     "searchLabel": "検索",
     "searchPlaceholder": "曲名・アーティスト・別名・タグで検索",
     "sourceLabel": "種類",

@@ -65,7 +65,7 @@ test("searches, filters, restores URLs and links to the latest performance", asy
 }) => {
   await page.goto("/repertoire");
   await expect(
-    page.getByRole("heading", { name: "歌唱レパートリー", exact: true }),
+    page.getByRole("heading", { name: "歌ったことがある楽曲", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
   await expect(page.getByRole("combobox", { name: "並び順" })).toHaveCount(0);
@@ -111,7 +111,7 @@ test("searches, filters, restores URLs and links to the latest performance", asy
   ).toHaveAttribute("src", /lmnopqrstuv/);
   await expect(preview).toContainText("配信日: 2026/02/02");
   await page
-    .getByRole("heading", { name: "歌唱レパートリー", exact: true })
+    .getByRole("heading", { name: "歌ったことがある楽曲", exact: true })
     .hover();
   await expect(preview).not.toBeVisible();
   await first.getByRole("button", { name: "アニソン", exact: true }).click();
@@ -147,7 +147,7 @@ test("supports English, dark mode and a narrow mobile viewport", async ({
   );
   await page.goto("/en/repertoire");
   await expect(
-    page.getByRole("heading", { name: "Singing Repertoire", exact: true }),
+    page.getByRole("heading", { name: "Songs AZKi Has Sung", exact: true }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute(
     "data-mantine-color-scheme",

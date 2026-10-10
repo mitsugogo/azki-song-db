@@ -37,7 +37,7 @@
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
     "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
     "categoryArchive": "storage",
-    "repertoire": "Singing Repertoire"
+    "repertoire": "Songs AZKi Has Sung"
   },
   "SearchInput": {
     "search": "Search",
@@ -1970,10 +1970,10 @@
     "membersOnlyAlertTitle": "Members only video"
   },
   "Repertoire": {
-    "title": "Singing Repertoire",
+    "title": "Songs AZKi Has Sung",
     "description": "Explore songs performed by AZKi in singing streams, collaborations, guest appearances, live shows and music videos, grouped by song title and original artist.",
     "home": "Home",
-    "loading": "Loading repertoire…",
+    "loading": "Loading songs…",
     "searchLabel": "Search",
     "searchPlaceholder": "Search titles, artists, aliases or tags",
     "sourceLabel": "Type",

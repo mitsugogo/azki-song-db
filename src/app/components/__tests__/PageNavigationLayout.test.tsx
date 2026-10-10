@@ -263,7 +263,7 @@ describe("SitePageLayout", () => {
     expect(search).toHaveValue("AZKi");
     expect(menuViewport.scrollTop).toBe(180);
     expect(
-      within(menu).getByRole("link", { name: "歌唱レパートリー" }),
+      within(menu).getByRole("link", { name: "歌ったことがある楽曲" }),
     ).toHaveAttribute("aria-current", "page");
 
     await act(async () => {
@@ -364,7 +364,7 @@ describe("PageNavigationLayout", () => {
     ["/search", "検索"],
     ["/units/sample", "ユニット"],
     ["/lives/sample", "ライブ"],
-    ["/repertoire", "歌唱レパートリー"],
+    ["/repertoire", "歌ったことがある楽曲"],
     ["/activity/2026/10", "活動の歴史"],
     ["/anniversaries", "記念日"],
     ["/data", "全収録データ"],
@@ -488,7 +488,7 @@ describe("PageNavigationLayout", () => {
       within(menu).getByRole("link", { name: "Discography" }),
     ).toHaveAttribute("aria-current", "page");
     expect(
-      within(menu).getByRole("link", { name: "歌唱レパートリー" }),
+      within(menu).getByRole("link", { name: "歌ったことがある楽曲" }),
     ).toHaveAttribute("href", "/repertoire");
     expect(
       within(menu).getByRole("link", { name: "プレイリスト" }),

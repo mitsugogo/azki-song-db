@@ -297,9 +297,7 @@ describe("RepertoireClient", () => {
   it("shows loading state and translated English controls", () => {
     mocks.loading = true;
     const { rerender } = render(<RepertoireClient />);
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "レパートリーを読み込み中",
-    );
+    expect(screen.getByRole("status")).toHaveTextContent("楽曲を読み込み中");
     mocks.loading = false;
     mocks.locale = "en";
     mocks.songs = [song("Song A")];
