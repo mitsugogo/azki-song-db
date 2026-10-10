@@ -442,11 +442,8 @@ describe("PageNavigationLayout", () => {
       }),
     ).toHaveAttribute("href", "https://github.com/mitsugogo/azki-song-db");
     expect(
-      within(menu).getByRole("link", { name: "不具合報告" }),
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining("https://docs.google.com/forms/"),
-    );
+      within(menu).queryByRole("link", { name: "不具合報告" }),
+    ).not.toBeInTheDocument();
   });
 
   it("上部へ戻る操作は本文のScrollAreaを操作し、左メニューを動かさない", async () => {

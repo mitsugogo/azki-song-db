@@ -22,6 +22,8 @@ async function openDrawer(page: Page) {
 }
 
 test.describe("Navigation drawer", () => {
+  test.use({ viewport: { width: 1279, height: 720 } });
+
   test.beforeEach(async ({ page }) => {
     await setupApiMocks(page);
   });

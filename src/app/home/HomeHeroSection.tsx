@@ -109,7 +109,10 @@ export const HomeHeroSection = memo(function HomeHeroSection({
   }, []);
 
   return (
-    <section className="relative left-1/2 isolate flex min-h-[48dvh] w-screen -translate-x-1/2 flex-col items-center justify-center pt-10 pb-4 text-center sm:pt-16">
+    <section
+      className="relative left-1/2 isolate flex min-h-[48dvh] -translate-x-1/2 flex-col items-center justify-center pt-10 pb-4 text-center sm:pt-16"
+      style={{ width: "calc(100vw - var(--home-sidebar-width, 0px))" }}
+    >
       <HomeHeroBackground
         song={backgroundSong}
         onPlayerChange={handlePlayerChange}

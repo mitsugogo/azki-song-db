@@ -1,0 +1,25 @@
+.layout {
+  --home-sidebar-width: 0px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.sidebar {
+  display: contents;
+}
+
+@media (min-width: 80em) {
+  .layout {
+    --home-sidebar-width: 18rem;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: var(--home-header-height);
+    display: block;
+    flex-shrink: 0;
+    width: var(--home-sidebar-width);
+    height: calc(100dvh - var(--home-header-height) - 2rem);
+  }
+}

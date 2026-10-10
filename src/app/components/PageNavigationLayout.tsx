@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -9,8 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { LoadingOverlay, ScrollArea } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { usePathname } from "@/i18n/navigation";
+import { useNavigationMenu } from "../hook/useNavigationMenu";
 import { Header } from "./Header";
 import DrawerMenu from "./DrawerMenu";
 import { PageNavigationViewportContext } from "./PageNavigationLayoutContext";
@@ -29,12 +28,7 @@ export default function PageNavigationLayout({
   const previousPathnameRef = useRef(pathname);
   const [viewport, setViewport] = useState<HTMLDivElement | null>(null);
   const viewportRef = useMemo(() => ({ current: viewport }), [viewport]);
-  const isDesktop = useMediaQuery("(min-width: 80em)", false);
-  const [opened, { toggle, close }] = useDisclosure(false);
-
-  useEffect(() => {
-    if (isDesktop) close();
-  }, [isDesktop, close]);
+  const { isDesktop, opened, toggle, close } = useNavigationMenu();
 
   useLayoutEffect(() => {
     if (previousPathnameRef.current !== pathname && viewport) {

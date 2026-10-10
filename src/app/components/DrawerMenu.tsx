@@ -17,12 +17,11 @@ import { useHover, useMediaQuery } from "@mantine/hooks";
 import { useTranslations, useLocale } from "next-intl";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { LiaExternalLinkAltSolid } from "react-icons/lia";
+import { LuSearch } from "react-icons/lu";
 import Acknowledgment from "./Acknowledgment";
 import usePWAInstall from "../hook/usePWAInstall";
 import useSongs from "../hook/useSongs";
 import { formatDate } from "../lib/formatDate";
-import { useGlobalPlayer } from "../hook/useGlobalPlayer";
-import type { Song } from "../types/song";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import classes from "./DrawerMenu.module.css";
 
@@ -48,16 +47,6 @@ interface PageCategory {
   items: PageItem[];
 }
 
-function buildBugReportUrl(currentSong: Song | null) {
-  const base =
-    "https://docs.google.com/forms/d/e/1FAIpQLScOZt6wOzE2okN5Pt7Ibf8nK64aoR4NM8Erw3cwgcFhNEIJ_Q/viewform?usp=pp_url&entry.385502129=";
-  const debug = currentSong
-    ? `title:${currentSong.title}&artist:${currentSong.artist}&video_id:${currentSong.video_id}&start:${currentSong.start}`
-    : "";
-
-  return base + encodeURIComponent(debug);
-}
-
 export default function DrawerMenu({
   opened,
   onClose,
@@ -72,7 +61,6 @@ export default function DrawerMenu({
   const isMobile = useMediaQuery("(max-width: 50em)");
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
   const { songsFetchedAt } = useSongs();
-  const { currentSong } = useGlobalPlayer();
   const t = useTranslations("DrawerMenu");
   const locale = useLocale();
 
@@ -121,8 +109,8 @@ export default function DrawerMenu({
 
   const isCurrentPage = (href: string) =>
     href === pathname || (href !== "/" && pathname?.startsWith(`${href}/`));
-  const sidebarLinkClass = variant === "sidebar" ? classes.link : "";
-  const sidebarSectionClass = variant === "sidebar" ? classes.sectionTitle : "";
+  const menuLinkClass = `${classes.linkTypography} ${variant === "sidebar" ? classes.link : ""}`;
+  const menuSectionClass = `${classes.sectionTitleTypography} ${variant === "sidebar" ? classes.sectionTitle : ""}`;
 
   useEffect(() => {
     fetch("/build-info.json")
@@ -159,7 +147,7 @@ export default function DrawerMenu({
             <Text
               c={variant === "sidebar" ? undefined : "dimmed"}
               size="xs"
-              className={`ml-3 mt-6 mb-2 font-semibold uppercase ${sidebarSectionClass}`}
+              className={`ml-3 mt-6 mb-2 font-semibold uppercase ${menuSectionClass}`}
             >
               {category.category}
             </Text>
@@ -178,9 +166,15 @@ export default function DrawerMenu({
                 key={item.name}
                 href={item.href}
                 aria-current={isCurrent ? "page" : undefined}
-                className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses} ${sidebarLinkClass}`}
+                className={`${isCurrent ? activeClasses : inactiveClasses} ${baseClasses} ${menuLinkClass}`}
                 onClick={onClose}
               >
+                {item.href === "/search" ? (
+                  <LuSearch
+                    className="mr-1.5 inline-block size-3.5 align-[-0.125em]"
+                    aria-hidden="true"
+                  />
+                ) : null}
                 {item.name}
               </Link>
             );
@@ -189,7 +183,7 @@ export default function DrawerMenu({
       ))}
 
       <div
-        className={`ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase ${sidebarSectionClass}`}
+        className={`ml-3 mt-6 mb-2 text-xs font-semibold text-light-gray-300 dark:text-gray-300 uppercase ${menuSectionClass}`}
       >
         {t("management")}
       </div>
@@ -197,7 +191,7 @@ export default function DrawerMenu({
         href="/playlist"
         key="playlist"
         aria-current={isCurrentPage("/playlist") ? "page" : undefined}
-        className={`block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${sidebarLinkClass}`}
+        className={`block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${menuLinkClass}`}
         onClick={onClose}
       >
         {t("playlist")}
@@ -207,7 +201,7 @@ export default function DrawerMenu({
         <>
           <UnstyledButton
             key="install-pwa"
-            className={`block w-full rounded-md px-3 py-1.5 text-left text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${sidebarLinkClass}`}
+            className={`block w-full rounded-md px-3 py-1.5 text-left text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${menuLinkClass}`}
             onClick={() => {
               promptInstall();
               onClose();
@@ -224,7 +218,7 @@ export default function DrawerMenu({
       <Link
         href="#"
         key="about"
-        className={`block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${sidebarLinkClass}`}
+        className={`block rounded-md px-3 py-1.5 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${menuLinkClass}`}
         onClick={() => {
           setShowAcknowledgment(true);
           onClose();
@@ -239,11 +233,11 @@ export default function DrawerMenu({
   const menuContent = (
     <nav
       aria-label={t("title")}
-      className={
+      className={`${classes.menuTypography} ${
         variant === "sidebar"
           ? `flex flex-1 flex-col ${classes.sidebarMenu}`
           : "flex flex-col h-full"
-      }
+      }`}
     >
       {variant === "sidebar" ? (
         <div className="space-y-1">{menuLinks}</div>
@@ -264,7 +258,7 @@ export default function DrawerMenu({
         <Link
           href="https://www.youtube.com/@AZKi"
           target="_blank"
-          className={`rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${sidebarLinkClass} ${classes.externalLink}`}
+          className={`rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${menuLinkClass} ${classes.externalLink}`}
           onClick={onClose}
         >
           <span>AZKi Channel</span>
@@ -284,7 +278,7 @@ export default function DrawerMenu({
           <Link
             href="https://departure.hololivepro.com/"
             target="_blank"
-            className={`rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${sidebarLinkClass} ${classes.externalLink}`}
+            className={`rounded-md px-3 py-2 text-base font-medium cursor-pointer hover:bg-white/5 hover:text-primary dark:hover:text-white ${menuLinkClass} ${classes.externalLink}`}
             onClick={onClose}
           >
             <div className={classes.externalLabel}>
@@ -342,15 +336,6 @@ export default function DrawerMenu({
             >
               CHANGELOG
             </Link>
-            <a
-              href={buildBugReportUrl(currentSong)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={classes.utilityLink}
-              onClick={onClose}
-            >
-              {t("reportIssue")}
-            </a>
           </div>
 
           <div className={classes.authorRow}>
@@ -417,7 +402,10 @@ export default function DrawerMenu({
           onClose={onClose}
           title={t("title")}
           overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
-          classNames={{ body: "flex flex-col overflow-hidden" }}
+          classNames={{
+            body: "flex flex-col overflow-hidden",
+            title: classes.sectionTitleTypography,
+          }}
           styles={{ body: { height: "calc(100% - 60px)" } }}
         >
           {menuContent}

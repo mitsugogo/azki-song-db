@@ -1,15 +1,27 @@
-.sidebarMenu {
+.menuTypography {
   letter-spacing: 0;
+}
+
+.linkTypography,
+.sectionTitleTypography {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.linkTypography {
+  font-weight: 400;
+}
+
+.sectionTitleTypography {
+  font-weight: 600;
+  text-transform: none;
 }
 
 .link {
   padding: 7px 12px;
   border-radius: var(--mantine-radius-sm);
   color: var(--mantine-color-gray-8);
-  font-size: 0.8125rem;
-  font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0;
   transition:
     background-color 100ms ease,
     color 100ms ease;
@@ -24,11 +36,6 @@
   margin: 24px 0 6px;
   padding-inline: 12px;
   color: var(--mantine-color-text);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.5;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 :global([data-mantine-color-scheme="dark"]) .link {
