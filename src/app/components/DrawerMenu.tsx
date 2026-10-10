@@ -235,7 +235,7 @@ export default function DrawerMenu({
       aria-label={t("title")}
       className={`${classes.menuTypography} ${
         variant === "sidebar"
-          ? `flex flex-1 flex-col ${classes.sidebarMenu}`
+          ? `flex flex-1 flex-col px-3 pt-4 pb-[6px] ${classes.sidebarMenu}`
           : "flex flex-col h-full"
       }`}
     >
@@ -254,7 +254,9 @@ export default function DrawerMenu({
         </ScrollArea>
       )}
 
-      <div className={`shrink-0 pb-3 ${classes.footer}`}>
+      <div
+        className={`shrink-0 ${variant === "drawer" ? "pb-3" : ""} ${classes.footer}`}
+      >
         <Link
           href="https://www.youtube.com/@AZKi"
           target="_blank"
@@ -379,7 +381,7 @@ export default function DrawerMenu({
   return (
     <>
       {variant === "sidebar" ? (
-        <aside className="hidden xl:block h-full w-72 shrink-0 overflow-hidden border-r border-light-gray-200 bg-white px-3 py-4 dark:border-gray-600 dark:bg-gray-800/75">
+        <aside className="hidden xl:block h-full w-72 shrink-0 overflow-hidden border-r border-light-gray-200 bg-white dark:border-gray-600 dark:bg-gray-800/75">
           <ScrollArea
             ref={sidebarScrollAreaRef}
             h="100%"

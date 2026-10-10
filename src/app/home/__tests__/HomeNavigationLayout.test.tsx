@@ -155,7 +155,22 @@ describe("HomeNavigationLayout", () => {
       renderLayout();
 
       const menu = await screen.findByRole("navigation", { name: "メニュー" });
-      expect(screen.getAllByRole("navigation")).toHaveLength(1);
+      const headerMenu = within(screen.getByRole("banner")).getByRole(
+        "navigation",
+      );
+      expect(screen.getAllByRole("navigation")).toHaveLength(2);
+      for (const [name, href] of [
+        ["検索", "/search"],
+        ["Discography", "/discography"],
+        ["活動の歴史", "/activity"],
+        ["記念日", "/anniversaries"],
+        ["統計情報", "/statistics"],
+      ]) {
+        expect(within(headerMenu).getByRole("link", { name })).toHaveAttribute(
+          "href",
+          href,
+        );
+      }
       expect(within(menu).getByRole("link", { name: "HOME" })).toHaveAttribute(
         "aria-current",
         "page",
@@ -236,6 +251,12 @@ describe("HomeNavigationLayout", () => {
     expect(
       within(menu).getByRole("link", { name: "Discography" }),
     ).toHaveAttribute("href", "/en/discography");
+    const headerMenu = within(screen.getByRole("banner")).getByRole(
+      "navigation",
+    );
+    expect(
+      within(headerMenu).getByRole("link", { name: "Search" }),
+    ).toHaveAttribute("href", "/en/search");
   });
 
   it("サイト説明を開いて閉じても左メニューを表示する", async () => {

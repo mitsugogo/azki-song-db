@@ -63,26 +63,24 @@ export function HomeHeader({
         </div>
 
         <div className="flex shrink-0 items-center justify-end sm:gap-2">
-          {!sidebarVisible ? (
-            <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
-              <Link href="/search" className="hover:text-primary-500">
-                <LuSearch className="mr-1 -mt-0.5 inline" />
-                {tDrawer("search")}
-              </Link>
-              <Link href="/discography" className="hover:text-primary-500">
-                {tDrawer("discography")}
-              </Link>
-              <Link href="/activity" className="hover:text-primary-500">
-                {tDrawer("activity")}
-              </Link>
-              <Link href="/anniversaries" className="hover:text-primary-500">
-                {tDrawer("anniversaries")}
-              </Link>
-              <Link href="/statistics" className="hover:text-primary-500">
-                {tDrawer("statistics")}
-              </Link>
-            </nav>
-          ) : null}
+          <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
+            <Link href="/search" className="hover:text-primary-500">
+              <LuSearch className="mr-1 -mt-0.5 inline" />
+              {tDrawer("search")}
+            </Link>
+            <Link href="/discography" className="hover:text-primary-500">
+              {tDrawer("discography")}
+            </Link>
+            <Link href="/activity" className="hover:text-primary-500">
+              {tDrawer("activity")}
+            </Link>
+            <Link href="/anniversaries" className="hover:text-primary-500">
+              {tDrawer("anniversaries")}
+            </Link>
+            <Link href="/statistics" className="hover:text-primary-500">
+              {tDrawer("statistics")}
+            </Link>
+          </nav>
           <LanguageSwitcher variant="light" />
           <ThemeToggle className="hover:text-primary-500 dark:hover:bg-primary-800 dark:hover:text-white" />
         </div>
