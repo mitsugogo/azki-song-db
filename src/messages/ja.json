@@ -256,6 +256,7 @@
     "activityEventDescription": "イベントを追加",
     "activityViewMilestoneTitle": "{title} が {count}再生達成",
     "activityViewMilestoneDescription": "現在 {count} 回再生",
+    "activityViewStats": "stats",
     "activityViewMilestonesLoading": "再生数達成を確認中",
     "activityFilterLabel": "アクティビティのフィルタ",
     "activityFilterTitle": "表示する項目",

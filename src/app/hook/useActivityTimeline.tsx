@@ -104,6 +104,7 @@ type UseActivityTimelineOptions = {
   limit?: number;
   songUpdateLimit?: number;
   archiveLimit?: number;
+  preferSongUpdates?: boolean;
   viewMilestonePeriod?: Period;
   dateRange?: ActivityTimelineDateRange;
   includeFutureScheduledItems?: boolean;
@@ -425,6 +426,7 @@ export default function useActivityTimeline({
   limit = DEFAULT_ACTIVITY_LIMIT,
   songUpdateLimit = DEFAULT_SONG_UPDATE_LIMIT,
   archiveLimit = DEFAULT_ARCHIVE_LIMIT,
+  preferSongUpdates = false,
   viewMilestonePeriod = "30d",
   dateRange,
   includeFutureScheduledItems = false,
@@ -445,8 +447,19 @@ export default function useActivityTimeline({
       songs,
       effectiveSongUpdateLimit,
     );
+    const songUpdateVideoIds = new Set(
+      preferSongUpdates
+        ? filterActivityTimelineItems(songUpdateItems, { dateRange, now }).map(
+            (item) => item.videoId,
+          )
+        : [],
+    );
     const archiveItems = buildArchiveActivityItems(
-      archives,
+      preferSongUpdates
+        ? archives.filter(
+            (archive) => !songUpdateVideoIds.has(archive.video_id),
+          )
+        : archives,
       effectiveArchiveLimit,
       songs,
     );
@@ -478,6 +491,7 @@ export default function useActivityTimeline({
     includeFutureScheduledItems,
     limit,
     milestones,
+    preferSongUpdates,
     songUpdateLimit,
     songs,
     viewStatisticsByVideoId,

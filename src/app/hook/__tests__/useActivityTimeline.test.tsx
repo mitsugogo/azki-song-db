@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import useArchives from "../useArchives";
 import useActivityTimeline from "../useActivityTimeline";
 import {
   buildViewMilestoneItems,
@@ -9,9 +10,10 @@ import {
 } from "../useActivityTimeline";
 import type { ViewStat } from "../../types/api/stat/views";
 import type { Song } from "../../types/song";
+import type { ArchiveItem } from "../../types/archiveItem";
 
 vi.mock("../useArchives", () => ({
-  default: () => ({ items: [], isLoading: false }),
+  default: vi.fn(() => ({ items: [], isLoading: false, fetchedAt: null })),
 }));
 vi.mock("../useReleaseViewCounts", () => ({
   default: () => ({ data: {}, loading: false }),
@@ -54,6 +56,152 @@ const createSong = (viewCount: number): Song => ({
   tags: [],
   milestones: [],
   view_count: viewCount,
+});
+
+const createArchive = (
+  videoId: string,
+  occurredAt = "2026-01-01T00:00:00.000Z",
+): ArchiveItem => ({
+  sequence: 1,
+  topic: "歌枠",
+  title: "Test Video",
+  video_id: videoId,
+  channel_id: "azki-channel",
+  video_url: `https://www.youtube.com/watch?v=${videoId}`,
+  video_duration: "01:00:00",
+  description: "",
+  published_at: occurredAt,
+  stream_started_at: occurredAt,
+  timestamp_comment: "",
+});
+
+beforeEach(() => {
+  vi.mocked(useArchives).mockReturnValue({
+    items: [],
+    isLoading: false,
+    fetchedAt: null,
+  });
+});
+
+describe("useActivityTimeline song update preference", () => {
+  it("同じ動画のアーカイブを除外し、収録曲数と別動画のアーカイブを残す", () => {
+    vi.mocked(useArchives).mockReturnValue({
+      items: [createArchive("video-1"), createArchive("video-2")],
+      isLoading: false,
+      fetchedAt: null,
+    });
+    const { result } = renderHook(() =>
+      useActivityTimeline({
+        songs: [createSong(0), { ...createSong(0), title: "Second Song" }],
+        preferSongUpdates: true,
+        enabled: false,
+      }),
+    );
+
+    expect(
+      result.current.items.map((item) => [item.kind, item.videoId]),
+    ).toEqual([
+      ["song_update", "video-1"],
+      ["archive", "video-2"],
+    ]);
+    expect(result.current.items[0]).toMatchObject({
+      count: 2,
+      videoTitle: "Test Video",
+      href: "/watch?v=video-1",
+      youtubeHref: "https://www.youtube.com/watch?v=video-1",
+    });
+  });
+
+  it("指定しなければ他ページ向けに楽曲とアーカイブの両方を残す", () => {
+    vi.mocked(useArchives).mockReturnValue({
+      items: [createArchive("video-1")],
+      isLoading: false,
+      fetchedAt: null,
+    });
+    const { result } = renderHook(() =>
+      useActivityTimeline({ songs: [createSong(0)], enabled: false }),
+    );
+
+    expect(result.current.items.map((item) => item.kind)).toEqual([
+      "song_update",
+      "archive",
+    ]);
+  });
+
+  it("アーカイブ件数と全体件数の制限前に重複を除き、次の配信で補う", () => {
+    vi.mocked(useArchives).mockReturnValue({
+      items: [
+        createArchive("video-1", "2026-01-03T00:00:00.000Z"),
+        createArchive("video-2", "2026-01-02T00:00:00.000Z"),
+        createArchive("video-3"),
+      ],
+      isLoading: false,
+      fetchedAt: null,
+    });
+    const { result } = renderHook(() =>
+      useActivityTimeline({
+        songs: [{ ...createSong(0), broadcast_at: "2026-01-03T00:00:00.000Z" }],
+        preferSongUpdates: true,
+        archiveLimit: 2,
+        limit: 3,
+        enabled: false,
+      }),
+    );
+
+    expect(result.current.items.map((item) => item.videoId)).toEqual([
+      "video-1",
+      "video-2",
+      "video-3",
+    ]);
+  });
+
+  it.each(["", "invalid", "2999-01-01T00:00:00.000Z"])(
+    "楽曲追加として表示できない場合はアーカイブを残す: %s",
+    (broadcastAt) => {
+      vi.mocked(useArchives).mockReturnValue({
+        items: [createArchive("video-1")],
+        isLoading: false,
+        fetchedAt: null,
+      });
+      const { result } = renderHook(() =>
+        useActivityTimeline({
+          songs: [{ ...createSong(0), broadcast_at: broadcastAt }],
+          preferSongUpdates: true,
+          enabled: false,
+        }),
+      );
+
+      expect(result.current.items.map((item) => item.kind)).toEqual([
+        "archive",
+      ]);
+    },
+  );
+
+  it("楽曲データの読み込み後に同じ動画のアーカイブを楽曲追加へ切り替える", () => {
+    vi.mocked(useArchives).mockReturnValue({
+      items: [createArchive("video-1")],
+      isLoading: false,
+      fetchedAt: null,
+    });
+    const { result, rerender } = renderHook(
+      ({ songs, isSongsLoading }) =>
+        useActivityTimeline({
+          songs,
+          isSongsLoading,
+          preferSongUpdates: true,
+          enabled: false,
+        }),
+      { initialProps: { songs: [] as Song[], isSongsLoading: true } },
+    );
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.items.map((item) => item.kind)).toEqual(["archive"]);
+    rerender({ songs: [createSong(0)], isSongsLoading: false });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.items.map((item) => item.kind)).toEqual([
+      "song_update",
+    ]);
+  });
 });
 
 describe("buildViewMilestoneItems", () => {

@@ -257,6 +257,7 @@
     "activityEventDescription": "Event added",
     "activityViewMilestoneTitle": "{title} reached {count} views",
     "activityViewMilestoneDescription": "Currently {count} views",
+    "activityViewStats": "stats",
     "activityViewMilestonesLoading": "Checking view milestones",
     "activityFilterLabel": "Activity filters",
     "activityFilterTitle": "Show items",
