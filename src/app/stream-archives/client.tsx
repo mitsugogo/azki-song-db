@@ -17,6 +17,7 @@ import {
   Button,
   Checkbox,
   LoadingOverlay,
+  ScrollArea,
   Select,
   SegmentedControl,
   Text,
@@ -1704,10 +1705,15 @@ export default function ArchivesPageClient() {
             className="sticky z-10"
             style={{ top: stickyControlsHeight }}
           >
-            <div
-              ref={desktopHeaderScrollRef}
-              className="overflow-x-auto overscroll-x-contain rounded-t-xl"
-              onScroll={handleDesktopHeaderScroll}
+            <ScrollArea
+              viewportRef={desktopHeaderScrollRef}
+              className="rounded-t-xl bg-light-gray-100 dark:bg-gray-800"
+              scrollbars="x"
+              scrollbarSize={6}
+              type="auto"
+              offsetScrollbars="present"
+              overscrollBehavior="contain"
+              viewportProps={{ onScroll: handleDesktopHeaderScroll }}
             >
               <div
                 className="grid bg-light-gray-100 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
@@ -1788,7 +1794,7 @@ export default function ArchivesPageClient() {
                   </SortableArchiveHeader>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
             {activeStickyArchiveItem && (
               <div className="pointer-events-none absolute left-0 top-full h-40 w-full overflow-clip">
                 <div
