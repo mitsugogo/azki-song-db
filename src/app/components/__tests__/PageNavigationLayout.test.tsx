@@ -194,6 +194,7 @@ function siteLayoutTree(children: ReactNode) {
 
 describe("SitePageLayout", () => {
   it.each([
+    "/about-azki",
     "/activity/2026/10",
     "/anniversaries",
     "/discography/album/sample",
@@ -343,6 +344,7 @@ describe("SitePageLayout", () => {
     menuViewport.scrollTop = 120;
 
     for (const pathname of [
+      "/about-azki",
       "/stream-archives",
       "/stream-archives/list",
       "/statistics",
@@ -420,6 +422,83 @@ describe.each(["ja", "en"] as const)(
 );
 
 describe("PageNavigationLayout", () => {
+  it.each([390, 1440])(
+    "幅%dpxで読み込み後に本文が伸びてもスクロールバーを表示する",
+    async (width) => {
+      viewportWidth = width;
+      const observers = new Map<Element, Set<ResizeObserverCallback>>();
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(private callback: ResizeObserverCallback) {}
+          observe(element: Element) {
+            const callbacks = observers.get(element) ?? new Set();
+            callbacks.add(this.callback);
+            observers.set(element, callbacks);
+          }
+          unobserve(element: Element) {
+            observers.get(element)?.delete(this.callback);
+          }
+          disconnect() {
+            observers.forEach((callbacks) => callbacks.delete(this.callback));
+          }
+        },
+      );
+      const { rerender } = renderLayout(<main>読み込み中</main>);
+      const viewport = screen
+        .getByRole("main")
+        .closest("[data-scrollarea-viewport]")!;
+      const content = viewport.firstElementChild!;
+      const scrollbar = viewport.parentElement!.querySelector(
+        '[data-orientation="vertical"]',
+      )!;
+      let scrollHeight = 200;
+      Object.defineProperties(viewport, {
+        clientHeight: { value: 400 },
+        offsetHeight: { value: 400 },
+        clientWidth: { value: width },
+        offsetWidth: { value: width },
+        scrollHeight: { get: () => scrollHeight },
+        scrollWidth: { value: width },
+      });
+      const resize = async (element: Element) => {
+        await act(async () => {
+          observers.get(element)?.forEach((callback) => {
+            callback([], {} as ResizeObserver);
+          });
+          // MantineはrAFの後に10msのdebounceで再計測する。
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        });
+      };
+      await resize(viewport);
+      await resize(content);
+      await waitFor(() =>
+        expect(scrollbar).toHaveAttribute("data-state", "hidden"),
+      );
+
+      scrollHeight = 1200;
+      rerender(
+        <MantineProvider>
+          <PageNavigationLayout>
+            <main>読み込み後の長い本文</main>
+          </PageNavigationLayout>
+        </MantineProvider>,
+      );
+      // 本文だけが伸び、表示領域の寸法は変わらない。
+      await resize(content);
+      await waitFor(() =>
+        expect(scrollbar).toHaveAttribute("data-state", "visible"),
+      );
+      expect(scrollbar).not.toHaveAttribute("data-hidden");
+
+      scrollHeight = 200;
+      await resize(content);
+      await waitFor(() =>
+        expect(scrollbar).toHaveAttribute("data-state", "hidden"),
+      );
+    },
+  );
+
   it.each([
     ["/search", "検索"],
     ["/units/sample", "ユニット"],
@@ -604,6 +683,39 @@ describe("PageNavigationLayout", () => {
       screen.getByRole("button", { name: "ナビゲーションを開く" }),
     ).toHaveAttribute("aria-expanded", "false");
   });
+
+  it.each(["ja", "en"] as const)(
+    "%sでHOMEの直後に紹介ページを置き、検索とサイト説明を区別する",
+    async (locale) => {
+      state.locale = locale;
+      state.pathname = "/about-azki";
+      renderLayout();
+      const messages = (locale === "ja" ? ja : en).DrawerMenu;
+      const menu = await screen.findByRole("navigation", {
+        name: messages.title,
+      });
+      const links = within(menu).getAllByRole("link");
+      const homeIndex = links.findIndex(
+        (link) => link.textContent === messages.home,
+      );
+      const aboutLink = within(menu).getByRole("link", {
+        name: messages.aboutAzki,
+      });
+      const searchLink = within(menu).getByRole("link", {
+        name: messages.search,
+      });
+      expect(links[homeIndex + 1]).toBe(aboutLink);
+      expect(links[homeIndex + 2]).toBe(searchLink);
+      expect(aboutLink).toHaveAttribute(
+        "href",
+        locale === "en" ? "/en/about-azki" : "/about-azki",
+      );
+      expect(aboutLink).toHaveAttribute("aria-current", "page");
+      expect(within(menu).getByRole("link", { name: messages.about })).not.toBe(
+        aboutLink,
+      );
+    },
+  );
 
   it("英語のカテゴリ別ページでもDiscographyを選択中にする", async () => {
     state.locale = "en";

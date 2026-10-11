@@ -64,7 +64,8 @@ export default function PageNavigationLayout({
               className="min-h-0 min-w-0 flex-1"
               type="auto"
               scrollbarSize={8}
-              offsetScrollbars="present"
+              // "present"は本文だけが伸びたときに非表示判定が残るため使わない。
+              offsetScrollbars
               classNames={{ content: classes.scrollContent }}
             >
               {children}

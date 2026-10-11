@@ -8,6 +8,7 @@ import Footer from "./Footer";
 import { AnalyticsWrapper } from "./AnalyticsWrapper";
 
 const pageRoutes = new Set([
+  "about-azki",
   "search",
   "activity",
   "anniversaries",

@@ -217,7 +217,8 @@
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
     "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
     "categoryArchive": "storage",
-    "repertoire": "Songs AZKi Has Sung"
+    "repertoire": "Songs AZKi Has Sung",
+    "aboutAzki": "Who is AZKi?"
   },
   "SearchInput": {
     "search": "Search",
@@ -2190,5 +2191,241 @@
     "sortBy": "Sort by {column}",
     "videoPreview": "Latest performance video",
     "broadcastDate": "Broadcast date"
+  },
+  "AboutAzki": {
+    "title": "Who is AZKi?",
+    "description": "A fan guide to AZKi: her profile, music and streams, the story behind her career, and words you may hear in her community",
+    "lead": "Whether you came here to learn about AZKi for the first time or discovered her through music, maps or games, get to know her a little at a time, starting with whatever interests you.",
+    "homeDescription": "From her profile to words heard on stream: a welcoming guide to getting to know AZKi.",
+    "home": "HOME",
+    "contents": "Start with what interests you",
+    "updatedAt": "Content updated:",
+    "relatedSources": "Related sources",
+    "permalink": "Link to “{title}”",
+    "officialProfile": "Official hololive profile",
+    "officialX": "AZKi on X",
+    "sections": {
+      "introduction": "Meet AZKi",
+      "profile": "At a glance",
+      "enjoy": "AZKi’s music and maps",
+      "columns": "A little more context",
+      "glossary": "Words you may hear on stream",
+      "explore": "Keep exploring",
+      "sources": "Sources"
+    },
+    "sources": {
+      "profile": "Official hololive profile",
+      "debut": "Victor profile (early career and major debut)",
+      "departure": "Official “Departure” live report",
+      "greeting": "Official hololive card game Fukuoka event report",
+      "farewell": "SEGA NET Mahjong MJ greeting voices",
+      "channel": "AZKi’s official YouTube channel",
+      "stream": "Her chatting stream description",
+      "geoguessr": "Official GeoGuessr website",
+      "geoStream": "Her GeoGuessr stream",
+      "soraz": "Official Victor SorAZ profile",
+      "nickname": "Official shop: AZKi Birthday Celebration 2024",
+      "greetingAudition": "Apr 15, 2023: Holomem voice audition, 21:54 onward",
+      "greetingOrigin": "Apr 17, 2023: AZKi explains the origin, 3:01 onward",
+      "greetingMinecraft": "Apr 19, 2023: Minecraft greeting, 1:07 onward",
+      "geoFirst": "January 15, 2023: first GeoGuessr stream",
+      "geoRta": "January 23, 2023: Japan-map speedrun and description",
+      "geoVerified": "August 18, 2023: official verification announcement, from 2:39",
+      "geoInterview": "Victor: AZKi interview on GeoGuessr and FreeGeo",
+      "pioneersOrigin": "November 15, 2018: AZKi explains her fan name",
+      "pioneersDrawing": "May 14, 2023: AZKi draws the Pioneers’ mascot on stream",
+      "externalLive": "Official report: joint concert with Shishigami Leona, LAST V STANDiNG vol.1",
+      "externalDuo": "Official report: joint concert with Else and Same no Poki, LAST V STANDiNG vol.2",
+      "nonstopMusic": "COVER announcement: Don’t Stop the Music",
+      "crossroads": "Official Stand at the crossroads report: AMOKA’s guest performance",
+      "azLocation": "AZKi’s location video: AZKi’s LOCATION! Vol.1",
+      "hololiveTransfer": "Official announcement: move to hololive in April 2022",
+      "pioneersVisual": "May 14, 2023: AZKi reveals the Pioneers’ appearance on X"
+    },
+    "introduction": {
+      "paragraphs": [
+        "AZKi (pronounced “Azuki”) is a virtual singer in hololive Generation 0. Original songs, cover videos, singing streams and concerts offer plenty of ways to discover her music. She loves music and singing, and dreams of making music that stays in someone’s memory.",
+        "If you discovered her through gaming, you may first think of GeoGuessr, where players identify locations from the scenery. Listening to a song, looking at a landscape together, or settling in for a chat: one doorway can lead to another way of enjoying her work.",
+        "This page introduces her basic profile, familiar community words and the background to her career."
+      ]
+    },
+    "profile": {
+      "reading": {
+        "label": "Name",
+        "value": "AZKi (Azuki)"
+      },
+      "affiliation": {
+        "label": "Affiliation",
+        "value": "hololive Generation 0"
+      },
+      "birthday": {
+        "label": "Birthday",
+        "value": "July 1"
+      },
+      "debut": {
+        "label": "Debut",
+        "value": "November 15, 2018"
+      },
+      "fanName": {
+        "label": "Fan name",
+        "value": "開拓者 (Kaitakusha / Pioneers)"
+      },
+      "dream": {
+        "label": "Dream",
+        "value": "To make music that stays in someone’s memory"
+      }
+    },
+    "enjoy": {
+      "paragraphs": [
+        "For AZKi, singing is both something she loves and a way to stay close to the people listening. Her dream of making music that stays in someone’s memory expresses a wish for songs to remain with their listeners. Her desire to create songs and music that stay close to the Pioneers’ hearts is part of why singing is central to her activities.",
+        "Her songs also offer a way to get to know her journey. Her 2018 debut song “Creating world” and “Inochi,” which she has continued singing since her early career, have accompanied that journey. Originally planning to end her activities, AZKi chose to continue with support from her fans. Hearing earlier songs in her voice today may give you a sense of what it means for her to keep singing.",
+        "During her early and middle years, AZKi frequently performed with VSingers and virtual artists outside hololive. Her “LAST V STANDiNG” joint concerts featured Shishigami Leona in 2019 and Else and Same no Poki in 2020. She also organized “Don’t Stop the Music,” a nonstop showcase of original VTuber music videos submitted by artists. AMOKA, a group active in VRChat, opened her seventh solo concert in 2021 after taking part in the third showcase. Creating places to discover other singers and music was part of her work alongside performing her own songs.",
+        "AZKi’s first GeoGuessr stream was on January 15, 2023, titled “<geoFirst>【GeoGuessr】ここ、どこ！？深夜の小旅行🌍【ホロライブ / AZKi】</geoFirst>.” Watching other hololive members play made her want to try it on stream. She recalled learning Japanese prefectures through karuta cards as a child before playing the Japan map. In her very first round, she looked at a phone number on a sign and used its area code to narrow down the region.",
+        "She soon became increasingly absorbed in GeoGuessr. Just eight days after her first stream, on January 23, she tried a Japan-map speedrun: reaching a perfect score as quickly as possible without reading chat or using searches. She described herself as having fallen into the “GeoGuessr rabbit hole.” Later streams explored secluded railway stations and included making a Holomem map. Alongside pursuing speed and accuracy, she began enjoying maps built around subjects she liked.",
+        "In 2023, GeoGuessr awarded AZKi a verification badge, making her one of its verified players. During her August 18 stream, she showed the checkmark on her profile and shared her excitement with the Pioneers.",
+        "GeoGuessr also became an important way for people to discover AZKi outside her music. The influence reached her music, too: “FreeGeo,” from her major-debut EP “3枚目の地図,” connects with the experience of traveling to different places through GeoGuessr’s maps. Singing and maps are connected in her broadcasts and songs as well as in her greeting."
+      ]
+    },
+    "videos": {
+      "creatingWorld": "Creating world",
+      "inochi": "Inochi (2024 ver.)",
+      "geoFirst": "First GeoGuessr stream: a late-night journey",
+      "geoRta": "GeoGuessr: Japan-map speedrun",
+      "geoVerified": "Exploring secluded stations! #02",
+      "freeGeo": "FreeGeo"
+    },
+    "watchVideo": "Watch “{title}” on YouTube",
+    "watchStreams": "Browse her official streams",
+    "watchGeoStream": "Watch her GeoGuessr stream",
+    "columns": {
+      "microphoneMap": {
+        "title": "Why a microphone in her right hand and a map in her left?",
+        "paragraphs": [
+          "“A microphone in my right hand, a map in my left—zero-guessing your heart!” The starting point was a self-introduction prepared for a voice audition. In the recording played during Houshou Marine’s Holomem voice audition on April 15, 2023, AZKi followed her name and affiliation with the microphone-and-map phrase. At that stage, she continued by introducing herself as a VSinger who likes singing and traveling.",
+          "She explained how she came up with it in her own relaxed GeoGuessr chatting stream on April 17. Marine had asked her to include a statement of enthusiasm at the beginning of the audition recording. AZKi looked up self-presentation for voice auditions, taking inspiration from advice to keep it within 30 seconds. She tried to find a good phrase that would express who she was concisely, arriving at the microphone in one hand and the map in the other. It was a short, memorable introduction bringing together her singing and her interest in maps.",
+          "At the opening of her Minecraft stream, “<greetingMinecraft>【Minecraft】AZ基地、建設するの巻【ホロライブ / AZKi】</greetingMinecraft>,” on April 19, she delivered the greeting with the “zero-guessing your heart” ending. With these words reaching out to the people watching and listening, the introduction she had prepared for an audition became the greeting in its current form."
+        ]
+      },
+      "pioneers": {
+        "title": "Who are the “Pioneers”?",
+        "paragraphs": [
+          "“開拓者,” read “kaitakusha” and translated as “Pioneers,” is AZKi’s fan name. On her debut day, November 15, 2018, she described her fans as the people who would create a world together with her. The name expresses the idea of fans creating and opening up new worlds alongside AZKi, accompanying her as she expands that world through music.",
+          "The Pioneers’ mascot design took shape during her May 14, 2023 drawing stream, “【お絵描き】ついに明かされる…！開拓者の姿！？Drawing Stream【ホロライブ / AZKi】.” Building on ideas discussed in earlier singing and chatting streams, she drew while incorporating suggestions from chat. Animals associated with digging and building, such as moles and beavers, were starting points. As she and her viewers discussed its color, shape and accessories, the Pioneers’ current appearance was decided."
+        ],
+        "quote": "ついに開拓者の姿が明らかに！！！こちらです！！！",
+        "quoteSource": "AZKi’s X post (May 14, 2023)",
+        "profile": {
+          "title": "The Pioneers’ mascot profile",
+          "name": {
+            "label": "Name",
+            "value": "開拓者 (Pioneers)"
+          },
+          "reading": {
+            "label": "Pronunciation",
+            "value": "Kaitakusha"
+          },
+          "kind": {
+            "label": "Type",
+            "value": "A new UMA"
+          },
+          "classification": {
+            "label": "Classification",
+            "value": "Guesser group, Diva family"
+          },
+          "creator": {
+            "label": "Creator",
+            "value": "AZKi"
+          }
+        }
+      },
+      "routes": {
+        "title": "What are Routes α, β and γ?",
+        "paragraphs": [
+          "The “routes” mentioned in discussions of AZKi’s concerts and career describe paths through her activities. Route α (alpha) was the original path that would have ended in July 2022. In 2021, she announced a move to Route β (beta), continuing her career instead. With support from the people cheering her on, she chose to move beyond the originally planned ending.",
+          "She then transferred from INNK MUSIC to hololive in April 2022. While continuing to focus on singing, she expanded her activities to include gaming streams and broadcasts with other hololive members.",
+          "Route γ (gamma) was introduced as a new path connected to her major debut with Victor Entertainment in 2023. Continuing her activities, then stepping into a new setting: understanding these turning points helps make sense of conversations about her career and concert staging that looks back on her past.",
+          "“Departure” in 2025 was a journey through her past, present and future, celebrating a new beginning after returning the main base of her music activities to hololive. Routes α, β and γ help explain that history; they do not require every present-day activity to fit one old category. Explore this site’s History page for more detail about events and songs along the way."
+        ]
+      }
+    },
+    "glossaryLead": "Words from streams and social media, grouped by topic. Return when something is unfamiliar, or use the “#” beside an entry to share a link directly to it.",
+    "glossaryGroups": {
+      "community": "Fans, greetings and hashtags",
+      "maps": "Map streams",
+      "history": "Career background"
+    },
+    "terms": {
+      "pioneers": {
+        "name": "開拓者 (Kaitakusha / Pioneers)",
+        "description": "AZKi’s fan name, meaning people who create and open up new worlds together with her."
+      },
+      "azukichi": {
+        "name": "あずきち (Azukichi)",
+        "description": "A nickname for AZKi."
+      },
+      "konazuki": {
+        "name": "こんあずき (Konazuki)",
+        "description": "A greeting used at the beginning of streams and elsewhere. “Konazuki” developed into the current “kon-kon-kon-kon, konazuki” greeting."
+      },
+      "fanMark": {
+        "name": "⚒️ (Fan mark)",
+        "description": "AZKi’s fan mark: an emoji showing a crossed pick and hammer."
+      },
+      "azukinchi": {
+        "name": "あずきんち (Azukinchi)",
+        "description": "#あずきんち is AZKi’s stream hashtag."
+      },
+      "dokoaz": {
+        "name": "どこAZ (DokoAZ)",
+        "description": "#どこAZ is the official hashtag for visits to places connected with AZKi. It is used for locations featured in GeoGuessr streams, places visited in AZ Location videos, and other places associated with her activities. You can find those places on this site’s <seichiMap>Seichi Map</seichiMap>."
+      },
+      "geoguessr": {
+        "name": "GeoGuessr",
+        "description": "A geography game where you infer your location on a map from street-view scenery. Buildings and signs provide clues. Her streams let you follow along as the possible location becomes more specific."
+      },
+      "zeroGuesser": {
+        "name": "ゼロゲッサー (Zero guesser)",
+        "description": "In GeoGuessr streams, a guess whose displayed distance from the correct location is 0 m. The word also appears in her greeting about zero-guessing your heart. It refers to the displayed distance, rather than merely achieving a perfect score."
+      },
+      "routeAlpha": {
+        "name": "Route α (Alpha)",
+        "description": "The original path that would have ended her activities in July 2022. It is discussed when looking back at her career. She chose a continuing path instead, so the term does not mean she actually ended her activities then."
+      },
+      "routeBeta": {
+        "name": "Route β (Beta)",
+        "description": "The path that branched from Route α to continue her career, announced in 2021. It was a turning point supported by her fans."
+      },
+      "routeGamma": {
+        "name": "Route γ (Gamma)",
+        "description": "A new path connected with her major debut through Victor Entertainment in 2023. Read it as the name of a past turning point. The History page offers more detail about what came afterward."
+      },
+      "azLocation": {
+        "name": "AZロケ (AZ Location)",
+        "description": "Short for “AZKi’s LOCATION!,” a video series in which AZKi visits places in person. She explores locations familiar from GeoGuessr, enjoying the local scenery and food."
+      }
+    },
+    "exploreLead": "Follow whatever caught your interest. Whether you want another song or more of her story, choose the doorway that suits your mood.",
+    "explore": {
+      "history": {
+        "title": "History",
+        "description": "Look back at her journey by year and month."
+      },
+      "discography": {
+        "title": "Discography",
+        "description": "Find original songs, covers and other releases."
+      },
+      "archives": {
+        "title": "Stream archives",
+        "description": "Discover singing, gaming, chatting and other broadcasts."
+      },
+      "units": {
+        "title": "Units",
+        "description": "Explore music made with others, including SorAZ."
+      },
+      "map": {
+        "title": "Seichi Map",
+        "description": "Explore places connected with her activities on a map."
+      }
+    }
   }
 }

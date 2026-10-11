@@ -68,6 +68,7 @@ export default function DrawerMenu({
     {
       items: [
         { name: t("home"), href: "/" },
+        { name: t("aboutAzki"), href: "/about-azki" },
         { name: t("search"), href: "/search" },
       ],
     },
