@@ -422,7 +422,12 @@ export default function DrawerMenu({
         overlayProps={{ backgroundOpacity: 0.5, blur: 5 }}
         fullScreen={isMobile}
       >
-        <Acknowledgment />
+        <Acknowledgment
+          onNavigate={() => {
+            setShowAcknowledgment(false);
+            onClose();
+          }}
+        />
         <div className="mt-4 flex justify-end">
           <Button
             className="transition text-sm cursor-pointer"

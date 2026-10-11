@@ -1,4 +1,184 @@
 {
+  "Legal": {
+    "terms": "Terms of Use & Disclaimer",
+    "privacy": "Privacy Policy",
+    "linksLabel": "Terms and privacy",
+    "home": "HOME",
+    "published": "Published:",
+    "updated": "Last updated:",
+    "services": {
+      "google": "Google Privacy Policy (Google sign-in, YouTube and Google Maps)",
+      "youtubeTerms": "YouTube Terms of Service",
+      "analytics": "Vercel Web Analytics privacy information",
+      "speedInsights": "Vercel Speed Insights privacy information",
+      "osm": "OpenStreetMap Foundation Privacy Policy",
+      "gsi": "Geospatial Information Authority of Japan Privacy Policy"
+    }
+  },
+  "Terms": {
+    "title": "Terms of Use & Disclaimer",
+    "description": "Conditions of use, ownership of rights and disclaimers for AZKi Song Database",
+    "sections": [
+      {
+        "id": "scope",
+        "heading": "About this site and scope",
+        "paragraphs": [
+          "AZKi Song Database (the Site) is an unofficial fan site operated by @mitsugogo. It is not an official website operated by AZKi, hololive production, COVER Corporation, or any other rights holder or service provider.",
+          "These terms apply to browsing the Site, playing videos, saving playlists and favorites, using the location map and visit records, sharing, and other features provided by the Site. Please see the Privacy Policy for information about how user information is handled."
+        ]
+      },
+      {
+        "id": "rights",
+        "heading": "Copyright and other rights",
+        "paragraphs": [
+          "Rights to videos, songs, images, names, logos and other content displayed or embedded on the Site belong to their respective creators and rights holders. Being able to view content on the Site does not grant permission to reproduce, redistribute or modify it.",
+          "The Site's source code is licensed under the MIT License. This license does not apply to videos, songs, third-party images, the contributed site icon or similar materials. Please check the conditions set by the respective rights holders."
+        ]
+      },
+      {
+        "id": "accounts",
+        "heading": "Accounts, saved data and sharing",
+        "paragraphs": [
+          "Some saving features require signing in with a Google account. Use your own account and manage it appropriately to prevent unauthorized use by others.",
+          "Publishing settings and sharing links can make playlists and visit records visible to other users. Check the content and recipients before sharing. Avoid including your own or other people's confidential or personal information in shared notes or URLs."
+        ]
+      },
+      {
+        "id": "prohibited",
+        "heading": "Prohibited conduct",
+        "paragraphs": [
+          "Unauthorized access, bypassing authentication, impersonating another user, and accessing or modifying another person's data without authorization are prohibited.",
+          "Excessive load on the Site or external services, interference with their operation, unlawful conduct, and infringement of another person's rights or privacy are prohibited."
+        ]
+      },
+      {
+        "id": "visits",
+        "heading": "Location map and visits",
+        "paragraphs": [
+          "Map locations, names, opening information and other details may be inaccurate or change. Check official information and local guidance before visiting.",
+          "Follow local rules and access restrictions. Do not enter private property without permission or disturb residents or facilities. Follow local guidance on photography and publication, and prioritize safety and consideration for others."
+        ]
+      },
+      {
+        "id": "disclaimer",
+        "heading": "Information, external services and disclaimer",
+        "paragraphs": [
+          "We work to improve the accuracy of information and statistics, but manual errors, delayed updates and inconsistent names may occur. Accuracy, completeness, timeliness and suitability for a particular purpose are not guaranteed.",
+          "Videos may become unavailable due to removal, privacy changes or regional restrictions. Changes or outages in external services such as YouTube and Google may also prevent access or use of features. Each external service or linked website is subject to its own terms and policies.",
+          "Outages, maintenance and changes may result in loss of saved data or the modification, suspension or termination of features or the service. Permanent retention or restoration of saved data is not guaranteed. Keep your own copies of records that you need.",
+          "To the extent permitted by applicable law, the operator is not liable for damage arising from use of, or inability to use, the Site. Where liability cannot legally be limited, including cases of intentional misconduct or gross negligence, applicable law takes precedence."
+        ]
+      },
+      {
+        "id": "changes",
+        "heading": "Changes to these terms",
+        "paragraphs": [
+          "These terms may be revised to reflect changes in the service or applicable law. Revisions and their effective dates will be announced on this page, and the last updated date will be changed. Changes will be made in accordance with applicable law."
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Contact",
+        "paragraphs": [
+          "For questions about these terms or the information on the Site, please contact the operator's X account, @mitsugogo."
+        ]
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "description": "How user information is handled for Google sign-in, saved data, sharing and analytics",
+    "sections": [
+      {
+        "id": "scope",
+        "heading": "Our approach and operator",
+        "paragraphs": [
+          "The operator of AZKi Song Database (the Site), @mitsugogo, uses user information for authentication, user-specific features, saving and sharing records, secure operation and service improvements. This policy explains how information is handled on the Site."
+        ]
+      },
+      {
+        "id": "googleAccount",
+        "heading": "Signing in with a Google account",
+        "paragraphs": [
+          "The Site uses Google accounts for sign-in. It does not request permission to obtain your email address, and email addresses are not included in the user data stored in its database. The account identifier received from Google is used to verify sign-in and associate your account with saved playlists, favorites, visit records and other saved data.",
+          "Your Google display name and profile picture are used to display the signed-in account and are not saved in the Site's user database. The identifier and this profile information are included in the sign-in session. The Site does not obtain your Google account password.",
+          "Google sign-in is used to save records within this Site. It does not request permission to read Gmail or read or write your Google Drive files or YouTube playlists. Google's handling of information is subject to its Privacy Policy."
+        ]
+      },
+      {
+        "id": "savedData",
+        "heading": "Saved information and purposes",
+        "paragraphs": [
+          "Playlist names, selected songs and videos, playback start positions and order, visibility settings, favorites, creation and update times, and related information are saved with your account identifier. They are used to display, edit, play, access across devices and share your records.",
+          "For the location map, the Site saves locations you record as visited, visit dates and times, notes, URLs, nicknames, ranking name-display preferences and sharing settings. They are used to manage and share visit records and to calculate and display visitor counts and rankings.",
+          "Legacy playlists and favorites remaining on a device may be migrated to your account's saved data when you sign in. Information used to prevent duplicate migration is also saved."
+        ]
+      },
+      {
+        "id": "sharing",
+        "heading": "Publishing, sharing and statistics",
+        "paragraphs": [
+          "Private playlists can only be viewed by their owner. Public playlists can be viewed by others and may be indexed by search engines. Unlisted playlists can be viewed by anyone who knows their link. Unlisted links do not verify a viewer's identity or prevent forwarding.",
+          "Enabling visit-record sharing allows anyone who knows the sharing link to view your nickname and visit records, including locations, visit dates and times, notes and URLs. Sharing can be disabled on the Site's sharing screen, but this does not retract information already viewed or saved by someone else.",
+          "Recorded visits contribute to visitor counts for locations and visitor rankings. Nicknames are displayed according to your display settings. Hiding your name does not exclude your records from statistics. Google account identifiers, display names and profile pictures are not used in these public displays."
+        ]
+      },
+      {
+        "id": "cookies",
+        "heading": "Cookies and device storage",
+        "paragraphs": [
+          "The Site uses cookies to maintain sign-in, secure authentication and remember language preferences. The sign-in session includes your Google account identifier, display name, profile picture and related information.",
+          "Display and map settings and actions to resume after sign-in may be saved in your browser's localStorage or sessionStorage. Legacy playlists and favorites may also remain on your device. Deleting cookies or device storage may sign you out or reset settings, but does not delete records already saved on the server."
+        ]
+      },
+      {
+        "id": "location",
+        "heading": "Use of your current location",
+        "paragraphs": [
+          "Your current location is obtained when you use the location-display control on the map and allow location access in your browser. It is used to show your position on the map and find nearby locations. It is not automatically saved as a visit record in the Site's user database.",
+          "Displaying the map involves communication with the selected map service. Please check that service's policy for how it handles information."
+        ]
+      },
+      {
+        "id": "analytics",
+        "heading": "Analytics and performance measurement",
+        "paragraphs": [
+          "The Site uses Vercel Web Analytics and Vercel Speed Insights to understand usage and improve performance. Information such as pages viewed, referrers, browser and device types, country or region, and performance measurements is sent to Vercel for statistics and measurement.",
+          "Vercel Web Analytics does not use third-party analytics cookies and, according to Vercel's documentation, focuses on aggregated statistics. This is separate from the Site's sign-in cookies and the handling of information by Google, YouTube and map services. See Vercel's documentation linked below for details."
+        ]
+      },
+      {
+        "id": "externalServices",
+        "heading": "External services and disclosure",
+        "paragraphs": [
+          "The Site uses Google sign-in, embedded YouTube videos, Google Maps, OpenStreetMap, GSI map tiles and other services. When you display or use them, information such as your IP address, browser information and viewing activity may be processed by those services. Linked websites are also subject to their respective policies.",
+          "External services are used as needed for authentication, hosting, data storage and analytics. The operator does not disclose your saved information to third parties except for publishing or sharing you choose, processing needed to provide the service, legal requirements and similar circumstances."
+        ]
+      },
+      {
+        "id": "deletion",
+        "heading": "Deleting information and retention",
+        "paragraphs": [
+          "Playlists, favorites, visit records and other information with deletion controls can be deleted using their respective features. Saved information is retained until deletion or similar action takes place. Signing out or revoking the connection in your Google account does not by itself delete saved data.",
+          "For deletion requests concerning information that cannot be deleted through the interface, or questions about how information is handled, contact the operator below. Information needed to review or respond to your request will be discussed privately rather than in public."
+        ]
+      },
+      {
+        "id": "changes",
+        "heading": "Changes to this policy",
+        "paragraphs": [
+          "This policy may be revised to reflect changes to the service or its handling of information. Revisions and their effective dates will be announced on this page, and the last updated date will be changed."
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Questions and deletion requests",
+        "paragraphs": [
+          "For questions about this policy or requests to delete saved information, please contact the operator's X account, @mitsugogo. Do not post your Google account identifier, visit history or other personal information publicly."
+        ]
+      }
+    ]
+  },
   "Loading": {
     "label": "Loading"
   },
@@ -1556,7 +1736,7 @@
     }
   },
   "Footer": {
-    "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
+    "disclaimer": "This site is an unofficial fan site maintained by volunteers. Rights to the videos belong to their creators."
   },
   "Summary": {
     "timelineTitle": "Timeline",

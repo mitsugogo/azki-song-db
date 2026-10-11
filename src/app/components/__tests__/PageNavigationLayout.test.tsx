@@ -50,10 +50,21 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("next-intl", () => ({
   useLocale: () => state.locale,
-  useTranslations: (namespace: "DrawerMenu" | "Loading") => (key: string) => {
-    const messages = (state.locale === "ja" ? ja : en)[namespace];
-    return messages[key as keyof typeof messages] ?? key;
-  },
+  useTranslations:
+    (namespace: "DrawerMenu" | "Loading" | "Legal" | "Acknowledgment") =>
+    (key: string) => {
+      const messages = (state.locale === "ja" ? ja : en)[namespace];
+      const value = key
+        .split(".")
+        .reduce<unknown>(
+          (value, part) =>
+            value && typeof value === "object"
+              ? (value as Record<string, unknown>)[part]
+              : undefined,
+          messages,
+        );
+      return typeof value === "string" ? value : key;
+    },
 }));
 
 vi.mock("../Header", () => ({
@@ -97,10 +108,6 @@ vi.mock("../../hook/usePWAInstall", () => ({
     isInstalled: false,
     promptInstall: state.promptInstall,
   }),
-}));
-
-vi.mock("../Acknowledgment", () => ({
-  default: () => <p>謝辞</p>,
 }));
 
 let viewportWidth = 1280;
@@ -209,6 +216,8 @@ describe("SitePageLayout", () => {
     "/statistics",
     "/stream-archives",
     "/stream-archives/list",
+    "/terms",
+    "/privacy",
   ])("%sの本文をMantineのスクロール領域に統一する", (pathname) => {
     state.pathname = pathname;
     render(siteLayoutTree(<main>本文</main>));
@@ -358,6 +367,57 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+
+describe.each(["ja", "en"] as const)(
+  "policy links from About (%s)",
+  (locale) => {
+    it.each([
+      [1280, "terms"],
+      [1280, "privacy"],
+      [800, "terms"],
+      [800, "privacy"],
+    ] as const)(
+      "幅%dpxで%sを選択するとAboutとDrawerを閉じる",
+      async (width, document) => {
+        state.locale = locale;
+        viewportWidth = width;
+        const messages = locale === "ja" ? ja : en;
+        renderLayout();
+        if (width < 1280)
+          fireEvent.click(
+            screen.getByRole("button", { name: "ナビゲーションを開く" }),
+          );
+        const menu = await screen.findByRole("navigation", {
+          name: messages.DrawerMenu.title,
+        });
+        expect(
+          within(menu).queryByRole("link", { name: messages.Legal.terms }),
+        ).not.toBeInTheDocument();
+        expect(
+          within(menu).queryByRole("link", { name: messages.Legal.privacy }),
+        ).not.toBeInTheDocument();
+        fireEvent.click(
+          within(menu).getByRole("link", { name: messages.DrawerMenu.about }),
+        );
+        const dialog = await screen.findByRole("dialog", {
+          name: messages.DrawerMenu.about,
+        });
+        const link = within(dialog).getByRole("link", {
+          name: messages.Legal[document],
+        });
+        expect(link).toHaveAttribute(
+          "href",
+          `${locale === "en" ? "/en" : ""}/${document}`,
+        );
+        expect(link).not.toHaveAttribute("target");
+        fireEvent.click(link);
+        await waitFor(() =>
+          expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+        );
+      },
+    );
+  },
+);
 
 describe("PageNavigationLayout", () => {
   it.each([
@@ -569,7 +629,9 @@ describe("PageNavigationLayout", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "このサイトについて",
     });
-    expect(within(dialog).getByText("謝辞")).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(ja.Acknowledgment.intro.p1),
+    ).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "閉じる" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),

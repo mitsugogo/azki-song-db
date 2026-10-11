@@ -22,6 +22,8 @@ const pageRoutes = new Set([
   "seichi-map",
   "statistics",
   "stream-archives",
+  "terms",
+  "privacy",
 ]);
 
 /** ルートの読み込み境界の外で、通常ページのヘッダーとメニューを維持する。 */
