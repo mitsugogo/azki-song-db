@@ -7,7 +7,6 @@ import Footer from "./components/Footer";
 import { HomeActivityTimelineSection } from "./home/HomeActivityTimelineSection";
 import { HomeNavigationLayout } from "./home/HomeNavigationLayout";
 import { HomeHeroSection } from "./home/HomeHeroSection";
-import { HomeAboutAzkiLink } from "./home/HomeAboutAzkiLink";
 import { HomeLatestVideoSection } from "./home/HomeLatestVideoSection";
 import { HomeEventsSection } from "./home/HomeEventsSection";
 import { HomeOngoingEventNotice } from "./home/HomeOngoingEventNotice";
@@ -103,8 +102,6 @@ export default function ClientTop() {
       <HomeNavigationLayout footer={<Footer />}>
         <main className="flex flex-1 flex-col">
           <HomeHeroSection songs={allSongs} />
-
-          <HomeAboutAzkiLink />
 
           <section className="pt-2 pb-10">
             <HomeLatestVideoSection isLoading={isLoading} songs={allSongs} />

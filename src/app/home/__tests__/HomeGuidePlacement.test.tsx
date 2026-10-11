@@ -69,21 +69,19 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("TOP guide placement", () => {
-  it("ヒーローの直後、最新動画の前に紹介リンクを表示する", async () => {
+describe("TOP content placement", () => {
+  it("紹介カードを表示せず、ヒーローの直後に最新動画を表示する", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValue({ ok: true, text: async () => "{}" });
     vi.stubGlobal("fetch", fetchMock);
     render(<ClientTop />);
     const hero = screen.getByRole("region", { name: "Hero" });
-    const guide = screen.getByRole("link", { name: /AZKiさんってどんな人/ });
     const latest = screen.getByRole("region", { name: "Latest video" });
-    expect(hero.parentElement?.children[1]).toContainElement(guide);
     expect(
-      guide.compareDocumentPosition(latest) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    expect(guide).toHaveAttribute("href", "/about-azki");
+      screen.queryByRole("link", { name: /AZKiさんってどんな人/ }),
+    ).not.toBeInTheDocument();
+    expect(hero.nextElementSibling).toContainElement(latest);
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith("/build-info.json"),
     );
