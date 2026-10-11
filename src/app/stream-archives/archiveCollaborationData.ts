@@ -6,6 +6,7 @@ import {
 } from "../config/holoGenerations";
 import {
   createChannelsByParticipantName,
+  getArchiveParticipantDisplayName,
   isAzkiArchiveParticipant,
   resolveArchiveParticipants,
   type ArchiveParticipantEntry,
@@ -317,7 +318,7 @@ export const createArchiveCollaborationRanking = (
       const current = countsByParticipant.get(key);
       countsByParticipant.set(key, {
         key,
-        name: participant.name,
+        name: getArchiveParticipantDisplayName(participant, locale),
         participantEntries: [participant],
         castNames: [participant.name],
         count: (current?.count ?? 0) + 1,
@@ -502,7 +503,23 @@ export const createArchiveCollaborationCombinationRanking = (
     const fallbackSeparator = locale.startsWith("ja") ? "・" : " + ";
     const name =
       getCollabUnitName(memberNames, locale) ??
-      memberNames.join(fallbackSeparator);
+      getCollabUnitName(
+        participantEntries.map((participant) =>
+          getArchiveParticipantDisplayName(participant, "ja"),
+        ),
+        locale,
+      ) ??
+      getCollabUnitName(
+        participantEntries.map((participant) =>
+          getArchiveParticipantDisplayName(participant, "en"),
+        ),
+        locale,
+      ) ??
+      participantEntries
+        .map((participant) =>
+          getArchiveParticipantDisplayName(participant, locale),
+        )
+        .join(fallbackSeparator);
     const current = countsByCombination.get(key);
 
     countsByCombination.set(key, {

@@ -45,6 +45,71 @@ const song = (
 });
 
 describe("createArchiveCollaborationRanking", () => {
+  it.each(["ja", "en"])(
+    "uses IRyS and resolves AZRyS from the legacy name in %s",
+    (locale) => {
+      const irys = channel("アイリス", "EN");
+      irys.artistName = "IRyS";
+      const azki = { name: "AZKi", channel: channel("AZKi") };
+      const items = [
+        {
+          stream_started_at: "2026-10-01T00:00:00.000Z",
+          video_duration: "PT1H",
+          participantEntries: [azki, { name: "アイリス", channel: irys }],
+        },
+      ];
+
+      expect(
+        createArchiveCollaborationRanking(items, null, locale)[0],
+      ).toMatchObject({ name: "IRyS", castNames: ["アイリス"], count: 1 });
+      expect(
+        createArchiveCollaborationCombinationRanking(
+          items,
+          null,
+          locale,
+          azki,
+        )[0],
+      ).toMatchObject({ name: "AZRyS", castNames: ["アイリス"] });
+    },
+  );
+
+  it.each([
+    ["ja", "星街すいせい", "AZKi・星街すいせい・フワワ・アビスガード"],
+    ["en", "Hoshimachi Suisei", "AZKi + Hoshimachi Suisei + Fuwawa Abyssgard"],
+  ])(
+    "localizes member and unnamed combination rankings in %s",
+    (locale, memberName, combinationName) => {
+      const azki = { name: "AZKi", channel: channel("AZKi") };
+      const items = [
+        {
+          stream_started_at: "2026-10-01T00:00:00.000Z",
+          participantEntries: [
+            azki,
+            { name: "星街すいせい", channel: channel("星街すいせい") },
+            {
+              name: "フワワアビスガード",
+              channel: channel("フワワアビスガード", "EN"),
+            },
+          ],
+        },
+      ];
+
+      expect(
+        createArchiveCollaborationRanking(items, null, locale).map(
+          ({ name }) => name,
+        ),
+      ).toContain(memberName);
+      expect(
+        createArchiveCollaborationCombinationRanking(
+          items,
+          null,
+          locale,
+          azki,
+        )[0].name,
+      ).toBe(combinationName);
+    },
+  );
+
   it("separates generation labels from inactive status", () => {
     const graduate = channel("夜空メル");
     graduate.generation = "1期生、卒業生";

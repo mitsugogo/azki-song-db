@@ -2,7 +2,11 @@
 
 import { Avatar, Text, Tooltip } from "@mantine/core";
 import { memo } from "react";
-import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import { useLocale } from "next-intl";
+import {
+  getArchiveParticipantDisplayName,
+  type ArchiveParticipantEntry,
+} from "../lib/archiveParticipants";
 
 const getChannelUrl = (channelId: string) =>
   `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`;
@@ -12,13 +16,16 @@ function ArchiveParticipantList({
 }: {
   participants: ArchiveParticipantEntry[];
 }) {
+  const locale = useLocale();
   if (participants.length === 0) {
     return <Text c="dimmed">-</Text>;
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {participants.map(({ name, channel }) => {
+      {participants.map((participant) => {
+        const { channel } = participant;
+        const name = getArchiveParticipantDisplayName(participant, locale);
         if (!channel) {
           return (
             <Text key={name} component="span" fz="xs">

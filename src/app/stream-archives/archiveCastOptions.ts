@@ -1,5 +1,8 @@
 import type { ChannelEntry } from "../types/api/yt/channels";
-import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import {
+  getArchiveParticipantDisplayName,
+  type ArchiveParticipantEntry,
+} from "../lib/archiveParticipants";
 import { createArchiveMembersWithoutCollaboration } from "./archiveCollaborationData";
 
 export type ArchiveCastOption = ArchiveParticipantEntry & {
@@ -32,7 +35,11 @@ export const createArchiveCastOptions = (
     (participant) => {
       const key = getCastOptionKey(participant);
       if (key && !optionsByKey.has(key)) {
-        optionsByKey.set(key, { ...participant, count: 0 });
+        optionsByKey.set(key, {
+          ...participant,
+          name: getArchiveParticipantDisplayName(participant, "ja"),
+          count: 0,
+        });
       }
     },
   );
@@ -52,7 +59,11 @@ export const createArchiveCastOptions = (
         key,
         current
           ? { ...current, count: current.count + 1 }
-          : { ...participant, count: 1 },
+          : {
+              ...participant,
+              name: getArchiveParticipantDisplayName(participant, "ja"),
+              count: 1,
+            },
       );
     });
   });

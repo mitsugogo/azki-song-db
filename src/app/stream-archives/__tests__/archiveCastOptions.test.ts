@@ -19,6 +19,24 @@ const channel = (
 });
 
 describe("createArchiveCastOptions", () => {
+  it("uses official Japanese identities for filter values even on English pages", () => {
+    const irys = channel("アイリス", { branch: "EN", artistName: "IRyS" });
+    const fuwawa = channel("フワワアビスガード", {
+      branch: "EN",
+      artistName: "Fuwawa Abyssgard",
+    });
+    const options = createArchiveCastOptions(
+      [{ participantEntries: [{ name: "IRyS", channel: irys }] }],
+      [irys, fuwawa],
+      "en",
+    );
+
+    expect(options.map(({ name, count }) => ({ name, count }))).toEqual([
+      { name: "IRyS", count: 1 },
+      { name: "フワワ・アビスガード", count: 0 },
+    ]);
+  });
+
   it("includes active hololive members with zero videos and counts each video once", () => {
     const azki = channel("AZKi");
     const suisei = channel("星街すいせい");

@@ -13,6 +13,8 @@ import {
 } from "@mantine/core";
 import { memo, useCallback, useMemo, useState } from "react";
 import { HiCheck } from "react-icons/hi";
+import { useLocale } from "next-intl";
+import { getArchiveParticipantDisplayName } from "../lib/archiveParticipants";
 import {
   holoGenerationGroupOrder,
   resolveHoloGenerationGroups,
@@ -39,6 +41,9 @@ type GroupedCastOptions = {
   items: GroupedCastOption[];
 };
 
+const getCanonicalCastName = (name: string) =>
+  getArchiveParticipantDisplayName({ name, channel: null }, "ja");
+
 function ArchiveCastFilter({
   options,
   value,
@@ -48,6 +53,7 @@ function ArchiveCastFilter({
   formatCountLabel,
   onChange,
 }: ArchiveCastFilterProps) {
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -108,10 +114,30 @@ function ArchiveCastFilter({
     () => new Map(options.map((option) => [option.name, option.count])),
     [options],
   );
+  const displayNamesByName = useMemo(
+    () =>
+      new Map(
+        options.map((option) => [
+          option.name,
+          getArchiveParticipantDisplayName(option, locale),
+        ]),
+      ),
+    [locale, options],
+  );
+  const selectedNames = useMemo(
+    () => new Set(value.map(getCanonicalCastName)),
+    [value],
+  );
+  const displayName = useCallback(
+    (name: string) =>
+      displayNamesByName.get(getCanonicalCastName(name)) ??
+      getArchiveParticipantDisplayName({ name, channel: null }, locale),
+    [displayNamesByName, locale],
+  );
   const formatOptionLabel = useCallback(
     (name: string) =>
-      `${name} - ${formatCountLabel(countsByName.get(name) ?? 0)}`,
-    [countsByName, formatCountLabel],
+      `${displayName(name)} - ${formatCountLabel(countsByName.get(getCanonicalCastName(name)) ?? 0)}`,
+    [countsByName, displayName, formatCountLabel],
   );
   const filteredData = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("ja-JP");
@@ -119,7 +145,15 @@ function ArchiveCastFilter({
     return data.flatMap((group) => {
       const items = normalizedSearch
         ? group.items.filter((option) =>
-            option.name.toLocaleLowerCase("ja-JP").includes(normalizedSearch),
+            [
+              option.name,
+              option.channel?.talentName ?? "",
+              option.channel?.artistName ?? "",
+              getArchiveParticipantDisplayName(option, "ja"),
+              getArchiveParticipantDisplayName(option, "en"),
+            ].some((name) =>
+              name.toLocaleLowerCase("ja-JP").includes(normalizedSearch),
+            ),
           )
         : group.items;
 
@@ -134,18 +168,23 @@ function ArchiveCastFilter({
       }
 
       onChange(
-        value.includes(option.name)
-          ? value.filter((name) => name !== option.name)
+        selectedNames.has(option.name)
+          ? value.filter((name) => getCanonicalCastName(name) !== option.name)
           : [...value, option.name],
       );
       setSearch("");
       combobox.updateSelectedOptionIndex("selected");
     },
-    [combobox, onChange, optionsByValue, value],
+    [combobox, onChange, optionsByValue, selectedNames, value],
   );
   const handleValueRemove = useCallback(
     (name: string) =>
-      onChange(value.filter((selectedName) => selectedName !== name)),
+      onChange(
+        value.filter(
+          (selectedName) =>
+            getCanonicalCastName(selectedName) !== getCanonicalCastName(name),
+        ),
+      ),
     [onChange, value],
   );
   const pills =
@@ -251,7 +290,7 @@ function ArchiveCastFilter({
             {filteredData.map((group) => (
               <Combobox.Group key={group.key} label={group.label}>
                 {group.items.map((option) => {
-                  const selected = value.includes(option.name);
+                  const selected = selectedNames.has(option.name);
                   const disabled = option.count === 0;
 
                   return (
@@ -274,11 +313,11 @@ function ArchiveCastFilter({
                               size="xs"
                               color="pink"
                             >
-                              {Array.from(option.name)[0]}
+                              {Array.from(displayName(option.name))[0]}
                             </Avatar>
                           ) : null}
                           <Text size="sm" c={disabled ? "dimmed" : undefined}>
-                            {option.name}{" "}
+                            {displayName(option.name)}{" "}
                             <Text span c="dimmed">
                               - {formatCountLabel(option.count)}
                             </Text>

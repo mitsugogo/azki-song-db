@@ -7,8 +7,11 @@ import {
   within,
 } from "@testing-library/react";
 import { useState } from "react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import ArchiveCastFilter from "../ArchiveCastFilter";
+
+const { localeMock } = vi.hoisted(() => ({ localeMock: vi.fn(() => "ja") }));
+vi.mock("next-intl", () => ({ useLocale: localeMock }));
 
 const formatCountLabel = (count: number) => `${count}件`;
 
@@ -41,6 +44,7 @@ const renderCastFilter = ({
   );
 
 describe("ArchiveCastFilter", () => {
+  beforeEach(() => localeMock.mockReturnValue("ja"));
   beforeAll(() => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -56,6 +60,81 @@ describe("ArchiveCastFilter", () => {
       })),
     });
   });
+
+  it.each(["ja", "en"])(
+    "shows IRyS and keeps legacy selections usable in %s",
+    (locale) => {
+      localeMock.mockReturnValue(locale);
+      const onChange = vi.fn();
+      render(
+        <MantineProvider>
+          <ArchiveCastFilter
+            options={[
+              {
+                name: "IRyS",
+                count: 2,
+                channel: {
+                  branch: "EN",
+                  generation: "Promise",
+                  talentName: "アイリス",
+                  artistName: "IRyS",
+                  youtubeId: "UC-irys",
+                  channelName: "IRyS Ch.",
+                  handle: "",
+                  subscriberCount: 0,
+                  iconUrl: "",
+                },
+              },
+            ]}
+            value={["アイリス"]}
+            placeholder="出演者"
+            nothingFoundMessage="該当なし"
+            selectedCountLabel="1人選択中"
+            formatCountLabel={formatCountLabel}
+            onChange={onChange}
+          />
+        </MantineProvider>,
+      );
+
+      expect(screen.getByText("IRyS - 2件")).toBeInTheDocument();
+      const input = screen.getByRole("combobox", { name: "出演者" });
+      fireEvent.change(input, { target: { value: "アイリス" } });
+      const option = screen.getByRole("option", { name: "IRyS - 2件" });
+      expect(option).toHaveAttribute("aria-selected", "true");
+      fireEvent.click(option);
+      expect(onChange).toHaveBeenCalledWith([]);
+    },
+  );
+
+  it.each([
+    ["ja", "星街すいせい", "Hoshimachi"],
+    ["en", "Hoshimachi Suisei", "星街"],
+  ])(
+    "displays official names and searches across languages in %s",
+    (locale, name, search) => {
+      localeMock.mockReturnValue(locale);
+      render(
+        <MantineProvider>
+          <ArchiveCastFilter
+            options={[{ name: "星街すいせい", channel: null, count: 1 }]}
+            value={[]}
+            placeholder="出演者"
+            nothingFoundMessage="該当なし"
+            selectedCountLabel="0人選択中"
+            formatCountLabel={formatCountLabel}
+            onChange={vi.fn()}
+          />
+        </MantineProvider>,
+      );
+
+      fireEvent.change(screen.getByRole("combobox", { name: "出演者" }), {
+        target: { value: search },
+      });
+      expect(
+        screen.getByRole("option", { name: `${name} - 1件` }),
+      ).toBeInTheDocument();
+    },
+  );
 
   it("renders an avatar only for cast members with channel data", () => {
     render(

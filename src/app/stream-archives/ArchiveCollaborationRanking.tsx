@@ -13,7 +13,11 @@ import {
 import { memo, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { HiUser, HiUserGroup } from "react-icons/hi";
-import type { ArchiveParticipantEntry } from "../lib/archiveParticipants";
+import { useLocale } from "next-intl";
+import {
+  getArchiveParticipantDisplayName,
+  type ArchiveParticipantEntry,
+} from "../lib/archiveParticipants";
 import {
   getArchiveHololiveMemberMetadata,
   type ArchiveCollaborationRankingItem,
@@ -71,6 +75,7 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
   onSelectedYearChange,
   onModeChange,
 }: ArchiveCollaborationRankingProps) {
+  const locale = useLocale();
   const maxMetricValue = items[0]?.totalDurationSeconds ?? 0;
   const noCollaborationGroups = [
     {
@@ -199,11 +204,17 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                             participant.channel?.youtubeId || participant.name
                           }
                           src={participant.channel?.iconUrl || null}
-                          alt={participant.name}
+                          alt={getArchiveParticipantDisplayName(
+                            participant,
+                            locale,
+                          )}
                           size="md"
                           radius="xl"
                         >
-                          {participant.name.slice(0, 1)}
+                          {getArchiveParticipantDisplayName(
+                            participant,
+                            locale,
+                          ).slice(0, 1)}
                         </Avatar>
                       ))}
                     {item.participantEntries.length > MAX_VISIBLE_AVATARS ? (
@@ -301,17 +312,26 @@ const ArchiveCollaborationRanking = memo(function ArchiveCollaborationRanking({
                   {participants.map((participant, idx) => (
                     <Tooltip
                       key={`${participant.channel?.youtubeId || participant.name}-${idx}`}
-                      label={participant.name}
+                      label={getArchiveParticipantDisplayName(
+                        participant,
+                        locale,
+                      )}
                       withArrow
                     >
                       <Avatar
                         src={participant.channel?.iconUrl || null}
-                        alt={participant.name}
+                        alt={getArchiveParticipantDisplayName(
+                          participant,
+                          locale,
+                        )}
                         size="md"
                         radius="xl"
                         color="pink"
                       >
-                        {participant.name.slice(0, 1)}
+                        {getArchiveParticipantDisplayName(
+                          participant,
+                          locale,
+                        ).slice(0, 1)}
                       </Avatar>
                     </Tooltip>
                   ))}
