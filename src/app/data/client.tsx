@@ -101,7 +101,7 @@ export default function ClientTable() {
       <div className="grow min-w-0 w-full lg:pb-0">
         <h1 className={pageClasses.heading}>{t("title")}</h1>
         <p className={pageClasses.description}>{t("description")}</p>
-        <div className="block w-full rounded-lg shadow-sm dark:border-gray-700">
+        <div className="block w-full rounded-b-lg shadow-sm dark:border-gray-700">
           <div className="sticky top-0 z-20 space-y-4 bg-white/95 py-2 backdrop-blur dark:bg-gray-900/95">
             <TextInput
               placeholder={t("searchPlaceholder")}
@@ -128,7 +128,7 @@ export default function ClientTable() {
                 {table.getHeaderGroups().map((headerGroup) => (
                   <div
                     key={headerGroup.id}
-                    className="flex flex-1 bg-white/30 dark:bg-gray-900/40 border-b border-white/20 dark:border-white/10 backdrop-blur-sm shadow-[0_4px_12px_rgba(15,23,42,0.04)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:text-white"
+                    className="table-header flex flex-1 border-b border-white/20 dark:border-white/10 dark:text-white"
                   >
                     {headerGroup.headers.map((header) => (
                       <div

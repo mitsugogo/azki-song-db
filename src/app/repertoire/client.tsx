@@ -234,12 +234,12 @@ export default function RepertoireClient() {
           {t("empty")}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-light-gray-200 bg-white/80 dark:border-white/10 dark:bg-gray-900/70">
+        <div className="overflow-hidden rounded-b-lg border border-light-gray-200 bg-white/80 dark:border-white/10 dark:bg-gray-900/70">
           <table
             className="block w-full text-left text-sm lg:table"
             aria-label={t("title")}
           >
-            <thead className="block overflow-x-auto bg-light-gray-100 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-200 lg:table-header-group">
+            <thead className="block overflow-x-auto text-xs text-gray-600 dark:text-gray-200 lg:table-header-group">
               <tr className="flex lg:table-row">
                 {sortableColumns.map(({ label, sort }) => {
                   const active = filters.sort === sort;

@@ -1699,7 +1699,7 @@ export default function ArchivesPageClient() {
           {t("empty")}
         </p>
       ) : isDesktop ? (
-        <div className="relative w-full max-w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
+        <div className="relative w-full max-w-full rounded-b-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
           <div
             ref={desktopStickyHeaderRef}
             className="sticky z-10"
@@ -1707,7 +1707,7 @@ export default function ArchivesPageClient() {
           >
             <ScrollArea
               viewportRef={desktopHeaderScrollRef}
-              className="rounded-t-xl bg-light-gray-100 dark:bg-gray-800"
+              className="table-header"
               scrollbars="x"
               scrollbarSize={6}
               type="auto"
@@ -1716,7 +1716,7 @@ export default function ArchivesPageClient() {
               viewportProps={{ onScroll: handleDesktopHeaderScroll }}
             >
               <div
-                className="grid bg-light-gray-100 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                className="table-header grid text-xs font-semibold text-gray-700 dark:text-gray-200"
                 style={{
                   gridTemplateColumns: DESKTOP_COLUMNS,
                   minWidth: DESKTOP_TABLE_MIN_WIDTH,

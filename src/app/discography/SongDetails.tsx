@@ -459,7 +459,7 @@ const SongDetails = ({
               className="w-full text-left text-sm text-gray-500 dark:text-gray-400"
               classNames={{
                 thead: "text-xs uppercase text-gray-700 dark:text-gray-400",
-                th: "bg-gray-50/50 px-2 py-1 dark:bg-gray-700 dark:text-light-gray-500",
+                th: "px-2 py-1 dark:text-light-gray-500",
                 td: "px-2 py-1",
               }}
             >

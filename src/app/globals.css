@@ -95,6 +95,14 @@ body {
   font-family: var(--font-sans) !important;
 }
 
+/* 通常のテーブルと仮想化テーブルで共通のヘッダー。 */
+table > thead,
+table > thead > tr,
+table > thead > tr > th,
+.table-header {
+  @apply rounded-none bg-light-gray-100 dark:bg-gray-800;
+}
+
 html.seichi-map-viewport-fullscreen-open,
 body.seichi-map-viewport-fullscreen-open {
   overflow: hidden;

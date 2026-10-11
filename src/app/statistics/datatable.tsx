@@ -184,10 +184,7 @@ export default function DataTable<
             {/* Header */}
             <div className="flex text-xs sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
-                <div
-                  key={headerGroup.id}
-                  className="flex flex-1 bg-light-gray-200 dark:bg-gray-700"
-                >
+                <div key={headerGroup.id} className="table-header flex flex-1">
                   {headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
@@ -385,7 +382,7 @@ export default function DataTable<
                             </h3>
                             <div className="w-full">
                               {/* Inner Header */}
-                              <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700">
+                              <div className="table-header flex text-xs text-gray-700 dark:text-gray-200">
                                 <div className="shrink-0 w-20 px-3 py-1">
                                   {tStats("renderers.lastVideoCell.play")}
                                 </div>

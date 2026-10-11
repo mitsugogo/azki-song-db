@@ -541,9 +541,8 @@ export default function AnniversariesPageClient() {
               <Table
                 withTableBorder
                 withRowBorders
-                className="rounded-xl border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50"
+                className="rounded-b-xl border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50"
                 classNames={{
-                  thead: "bg-light-gray-100/70 dark:bg-gray-800/60",
                   th: "px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200",
                   td: "px-3 py-3 align-top text-gray-800 dark:text-gray-100",
                 }}
