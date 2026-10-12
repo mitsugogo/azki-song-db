@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.45.0](https://github.com/mitsugogo/azki-song-db/compare/v2.44.1...v2.45.0) (2026-10-12)
+
+### Features
+
+* 「AZKiさんってどんな人？」を追加 ([b9a279f](https://github.com/mitsugogo/azki-song-db/commit/b9a279f6b29a659ff1b1e1ffe415579258b535c5))
+* 3D Live版をディスコグラフィに追加 ([88ee55b](https://github.com/mitsugogo/azki-song-db/commit/88ee55be6acd04a55a41e5478f80446cad3f4672))
+* **repertoire:** 歌唱レパートリー一覧と検索・ソートを追加 ([bf5d10d](https://github.com/mitsugogo/azki-song-db/commit/bf5d10da19104b0994bcd3cb007c50c5b12cdd0b))
+* アーカイブカレンダーの月をURLに保存する ([00976ac](https://github.com/mitsugogo/azki-song-db/commit/00976ac47f196283e0afa56f28d68acd8543249f))
+* アクティビティに楽曲統計リンクを追加 ([398263a](https://github.com/mitsugogo/azki-song-db/commit/398263aeb304481709c572d00a764e974781dedd))
+* ナビゲーションレイアウトを共通化する ([b46a497](https://github.com/mitsugogo/azki-song-db/commit/b46a497076957349ed9595b50dc106e2704c9a90))
+* ホーム画面にデスクトップ用サイドバーを追加 ([927636c](https://github.com/mitsugogo/azki-song-db/commit/927636cf9d4af6345df8bf220ba7ac5bd56a7e08))
+* レパートリーにJOYSOUND検索リンクを追加 ([c44e8a6](https://github.com/mitsugogo/azki-song-db/commit/c44e8a6c28ab167b4d44163619c686de24c68259))
+* 再生中の楽曲情報に統計リンクを追加 ([6e1e8ad](https://github.com/mitsugogo/azki-song-db/commit/6e1e8ad3ba944c8dcca28f80ba83893b40815799))
+* 最新動画セクションをトップページに追加 ([f071626](https://github.com/mitsugogo/azki-song-db/commit/f0716269f6ea228b31645c502104baedbaf72c47))
+* 楽曲一覧に参加者アバターを表示 ([ac7bafb](https://github.com/mitsugogo/azki-song-db/commit/ac7bafb3fab7b432451339608d80a08f1be2ab6a))
+* 開催中イベントの一覧表示を追加する ([15feb17](https://github.com/mitsugogo/azki-song-db/commit/15feb172a2637f46fda611c351f86b4e28a3325b))
+* 集約レイアウトとページ内ローディング表示を導入 ([4b0f35b](https://github.com/mitsugogo/azki-song-db/commit/4b0f35b77e0e4bccb3c3aa9cb46e9093dae0a1e0))
+
+### Bug Fixes
+
+* OG画像の背景を埋め込みPNGで読み込む ([488bffd](https://github.com/mitsugogo/azki-song-db/commit/488bffdb25d9fb211eaa3b5e854cb4e2581bbaed))
+* OG画像ルートをNode.jsランタイムに戻す ([c9a948f](https://github.com/mitsugogo/azki-song-db/commit/c9a948f83b2be7af389e167cfd6345927cce94c7))
+* TOPのスクロール領域を独立させる ([9f1f126](https://github.com/mitsugogo/azki-song-db/commit/9f1f1267441af211f7eec2c6611aa2f244c6c2e5))
+* アーカイブ出演者名を公式表記に統一する ([a57d4f6](https://github.com/mitsugogo/azki-song-db/commit/a57d4f6d7e094f5780efb331eda85d611d8b304e))
+* データ一覧の横スクロールと見出しを固定する ([83960ae](https://github.com/mitsugogo/azki-song-db/commit/83960ae60d24b02b045878fe7e291edd744968ae))
+* テーブル見出しを統一し表示モードの初期値をリストに変更 ([a2d9ef0](https://github.com/mitsugogo/azki-song-db/commit/a2d9ef0826d6633a1a182dd50fc1c73bcf3081e0))
+* デスクトップ見出しに横スクロールバーを追加 ([2b52fc0](https://github.com/mitsugogo/azki-song-db/commit/2b52fc043db8be2a0526bbd614368e5d4fd4fc69))
+* ホームヘッダーにナビゲーションを常時表示 ([d3389b2](https://github.com/mitsugogo/azki-song-db/commit/d3389b2f554d398a8859003a0c2b524409dd5a38))
+* レパートリー画面の表示とテストを調整 ([9d1c0b8](https://github.com/mitsugogo/azki-song-db/commit/9d1c0b8579b695cfe0affa67b3ae7f86c7644b13))
+* 再生アイコンを変更 ([7e48d3d](https://github.com/mitsugogo/azki-song-db/commit/7e48d3d3c444e745a501801d4003adcd9d4fd288))
+* 地図ポップアップの説明文をスクロール可能にする ([8ca14e4](https://github.com/mitsugogo/azki-song-db/commit/8ca14e418965608ce607ca5e8ed34021016b8518))
+* 年別サマリーの固定バー表示を安定化 ([31e27a8](https://github.com/mitsugogo/azki-song-db/commit/31e27a85281e1e33e07ae3f8bc0fb536663655bc))
+* 歌唱レパートリーの表記を変更する ([c22f258](https://github.com/mitsugogo/azki-song-db/commit/c22f25810e7eda1930e279db33a1acf9fa23b61b))
+
 ## [2.44.1](https://github.com/mitsugogo/azki-song-db/compare/v2.44.0...v2.44.1) (2026-10-06)
 
 ### Bug Fixes
