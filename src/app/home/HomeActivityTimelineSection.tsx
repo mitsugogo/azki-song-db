@@ -55,6 +55,7 @@ export const HomeActivityTimelineSection = memo(
       limit: 160,
       songUpdateLimit: 80,
       archiveLimit: 80,
+      preferSongUpdates: true,
       enabled: shouldLoadViewStatistics,
     });
     const visibleItems = useMemo(

@@ -3,8 +3,8 @@
 import { Notifications } from "@mantine/notifications";
 import { GlobalPlayerProvider } from "../hook/useGlobalPlayer";
 import PageTransitionHandler from "./PageTransitionHandler";
-import { LoadingProvider, useLoading } from "../context/LoadingContext";
-import Loading from "../loading";
+import { LoadingProvider } from "../context/LoadingContext";
+import SitePageLayout from "./SitePageLayout";
 import { SharedYouTubePlayerProvider } from "./SharedYouTubePlayer";
 import ServiceWorkerCleanup from "./ServiceWorkerCleanup";
 
@@ -27,10 +27,9 @@ export default function ClientProviders({
             <SharedYouTubePlayerProvider>
               <LoadingProvider>
                 <Notifications position="top-right" zIndex={10000} limit={5} />
-                {children}
+                <SitePageLayout>{children}</SitePageLayout>
                 <MiniPlayer />
                 <PageTransitionHandler />
-                <LoadingOverlayIfNeeded />
                 <ServiceWorkerCleanup />
               </LoadingProvider>
             </SharedYouTubePlayerProvider>
@@ -39,10 +38,4 @@ export default function ClientProviders({
       </AdminModeProvider>
     </SessionProvider>
   );
-}
-
-function LoadingOverlayIfNeeded() {
-  const { loading } = useLoading();
-  if (!loading) return null;
-  return <Loading />;
 }

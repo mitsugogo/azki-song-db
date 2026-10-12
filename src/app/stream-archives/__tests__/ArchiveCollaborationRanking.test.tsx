@@ -44,6 +44,45 @@ describe("ArchiveCollaborationRanking", () => {
     expect(theme.colors?.hololive?.[2]).toBe("#a4ebf5");
   });
 
+  it("uses IRyS for members without collaborations", () => {
+    render(
+      <MantineProvider>
+        <ArchiveCollaborationRanking
+          items={[]}
+          membersWithoutCollaboration={[
+            {
+              name: "アイリス",
+              channel: {
+                branch: "EN",
+                generation: "Promise",
+                talentName: "アイリス",
+                artistName: "IRyS",
+                youtubeId: "UC-irys",
+                channelName: "IRyS Ch.",
+                handle: "",
+                subscriberCount: 0,
+                iconUrl: "https://example.com/irys.png",
+              },
+            },
+          ]}
+          membersWithoutKaraokeCollaboration={[]}
+          years={[]}
+          selectedYear={null}
+          mode="member"
+          labels={labels}
+          formatDuration={formatDuration}
+          onSelectedYearChange={vi.fn()}
+          onModeChange={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByRole("img", { name: "IRyS" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", { name: "アイリス" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders ranked collaborators with avatars, counts, and gauges", () => {
     render(
       <MantineProvider theme={theme}>

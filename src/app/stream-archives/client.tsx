@@ -17,6 +17,7 @@ import {
   Button,
   Checkbox,
   LoadingOverlay,
+  ScrollArea,
   Select,
   SegmentedControl,
   Text,
@@ -29,7 +30,7 @@ import {
   useElementSize,
   useMergedRef,
 } from "@mantine/hooks";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { usePageScrollVirtualizer } from "../hook/usePageScrollVirtualizer";
 import { Link } from "@/i18n/navigation";
 import {
   HiCalendar,
@@ -1030,7 +1031,6 @@ export default function ArchivesPageClient() {
     Set<string>
   >(() => new Set());
   const [areMobileFiltersOpen, setAreMobileFiltersOpen] = useState(false);
-  const [archiveScrollMargin, setArchiveScrollMargin] = useState(0);
   const [activeArchiveAnchorVideoId, setActiveArchiveAnchorVideoId] = useState<
     string | null
   >(null);
@@ -1178,7 +1178,7 @@ export default function ArchivesPageClient() {
   const displayGroupCount =
     viewMode === "series" ? seriesViewGroups.length : archiveGroups.length;
 
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = usePageScrollVirtualizer(archiveListRef, {
     count: viewMode === "list" ? archiveEntries.length : 0,
     estimateSize: (index) => {
       const entry = archiveEntries[index];
@@ -1187,7 +1187,6 @@ export default function ArchivesPageClient() {
       }
       return entry?.type === "group" ? 68 : 440;
     },
-    scrollMargin: archiveScrollMargin,
     overscan: 8,
     // React 19では行refの計測中にTanStack VirtualのflushSyncを呼べない。
     useFlushSync: false,
@@ -1305,51 +1304,6 @@ export default function ArchivesPageClient() {
     mediaQuery.addEventListener("change", updateLayoutMode);
     return () => mediaQuery.removeEventListener("change", updateLayoutMode);
   }, []);
-
-  useEffect(() => {
-    if (viewMode !== "list") {
-      return;
-    }
-
-    let frameId: number | null = null;
-    const updateScrollMargin = () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-
-      frameId = window.requestAnimationFrame(() => {
-        frameId = null;
-        const listElement = archiveListRef.current;
-        if (!listElement) {
-          return;
-        }
-
-        const nextScrollMargin =
-          listElement.getBoundingClientRect().top + window.scrollY;
-        setArchiveScrollMargin((current) =>
-          Math.abs(current - nextScrollMargin) < 1 ? current : nextScrollMargin,
-        );
-      });
-    };
-
-    updateScrollMargin();
-    window.addEventListener("resize", updateScrollMargin);
-    return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-      window.removeEventListener("resize", updateScrollMargin);
-    };
-  }, [
-    archiveEntries.length,
-    areMobileFiltersOpen,
-    desktopStickyHeaderHeight,
-    isDesktop,
-    isLoading,
-    selectedCastNames,
-    stickyControlsHeight,
-    viewMode,
-  ]);
 
   useEffect(() => {
     rowVirtualizer.measure();
@@ -1745,19 +1699,24 @@ export default function ArchivesPageClient() {
           {t("empty")}
         </p>
       ) : isDesktop ? (
-        <div className="relative w-full max-w-full rounded-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
+        <div className="relative w-full max-w-full rounded-b-xl border border-light-gray-200/50 bg-white/70 text-sm shadow-sm dark:border-white/10 dark:bg-gray-900/50">
           <div
             ref={desktopStickyHeaderRef}
             className="sticky z-10"
             style={{ top: stickyControlsHeight }}
           >
-            <div
-              ref={desktopHeaderScrollRef}
-              className="overflow-x-auto overscroll-x-contain rounded-t-xl"
-              onScroll={handleDesktopHeaderScroll}
+            <ScrollArea
+              viewportRef={desktopHeaderScrollRef}
+              className="table-header"
+              scrollbars="x"
+              scrollbarSize={6}
+              type="auto"
+              offsetScrollbars="present"
+              overscrollBehavior="contain"
+              viewportProps={{ onScroll: handleDesktopHeaderScroll }}
             >
               <div
-                className="grid bg-light-gray-100 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                className="table-header grid text-xs font-semibold text-gray-700 dark:text-gray-200"
                 style={{
                   gridTemplateColumns: DESKTOP_COLUMNS,
                   minWidth: DESKTOP_TABLE_MIN_WIDTH,
@@ -1835,7 +1794,7 @@ export default function ArchivesPageClient() {
                   </SortableArchiveHeader>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
             {activeStickyArchiveItem && (
               <div className="pointer-events-none absolute left-0 top-full h-40 w-full overflow-clip">
                 <div
@@ -1893,7 +1852,7 @@ export default function ArchivesPageClient() {
                       className="absolute left-0 top-0 w-full"
                       style={{
                         transform: `translateY(${
-                          virtualRow.start - archiveScrollMargin
+                          virtualRow.start - rowVirtualizer.options.scrollMargin
                         }px)`,
                       }}
                     >
@@ -1969,7 +1928,7 @@ export default function ArchivesPageClient() {
                 className="absolute left-0 top-0 w-full"
                 style={{
                   transform: `translateY(${
-                    virtualRow.start - archiveScrollMargin
+                    virtualRow.start - rowVirtualizer.options.scrollMargin
                   }px)`,
                 }}
               >

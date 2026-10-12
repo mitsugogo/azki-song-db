@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Breadcrumbs, Button } from "@mantine/core";
 import { HiChevronRight, HiHome } from "react-icons/hi";
@@ -28,31 +27,8 @@ export default function SummaryYearClient(props: {
     typeof displayYearServer === "number" && displayYearServer < maxYear
       ? displayYearServer + 1
       : null;
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const stickyTriggerRef = useRef<HTMLDivElement>(null);
-  const [isStickyActive, setIsStickyActive] = useState(false);
-
-  useEffect(() => {
-    const root = scrollContainerRef.current;
-    const target = stickyTriggerRef.current;
-    if (!root || !target) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsStickyActive(entry.intersectionRatio < 1);
-      },
-      {
-        root,
-        threshold: 1,
-      },
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={scrollContainerRef} className={pageClasses.shell}>
+    <div className={pageClasses.shell}>
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}
@@ -74,15 +50,7 @@ export default function SummaryYearClient(props: {
         </Link>
       </Breadcrumbs>
 
-      <div ref={stickyTriggerRef} className="h-px w-full" aria-hidden="true" />
-
-      <div
-        className={`sticky top-0 z-20 mb-4 pb-2 ${
-          isStickyActive
-            ? "bg-white/90 p-4 backdrop-blur supports-backdrop-filter:bg-white/80 dark:bg-gray-900/90 dark:supports-backdrop-filter:bg-gray-900/80"
-            : ""
-        }`}
-      >
+      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/60 px-4 py-2 backdrop-blur dark:bg-gray-900/75 sm:-mx-6 sm:px-6">
         {/* 前年・翌年ページャー */}
         <div className="mb-4 w-full">
           {displayYearServer && (

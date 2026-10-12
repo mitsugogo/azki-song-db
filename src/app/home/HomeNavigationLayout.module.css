@@ -1,0 +1,32 @@
+.layout {
+  --home-sidebar-width: 0px;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.sidebar {
+  display: contents;
+}
+
+.scrollContent {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-width: 100%;
+  overflow-x: clip;
+}
+
+@media (min-width: 80em) {
+  .layout {
+    --home-sidebar-width: 18rem;
+  }
+
+  .sidebar {
+    display: block;
+    flex-shrink: 0;
+    width: var(--home-sidebar-width);
+    height: 100%;
+  }
+}

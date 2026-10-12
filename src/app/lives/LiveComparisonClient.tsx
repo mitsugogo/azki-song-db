@@ -52,7 +52,7 @@ export default function LiveComparisonClient({
             role="region"
             aria-label={t("comparisonTableLabel")}
             tabIndex={0}
-            className="mt-4 overflow-x-auto rounded-2xl border border-light-gray-200 bg-white/80 dark:border-white/10 dark:bg-gray-900/65"
+            className="mt-4 overflow-x-auto rounded-b-2xl border border-light-gray-200 bg-white/80 dark:border-white/10 dark:bg-gray-900/65"
           >
             <table
               className="w-full table-fixed border-collapse text-left text-sm"
@@ -60,7 +60,7 @@ export default function LiveComparisonClient({
             >
               <caption className="sr-only">{t("comparisonTableLabel")}</caption>
               <thead>
-                <tr className="border-b border-light-gray-200 bg-primary-50/60 dark:border-white/10 dark:bg-primary-950/30">
+                <tr className="border-b border-light-gray-200 dark:border-white/10">
                   <th
                     scope="col"
                     className="w-14 px-3 py-3 text-gray-500 dark:text-gray-400"

@@ -1,17 +1,15 @@
-import { LoadingOverlay, MantineProvider } from "@mantine/core";
-import { theme } from "./theme";
+import { Loader } from "@mantine/core";
+import { useTranslations } from "next-intl";
 
 export default function Loading() {
+  const t = useTranslations("Loading");
   return (
-    <MantineProvider theme={theme}>
-      <div className="flex items-center justify-center h-[calc(100dvh-64px)] md:h-[calc(100dvh-99px)]">
-        <LoadingOverlay
-          visible={true}
-          zIndex={1000}
-          loaderProps={{ color: "pink", type: "bars" }}
-          overlayProps={{ blur: 2 }}
-        />
-      </div>
-    </MantineProvider>
+    <div
+      role="status"
+      aria-label={t("label")}
+      className="flex min-h-48 flex-1 items-center justify-center py-12"
+    >
+      <Loader color="pink" type="bars" />
+    </div>
   );
 }

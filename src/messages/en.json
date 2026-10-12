@@ -1,4 +1,187 @@
 {
+  "Legal": {
+    "terms": "Terms of Use & Disclaimer",
+    "privacy": "Privacy Policy",
+    "linksLabel": "Terms and privacy",
+    "home": "HOME",
+    "published": "Published:",
+    "updated": "Last updated:",
+    "services": {
+      "google": "Google Privacy Policy (Google sign-in, YouTube and Google Maps)",
+      "youtubeTerms": "YouTube Terms of Service",
+      "analytics": "Vercel Web Analytics privacy information",
+      "speedInsights": "Vercel Speed Insights privacy information",
+      "osm": "OpenStreetMap Foundation Privacy Policy",
+      "gsi": "Geospatial Information Authority of Japan Privacy Policy"
+    }
+  },
+  "Terms": {
+    "title": "Terms of Use & Disclaimer",
+    "description": "Conditions of use, ownership of rights and disclaimers for AZKi Song Database",
+    "sections": [
+      {
+        "id": "scope",
+        "heading": "About this site and scope",
+        "paragraphs": [
+          "AZKi Song Database (the Site) is an unofficial fan site operated by @mitsugogo. It is not an official website operated by AZKi, hololive production, COVER Corporation, or any other rights holder or service provider.",
+          "These terms apply to browsing the Site, playing videos, saving playlists and favorites, using the location map and visit records, sharing, and other features provided by the Site. Please see the Privacy Policy for information about how user information is handled."
+        ]
+      },
+      {
+        "id": "rights",
+        "heading": "Copyright and other rights",
+        "paragraphs": [
+          "Rights to videos, songs, images, names, logos and other content displayed or embedded on the Site belong to their respective creators and rights holders. Being able to view content on the Site does not grant permission to reproduce, redistribute or modify it.",
+          "The Site's source code is licensed under the MIT License. This license does not apply to videos, songs, third-party images, the contributed site icon or similar materials. Please check the conditions set by the respective rights holders."
+        ]
+      },
+      {
+        "id": "accounts",
+        "heading": "Accounts, saved data and sharing",
+        "paragraphs": [
+          "Some saving features require signing in with a Google account. Use your own account and manage it appropriately to prevent unauthorized use by others.",
+          "Publishing settings and sharing links can make playlists and visit records visible to other users. Check the content and recipients before sharing. Avoid including your own or other people's confidential or personal information in shared notes or URLs."
+        ]
+      },
+      {
+        "id": "prohibited",
+        "heading": "Prohibited conduct",
+        "paragraphs": [
+          "Unauthorized access, bypassing authentication, impersonating another user, and accessing or modifying another person's data without authorization are prohibited.",
+          "Excessive load on the Site or external services, interference with their operation, unlawful conduct, and infringement of another person's rights or privacy are prohibited."
+        ]
+      },
+      {
+        "id": "visits",
+        "heading": "Location map and visits",
+        "paragraphs": [
+          "Map locations, names, opening information and other details may be inaccurate or change. Check official information and local guidance before visiting.",
+          "Follow local rules and access restrictions. Do not enter private property without permission or disturb residents or facilities. Follow local guidance on photography and publication, and prioritize safety and consideration for others."
+        ]
+      },
+      {
+        "id": "disclaimer",
+        "heading": "Information, external services and disclaimer",
+        "paragraphs": [
+          "We work to improve the accuracy of information and statistics, but manual errors, delayed updates and inconsistent names may occur. Accuracy, completeness, timeliness and suitability for a particular purpose are not guaranteed.",
+          "Videos may become unavailable due to removal, privacy changes or regional restrictions. Changes or outages in external services such as YouTube and Google may also prevent access or use of features. Each external service or linked website is subject to its own terms and policies.",
+          "Outages, maintenance and changes may result in loss of saved data or the modification, suspension or termination of features or the service. Permanent retention or restoration of saved data is not guaranteed. Keep your own copies of records that you need.",
+          "To the extent permitted by applicable law, the operator is not liable for damage arising from use of, or inability to use, the Site. Where liability cannot legally be limited, including cases of intentional misconduct or gross negligence, applicable law takes precedence."
+        ]
+      },
+      {
+        "id": "changes",
+        "heading": "Changes to these terms",
+        "paragraphs": [
+          "These terms may be revised to reflect changes in the service or applicable law. Revisions and their effective dates will be announced on this page, and the last updated date will be changed. Changes will be made in accordance with applicable law."
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Contact",
+        "paragraphs": [
+          "For questions about these terms or the information on the Site, please contact the operator's X account, @mitsugogo."
+        ]
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "description": "How user information is handled for Google sign-in, saved data, sharing and analytics",
+    "sections": [
+      {
+        "id": "scope",
+        "heading": "Our approach and operator",
+        "paragraphs": [
+          "The operator of AZKi Song Database (the Site), @mitsugogo, uses user information for authentication, user-specific features, saving and sharing records, secure operation and service improvements. This policy explains how information is handled on the Site."
+        ]
+      },
+      {
+        "id": "googleAccount",
+        "heading": "Signing in with a Google account",
+        "paragraphs": [
+          "The Site uses Google accounts for sign-in. It does not request permission to obtain your email address, and email addresses are not included in the user data stored in its database. The account identifier received from Google is used to verify sign-in and associate your account with saved playlists, favorites, visit records and other saved data.",
+          "Your Google display name and profile picture are used to display the signed-in account and are not saved in the Site's user database. The identifier and this profile information are included in the sign-in session. The Site does not obtain your Google account password.",
+          "Google sign-in is used to save records within this Site. It does not request permission to read Gmail or read or write your Google Drive files or YouTube playlists. Google's handling of information is subject to its Privacy Policy."
+        ]
+      },
+      {
+        "id": "savedData",
+        "heading": "Saved information and purposes",
+        "paragraphs": [
+          "Playlist names, selected songs and videos, playback start positions and order, visibility settings, favorites, creation and update times, and related information are saved with your account identifier. They are used to display, edit, play, access across devices and share your records.",
+          "For the location map, the Site saves locations you record as visited, visit dates and times, notes, URLs, nicknames, ranking name-display preferences and sharing settings. They are used to manage and share visit records and to calculate and display visitor counts and rankings.",
+          "Legacy playlists and favorites remaining on a device may be migrated to your account's saved data when you sign in. Information used to prevent duplicate migration is also saved."
+        ]
+      },
+      {
+        "id": "sharing",
+        "heading": "Publishing, sharing and statistics",
+        "paragraphs": [
+          "Private playlists can only be viewed by their owner. Public playlists can be viewed by others and may be indexed by search engines. Unlisted playlists can be viewed by anyone who knows their link. Unlisted links do not verify a viewer's identity or prevent forwarding.",
+          "Enabling visit-record sharing allows anyone who knows the sharing link to view your nickname and visit records, including locations, visit dates and times, notes and URLs. Sharing can be disabled on the Site's sharing screen, but this does not retract information already viewed or saved by someone else.",
+          "Recorded visits contribute to visitor counts for locations and visitor rankings. Nicknames are displayed according to your display settings. Hiding your name does not exclude your records from statistics. Google account identifiers, display names and profile pictures are not used in these public displays."
+        ]
+      },
+      {
+        "id": "cookies",
+        "heading": "Cookies and device storage",
+        "paragraphs": [
+          "The Site uses cookies to maintain sign-in, secure authentication and remember language preferences. The sign-in session includes your Google account identifier, display name, profile picture and related information.",
+          "Display and map settings and actions to resume after sign-in may be saved in your browser's localStorage or sessionStorage. Legacy playlists and favorites may also remain on your device. Deleting cookies or device storage may sign you out or reset settings, but does not delete records already saved on the server."
+        ]
+      },
+      {
+        "id": "location",
+        "heading": "Use of your current location",
+        "paragraphs": [
+          "Your current location is obtained when you use the location-display control on the map and allow location access in your browser. It is used to show your position on the map and find nearby locations. It is not automatically saved as a visit record in the Site's user database.",
+          "Displaying the map involves communication with the selected map service. Please check that service's policy for how it handles information."
+        ]
+      },
+      {
+        "id": "analytics",
+        "heading": "Analytics and performance measurement",
+        "paragraphs": [
+          "The Site uses Vercel Web Analytics and Vercel Speed Insights to understand usage and improve performance. Information such as pages viewed, referrers, browser and device types, country or region, and performance measurements is sent to Vercel for statistics and measurement.",
+          "Vercel Web Analytics does not use third-party analytics cookies and, according to Vercel's documentation, focuses on aggregated statistics. This is separate from the Site's sign-in cookies and the handling of information by Google, YouTube and map services. See Vercel's documentation linked below for details."
+        ]
+      },
+      {
+        "id": "externalServices",
+        "heading": "External services and disclosure",
+        "paragraphs": [
+          "The Site uses Google sign-in, embedded YouTube videos, Google Maps, OpenStreetMap, GSI map tiles and other services. When you display or use them, information such as your IP address, browser information and viewing activity may be processed by those services. Linked websites are also subject to their respective policies.",
+          "External services are used as needed for authentication, hosting, data storage and analytics. The operator does not disclose your saved information to third parties except for publishing or sharing you choose, processing needed to provide the service, legal requirements and similar circumstances."
+        ]
+      },
+      {
+        "id": "deletion",
+        "heading": "Deleting information and retention",
+        "paragraphs": [
+          "Playlists, favorites, visit records and other information with deletion controls can be deleted using their respective features. Saved information is retained until deletion or similar action takes place. Signing out or revoking the connection in your Google account does not by itself delete saved data.",
+          "For deletion requests concerning information that cannot be deleted through the interface, or questions about how information is handled, contact the operator below. Information needed to review or respond to your request will be discussed privately rather than in public."
+        ]
+      },
+      {
+        "id": "changes",
+        "heading": "Changes to this policy",
+        "paragraphs": [
+          "This policy may be revised to reflect changes to the service or its handling of information. Revisions and their effective dates will be announced on this page, and the last updated date will be changed."
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Questions and deletion requests",
+        "paragraphs": [
+          "For questions about this policy or requests to delete saved information, please contact the operator's X account, @mitsugogo. Do not post your Google account identifier, visit history or other personal information publicly."
+        ]
+      }
+    ]
+  },
+  "Loading": {
+    "label": "Loading"
+  },
   "Header": {
     "toggleNavigation": "Toggle navigation",
     "searchPlaceholder": "Search by title, artist, tags",
@@ -12,7 +195,6 @@
     "installApp": "Install app",
     "about": "About this site",
     "soloLive": "Solo live!",
-    "reportIssue": "Report an issue",
     "close": "Close",
     "categoryActivity": "Activity",
     "categoryShare": "Share",
@@ -21,7 +203,7 @@
     "discography": "Discography",
     "units": "Units",
     "lives": "Lives",
-    "activity": "Activity",
+    "activity": "History",
     "anniversaries": "Anniversaries",
     "archives": "Stream Archives",
     "seichiMapComplete": "Seichi Map",
@@ -34,7 +216,9 @@
     "mapTooltip": "Seichi-Junrei (聖地巡礼) refers to the act of visiting locations that appear in or are associated with one's favorite media/artists.",
     "whereMyAzkichiBegan": "Where did your AZKi journey begin?",
     "whereMyRobocosanBegan": "Where did your Roboco-san journey begin?",
-    "categoryArchive": "storage"
+    "categoryArchive": "storage",
+    "repertoire": "Songs AZKi Has Sung",
+    "aboutAzki": "Who is AZKi?"
   },
   "SearchInput": {
     "search": "Search",
@@ -138,6 +322,7 @@
       "album": "Album:",
       "singers": "Singers:",
       "videoTitle": "Video title:",
+      "viewStats": "stats",
       "broadcastDate": "Stream date:",
       "tags": "Tags:",
       "milestones": "Milestones:",
@@ -219,14 +404,18 @@
     "showFewerSongModes": "Show less",
     "recommendedLabel": "Recommended",
     "recommendedTitle": "Recommended songs",
+    "latestVideoTitle": "Latest video",
+    "latestVideoSongCount": "{count, plural, one {# song} other {# songs}}",
+    "latestVideoPlay": "Play latest video: {title}",
     "eventsTitle": "Events",
     "eventOngoing": "Now",
+    "ongoingEventsTitle": "Ongoing events",
     "eventOngoingTitle": "Now: {title}",
     "eventsEmpty": "No current or upcoming events",
     "linkLabel": "Link",
     "anniversariesTitle": "Anniversaries",
     "viewAnniversaries": "See anniversaries",
-    "viewSummary": "See activity",
+    "viewSummary": "See history",
     "todayMilestonesEmpty": "Nothing happened on this day",
     "timelineLabel": "Timeline",
     "timelineTitle": "Anniversaries & Events",
@@ -234,8 +423,8 @@
     "recentUpdatesTitle": "Updates",
     "recentUpdatesAddedCount": "{count} songs added",
     "noRecentUpdates": "No recent updates",
-    "activityLabel": "Activity",
-    "activityTitle": "Activity",
+    "activityLabel": "History",
+    "activityTitle": "History",
     "activitySongUpdateBadge": "Music",
     "activityArchiveBadge": "Stream",
     "activityViewMilestoneBadge": "Views",
@@ -250,6 +439,7 @@
     "activityEventDescription": "Event added",
     "activityViewMilestoneTitle": "{title} reached {count} views",
     "activityViewMilestoneDescription": "Currently {count} views",
+    "activityViewStats": "stats",
     "activityViewMilestonesLoading": "Checking view milestones",
     "activityFilterLabel": "Activity filters",
     "activityFilterTitle": "Show items",
@@ -421,11 +611,11 @@
       "myBest9WithTopic": "Theme: \"{title}\" | Ultimate 9 song generator | {siteName}"
     },
     "summary": {
-      "title": "Activity Summary",
+      "title": "History",
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.).",
       "yearTitle": "AZKi's song activity in {year}",
       "yearDescription": "A summary of music-related activity in {year}, including livestreams, covers, and originals",
-      "monthTitle": "{month} activity",
+      "monthTitle": "History for {month}",
       "monthDescription": "Music, streams, milestones, events, and anniversaries from {month}."
     },
     "anniversaries": {
@@ -892,6 +1082,7 @@
       "mv": "MV",
       "animated": "AniAZ",
       "artTrack": "Art Track",
+      "live3d": "3D Live",
       "other": "Video",
       "switcherLabel": "Switch video version"
     },
@@ -1546,7 +1737,7 @@
     }
   },
   "Footer": {
-    "disclaimer": "This site is an unofficial fan site maintained by volunteers. Videos were produced by Hololive Production and AZKi; rights to the videos belong to their creators."
+    "disclaimer": "This site is an unofficial fan site maintained by volunteers. Rights to the videos belong to their creators."
   },
   "Summary": {
     "timelineTitle": "Timeline",
@@ -1559,7 +1750,7 @@
     "daysSuffix": " days",
     "homeLabel": "HOME",
     "page": {
-      "title": "Activity Summary",
+      "title": "History",
       "description": "Year-by-year summaries of activity (song counts, covers/originals, etc.). Click a year for details.",
       "activityDays": "Days active: {days} (since 2018/11/15 — {duration})"
     },
@@ -1959,5 +2150,281 @@
     "close": "Close",
     "membersOnlyAlert": "This is a member-only video. \nPlease be careful when sharing on SNS, etc. as it may be private.",
     "membersOnlyAlertTitle": "Members only video"
+  },
+  "Repertoire": {
+    "title": "Songs AZKi Has Sung",
+    "description": "Explore songs performed by AZKi in singing streams, collaborations, guest appearances, live shows and music videos, grouped by song title and original artist.",
+    "home": "Home",
+    "loading": "Loading songs…",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search titles, artists, aliases or tags",
+    "sourceLabel": "Type",
+    "allSources": "All",
+    "source": {
+      "singing": "Singing streams",
+      "collaboration": "Collaborations, guests & live shows",
+      "other": "Music videos & other recordings"
+    },
+    "tagsLabel": "Tags (match all)",
+    "tagsPlaceholder": "Filter by tags",
+    "noTags": "No matching tags",
+    "clearFilters": "Clear filters",
+    "resultCount": "{count} of {total} songs",
+    "empty": "No songs match your filters.",
+    "performanceCountLabel": "Performances",
+    "performanceCount": "{count}",
+    "latestLabel": "Last performance date",
+    "unknownDate": "Unknown date",
+    "play": "Play",
+    "playLabel": "Play the latest performance of {title} in SongDB",
+    "youtube": "YouTube",
+    "youtubeLabel": "Open the latest performance of {title} on YouTube",
+    "joysound": "Search JOYSOUND for STREAMER",
+    "joysoundLabel": "Search for {title} on JOYSOUND for STREAMER",
+    "joysoundTrademark": "\"JOYSOUND\" is a registered trademark of XING INC.",
+    "joysoundService": "\"Karaoke JOYSOUND for STREAMER\" is a service provided by XING INC.",
+    "noVideo": "No playable video is registered.",
+    "songTitle": "Song title",
+    "artistLabel": "Artist",
+    "tagsColumn": "Tags",
+    "playbackLabel": "Latest",
+    "sortBy": "Sort by {column}",
+    "videoPreview": "Latest performance video",
+    "broadcastDate": "Broadcast date"
+  },
+  "AboutAzki": {
+    "title": "Who is AZKi?",
+    "description": "A fan guide to AZKi: her profile, music and streams, the story behind her career, and words you may hear in her community",
+    "lead": "Whether you came here to learn about AZKi for the first time or discovered her through music, maps or games, get to know her a little at a time, starting with whatever interests you.",
+    "home": "HOME",
+    "contents": "Start with what interests you",
+    "updatedAt": "Content updated:",
+    "relatedSources": "Related sources",
+    "permalink": "Link to “{title}”",
+    "officialProfile": "Official hololive profile",
+    "officialX": "AZKi on X",
+    "sections": {
+      "introduction": "Meet AZKi",
+      "profile": "At a glance",
+      "enjoy": "AZKi’s music and maps",
+      "columns": "A little more context",
+      "glossary": "Words you may hear on stream",
+      "explore": "Keep exploring",
+      "sources": "Sources"
+    },
+    "sources": {
+      "profile": "Official hololive profile",
+      "debut": "Victor profile (early career and major debut)",
+      "departure": "Official “Departure” live report",
+      "greeting": "Official hololive card game Fukuoka event report",
+      "farewell": "SEGA NET Mahjong MJ greeting voices",
+      "channel": "AZKi’s official YouTube channel",
+      "stream": "Her chatting stream description",
+      "geoguessr": "Official GeoGuessr website",
+      "geoStream": "Her GeoGuessr stream",
+      "soraz": "Official Victor SorAZ profile",
+      "nickname": "Official shop: AZKi Birthday Celebration 2024",
+      "greetingAudition": "Apr 15, 2023: Holomem voice audition, 21:54 onward",
+      "greetingOrigin": "Apr 17, 2023: AZKi explains the origin, 3:01 onward",
+      "greetingMinecraft": "Apr 19, 2023: Minecraft greeting, 1:07 onward",
+      "geoFirst": "January 15, 2023: first GeoGuessr stream",
+      "geoRta": "January 23, 2023: Japan-map speedrun and description",
+      "geoVerified": "August 18, 2023: official verification announcement, from 2:39",
+      "geoInterview": "Victor: AZKi interview on GeoGuessr and FreeGeo",
+      "pioneersOrigin": "November 15, 2018: AZKi explains her fan name",
+      "pioneersDrawing": "May 14, 2023: AZKi draws the Pioneers’ mascot on stream",
+      "externalLive": "Official report: joint concert with Shishigami Leona, LAST V STANDiNG vol.1",
+      "externalDuo": "Official report: joint concert with Else and Same no Poki, LAST V STANDiNG vol.2",
+      "nonstopMusic": "COVER announcement: Don’t Stop the Music",
+      "crossroads": "Official Stand at the crossroads report: AMOKA’s guest performance",
+      "azLocation": "AZKi’s location video: AZKi’s LOCATION! Vol.1",
+      "hololiveTransfer": "Official announcement: move to hololive in April 2022",
+      "pioneersVisual": "May 14, 2023: AZKi reveals the Pioneers’ appearance on X"
+    },
+    "introduction": {
+      "paragraphs": [
+        "AZKi (pronounced “Azuki”) is a virtual singer in hololive Generation 0. Original songs, cover videos, singing streams and concerts offer plenty of ways to discover her music. She loves music and singing, and dreams of making music that stays in someone’s memory.",
+        "If you discovered her through gaming, you may first think of GeoGuessr, where players identify locations from the scenery. Listening to a song, looking at a landscape together, or settling in for a chat: one doorway can lead to another way of enjoying her work.",
+        "This page introduces her basic profile, familiar community words and the background to her career."
+      ]
+    },
+    "profile": {
+      "reading": {
+        "label": "Name",
+        "value": "AZKi (Azuki)"
+      },
+      "affiliation": {
+        "label": "Affiliation",
+        "value": "hololive Generation 0"
+      },
+      "birthday": {
+        "label": "Birthday",
+        "value": "July 1"
+      },
+      "debut": {
+        "label": "Debut",
+        "value": "November 15, 2018"
+      },
+      "fanName": {
+        "label": "Fan name",
+        "value": "開拓者 (Kaitakusha / Pioneers)"
+      },
+      "dream": {
+        "label": "Dream",
+        "value": "To make music that stays in someone’s memory"
+      }
+    },
+    "enjoy": {
+      "paragraphs": [
+        "For AZKi, singing is both something she loves and a way to stay close to the people listening. Her dream of making music that stays in someone’s memory expresses a wish for songs to remain with their listeners. Her desire to create songs and music that stay close to the Pioneers’ hearts is part of why singing is central to her activities.",
+        "Her songs also offer a way to get to know her journey. Her 2018 debut song “Creating world” and “Inochi,” which she has continued singing since her early career, have accompanied that journey. Originally planning to end her activities, AZKi chose to continue with support from her fans. Hearing earlier songs in her voice today may give you a sense of what it means for her to keep singing.",
+        "During her early and middle years, AZKi frequently performed with VSingers and virtual artists outside hololive. Her “LAST V STANDiNG” joint concerts featured Shishigami Leona in 2019 and Else and Same no Poki in 2020. She also organized “Don’t Stop the Music,” a nonstop showcase of original VTuber music videos submitted by artists. AMOKA, a group active in VRChat, opened her seventh solo concert in 2021 after taking part in the third showcase. Creating places to discover other singers and music was part of her work alongside performing her own songs.",
+        "AZKi’s first GeoGuessr stream was on January 15, 2023, titled “<geoFirst>【GeoGuessr】ここ、どこ！？深夜の小旅行🌍【ホロライブ / AZKi】</geoFirst>.” Watching other hololive members play made her want to try it on stream. She recalled learning Japanese prefectures through karuta cards as a child before playing the Japan map. In her very first round, she looked at a phone number on a sign and used its area code to narrow down the region.",
+        "She soon became increasingly absorbed in GeoGuessr. Just eight days after her first stream, on January 23, she tried a Japan-map speedrun: reaching a perfect score as quickly as possible without reading chat or using searches. She described herself as having fallen into the “GeoGuessr rabbit hole.” Later streams explored secluded railway stations and included making a Holomem map. Alongside pursuing speed and accuracy, she began enjoying maps built around subjects she liked.",
+        "In 2023, GeoGuessr awarded AZKi a verification badge, making her one of its verified players. During her August 18 stream, she showed the checkmark on her profile and shared her excitement with the Pioneers.",
+        "GeoGuessr also became an important way for people to discover AZKi outside her music. The influence reached her music, too: “FreeGeo,” from her major-debut EP “3枚目の地図,” connects with the experience of traveling to different places through GeoGuessr’s maps. Singing and maps are connected in her broadcasts and songs as well as in her greeting."
+      ]
+    },
+    "videos": {
+      "creatingWorld": "Creating world",
+      "inochi": "Inochi (2024 ver.)",
+      "geoFirst": "First GeoGuessr stream: a late-night journey",
+      "geoRta": "GeoGuessr: Japan-map speedrun",
+      "geoVerified": "Exploring secluded stations! #02",
+      "freeGeo": "FreeGeo"
+    },
+    "watchVideo": "Watch “{title}” on YouTube",
+    "watchStreams": "Browse her official streams",
+    "watchGeoStream": "Watch her GeoGuessr stream",
+    "columns": {
+      "microphoneMap": {
+        "title": "Why a microphone in her right hand and a map in her left?",
+        "paragraphs": [
+          "“A microphone in my right hand, a map in my left—zero-guessing your heart!” The starting point was a self-introduction prepared for a voice audition. In the recording played during Houshou Marine’s Holomem voice audition on April 15, 2023, AZKi followed her name and affiliation with the microphone-and-map phrase. At that stage, she continued by introducing herself as a VSinger who likes singing and traveling.",
+          "She explained how she came up with it in her own relaxed GeoGuessr chatting stream on April 17. Marine had asked her to include a statement of enthusiasm at the beginning of the audition recording. AZKi looked up self-presentation for voice auditions, taking inspiration from advice to keep it within 30 seconds. She tried to find a good phrase that would express who she was concisely, arriving at the microphone in one hand and the map in the other. It was a short, memorable introduction bringing together her singing and her interest in maps.",
+          "At the opening of her Minecraft stream, “<greetingMinecraft>【Minecraft】AZ基地、建設するの巻【ホロライブ / AZKi】</greetingMinecraft>,” on April 19, she delivered the greeting with the “zero-guessing your heart” ending. With these words reaching out to the people watching and listening, the introduction she had prepared for an audition became the greeting in its current form."
+        ]
+      },
+      "pioneers": {
+        "title": "Who are the “Pioneers”?",
+        "paragraphs": [
+          "“開拓者,” read “kaitakusha” and translated as “Pioneers,” is AZKi’s fan name. On her debut day, November 15, 2018, she described her fans as the people who would create a world together with her. The name expresses the idea of fans creating and opening up new worlds alongside AZKi, accompanying her as she expands that world through music.",
+          "The Pioneers’ mascot design took shape during her May 14, 2023 drawing stream, “【お絵描き】ついに明かされる…！開拓者の姿！？Drawing Stream【ホロライブ / AZKi】.” Building on ideas discussed in earlier singing and chatting streams, she drew while incorporating suggestions from chat. Animals associated with digging and building, such as moles and beavers, were starting points. As she and her viewers discussed its color, shape and accessories, the Pioneers’ current appearance was decided."
+        ],
+        "quote": "ついに開拓者の姿が明らかに！！！こちらです！！！",
+        "quoteSource": "AZKi’s X post (May 14, 2023)",
+        "profile": {
+          "title": "The Pioneers’ mascot profile",
+          "name": {
+            "label": "Name",
+            "value": "開拓者 (Pioneers)"
+          },
+          "reading": {
+            "label": "Pronunciation",
+            "value": "Kaitakusha"
+          },
+          "kind": {
+            "label": "Type",
+            "value": "A new UMA"
+          },
+          "classification": {
+            "label": "Classification",
+            "value": "Guesser group, Diva family"
+          },
+          "creator": {
+            "label": "Creator",
+            "value": "AZKi"
+          }
+        }
+      },
+      "routes": {
+        "title": "What are Routes α, β and γ?",
+        "paragraphs": [
+          "The “routes” mentioned in discussions of AZKi’s concerts and career describe paths through her activities. Route α (alpha) was the original path that would have ended in July 2022. In 2021, she announced a move to Route β (beta), continuing her career instead. With support from the people cheering her on, she chose to move beyond the originally planned ending.",
+          "She then transferred from INNK MUSIC to hololive in April 2022. While continuing to focus on singing, she expanded her activities to include gaming streams and broadcasts with other hololive members.",
+          "Route γ (gamma) was introduced as a new path connected to her major debut with Victor Entertainment in 2023. Continuing her activities, then stepping into a new setting: understanding these turning points helps make sense of conversations about her career and concert staging that looks back on her past.",
+          "“Departure” in 2025 was a journey through her past, present and future, celebrating a new beginning after returning the main base of her music activities to hololive. Routes α, β and γ help explain that history; they do not require every present-day activity to fit one old category. Explore this site’s History page for more detail about events and songs along the way."
+        ]
+      }
+    },
+    "glossaryLead": "Words from streams and social media, grouped by topic. Return when something is unfamiliar, or use the “#” beside an entry to share a link directly to it.",
+    "glossaryGroups": {
+      "community": "Fans, greetings and hashtags",
+      "maps": "Map streams",
+      "history": "Career background"
+    },
+    "terms": {
+      "pioneers": {
+        "name": "開拓者 (Kaitakusha / Pioneers)",
+        "description": "AZKi’s fan name, meaning people who create and open up new worlds together with her."
+      },
+      "azukichi": {
+        "name": "あずきち (Azukichi)",
+        "description": "A nickname for AZKi."
+      },
+      "konazuki": {
+        "name": "こんあずき (Konazuki)",
+        "description": "A greeting used at the beginning of streams and elsewhere. “Konazuki” developed into the current “kon-kon-kon-kon, konazuki” greeting."
+      },
+      "fanMark": {
+        "name": "⚒️ (Fan mark)",
+        "description": "AZKi’s fan mark: an emoji showing a crossed pick and hammer."
+      },
+      "azukinchi": {
+        "name": "あずきんち (Azukinchi)",
+        "description": "#あずきんち is AZKi’s stream hashtag."
+      },
+      "dokoaz": {
+        "name": "どこAZ (DokoAZ)",
+        "description": "#どこAZ is the official hashtag for visits to places connected with AZKi. It is used for locations featured in GeoGuessr streams, places visited in AZ Location videos, and other places associated with her activities. You can find those places on this site’s <seichiMap>Seichi Map</seichiMap>."
+      },
+      "geoguessr": {
+        "name": "GeoGuessr",
+        "description": "A geography game where you infer your location on a map from street-view scenery. Buildings and signs provide clues. Her streams let you follow along as the possible location becomes more specific."
+      },
+      "zeroGuesser": {
+        "name": "ゼロゲッサー (Zero guesser)",
+        "description": "In GeoGuessr streams, a guess whose displayed distance from the correct location is 0 m. The word also appears in her greeting about zero-guessing your heart. It refers to the displayed distance, rather than merely achieving a perfect score."
+      },
+      "routeAlpha": {
+        "name": "Route α (Alpha)",
+        "description": "The original path that would have ended her activities in July 2022. It is discussed when looking back at her career. She chose a continuing path instead, so the term does not mean she actually ended her activities then."
+      },
+      "routeBeta": {
+        "name": "Route β (Beta)",
+        "description": "The path that branched from Route α to continue her career, announced in 2021. It was a turning point supported by her fans."
+      },
+      "routeGamma": {
+        "name": "Route γ (Gamma)",
+        "description": "A new path connected with her major debut through Victor Entertainment in 2023. Read it as the name of a past turning point. The History page offers more detail about what came afterward."
+      },
+      "azLocation": {
+        "name": "AZロケ (AZ Location)",
+        "description": "Short for “AZKi’s LOCATION!,” a video series in which AZKi visits places in person. She explores locations familiar from GeoGuessr, enjoying the local scenery and food."
+      }
+    },
+    "exploreLead": "Follow whatever caught your interest. Whether you want another song or more of her story, choose the doorway that suits your mood.",
+    "explore": {
+      "history": {
+        "title": "History",
+        "description": "Look back at her journey by year and month."
+      },
+      "discography": {
+        "title": "Discography",
+        "description": "Find original songs, covers and other releases."
+      },
+      "archives": {
+        "title": "Stream archives",
+        "description": "Discover singing, gaming, chatting and other broadcasts."
+      },
+      "units": {
+        "title": "Units",
+        "description": "Explore music made with others, including SorAZ."
+      },
+      "map": {
+        "title": "Seichi Map",
+        "description": "Explore places connected with her activities on a map."
+      }
+    }
   }
 }

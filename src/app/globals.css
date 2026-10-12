@@ -95,6 +95,14 @@ body {
   font-family: var(--font-sans) !important;
 }
 
+/* 通常のテーブルと仮想化テーブルで共通のヘッダー。 */
+table > thead,
+table > thead > tr,
+table > thead > tr > th,
+.table-header {
+  @apply rounded-none bg-light-gray-100 dark:bg-gray-800;
+}
+
 html.seichi-map-viewport-fullscreen-open,
 body.seichi-map-viewport-fullscreen-open {
   overflow: hidden;
@@ -173,13 +181,18 @@ body.seichi-map-viewport-fullscreen-open {
   padding: 2px 2px 4px;
 }
 
-.seichi-map-popup__body {
+.seichi-map-popup__scroll-area {
+  display: flex;
+  flex: 1 1 auto;
   min-block-size: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.seichi-map-popup__body {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   padding-inline-end: 2px;
-  scrollbar-gutter: stable;
-  -webkit-overflow-scrolling: touch;
 }
 
 .seichi-map-popup__actions {

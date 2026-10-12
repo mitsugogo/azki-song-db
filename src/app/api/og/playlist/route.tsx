@@ -16,8 +16,6 @@ import {
   ogImageHeaders,
 } from "../ogDesign";
 
-export const runtime = "edge";
-
 type PlaylistOgCell = {
   thumbnailUrl: string;
 };

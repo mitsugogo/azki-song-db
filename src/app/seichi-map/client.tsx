@@ -68,6 +68,11 @@ import { Link } from "@/i18n/navigation";
 import { breadcrumbClasses, pageClasses } from "../theme";
 import type { ArchiveItem } from "../types/archiveItem";
 import type { SeichiMapLocation } from "../lib/seichiMap";
+import { removeYouTubeLinksFromDescription } from "./description";
+import {
+  SeichiMapPopupScrollArea,
+  type SeichiMapPopupScrollContent,
+} from "./SeichiMapPopupScrollArea";
 import {
   parseSeichiMapUserCount,
   SEICHI_MAP_USER_COUNT_HEADER,
@@ -347,7 +352,6 @@ const HIDDEN_LAYERS_STORAGE_KEY = "azki-seichi-map:hidden-layers";
 const NICKNAME_PROMPT_DISMISSED_STORAGE_KEY =
   "azki-seichi-map:nickname-prompt-dismissed";
 const urlPattern = /https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%#]+/g;
-const timestampPattern = /(?:^|\s)(\d{1,2}:\d{2}(?::\d{2})?)~?/;
 
 type GoogleMapsLibraries = {
   core: GoogleMapsCoreLibrary;
@@ -671,18 +675,10 @@ const extractYouTubeVideoIdsFromLocations = (
 };
 
 const getDescriptionWithoutYouTubeLinks = (value: string) => {
-  return stripHtmlToLines(value)
-    .split(/\r?\n/)
-    .map((line) => {
-      let nextLine = line;
-      for (const match of line.matchAll(urlPattern)) {
-        if (!toYouTubeReference(match[0])) continue;
-        nextLine = nextLine.replace(match[0], "").replace(timestampPattern, "");
-      }
-      return nextLine.replace(/[~〜]+/g, "").trim();
-    })
-    .filter((line) => line.length > 0)
-    .join("\n");
+  return removeYouTubeLinksFromDescription(
+    stripHtmlToLines(value),
+    extractYouTubeReferences(value).map((reference) => reference.rawUrl),
+  );
 };
 
 const getYouTubeThumbnailUrl = (videoId: string) =>
@@ -1285,6 +1281,8 @@ export default function SeichiMapCompleteClient({
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
+  const [popupScrollContent, setPopupScrollContent] =
+    useState<SeichiMapPopupScrollContent | null>(null);
   const getMarkerPresentationRef = useRef<
     (location: LocationOption) => SeichiMapMarkerPresentation
   >(() =>
@@ -2292,6 +2290,7 @@ export default function SeichiMapCompleteClient({
       mapClickListenerRef.current = null;
       infoWindowRef.current?.close?.();
       infoWindowRef.current = null;
+      setPopupScrollContent(null);
       const currentLocationControl = currentLocationControlRef.current;
       if (
         currentLocationControl &&
@@ -2393,6 +2392,7 @@ export default function SeichiMapCompleteClient({
       setMapReady(false);
       leafletPopupRef.current = null;
       leafletCurrentLocationMarkerRef.current = null;
+      setPopupScrollContent(null);
       leafletCanvasRendererRef.current = null;
       leafletMarkerLayerRef.current = null;
       leafletMapRef.current?.remove();
@@ -2574,6 +2574,8 @@ export default function SeichiMapCompleteClient({
 
       const body = document.createElement("div");
       body.className = "seichi-map-popup__body";
+      const scrollContainer = document.createElement("div");
+      scrollContainer.className = "seichi-map-popup__scroll-area";
 
       const title = document.createElement("strong");
       title.style.color = "#1a1b1e";
@@ -2823,7 +2825,10 @@ export default function SeichiMapCompleteClient({
         actions.appendChild(deleteButton);
       }
 
-      content.append(body, actions);
+      // Keep content available for the map's initial popup size measurement.
+      scrollContainer.appendChild(body);
+      content.append(scrollContainer, actions);
+      setPopupScrollContent({ container: scrollContainer, body });
       return content;
     },
     [
@@ -2881,6 +2886,7 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     selectedLocationIdRef.current = selectedLocationId;
     mapOverlayRef.current?.setSelectedLocationId(selectedLocationId);
+    if (!selectedLocationId) setPopupScrollContent(null);
   }, [selectedLocationId]);
 
   useEffect(() => {
@@ -3427,6 +3433,9 @@ export default function SeichiMapCompleteClient({
 
   return (
     <main className={pageClasses.shellFlushBottom}>
+      {popupScrollContent && (
+        <SeichiMapPopupScrollArea {...popupScrollContent} />
+      )}
       <Breadcrumbs
         aria-label="Breadcrumb"
         className={breadcrumbClasses.root}

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchOgFonts,
-  getOgBackgroundImageUrl,
+  loadOgBackgroundImage,
   getOgDetailContentTopPadding,
   getOgDetailThumbnailLayout,
 } from "../ogDesign";
@@ -79,10 +79,17 @@ describe("fetchOgFonts", () => {
 });
 
 describe("OG共通レイアウト", () => {
-  it("配布済みの背景画像を同一オリジンの絶対URLとして参照する", () => {
-    expect(getOgBackgroundImageUrl("https://example.test")).toBe(
-      "https://example.test/default_ogp_bg_az.png",
-    );
+  it("背景画像はHTTP取得せず、埋め込み可能なPNGとして読み込む", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    try {
+      const source = await loadOgBackgroundImage();
+      expect(source).toMatch(/^data:image\/png;base64,/);
+      const image = Buffer.from(source.split(",")[1], "base64");
+      expect(image.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      fetchMock.mockRestore();
+    }
   });
 
   it("アートトラックは正方形へトリミングし、通常動画は16:9を欠けずに配置する", () => {

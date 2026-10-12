@@ -140,9 +140,8 @@ describe("generic OG cache", () => {
       expect.arrayContaining(["タイトル", "説明"]),
     );
     expect(
-      elements.some(
-        (item) =>
-          item.props?.src === "https://example.test/default_ogp_bg_az.png",
+      elements.some((item) =>
+        item.props?.src?.startsWith("data:image/png;base64,"),
       ),
     ).toBe(true);
   });

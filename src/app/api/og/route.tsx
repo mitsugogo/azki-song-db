@@ -3,11 +3,9 @@ import { ImageResponse } from "next/og";
 import { siteConfig } from "@/app/config/siteConfig";
 import {
   fetchOgFonts,
-  getOgBackgroundImageUrl,
+  loadOgBackgroundImage,
   normalizeOgText,
 } from "./ogDesign";
-
-export const runtime = "edge";
 
 const genericOgImageHeaders = {
   "Content-Type": "image/png",
@@ -34,7 +32,7 @@ export async function GET(req: NextRequest) {
     const titleLength = Array.from(title).length;
     const titleFontSize = titleLength > 56 ? 46 : titleLength > 36 ? 56 : 72;
     const subTitleFontSize = Array.from(subTitle).length > 58 ? 28 : 34;
-    const backgroundUrl = getOgBackgroundImageUrl(requestUrl.origin);
+    const backgroundUrl = await loadOgBackgroundImage();
     const fonts = await fetchOgFonts(
       `${title || siteConfig.siteName}${subTitle || ""}`,
     );

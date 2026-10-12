@@ -3,6 +3,7 @@
 import { Avatar, Tooltip } from "@mantine/core";
 import { useMemo } from "react";
 import useChannels from "@/app/hook/useChannels";
+import ChannelAvatar from "@/app/components/ChannelAvatar";
 import {
   createChannelsByParticipantName,
   resolveArchiveParticipants,
@@ -36,24 +37,22 @@ export default function UnitMemberAvatars({
       {participants.map(({ name, channel }) => {
         const channelName = channel?.channelName || name;
         const avatar = (
-          <Avatar
-            src={channel?.iconUrl || null}
-            alt={name}
+          <ChannelAvatar
+            key={`${channel?.iconUrl || ""}:${variant}`}
+            name={name}
+            iconUrl={channel?.iconUrl || ""}
+            resolution={variant === "card" ? 160 : 320}
             size={
               variant === "card"
                 ? "clamp(3rem, 7vw, 4.5rem)"
                 : "clamp(7.5rem, 13vw, 10.5rem)"
             }
-            radius="xl"
-            color="pink"
             className={
               variant === "card"
                 ? "border-[3px] border-white dark:border-gray-900"
                 : "border-4 border-white dark:border-gray-900"
             }
-          >
-            {Array.from(name)[0]}
-          </Avatar>
+          />
         );
 
         if (variant === "card") {

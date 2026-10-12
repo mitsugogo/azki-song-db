@@ -11,6 +11,10 @@ function getScrollableAncestor(
 ): HTMLElement | null {
   let current = element?.parentElement ?? null;
   while (current) {
+    // ScrollArea の初期描画では、スクロールバー初期化まで overflow が hidden になる。
+    if (current.hasAttribute("data-scrollarea-viewport")) {
+      return current;
+    }
     const { overflow, overflowY } = window.getComputedStyle(current);
     if (/(auto|scroll)/.test(overflow + overflowY)) {
       return current;

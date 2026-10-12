@@ -191,6 +191,66 @@ describe("DiscographySongList", () => {
     expect(globalPlayerMock.setCurrentSong).toHaveBeenLastCalledWith(artTrack);
   });
 
+  it("Magiaを1行にスタックし、MVと3D Live版の再生・リンクを切り替えられる", () => {
+    const metadata = {
+      title: "Magia",
+      artist: "Kalafina",
+      album: "",
+      sing: "アキ・ローゼンタール、大神ミオ、AZKi",
+      sings: ["アキ・ローゼンタール", "大神ミオ", "AZKi"],
+    };
+    const mv = {
+      ...createSong("Ti2ELlQbuYc", ["カバー曲", "カバー曲MV"], 1934),
+      ...metadata,
+      slugv2: "magia-mv",
+      start: 0,
+    };
+    const live = {
+      ...createSong("X0wwLISllTM", ["カバー曲", "公式切り抜き"], 1935),
+      ...metadata,
+      video_title: "【3D Live ver.】Magia / RosaMiA🌹 (cover)",
+      slugv2: "magia-3d-live",
+      start: 0,
+    };
+    const item: StatisticsItem = {
+      key: "Magia",
+      count: 1,
+      isAlbum: false,
+      song: mv,
+      firstVideo: mv,
+      lastVideo: mv,
+      videos: [live, mv],
+    };
+
+    render(
+      <MantineProvider>
+        <DiscographySongList
+          data={[item]}
+          groupByAlbum
+          groupByYear={false}
+          visibleItems={[true]}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "buttons.play" }));
+    expect(globalPlayerMock.setCurrentSong).toHaveBeenLastCalledWith(mv);
+
+    fireEvent.click(screen.getByText("live3d"));
+    expect(screen.getByRole("link", { name: /Magia\s*\[/ })).toHaveAttribute(
+      "href",
+      "/discography/covers/magia-3d-live",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.play" }));
+    expect(globalPlayerMock.setCurrentSong).toHaveBeenLastCalledWith(live);
+    expect(globalPlayerMock.setCurrentTime).toHaveBeenLastCalledWith(0);
+
+    fireEvent.click(screen.getByText("mv"));
+    fireEvent.click(screen.getByRole("button", { name: "buttons.play" }));
+    expect(globalPlayerMock.setCurrentSong).toHaveBeenLastCalledWith(mv);
+  });
+
   it("アルバム内のアートトラックを正方形トリミングのサムネイルにする", () => {
     const musicVideo = createSong("mvvideo0001", ["オリ曲MV"]);
     const artTrack = createSong("arttrack001", ["オリ曲", "アートトラック"], 2);

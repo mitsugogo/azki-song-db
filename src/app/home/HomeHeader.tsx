@@ -2,7 +2,6 @@
 
 import { Burger } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { Link } from "../../i18n/navigation";
 import { siteConfig } from "../config/siteConfig";
@@ -12,28 +11,21 @@ import ThemeToggle from "../components/ThemeToggle";
 type HomeHeaderProps = {
   drawerOpened: boolean;
   onToggleDrawer: () => void;
+  sidebarVisible?: boolean;
+  isScrolled?: boolean;
 };
 
-export function HomeHeader({ drawerOpened, onToggleDrawer }: HomeHeaderProps) {
+export function HomeHeader({
+  drawerOpened,
+  onToggleDrawer,
+  sidebarVisible = false,
+  isScrolled = false,
+}: HomeHeaderProps) {
   const tDrawer = useTranslations("DrawerMenu");
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const updateHeaderState = () => {
-      setIsScrolled(window.scrollY > 12);
-    };
-
-    updateHeaderState();
-    window.addEventListener("scroll", updateHeaderState, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", updateHeaderState);
-    };
-  }, []);
 
   return (
     <header
-      className={`sticky top-0 z-40 -mx-4 isolate px-4 py-4 transition-colors duration-200 before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:transition-colors before:duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+      className={`relative -mx-4 isolate px-4 py-4 transition-colors duration-200 before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:transition-colors before:duration-200 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
         isScrolled
           ? "before:bg-white/80 before:backdrop-blur dark:before:bg-gray-900/70"
           : "border-transparent before:bg-transparent"
@@ -41,11 +33,14 @@ export function HomeHeader({ drawerOpened, onToggleDrawer }: HomeHeaderProps) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <Burger
-            opened={drawerOpened}
-            onClick={onToggleDrawer}
-            aria-label="Toggle navigation"
-          />
+          {!sidebarVisible ? (
+            <Burger
+              opened={drawerOpened}
+              onClick={onToggleDrawer}
+              aria-label="Toggle navigation"
+              aria-expanded={drawerOpened}
+            />
+          ) : null}
           <Link
             href="/"
             className="inline-block truncate text-base font-semibold tracking-[0.12em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"

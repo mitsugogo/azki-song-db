@@ -11,6 +11,7 @@ import {
   FaUsers,
   FaYoutube,
   FaStar,
+  FaChartBar,
 } from "react-icons/fa6";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { IoAlbums, IoTime } from "react-icons/io5";
@@ -25,6 +26,7 @@ import { Tooltip } from "@mantine/core";
 import { FaInfoCircle } from "react-icons/fa";
 import { getCollabUnitName } from "../config/collabUnits";
 import { renderLinkedText } from "../lib/textLinkify";
+import { getDiscographyLink } from "../lib/song";
 
 interface NowPlayingSongInfoDetailProps {
   currentSong: Song;
@@ -53,6 +55,7 @@ const NowPlayingSongInfoDetail = ({
 }: NowPlayingSongInfoDetailProps) => {
   const locale = useLocale();
   const t = useTranslations("Watch.nowPlayingSongInfoDetail");
+  const statsHref = getDiscographyLink(currentSong);
   const [isTimestampExpand, setIsTimestampExpand] = useState(false);
   const [isSangFrameExpand, setIsSangFrameExpand] = useState(false);
 
@@ -417,6 +420,24 @@ const NowPlayingSongInfoDetail = ({
                 >
                   YouTube
                 </Badge>
+                {statsHref && (
+                  <>
+                    &nbsp;
+                    <Badge
+                      color="gray"
+                      component={Link}
+                      href={statsHref}
+                      prefetch={false}
+                      leftSection={<FaChartBar className="h-3 w-3" />}
+                      radius="xs"
+                      size="xs"
+                      variant="light"
+                      className="cursor-pointer"
+                    >
+                      {t("viewStats")}
+                    </Badge>
+                  </>
+                )}
               </dd>
             </div>
 

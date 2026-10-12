@@ -11,7 +11,7 @@ import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { Link } from "@/i18n/navigation";
 import { BsPlayCircle } from "react-icons/bs";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { usePageScrollVirtualizer } from "../hook/usePageScrollVirtualizer";
 import historyHelper from "../lib/history";
 import { useTranslations } from "next-intl";
 import { Badge } from "@mantine/core";
@@ -82,7 +82,6 @@ export default function DataTable<
   const [sorting, setSorting] = useState<ColumnSort[]>(initialSorting);
   const [debouncedFilter] = useDebouncedValue(inputValue, 300);
   const tableBodyRef = useRef<HTMLDivElement>(null);
-  const [tableBodyOffsetTop, setTableBodyOffsetTop] = useState(0);
 
   useEffect(() => {
     setSorting((prev) => {
@@ -161,23 +160,10 @@ export default function DataTable<
     }, 0);
   }, [data]);
 
-  useEffect(() => {
-    const updateOffset = () => {
-      if (!tableBodyRef.current) return;
-      const rect = tableBodyRef.current.getBoundingClientRect();
-      setTableBodyOffsetTop(rect.top + window.scrollY);
-    };
-
-    updateOffset();
-    window.addEventListener("resize", updateOffset);
-    return () => window.removeEventListener("resize", updateOffset);
-  }, [rows.length, debouncedFilter]);
-
-  const rowVirtualizer = useWindowVirtualizer({
+  const rowVirtualizer = usePageScrollVirtualizer(tableBodyRef, {
     count: rows.length,
     estimateSize: () => 86,
     overscan: 10,
-    scrollMargin: tableBodyOffsetTop,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -198,10 +184,7 @@ export default function DataTable<
             {/* Header */}
             <div className="flex text-xs sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
-                <div
-                  key={headerGroup.id}
-                  className="flex flex-1 bg-light-gray-200 dark:bg-gray-700"
-                >
+                <div key={headerGroup.id} className="table-header flex flex-1">
                   {headerGroup.headers.map((header) => (
                     <div
                       key={header.id}
@@ -282,7 +265,7 @@ export default function DataTable<
                           left: 0,
                           minWidth: `${minWidth + "px" || "auto"}`,
                           width: "100%",
-                          transform: `translateY(${virtualRow.start - tableBodyOffsetTop}px)`,
+                          transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                         }}
                         className={`flex border-b border-white/20 dark:border-white/10 ${
                           onRowClick ? "cursor-pointer select-none" : ""
@@ -385,7 +368,7 @@ export default function DataTable<
                           <div
                             className="p-4 bg-gray-100 dark:bg-gray-800 relative z-50 shadow-inner shadow-gray-500/50 dark:shadow-gray-900"
                             style={{
-                              transform: `translateY(${virtualRow.end - tableBodyOffsetTop}px)`,
+                              transform: `translateY(${virtualRow.end - rowVirtualizer.options.scrollMargin}px)`,
                             }}
                           >
                             <h3 className="text-lg font-semibold mb-2">
@@ -399,7 +382,7 @@ export default function DataTable<
                             </h3>
                             <div className="w-full">
                               {/* Inner Header */}
-                              <div className="flex text-xs text-gray-700  bg-gray-50 dark:bg-gray-700">
+                              <div className="table-header flex text-xs text-gray-700 dark:text-gray-200">
                                 <div className="shrink-0 w-20 px-3 py-1">
                                   {tStats("renderers.lastVideoCell.play")}
                                 </div>

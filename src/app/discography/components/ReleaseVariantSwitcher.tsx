@@ -53,7 +53,9 @@ export default function ReleaseVariantSwitcher({
           ? t("animated")
           : kind === "art-track"
             ? t("artTrack")
-            : t("other");
+            : kind === "3d-live"
+              ? t("live3d")
+              : t("other");
     const kindIndex = kindSeen.get(kind) ?? 0;
     kindSeen.set(kind, kindIndex + 1);
 

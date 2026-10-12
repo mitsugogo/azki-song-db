@@ -1,6 +1,3 @@
-import { Header } from "../components/Header";
-import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
-import Footer from "../components/Footer";
 import { Viewport } from "next";
 import StreamArchivesScrollControls from "./StreamArchivesScrollControls";
 
@@ -18,13 +15,8 @@ export default function ArchivesLayout({
 }) {
   return (
     <>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <div>{children}</div>
-        <Footer />
-      </div>
+      {children}
       <StreamArchivesScrollControls />
-      <AnalyticsWrapper />
     </>
   );
 }

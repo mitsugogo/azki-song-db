@@ -11,8 +11,6 @@ import {
   ogImageHeaders,
 } from "../../ogDesign";
 
-export const runtime = "edge";
-
 type OgSongCard = {
   url: string;
   title: string;

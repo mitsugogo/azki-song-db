@@ -25,6 +25,7 @@ vi.mock("../YoutubeThumbnail", () => ({
   default: ({ alt }: { alt: string }) => <span>{alt}</span>,
 }));
 vi.mock("../MilestoneBadge", () => ({ default: () => null }));
+vi.mock("../SongParticipantAvatars", () => ({ default: () => null }));
 
 import SongListItem from "../SongListItem";
 

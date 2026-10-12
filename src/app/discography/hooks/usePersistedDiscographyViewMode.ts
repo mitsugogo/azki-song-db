@@ -12,7 +12,7 @@ function isDiscographyViewMode(
 }
 
 export function usePersistedDiscographyViewMode(allowOriginalMv: boolean) {
-  const [viewMode, setViewMode] = useState<DiscographyViewMode>("tile");
+  const [viewMode, setViewMode] = useState<DiscographyViewMode>("list");
 
   useEffect(() => {
     try {
@@ -21,15 +21,15 @@ export function usePersistedDiscographyViewMode(allowOriginalMv: boolean) {
       );
       const restoredMode = isDiscographyViewMode(storedMode)
         ? storedMode
-        : "tile";
+        : "list";
 
       setViewMode(
         restoredMode === "originalMv" && !allowOriginalMv
-          ? "tile"
+          ? "list"
           : restoredMode,
       );
     } catch {
-      setViewMode("tile");
+      setViewMode("list");
     }
   }, [allowOriginalMv]);
 

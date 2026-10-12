@@ -10,6 +10,7 @@ import { formatDate } from "../lib/formatDate";
 import { Link } from "@/i18n/navigation";
 import { FaStar } from "react-icons/fa6";
 import { color } from "motion/react";
+import SongParticipantAvatars from "./SongParticipantAvatars";
 
 interface SongListItemProps {
   song: Song;
@@ -131,8 +132,8 @@ const SongListItem = React.memo(
                 )}
               </div>
             </div>
-            <div className="min-w-0 flex-1 space-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:space-y-1">
-              <div>
+            <div className="min-w-0 flex-1 grid grid-cols-[minmax(0,1fr)_auto] gap-x-1 gap-y-0.5 px-3 pt-0.5 lg:pt-0 lg:pb-2 lg:gap-y-1">
+              <div className="col-span-2 row-start-1">
                 {song.is_members_only && (
                   <div className="text-xs hidden lg:block">
                     <Badge
@@ -149,7 +150,7 @@ const SongListItem = React.memo(
                 )}
               </div>
               <div
-                className={`line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white break-all`}
+                className={`min-w-0 col-start-1 row-start-2 lg:col-span-2 line-clamp-1 lg:line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white break-all`}
               >
                 <span
                   className={`${
@@ -164,7 +165,7 @@ const SongListItem = React.memo(
                 </span>
               </div>
               <div
-                className={`line-clamp-1 lg:line-clamp-2 text-xs text-gray-600 dark:text-gray-100`}
+                className={`col-span-2 row-start-3 line-clamp-1 lg:line-clamp-2 text-xs text-gray-600 dark:text-gray-100`}
               >
                 <span
                   className={`${
@@ -178,8 +179,8 @@ const SongListItem = React.memo(
                   </span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[0.7rem] uppercase  text-gray-400 dark:text-gray-300">
-                <span>
+              <div className="col-span-2 row-start-4 lg:col-span-1 flex items-center justify-between gap-1 text-[0.7rem] uppercase text-gray-400 dark:text-gray-300">
+                <span className="whitespace-nowrap">
                   {song.broadcast_at && formatDate(song.broadcast_at, locale)}
                 </span>
                 {song.live_call && (
@@ -195,6 +196,7 @@ const SongListItem = React.memo(
                   </span>
                 )}
               </div>
+              {!isHide && <SongParticipantAvatars song={song} />}
             </div>
           </Link>
         </li>

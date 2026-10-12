@@ -1,11 +1,11 @@
 "use client";
 
-import { List } from "@mantine/core";
 import { Link } from "@/i18n/navigation";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { useTranslations } from "next-intl";
+import PolicyLinks from "./PolicyLinks";
 
-const Acknowledgment = () => {
+const Acknowledgment = ({ onNavigate }: { onNavigate?: () => void }) => {
   const t = useTranslations("Acknowledgment");
 
   return (
@@ -133,6 +133,10 @@ const Acknowledgment = () => {
           </Link>
         </p>
       </div>
+      <PolicyLinks
+        onNavigate={onNavigate}
+        className="mt-5 text-sm text-primary dark:text-primary-400"
+      />
     </>
   );
 };

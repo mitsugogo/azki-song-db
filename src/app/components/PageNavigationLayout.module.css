@@ -1,0 +1,14 @@
+.sidebar {
+  display: contents;
+}
+
+.scrollContent {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-width: 100%;
+}
+
+.scrollContent > * {
+  overflow: visible;
+}

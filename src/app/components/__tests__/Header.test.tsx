@@ -132,4 +132,16 @@ describe("Header", () => {
     expect(target.startsWith("/search")).toBe(false);
     expect(target).toBe("/discography");
   });
+
+  it("外部からメニューを制御する場合はボタン操作を委譲し、Drawerを重複表示しない", () => {
+    const onToggle = vi.fn();
+    render(
+      <Header withDesktopNavigation navigation={{ opened: false, onToggle }} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "menu" }));
+
+    expect(onToggle).toHaveBeenCalledOnce();
+    expect(screen.queryByTestId("drawer-menu")).not.toBeInTheDocument();
+  });
 });

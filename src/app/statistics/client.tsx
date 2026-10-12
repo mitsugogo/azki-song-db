@@ -16,8 +16,10 @@ import { buildViewMilestoneInfo } from "../lib/viewMilestone";
 import { StatisticsItem } from "../types/statisticsItem";
 import { getTabsConfig } from "./tabsConfig";
 import { pageClasses } from "../theme";
+import { usePageNavigationViewport } from "../components/PageNavigationLayoutContext";
 
 export default function StatisticsPage() {
+  const viewportRef = usePageNavigationViewport();
   const t = useTranslations("Statistics");
   const tabsConfig = useMemo(() => getTabsConfig(t), [t]);
 
@@ -220,17 +222,19 @@ export default function StatisticsPage() {
   }, [defaultTab, tabKeys]);
 
   useEffect(() => {
+    const viewport = viewportRef?.current;
+    if (!viewport) return;
     const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 400);
+      setShowBackToTop(viewport.scrollTop > 400);
     };
 
     handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", handleScroll);
+  }, [viewportRef]);
 
   const handleBackToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    viewportRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const activeTabConfig = useMemo(
@@ -338,7 +342,7 @@ export default function StatisticsPage() {
           type="button"
           onClick={handleBackToTop}
           aria-label={t("backToTopAriaLabel")}
-          className="fixed bottom-4 right-4 z-40 inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-lg transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+          className="fixed bottom-20 right-4 z-40 inline-flex items-center justify-center rounded-full bg-primary-600 p-3 text-white shadow-lg transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
         >
           <HiArrowUp className="h-5 w-5" />
         </button>

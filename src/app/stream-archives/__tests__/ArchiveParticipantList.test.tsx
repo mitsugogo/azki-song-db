@@ -1,9 +1,13 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import ArchiveParticipantList from "../ArchiveParticipantList";
 
+const { localeMock } = vi.hoisted(() => ({ localeMock: vi.fn(() => "ja") }));
+vi.mock("next-intl", () => ({ useLocale: localeMock }));
+
 describe("ArchiveParticipantList", () => {
+  beforeEach(() => localeMock.mockReturnValue("ja"));
   beforeAll(() => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -51,5 +55,26 @@ describe("ArchiveParticipantList", () => {
       "https://www.youtube.com/channel/UC-azki",
     );
     expect(screen.getByText("ゲスト")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["ja", "フワワ・アビスガード"],
+    ["en", "Fuwawa Abyssgard"],
+  ])("displays official participant names in %s", (locale, fuwawaName) => {
+    localeMock.mockReturnValue(locale);
+    render(
+      <MantineProvider>
+        <ArchiveParticipantList
+          participants={[
+            { name: "アイリス", channel: null },
+            { name: "フワワアビスガード", channel: null },
+          ]}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByText("IRyS")).toBeInTheDocument();
+    expect(screen.getByText(fuwawaName)).toBeInTheDocument();
+    expect(screen.queryByText("アイリス")).not.toBeInTheDocument();
   });
 });

@@ -1,7 +1,8 @@
 import type { Song } from "../../types/song";
 import { normalizeSongTitle } from "./normalizeSongTitle";
 
-export type ReleaseVariantKind = "mv" | "animated" | "art-track" | "other";
+export type ReleaseVariantKind =
+  "mv" | "animated" | "art-track" | "3d-live" | "other";
 
 export type ReleaseVariantGroup = {
   key: string;
@@ -24,10 +25,15 @@ export const isAnimatedAz = (song: Song) =>
 export const isArtTrack = (song: Pick<Song, "tags">) =>
   (song.tags || []).includes("アートトラック");
 
+const is3DLiveVariant = (song: Song) =>
+  (song.tags || []).includes("公式切り抜き") &&
+  /\b3d\s*live\s+ver\b/i.test((song.video_title || "").normalize("NFKC"));
+
 export const getReleaseVariantKind = (song: Song): ReleaseVariantKind => {
   if (isAnimatedAz(song)) return "animated";
   if (isMusicVideo(song)) return "mv";
   if (isArtTrack(song)) return "art-track";
+  if (is3DLiveVariant(song)) return "3d-live";
   return "other";
 };
 
@@ -37,7 +43,14 @@ export const getSongInstanceKey = (song: Song) =>
     : `${song.video_id || "video"}__${Number(song.start ?? 0)}__${song.slugv2 || ""}`;
 
 const isReleaseVariantCandidate = (song: Song) =>
-  isMusicVideo(song) || isArtTrack(song);
+  isMusicVideo(song) || isArtTrack(song) || is3DLiveVariant(song);
+
+const getSingerKey = (song: Song) =>
+  (song.sings?.length ? song.sings : (song.sing || "").split("、"))
+    .map(normalizeKeyPart)
+    .filter(Boolean)
+    .sort()
+    .join("、");
 
 const getTitleArtistKeyParts = (song: Song) => {
   const title = normalizeKeyPart(normalizeSongTitle(song.title, song.artist));
@@ -74,12 +87,16 @@ export const getReleaseVariantGroupKey = (song: Song) => {
   return `release::${album}::${title}::${artist}`;
 };
 
+const get3DLiveReleaseVariantGroupKey = (song: Song, releaseKey: string) =>
+  `${releaseKey}::3d-live::${getSingerKey(song)}`;
+
 const variantPriority = (song: Song) => {
   const kind = getReleaseVariantKind(song);
   if (kind === "mv") return 0;
   if (kind === "animated") return 1;
   if (kind === "art-track") return 2;
-  return 3;
+  if (kind === "3d-live") return 3;
+  return 4;
 };
 
 export const sortReleaseVariants = (songs: Song[]) =>
@@ -105,6 +122,32 @@ export const groupReleaseVariants = (songs: Song[]): ReleaseVariantGroup[] => {
       return title && artist ? `${title}::${artist}` : "";
     }),
   );
+  const getGroupKey = (song: Song) => {
+    const { title, artist } = getTitleArtistKeyParts(song);
+    const titleArtistKey = title && artist ? `${title}::${artist}` : "";
+    const shouldCrossAlbumGroup =
+      isReleaseVariantCandidate(song) &&
+      titleArtistKey &&
+      animatedTitleArtistKeys.has(titleArtistKey);
+    return shouldCrossAlbumGroup
+      ? getCrossAlbumReleaseVariantGroupKey(song)
+      : getReleaseVariantGroupKey(song);
+  };
+  // 3D Live版は、同じ歌唱者のMV・アートトラックがある場合だけまとめる。
+  const releaseAnchorKeys = new Set(
+    songs
+      .filter(
+        (song) =>
+          (isMusicVideo(song) || isArtTrack(song)) && getSingerKey(song),
+      )
+      .map((song) => get3DLiveReleaseVariantGroupKey(song, getGroupKey(song))),
+  );
+  const liveReleaseKeys = new Set(
+    songs
+      .filter((song) => getReleaseVariantKind(song) === "3d-live")
+      .map((song) => get3DLiveReleaseVariantGroupKey(song, getGroupKey(song)))
+      .filter((key) => releaseAnchorKeys.has(key)),
+  );
   const groups = new Map<
     string,
     {
@@ -114,15 +157,13 @@ export const groupReleaseVariants = (songs: Song[]): ReleaseVariantGroup[] => {
   >();
 
   songs.forEach((song, index) => {
-    const { title, artist } = getTitleArtistKeyParts(song);
-    const titleArtistKey = title && artist ? `${title}::${artist}` : "";
-    const shouldCrossAlbumGroup =
-      isReleaseVariantCandidate(song) &&
-      titleArtistKey &&
-      animatedTitleArtistKeys.has(titleArtistKey);
-    const key = shouldCrossAlbumGroup
-      ? getCrossAlbumReleaseVariantGroupKey(song)
-      : getReleaseVariantGroupKey(song);
+    const groupKey = getGroupKey(song);
+    const liveGroupKey = get3DLiveReleaseVariantGroupKey(song, groupKey);
+    const key = liveReleaseKeys.has(liveGroupKey)
+      ? liveGroupKey
+      : getReleaseVariantKind(song) === "3d-live"
+        ? `single::${getSongInstanceKey(song)}`
+        : groupKey;
     const current = groups.get(key);
     if (current) {
       current.variants.push(song);
@@ -169,7 +210,10 @@ export const hasMultipleReleaseVariants = (variants: Song[]) => {
   );
   return (
     variants.length > 1 &&
-    (kinds.has("mv") || kinds.has("animated") || kinds.has("art-track"))
+    (kinds.has("mv") ||
+      kinds.has("animated") ||
+      kinds.has("art-track") ||
+      kinds.has("3d-live"))
   );
 };
 
@@ -203,4 +247,10 @@ export const findReleaseVariantGroup = (songs: Song[], song: Song | null) => {
 
 export const matchesReleaseVariantGroupKey = (song: Song, groupKey: string) =>
   getReleaseVariantGroupKey(song) === groupKey ||
-  getCrossAlbumReleaseVariantGroupKey(song) === groupKey;
+  getCrossAlbumReleaseVariantGroupKey(song) === groupKey ||
+  get3DLiveReleaseVariantGroupKey(song, getReleaseVariantGroupKey(song)) ===
+    groupKey ||
+  get3DLiveReleaseVariantGroupKey(
+    song,
+    getCrossAlbumReleaseVariantGroupKey(song),
+  ) === groupKey;

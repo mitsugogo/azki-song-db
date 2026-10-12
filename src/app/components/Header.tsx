@@ -17,7 +17,18 @@ import DrawerMenu from "./DrawerMenu";
 import { siteConfig } from "@/app/config/siteConfig";
 import { routing } from "../../i18n/routing";
 
-export function Header() {
+type HeaderProps = {
+  navigation?: {
+    opened: boolean;
+    onToggle: () => void;
+  };
+  withDesktopNavigation?: boolean;
+};
+
+export function Header({
+  navigation,
+  withDesktopNavigation = false,
+}: HeaderProps = {}) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const { allSongs } = useSongs();
@@ -48,15 +59,19 @@ export function Header() {
       <header className="relative z-30 bg-primary-800 dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
         <div className="w-full px-2">
           <div className="relative flex h-10 lg:h-16 items-center">
-            <div className="absolute inset-y-0 left-0 flex items-center z-10">
+            <div
+              className={`absolute inset-y-0 left-0 flex items-center z-10 ${withDesktopNavigation ? "xl:hidden" : ""}`}
+            >
               <Burger
-                opened={drawerOpened}
-                onClick={toggleDrawer}
+                opened={navigation?.opened ?? drawerOpened}
+                onClick={navigation?.onToggle ?? toggleDrawer}
                 color="white"
                 aria-label={t("toggleNavigation")}
               />
             </div>
-            <div className="flex flex-1 items-center justify-start ml-12">
+            <div
+              className={`flex flex-1 items-center justify-start ml-12 ${withDesktopNavigation ? "xl:ml-0" : ""}`}
+            >
               <div className="flex shrink-0 items-center lg:ml-2">
                 <Link href="/">
                   <>
@@ -187,7 +202,9 @@ export function Header() {
         </div>
       </header>
 
-      <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
+      {!navigation && (
+        <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
+      )}
     </>
   );
 }

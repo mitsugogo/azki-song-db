@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
 import { useLocale } from "next-intl";
 import { AnalyticsWrapper } from "./components/AnalyticsWrapper";
-import DrawerMenu from "./components/DrawerMenu";
 import Footer from "./components/Footer";
 import { HomeActivityTimelineSection } from "./home/HomeActivityTimelineSection";
-import { HomeHeader } from "./home/HomeHeader";
+import { HomeNavigationLayout } from "./home/HomeNavigationLayout";
 import { HomeHeroSection } from "./home/HomeHeroSection";
+import { HomeLatestVideoSection } from "./home/HomeLatestVideoSection";
 import { HomeEventsSection } from "./home/HomeEventsSection";
 import { HomeOngoingEventNotice } from "./home/HomeOngoingEventNotice";
 import { HomeLinksAndMeta } from "./home/HomeLinksAndMeta";
@@ -30,8 +29,6 @@ type BuildInfo = {
 
 export default function ClientTop() {
   const locale = useLocale();
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
-    useDisclosure(false);
   const { allSongs, songsFetchedAt, isLoading } = useSongs();
   const { channels: channelsRegistry } = useChannels();
   const { items: anniversaryItems, isLoading: isAnniversariesLoading } =
@@ -102,13 +99,13 @@ export default function ClientTop() {
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-[radial-gradient(circle_at_top,rgba(244,114,182,0.18),transparent_38%),linear-gradient(180deg,#fffafc_0%,#fdf2f8_100%)] text-gray-900 dark:bg-[radial-gradient(circle_at_top,rgba(190,24,93,0.2),transparent_34%),linear-gradient(180deg,#111827_0%,#0f172a_100%)] dark:text-white">
-      <div className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col px-4 pb-24 pt-0 sm:px-6 lg:px-8">
-        <HomeHeader drawerOpened={drawerOpened} onToggleDrawer={toggleDrawer} />
-
+      <HomeNavigationLayout footer={<Footer />}>
         <main className="flex flex-1 flex-col">
           <HomeHeroSection songs={allSongs} />
 
-          <section className="pt-8 pb-10 sm:pt-10">
+          <section className="pt-2 pb-10">
+            <HomeLatestVideoSection isLoading={isLoading} songs={allSongs} />
+
             <HomeOngoingEventNotice events={eventItems} />
 
             <HomeRecommendedSongsSection
@@ -161,10 +158,7 @@ export default function ClientTop() {
             />
           </section>
         </main>
-
-        <Footer />
-      </div>
-      <DrawerMenu opened={drawerOpened} onClose={closeDrawer} />
+      </HomeNavigationLayout>
       <AnalyticsWrapper />
     </div>
   );

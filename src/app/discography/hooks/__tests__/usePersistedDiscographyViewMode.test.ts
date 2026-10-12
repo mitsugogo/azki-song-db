@@ -9,13 +9,29 @@ describe("usePersistedDiscographyViewMode", () => {
     localStorage.clear();
   });
 
-  it("保存された表示モードを復元する", async () => {
-    localStorage.setItem(DISCOGRAPHY_VIEW_MODE_STORAGE_KEY, "list");
+  it.each([true, false])(
+    "保存値がない場合はリストを表示する（オリ曲MV対応: %s）",
+    (allowOriginalMv) => {
+      const { result } = renderHook(() =>
+        usePersistedDiscographyViewMode(allowOriginalMv),
+      );
 
-    const { result } = renderHook(() => usePersistedDiscographyViewMode(true));
+      expect(result.current[0]).toBe("list");
+    },
+  );
 
-    await waitFor(() => expect(result.current[0]).toBe("list"));
-  });
+  it.each(["tile", "list", "originalMv"])(
+    "保存された表示モード %s を復元する",
+    async (mode) => {
+      localStorage.setItem(DISCOGRAPHY_VIEW_MODE_STORAGE_KEY, mode);
+
+      const { result } = renderHook(() =>
+        usePersistedDiscographyViewMode(true),
+      );
+
+      await waitFor(() => expect(result.current[0]).toBe(mode));
+    },
+  );
 
   it("表示モードの変更を保存する", () => {
     const { result } = renderHook(() => usePersistedDiscographyViewMode(true));
@@ -28,7 +44,7 @@ describe("usePersistedDiscographyViewMode", () => {
     );
   });
 
-  it("オリ曲MVを表示できないカテゴリではタイルにフォールバックし、保存値は維持する", async () => {
+  it("オリ曲MVを表示できないカテゴリではリストにフォールバックし、保存値は維持する", async () => {
     localStorage.setItem(DISCOGRAPHY_VIEW_MODE_STORAGE_KEY, "originalMv");
 
     const { result, rerender } = renderHook(
@@ -36,7 +52,7 @@ describe("usePersistedDiscographyViewMode", () => {
       { initialProps: { allowOriginalMv: false } },
     );
 
-    expect(result.current[0]).toBe("tile");
+    expect(result.current[0]).toBe("list");
     expect(localStorage.getItem(DISCOGRAPHY_VIEW_MODE_STORAGE_KEY)).toBe(
       "originalMv",
     );
@@ -45,11 +61,11 @@ describe("usePersistedDiscographyViewMode", () => {
     await waitFor(() => expect(result.current[0]).toBe("originalMv"));
   });
 
-  it("不正な保存値はタイルとして扱う", async () => {
+  it("不正な保存値はリストとして扱う", async () => {
     localStorage.setItem(DISCOGRAPHY_VIEW_MODE_STORAGE_KEY, "unknown");
 
     const { result } = renderHook(() => usePersistedDiscographyViewMode(true));
 
-    await waitFor(() => expect(result.current[0]).toBe("tile"));
+    await waitFor(() => expect(result.current[0]).toBe("list"));
   });
 });

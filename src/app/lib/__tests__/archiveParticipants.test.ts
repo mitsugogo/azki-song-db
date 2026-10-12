@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChannelEntry } from "../../types/api/yt/channels";
 import {
   createChannelsByParticipantName,
+  getArchiveParticipantDisplayName,
   isAzkiArchiveParticipant,
   matchesSelectedArchiveParticipantEntries,
   matchesSelectedArchiveParticipants,
@@ -23,6 +24,62 @@ const channel = (overrides: Partial<ChannelEntry>): ChannelEntry => ({
 });
 
 describe("archive participants", () => {
+  it.each([
+    ["アイリス", "IRyS", "IRyS"],
+    ["IRyS", "IRyS", "IRyS"],
+    [
+      "アイラニ・イオフイフティーン",
+      "アイラニ・イオフィフティーン",
+      "Airani Iofifteen",
+    ],
+    ["フワワアビスガード", "フワワ・アビスガード", "Fuwawa Abyssgard"],
+    ["モココアビスガード", "モココ・アビスガード", "Mococo Abyssgard"],
+    ["星街すいせい", "星街すいせい", "Hoshimachi Suisei"],
+    ["Robocosan", "ロボ子さん", "Robocosan"],
+    ["Ninomae Ina'nis", "一伊那尓栖", "Ninomae Ina’nis"],
+    ["ゲスト", "ゲスト", "ゲスト"],
+  ])("displays official Japanese and English names for %s", (name, ja, en) => {
+    const participant = { name, channel: null };
+    expect(getArchiveParticipantDisplayName(participant, "ja")).toBe(ja);
+    expect(getArchiveParticipantDisplayName(participant, "en")).toBe(en);
+  });
+
+  it("resolves official and legacy aliases to the same channel and filter identity", () => {
+    const irys = channel({
+      talentName: "アイリス",
+      artistName: "IRyS",
+      youtubeId: "UC-irys",
+    });
+    const iofi = channel({
+      talentName: "アイラニ・イオフイフティーン",
+      artistName: "Airani Iofifteen",
+      youtubeId: "UC-iofi",
+    });
+    const channelsByName = createChannelsByParticipantName([irys, iofi]);
+    const participants = resolveArchiveParticipants(
+      ["IRyS", "アイラニ・イオフィフティーン"],
+      channelsByName,
+    );
+
+    expect(participants.map(({ channel }) => channel?.youtubeId)).toEqual([
+      "UC-irys",
+      "UC-iofi",
+    ]);
+    expect(
+      matchesSelectedArchiveParticipantEntries(participants, [
+        "アイリス",
+        "Airani Iofifteen",
+      ]),
+    ).toBe(true);
+    expect(matchesSelectedArchiveParticipants(["アイリス"], ["IRyS"])).toBe(
+      true,
+    );
+    expect(
+      getArchiveParticipantDisplayName({ name: "別名", channel: irys }, "ja"),
+    ).toBe("IRyS");
+    expect(parseArchiveParticipants("アイリス、IRyS")).toEqual(["アイリス"]);
+  });
+
   it("parses Japanese comma-separated participant names", () => {
     expect(parseArchiveParticipants("AZKi、 鷹嶺ルイ、AZKi")).toEqual([
       "AZKi",

@@ -17,7 +17,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BsGeoAlt } from "react-icons/bs";
-import { FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { FaChartBar, FaXTwitter, FaYoutube } from "react-icons/fa6";
 import {
   LuArrowRight,
   LuMusic,
@@ -33,6 +33,7 @@ import {
   getActivityImportanceTitleClassName,
 } from "../lib/activityImportance";
 import { formatDate } from "../lib/formatDate";
+import { getDiscographyLink } from "../lib/song";
 import {
   filterActivityTimelineItemsForDisplay,
   type ActivityTimelineDisplayFilters,
@@ -398,6 +399,10 @@ export default function ActivityTimelineSection({
                 const baseImportanceTitleClassName =
                   getActivityImportanceTitleClassName(item.importance);
                 const titleHref = presentation.titleHref;
+                const statsHref =
+                  item.kind === "view_milestone"
+                    ? getDiscographyLink(item.song)
+                    : null;
                 const thumbnailHref = presentation.youtubeHref ?? item.href;
                 const descriptionHref = presentation.timelineDescriptionHref;
                 const placeHref = presentation.placeHref;
@@ -728,20 +733,37 @@ export default function ActivityTimelineSection({
                         </div>
                       </div>
                     ) : null}
-                    {onItemSelect ? (
-                      <UnstyledButton
-                        type="button"
-                        className="mt-1 block rounded-sm text-left text-xs text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-gray-400"
-                        aria-label={itemSelectAriaLabel}
-                        onClick={handleItemSelect}
-                      >
-                        {formatDate(item.occurredAt, locale)}
-                      </UnstyledButton>
-                    ) : (
-                      <Text size="xs" c="dimmed" className="mt-1">
-                        {formatDate(item.occurredAt, locale)}
-                      </Text>
-                    )}
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      {onItemSelect ? (
+                        <UnstyledButton
+                          type="button"
+                          className="block rounded-sm text-left text-xs text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-gray-400"
+                          aria-label={itemSelectAriaLabel}
+                          onClick={handleItemSelect}
+                        >
+                          {formatDate(item.occurredAt, locale)}
+                        </UnstyledButton>
+                      ) : (
+                        <Text size="xs" c="dimmed">
+                          {formatDate(item.occurredAt, locale)}
+                        </Text>
+                      )}
+                      {statsHref ? (
+                        <Badge
+                          color="gray"
+                          component={Link}
+                          href={statsHref}
+                          prefetch={false}
+                          leftSection={<FaChartBar className="h-3 w-3" />}
+                          radius="xs"
+                          size="xs"
+                          variant="light"
+                          className="cursor-pointer"
+                        >
+                          {t("activityViewStats")}
+                        </Badge>
+                      ) : null}
+                    </div>
                   </Timeline.Item>
                 );
               })}

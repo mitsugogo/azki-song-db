@@ -1,4 +1,5 @@
 import { siteConfig } from "../config/siteConfig";
+import { getOfficialHololiveTalentName } from "../config/hololiveTalentNames";
 import type { ChannelEntry } from "../types/api/yt/channels";
 
 export type ArchiveParticipantEntry = {
@@ -7,7 +8,26 @@ export type ArchiveParticipantEntry = {
 };
 
 const normalizeParticipantName = (value: string) =>
-  value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
+  (getOfficialHololiveTalentName(value, "ja") ?? value)
+    .normalize("NFKC")
+    .trim()
+    .toLocaleLowerCase("ja-JP");
+
+export const getArchiveParticipantDisplayName = (
+  participant: ArchiveParticipantEntry,
+  locale: string,
+) => {
+  for (const name of [
+    participant.channel?.talentName,
+    participant.channel?.artistName,
+    participant.name,
+  ]) {
+    const officialName = getOfficialHololiveTalentName(name ?? "", locale);
+    if (officialName) return officialName;
+  }
+
+  return participant.name;
+};
 
 export const isAzkiArchiveParticipant = (
   participant: ArchiveParticipantEntry,

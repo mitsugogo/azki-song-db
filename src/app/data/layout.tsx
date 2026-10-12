@@ -1,6 +1,3 @@
-import { Header } from "../components/Header";
-import { AnalyticsWrapper } from "../components/AnalyticsWrapper";
-import Footer from "../components/Footer";
 import { Viewport } from "next";
 
 export const viewport: Viewport = {
@@ -15,14 +12,5 @@ export default function StatsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <div>{children}</div>
-        <Footer />
-      </div>
-      <AnalyticsWrapper />
-    </>
-  );
+  return children;
 }

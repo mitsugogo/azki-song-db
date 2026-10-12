@@ -3,6 +3,33 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ActivityTimelineSection from "../ActivityTimelineSection";
 import type { ActivityTimelineItem } from "../../hook/useActivityTimeline";
+import type { Song } from "../../types/song";
+
+const createViewMilestoneItem = (
+  songOverrides: Partial<Song> = {},
+): Extract<ActivityTimelineItem, { kind: "view_milestone" }> => ({
+  id: "view-milestone-video-1",
+  kind: "view_milestone",
+  occurredAt: "2026-06-24T00:00:00.000Z",
+  href: "/watch?v=video-1",
+  youtubeHref: "https://www.youtube.com/watch?v=video-1",
+  videoId: "video-1",
+  importance: "normal",
+  targetCount: 1_000_000,
+  currentViewCount: 1_000_000,
+  song: {
+    title: "統計のある楽曲",
+    artist: "AZKi",
+    sing: "AZKi",
+    sings: ["AZKi"],
+    tags: ["カバー曲"],
+    milestones: [],
+    video_id: "video-1",
+    video_title: "再生数達成動画",
+    slugv2: "stats-song",
+    ...songOverrides,
+  } as Song,
+});
 
 describe("ActivityTimelineSection", () => {
   beforeEach(() => {
@@ -19,6 +46,76 @@ describe("ActivityTimelineSection", () => {
         dispatchEvent: vi.fn(),
       })),
     });
+  });
+
+  it.each([
+    ["カバー曲", "covers"],
+    ["オリ曲", "originals"],
+  ])("再生数達成のstatsを該当楽曲の統計へリンクする: %s", (tag, category) => {
+    render(
+      <MantineProvider>
+        <ActivityTimelineSection
+          items={[createViewMilestoneItem({ tags: [tag] })]}
+          isLoading={false}
+          shouldLoadViewStatistics={false}
+          channels={[]}
+          showTitle={false}
+        />
+      </MantineProvider>,
+    );
+
+    const statsLink = screen.getByRole("link", { name: "activityViewStats" });
+    expect(statsLink).toHaveAttribute(
+      "href",
+      `/discography/${category}/stats-song`,
+    );
+    expect(statsLink.parentElement).toHaveTextContent("2026/06/24");
+    expect(
+      screen.getByRole("link", { name: "再生数達成動画" }),
+    ).toHaveAttribute("href", "https://www.youtube.com/watch?v=video-1");
+  });
+
+  it.each([{ slugv2: undefined }, { tags: ["歌枠"] }])(
+    "統計ページがない楽曲にはstatsリンクを表示しない: %j",
+    (songOverrides) => {
+      render(
+        <MantineProvider>
+          <ActivityTimelineSection
+            items={[createViewMilestoneItem(songOverrides)]}
+            isLoading={false}
+            shouldLoadViewStatistics={false}
+            channels={[]}
+            showTitle={false}
+          />
+        </MantineProvider>,
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "activityViewStats" }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("詳細選択モードでもstatsリンクを独立して表示する", () => {
+    const onItemSelect = vi.fn();
+    render(
+      <MantineProvider>
+        <ActivityTimelineSection
+          items={[createViewMilestoneItem()]}
+          isLoading={false}
+          shouldLoadViewStatistics={false}
+          channels={[]}
+          showTitle={false}
+          onItemSelect={onItemSelect}
+          getItemSelectAriaLabel={() => "詳細を表示"}
+        />
+      </MantineProvider>,
+    );
+
+    const statsLink = screen.getByRole("link", { name: "activityViewStats" });
+    expect(statsLink).toHaveAttribute("href", "/discography/covers/stats-song");
+    expect(statsLink.closest("button")).toBeNull();
+    expect(onItemSelect).not.toHaveBeenCalled();
   });
 
   it("uses Mantine buttons for item selection without changing default links", () => {

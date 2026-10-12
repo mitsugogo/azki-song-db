@@ -208,7 +208,7 @@ export default function ActivityCalendarSection({
       aria-label={t("calendarLabel", { month: monthLabel })}
     >
       <div
-        className="overflow-hidden rounded-xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
+        className="overflow-hidden rounded-b-xl border border-white/70 bg-white/85 shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gray-900/75 dark:shadow-[0_18px_52px_rgba(0,0,0,0.35)]"
         data-testid="activity-calendar"
         aria-busy={isLoading}
       >
