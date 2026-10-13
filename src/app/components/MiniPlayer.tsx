@@ -23,6 +23,10 @@ type Position = {
 
 const SNAP_DISTANCE = 50; // スナップ距離（ピクセル）
 const STORAGE_KEY = "mini-player-position";
+// https://developers.google.com/youtube/terms/required-minimum-functionality#embedded-youtube-player-size
+// ヘッダーを除いた YouTube プレイヤー領域は最低 200×200px 必要。
+const PLAYER_MIN_SIZE = 200;
+const PLAYER_FALLBACK_HEIGHT = PLAYER_MIN_SIZE + 56;
 
 const getInitialPlaybackStartTime = (
   currentTime: number,
@@ -90,7 +94,8 @@ export default function MiniPlayer() {
       ? JSON.stringify(storedPosition)
       : null;
     const playerWidth = 320; // w-80 = 320px
-    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const playerHeight =
+      miniPlayerRef.current?.offsetHeight || PLAYER_FALLBACK_HEIGHT;
 
     const safeWindowWidth =
       typeof window !== "undefined" ? window.innerWidth : playerWidth + 32;
@@ -147,7 +152,8 @@ export default function MiniPlayer() {
   useEffect(() => {
     positionRef.current = position;
     const playerWidth = 320;
-    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const playerHeight =
+      miniPlayerRef.current?.offsetHeight || PLAYER_FALLBACK_HEIGHT;
     const minX = 16;
     const minY = 16;
 
@@ -176,7 +182,8 @@ export default function MiniPlayer() {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const playerWidth = 320;
-      const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+      const playerHeight =
+        miniPlayerRef.current?.offsetHeight || PLAYER_FALLBACK_HEIGHT;
 
       const minX = 16;
       const minY = 16;
@@ -217,7 +224,8 @@ export default function MiniPlayer() {
   // 四隅にスナップする関数
   const snapToCorner = useCallback((x: number, y: number): Position => {
     const playerWidth = 320; // w-80 = 320px
-    const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+    const playerHeight =
+      miniPlayerRef.current?.offsetHeight || PLAYER_FALLBACK_HEIGHT;
     const windowWidth =
       typeof window !== "undefined" ? window.innerWidth : x + playerWidth + 16;
     const windowHeight =
@@ -278,7 +286,8 @@ export default function MiniPlayer() {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const playerWidth = 320;
-      const playerHeight = miniPlayerRef.current?.offsetHeight || 240;
+      const playerHeight =
+        miniPlayerRef.current?.offsetHeight || PLAYER_FALLBACK_HEIGHT;
 
       const clampedX = Math.max(0, Math.min(newX, windowWidth - playerWidth));
       const clampedY = Math.max(0, Math.min(newY, windowHeight - playerHeight));
@@ -496,9 +505,9 @@ export default function MiniPlayer() {
       <motion.div
         ref={miniPlayerRef}
         data-testid="mini-player"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         style={{
           position: "fixed",
@@ -561,7 +570,10 @@ export default function MiniPlayer() {
         </div>
 
         {/* プレイヤー */}
-        <div className="relative aspect-video w-full bg-black">
+        <div
+          className="relative w-full bg-black"
+          style={{ minWidth: PLAYER_MIN_SIZE, height: PLAYER_MIN_SIZE }}
+        >
           <SharedYouTubePlayerSlot
             sourceId="mini"
             active={isSharedPlayerActive}
