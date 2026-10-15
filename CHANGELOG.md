@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.46.0](https://github.com/mitsugogo/azki-song-db/compare/v2.45.0...v2.46.0) (2026-10-15)
+
+### Features
+
+* ヘッダーに活動日数バッジを追加 ([174af30](https://github.com/mitsugogo/azki-song-db/commit/174af30df19794a8f1442d09ebddc57c6d6270fc))
+
+### Bug Fixes
+
+* ミニプレイヤーの最小サイズを確保する ([2db8390](https://github.com/mitsugogo/azki-song-db/commit/2db839088994350476eff552bd5d21f05f795294))
+
 ## [2.45.0](https://github.com/mitsugogo/azki-song-db/compare/v2.44.1...v2.45.0) (2026-10-12)
 
 ### Features
