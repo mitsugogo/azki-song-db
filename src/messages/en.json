@@ -186,7 +186,11 @@
     "toggleNavigation": "Toggle navigation",
     "searchPlaceholder": "Search by title, artist, tags",
     "languageSwitcher": "Language switcher",
-    "membersOnlyBadge": "Members only"
+    "membersOnlyBadge": "Members only",
+    "activityLabel": "Active",
+    "activityDays": "{days} days",
+    "activityDaysDescription": "AZKi: day {days} since November 15, 2018 (Japan time)",
+    "activityDuration": "Active for {years} years {months} months {days} days"
   },
   "DrawerMenu": {
     "title": "Menu",
@@ -1859,6 +1863,11 @@
       "p1": {
         "prefix": "The icon is provided by",
         "linkText": "わいす / Ys (@YsWeissYs)",
+        "suffix": "."
+      },
+      "headerIcon": {
+        "prefix": "The header icon was created by ",
+        "linkText": "おまっち (@Omatch_Pioneer)",
         "suffix": "."
       },
       "p2": "The source code is MIT LICENSE, but the icon is not covered by that license."
