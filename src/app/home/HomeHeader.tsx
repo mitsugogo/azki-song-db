@@ -7,6 +7,7 @@ import { Link } from "../../i18n/navigation";
 import { siteConfig } from "../config/siteConfig";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import ThemeToggle from "../components/ThemeToggle";
+import ActivityDaysBadge from "../components/ActivityDaysBadge";
 
 type HomeHeaderProps = {
   drawerOpened: boolean;
@@ -31,26 +32,33 @@ export function HomeHeader({
           : "border-transparent before:bg-transparent"
       }`}
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="flex items-center justify-between gap-1 sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           {!sidebarVisible ? (
             <Burger
               opened={drawerOpened}
               onClick={onToggleDrawer}
               aria-label="Toggle navigation"
               aria-expanded={drawerOpened}
+              className="shrink-0"
             />
           ) : null}
-          <Link
-            href="/"
-            className="inline-block truncate text-base font-semibold tracking-[0.12em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"
-          >
-            {siteConfig.siteNameUpper}
-          </Link>
+          <div className="flex min-w-0 flex-1 items-center gap-1 md:gap-3">
+            <Link
+              href="/"
+              className="inline-block min-w-0 max-w-full truncate text-xs font-semibold tracking-[0.04em] text-primary dark:text-pink-200 sm:text-lg sm:tracking-[0.24em]"
+            >
+              <span className="sm:hidden">{siteConfig.shortName}</span>
+              <span className="hidden sm:inline">
+                {siteConfig.siteNameUpper}
+              </span>
+            </Link>
+            <ActivityDaysBadge variant="light" />
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center justify-end sm:gap-2">
-          <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 sm:flex">
+          <nav className="hidden items-center gap-5 text-sm text-gray-600 dark:text-gray-100 xl:flex">
             <Link href="/search" className="hover:text-primary-500">
               <LuSearch className="mr-1 -mt-0.5 inline" />
               {tDrawer("search")}

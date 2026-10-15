@@ -71,6 +71,18 @@ const Acknowledgment = ({ onNavigate }: { onNavigate?: () => void }) => {
           </Link>{" "}
           {t("icon.p1.suffix")}
         </p>
+        <p className="mt-2">
+          {t("icon.headerIcon.prefix")}
+          <Link
+            href="https://x.com/Omatch_Pioneer"
+            className="text-primary hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("icon.headerIcon.linkText")}
+          </Link>
+          {t("icon.headerIcon.suffix")}
+        </p>
         <p className="mt-2">{t("icon.p2")}</p>
       </div>
 

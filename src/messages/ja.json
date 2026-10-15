@@ -186,7 +186,11 @@
     "toggleNavigation": "ナビゲーションを開く",
     "searchPlaceholder": "曲名、アーティスト、タグなどで検索",
     "languageSwitcher": "言語切替",
-    "membersOnlyBadge": "メンバー限定"
+    "membersOnlyBadge": "メンバー限定",
+    "activityLabel": "活動",
+    "activityDays": "{days}日",
+    "activityDaysDescription": "AZKi 活動{days}日目（2018年11月15日から、日本時間で集計）",
+    "activityDuration": "活動開始から {years}年{months}ヶ月{days}日"
   },
   "DrawerMenu": {
     "title": "メニュー",
@@ -1851,6 +1855,11 @@
         "prefix": "アイコンは、",
         "linkText": "わいす / Ys (@YsWeissYs)",
         "suffix": "さんにご提供いただいたアイコンを使用しています。"
+      },
+      "headerIcon": {
+        "prefix": "ヘッダーアイコンは、",
+        "linkText": "おまっち (@Omatch_Pioneer)",
+        "suffix": "さんに制作していただきました。"
       },
       "p2": "ソースコードはMIT LICENSEですが、アイコンについては適用されませんのでご注意ください。"
     },

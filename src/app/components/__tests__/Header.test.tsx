@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import jaMessages from "@/messages/ja.json";
 
 const { pathnameMock, pushMock } = vi.hoisted(() => ({
   pathnameMock: vi.fn(),
@@ -26,17 +27,21 @@ vi.mock("next-intl", () => ({
   useLocale: () => "ja",
   useTranslations:
     () =>
-    (key: string): string => {
+    (key: string, values: Record<string, unknown> = {}): string => {
       const dict: Record<string, string> = {
+        ...jaMessages.Header,
         toggleNavigation: "ナビゲーションを開く",
         searchPlaceholder: "曲名、アーティスト、タグなどで検索",
         languageSwitcher: "言語切替",
       };
-      return dict[key] ?? key;
+      return (dict[key] ?? key).replace(/\{(\w+)\}/g, (_, name) =>
+        String(values[name]),
+      );
     },
 }));
 
 vi.mock("@mantine/core", () => ({
+  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   Burger: ({ onClick }: { onClick: () => void }) => (
     <button onClick={onClick}>menu</button>
   ),
@@ -86,6 +91,7 @@ vi.mock("../SearchInput", () => ({
 }));
 
 import { Header } from "../Header";
+import { HomeHeader } from "../../home/HomeHeader";
 
 describe("Header", () => {
   beforeEach(() => {
@@ -97,6 +103,22 @@ describe("Header", () => {
       back: vi.fn(),
       refresh: vi.fn(),
     };
+  });
+
+  it.each([
+    ["通常ページ", <Header />],
+    ["TOP", <HomeHeader drawerOpened={false} onToggleDrawer={() => {}} />],
+  ])("%sではサイト名の直後に活動日数を添える", (_, header) => {
+    render(header);
+
+    const siteLink = screen.getByRole("link", { name: /AZKi SONG DATABASE/ });
+    const badge = screen.getByRole("link", { name: /AZKi 活動\d+日目/ });
+    expect(siteLink).toHaveAttribute("href", "/");
+    expect(siteLink.parentElement).toContainElement(badge);
+    expect(
+      siteLink.compareDocumentPosition(badge) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("watchページで検索バーをクリアしたときはsearchに遷移せずqのみ削除する", () => {
