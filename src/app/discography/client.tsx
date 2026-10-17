@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useScrollIntoView } from "@mantine/hooks";
 import { ScrollToTopButton } from "../components/ScrollToTopButton";
@@ -36,7 +36,6 @@ export default function DiscographyClient({
 }) {
   const t = useTranslations("Discography");
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [indicatorTab, setIndicatorTab] = useState(initialTab);
   const [groupByAlbum, setGroupByAlbum] = useState(true);
   const [groupByYear, setGroupByYear] = useState(false);
   const [viewMode, setViewMode] = usePersistedDiscographyViewMode(
@@ -44,7 +43,6 @@ export default function DiscographyClient({
   );
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [anchorToScroll, setAnchorToScroll] = useState<string | null>(null);
-  const [visibleItems, setVisibleItems] = useState<boolean[]>([]);
   const [tabsRootRef, setTabsRootRef] = useState<HTMLDivElement | null>(null);
   const [tabRefs, setTabRefs] = useState<
     Record<string, HTMLButtonElement | null>
@@ -80,42 +78,29 @@ export default function DiscographyClient({
 
   useEffect(() => {
     setActiveTab(initialTab);
-    setIndicatorTab(initialTab);
     setExpandedItem(null);
     setAnchorToScroll(null);
   }, [initialTab]);
 
-  // アクティブタブのアイテム表示アニメーション
-  useEffect(() => {
-    const dataForTab = [
-      allSongCountsByReleaseDate,
-      originalSongCountsByReleaseDate,
-      unitSongCountsByReleaseDate,
-      overallSongCountsByReleaseDate,
-      coverSongCountsByReleaseDate,
-    ];
-    const data = dataForTab[activeTab] ?? [];
-    setVisibleItems(new Array(data.length).fill(false));
-    const timeout = setTimeout(() => {
-      data.forEach((_, index) => {
-        setTimeout(() => {
-          setVisibleItems((prev) => {
-            const next = [...prev];
-            next[index] = true;
-            return next;
-          });
-        }, index * 50);
-      });
-    }, 100);
-    return () => clearTimeout(timeout);
-  }, [
-    activeTab,
+  const tabDataList = [
     allSongCountsByReleaseDate,
     originalSongCountsByReleaseDate,
     unitSongCountsByReleaseDate,
     overallSongCountsByReleaseDate,
     coverSongCountsByReleaseDate,
-  ]);
+  ];
+  const activeData = tabDataList[activeTab] ?? allSongCountsByReleaseDate;
+  // 項目ごとのタイマーで一覧全体を再描画せず、取得済みデータを一度で表示する。
+  const visibleItems = useMemo(() => activeData.map(() => true), [activeData]);
+
+  const handleItemClick = useCallback(
+    (key: string) => {
+      const next = expandedItem === key ? null : key;
+      setExpandedItem(next);
+      setAnchorToScroll(next);
+    },
+    [expandedItem],
+  );
 
   useEffect(() => {
     if (!anchorToScroll) return;
@@ -127,16 +112,6 @@ export default function DiscographyClient({
   if (loading) {
     return <Loading />;
   }
-
-  const handleItemClick = (key: string) => {
-    if (key === expandedItem) {
-      setExpandedItem(null);
-      setAnchorToScroll(null);
-      return;
-    }
-    setExpandedItem(key);
-    setAnchorToScroll(key);
-  };
 
   const handleGroupByAlbumChange = () => {
     setGroupByAlbum(!groupByAlbum);
@@ -159,25 +134,22 @@ export default function DiscographyClient({
   const handleTabChange = (index: number) => {
     const destination = TAB_URLS[index];
 
-    setIndicatorTab(index);
+    setActiveTab(index);
     setExpandedItem(null);
     setAnchorToScroll(null);
 
-    if (destination && pathname !== destination) {
-      router.push(destination);
-      return;
+    // 遷移完了前に元のタブへ戻した場合も、直前の遷移を置き換える。
+    if (destination && (pathname !== destination || activeTab !== index)) {
+      router.push(destination, { scroll: false });
     }
-
-    setActiveTab(index);
   };
 
-  const tabDataList = [
-    allSongCountsByReleaseDate,
-    originalSongCountsByReleaseDate,
-    unitSongCountsByReleaseDate,
-    overallSongCountsByReleaseDate,
-    coverSongCountsByReleaseDate,
-  ];
+  const prefetchTab = (index: number) => {
+    const destination = TAB_URLS[index];
+    if (destination && pathname !== destination) {
+      router.prefetch(destination);
+    }
+  };
 
   return (
     <>
@@ -210,7 +182,7 @@ export default function DiscographyClient({
 
         <Tabs
           variant="none"
-          value={String(indicatorTab)}
+          value={String(activeTab)}
           onChange={(value) => {
             if (value !== null) {
               handleTabChange(Number(value));
@@ -224,6 +196,8 @@ export default function DiscographyClient({
           >
             <Tabs.Tab
               value="0"
+              onMouseEnter={() => prefetchTab(0)}
+              onFocus={() => prefetchTab(0)}
               ref={tabRefCallbacks["0"]}
               className={discographyTabClass}
             >
@@ -231,6 +205,8 @@ export default function DiscographyClient({
             </Tabs.Tab>
             <Tabs.Tab
               value="1"
+              onMouseEnter={() => prefetchTab(1)}
+              onFocus={() => prefetchTab(1)}
               ref={tabRefCallbacks["1"]}
               className={discographyTabClass}
             >
@@ -240,6 +216,8 @@ export default function DiscographyClient({
             </Tabs.Tab>
             <Tabs.Tab
               value="2"
+              onMouseEnter={() => prefetchTab(2)}
+              onFocus={() => prefetchTab(2)}
               ref={tabRefCallbacks["2"]}
               className={discographyTabClass}
             >
@@ -247,6 +225,8 @@ export default function DiscographyClient({
             </Tabs.Tab>
             <Tabs.Tab
               value="3"
+              onMouseEnter={() => prefetchTab(3)}
+              onFocus={() => prefetchTab(3)}
               ref={tabRefCallbacks["3"]}
               className={discographyTabClass}
             >
@@ -254,13 +234,15 @@ export default function DiscographyClient({
             </Tabs.Tab>
             <Tabs.Tab
               value="4"
+              onMouseEnter={() => prefetchTab(4)}
+              onFocus={() => prefetchTab(4)}
               ref={tabRefCallbacks["4"]}
               className={discographyTabClass}
             >
               {t("tabs.covers", { count: tabCounts.covers })}
             </Tabs.Tab>
             <FloatingIndicator
-              target={tabRefs[String(indicatorTab)]}
+              target={tabRefs[String(activeTab)]}
               parent={tabsRootRef}
               transitionDuration={220}
               className="z-0 rounded-md bg-primary-600 shadow-sm dark:bg-primary-500"
@@ -268,7 +250,7 @@ export default function DiscographyClient({
           </Tabs.List>
         </Tabs>
         <ContentRenderer
-          data={tabDataList[activeTab] ?? []}
+          data={activeData}
           tabIndex={activeTab}
           groupByAlbum={groupByAlbum}
           groupByYear={groupByYear}

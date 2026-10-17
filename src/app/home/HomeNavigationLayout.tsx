@@ -20,14 +20,11 @@ export function HomeNavigationLayout({
   return (
     <div className={classes.layout}>
       <div className="relative z-40 shrink-0">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <HomeHeader
-            drawerOpened={opened}
-            onToggleDrawer={toggle}
-            sidebarVisible={isDesktop}
-            isScrolled={isScrolled}
-          />
-        </div>
+        <HomeHeader
+          drawerOpened={opened}
+          onToggleDrawer={toggle}
+          isScrolled={isScrolled}
+        />
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <div className={classes.sidebar}>

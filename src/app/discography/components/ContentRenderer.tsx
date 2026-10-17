@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { StatisticsItem } from "../createStatistics";
 import SongItem from "../SongItem";
 import SongDetails from "../SongDetails";
@@ -24,7 +25,7 @@ interface ContentRendererProps {
 /**
  * 楽曲一覧のコンテンツをレンダリングするコンポーネント
  */
-export default function ContentRenderer({
+function ContentRenderer({
   data,
   tabIndex,
   groupByAlbum,
@@ -163,3 +164,5 @@ export default function ContentRenderer({
     </div>
   );
 }
+
+export default memo(ContentRenderer);

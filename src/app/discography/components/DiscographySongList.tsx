@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import {
   isCollaborationSong,
@@ -53,7 +53,7 @@ function getSongHref(song: Song) {
     : null;
 }
 
-function DiscographySongListItem({
+const DiscographySongListItem = memo(function DiscographySongListItem({
   item,
   isVisible,
   groupByAlbum,
@@ -77,12 +77,16 @@ function DiscographySongListItem({
   const date = isAlbum
     ? item.firstVideo.album_release_at
     : item.firstVideo.broadcast_at;
-  const trackGroups = groupReleaseVariants(
-    [...item.videos].sort(
-      (left, right) =>
-        (left.source_order ?? Number.MAX_SAFE_INTEGER) -
-        (right.source_order ?? Number.MAX_SAFE_INTEGER),
-    ),
+  const trackGroups = useMemo(
+    () =>
+      groupReleaseVariants(
+        [...item.videos].sort(
+          (left, right) =>
+            (left.source_order ?? Number.MAX_SAFE_INTEGER) -
+            (right.source_order ?? Number.MAX_SAFE_INTEGER),
+        ),
+      ),
+    [item.videos],
   );
   const thumbnailSong = isAlbum
     ? getAlbumThumbnailSong(item.videos, item.firstVideo)
@@ -102,6 +106,7 @@ function DiscographySongListItem({
         {headingHref ? (
           <Link
             href={headingHref}
+            prefetch={false}
             aria-label={title}
             className={`block w-full shrink-0 overflow-hidden rounded-md bg-gray-100 sm:w-52 lg:w-64 dark:bg-gray-800 ${
               usesAlbumArtwork ? "self-start" : ""
@@ -139,6 +144,7 @@ function DiscographySongListItem({
           {headingHref ? (
             <Link
               href={headingHref}
+              prefetch={false}
               className="block text-lg font-bold leading-snug text-gray-950 hover:text-primary-600 dark:text-white dark:hover:text-primary-400 sm:text-xl"
             >
               {title}
@@ -212,6 +218,7 @@ function DiscographySongListItem({
                     {trackHref ? (
                       <Link
                         href={trackHref}
+                        prefetch={false}
                         className={`${rowClassName} hover:bg-primary-50 dark:hover:bg-primary-950/30`}
                       >
                         {rowContent}
@@ -238,7 +245,7 @@ function DiscographySongListItem({
       </div>
     </article>
   );
-}
+});
 
 export default function DiscographySongList({
   data,

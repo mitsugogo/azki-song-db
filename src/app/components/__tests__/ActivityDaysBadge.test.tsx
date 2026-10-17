@@ -45,6 +45,7 @@ describe("ActivityDaysBadge", () => {
     locale.current = "ja";
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-09T03:00:00Z"));
+    vi.spyOn(Math, "random").mockReturnValue(0);
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -76,6 +77,103 @@ describe("ActivityDaysBadge", () => {
       "/azki-header-chibi.webp",
     );
     expect(badge.querySelector("img")).toHaveAttribute("alt", "");
+  });
+
+  it.each(["header", "light"] as const)(
+    "%sでは3000日当日だけクラッカーを表示する",
+    (variant) => {
+      vi.setSystemTime(new Date("2027-01-30T14:59:59Z"));
+      renderBadge(variant);
+      expect(screen.getByRole("link")).toHaveTextContent("活動2999日");
+      expect(screen.queryByText("🎉")).not.toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(1000));
+
+      expect(screen.getByRole("link")).toHaveTextContent("活動3000日🎉");
+      expect(screen.getByText("🎉")).toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(24 * 60 * 60 * 1000));
+
+      expect(screen.getByRole("link")).toHaveTextContent("活動3001日");
+      expect(screen.queryByText("🎉")).not.toBeInTheDocument();
+    },
+  );
+
+  it("英語でも3000日にクラッカーを表示する", () => {
+    locale.current = "en";
+    vi.setSystemTime(new Date("2027-01-31T03:00:00Z"));
+    renderBadge();
+
+    expect(screen.getByRole("link")).toHaveTextContent("Active3000 days🎉");
+  });
+
+  it.each([
+    [0, "/azki-header-chibi.webp"],
+    [1 / 3, "/azki-header-chibi-20261017-01.webp"],
+    [2 / 3, "/azki-header-chibi-20261017-02.webp"],
+    [0.999999, "/azki-header-chibi-20261017-02.webp"],
+  ])("読み込み時の乱数%sで%sを選ぶ", (random, imageSrc) => {
+    vi.mocked(Math.random).mockReturnValue(random);
+    renderBadge();
+
+    expect(screen.getByRole("link").querySelector("img")).toHaveAttribute(
+      "src",
+      imageSrc,
+    );
+  });
+
+  it("再描画や日付更新、タブ復帰では選んだ画像を変えない", () => {
+    vi.mocked(Math.random).mockReturnValue(0.5);
+    const { rerender } = renderBadge();
+    vi.mocked(Math.random).mockReturnValue(0.9);
+
+    rerender(
+      <MantineProvider env="test">
+        <ActivityDaysBadge variant="light" />
+      </MantineProvider>,
+    );
+    act(() => vi.advanceTimersByTime(24 * 60 * 60 * 1000));
+    fireEvent.focus(window);
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+    fireEvent(document, new Event("visibilitychange"));
+
+    expect(screen.getByText("2887日")).toBeInTheDocument();
+    expect(screen.getByRole("link").querySelector("img")).toHaveAttribute(
+      "src",
+      "/azki-header-chibi-20261017-01.webp",
+    );
+  });
+
+  it("次の読み込みでは画像を選び直す", () => {
+    const { unmount } = renderBadge();
+    unmount();
+    vi.mocked(Math.random).mockReturnValue(0.9);
+
+    renderBadge();
+
+    expect(screen.getByRole("link").querySelector("img")).toHaveAttribute(
+      "src",
+      "/azki-header-chibi-20261017-02.webp",
+    );
+  });
+
+  it("SSRでは画像を固定し、ブラウザでランダムに選ぶ", () => {
+    vi.mocked(Math.random).mockReturnValue(0.9);
+
+    const html = renderToString(
+      <MantineProvider env="test">
+        <ActivityDaysBadge />
+      </MantineProvider>,
+    );
+
+    expect(html).toContain('src="/azki-header-chibi.webp"');
+    expect(html).not.toContain("/azki-header-chibi-20261017-02.webp");
+
+    renderBadge();
+    expect(screen.getByRole("link").querySelector("img")).toHaveAttribute(
+      "src",
+      "/azki-header-chibi-20261017-02.webp",
+    );
   });
 
   it("ホバーするとMantine Tooltipで活動開始からの年月日を表示する", async () => {

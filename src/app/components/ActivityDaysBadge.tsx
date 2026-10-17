@@ -15,14 +15,22 @@ type ActivityDaysBadgeProps = {
   variant?: "header" | "light";
 };
 
+const headerImages = [
+  "/azki-header-chibi.webp",
+  "/azki-header-chibi-20261017-01.webp",
+  "/azki-header-chibi-20261017-02.webp",
+];
+
 export default function ActivityDaysBadge({
   variant = "header",
 }: ActivityDaysBadgeProps) {
   const t = useTranslations("Header");
   // SSR と最初の client render を揃え、キャッシュされた日数を表示しない。
   const [stats, setStats] = useState<ActivityJourneyStats | null>(null);
+  const [imageSrc, setImageSrc] = useState(headerImages[0]);
 
   useEffect(() => {
+    setImageSrc(headerImages[Math.floor(Math.random() * headerImages.length)]);
     let timer: number | undefined;
 
     const refresh = () => {
@@ -75,17 +83,18 @@ export default function ActivityDaysBadge({
         }`}
       >
         <Image
-          src="/azki-header-chibi.webp"
+          src={imageSrc}
           alt=""
           aria-hidden="true"
           width={80}
           height={80}
           unoptimized
-          className="h-8 w-auto shrink-0 self-end md:h-10"
+          className="h-8 w-8 shrink-0 self-end object-contain md:h-10 md:w-10"
         />
         <span>{t("activityLabel")}</span>
         <span className="min-w-[5ch] font-semibold tabular-nums">
           {t("activityDays", { days: activityDays ?? "—" })}
+          {activityDays === 3000 && <span aria-hidden="true">🎉</span>}
         </span>
       </Link>
     </Tooltip>

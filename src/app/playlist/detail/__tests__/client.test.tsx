@@ -1,240 +1,256 @@
-import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Song } from "@/app/types/song";
+import type { DragEndEvent, DndContextProps } from "@dnd-kit/core";
+import { renderUI, resetState, song, state } from "../../__tests__/setup";
+import PlaylistDetailPage from "../client";
 
-vi.mock("@mantine/core", () => {
-  const createComponent =
-    (tag: keyof JSX.IntrinsicElements) =>
-    ({ children, ...props }: any) =>
-      React.createElement(tag, props, children);
-
-  const TableRoot = ({ children, ...props }: any) => <table>{children}</table>;
-
+const dnd = vi.hoisted(() => ({
+  end: undefined as DndContextProps["onDragEnd"],
+}));
+vi.mock("@dnd-kit/core", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@dnd-kit/core")>();
   return {
-    createTheme: (value: any) => value,
-    Badge: createComponent("span"),
-    Breadcrumbs: createComponent("nav"),
-    Button: ({ children, ...props }: any) => (
-      <button type="button" {...props}>
-        {children}
-      </button>
-    ),
-    Checkbox: ({ checked, indeterminate, onChange, ...props }: any) => (
-      <input
-        type="checkbox"
-        checked={checked}
-        aria-checked={indeterminate ? "mixed" : checked}
-        onChange={onChange}
-        {...props}
-      />
-    ),
-    ScrollArea: createComponent("div"),
-    Table: Object.assign(TableRoot, {
-      Thead: createComponent("thead"),
-      Tbody: createComponent("tbody"),
-      Tr: createComponent("tr"),
-      Th: createComponent("th"),
-      Td: createComponent("td"),
-    }),
+    ...original,
+    DndContext: (props: DndContextProps) => {
+      dnd.end = props.onDragEnd;
+      return <original.DndContext {...props} />;
+    },
   };
 });
 
-vi.mock("@mantine/hooks", () => ({
-  useSelection: () => [
-    [],
-    {
-      isSomeSelected: () => false,
-      isAllSelected: () => false,
-      resetSelection: vi.fn(),
-      setSelection: vi.fn(),
-      select: vi.fn(),
-      deselect: vi.fn(),
-    },
-  ],
-}));
-
-vi.mock("next/link", () => ({
-  default: ({ children, href, ...props }: any) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
-vi.mock("@/app/loading", () => ({
-  default: () => <div>loading</div>,
-}));
-
-vi.mock("react-icons/fa6", () => ({
-  FaRegTrashCan: () => <span>trash</span>,
-  FaBars: () => <span>bars</span>,
-  FaYoutube: () => <span aria-hidden="true" />,
-}));
-
-vi.mock("react-icons/lu", () => ({
-  LuPlay: () => <span aria-hidden="true" />,
-}));
-
-vi.mock("react-icons/hi", () => ({
-  HiHome: () => <span>home</span>,
-  HiChevronRight: () => <span>chevron</span>,
-}));
-
-vi.mock("../../../theme", () => ({
-  breadcrumbClasses: {
-    root: "root",
-    separator: "separator",
-    link: "link",
-  },
-  pageClasses: {
-    shellFlushBottom: "shellFlushBottom",
-    heading: "heading",
-  },
-}));
-
-vi.mock("@dnd-kit/core", () => ({
-  DndContext: ({ children }: any) => <div>{children}</div>,
-  closestCenter: vi.fn(),
-  useSensors: vi.fn(() => []),
-  useSensor: vi.fn(() => ({})),
-  PointerSensor: function PointerSensor() {},
-  KeyboardSensor: function KeyboardSensor() {},
-}));
-
-vi.mock("@dnd-kit/sortable", () => ({
-  SortableContext: ({ children }: any) => <>{children}</>,
-  sortableKeyboardCoordinates: vi.fn(),
-  useSortable: vi.fn(() => ({
-    attributes: {},
-    listeners: {},
-    setNodeRef: vi.fn(),
-    transform: null,
-    transition: undefined,
-  })),
-  arrayMove: vi.fn((items) => items),
-}));
-
-vi.mock("@dnd-kit/utilities", () => ({
-  CSS: {
-    Transform: {
-      toString: () => undefined,
-    },
-  },
-}));
-
-const useSongsMock = vi.fn();
-vi.mock("../../../hook/useSongs", () => ({
-  default: () => useSongsMock(),
-}));
-
-const usePlaylistsMock = vi.fn();
-vi.mock("../../../hook/usePlaylists", () => ({
-  default: () => usePlaylistsMock(),
-}));
-
-const useFavoritesMock = vi.fn();
-vi.mock("../../../hook/useFavorites", () => ({
-  default: () => useFavoritesMock(),
-}));
-
-const globalPlayerMock = {
-  setCurrentSong: vi.fn(),
-  setCurrentTime: vi.fn(),
-  setIsPlaying: vi.fn(),
-  setIsMinimized: vi.fn(),
-};
-
-vi.mock("../../../hook/useGlobalPlayer", () => ({
-  useGlobalPlayer: () => globalPlayerMock,
-}));
-
-vi.mock("../../../components/YoutubeThumbnail", () => ({
-  default: ({ alt }: { alt: string }) => (
-    <div data-testid="yt-thumb" data-alt={alt} />
-  ),
-}));
-
-vi.mock("../../../components/SignedInOnly", () => ({
-  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-import PlaylistDetailPage from "../client";
-
-const sampleSong: Song = {
-  title: "テスト曲",
-  artist: "AZKi",
-  album: "Album",
-  lyricist: "Lyricist",
-  composer: "Composer",
-  arranger: "Arranger",
-  album_list_uri: "",
-  album_release_at: "2024-01-01",
-  album_is_compilation: false,
-  sing: "AZKi",
-  video_title: "テスト動画",
-  video_uri: "https://youtu.be/video-1",
-  video_id: "video-1",
-  start: "15",
-  end: "30",
-  broadcast_at: "2024-01-01",
-  year: 2024,
-  tags: [],
-  milestones: [],
-};
-
-describe("PlaylistDetailPage", () => {
+describe("Playlist detail", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-
-    window.history.pushState({}, "", "/playlist/detail?id=playlist-1");
-
-    useSongsMock.mockReturnValue({
-      allSongs: [sampleSong],
-      isLoading: false,
-    });
-
-    usePlaylistsMock.mockReturnValue({
-      playlists: [
-        {
-          id: "playlist-1",
-          name: "プレイリスト1",
-          songs: [{ videoId: "video-1", start: "15" }],
-          createdAt: "2024-01-01T00:00:00.000Z",
-          updatedAt: "2024-01-01T00:00:00.000Z",
-        },
-      ],
-      updatePlaylist: vi.fn(),
-      encodePlaylistUrlParam: vi.fn(),
-      clearAllSongs: vi.fn(),
-    });
-
-    useFavoritesMock.mockReturnValue({
-      favorites: [],
-      reorderFavorites: vi.fn(),
-      clearAllFavorites: vi.fn(),
-      removeMultipleFavorites: vi.fn(),
-    });
+    resetState();
+    window.history.replaceState({}, "", "/playlist/detail?id=playlist-1");
   });
 
-  it("再生ボタンでMiniPlayerのプレビュー再生を開始する", async () => {
-    render(<PlaylistDetailPage />);
-
-    await waitFor(() => {
+  it.each([false, true])(
+    "曲名と動画操作を%sのレイアウトで表示し、プレビューを再生する",
+    async (desktop) => {
+      resetState(desktop);
+      renderUI(<PlaylistDetailPage />);
+      expect(
+        await screen.findByRole("heading", { name: "プレイリスト1", level: 1 }),
+      ).toBeInTheDocument();
       expect(screen.getByText("テスト曲")).toBeInTheDocument();
-    });
+      if (desktop) expect(screen.getByRole("table")).toBeInTheDocument();
+      else {
+        expect(screen.queryByRole("table")).not.toBeInTheDocument();
+        expect(screen.getAllByRole("listitem")).toHaveLength(2);
+      }
+      expect(
+        screen.getByRole("link", { name: "「テスト曲」をYouTubeで開く" }),
+      ).toHaveAttribute(
+        "href",
+        "https://www.youtube.com/watch?v=video-1&t=15s",
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "「テスト曲」をプレビュー" }),
+      );
+      expect(state.setCurrentSong).toHaveBeenCalledWith(song);
+      expect(state.setCurrentTime).toHaveBeenCalledWith(15);
+      expect(state.setIsMinimized).toHaveBeenCalledWith(true);
+      expect(state.setIsPlaying).toHaveBeenCalledWith(true);
+      expect(
+        screen
+          .getByRole("link", { name: "「プレイリスト1」を再生" })
+          .getAttribute("href"),
+      ).toContain("playlist=");
+    },
+  );
 
-    expect(screen.getByText("テスト動画")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /youtube/i })).toHaveAttribute(
-      "href",
-      "https://www.youtube.com/watch?v=video-1&t=15s",
+  it("同じ動画・開始位置の楽曲情報が複数ある場合は従来どおり先頭を使う", async () => {
+    state.songs.push({ ...song, title: "別の楽曲情報" });
+    renderUI(<PlaylistDetailPage />);
+    expect(await screen.findByText("テスト曲")).toBeInTheDocument();
+    expect(screen.queryByText("別の楽曲情報")).not.toBeInTheDocument();
+  });
+
+  it("選択曲削除はキャンセルでき、確定時に選択外の曲を維持する", async () => {
+    renderUI(<PlaylistDetailPage />);
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "「テスト曲」を選択" }),
     );
+    expect(
+      screen.getByRole("checkbox", { name: "すべて選択" }),
+    ).toBePartiallyChecked();
+    fireEvent.click(screen.getByRole("button", { name: "選択項目を削除" }));
+    expect(
+      screen.getByText("1曲をリストから削除します。よろしいですか？"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    expect(state.updatePlaylist).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "選択項目を削除" }));
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "削除",
+        exact: true,
+      }),
+    );
+    expect(state.updatePlaylist).toHaveBeenCalledWith({
+      ...state.playlists[0],
+      songs: [state.playlists[0].songs[1]],
+    });
+    expect(screen.queryByText("1件を選択中")).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "プレビュー" }));
+  it.each([false, true])(
+    "全曲削除はメニュー内に置き、確認後に実行する（お気に入り=%s）",
+    async (favorites) => {
+      if (favorites) {
+        state.favorites = state.playlists[0].songs;
+        window.history.replaceState(
+          {},
+          "",
+          "/playlist/detail?id=system-favorites",
+        );
+      }
+      renderUI(<PlaylistDetailPage />);
+      expect(
+        screen.queryByRole("button", {
+          name: "プレイリスト内の曲をすべて削除",
+        }),
+      ).not.toBeInTheDocument();
+      fireEvent.click(
+        await screen.findByRole("button", { name: "その他の操作" }),
+      );
+      fireEvent.click(
+        await screen.findByRole("menuitem", {
+          name: "プレイリスト内の曲をすべて削除",
+        }),
+      );
+      expect(
+        screen.getByText("2曲をリストから削除します。よろしいですか？"),
+      ).toBeInTheDocument();
+      expect(state.clearAllSongs).not.toHaveBeenCalled();
+      expect(state.clearAllFavorites).not.toHaveBeenCalled();
+      fireEvent.click(
+        within(screen.getByRole("dialog")).getByRole("button", {
+          name: "削除",
+          exact: true,
+        }),
+      );
+      if (favorites) expect(state.clearAllFavorites).toHaveBeenCalledOnce();
+      else expect(state.clearAllSongs).toHaveBeenCalledWith(state.playlists[0]);
+    },
+  );
 
-    expect(globalPlayerMock.setCurrentSong).toHaveBeenCalledWith(sampleSong);
-    expect(globalPlayerMock.setCurrentTime).toHaveBeenCalledWith(15);
-    expect(globalPlayerMock.setIsMinimized).toHaveBeenCalledWith(true);
-    expect(globalPlayerMock.setIsPlaying).toHaveBeenCalledWith(true);
+  it("お気に入りの選択削除は専用の処理に渡す", async () => {
+    state.favorites = state.playlists[0].songs;
+    window.history.replaceState({}, "", "/playlist/detail?id=system-favorites");
+    renderUI(<PlaylistDetailPage />);
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "すべて選択" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "選択項目を削除" }));
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "削除",
+        exact: true,
+      }),
+    );
+    expect(state.removeMultipleFavorites).toHaveBeenCalledWith(state.favorites);
+    expect(state.updatePlaylist).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    "並べ替えで未取得の曲も保持して保存する（お気に入り=%s）",
+    async (favorites) => {
+      const missing = { videoId: "missing-video", start: "0" };
+      state.playlists[0].songs.splice(1, 0, missing);
+      if (favorites) {
+        state.favorites = state.playlists[0].songs;
+        window.history.replaceState(
+          {},
+          "",
+          "/playlist/detail?id=system-favorites",
+        );
+      }
+      renderUI(<PlaylistDetailPage />);
+      expect(
+        await screen.findByText("楽曲情報を取得できません"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", {
+          name: "「楽曲情報を取得できません」をプレビュー",
+        }),
+      ).toBeDisabled();
+      act(() =>
+        dnd.end?.({
+          active: { id: "video-2-20" },
+          over: { id: "video-1-15" },
+        } as DragEndEvent),
+      );
+      const songs = [
+        state.playlists[0].songs[2],
+        state.playlists[0].songs[0],
+        missing,
+      ];
+      if (favorites) expect(state.reorderFavorites).toHaveBeenCalledWith(songs);
+      else
+        expect(state.updatePlaylist).toHaveBeenCalledWith({
+          ...state.playlists[0],
+          songs,
+        });
+    },
+  );
+
+  it("ハンドルをSpaceでつかみ、Escapeで取り消せる", async () => {
+    renderUI(<PlaylistDetailPage />);
+    const handle = await screen.findByRole("button", {
+      name: "「テスト曲」を並べ替え",
+    });
+    handle.focus();
+    fireEvent.keyDown(handle, { code: "Space", key: " " });
+    await waitFor(() => expect(handle).toHaveAttribute("aria-pressed", "true"));
+    fireEvent.keyDown(document, { code: "Escape", key: "Escape" });
+    await waitFor(() =>
+      expect(handle).not.toHaveAttribute("aria-pressed", "true"),
+    );
+    expect(state.updatePlaylist).not.toHaveBeenCalled();
+  });
+
+  it("ライブラリ取得完了前に未検出や空状態を表示しない", async () => {
+    state.ready = false;
+    state.playlists = [];
+    const { rerenderUI } = renderUI(<PlaylistDetailPage />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(
+      screen.queryByText("このIDのプレイリストは見つかりません"),
+    ).not.toBeInTheDocument();
+    state.ready = true;
+    rerenderUI(<PlaylistDetailPage />);
+    expect(
+      await screen.findByText("このIDのプレイリストは見つかりません"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "プレイリスト一覧へ" }),
+    ).toHaveAttribute("href", "/playlist");
+  });
+
+  it("空のプレイリストでは再生と全曲削除を無効にする", async () => {
+    window.history.replaceState({}, "", "/playlist/detail?id=playlist-2");
+    renderUI(<PlaylistDetailPage />);
+    expect(
+      await screen.findByText("プレイリスト内に曲がありません"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "「空のリスト」を再生" }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "その他の操作" }));
+    expect(
+      await screen.findByRole("menuitem", {
+        name: "プレイリスト内の曲をすべて削除",
+      }),
+    ).toHaveAttribute("data-disabled");
   });
 });

@@ -1,4 +1,4 @@
-import { Button, Input, Modal } from "@mantine/core";
+import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { PlaylistEntry } from "@/app/lib/playlistUrl";
@@ -47,26 +47,13 @@ export default function CreatePlaylistModal({
       opened={onenModal}
       onClose={() => setOpenModal(false)}
       title={t("title")}
+      closeButtonProps={{ "aria-label": t("close") }}
       centered
     >
-      <Input.Wrapper label={t("name")} required withAsterisk>
-        <Input
-          placeholder={t("placeholder")}
-          value={newPlaylistName}
-          onChange={(event) =>
-            setNewPlaylistName(event.target.value.substring(0, 200))
-          }
-          maxLength={200}
-          required
-        />
-      </Input.Wrapper>
-      {isDuplicate(newPlaylistName) && (
-        <p className="text-red-500 text-xs">{t("duplicate")}</p>
-      )}
-      <Button
-        className="mt-4"
-        disabled={!newPlaylistName || isDuplicate(newPlaylistName)}
-        onClick={() => {
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!newPlaylistName.trim() || isDuplicate(newPlaylistName)) return;
           savePlaylist({
             name: newPlaylistName,
             songs: initialSongs.map((song) => ({ ...song })),
@@ -74,9 +61,40 @@ export default function CreatePlaylistModal({
           setNewPlaylistName("");
           setOpenModal(false);
         }}
+        onKeyDown={(event) => {
+          if (
+            event.key === "Enter" &&
+            (event.nativeEvent.isComposing || event.keyCode === 229)
+          )
+            event.preventDefault();
+        }}
       >
-        {t("create")}
-      </Button>
+        <Stack>
+          <TextInput
+            label={t("name")}
+            placeholder={t("placeholder")}
+            value={newPlaylistName}
+            onChange={(event) =>
+              setNewPlaylistName(event.target.value.substring(0, 200))
+            }
+            maxLength={200}
+            required
+            data-autofocus
+            error={isDuplicate(newPlaylistName) ? t("duplicate") : undefined}
+          />
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setOpenModal(false)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              disabled={!newPlaylistName.trim() || isDuplicate(newPlaylistName)}
+            >
+              {t("create")}
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 }
