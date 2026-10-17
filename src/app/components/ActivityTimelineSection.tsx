@@ -109,7 +109,7 @@ function getActivityItemBullet(kind: ActivityTimelineItem["kind"]) {
 function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
   if (kind === "anniversary") {
     return {
-      item: "rounded-lg border border-pink-200/80 bg-gradient-to-r from-pink-50/90 to-amber-50/80 p-3 shadow-[0_10px_28px_rgba(219,39,119,0.12)] dark:border-pink-300/20 dark:from-pink-300/10 dark:to-amber-300/10",
+      item: "rounded-lg border border-pink-200/80 bg-gradient-to-r from-pink-50/90 to-amber-50/80 p-3 dark:border-pink-300/20 dark:from-pink-300/10 dark:to-amber-300/10",
       title:
         "min-w-0 text-sm font-bold leading-6 text-pink-900 transition hover:text-primary dark:text-pink-100 dark:hover:text-pink-200",
       thumbnail: "",
@@ -119,7 +119,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
 
   if (kind === "view_milestone") {
     return {
-      item: "rounded-lg border border-yellow-300/50 bg-yellow-50/80 p-3 shadow-[0_12px_34px_rgba(202,138,4,0.16)] dark:border-yellow-300/25 dark:bg-yellow-300/10",
+      item: "rounded-lg border border-yellow-300/50 bg-yellow-50/80 p-3 dark:border-yellow-300/25 dark:bg-yellow-300/10",
       title:
         "min-w-0 text-base font-bold leading-7 text-gray-950 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "w-32 sm:w-36",
@@ -129,7 +129,7 @@ function getActivityItemClasses(kind: ActivityTimelineItem["kind"]) {
 
   if (kind === "song_update") {
     return {
-      item: "rounded-lg border border-primary/20 bg-primary/5 p-3 shadow-[0_8px_24px_rgba(190,24,93,0.1)] dark:border-pink-300/20 dark:bg-pink-300/10",
+      item: "rounded-lg border border-primary/20 bg-primary/5 p-3 dark:border-pink-300/20 dark:bg-pink-300/10",
       title:
         "min-w-0 text-sm font-semibold leading-6 text-gray-900 transition hover:text-primary dark:text-white dark:hover:text-pink-200",
       thumbnail: "w-28 sm:w-32",
@@ -534,7 +534,7 @@ export default function ActivityTimelineSection({
                   >
                     {hasActivityDetails ? (
                       <div
-                        className={`mt-2 ${itemClasses.item} ${isVideoActivity ? importanceItemClassName : ""}`}
+                        className={`mt-2 shadow-none! ${itemClasses.item} ${isVideoActivity ? importanceItemClassName : ""}`}
                         data-importance={item.importance}
                       >
                         <div className="flex items-start gap-3">

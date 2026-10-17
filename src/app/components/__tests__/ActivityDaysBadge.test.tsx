@@ -79,6 +79,34 @@ describe("ActivityDaysBadge", () => {
     expect(badge.querySelector("img")).toHaveAttribute("alt", "");
   });
 
+  it.each(["header", "light"] as const)(
+    "%sでは3000日当日だけクラッカーを表示する",
+    (variant) => {
+      vi.setSystemTime(new Date("2027-01-30T14:59:59Z"));
+      renderBadge(variant);
+      expect(screen.getByRole("link")).toHaveTextContent("活動2999日");
+      expect(screen.queryByText("🎉")).not.toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(1000));
+
+      expect(screen.getByRole("link")).toHaveTextContent("活動3000日🎉");
+      expect(screen.getByText("🎉")).toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(24 * 60 * 60 * 1000));
+
+      expect(screen.getByRole("link")).toHaveTextContent("活動3001日");
+      expect(screen.queryByText("🎉")).not.toBeInTheDocument();
+    },
+  );
+
+  it("英語でも3000日にクラッカーを表示する", () => {
+    locale.current = "en";
+    vi.setSystemTime(new Date("2027-01-31T03:00:00Z"));
+    renderBadge();
+
+    expect(screen.getByRole("link")).toHaveTextContent("Active3000 days🎉");
+  });
+
   it.each([
     [0, "/azki-header-chibi.webp"],
     [1 / 3, "/azki-header-chibi-20261017-01.webp"],

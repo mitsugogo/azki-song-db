@@ -94,6 +94,7 @@ export default function ActivityDaysBadge({
         <span>{t("activityLabel")}</span>
         <span className="min-w-[5ch] font-semibold tabular-nums">
           {t("activityDays", { days: activityDays ?? "—" })}
+          {activityDays === 3000 && <span aria-hidden="true">🎉</span>}
         </span>
       </Link>
     </Tooltip>
