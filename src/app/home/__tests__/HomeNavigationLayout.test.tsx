@@ -16,6 +16,13 @@ import jaMessages from "@/messages/ja.json";
 import { HomeNavigationLayout } from "../HomeNavigationLayout";
 
 const state = vi.hoisted(() => ({ locale: "ja" as "ja" | "en" }));
+const auth = vi.hoisted(() => ({
+  useSession: vi.fn(),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}));
+
+vi.mock("next-auth/react", () => auth);
 
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/",
@@ -35,15 +42,20 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("next-intl", () => ({
   useLocale: () => state.locale,
-  useTranslations: () => (key: string) => {
-    const messages = (state.locale === "en" ? enMessages : jaMessages)
-      .DrawerMenu;
+  useTranslations: (namespace: string) => (key: string) => {
+    const localizedMessages = state.locale === "en" ? enMessages : jaMessages;
+    const messages =
+      namespace === "Account"
+        ? localizedMessages.Account
+        : localizedMessages.DrawerMenu;
     return messages[key as keyof typeof messages] ?? key;
   },
 }));
 
 vi.mock("../../components/LanguageSwitcher", () => ({
-  default: () => <button>言語切替</button>,
+  default: ({ compact }: { compact?: boolean }) => (
+    <button>{compact ? "言語切替（コンパクト）" : "言語切替"}</button>
+  ),
 }));
 vi.mock("../../components/ThemeToggle", () => ({
   default: () => <button>テーマ切替</button>,
@@ -93,7 +105,7 @@ function setViewportWidth(width: number) {
 
 function renderLayout() {
   return render(
-    <MantineProvider>
+    <MantineProvider env="test">
       <HomeNavigationLayout footer={<footer>TOPのフッター</footer>}>
         <main>
           <input aria-label="TOPの検索" />
@@ -105,6 +117,9 @@ function renderLayout() {
 }
 
 beforeEach(() => {
+  auth.useSession.mockReturnValue({ data: null, status: "unauthenticated" });
+  auth.signIn.mockClear();
+  auth.signOut.mockClear();
   state.locale = "ja";
   viewportWidth = 1280;
   mediaListeners.clear();
@@ -149,6 +164,47 @@ afterEach(() => {
 });
 
 describe("HomeNavigationLayout", () => {
+  it("TOPのアカウントメニューからサインインできる", async () => {
+    renderLayout();
+
+    fireEvent.click(
+      within(screen.getByRole("banner")).getByRole("button", {
+        name: "アカウントメニュー",
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Googleでサインイン" }),
+    );
+
+    expect(auth.signIn).toHaveBeenCalledWith("google", {
+      callbackUrl: window.location.href,
+    });
+  });
+
+  it("TOPでもログイン済みのユーザー名とサインアウトを表示する", async () => {
+    auth.useSession.mockReturnValue({
+      data: { user: { name: "テストユーザー" } },
+      status: "authenticated",
+    });
+    renderLayout();
+
+    fireEvent.click(
+      within(screen.getByRole("banner")).getByRole("button", {
+        name: "アカウントメニュー",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByText("テストユーザー")).toBeVisible(),
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "サインアウト" }),
+    );
+
+    expect(auth.signOut).toHaveBeenCalledWith({
+      callbackUrl: window.location.href,
+    });
+  });
+
   it("初回HTMLから開閉ボタンにPC用の非表示CSSを適用する", () => {
     const serverContainer = document.createElement("div");
     serverContainer.innerHTML = renderToString(

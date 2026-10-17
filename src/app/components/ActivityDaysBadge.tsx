@@ -89,7 +89,7 @@ export default function ActivityDaysBadge({
           width={80}
           height={80}
           unoptimized
-          className="h-8 w-auto shrink-0 self-end md:h-10"
+          className="h-8 w-8 shrink-0 self-end object-contain md:h-10 md:w-10"
         />
         <span>{t("activityLabel")}</span>
         <span className="min-w-[5ch] font-semibold tabular-nums">

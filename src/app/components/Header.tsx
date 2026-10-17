@@ -16,7 +16,7 @@ import SearchInput from "./SearchInput";
 import DrawerMenu from "./DrawerMenu";
 import { siteConfig } from "@/app/config/siteConfig";
 import { routing } from "../../i18n/routing";
-import ActivityDaysBadge from "./ActivityDaysBadge";
+import HeaderContent from "./HeaderContent";
 
 type HeaderProps = {
   navigation?: {
@@ -58,130 +58,18 @@ export function Header({
   return (
     <>
       <header className="relative z-30 bg-primary-800 dark:bg-gray-800/75 text-white shadow-md backdrop-blur">
-        <div className="w-full px-2">
-          <div className="relative flex h-14 md:h-10 lg:h-16 items-center gap-2">
-            <div
-              className={`absolute inset-y-0 left-0 flex items-center z-10 ${withDesktopNavigation ? "xl:hidden" : ""}`}
-            >
-              <Burger
-                opened={navigation?.opened ?? drawerOpened}
-                onClick={navigation?.onToggle ?? toggleDrawer}
-                color="white"
-                aria-label={t("toggleNavigation")}
-              />
-            </div>
-            <div
-              className={`flex min-w-0 flex-1 items-center justify-start ml-12 ${withDesktopNavigation ? "xl:ml-0" : ""}`}
-            >
-              <div className="flex min-w-0 items-center gap-1 md:shrink-0 md:gap-3 lg:ml-2">
-                <Link href="/" className="min-w-0 max-w-full">
-                  <>
-                    <h1 className="hidden sm:block truncate text-lg lg:text-lg font-semibold tracking-[0.06em]">
-                      {siteConfig.siteNameUpper}
-                    </h1>
-                    <h1 className="sm:hidden truncate text-xs font-semibold tracking-[0.04em]">
-                      {siteConfig.shortName}
-                    </h1>
-                  </>
-                </Link>
-                <ActivityDaysBadge />
-              </div>
-              {/* 検索フィールド - lg以上で表示 */}
-              <div className="hidden min-w-0 lg:flex lg:flex-1 lg:justify-center lg:mx-4">
-                <div className="w-full max-w-md">
-                  <SearchInput
-                    allSongs={allSongs}
-                    searchValue={
-                      searchTerm
-                        ? searchTerm.split("|").filter((v) => v.trim())
-                        : []
-                    }
-                    onSearchChange={(values: string[]) => {
-                      const query = values.join("|");
-                      setSearchTerm(query);
-
-                      // 現在のパスを取得
-                      const currentPath =
-                        typeof window !== "undefined"
-                          ? window.location.pathname
-                          : pathname;
-                      const normalizedPath =
-                        normalizeLocalizedPath(currentPath);
-
-                      // 再生ページと検索ページ以外では、検索時だけ検索ページに遷移
-                      if (
-                        normalizedPath !== "/watch" &&
-                        normalizedPath !== "/search"
-                      ) {
-                        if (!query) {
-                          if (typeof window !== "undefined") {
-                            const url = new URL(window.location.href);
-                            url.searchParams.delete("q");
-                            const searchString = url.searchParams.toString();
-                            const target = searchString
-                              ? `${normalizedPath}?${searchString}`
-                              : normalizedPath;
-                            router.push(target);
-                          } else {
-                            router.push(normalizedPath);
-                          }
-                          return;
-                        }
-
-                        // 他のページから検索ページへ遷移する際は、既存の v/t 等を保持して遷移する
-                        const searchPath = "/search";
-
-                        if (typeof window !== "undefined") {
-                          const url = new URL(window.location.href);
-                          url.pathname = searchPath;
-                          if (query) {
-                            url.searchParams.set("q", query);
-                          } else {
-                            url.searchParams.delete("q");
-                          }
-                          const target =
-                            url.pathname +
-                            (url.search
-                              ? `?${url.searchParams.toString()}`
-                              : "");
-                          router.push(target);
-                        } else {
-                          const searchUrl = query
-                            ? `/search?q=${encodeURIComponent(query)}`
-                            : "/search";
-                          router.push(searchUrl);
-                        }
-                      } else {
-                        // 再生ページと検索ページでは、URLパラメータを更新（既存のパラメータは保持）
-                        const pagePath = normalizedPath;
-
-                        if (typeof window !== "undefined") {
-                          const url = new URL(window.location.href);
-                          if (query) {
-                            url.searchParams.set("q", query);
-                          } else {
-                            url.searchParams.delete("q");
-                          }
-                          const searchString = url.searchParams.toString();
-                          const target = searchString
-                            ? `${pagePath}?${searchString}`
-                            : pagePath;
-                          router.push(target);
-                        } else {
-                          const target = query
-                            ? `${pagePath}?q=${encodeURIComponent(query)}`
-                            : pagePath;
-                          router.push(target);
-                        }
-                      }
-                    }}
-                    placeholder={t("searchPlaceholder")}
-                    className="[&_input]:h-7"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center pr-2 sm:ml-6 sm:pr-0">
+        <HeaderContent
+          withDesktopNavigation={withDesktopNavigation}
+          navigationToggle={
+            <Burger
+              opened={navigation?.opened ?? drawerOpened}
+              onClick={navigation?.onToggle ?? toggleDrawer}
+              color="white"
+              aria-label={t("toggleNavigation")}
+            />
+          }
+          actions={
+            <>
               <Link
                 href={siteConfig.channelUrl}
                 target="_blank"
@@ -199,9 +87,101 @@ export function Header({
               <FoldableToggle />
               <ThemeToggle />
               <AccountMenu />
+            </>
+          }
+        >
+          {/* 検索フィールド - lg以上で表示 */}
+          <div className="hidden min-w-0 lg:flex lg:flex-1 lg:justify-center lg:mx-4">
+            <div className="w-full max-w-md">
+              <SearchInput
+                allSongs={allSongs}
+                searchValue={
+                  searchTerm
+                    ? searchTerm.split("|").filter((v) => v.trim())
+                    : []
+                }
+                onSearchChange={(values: string[]) => {
+                  const query = values.join("|");
+                  setSearchTerm(query);
+
+                  // 現在のパスを取得
+                  const currentPath =
+                    typeof window !== "undefined"
+                      ? window.location.pathname
+                      : pathname;
+                  const normalizedPath = normalizeLocalizedPath(currentPath);
+
+                  // 再生ページと検索ページ以外では、検索時だけ検索ページに遷移
+                  if (
+                    normalizedPath !== "/watch" &&
+                    normalizedPath !== "/search"
+                  ) {
+                    if (!query) {
+                      if (typeof window !== "undefined") {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete("q");
+                        const searchString = url.searchParams.toString();
+                        const target = searchString
+                          ? `${normalizedPath}?${searchString}`
+                          : normalizedPath;
+                        router.push(target);
+                      } else {
+                        router.push(normalizedPath);
+                      }
+                      return;
+                    }
+
+                    // 他のページから検索ページへ遷移する際は、既存の v/t 等を保持して遷移する
+                    const searchPath = "/search";
+
+                    if (typeof window !== "undefined") {
+                      const url = new URL(window.location.href);
+                      url.pathname = searchPath;
+                      if (query) {
+                        url.searchParams.set("q", query);
+                      } else {
+                        url.searchParams.delete("q");
+                      }
+                      const target =
+                        url.pathname +
+                        (url.search ? `?${url.searchParams.toString()}` : "");
+                      router.push(target);
+                    } else {
+                      const searchUrl = query
+                        ? `/search?q=${encodeURIComponent(query)}`
+                        : "/search";
+                      router.push(searchUrl);
+                    }
+                  } else {
+                    // 再生ページと検索ページでは、URLパラメータを更新（既存のパラメータは保持）
+                    const pagePath = normalizedPath;
+
+                    if (typeof window !== "undefined") {
+                      const url = new URL(window.location.href);
+                      if (query) {
+                        url.searchParams.set("q", query);
+                      } else {
+                        url.searchParams.delete("q");
+                      }
+                      const searchString = url.searchParams.toString();
+                      const target = searchString
+                        ? `${pagePath}?${searchString}`
+                        : pagePath;
+                      router.push(target);
+                    } else {
+                      const target = query
+                        ? `${pagePath}?q=${encodeURIComponent(query)}`
+                        : pagePath;
+                      router.push(target);
+                    }
+                  }
+                }}
+                placeholder={t("searchPlaceholder")}
+                className="[&_input]:h-7"
+              />
             </div>
           </div>
-        </div>
+        </HeaderContent>
       </header>
 
       {!navigation && (
