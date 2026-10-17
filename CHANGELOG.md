@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.47.0](https://github.com/mitsugogo/azki-song-db/compare/v2.46.0...v2.47.0) (2026-10-17)
+
+### Features
+
+* 3000日達成時にクラッカーを表示する ([51327a3](https://github.com/mitsugogo/azki-song-db/commit/51327a36c21289d75898f97cd2b6f095db195793))
+* TOPヘッダーにアカウントメニューを追加 ([3346d15](https://github.com/mitsugogo/azki-song-db/commit/3346d15b446d860fe727ca6d164c592a0f673ee1))
+* ヘッダーのちびキャラ画像をランダム表示 ([f2da954](https://github.com/mitsugogo/azki-song-db/commit/f2da954527535891cfd593d06c55bf2f3667e29b))
+* 記念日ページをカード形式に刷新する ([dab2b4f](https://github.com/mitsugogo/azki-song-db/commit/dab2b4f6cfde0be04e1c3f177bba2a69e8c04fb4))
+
+### Bug Fixes
+
+* PC初回表示でナビゲーションボタンを非表示にする ([164e9c9](https://github.com/mitsugogo/azki-song-db/commit/164e9c90f562c99592886bf1d42cab37292432a2))
+
+### Performance Improvements
+
+* ディスコグラフィの表示とタブ遷移を最適化する ([f946cea](https://github.com/mitsugogo/azki-song-db/commit/f946ceabc8080bbe2447d3b74b17c02153b7917f))
+
 ## [2.46.0](https://github.com/mitsugogo/azki-song-db/compare/v2.45.0...v2.46.0) (2026-10-15)
 
 ### Features
