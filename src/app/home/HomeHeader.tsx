@@ -12,14 +12,12 @@ import ActivityDaysBadge from "../components/ActivityDaysBadge";
 type HomeHeaderProps = {
   drawerOpened: boolean;
   onToggleDrawer: () => void;
-  sidebarVisible?: boolean;
   isScrolled?: boolean;
 };
 
 export function HomeHeader({
   drawerOpened,
   onToggleDrawer,
-  sidebarVisible = false,
   isScrolled = false,
 }: HomeHeaderProps) {
   const tDrawer = useTranslations("DrawerMenu");
@@ -34,7 +32,7 @@ export function HomeHeader({
     >
       <div className="flex items-center justify-between gap-1 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-          {!sidebarVisible ? (
+          <div className="shrink-0 xl:hidden">
             <Burger
               opened={drawerOpened}
               onClick={onToggleDrawer}
@@ -42,7 +40,7 @@ export function HomeHeader({
               aria-expanded={drawerOpened}
               className="shrink-0"
             />
-          ) : null}
+          </div>
           <div className="flex min-w-0 flex-1 items-center gap-1 md:gap-3">
             <Link
               href="/"

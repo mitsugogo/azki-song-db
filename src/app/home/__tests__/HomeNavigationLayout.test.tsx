@@ -9,6 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import type { ComponentProps } from "react";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import enMessages from "@/messages/en.json";
 import jaMessages from "@/messages/ja.json";
@@ -148,6 +149,23 @@ afterEach(() => {
 });
 
 describe("HomeNavigationLayout", () => {
+  it("初回HTMLから開閉ボタンにPC用の非表示CSSを適用する", () => {
+    const serverContainer = document.createElement("div");
+    serverContainer.innerHTML = renderToString(
+      <MantineProvider>
+        <HomeNavigationLayout>
+          <main>TOPの本文</main>
+        </HomeNavigationLayout>
+      </MantineProvider>,
+    );
+
+    const toggle = within(serverContainer).getByRole("button", {
+      name: "Toggle navigation",
+    });
+    expect(toggle.parentElement).toHaveClass("xl:hidden");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
   it.each([390, 1440])(
     "幅%dpxで本文を独立してスクロールし、ヘッダーの背景を切り替える",
     async (width) => {
@@ -216,9 +234,9 @@ describe("HomeNavigationLayout", () => {
         within(menu).getByRole("link", { name: "プレイリスト" }),
       ).toHaveAttribute("href", "/playlist");
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: "Toggle navigation" }),
-      ).not.toBeInTheDocument();
+      const toggle = screen.getByRole("button", { name: "Toggle navigation" });
+      expect(toggle.parentElement).toHaveClass("xl:hidden");
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
       expect(screen.getByRole("main")).toHaveTextContent("TOPの本文");
       expect(screen.getByRole("button", { name: "言語切替" })).toBeVisible();
       expect(screen.getByRole("button", { name: "テーマ切替" })).toBeVisible();

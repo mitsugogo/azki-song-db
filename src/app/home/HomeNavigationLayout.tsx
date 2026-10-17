@@ -24,7 +24,6 @@ export function HomeNavigationLayout({
           <HomeHeader
             drawerOpened={opened}
             onToggleDrawer={toggle}
-            sidebarVisible={isDesktop}
             isScrolled={isScrolled}
           />
         </div>
