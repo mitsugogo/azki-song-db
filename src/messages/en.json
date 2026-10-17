@@ -349,7 +349,9 @@
       "name": "Playlist name",
       "placeholder": "Enter playlist name...",
       "duplicate": "A playlist with the same name already exists",
-      "create": "Create"
+      "create": "Create",
+      "cancel": "Cancel",
+      "close": "Close"
     },
     "playerControls": {
       "play": "Play",
@@ -964,7 +966,15 @@
       "label": "Visibility",
       "public": "Public",
       "unlisted": "Anyone with the link",
-      "private": "Private"
+      "private": "Private",
+      "autoSave": "Changes are saved automatically.",
+      "description": {
+        "PUBLIC": "Anyone can view this playlist, and search engines can index it.",
+        "UNLISTED": "Anyone with the link can view it. Search engines will not index it.",
+        "PRIVATE": "Only you can view this playlist."
+      },
+      "privateCopyHint": "Change visibility to share this playlist.",
+      "emptyCopyHint": "Add songs before sharing this playlist."
     },
     "shared": {
       "songCount": "{count} songs",
@@ -998,10 +1008,32 @@
         "trackArtist": "Track / Artist",
         "video": "Video",
         "empty": "No songs in the playlist"
-      }
+      },
+      "reorderHint": "Drag a handle to reorder. With a keyboard, press Space to pick up, then use the arrow keys.",
+      "reorderNamed": "Reorder {name}",
+      "previewNamed": "Preview {name}",
+      "youtubeNamed": "Open {name} on YouTube",
+      "unavailable": "Song information unavailable",
+      "confirmDeleteSongs": "Remove {count} songs from this list?"
     },
     "keywords": "AZKi, song, summary, song, Discography, original song, collaboration song, cover song, song frame, live, setlist, Hololive",
-    "ogSubtitle": "A playlist containing {count} songs"
+    "ogSubtitle": "A playlist containing {count} songs",
+    "share": "Share",
+    "shareNamed": "Share {name}",
+    "playNamed": "Play {name}",
+    "selectNamed": "Select {name}",
+    "selectAll": "Select all",
+    "selectedCount": "{count} selected",
+    "resetSelection": "Clear selection",
+    "deleteSelection": "Delete selected",
+    "selectionActions": "Selection actions",
+    "actions": "More actions",
+    "empty": "No playlists yet. Use “Create new playlist” to create one.",
+    "confirmTitle": "Confirm deletion",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "backToList": "Back to playlists"
   },
   "SearchBrowse": {
     "title": "Search",

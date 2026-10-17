@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Breadcrumbs,
+  ActionIcon,
   Button,
   Checkbox,
-  ScrollArea,
+  Group,
+  Menu,
+  Stack,
   Table,
+  Text,
+  Tooltip,
 } from "@mantine/core";
-import { useSelection } from "@mantine/hooks";
-import usePlaylists, { Playlist } from "../../hook/usePlaylists";
-import useFavorites from "../../hook/useFavorites";
-import { Song } from "@/app/types/song";
-import { Link } from "@/i18n/navigation";
-import { useTranslations, useLocale } from "next-intl";
-import Loading from "@/app/loading";
-import { FaRegTrashCan, FaBars } from "react-icons/fa6";
-import { formatDate } from "../../lib/formatDate";
-
+import { useMediaQuery, useSelection } from "@mantine/hooks";
 import {
   DndContext,
   closestCenter,
@@ -25,133 +20,33 @@ import {
   useSensor,
   PointerSensor,
   KeyboardSensor,
-  DragEndEvent,
+  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   arrayMove,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { HiHome, HiChevronRight } from "react-icons/hi";
-import { breadcrumbClasses, pageClasses } from "../../theme";
+import { FaEllipsis, FaRegTrashCan } from "react-icons/fa6";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import usePlaylists from "../../hook/usePlaylists";
+import useFavorites from "../../hook/useFavorites";
 import useSongs from "../../hook/useSongs";
 import { useGlobalPlayer } from "../../hook/useGlobalPlayer";
-import { LuPlay } from "react-icons/lu";
-import YoutubeThumbnail from "../../components/YoutubeThumbnail";
-import { FaYoutube } from "react-icons/fa6";
+import type { Playlist } from "../../lib/playlistUrl";
+import type { Song } from "../../types/song";
+import Loading from "../../loading";
 import SignedInOnly from "../../components/SignedInOnly";
-
-type PlaylistWithSongs = {
-  id: string;
-  name: string;
-  songs: {
-    videoId: string;
-    start: number;
-    songinfo: Song;
-  }[];
-};
-
-const SortableRow = ({
-  s,
-  index,
-  isSelected,
-  onCheckboxChange,
-  onPreview,
-}: {
-  s: PlaylistWithSongs["songs"][0];
-  index: number;
-  isSelected: boolean;
-  onCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onPreview: () => void;
-}) => {
-  const t = useTranslations("Playlist");
-  const locale = useLocale();
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: `${s.videoId}-${s.start}` });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  const youtubeUrl = `https://www.youtube.com/watch?v=${s.videoId}${
-    Number(s.start) > 0 ? `&t=${s.start}s` : ""
-  }`;
-
-  const formattedBroadcastDate = s.songinfo.broadcast_at
-    ? formatDate(s.songinfo.broadcast_at, locale)
-    : null;
-
-  return (
-    <Table.Tr
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      bg={isSelected ? "var(--mantine-color-blue-light)" : undefined}
-    >
-      <Table.Td>
-        {/* ドラッグハンドル */}
-        <div {...listeners} className="cursor-grab hover:text-blue-500">
-          <FaBars />
-        </div>
-      </Table.Td>
-      <Table.Td>
-        <Checkbox
-          aria-label={t("aria.selectRow")}
-          checked={isSelected}
-          onChange={onCheckboxChange}
-        />
-      </Table.Td>
-      <Table.Td>{index + 1}</Table.Td>
-      <Table.Td>
-        <div className="line-clamp-2">{s.songinfo.title}</div>
-        <div className="line-clamp-1 text-xs text-light-gray-400 dark:text-gray-200">
-          {s.songinfo.artist}
-        </div>
-      </Table.Td>
-      <Table.Td>
-        <div className="flex items-start gap-3 p-2.5" style={{ minWidth: 260 }}>
-          <div className="relative h-20 w-34 shrink-0 overflow-hidden rounded-lg bg-black">
-            <YoutubeThumbnail
-              videoId={s.videoId}
-              alt={s.songinfo.video_title}
-              imageClassName="object-cover"
-            />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="line-clamp-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white">
-              {s.songinfo.video_title}
-            </div>
-            {formattedBroadcastDate && (
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-200">
-                {formattedBroadcastDate} {t("detail.streamed")}
-              </div>
-            )}
-
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <a
-                href={youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700"
-              >
-                <FaYoutube className="mr-1" />
-                {t("detail.youtube")}
-              </a>
-              <Button color="pink" size="compact-sm" onClick={onPreview}>
-                <LuPlay className="mr-1" />
-                {t("detail.preview")}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Table.Td>
-    </Table.Tr>
-  );
-};
+import { pageClasses } from "../../theme";
+import {
+  DeleteConfirmation,
+  PlaylistBreadcrumbs,
+  PlaylistPlayButton,
+  SelectionBar,
+} from "../PlaylistControls";
+import SortablePlaylistSong, { playlistSongKey } from "./SortablePlaylistSong";
 
 export default function PlaylistDetailPage() {
   return (
@@ -163,14 +58,11 @@ export default function PlaylistDetailPage() {
 
 function PlaylistDetailPageContent() {
   const t = useTranslations("Playlist");
-  const g = useTranslations("DrawerMenu");
-
-  const [id, setId] = useState("");
+  const [id, setId] = useState<string | null>(null);
+  const [deleteMode, setDeleteMode] = useState<"selected" | "all" | null>(null);
+  const desktop = useMediaQuery("(min-width: 64em)", false);
   const { allSongs, isLoading } = useSongs();
-  const [playlistSongs, setPlaylistSongs] = useState<
-    PlaylistWithSongs["songs"]
-  >([]);
-  const { playlists, updatePlaylist, clearAllSongs } = usePlaylists();
+  const { playlists, updatePlaylist, clearAllSongs, ready } = usePlaylists();
   const {
     favorites,
     reorderFavorites,
@@ -179,305 +71,237 @@ function PlaylistDetailPageContent() {
   } = useFavorites();
   const { setCurrentSong, setCurrentTime, setIsPlaying, setIsMinimized } =
     useGlobalPlayer();
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [isFavoritesMode, setIsFavoritesMode] = useState(false);
-
+  useEffect(() => {
+    setId(new URL(window.location.href).searchParams.get("id") ?? "");
+  }, []);
+  const isFavorites = id === "system-favorites";
+  const playlist: Playlist | undefined = isFavorites
+    ? { id: "system-favorites", name: t("favoritesName"), songs: favorites }
+    : playlists.find((p) => p.id === id);
+  const rowKeys = playlist?.songs.map(playlistSongKey) ?? [];
+  const [selection, handlers] = useSelection({ data: rowKeys });
+  const selected = selection.filter((key) => rowKeys.includes(key));
+  const allSelected = rowKeys.length > 0 && selected.length === rowKeys.length;
+  const songIndex = useMemo(() => {
+    const index = new Map<string, Song>();
+    for (const song of allSongs) {
+      const key = `${song.video_id}-${Number(song.start)}`;
+      // Match the first catalog entry, as the previous Array.find lookup did.
+      if (!index.has(key)) index.set(key, song);
+    }
+    return index;
+  }, [allSongs]);
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
-  const rowKeys = useMemo(
-    () => playlistSongs.map((s) => `${s.videoId}-${s.start}`),
-    [playlistSongs],
-  );
-
-  const [selection, handlers] = useSelection({
-    data: rowKeys,
-    defaultSelection: [],
-  });
-
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    const id = url.searchParams.get("id");
-    setId(id || "");
-    setIsFavoritesMode(id === "system-favorites");
-  }, []);
-
-  useEffect(() => {
-    if (!id) return;
-
-    // お気に入りモードの場合
-    if (isFavoritesMode) {
-      const favoritesPlaylist: Playlist = {
-        id: "system-favorites",
-        name: t("favoritesName"),
-        songs: favorites,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setPlaylist(favoritesPlaylist);
-
-      const songsWithInfo = favorites
-        .map((s) => {
-          const songInfo = allSongs.find(
-            (song) =>
-              song.video_id === s.videoId &&
-              Number(String(song.start)) === Number(s.start),
-          );
-          return songInfo
-            ? { ...s, start: Number(s.start), songinfo: songInfo }
-            : null;
-        })
-        .filter((s) => s !== null);
-
-      setPlaylistSongs(songsWithInfo as PlaylistWithSongs["songs"]);
-      return;
-    }
-
-    // 通常のプレイリストの場合
-    const currentPlaylist = playlists.find((p) => p.id === id);
-    if (!currentPlaylist) {
-      setPlaylist(null);
-      setPlaylistSongs([]);
-      return;
-    }
-    setPlaylist(currentPlaylist);
-
-    const songsWithInfo = currentPlaylist.songs
-      .map((s) => {
-        const songInfo = allSongs.find(
-          (song) =>
-            song.video_id === s.videoId &&
-            Number(String(song.start)) === Number(s.start),
-        );
-        return songInfo
-          ? { ...s, start: Number(s.start), songinfo: songInfo }
-          : null;
-      })
-      .filter((s) => s !== null);
-
-    setPlaylistSongs(songsWithInfo as PlaylistWithSongs["songs"]);
-  }, [playlists, allSongs, id, isFavoritesMode, favorites]);
-
-  const handleDeleteSelected = () => {
-    if (!playlist) return;
-    const keysToDelete = selection;
-
-    // お気に入りモードの場合
-    if (isFavoritesMode) {
-      const entriesToDelete = favorites.filter((s) =>
-        keysToDelete.includes(`${s.videoId}-${s.start}`),
-      );
-      removeMultipleFavorites(entriesToDelete);
-      handlers.resetSelection();
-      return;
-    }
-
-    // 通常のプレイリストの場合
-    const updatedSongs = playlist.songs.filter(
-      (s) => !keysToDelete.includes(`${s.videoId}-${s.start}`),
-    );
-    console.log(keysToDelete);
-    const updatedPlaylist = { ...playlist, songs: updatedSongs };
-    updatePlaylist(updatedPlaylist);
-    const updatedPlaylistSongsWithInfo = updatedSongs
-      .map((s) => {
-        const songInfo = allSongs.find(
-          (song) =>
-            song.video_id === s.videoId &&
-            Number(song.start) === Number(s.start),
-        );
-        return songInfo
-          ? { ...s, start: Number(s.start), songinfo: songInfo }
-          : null;
-      })
-      .filter((s) => s !== null);
-
-    setPlaylistSongs(
-      updatedPlaylistSongsWithInfo as PlaylistWithSongs["songs"],
-    );
-
-    // Reset the selection
-    handlers.resetSelection();
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!playlist || !over || active.id === over.id) return;
+    const from = rowKeys.indexOf(String(active.id));
+    const to = rowKeys.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    // Keep every stored entry, including songs no longer present in the catalog.
+    const songs = arrayMove(playlist.songs, from, to);
+    if (isFavorites) reorderFavorites(songs);
+    else updatePlaylist({ ...playlist, songs });
   };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (active && over && active.id !== over?.id) {
-      const oldIndex = rowKeys.indexOf(active.id as string);
-      const newIndex = rowKeys.indexOf(over.id as string);
-
-      const newSongs = arrayMove(playlistSongs, oldIndex, newIndex);
-
-      setPlaylistSongs(newSongs);
-
-      // お気に入りモードの場合
-      if (isFavoritesMode) {
-        const updatedFavorites = newSongs.map((s) => ({
-          videoId: s.videoId,
-          start: String(s.start),
-        }));
-        reorderFavorites(updatedFavorites);
-        return;
-      }
-
-      // 通常のプレイリストの場合
-      if (playlist) {
-        const updatedPlaylist = {
-          ...playlist,
-          songs: newSongs.map((s) => ({
-            videoId: s.videoId,
-            start: String(s.start),
-          })),
-        };
-        updatePlaylist(updatedPlaylist);
-      }
-    }
-  };
-
-  const handlePreviewSong = (song: Song) => {
+  const preview = (song?: Song) => {
+    if (!song) return;
     setCurrentSong(song);
     setCurrentTime(Number(song.start));
     setIsMinimized(true);
     setIsPlaying(true);
   };
-
-  if (isLoading) {
+  const confirmDelete = () => {
+    if (!playlist) return;
+    if (deleteMode === "all") {
+      if (isFavorites) clearAllFavorites();
+      else clearAllSongs(playlist);
+    } else if (deleteMode === "selected") {
+      if (isFavorites)
+        removeMultipleFavorites(
+          favorites.filter((entry) =>
+            selected.includes(playlistSongKey(entry)),
+          ),
+        );
+      else
+        updatePlaylist({
+          ...playlist,
+          songs: playlist.songs.filter(
+            (entry) => !selected.includes(playlistSongKey(entry)),
+          ),
+        });
+    }
+    handlers.resetSelection();
+    setDeleteMode(null);
+  };
+  const loading = !ready || isLoading || id === null;
+  const rows = playlist?.songs.map((entry, index) => {
+    const key = playlistSongKey(entry);
+    const song = songIndex.get(`${entry.videoId}-${Number(entry.start)}`);
     return (
-      <div className={pageClasses.shellFlushBottom}>
-        <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
-        <Loading />
-      </div>
+      <SortablePlaylistSong
+        key={key}
+        entry={entry}
+        song={song}
+        index={index}
+        desktop={desktop}
+        selected={selected.includes(key)}
+        onSelect={() => handlers.toggle(key)}
+        onPreview={() => preview(song)}
+      />
     );
-  }
-
-  if (!playlist) {
-    return (
-      <div className={pageClasses.shellFlushBottom}>
-        <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
-        <div>
-          <p>{t("detail.notFound")}</p>
-        </div>
-      </div>
-    );
-  }
+  });
 
   return (
-    <div className={pageClasses.shellFlushBottom}>
-      <Breadcrumbs
-        aria-label="Breadcrumb"
-        className={breadcrumbClasses.root}
-        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-      >
-        <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="w-4 h-4 mr-1.5" /> {g("home")}
-        </Link>
-        <Link href="/playlist" className={breadcrumbClasses.link}>
-          {t("title")}
-        </Link>
-        <span className={breadcrumbClasses.link}>
-          {t("detail.breadcrumbTitle", {
-            id: playlist?.id ?? "",
-            name: playlist?.name ?? "",
-          })}
-        </span>
-      </Breadcrumbs>
-
-      <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
-
-      <div className="flex justify-between items-center mb-3 sm:flex-row sm:items-baseline">
-        <h2 className="hidden lg:flex font-semibold">
-          {t("detail.header", { id, name: playlist.name })}
-        </h2>
-        <div className="flex items-center gap-2 sm:mt-0">
-          <Button
-            color="red"
-            onClick={handleDeleteSelected}
-            disabled={selection.length === 0}
-          >
-            {t("detail.deleteSelectedSongs")}
+    <div className={pageClasses.shell}>
+      <PlaylistBreadcrumbs name={!loading ? playlist?.name : undefined} />
+      {loading ? (
+        <>
+          <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
+          <Loading />
+        </>
+      ) : !playlist ? (
+        <Stack align="flex-start">
+          <h1 className={pageClasses.heading}>{t("manageTitle")}</h1>
+          <Text c="dimmed" size="sm">
+            {t("detail.notFound")}
+          </Text>
+          <Button component={Link} href="/playlist" variant="default">
+            {t("backToList")}
           </Button>
-          <Button
-            color="red"
-            onClick={() =>
-              isFavoritesMode ? clearAllFavorites() : clearAllSongs(playlist)
-            }
-            disabled={playlist.songs.length === 0}
-          >
-            <FaRegTrashCan className="mr-2" /> {t("detail.clearAllSongs")}
-          </Button>
-        </div>
-      </div>
-
-      <ScrollArea className="h-[calc(100vh-200px)] lg:h-[calc(100vh-260px)]">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <Table striped highlightOnHover withColumnBorders>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>{t("detail.table.sort")}</Table.Th>
-                <Table.Th>
-                  <Checkbox
-                    aria-label={t("detail.table.selectAll")}
-                    indeterminate={handlers.isSomeSelected()}
-                    checked={handlers.isAllSelected()}
-                    onChange={() => {
-                      if (handlers.isAllSelected()) {
-                        handlers.resetSelection();
-                      } else {
-                        handlers.setSelection(rowKeys);
-                      }
-                    }}
-                  />
-                </Table.Th>
-                <Table.Th>#</Table.Th>
-                <Table.Th>{t("detail.table.trackArtist")}</Table.Th>
-                <Table.Th>{t("detail.table.video")}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            {playlistSongs.length === 0 && (
-              <Table.Tbody>
-                <Table.Tr>
-                  <Table.Td colSpan={5} className="text-center">
-                    {t("detail.table.empty")}
-                  </Table.Td>
-                </Table.Tr>
-              </Table.Tbody>
-            )}
-            <SortableContext items={rowKeys}>
-              <Table.Tbody>
-                {playlistSongs.map((s, index) => {
-                  const rowKey = `${s.videoId}-${s.start}`;
-                  const isSelected = selection.includes(rowKey);
-                  return (
-                    <SortableRow
-                      key={rowKey}
-                      s={s}
-                      index={index}
-                      isSelected={isSelected}
-                      onCheckboxChange={(event) => {
-                        if (event.currentTarget.checked) {
-                          handlers.select(rowKey);
-                        } else {
-                          handlers.deselect(rowKey);
-                        }
-                      }}
-                      onPreview={() => handlePreviewSong(s.songinfo)}
-                    />
-                  );
-                })}
-              </Table.Tbody>
-            </SortableContext>
-          </Table>
-        </DndContext>
-      </ScrollArea>
+        </Stack>
+      ) : (
+        <>
+          <Stack gap="sm" mb="lg">
+            <h1
+              className={pageClasses.heading}
+              style={{ overflowWrap: "anywhere" }}
+            >
+              {playlist.name}
+            </h1>
+            <Group justify="space-between" align="flex-start">
+              <Stack gap={4} style={{ flex: "1 1 240px", minWidth: 0 }}>
+                <Text size="sm" c="dimmed">
+                  {t("shared.songCount", { count: playlist.songs.length })}
+                </Text>
+                {playlist.songs.length > 1 && (
+                  <Text size="xs" c="dimmed">
+                    {t("detail.reorderHint")}
+                  </Text>
+                )}
+              </Stack>
+              <Group gap="xs">
+                <PlaylistPlayButton playlist={playlist} />
+                <Menu position="bottom-end" returnFocus>
+                  <Menu.Target>
+                    <Tooltip label={t("actions")}>
+                      <ActionIcon
+                        variant="default"
+                        size="lg"
+                        aria-label={t("actions")}
+                      >
+                        <FaEllipsis />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      color="red"
+                      leftSection={<FaRegTrashCan />}
+                      disabled={!playlist.songs.length}
+                      onClick={() => setDeleteMode("all")}
+                    >
+                      {t("detail.clearAllSongs")}
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
+            </Group>
+          </Stack>
+          {playlist.songs.length === 0 ? (
+            <Text c="dimmed" size="sm" py="xl">
+              {t("detail.table.empty")}
+            </Text>
+          ) : (
+            <>
+              <Checkbox
+                label={t("selectAll")}
+                checked={allSelected}
+                indeterminate={selected.length > 0 && !allSelected}
+                onChange={() =>
+                  allSelected
+                    ? handlers.resetSelection()
+                    : handlers.setSelection(rowKeys)
+                }
+                mb="md"
+              />
+              <SelectionBar
+                count={selected.length}
+                onReset={handlers.resetSelection}
+                onDelete={() => setDeleteMode("selected")}
+              />
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={rowKeys}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {desktop ? (
+                    <Table highlightOnHover verticalSpacing="sm" layout="fixed">
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th w={56}>
+                            <span className="sr-only">
+                              {t("detail.table.sort")}
+                            </span>
+                          </Table.Th>
+                          <Table.Th w={44}>
+                            <span className="sr-only">
+                              {t("selectionActions")}
+                            </span>
+                          </Table.Th>
+                          <Table.Th w={44}>#</Table.Th>
+                          <Table.Th w="30%">
+                            {t("detail.table.trackArtist")}
+                          </Table.Th>
+                          <Table.Th>{t("detail.table.video")}</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>{rows}</Table.Tbody>
+                    </Table>
+                  ) : (
+                    <Stack
+                      component="ul"
+                      m={0}
+                      p={0}
+                      gap={0}
+                      style={{ listStyle: "none" }}
+                    >
+                      {rows}
+                    </Stack>
+                  )}
+                </SortableContext>
+              </DndContext>
+            </>
+          )}
+          <DeleteConfirmation
+            opened={deleteMode !== null}
+            message={t("detail.confirmDeleteSongs", {
+              count:
+                deleteMode === "all" ? playlist.songs.length : selected.length,
+            })}
+            onClose={() => setDeleteMode(null)}
+            onConfirm={confirmDelete}
+          />
+        </>
+      )}
     </div>
   );
 }

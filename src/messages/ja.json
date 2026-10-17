@@ -348,7 +348,9 @@
       "name": "プレイリスト名",
       "placeholder": "プレイリスト名を入力...",
       "duplicate": "同じ名前のプレイリストは作成できません",
-      "create": "作成"
+      "create": "作成",
+      "cancel": "キャンセル",
+      "close": "閉じる"
     },
     "playerControls": {
       "play": "再生",
@@ -964,7 +966,15 @@
       "label": "共有設定",
       "public": "公開",
       "unlisted": "URLを知っている人にのみ公開",
-      "private": "非公開"
+      "private": "非公開",
+      "autoSave": "変更すると自動で保存されます。",
+      "description": {
+        "PUBLIC": "誰でも閲覧でき、検索エンジンにも表示されます。",
+        "UNLISTED": "URLを知っている人が閲覧できます。検索エンジンには表示されません。",
+        "PRIVATE": "自分だけが閲覧できます。"
+      },
+      "privateCopyHint": "共有するには公開範囲を変更してください。",
+      "emptyCopyHint": "曲を追加してから共有できます。"
     },
     "shared": {
       "songCount": "全{count}曲",
@@ -998,8 +1008,30 @@
         "trackArtist": "曲/アーティスト",
         "video": "動画",
         "empty": "プレイリスト内に曲がありません"
-      }
-    }
+      },
+      "reorderHint": "ハンドルをドラッグして並べ替え。キーボードではSpaceでつかみ、矢印キーで移動できます。",
+      "reorderNamed": "「{name}」を並べ替え",
+      "previewNamed": "「{name}」をプレビュー",
+      "youtubeNamed": "「{name}」をYouTubeで開く",
+      "unavailable": "楽曲情報を取得できません",
+      "confirmDeleteSongs": "{count}曲をリストから削除します。よろしいですか？"
+    },
+    "share": "共有",
+    "shareNamed": "「{name}」を共有",
+    "playNamed": "「{name}」を再生",
+    "selectNamed": "「{name}」を選択",
+    "selectAll": "すべて選択",
+    "selectedCount": "{count}件を選択中",
+    "resetSelection": "選択解除",
+    "deleteSelection": "選択項目を削除",
+    "selectionActions": "選択した項目の操作",
+    "actions": "その他の操作",
+    "empty": "プレイリストはまだありません。「新規プレイリスト作成」から作成できます。",
+    "confirmTitle": "削除の確認",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "delete": "削除",
+    "backToList": "プレイリスト一覧へ"
   },
   "SearchBrowse": {
     "title": "検索",
