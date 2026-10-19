@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildWatchCanonicalUrl, buildWatchHref } from "../watchUrl";
 
-const baseUrl = "https://azki-song-db.vercel.app";
+const baseUrl = "https://azki-song-db.mitsugogo.tech";
 
 describe("buildWatchCanonicalUrl", () => {
   it.each([

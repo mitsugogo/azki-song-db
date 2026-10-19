@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "./config/siteConfig";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -23,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "ja",
     name: "AZKi Song Database",
     short_name: "AZ SongDB",
-    id: "https://azki-song-db.vercel.app/",
+    id: siteConfig.siteUrl,
     description: "ホロライブ所属のAZKiさんの歌データベース",
     start_url: "/",
     categories: ["music", "entertainment"],

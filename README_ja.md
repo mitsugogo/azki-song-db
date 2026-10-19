@@ -5,7 +5,7 @@
 
 これは、ホロライブ所属の AZKi さん（Virtual DiVA）の歌唱楽曲、オリジナル楽曲、カバー楽曲、コラボ楽曲、歌枠セトリ、活動記録、記念日、統計情報をまとめるための非公式ファンサイトです。
 
-https://azki-song-db.vercel.app/
+https://azki-song-db.mitsugogo.tech/
 
 ## 概要
 
@@ -92,6 +92,11 @@ pnpm test:e2e:headed
 `.env.local` にこれらを設定してください。
 
 Vercelにデプロイする場合は、該当の環境変数をコンソールから設定してください。
+
+本番URLは `https://azki-song-db.mitsugogo.tech/` です。本番環境で
+`NEXT_PUBLIC_BASE_URL` または `PUBLIC_BASE_URL` を設定する場合は、共有リンク・canonical・
+OGP画像が新ドメインになるよう、どちらにもこのURLを指定してください。
+ローカル開発では `http://localhost:3000` を使用してください。
 
 ## Vercel CDNキャッシュ運用（タグ指定削除）
 

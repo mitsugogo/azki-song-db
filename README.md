@@ -8,7 +8,7 @@
 
 This is a [Next.js](https://nextjs.org) project for AZKi Song Database, an unofficial fan site that collects AZKi's original songs, covers, collaboration songs, singing streams, setlists, activity history, anniversaries, and statistics.
 
-[AZKi Song Database](https://azki-song-db.vercel.app/)
+[AZKi Song Database](https://azki-song-db.mitsugogo.tech/)
 
 ## Features
 
@@ -127,6 +127,11 @@ The following environment variables are used in the project:
 | `PUBLIC_BASE_URL`      | Fallback base URL for server-side URL generation           |
 
 Please set these environment variables in your `.env.local` file or in your production environment.
+
+The production URL is `https://azki-song-db.mitsugogo.tech/`. If you set
+`NEXT_PUBLIC_BASE_URL` or `PUBLIC_BASE_URL` in production, use this URL for both
+so shared links, canonical URLs, and OGP images use the new domain. Keep local
+development URLs pointed at `http://localhost:3000`.
 
 ## Vercel CDN Cache operation (tag-based purge)
 

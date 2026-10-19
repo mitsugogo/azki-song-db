@@ -83,7 +83,7 @@ describe("MyBestNineSongs integration", () => {
     expect(decodedSelection.songs[0]).toEqual({ v: "dQw4w9WgXcQ", s: "0" });
 
     // 5. 共有 URL の形式チェック
-    const shareUrl = `https://azki-song-db.vercel.app/share/my-best-9-songs/${base64url}`;
+    const shareUrl = `https://azki-song-db.mitsugogo.tech/share/my-best-9-songs/${base64url}`;
     expect(shareUrl).toMatch(
       /^https:\/\/.*\/share\/my-best-9-songs\/[A-Za-z0-9_-]+$/,
     );
@@ -138,7 +138,7 @@ describe("MyBestNineSongs integration", () => {
   it("OG 画像パラメータの検証", () => {
     // メタデータで使用される URL パラメータ
     const encoded = "sampleEncodedData";
-    const ogImageUrl = `https://azki-song-db.vercel.app/api/og/share/my-best-9-songs?encoded=${encoded}&w=1200&h=630`;
+    const ogImageUrl = `https://azki-song-db.mitsugogo.tech/api/og/share/my-best-9-songs?encoded=${encoded}&w=1200&h=630`;
 
     expect(ogImageUrl).toContain("api/og/share/my-best-9-songs");
     expect(ogImageUrl).toContain("w=1200");
