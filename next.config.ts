@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
   redirects() {
     return [
       {
+        source: "/:path*",
+        has: [{ type: "host", value: "azki-song-db\\.vercel\\.app" }],
+        destination: "https://azki-song-db.mitsugogo.tech/:path*",
+        permanent: true,
+      },
+      {
         source: "/summary/:path*",
         destination: "/activity/:path*",
         permanent: true,

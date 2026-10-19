@@ -80,7 +80,7 @@ describe("playlistUrl", () => {
   it("playlist OGP URLは正方形の専用OGルートになる", () => {
     const ogImageUrl = new URL(
       "/api/og/playlist",
-      "https://azki-song-db.vercel.app",
+      "https://azki-song-db.mitsugogo.tech",
     );
     ogImageUrl.searchParams.set(
       "p",

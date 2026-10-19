@@ -11,7 +11,7 @@ export const siteConfig = {
   xName: "AZKi_VDiVA",
   xUrl: "https://x.com/AZKi_VDiVA",
   // 本番のURL
-  siteUrl: "https://azki-song-db.vercel.app/",
+  siteUrl: "https://azki-song-db.mitsugogo.tech/",
 };
 
 /**
