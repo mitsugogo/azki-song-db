@@ -46,8 +46,11 @@
   },
   {
     "id": "017677006e468dfd",
-    "sourceIds": ["017677006e468dfd"],
-    "names": ["イオンモール幕張新都心(hololive base)"],
+    "sourceIds": ["017677006e468dfd", "4553a6473c3742e3"],
+    "names": [
+      "イオンモール幕張新都心(hololive base)",
+      "(終了)イオンモール幕張新都心(hololive base)"
+    ],
     "positions": [[35.654358, 140.0309562]],
     "descriptionKeys": ["82c93a5b0eccf515", "db4e8f1d521f0412"]
   },
@@ -193,6 +196,13 @@
     "descriptionKeys": ["2db1b6da8bbcabc2", "e88162270ad52467"]
   },
   {
+    "id": "05f139a10d628b4a",
+    "sourceIds": ["05f139a10d628b4a"],
+    "names": ["川魚田舎料理 船場亭(空の日)"],
+    "positions": [[36.7647306, 139.7583938]],
+    "descriptionKeys": ["6c1ef83a9cdc7c07", "d7518c2394334697"]
+  },
+  {
     "id": "064094c72b5dfc96",
     "sourceIds": ["064094c72b5dfc96"],
     "names": ["糸魚川駅(海の見える駅)"],
@@ -208,13 +218,24 @@
   },
   {
     "id": "071d148ee111e0d3",
-    "sourceIds": ["071d148ee111e0d3", "9ce8a25b8acce39a", "094d0877f864de37"],
+    "sourceIds": [
+      "071d148ee111e0d3",
+      "9ce8a25b8acce39a",
+      "094d0877f864de37",
+      "60af13f87c7ffd21"
+    ],
     "names": [
       "羽生市 2025年初ゼロゲッサーの地",
-      "羽生市 2025年初ゼロゲッサーの地(azkiナビ)"
+      "羽生市 2025年初ゼロゲッサーの地(azkiナビ)",
+      "埼玉県羽生市 ご当地ボイス(azkiナビ)"
     ],
     "positions": [[36.175398, 139.528056]],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "af2b346f6ead565a",
+      "4b2b58e929fcbd55"
+    ]
   },
   {
     "id": "077457580c69d43e",
@@ -256,12 +277,15 @@
   },
   {
     "id": "07a1a75b63487a2c",
-    "sourceIds": ["07a1a75b63487a2c", "360e2d21099838cf"],
+    "sourceIds": ["07a1a75b63487a2c", "360e2d21099838cf", "fbe3b734d182ce43"],
     "names": [
       "薩摩塩屋駅(秘境駅)※満点guess未達成",
       "薩摩塩屋駅(100guess耐久2026/秘境駅)※満点guess未達成"
     ],
-    "positions": [[31.257109, 130.376109]],
+    "positions": [
+      [31.257109, 130.376109],
+      [31.2571136, 130.3753848]
+    ],
     "descriptionKeys": ["782f22cc41c072e4", "4d19e37a4651c698"]
   },
   {
@@ -338,6 +362,17 @@
       "a16a3a6305d5bd78",
       "5fc9bb83dfcb2391",
       "cc0576a296b92a3f"
+    ]
+  },
+  {
+    "id": "0931bc2d7ef967ea",
+    "sourceIds": ["0931bc2d7ef967ea"],
+    "names": ["中央弘前駅 ご当地ボイス(azkiナビ)"],
+    "positions": [[40.599543, 140.4731063]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "f7b7a4f16a049806",
+      "aa7fc3a14287846c"
     ]
   },
   {
@@ -528,6 +563,20 @@
     "descriptionKeys": ["c5b072b59ce99432", "93fa01ac6724dacb"]
   },
   {
+    "id": "0ccfb3ddc42a7b69",
+    "sourceIds": ["0ccfb3ddc42a7b69"],
+    "names": ["トリムパークかなづ(空の日)"],
+    "positions": [[36.2152986, 136.2481894]],
+    "descriptionKeys": ["5cb1dc2d8c039b84", "444a323d41c21449"]
+  },
+  {
+    "id": "0cd3a3ae84a29c81",
+    "sourceIds": ["0cd3a3ae84a29c81"],
+    "names": ["plant-3 清水店(空の日)"],
+    "positions": [[36.0299629, 136.148086]],
+    "descriptionKeys": ["85a1a508e6d345ec", "a8e471145c06aeff"]
+  },
+  {
     "id": "0cd5f5e7b9db573b",
     "sourceIds": ["0cd5f5e7b9db573b", "5f2f704b593124df"],
     "names": ["道の駅 中山盆地", "道の駅 中山盆地(100guess耐久2026)"],
@@ -557,6 +606,17 @@
     ],
     "positions": [[33.5740134, 133.7228299]],
     "descriptionKeys": ["148ff416382d89c2", "03ff44ba1079bdb5"]
+  },
+  {
+    "id": "0db2263eb0d331fb",
+    "sourceIds": ["0db2263eb0d331fb"],
+    "names": ["焼肉きんぐ1号店 ご当地ボイス(azkiナビ)"],
+    "positions": [[36.5486778, 136.5954847]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "eb56e9ee98723ac2",
+      "e582060773b4fb2a"
+    ]
   },
   {
     "id": "0dc58166a694928c",
@@ -590,9 +650,12 @@
   },
   {
     "id": "0e955372674d0fe5",
-    "sourceIds": ["0e955372674d0fe5"],
+    "sourceIds": ["0e955372674d0fe5", "32f34c7bcc2cf612"],
     "names": ["男体山を望むスポット(日本の山)"],
-    "positions": [[36.7484123, 139.6305399]],
+    "positions": [
+      [36.7484123, 139.6305399],
+      [36.7479094, 139.6358239]
+    ],
     "descriptionKeys": ["60f02c7f2626f525", "54d54a2da25106a2"]
   },
   {
@@ -650,6 +713,13 @@
     "names": ["沢田駅(海の見える駅)"],
     "positions": [[38.4325473, 141.3821189]],
     "descriptionKeys": ["1b684833e253c8ff", "60f10699ef511342"]
+  },
+  {
+    "id": "10134866d3844b45",
+    "sourceIds": ["10134866d3844b45"],
+    "names": ["西ノ島 三度漁港(空の日)"],
+    "positions": [[36.0634567, 132.9506362]],
+    "descriptionKeys": ["34e16024f5c070e2", "6218f9751996d344"]
   },
   {
     "id": "102e4710e60da791",
@@ -826,6 +896,13 @@
     "names": ["さわやか 長泉店(さわやか)"],
     "positions": [[35.138706, 138.9080851]],
     "descriptionKeys": ["3ea25a2dd8fcffc1", "5a45152e608216dc"]
+  },
+  {
+    "id": "13f65f4cbab30592",
+    "sourceIds": ["13f65f4cbab30592"],
+    "names": ["利尻島 オタトマリ沼(空の日)"],
+    "positions": [[45.1191166, 141.2862112]],
+    "descriptionKeys": ["8ef585d7d4907673", "1805a305262bae1e"]
   },
   {
     "id": "13f7a73c54009753",
@@ -1120,6 +1197,13 @@
     "descriptionKeys": ["d545fa726536a9e7", "e1fbe8954ea2479c"]
   },
   {
+    "id": "1accc390afeba339",
+    "sourceIds": ["1accc390afeba339"],
+    "names": ["kintex 第2展示場"],
+    "positions": [[37.6645334, 126.7417959]],
+    "descriptionKeys": ["b3b573f45ee3bf3f"]
+  },
+  {
     "id": "1b33f4ea27aaa44d",
     "sourceIds": ["1b33f4ea27aaa44d", "53ef2dd47f54fbc1"],
     "names": [
@@ -1152,8 +1236,12 @@
   },
   {
     "id": "1bd8b96cbe3e9b8e",
-    "sourceIds": ["1bd8b96cbe3e9b8e"],
-    "names": ["香川県警コラボ交通情報板10(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["1bd8b96cbe3e9b8e", "a6c43b062c050da1", "62be1248143422e0"],
+    "names": [
+      "香川県警コラボ交通情報板10(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板10",
+      "(掲載終了)香川県警コラボ交通情報板10(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3485505, 134.0117343]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -1217,6 +1305,17 @@
     "names": ["八ッ場ダム(2024年末ジオゲッサー/ミオしゃmap)"],
     "positions": [[36.5587996, 138.7153406]],
     "descriptionKeys": ["ff1bf874d3675763", "869437c44e9007cd"]
+  },
+  {
+    "id": "1ce98958a2a06e94",
+    "sourceIds": ["1ce98958a2a06e94"],
+    "names": ["高松空港 ご当地ボイス(azkiナビ)"],
+    "positions": [[34.2190472, 134.0180764]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "77fb1059446d6d8a",
+      "374c7f1070b1e138"
+    ]
   },
   {
     "id": "1cebd76651dee32c",
@@ -1344,6 +1443,13 @@
     "descriptionKeys": ["687e5ff50e01149a", "a7f7660cae119b19"]
   },
   {
+    "id": "1ef1d85f07be370a",
+    "sourceIds": ["1ef1d85f07be370a"],
+    "names": ["jr東日本 武蔵野統括センター(鉄道車両基地)"],
+    "positions": [[35.7973687, 139.519603]],
+    "descriptionKeys": ["f6a664c071c3bae4", "f8f08b5d45d2ea7c"]
+  },
+  {
     "id": "1f2660df2ae5dd4f",
     "sourceIds": ["1f2660df2ae5dd4f", "40c39bc300b95c04"],
     "names": ["breitwiesstraße(ろぼいなぁず)"],
@@ -1370,13 +1476,27 @@
   },
   {
     "id": "1f7b85c477213a88",
-    "sourceIds": ["1f7b85c477213a88", "8f5e0b98be9be61c", "8d96421c7c061236"],
-    "names": ["エンジェルロード", "エンジェルロード(azkiナビ)"],
+    "sourceIds": [
+      "1f7b85c477213a88",
+      "8f5e0b98be9be61c",
+      "8d96421c7c061236",
+      "782948d40ec56b13"
+    ],
+    "names": [
+      "エンジェルロード",
+      "エンジェルロード(azkiナビ)",
+      "エンジェルロード ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.4800281, 134.1877574],
       [34.4791216, 134.1886694]
     ],
-    "descriptionKeys": ["addb414574624ed6"]
+    "descriptionKeys": [
+      "addb414574624ed6",
+      "bb1b13391dfd16a5",
+      "f3683ccdb030b63d",
+      "7cfefed7873a5eb1"
+    ]
   },
   {
     "id": "1f8f77b8e6b58df1",
@@ -1391,6 +1511,13 @@
     "names": ["栂・美木多駅(日本の駅)"],
     "positions": [[34.485156, 135.490151]],
     "descriptionKeys": ["f0b93557a357b439", "e4cf8574e1e57191"]
+  },
+  {
+    "id": "1fb1dae5b0cc57e1",
+    "sourceIds": ["1fb1dae5b0cc57e1"],
+    "names": ["tokyo dream park(ホロ9周年イベント)"],
+    "positions": [[35.6293567, 139.7878091]],
+    "descriptionKeys": ["3597859849a8e9ed", "fce1d77f9c0c8772"]
   },
   {
     "id": "1fc612d692173312",
@@ -1484,20 +1611,37 @@
   },
   {
     "id": "20a35d2cebd16d12",
-    "sourceIds": ["20a35d2cebd16d12"],
-    "names": ["極楽湯 名取店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["20a35d2cebd16d12", "bfbd6ef2b9bbbc29"],
+    "names": [
+      "極楽湯 名取店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 名取店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[38.179845, 140.8769854]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
   {
     "id": "20bea503075ff1a9",
-    "sourceIds": ["20bea503075ff1a9", "384f48d0062d175f", "d6c6c5cc527a4c8d"],
-    "names": ["成田国際空港", "成田国際空港(azkiナビ)"],
+    "sourceIds": [
+      "20bea503075ff1a9",
+      "384f48d0062d175f",
+      "d6c6c5cc527a4c8d",
+      "5dd263819e224fa2"
+    ],
+    "names": [
+      "成田国際空港",
+      "成田国際空港(azkiナビ)",
+      "成田国際空港 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.770178, 140.3843215],
       [35.7701388, 140.3850967]
     ],
-    "descriptionKeys": ["18edfa7a59d1769b"]
+    "descriptionKeys": [
+      "18edfa7a59d1769b",
+      "bb1b13391dfd16a5",
+      "30bf1efe63ff0d73",
+      "f6f948382652d8da"
+    ]
   },
   {
     "id": "20e77b72702820d5",
@@ -1508,8 +1652,11 @@
   },
   {
     "id": "213fd98b5ab70a6e",
-    "sourceIds": ["213fd98b5ab70a6e"],
-    "names": ["raku spa bay 横浜(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["213fd98b5ab70a6e", "4460bc3c1ae28aff"],
+    "names": [
+      "raku spa bay 横浜(フロライフ 癒やしの湯巡り旅)",
+      "(終了)raku spa bay 横浜(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[35.4688485, 139.6390778]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -1566,6 +1713,17 @@
     "names": ["姫駅(姫森ルーナ)", "姫駅(ホロメンマップ/姫森ルーナ)"],
     "positions": [[35.3820612, 137.0722139]],
     "descriptionKeys": ["e2e90805bb895530", "aa2f867d7c2a0879"]
+  },
+  {
+    "id": "225e31d1c1372a51",
+    "sourceIds": ["225e31d1c1372a51"],
+    "names": ["卸町駅 ご当地ボイス(azkiナビ)"],
+    "positions": [[38.2515809, 140.9202192]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "375258e1de4d5f34",
+      "b78c03de0bf2c643"
+    ]
   },
   {
     "id": "22864a9e5582ebfa",
@@ -1687,8 +1845,12 @@
   },
   {
     "id": "246bd817f0c4b27c",
-    "sourceIds": ["246bd817f0c4b27c"],
-    "names": ["リバティ池本(香川県警コラボデジタルサイネージ)"],
+    "sourceIds": ["246bd817f0c4b27c", "8fbb440ebfc13934", "75398a488cd8f577"],
+    "names": [
+      "リバティ池本(香川県警コラボデジタルサイネージ)",
+      "(掲載終了)リバティ池本",
+      "(掲載終了)リバティ池本(香川県警コラボデジタルサイネージ)"
+    ],
     "positions": [[34.3497352, 134.0477122]],
     "descriptionKeys": [
       "f9d86db1826db552",
@@ -1700,8 +1862,12 @@
   },
   {
     "id": "249914767aa68fad",
-    "sourceIds": ["249914767aa68fad"],
-    "names": ["香川県警コラボ交通情報板7(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["249914767aa68fad", "849df5a850c03ee6", "ce1e9f0de2fb1243"],
+    "names": [
+      "香川県警コラボ交通情報板7(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板7",
+      "(掲載終了)香川県警コラボ交通情報板7(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.213202, 133.8022791]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -1757,6 +1923,13 @@
     "descriptionKeys": ["2e009124edade4c9", "65e8697c2aed5214"]
   },
   {
+    "id": "25b6521ab571388b",
+    "sourceIds": ["25b6521ab571388b"],
+    "names": ["結城駅(空の日)"],
+    "positions": [[36.2982229, 139.8723709]],
+    "descriptionKeys": ["0c502225fca21d5f", "ad1e770e120f93be"]
+  },
+  {
     "id": "25f04b6fde98af3f",
     "sourceIds": ["25f04b6fde98af3f", "a2d40b38e80e551a"],
     "names": ["帯広の森野球場(野球場)"],
@@ -1769,6 +1942,13 @@
     "names": ["墨田区立向島中学校跡※作中の駒形高校(パラノマサイト file23)"],
     "positions": [[35.7253172, 139.8177166]],
     "descriptionKeys": ["6105291e2350f61c", "ccdb70f5c11b83e9"]
+  },
+  {
+    "id": "263b54dafa638355",
+    "sourceIds": ["263b54dafa638355"],
+    "names": ["八丁池(空の日)"],
+    "positions": [[34.8461947, 138.9613849]],
+    "descriptionKeys": ["79aa3714b48d0a7a", "4276c0ae587752d3"]
   },
   {
     "id": "267171074540b3f8",
@@ -1797,6 +1977,13 @@
     "names": ["かつお船(響咲リオナコラボ)"],
     "positions": [[33.5095451, 133.5746012]],
     "descriptionKeys": ["5a0ebdd5cefc0dc4", "b140495a124e049d"]
+  },
+  {
+    "id": "26cf9bdcee92f423",
+    "sourceIds": ["26cf9bdcee92f423"],
+    "names": ["jr西日本 博多総合車両所広島支所(鉄道車両基地)"],
+    "positions": [[34.4081917, 132.5010125]],
+    "descriptionKeys": ["bc477fe56028e811", "d79eac23fcffee64"]
   },
   {
     "id": "26e4185e31a7b5e3",
@@ -1844,10 +2031,20 @@
     ]
   },
   {
+    "id": "27e806504b1c9889",
+    "sourceIds": ["27e806504b1c9889"],
+    "names": ["波介川河川敷広場(空の日)"],
+    "positions": [[33.4869627, 133.4339707]],
+    "descriptionKeys": ["17df6b80a6f58a0a", "bb3ea9f8ba4e0212"]
+  },
+  {
     "id": "28301fe6a9ea2f6d",
-    "sourceIds": ["28301fe6a9ea2f6d", "8553ee10a07b30e8"],
+    "sourceIds": ["28301fe6a9ea2f6d", "8553ee10a07b30e8", "3ce155ae27375c97"],
     "names": ["twitterの青い鳥(?)お鷹ぽっぽ青看板(面白い・珍しい青看板)"],
-    "positions": [[37.8104875, 140.1112796]],
+    "positions": [
+      [37.8104875, 140.1112796],
+      [37.810674, 140.1113493]
+    ],
     "descriptionKeys": ["00f329ce6f0569fa", "49346887c4b1a76b"]
   },
   {
@@ -1949,10 +2146,23 @@
   },
   {
     "id": "2a34dc317573dd75",
-    "sourceIds": ["2a34dc317573dd75", "f8f5e41cb03f4a77", "ce153fd3a666d89c"],
-    "names": ["はわい海水浴場", "はわい海水浴場(azkiナビ)"],
+    "sourceIds": [
+      "2a34dc317573dd75",
+      "f8f5e41cb03f4a77",
+      "ce153fd3a666d89c",
+      "3b513f20551c0455"
+    ],
+    "names": [
+      "はわい海水浴場",
+      "はわい海水浴場(azkiナビ)",
+      "はわい海水浴場 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[35.5065247, 133.8786135]],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "8cf7ab26b8ed5379",
+      "95004eb6c76a05bd"
+    ]
   },
   {
     "id": "2a385967130514e2",
@@ -2041,6 +2251,13 @@
     "descriptionKeys": ["83bf967f4302aabf", "41469f6bbfec2939"]
   },
   {
+    "id": "2bd009a1eec27d33",
+    "sourceIds": ["2bd009a1eec27d33"],
+    "names": ["近畿日本鉄道 宮津車庫(鉄道車両基地)"],
+    "positions": [[34.7951353, 135.7864004]],
+    "descriptionKeys": ["15a7c43b041f6860", "d1f12e3295496819"]
+  },
+  {
     "id": "2be1d77d6f1e95bd",
     "sourceIds": ["2be1d77d6f1e95bd", "9f149d4ddc1ab430"],
     "names": ["スタジオアリス 豊橋店(ハローマック跡地)"],
@@ -2119,10 +2336,24 @@
   },
   {
     "id": "2d48fa976827f508",
-    "sourceIds": ["2d48fa976827f508", "89c1dacf96a61023", "0fbf102cbb32ddf9"],
-    "names": ["宇都宮駅", "宇都宮駅(azkiナビ)"],
+    "sourceIds": [
+      "2d48fa976827f508",
+      "89c1dacf96a61023",
+      "0fbf102cbb32ddf9",
+      "af8d2629503044f3"
+    ],
+    "names": [
+      "宇都宮駅",
+      "宇都宮駅(azkiナビ)",
+      "宇都宮駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[36.5590579, 139.8982794]],
-    "descriptionKeys": ["addb414574624ed6"]
+    "descriptionKeys": [
+      "addb414574624ed6",
+      "bb1b13391dfd16a5",
+      "716b73d4319b0633",
+      "ac9a4d4cc91accbe"
+    ]
   },
   {
     "id": "2d4f82e14d6c504c",
@@ -2140,16 +2371,27 @@
   },
   {
     "id": "2dcf903fa976a034",
-    "sourceIds": ["2dcf903fa976a034", "cbeccc879cbd5062", "488cb16b24d8806b"],
+    "sourceIds": [
+      "2dcf903fa976a034",
+      "cbeccc879cbd5062",
+      "488cb16b24d8806b",
+      "3cb48130eb7b40a2"
+    ],
     "names": [
       "日奈久温泉センター ばんぺい湯のくまモン",
-      "日奈久温泉センター ばんぺい湯のくまモン(azkiナビ)"
+      "日奈久温泉センター ばんぺい湯のくまモン(azkiナビ)",
+      "日奈久温泉センター ばんぺい湯 ご当地ボイス(azkiナビ)"
     ],
     "positions": [
       [32.4325276, 130.5749199],
       [32.4324189, 130.5747509]
     ],
-    "descriptionKeys": ["3fbaae849b653f6d"]
+    "descriptionKeys": [
+      "3fbaae849b653f6d",
+      "bb1b13391dfd16a5",
+      "21f373a72be3ff78",
+      "e4d7cc9314391ce8"
+    ]
   },
   {
     "id": "2e2426d9f303cc60",
@@ -2184,8 +2426,12 @@
   },
   {
     "id": "2e4b29ff7c45219e",
-    "sourceIds": ["2e4b29ff7c45219e"],
-    "names": ["香川県警コラボ交通情報板2(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["2e4b29ff7c45219e", "78e67895580966d8", "5c94ed57df58da86"],
+    "names": [
+      "香川県警コラボ交通情報板2(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板2",
+      "(掲載終了)香川県警コラボ交通情報板2(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3533826, 133.9740244]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -2413,13 +2659,23 @@
   },
   {
     "id": "31ab573d7e8e7ac5",
-    "sourceIds": ["31ab573d7e8e7ac5", "20535ea0e1928ae0", "529ad383788b7780"],
-    "names": ["豊洲pit", "豊洲pit(azkiナビ)"],
+    "sourceIds": [
+      "31ab573d7e8e7ac5",
+      "20535ea0e1928ae0",
+      "529ad383788b7780",
+      "2c9833c346d7bc24"
+    ],
+    "names": ["豊洲pit", "豊洲pit(azkiナビ)", "豊洲pit ご当地ボイス(azkiナビ)"],
     "positions": [
       [35.6496061, 139.7883756],
       [35.6492476, 139.7888088]
     ],
-    "descriptionKeys": ["010348534fa754f2", "76289837ab320888"]
+    "descriptionKeys": [
+      "010348534fa754f2",
+      "76289837ab320888",
+      "bb1b13391dfd16a5",
+      "9d25a7d223ac344e"
+    ]
   },
   {
     "id": "31b1998c2e42ac1f",
@@ -2433,7 +2689,7 @@
     "sourceIds": ["31e66eb22e1e4459"],
     "names": ["kintex 第1展示場"],
     "positions": [[37.6696535, 126.7449194]],
-    "descriptionKeys": ["ec61d572cfeedb8c"]
+    "descriptionKeys": ["ec61d572cfeedb8c", "98fd27a2151fdecb"]
   },
   {
     "id": "31f5b5b11e09fc1c",
@@ -2461,13 +2717,26 @@
   },
   {
     "id": "322491d38c96f258",
-    "sourceIds": ["322491d38c96f258", "bd666e7219714dc6", "a9bb70f65f229332"],
-    "names": ["鳥取砂丘", "鳥取砂丘(azkiナビ)"],
+    "sourceIds": [
+      "322491d38c96f258",
+      "bd666e7219714dc6",
+      "a9bb70f65f229332",
+      "e69745f26a12782e"
+    ],
+    "names": [
+      "鳥取砂丘",
+      "鳥取砂丘(azkiナビ)",
+      "鳥取砂丘 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.5433966, 134.2370329],
       [35.5423839, 134.2366896]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "d2b66475dcbd142c",
+      "2a4b00b286d45099"
+    ]
   },
   {
     "id": "327d65a73c73478b",
@@ -2648,6 +2917,13 @@
     "descriptionKeys": ["38bd5faebb564d34", "0e1f032287e2ef1e"]
   },
   {
+    "id": "35afad7ba702f842",
+    "sourceIds": ["35afad7ba702f842"],
+    "names": ["清水沢ダム(空の日)"],
+    "positions": [[43.001763, 142.0208167]],
+    "descriptionKeys": ["0fa27c6a6d196b70", "d8a3f5ba04a8d46d"]
+  },
+  {
     "id": "35b0eb44a2722104",
     "sourceIds": ["35b0eb44a2722104", "a3afc195273d3e47"],
     "names": ["nusa tenggara(クレイジー・オリーコラボ)"],
@@ -2751,6 +3027,13 @@
     "names": ["中河原駅(京王電鉄)"],
     "positions": [[35.6596161, 139.4578874]],
     "descriptionKeys": ["535200ee9b096c42", "78011d7e54fc3eb6"]
+  },
+  {
+    "id": "36a3f0e0f572af69",
+    "sourceIds": ["36a3f0e0f572af69"],
+    "names": ["jr西日本 後藤綜合車両所出雲支所浜田派出所(鉄道車両基地)"],
+    "positions": [[34.9046209, 132.0879834]],
+    "descriptionKeys": ["8e7b7b30916ec5a0", "71a03223043842f0"]
   },
   {
     "id": "36acab553fa08afb",
@@ -3001,8 +3284,12 @@
   },
   {
     "id": "3ac6943305c3c321",
-    "sourceIds": ["3ac6943305c3c321"],
-    "names": ["香川県警コラボ交通情報板5(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["3ac6943305c3c321", "08def62c2018d06c", "96367ee596f26a31"],
+    "names": [
+      "香川県警コラボ交通情報板5(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板5",
+      "(掲載終了)香川県警コラボ交通情報板5(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.2642311, 134.1307595]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -3032,6 +3319,17 @@
     "names": ["中村日赤駅(日本の駅)"],
     "positions": [[35.1724256, 136.8617529]],
     "descriptionKeys": ["fc703049e43f9b01", "989446d895d5daed"]
+  },
+  {
+    "id": "3b49a99c786767cc",
+    "sourceIds": ["3b49a99c786767cc"],
+    "names": ["兎田バス停 ご当地ボイス(azkiナビ)"],
+    "positions": [[34.3783585, 135.3084266]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "0cd4576293453df7",
+      "84d36cadec182f2c"
+    ]
   },
   {
     "id": "3b60b14c4eb35f57",
@@ -3084,6 +3382,13 @@
     ],
     "positions": [[35.1163809, 140.1201064]],
     "descriptionKeys": ["dea8871ecaa8ca08", "0a961dcbcc5f4748"]
+  },
+  {
+    "id": "3cca668c0762a9b6",
+    "sourceIds": ["3cca668c0762a9b6"],
+    "names": ["札幌市交通局 高速電車東車両基地(鉄道車両基地)"],
+    "positions": [[43.0261815, 141.4618851]],
+    "descriptionKeys": ["ea7dd72f9a8b19bb", "b5132d090dc9159a"]
   },
   {
     "id": "3d60a72e1e0e42ab",
@@ -3165,10 +3470,15 @@
   },
   {
     "id": "3f3e0083b36cfb1e",
-    "sourceIds": ["3f3e0083b36cfb1e", "ebc9785e433248b6", "e70fd4fc6eea1cd3"],
-    "names": ["上野駅", "上野駅(azkiナビ)"],
+    "sourceIds": [
+      "3f3e0083b36cfb1e",
+      "ebc9785e433248b6",
+      "e70fd4fc6eea1cd3",
+      "c691bc36c08346d8"
+    ],
+    "names": ["上野駅", "上野駅(azkiナビ)", "上野駅 ご当地ボイス(azkiナビ)"],
     "positions": [[35.7141672, 139.7774091]],
-    "descriptionKeys": []
+    "descriptionKeys": ["bb1b13391dfd16a5", "455173c3de439a0e"]
   },
   {
     "id": "3fcd45fbed3cc100",
@@ -3449,8 +3759,11 @@
   },
   {
     "id": "45a45361d390df4c",
-    "sourceIds": ["45a45361d390df4c"],
-    "names": ["極楽湯 千葉稲毛店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["45a45361d390df4c", "aee4e72146fa25be"],
+    "names": [
+      "極楽湯 千葉稲毛店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 千葉稲毛店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[35.650571, 140.1197523]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -3497,13 +3810,22 @@
   },
   {
     "id": "460aca6f19814754",
-    "sourceIds": ["460aca6f19814754", "037c75c64f486a45", "09a693a9329b0db2"],
-    "names": ["磯子駅", "磯子駅(azkiナビ)"],
+    "sourceIds": [
+      "460aca6f19814754",
+      "037c75c64f486a45",
+      "09a693a9329b0db2",
+      "ddd82d2c417e2bcd"
+    ],
+    "names": ["磯子駅", "磯子駅(azkiナビ)", "磯子駅 ご当地ボイス(azkiナビ)"],
     "positions": [
       [35.3998639, 139.6179011],
       [35.400205, 139.6177884]
     ],
-    "descriptionKeys": ["addb414574624ed6"]
+    "descriptionKeys": [
+      "addb414574624ed6",
+      "bb1b13391dfd16a5",
+      "455173c3de439a0e"
+    ]
   },
   {
     "id": "46159fe65bb5b8ec",
@@ -3569,13 +3891,28 @@
   },
   {
     "id": "477ced93da5d84c8",
-    "sourceIds": ["477ced93da5d84c8", "f5da70df2203ccf9", "403ec54ae75ac06f"],
-    "names": ["袋井市役所", "袋井市役所(azkiナビ)"],
+    "sourceIds": [
+      "477ced93da5d84c8",
+      "f5da70df2203ccf9",
+      "403ec54ae75ac06f",
+      "af61d1d02c8e6d68"
+    ],
+    "names": [
+      "袋井市役所",
+      "袋井市役所(azkiナビ)",
+      "袋井市役所 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.7504264, 137.9255571],
       [34.7499856, 137.9257878]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "af62d6c017d9e29f",
+      "8a72a07adf604a03",
+      "070714b686894497"
+    ]
   },
   {
     "id": "4783e68610e031ca",
@@ -3596,6 +3933,13 @@
       [36.0869468, 136.3605921]
     ],
     "descriptionKeys": ["471bf22cc48f1f38", "e9c840cbaff91a16"]
+  },
+  {
+    "id": "4794cc5341814493",
+    "sourceIds": ["4794cc5341814493"],
+    "names": ["ココカラファイン 宝塚山本店(日本マップの配信)"],
+    "positions": [[34.8147334, 135.3930404]],
+    "descriptionKeys": ["d750241dee3707f0", "742cc1291db6c28f"]
   },
   {
     "id": "47a688d3127a6dec",
@@ -3624,6 +3968,13 @@
     ],
     "positions": [[39.3175151, 140.5555895]],
     "descriptionKeys": ["74e707e69a0fff1d", "7a55a2b0c89e1ed6"]
+  },
+  {
+    "id": "486b458e3a648d02",
+    "sourceIds": ["486b458e3a648d02"],
+    "names": ["旭川河川敷(日本マップの配信)"],
+    "positions": [[34.6752604, 133.9336287]],
+    "descriptionKeys": ["4f9d50753fa944a3", "dfb482f0424c47ce"]
   },
   {
     "id": "487cb6d3affbe5db",
@@ -3679,6 +4030,17 @@
     "names": ["船岡駅 白石川堤一目千本桜(さくら名所100選)"],
     "positions": [[38.0590284, 140.7649249]],
     "descriptionKeys": ["89657b80a4180dc8", "f8c6af7b553184e3"]
+  },
+  {
+    "id": "49cad26705bdb6b7",
+    "sourceIds": ["49cad26705bdb6b7"],
+    "names": ["秋田県秋田市 ご当地ボイス(azkiナビ)"],
+    "positions": [[39.7121184, 140.1186574]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "6f4c52ab5ff95c1c",
+      "659bd9b2b30516c7"
+    ]
   },
   {
     "id": "4a1c18f3a0354ce6",
@@ -3791,13 +4153,27 @@
   },
   {
     "id": "4c30ff57afd260d9",
-    "sourceIds": ["4c30ff57afd260d9", "f9900bd8bac2c8f6", "b2c906102522586a"],
-    "names": ["伊豆パノラマパーク", "伊豆パノラマパーク(azkiナビ)"],
+    "sourceIds": [
+      "4c30ff57afd260d9",
+      "f9900bd8bac2c8f6",
+      "b2c906102522586a",
+      "97add0e53d376e95"
+    ],
+    "names": [
+      "伊豆パノラマパーク",
+      "伊豆パノラマパーク(azkiナビ)",
+      "伊豆パノラマパーク ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.0274385, 138.9283316],
       [35.0271134, 138.9297585]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "9dfcec6f11f3a6ee",
+      "1a2ca3576b779a42"
+    ]
   },
   {
     "id": "4c32e5746de0c194",
@@ -3822,10 +4198,19 @@
   },
   {
     "id": "4ca41b88e0567f50",
-    "sourceIds": ["4ca41b88e0567f50", "898bdddd259bfc9f", "ba0272178046f1f0"],
-    "names": ["渋谷駅", "渋谷駅(azkiナビ)"],
+    "sourceIds": [
+      "4ca41b88e0567f50",
+      "898bdddd259bfc9f",
+      "ba0272178046f1f0",
+      "39ee4e7f0eb4a99e"
+    ],
+    "names": ["渋谷駅", "渋谷駅(azkiナビ)", "渋谷駅 ご当地ボイス(azkiナビ)"],
     "positions": [[35.6580339, 139.7016358]],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "c7d64871b37195cd",
+      "3908c9027c9ff339"
+    ]
   },
   {
     "id": "4ca73c4d5fadd780",
@@ -3872,6 +4257,13 @@
       "845eb8375fd9107d",
       "8757b8987b0b2ed7"
     ]
+  },
+  {
+    "id": "4d135b6b5bc92f34",
+    "sourceIds": ["4d135b6b5bc92f34"],
+    "names": ["大洗港(空の日)"],
+    "positions": [[36.3038991, 140.5703843]],
+    "descriptionKeys": ["c5830a50a297bc21", "a40b45a94faec146"]
   },
   {
     "id": "4d4cdeadd34f2167",
@@ -3962,6 +4354,13 @@
     "descriptionKeys": ["5e5740bdf1fce962", "66fb164c5a7cb067"]
   },
   {
+    "id": "4f2d4cdc4e00cf55",
+    "sourceIds": ["4f2d4cdc4e00cf55"],
+    "names": ["小田急電鉄 喜多見検車区唐木田出張所(鉄道車両基地)"],
+    "positions": [[35.6150149, 139.4096577]],
+    "descriptionKeys": ["84c3c5926f060a92", "949116132c77631a"]
+  },
+  {
     "id": "4f63a8fa1d202a3d",
     "sourceIds": ["4f63a8fa1d202a3d", "723179dfbd05ff31"],
     "names": ["京王永山駅(京王電鉄)"],
@@ -3984,8 +4383,12 @@
   },
   {
     "id": "501f6af685f120be",
-    "sourceIds": ["501f6af685f120be"],
-    "names": ["香川県警コラボ交通情報板9(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["501f6af685f120be", "50cc8ea0f5c850d8", "91b9738dd10c6ffb"],
+    "names": [
+      "香川県警コラボ交通情報板9(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板9",
+      "(掲載終了)香川県警コラボ交通情報板9(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3060758, 133.9774342]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -4004,9 +4407,12 @@
   },
   {
     "id": "5077a40980a3b297",
-    "sourceIds": ["5077a40980a3b297", "e6162ee7d8187d0a"],
+    "sourceIds": ["5077a40980a3b297", "e6162ee7d8187d0a", "890c617dbe5de185"],
     "names": ["薩摩塩屋駅(秘境駅#2)"],
-    "positions": [[31.2571091, 130.3761092]],
+    "positions": [
+      [31.2571091, 130.3761092],
+      [31.2570999, 130.376297]
+    ],
     "descriptionKeys": ["fe091d56da3bff7a", "35cd4d9a53da5a09"]
   },
   {
@@ -4079,6 +4485,17 @@
     "descriptionKeys": ["2bc25928c41cf191", "d477195e848eb652"]
   },
   {
+    "id": "52169163485e9b9c",
+    "sourceIds": ["52169163485e9b9c"],
+    "names": ["【推定】 赤井駅 ご当地ボイス(azkiナビ)"],
+    "positions": [[37.0806671, 140.8662799]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "33568529fdee9519",
+      "246621938a9e818d"
+    ]
+  },
+  {
     "id": "5298886933b123a7",
     "sourceIds": ["5298886933b123a7", "e26e0903b316306d"],
     "names": [
@@ -4137,13 +4554,22 @@
   },
   {
     "id": "53bf5dbfdf24789a",
-    "sourceIds": ["53bf5dbfdf24789a", "32b86b9928f14075", "e63de3e99b04d4e1"],
-    "names": ["東京タワー", "東京タワー(azkiナビ)"],
+    "sourceIds": [
+      "53bf5dbfdf24789a",
+      "32b86b9928f14075",
+      "e63de3e99b04d4e1",
+      "787a2153f05a523c"
+    ],
+    "names": [
+      "東京タワー",
+      "東京タワー(azkiナビ)",
+      "東京タワー ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.6585805, 139.7454329],
       [35.6585805, 139.7454597]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": ["bb1b13391dfd16a5", "455173c3de439a0e"]
   },
   {
     "id": "53c9afd704c75602",
@@ -4151,6 +4577,18 @@
     "names": ["おれんじくん交差点(面白い交差点名)"],
     "positions": [[33.5195156, 131.6849573]],
     "descriptionKeys": ["8711eaeba3b4e69e", "eea0f1692048fa35"]
+  },
+  {
+    "id": "53ddc027ae16accb",
+    "sourceIds": ["53ddc027ae16accb"],
+    "names": ["【推定】 薩摩塩屋駅 ご当地ボイス(azkiナビ)"],
+    "positions": [[31.2561644, 130.3761284]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "fe091d56da3bff7a",
+      "782f22cc41c072e4",
+      "9835ca7e52eb2a7c"
+    ]
   },
   {
     "id": "5423e806ca4a8b19",
@@ -4196,6 +4634,17 @@
     "names": ["リフト山上駅(あくぺこあず高尾山エピソード)"],
     "positions": [[35.6324852, 139.2576575]],
     "descriptionKeys": ["bbcd5dcd413b861f", "3f1c527fd081f271"]
+  },
+  {
+    "id": "5528898ce538b983",
+    "sourceIds": ["5528898ce538b983"],
+    "names": ["【推定】 由良モニュメント ご当地ボイス(azkiナビ)"],
+    "positions": [[38.7206503, 139.6853324]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "8bf1f8b4a2f47a83",
+      "df9b721919168077"
+    ]
   },
   {
     "id": "553c28d2f62b11f9",
@@ -4343,8 +4792,18 @@
   },
   {
     "id": "58cc7e87677a086b",
-    "sourceIds": ["58cc7e87677a086b", "5b601ac1120c09b5"],
-    "names": ["えーちゃん食堂(友人a)", "えーちゃん食堂(ホロメンマップ/友人a)"],
+    "sourceIds": [
+      "58cc7e87677a086b",
+      "5b601ac1120c09b5",
+      "cc7be59495301907",
+      "940a23314e5be946"
+    ],
+    "names": [
+      "えーちゃん食堂(友人a)",
+      "えーちゃん食堂(ホロメンマップ/友人a)",
+      "えーちゃん食堂(閉店)(友人a)",
+      "えーちゃん食堂(閉店)(ホロメンマップ/友人a)"
+    ],
     "positions": [[36.759101, 139.618789]],
     "descriptionKeys": ["6adaaa22ad4f9279", "f5c54e7c3b454e40"]
   },
@@ -4585,13 +5044,22 @@
   },
   {
     "id": "5c49f31ae2e24107",
-    "sourceIds": ["5c49f31ae2e24107", "8151574fbc05b24d", "598590eb8c93b0a0"],
-    "names": ["kt zepp yokohama", "kt zepp yokohama(azkiナビ)"],
+    "sourceIds": [
+      "5c49f31ae2e24107",
+      "8151574fbc05b24d",
+      "598590eb8c93b0a0",
+      "1d49ef4089d87ffe"
+    ],
+    "names": [
+      "kt zepp yokohama",
+      "kt zepp yokohama(azkiナビ)",
+      "kt zepp yokohama ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.4596908, 139.6258804],
       [35.4602763, 139.6264812]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": ["dcd8ce3b012c2045"]
   },
   {
     "id": "5c63c90f6309d2e2",
@@ -4609,6 +5077,17 @@
     "names": ["梁川駅(旅するazki応援広告)"],
     "positions": [[37.8459416, 140.6031764]],
     "descriptionKeys": ["15ba3b2ca3b03ed2", "634a75e242f5f6d4"]
+  },
+  {
+    "id": "5c78a9d0df209682",
+    "sourceIds": ["5c78a9d0df209682"],
+    "names": ["サンメッセ日南 ご当地ボイス(azkiナビ)"],
+    "positions": [[31.6618062, 131.4625176]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "5ffdc480b88d49e9",
+      "8cc46b18cb1b409d"
+    ]
   },
   {
     "id": "5ca49dc5fd644166",
@@ -4680,11 +5159,25 @@
     "descriptionKeys": ["29494e49d52a98fc", "4e20f2bc5561d942"]
   },
   {
+    "id": "5d74686223d92d43",
+    "sourceIds": ["5d74686223d92d43"],
+    "names": ["jr西日本 岡山気動車区(鉄道車両基地)"],
+    "positions": [[34.6720942, 133.9207764]],
+    "descriptionKeys": ["8fc811088f1b22ef", "c4f7019d38b40275"]
+  },
+  {
     "id": "5d893772a0451ca2",
     "sourceIds": ["5d893772a0451ca2", "4261a4fe7b611ae5"],
     "names": ["市場駅(日本の駅)"],
     "positions": [[34.8193, 134.9325495]],
     "descriptionKeys": ["7c59b23a513b27fe", "e9f28bdfb3dd00f5"]
+  },
+  {
+    "id": "5d8d26e0d018ce60",
+    "sourceIds": ["5d8d26e0d018ce60"],
+    "names": ["みやこサンセットビーチ(日本マップの配信)"],
+    "positions": [[24.8032276, 125.2570385]],
+    "descriptionKeys": ["7431b0c570c2cab3", "8dd75f2c1d522f6b"]
   },
   {
     "id": "5d969a33233d09fa",
@@ -4895,16 +5388,27 @@
   },
   {
     "id": "636e6850b626576f",
-    "sourceIds": ["636e6850b626576f", "8e4ee56a1da37336", "1a18fcb0d4f26ee8"],
+    "sourceIds": [
+      "636e6850b626576f",
+      "8e4ee56a1da37336",
+      "1a18fcb0d4f26ee8",
+      "595886b27331ed8d"
+    ],
     "names": [
       "巨大たまねぎオブジェ『おっ玉葱』",
-      "巨大たまねぎオブジェ『おっ玉葱』(azkiナビ)"
+      "巨大たまねぎオブジェ『おっ玉葱』(azkiナビ)",
+      "おっ玉葱 ご当地ボイス(azkiナビ)"
     ],
     "positions": [
       [34.2545256, 134.6845377],
       [34.2550516, 134.6848307]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "dbd33b9ff0d3ea57",
+      "abdba5d8a9636eec"
+    ]
   },
   {
     "id": "6378971981bb0eb8",
@@ -4970,11 +5474,16 @@
     "sourceIds": ["644a9aa854672c85", "5db964afb873f24d"],
     "names": ["久保田城表門(さくら名所100選)"],
     "positions": [[39.721194, 140.1241137]],
-    "descriptionKeys": ["925e4c8ccfa908e5", "af414ed9409e74bb"]
+    "descriptionKeys": [
+      "925e4c8ccfa908e5",
+      "af414ed9409e74bb",
+      "26a6a642bd462d0f",
+      "58d56817552c4dda"
+    ]
   },
   {
     "id": "64505e576963648f",
-    "sourceIds": ["64505e576963648f"],
+    "sourceIds": ["64505e576963648f", "c50b2e2a38c69918"],
     "names": ["azki × 香川県警察 交通規制アンバサダーポスター撮影地"],
     "positions": [[34.4896125, 134.0897301]],
     "descriptionKeys": [
@@ -5024,6 +5533,17 @@
     "names": ["神戸市須磨区のハト(日本のハト)"],
     "positions": [[34.6580706, 135.1308056]],
     "descriptionKeys": ["d97bae96be80d90d", "82c88d224c1f6a96"]
+  },
+  {
+    "id": "65947b02d5050c92",
+    "sourceIds": ["65947b02d5050c92"],
+    "names": ["新幹線と地下鉄の交差が見れるポイント(鉄道車両基地)"],
+    "positions": [[34.6812237, 135.0771229]],
+    "descriptionKeys": [
+      "73980e7ae2c29404",
+      "650bf5d22b2a2aaf",
+      "78d14046dab02bcc"
+    ]
   },
   {
     "id": "65ab3fd2277c6134",
@@ -5325,6 +5845,17 @@
     "descriptionKeys": ["1f6ae12947c47f7f", "412a6ff3c7afa866"]
   },
   {
+    "id": "6c6561c19cd0a03b",
+    "sourceIds": ["6c6561c19cd0a03b"],
+    "names": ["東京競馬場 ご当地ボイス(azkiナビ)"],
+    "positions": [[35.666954, 139.4847597]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "f604af21bea54e28",
+      "ae800511fac40079"
+    ]
+  },
+  {
     "id": "6cb984d4675eda15",
     "sourceIds": ["6cb984d4675eda15", "3715f2800f8e507c"],
     "names": [
@@ -5390,6 +5921,13 @@
     "descriptionKeys": ["93479722e7294ca9", "eeb0bf2979d1ea41"]
   },
   {
+    "id": "6e094a388b989645",
+    "sourceIds": ["6e094a388b989645"],
+    "names": ["東京地下鉄 千住検車区(鉄道車両基地)"],
+    "positions": [[35.737554, 139.804869]],
+    "descriptionKeys": ["d5e6a425e335c2ef", "77e8c25dcd6cdb97"]
+  },
+  {
     "id": "6e11a2cad5b1bd33",
     "sourceIds": ["6e11a2cad5b1bd33", "a734e6d8070d6a30"],
     "names": [
@@ -5400,8 +5938,12 @@
   },
   {
     "id": "6e31af8f109ed56b",
-    "sourceIds": ["6e31af8f109ed56b"],
-    "names": ["香川県警コラボ交通情報板14(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["6e31af8f109ed56b", "14b3900c7408e3e2", "7263191b544cbdd6"],
+    "names": [
+      "香川県警コラボ交通情報板14(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板14",
+      "(掲載終了)香川県警コラボ交通情報板14(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3000612, 133.8015412]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -5491,6 +6033,13 @@
     "names": ["上野駅3、4番線ホーム", "上野駅3、4番線ホーム(日本マップの配信)"],
     "positions": [[35.7121544, 139.7753874]],
     "descriptionKeys": ["4d36759e7bdd0158", "444cde700b83736d"]
+  },
+  {
+    "id": "70740d209206cd37",
+    "sourceIds": ["70740d209206cd37"],
+    "names": ["松島 宇内浜(空の日)"],
+    "positions": [[38.3361718, 141.1125107]],
+    "descriptionKeys": ["87f6975ad0b05758", "5f5d571fcaa9c951"]
   },
   {
     "id": "70a1b11b9e856f64",
@@ -5687,10 +6236,20 @@
   },
   {
     "id": "73ca0e5d8a2cd250",
-    "sourceIds": ["73ca0e5d8a2cd250"],
-    "names": ["極楽湯 堺泉北店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["73ca0e5d8a2cd250", "05616b52ebd21db4"],
+    "names": [
+      "極楽湯 堺泉北店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 堺泉北店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[34.4965955, 135.4935649]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
+  },
+  {
+    "id": "73f46f9498888ad2",
+    "sourceIds": ["73f46f9498888ad2"],
+    "names": ["渋谷ストリーム ホール(深海フェス2026)"],
+    "positions": [[35.6575589, 139.7025291]],
+    "descriptionKeys": ["acc9748952dd1cea", "b06f1a4cfa299c3c"]
   },
   {
     "id": "741454f483b507a9",
@@ -5739,13 +6298,29 @@
   },
   {
     "id": "75bd585228706b3a",
-    "sourceIds": ["75bd585228706b3a", "a8611f7b89855cb0", "65b2967b8eee9981"],
-    "names": ["六本木駅", "六本木駅(azkiナビ)"],
+    "sourceIds": [
+      "75bd585228706b3a",
+      "a8611f7b89855cb0",
+      "65b2967b8eee9981",
+      "67ef5c3a90f8f22d"
+    ],
+    "names": [
+      "六本木駅",
+      "六本木駅(azkiナビ)",
+      "六本木駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.6632707, 139.7320854],
       [35.663262, 139.7323322]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": ["bb1b13391dfd16a5", "455173c3de439a0e"]
+  },
+  {
+    "id": "75f68ed1427e3ea5",
+    "sourceIds": ["75f68ed1427e3ea5"],
+    "names": ["神戸市交通局 車両基地(鉄道車両基地)"],
+    "positions": [[34.6791269, 135.0839455]],
+    "descriptionKeys": ["a1d8595e32ebb5c9", "025f9fc340462644"]
   },
   {
     "id": "75fe09a7aedc9367",
@@ -5879,6 +6454,13 @@
     "descriptionKeys": ["46ef57a74733941c", "4d567d47b7b6c9c2"]
   },
   {
+    "id": "785ae67fa3091504",
+    "sourceIds": ["785ae67fa3091504"],
+    "names": ["やんばる国立公園 辺戸岬付近(日本マップの配信)"],
+    "positions": [[26.8649309, 128.2495285]],
+    "descriptionKeys": ["1904b8024da22a64", "341c6f49f05b71a1"]
+  },
+  {
     "id": "7875e29505c63705",
     "sourceIds": ["7875e29505c63705", "5feafdc71d3fbf26"],
     "names": ["本宮駅(鉄道の日ジオゲッサー)"],
@@ -5956,16 +6538,26 @@
   },
   {
     "id": "7a45d88baf81af21",
-    "sourceIds": ["7a45d88baf81af21", "c5a4a35517c3ec8d", "02aa58bf5df85894"],
+    "sourceIds": [
+      "7a45d88baf81af21",
+      "c5a4a35517c3ec8d",
+      "02aa58bf5df85894",
+      "9e2d2730a9e598f9"
+    ],
     "names": [
       "峠の釜めし おぎのや 横川本店",
-      "峠の釜めし おぎのや 横川本店(azkiナビ)"
+      "峠の釜めし おぎのや 横川本店(azkiナビ)",
+      "峠の釜めし おぎのや横川本店 ご当地ボイス(azkiナビ)"
     ],
     "positions": [
       [36.3365599, 138.7369359],
       [36.3367209, 138.7368367]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "ac32f6cbc5110c3b",
+      "d9c8593ae445968f"
+    ]
   },
   {
     "id": "7a620b71238e45d0",
@@ -6070,13 +6662,26 @@
   },
   {
     "id": "7c9eebe0bfcface4",
-    "sourceIds": ["7c9eebe0bfcface4", "bf2b734fe6ff45dc", "1ca3b5176e41af47"],
-    "names": ["さわやか 長泉店", "さわやか 長泉店(azkiナビ)"],
+    "sourceIds": [
+      "7c9eebe0bfcface4",
+      "bf2b734fe6ff45dc",
+      "1ca3b5176e41af47",
+      "07f8482f235fe344"
+    ],
+    "names": [
+      "さわやか 長泉店",
+      "さわやか 長泉店(azkiナビ)",
+      "さわやか長泉店 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.1387512, 138.9077898],
       [35.1387863, 138.9076181]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "1652aa071de510d7",
+      "38bcbdc1560f6894"
+    ]
   },
   {
     "id": "7d114d24f9a25fa0",
@@ -6203,6 +6808,17 @@
     "descriptionKeys": ["7625cd773d98346f", "754c400df75a35d9"]
   },
   {
+    "id": "7f877fde8cd5cc69",
+    "sourceIds": ["7f877fde8cd5cc69"],
+    "names": ["高知県高知市 ご当地ボイス(azkiナビ)"],
+    "positions": [[33.5089994, 133.5730425]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "5a0ebdd5cefc0dc4",
+      "6bb6750cf42f148c"
+    ]
+  },
+  {
     "id": "7f95cc63cedc8dc6",
     "sourceIds": ["7f95cc63cedc8dc6", "548d3d942f595e06"],
     "names": ["大鳴門橋(ets2日本mod)"],
@@ -6292,10 +6908,19 @@
   },
   {
     "id": "80c6dfa69932640e",
-    "sourceIds": ["80c6dfa69932640e", "4b06a46fa2960006", "f57ae20ebd919892"],
-    "names": ["江の島", "江の島(azkiナビ)"],
+    "sourceIds": [
+      "80c6dfa69932640e",
+      "4b06a46fa2960006",
+      "f57ae20ebd919892",
+      "03f1c7a28dbfb9d3"
+    ],
+    "names": ["江の島", "江の島(azkiナビ)", "江の島 ご当地ボイス(azkiナビ)"],
     "positions": [[35.302452, 139.4815813]],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "2990317d6b4da0f0",
+      "a6e85c00d199e8ca"
+    ]
   },
   {
     "id": "80d7c1742ac30f54",
@@ -6365,8 +6990,11 @@
   },
   {
     "id": "816f1d34d7110c6c",
-    "sourceIds": ["816f1d34d7110c6c"],
-    "names": ["極楽湯 宇都宮店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["816f1d34d7110c6c", "745e800e4b7662ec"],
+    "names": [
+      "極楽湯 宇都宮店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 宇都宮店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[36.5813455, 139.9243479]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -6438,13 +7066,27 @@
   },
   {
     "id": "834f815b015e1982",
-    "sourceIds": ["834f815b015e1982", "7394943ec7f8fdca", "8b023523c85041c2"],
-    "names": ["温泉津駅", "温泉津駅(azkiナビ)"],
+    "sourceIds": [
+      "834f815b015e1982",
+      "7394943ec7f8fdca",
+      "8b023523c85041c2",
+      "369b2a5915ff52aa"
+    ],
+    "names": [
+      "温泉津駅",
+      "温泉津駅(azkiナビ)",
+      "温泉津駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.0915164, 132.3503286],
       [35.0914286, 132.350806]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "842392e76bc71916",
+      "6c201bd6c096ffb0"
+    ]
   },
   {
     "id": "8354c72aa6789554",
@@ -6480,6 +7122,13 @@
     "names": ["幕張海浜公園(幕張ゲッサー)"],
     "positions": [[35.6430183, 140.033617]],
     "descriptionKeys": ["3576475afebb5394", "dd4bf773c6508778"]
+  },
+  {
+    "id": "8455eaa0f2bc589d",
+    "sourceIds": ["8455eaa0f2bc589d"],
+    "names": ["jr西日本 吹田総合車両所福知山支所(鉄道車両基地)"],
+    "positions": [[35.2954872, 135.0969316]],
+    "descriptionKeys": ["5ffe2db2c748af13", "960cbca6c25bb291"]
   },
   {
     "id": "847720b332bb0f2c",
@@ -6582,8 +7231,12 @@
   },
   {
     "id": "8611a6a84c8b79da",
-    "sourceIds": ["8611a6a84c8b79da"],
-    "names": ["香川県警コラボ交通情報板3(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["8611a6a84c8b79da", "6ce7e55a797dc577", "d0e18fb2038452a0"],
+    "names": [
+      "香川県警コラボ交通情報板3(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板3",
+      "(掲載終了)香川県警コラボ交通情報板3(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.2926284, 133.8344165]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -6730,8 +7383,12 @@
   },
   {
     "id": "89bc913990b8698b",
-    "sourceIds": ["89bc913990b8698b"],
-    "names": ["香川県警コラボ交通情報板6(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["89bc913990b8698b", "306cb6c44fd4a808", "696533ec6e99ef31"],
+    "names": [
+      "香川県警コラボ交通情報板6(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板6",
+      "(掲載終了)香川県警コラボ交通情報板6(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.2268627, 133.8669369]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -6777,8 +7434,12 @@
   },
   {
     "id": "8a5c786dabd5e2c5",
-    "sourceIds": ["8a5c786dabd5e2c5"],
-    "names": ["香川県警コラボ交通情報板11(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["8a5c786dabd5e2c5", "eb44a78e7145d57d", "cc3667d336abd530"],
+    "names": [
+      "香川県警コラボ交通情報板11(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板11",
+      "(掲載終了)香川県警コラボ交通情報板11(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.340047, 134.1168045]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -7004,13 +7665,26 @@
   },
   {
     "id": "9015f81f80773143",
-    "sourceIds": ["9015f81f80773143", "ca0bd3a219f843c1", "7307a1751fc5b5d3"],
-    "names": ["横浜アリーナ", "横浜アリーナ(azkiナビ)"],
+    "sourceIds": [
+      "9015f81f80773143",
+      "ca0bd3a219f843c1",
+      "7307a1751fc5b5d3",
+      "05969b25bcd2ec03"
+    ],
+    "names": [
+      "横浜アリーナ",
+      "横浜アリーナ(azkiナビ)",
+      "横浜アリーナ ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.5112519, 139.6201423],
       [35.5112344, 139.6200887]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "5fc9bb83dfcb2391",
+      "a1989c6c051c7930"
+    ]
   },
   {
     "id": "901e1ac675f5423b",
@@ -7092,6 +7766,17 @@
     "descriptionKeys": ["9dfcec6f11f3a6ee", "7b16c23a4b6b1424"]
   },
   {
+    "id": "9212428505838e37",
+    "sourceIds": ["9212428505838e37"],
+    "names": ["【推定】 熊本県熊本市 ご当地ボイス(azkiナビ)"],
+    "positions": [[32.8133685, 130.7008355]],
+    "descriptionKeys": [
+      "7b2e1b418dd17251",
+      "bb1b13391dfd16a5",
+      "932cc637816c4d3a"
+    ]
+  },
+  {
     "id": "923e201fde47dd9e",
     "sourceIds": ["923e201fde47dd9e", "c416ed8a0cffec8a"],
     "names": ["アニメイト宇都宮(ラプラス・ダークネスコラボ)"],
@@ -7107,6 +7792,17 @@
     ],
     "positions": [[43.124831, 141.210401]],
     "descriptionKeys": ["f298e107e4648768", "44656716ceee454e"]
+  },
+  {
+    "id": "92cf5c3cbe541ecd",
+    "sourceIds": ["92cf5c3cbe541ecd"],
+    "names": ["蛸のすべり台 ご当地ボイス(azkiナビ)"],
+    "positions": [[37.4431969, 138.7525787]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "70c9020af9e82500",
+      "d7e5fa8591735934"
+    ]
   },
   {
     "id": "9313479240d5eddf",
@@ -7138,8 +7834,17 @@
   },
   {
     "id": "9436ce6f99c1dafb",
-    "sourceIds": ["9436ce6f99c1dafb", "22b3ad1d61eea0f9"],
-    "names": ["香川県警コラボ交通情報板12(香川県警察交通規制アンバサダー)"],
+    "sourceIds": [
+      "9436ce6f99c1dafb",
+      "22b3ad1d61eea0f9",
+      "57cc5f70953f4929",
+      "8f10f03e41499f29"
+    ],
+    "names": [
+      "香川県警コラボ交通情報板12(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板12",
+      "(掲載終了)香川県警コラボ交通情報板12(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [
       [34.3219704, 134.1991403],
       [34.3220413, 134.1991939]
@@ -7227,20 +7932,32 @@
   },
   {
     "id": "96aba3d15980ea60",
-    "sourceIds": ["96aba3d15980ea60"],
-    "names": ["raku spa 1010 神田(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["96aba3d15980ea60", "c87a14d6e1257953"],
+    "names": [
+      "raku spa 1010 神田(フロライフ 癒やしの湯巡り旅)",
+      "(終了)raku spa 1010 神田(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[35.698137, 139.767935]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
   {
     "id": "96bc0cd87751d688",
-    "sourceIds": ["96bc0cd87751d688", "df331337c3260eac", "67957155b1312093"],
-    "names": ["神保町駅", "神保町駅(azkiナビ)"],
+    "sourceIds": [
+      "96bc0cd87751d688",
+      "df331337c3260eac",
+      "67957155b1312093",
+      "1e2bbe47d91980a5"
+    ],
+    "names": [
+      "神保町駅",
+      "神保町駅(azkiナビ)",
+      "神保町駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.6959319, 139.7576272],
       [35.6959493, 139.758346]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": ["bb1b13391dfd16a5", "455173c3de439a0e"]
   },
   {
     "id": "96ceccfb36c649fb",
@@ -7289,8 +8006,12 @@
   },
   {
     "id": "973345b155aaa65f",
-    "sourceIds": ["973345b155aaa65f"],
-    "names": ["香川県警コラボ交通情報板13(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["973345b155aaa65f", "883271d753311411", "9ae0613712518c36"],
+    "names": [
+      "香川県警コラボ交通情報板13(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板13",
+      "(掲載終了)香川県警コラボ交通情報板13(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.2381243, 134.0278795]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -7332,10 +8053,15 @@
   },
   {
     "id": "97970ee020b28fb0",
-    "sourceIds": ["97970ee020b28fb0", "2671863c173eb4b2"],
-    "names": ["帝釈峡(azナビ)"],
+    "sourceIds": ["97970ee020b28fb0", "2671863c173eb4b2", "533a33ad48ef114c"],
+    "names": ["帝釈峡(azナビ)", "帝釈峡 ご当地ボイス(azkiナビ)"],
     "positions": [[34.8682437, 133.2051639]],
-    "descriptionKeys": ["d643e5a65bb03370"]
+    "descriptionKeys": [
+      "d643e5a65bb03370",
+      "bb1b13391dfd16a5",
+      "ddeef903c3cacdc0",
+      "7482d5aee4b356bc"
+    ]
   },
   {
     "id": "97a77875136b34b2",
@@ -7367,10 +8093,17 @@
   },
   {
     "id": "9838d588a20f6804",
-    "sourceIds": ["9838d588a20f6804", "04659ae6cb16517c"],
+    "sourceIds": [
+      "9838d588a20f6804",
+      "04659ae6cb16517c",
+      "e2f50f0ebc80c9c8",
+      "d2d9a9de30703d23"
+    ],
     "names": [
       "サンメッセ日南 モアイ像(古石ビジュー0)",
-      "サンメッセ日南 モアイ像(ホロメンマップ/古石ビジュー0)"
+      "サンメッセ日南 モアイ像(ホロメンマップ/古石ビジュー0)",
+      "サンメッセ日南 モアイ像(古石ビジュー)",
+      "サンメッセ日南 モアイ像(ホロメンマップ/古石ビジュー)"
     ],
     "positions": [[31.6623748, 131.4614391]],
     "descriptionKeys": ["5ffdc480b88d49e9", "8c37b1866fe8df86"]
@@ -7444,6 +8177,13 @@
     "names": ["3方向府道2号線の青看板(面白い・珍しい青看板)"],
     "positions": [[34.6352682, 135.5890435]],
     "descriptionKeys": ["a8c80c6305ea709d", "e1a7a65c8385ef42"]
+  },
+  {
+    "id": "99add0c7fdba5f4c",
+    "sourceIds": ["99add0c7fdba5f4c"],
+    "names": ["能勢電鉄 平野車庫(鉄道車両基地)"],
+    "positions": [[34.8678682, 135.4168387]],
+    "descriptionKeys": ["32e6cd5793547a69", "bc6819fdba4d20bc"]
   },
   {
     "id": "99c5b8d7fad05886",
@@ -7785,6 +8525,13 @@
     "descriptionKeys": ["4d0360686684950c", "6776d043392ae0dc"]
   },
   {
+    "id": "a02fdbd6b4ee29c8",
+    "sourceIds": ["a02fdbd6b4ee29c8"],
+    "names": ["奄美大島の海岸(空の日)"],
+    "positions": [[28.1910102, 129.2657673]],
+    "descriptionKeys": ["eb468c4d246c36a8", "e054e68326ec7e9f"]
+  },
+  {
     "id": "a036280b271fca06",
     "sourceIds": ["a036280b271fca06", "fdd02f1ca7539846"],
     "names": ["阪急電鉄 新淀川橋梁(take me to heaven)"],
@@ -7804,6 +8551,17 @@
     "names": ["豊島区立東池袋中央公園(にゃ~ん2026)"],
     "positions": [[35.7301743, 139.7184001]],
     "descriptionKeys": ["238fef3ab4e7fc3c", "28dd2b3bdb456e41"]
+  },
+  {
+    "id": "a108cb78dc509c85",
+    "sourceIds": ["a108cb78dc509c85"],
+    "names": ["駿河湾 ご当地ボイス(azkiナビ)"],
+    "positions": [[34.8993351, 138.347492]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "d6847585603aaeb2",
+      "589ef28acbe7269f"
+    ]
   },
   {
     "id": "a150765499b6ba24",
@@ -8051,10 +8809,23 @@
   },
   {
     "id": "a6c1f9d6a65619b9",
-    "sourceIds": ["a6c1f9d6a65619b9", "e151c52d817482e8", "2e64d163a51d7216"],
-    "names": ["東京都庭園美術館", "東京都庭園美術館(azkiナビ)"],
+    "sourceIds": [
+      "a6c1f9d6a65619b9",
+      "e151c52d817482e8",
+      "2e64d163a51d7216",
+      "74c687265b86a4b1"
+    ],
+    "names": [
+      "東京都庭園美術館",
+      "東京都庭園美術館(azkiナビ)",
+      "東京都庭園美術館 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[35.6369465, 139.7190408]],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "7d0f5cc3518fd16a",
+      "0cd6f4497a416f34"
+    ]
   },
   {
     "id": "a6e1f1082bc6d931",
@@ -8121,8 +8892,11 @@
   },
   {
     "id": "a829db20bbdfd415",
-    "sourceIds": ["a829db20bbdfd415"],
-    "names": ["極楽湯 福井店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["a829db20bbdfd415", "9b605a287df366cc"],
+    "names": [
+      "極楽湯 福井店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 福井店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[36.0747369, 136.2389667]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -8204,16 +8978,27 @@
   },
   {
     "id": "aac5ea686d25f9a8",
-    "sourceIds": ["aac5ea686d25f9a8", "a87d931e73342c03", "f61df76ddbcc8871"],
+    "sourceIds": [
+      "aac5ea686d25f9a8",
+      "a87d931e73342c03",
+      "f61df76ddbcc8871",
+      "01c69f9b5bb83d11"
+    ],
     "names": [
       "mazda zoom-zoomスタジアム広島",
-      "mazda zoom-zoomスタジアム広島(azkiナビ)"
+      "mazda zoom-zoomスタジアム広島(azkiナビ)",
+      "mazda zoom-zoomスタジアム広島 ご当地ボイス(azkiナビ)"
     ],
     "positions": [
       [34.3918689, 132.4845553],
       [34.3909393, 132.4825866]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "ce324a46e77e3bf3",
+      "a0f55fc1fa68887e"
+    ]
   },
   {
     "id": "aad650199b1e82f4",
@@ -8279,13 +9064,26 @@
   },
   {
     "id": "acfe4688625fb332",
-    "sourceIds": ["acfe4688625fb332", "0a51e4b95eefa1d9", "7d5883612074a8fa"],
-    "names": ["小豆坂小入口", "小豆坂小入口(azkiナビ)"],
+    "sourceIds": [
+      "acfe4688625fb332",
+      "0a51e4b95eefa1d9",
+      "7d5883612074a8fa",
+      "2d9a556355c50f86"
+    ],
+    "names": [
+      "小豆坂小入口",
+      "小豆坂小入口(azkiナビ)",
+      "小豆坂小入口 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.9261692, 137.1739633],
       [34.9262132, 137.1740974]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "2d28af42256c4292",
+      "9b53e774ddd702d7"
+    ]
   },
   {
     "id": "ad0e4ef83c98809e",
@@ -8313,8 +9111,11 @@
   },
   {
     "id": "ad8a8a916a88ef75",
-    "sourceIds": ["ad8a8a916a88ef75"],
-    "names": ["ヒナタの杜 小戸の湯どころ(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["ad8a8a916a88ef75", "5f5a550836a92962"],
+    "names": [
+      "ヒナタの杜 小戸の湯どころ(フロライフ 癒やしの湯巡り旅)",
+      "(終了)ヒナタの杜 小戸の湯どころ(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[33.5924209, 130.3170087]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -8328,6 +9129,24 @@
       "224072c262800d2b",
       "d99384c797d0c72c",
       "94ccfb26ee2d22e3"
+    ]
+  },
+  {
+    "id": "ade8f75f344194c4",
+    "sourceIds": ["ade8f75f344194c4"],
+    "names": ["正定寺上空(空の日)"],
+    "positions": [[36.196436, 139.7004307]],
+    "descriptionKeys": ["127a86da83ce1683", "50b9228e53f1a6db"]
+  },
+  {
+    "id": "ae1492e1caef9456",
+    "sourceIds": ["ae1492e1caef9456"],
+    "names": ["【推定】 お鷹ぽっぽ青看板 ご当地ボイス(azkiナビ)"],
+    "positions": [[37.8103138, 140.1112206]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "00f329ce6f0569fa",
+      "0cf2f83ce5d54d26"
     ]
   },
   {
@@ -8373,6 +9192,17 @@
     "descriptionKeys": ["eb56e9ee98723ac2", "ef59148602857657"]
   },
   {
+    "id": "aeeb053f8e48d0ea",
+    "sourceIds": ["aeeb053f8e48d0ea"],
+    "names": ["新潟県新潟市 ご当地ボイス(azkiナビ)"],
+    "positions": [[37.9217797, 139.0459983]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "1301b792b4ab8b45",
+      "100c66c25d76c597"
+    ]
+  },
+  {
     "id": "aef27370593b7d51",
     "sourceIds": ["aef27370593b7d51", "3a943b71a8d753f0"],
     "names": ["長野県上伊那のハト(日本のハト)"],
@@ -8391,13 +9221,27 @@
   },
   {
     "id": "af16635004eaf22a",
-    "sourceIds": ["af16635004eaf22a", "6e31c71a8bf10e68", "c282834109a7646b"],
-    "names": ["西(北)交差点", "西(北)交差点(azkiナビ)"],
+    "sourceIds": [
+      "af16635004eaf22a",
+      "6e31c71a8bf10e68",
+      "c282834109a7646b",
+      "945f3c4106c57ba6"
+    ],
+    "names": [
+      "西(北)交差点",
+      "西(北)交差点(azkiナビ)",
+      "西(北)交差点 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [26.2148502, 127.6712049],
       [26.2148334, 127.6713846]
     ],
-    "descriptionKeys": ["e6e973e230dd3acb"]
+    "descriptionKeys": [
+      "e6e973e230dd3acb",
+      "bb1b13391dfd16a5",
+      "3eca766647fe67b2",
+      "80d0c20b56a438df"
+    ]
   },
   {
     "id": "af1ad6ca5c5a7eff",
@@ -8675,10 +9519,23 @@
   },
   {
     "id": "b46b9637069399cf",
-    "sourceIds": ["b46b9637069399cf", "112ea345c1d1360e", "af5c04bd7a477c7d"],
-    "names": ["柿田川公園", "柿田川公園(azkiナビ)"],
+    "sourceIds": [
+      "b46b9637069399cf",
+      "112ea345c1d1360e",
+      "af5c04bd7a477c7d",
+      "681852f42df7dfb3"
+    ],
+    "names": [
+      "柿田川公園",
+      "柿田川公園(azkiナビ)",
+      "柿田川公園 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[35.1079289, 138.9014109]],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "fee5e4a2c83f09b5",
+      "88901cb6e28690c1"
+    ]
   },
   {
     "id": "b486d19df406e84b",
@@ -8710,13 +9567,27 @@
   },
   {
     "id": "b4ec4285797fcb8b",
-    "sourceIds": ["b4ec4285797fcb8b", "19bff1321900ae96", "10622bdf67843d9d"],
-    "names": ["三輪明神 大神神社", "三輪明神 大神神社(azkiナビ)"],
+    "sourceIds": [
+      "b4ec4285797fcb8b",
+      "19bff1321900ae96",
+      "10622bdf67843d9d",
+      "d17207852dcd6d56"
+    ],
+    "names": [
+      "三輪明神 大神神社",
+      "三輪明神 大神神社(azkiナビ)",
+      "三輪明神 大神神社 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.5287943, 135.8532348],
       [34.528865, 135.8525052]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "ff1caf0ae66e1670",
+      "1d9dc3fbdb29f95f"
+    ]
   },
   {
     "id": "b50f60fe445def32",
@@ -8727,8 +9598,12 @@
   },
   {
     "id": "b524153c594644cc",
-    "sourceIds": ["b524153c594644cc"],
-    "names": ["香川県警コラボ交通情報板4(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["b524153c594644cc", "58903ad9b0f226c9", "1d26654d4463b592"],
+    "names": [
+      "香川県警コラボ交通情報板4(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板4",
+      "(掲載終了)香川県警コラボ交通情報板4(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3149064, 133.8977165]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -8803,6 +9678,20 @@
     "descriptionKeys": ["659149b67383da61", "496658f64a4b4488"]
   },
   {
+    "id": "b6bd6070c1ade93a",
+    "sourceIds": ["b6bd6070c1ade93a"],
+    "names": ["jr東海 豊橋運輸区(鉄道車両基地)"],
+    "positions": [[34.7657428, 137.3809071]],
+    "descriptionKeys": ["7ed95c338306492b", "00e80306fb5e0e5b"]
+  },
+  {
+    "id": "b6cb33c3db438418",
+    "sourceIds": ["b6cb33c3db438418"],
+    "names": ["福井駅 ご当地ボイス(azkiナビ)"],
+    "positions": [[36.0616504, 136.2235456]],
+    "descriptionKeys": ["bb1b13391dfd16a5", "455173c3de439a0e"]
+  },
+  {
     "id": "b6f54d427edd54a1",
     "sourceIds": ["b6f54d427edd54a1"],
     "names": ["錦糸堀公園(パラノマサイト file23)"],
@@ -8828,13 +9717,37 @@
   },
   {
     "id": "b7aeed54f3e97626",
-    "sourceIds": ["b7aeed54f3e97626", "e57b6f070570b501", "dfc2a7b33c3c2099"],
-    "names": ["寒霞渓", "寒霞渓(azkiナビ)"],
+    "sourceIds": [
+      "b7aeed54f3e97626",
+      "e57b6f070570b501",
+      "dfc2a7b33c3c2099",
+      "ab989c87077aa11f"
+    ],
+    "names": ["寒霞渓", "寒霞渓(azkiナビ)", "寒霞渓 ご当地ボイス(azkiナビ)"],
     "positions": [
       [34.5165472, 134.3012678],
       [34.5167638, 134.3010479]
     ],
-    "descriptionKeys": ["addb414574624ed6"]
+    "descriptionKeys": [
+      "addb414574624ed6",
+      "bb1b13391dfd16a5",
+      "17c95ba516183f7b",
+      "fbad6f458572148e"
+    ]
+  },
+  {
+    "id": "b7e50ca9e2260b23",
+    "sourceIds": ["b7e50ca9e2260b23"],
+    "names": ["鈴川橋(日本マップの配信)"],
+    "positions": [[35.3688186, 139.3118032]],
+    "descriptionKeys": ["6dd5e70e1a7fc190", "0bf73fe0d916e863"]
+  },
+  {
+    "id": "b7e77dc705a8af4f",
+    "sourceIds": ["b7e77dc705a8af4f"],
+    "names": ["dpl横浜大黒(空の日)"],
+    "positions": [[35.4734451, 139.6683518]],
+    "descriptionKeys": ["b0f7faacefed695b", "72da0ff3e864b1fa"]
   },
   {
     "id": "b7ec07521170132a",
@@ -8905,13 +9818,26 @@
   },
   {
     "id": "b8b1a628933cff5d",
-    "sourceIds": ["b8b1a628933cff5d", "839f67f2e1fd172c", "d3193f4aea9a7203"],
-    "names": ["zozoマリンスタジアム", "zozoマリンスタジアム(azkiナビ)"],
+    "sourceIds": [
+      "b8b1a628933cff5d",
+      "839f67f2e1fd172c",
+      "d3193f4aea9a7203",
+      "59b5b1a93e53a4b9"
+    ],
+    "names": [
+      "zozoマリンスタジアム",
+      "zozoマリンスタジアム(azkiナビ)",
+      "zozoマリンスタジアム ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.6452433, 140.0309078],
       [35.6453348, 140.0309454]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "ef9e22d41808e2be",
+      "6fe2286968f5fd7a"
+    ]
   },
   {
     "id": "b954cbf555054a84",
@@ -9025,13 +9951,27 @@
   },
   {
     "id": "bb3c73e6371e2549",
-    "sourceIds": ["bb3c73e6371e2549", "6f5e09fd301ec842", "72b99a9c82b77ec2"],
-    "names": ["東京都写真美術館", "東京都写真美術館(azkiナビ)"],
+    "sourceIds": [
+      "bb3c73e6371e2549",
+      "6f5e09fd301ec842",
+      "72b99a9c82b77ec2",
+      "dadddcbd028271ae"
+    ],
+    "names": [
+      "東京都写真美術館",
+      "東京都写真美術館(azkiナビ)",
+      "東京都写真美術館 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.6416411, 139.7132893],
       [35.6411528, 139.7135012]
     ],
-    "descriptionKeys": ["addb414574624ed6"]
+    "descriptionKeys": [
+      "addb414574624ed6",
+      "bb1b13391dfd16a5",
+      "a1ffaf0a61e9e369",
+      "3b2f741697883290"
+    ]
   },
   {
     "id": "bb4b63fd79e60b17",
@@ -9422,8 +10362,11 @@
   },
   {
     "id": "c3829a81bd918b24",
-    "sourceIds": ["c3829a81bd918b24"],
-    "names": ["オリーブナビ小豆島(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["c3829a81bd918b24", "dff5ade842b79771"],
+    "names": [
+      "オリーブナビ小豆島(香川県警察交通規制アンバサダー)",
+      "(終了)オリーブナビ小豆島(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.4695916, 134.2744466]],
     "descriptionKeys": ["46eeee9e343d1562", "66b3bd17c54f49c2"]
   },
@@ -9469,6 +10412,13 @@
       "9bf52f7c90705be0",
       "ad076de0d0ce5108"
     ]
+  },
+  {
+    "id": "c495933300a9f158",
+    "sourceIds": ["c495933300a9f158"],
+    "names": ["志原海岸 ベアーズロック(空の日)"],
+    "positions": [[33.5676569, 135.4322608]],
+    "descriptionKeys": ["6562ad79461a5963", "15c68750f6b742a7"]
   },
   {
     "id": "c4b378895c7279d2",
@@ -9557,13 +10507,27 @@
   },
   {
     "id": "c60499353e161435",
-    "sourceIds": ["c60499353e161435", "d706f4e3acce08bc", "dcd4007b195656a5"],
-    "names": ["あずきミュージアム", "あずきミュージアム(azkiナビ)"],
+    "sourceIds": [
+      "c60499353e161435",
+      "d706f4e3acce08bc",
+      "dcd4007b195656a5",
+      "10c095d1cbd651b5"
+    ],
+    "names": [
+      "あずきミュージアム",
+      "あずきミュージアム(azkiナビ)",
+      "あずきミュージアム ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.824029, 134.7014873],
       [34.8240378, 134.7014497]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "43f71059b6db56d1",
+      "fada57df82ad9715"
+    ]
   },
   {
     "id": "c664afe3425378d2",
@@ -9661,13 +10625,22 @@
   },
   {
     "id": "c8707a1b76376d1c",
-    "sourceIds": ["c8707a1b76376d1c", "d9fd714debaa3b16", "e668f56198b9871b"],
-    "names": ["三島駅", "三島駅(azkiナビ)"],
+    "sourceIds": [
+      "c8707a1b76376d1c",
+      "d9fd714debaa3b16",
+      "e668f56198b9871b",
+      "6dcd17f6650dd0d4"
+    ],
+    "names": ["三島駅", "三島駅(azkiナビ)", "三島駅 ご当地ボイス(azkiナビ)"],
     "positions": [
       [35.1278448, 138.9105516],
       [35.1279369, 138.9107769]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "f1820b9f030fe753",
+      "8262abc1629d6eac"
+    ]
   },
   {
     "id": "c895a758bf2337ca",
@@ -9750,6 +10723,13 @@
     "names": ["富岡製糸場(2024年末ジオゲッサー/ミオしゃmap)"],
     "positions": [[36.2557505, 138.8889046]],
     "descriptionKeys": ["1509b515af566141", "2f42d0fe7bb6a4d7"]
+  },
+  {
+    "id": "cbd83e22130f5602",
+    "sourceIds": ["cbd83e22130f5602"],
+    "names": ["横浜市営地下鉄グリーンライン 川和車両基地(鉄道車両基地)"],
+    "positions": [[35.5224967, 139.5476244]],
+    "descriptionKeys": ["0f8990cca4aa40ce", "5299424eb73b3668"]
   },
   {
     "id": "cbf27ca7da2a1cc6",
@@ -9876,13 +10856,24 @@
   },
   {
     "id": "cd8630c61d20477f",
-    "sourceIds": ["cd8630c61d20477f", "50a7ce2f25ada7f4", "4ca7425a21e1f175"],
+    "sourceIds": [
+      "cd8630c61d20477f",
+      "50a7ce2f25ada7f4",
+      "4ca7425a21e1f175",
+      "f987864c662ce5f2"
+    ],
     "names": [
       "香川県ボイス 坂出北ic付近",
-      "香川県ボイス 坂出北ic付近 (azkiナビ)"
+      "香川県ボイス 坂出北ic付近 (azkiナビ)",
+      "香川県坂出市 ご当地ボイス(azkiナビ)"
     ],
     "positions": [[34.3195626, 133.8350353]],
-    "descriptionKeys": ["eb31eb11a1667b01"]
+    "descriptionKeys": [
+      "eb31eb11a1667b01",
+      "bb1b13391dfd16a5",
+      "51e34138f65c03c7",
+      "57a1b11f2d672eb0"
+    ]
   },
   {
     "id": "cd93bb88306b4e1e",
@@ -9934,8 +10925,12 @@
   },
   {
     "id": "ce1262c76111a16f",
-    "sourceIds": ["ce1262c76111a16f"],
-    "names": ["香川県警コラボ交通情報板16(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["ce1262c76111a16f", "a1ae2ea228f5002a", "231e8423eae27c0a"],
+    "names": [
+      "香川県警コラボ交通情報板16(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板16",
+      "(掲載終了)香川県警コラボ交通情報板16(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.310234, 134.0734042]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -10052,13 +11047,27 @@
   },
   {
     "id": "d0a1ace90498418f",
-    "sourceIds": ["d0a1ace90498418f", "0188e4e912d2ed72", "9d8e0043326ff88c"],
-    "names": ["百舌鳥駅", "百舌鳥駅(azkiナビ)"],
+    "sourceIds": [
+      "d0a1ace90498418f",
+      "0188e4e912d2ed72",
+      "9d8e0043326ff88c",
+      "96b250b43a794951"
+    ],
+    "names": [
+      "百舌鳥駅",
+      "百舌鳥駅(azkiナビ)",
+      "百舌鳥駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.5582252, 135.4889782],
       [34.558191, 135.4889232]
     ],
-    "descriptionKeys": ["e6e973e230dd3acb"]
+    "descriptionKeys": [
+      "e6e973e230dd3acb",
+      "bb1b13391dfd16a5",
+      "a14729c7f1fab911",
+      "08c34aac8b1ce792"
+    ]
   },
   {
     "id": "d0e97770c574e71e",
@@ -10301,6 +11310,17 @@
     "descriptionKeys": ["7f88a7fc063ae9ad", "a69f025fc2ac81c9"]
   },
   {
+    "id": "d511e6df8120c449",
+    "sourceIds": ["d511e6df8120c449"],
+    "names": ["藤花 ご当地ボイス(azkiナビ)"],
+    "positions": [[42.8310821, 141.6472014]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "b1468b7251be9fc2",
+      "e137a61e7b415d1c"
+    ]
+  },
+  {
     "id": "d513ca21d3846731",
     "sourceIds": ["d513ca21d3846731", "9c1c87c67ad324e9"],
     "names": ["わかさスタジアム京都(野球場)"],
@@ -10376,10 +11396,23 @@
   },
   {
     "id": "d5ff527d792de978",
-    "sourceIds": ["d5ff527d792de978", "5bba15c0ea706dd4", "13c789fdecec6679"],
-    "names": ["阪急うめだ本店", "阪急うめだ本店(azkiナビ)"],
+    "sourceIds": [
+      "d5ff527d792de978",
+      "5bba15c0ea706dd4",
+      "13c789fdecec6679",
+      "ff5173e9d783df8e"
+    ],
+    "names": [
+      "阪急うめだ本店",
+      "阪急うめだ本店(azkiナビ)",
+      "阪急うめだ本店 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[34.7028186, 135.4985323]],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "32aa1a524d1a2680",
+      "bdf2bcd543bdfcc5"
+    ]
   },
   {
     "id": "d6354dad7bd4c2aa",
@@ -10409,13 +11442,26 @@
   },
   {
     "id": "d7922893df54b7e2",
-    "sourceIds": ["d7922893df54b7e2", "142d99b137d5ba81", "0059243398c9454c"],
-    "names": ["名古屋県宝生町", "名古屋県宝生町(azkiナビ)"],
+    "sourceIds": [
+      "d7922893df54b7e2",
+      "142d99b137d5ba81",
+      "0059243398c9454c",
+      "7fd484163002c3ec"
+    ],
+    "names": [
+      "名古屋県宝生町",
+      "名古屋県宝生町(azkiナビ)",
+      "名古屋県宝生町 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.0872504, 136.9129601],
       [35.0868597, 136.9129547]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "beaeaed5da0db3f0",
+      "f44d1a626adb7075"
+    ]
   },
   {
     "id": "d7b1d7a39dd84cc1",
@@ -10553,13 +11599,27 @@
   },
   {
     "id": "da5ea77118e91b5c",
-    "sourceIds": ["da5ea77118e91b5c", "f6cd8e6dca6b1779", "950ec5b05402706b"],
-    "names": ["瓢箪山駅", "瓢箪山駅(azkiナビ)"],
+    "sourceIds": [
+      "da5ea77118e91b5c",
+      "f6cd8e6dca6b1779",
+      "950ec5b05402706b",
+      "59221a33e9e11718"
+    ],
+    "names": [
+      "瓢箪山駅",
+      "瓢箪山駅(azkiナビ)",
+      "瓢箪山駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [34.6620363, 135.639719],
       [34.6618576, 135.6400757]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "e802cb97a46379a7",
+      "2f89cb325da17cc5"
+    ]
   },
   {
     "id": "da603247a210d90e",
@@ -10609,8 +11669,11 @@
   },
   {
     "id": "db3eeb7d463c19c0",
-    "sourceIds": ["db3eeb7d463c19c0"],
-    "names": ["極楽湯グループ 鷹山の湯(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["db3eeb7d463c19c0", "545fbc7ea5c88458"],
+    "names": [
+      "極楽湯グループ 鷹山の湯(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯グループ 鷹山の湯(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[37.9367093, 140.1235913]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -10767,6 +11830,13 @@
     "descriptionKeys": ["799ebea391b9c004", "511c6068c23d8861"]
   },
   {
+    "id": "de8823efd4d3196f",
+    "sourceIds": ["de8823efd4d3196f"],
+    "names": ["神戸新交通 中埠頭車両基地(鉄道車両基地)"],
+    "positions": [[34.666756, 135.2195998]],
+    "descriptionKeys": ["cb57a46ee06200a2", "c9f1e27fc878f748"]
+  },
+  {
     "id": "defdbbe940af8814",
     "sourceIds": ["defdbbe940af8814", "f5b781bbafc2730d"],
     "names": ["きくなん動物病院(全国のくまモン)"],
@@ -10898,6 +11968,17 @@
     ]
   },
   {
+    "id": "e2eaaca52a8357ff",
+    "sourceIds": ["e2eaaca52a8357ff"],
+    "names": ["【推定】 ブルーシール1号店 ご当地ボイス(azkiナビ)"],
+    "positions": [[26.2668007, 127.7216067]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "8b58769fafa82931",
+      "9189017595f4c1b7"
+    ]
+  },
+  {
     "id": "e2eb349d8065d082",
     "sourceIds": ["e2eb349d8065d082", "5980a3746af1127c"],
     "names": [
@@ -10919,13 +12000,27 @@
   },
   {
     "id": "e3738b2ac688a31e",
-    "sourceIds": ["e3738b2ac688a31e", "9982129dfb22d13a", "4902627d9dd54f4c"],
-    "names": ["ゴリラ公園", "ゴリラ公園(azkiナビ)"],
+    "sourceIds": [
+      "e3738b2ac688a31e",
+      "9982129dfb22d13a",
+      "4902627d9dd54f4c",
+      "be624169db5125af"
+    ],
+    "names": [
+      "ゴリラ公園",
+      "ゴリラ公園(azkiナビ)",
+      "ゴリラ公園 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [
       [35.8395737, 139.6794672],
       [35.8397346, 139.679671]
     ],
-    "descriptionKeys": []
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "af1b54577bba76d2",
+      "aea598c0dc4dad75",
+      "05049911e713928f"
+    ]
   },
   {
     "id": "e386e8f360d9f6c2",
@@ -10991,10 +12086,23 @@
   },
   {
     "id": "e493e81235e18145",
-    "sourceIds": ["e493e81235e18145", "f91c9da933b7383b", "1bc195ecb6cd061e"],
-    "names": ["本厚木駅", "本厚木駅(azkiナビ)"],
+    "sourceIds": [
+      "e493e81235e18145",
+      "f91c9da933b7383b",
+      "1bc195ecb6cd061e",
+      "b3933cb15fc674fb"
+    ],
+    "names": [
+      "本厚木駅",
+      "本厚木駅(azkiナビ)",
+      "本厚木駅 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[35.4394083, 139.3644221]],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "455173c3de439a0e"
+    ]
   },
   {
     "id": "e4b78cc34477d231",
@@ -11069,8 +12177,12 @@
   },
   {
     "id": "e72a5a8627cb9245",
-    "sourceIds": ["e72a5a8627cb9245"],
-    "names": ["香川県警コラボ交通情報板15(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["e72a5a8627cb9245", "ce647446889b67b6", "d7a24bc376586ffa"],
+    "names": [
+      "香川県警コラボ交通情報板15(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板15",
+      "(掲載終了)香川県警コラボ交通情報板15(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3120636, 134.0324841]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -11294,8 +12406,11 @@
   },
   {
     "id": "eac1e31b0695e40f",
-    "sourceIds": ["eac1e31b0695e40f"],
-    "names": ["raku spa garden 名古屋(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["eac1e31b0695e40f", "5729e20bd0a73421"],
+    "names": [
+      "raku spa garden 名古屋(フロライフ 癒やしの湯巡り旅)",
+      "(終了)raku spa garden 名古屋(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[35.1786166, 136.9793808]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -11496,6 +12611,17 @@
     "descriptionKeys": ["bc012cdee7896818", "1ff13f961363e5a6"]
   },
   {
+    "id": "edb6738ebd946083",
+    "sourceIds": ["edb6738ebd946083"],
+    "names": ["【推定】 秋田市大森山動物園 ご当地ボイス(azkiナビ)"],
+    "positions": [[39.6731531, 140.0728519]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "3b30c601063b450c",
+      "f991693922d96aa5"
+    ]
+  },
+  {
     "id": "edd9fcbd4b7e5fb7",
     "sourceIds": ["edd9fcbd4b7e5fb7", "bcc9e596612a61b8"],
     "names": [
@@ -11527,6 +12653,13 @@
     ],
     "positions": [[35.7029421, 139.8009372]],
     "descriptionKeys": ["b83aa85f910facbf", "4a02b0f289223bf6"]
+  },
+  {
+    "id": "ef06362b7e619322",
+    "sourceIds": ["ef06362b7e619322"],
+    "names": ["若桜鉄道 若桜駅(鉄道車両基地)"],
+    "positions": [[35.3450351, 134.3987584]],
+    "descriptionKeys": ["3a7a043eda2e736a", "df15010ad5b376eb"]
   },
   {
     "id": "ef1db8ecda37435c",
@@ -11699,6 +12832,13 @@
     "descriptionKeys": ["392e29cfb1a90da9", "f61355ec02e8e9e4"]
   },
   {
+    "id": "f1c274be30f46f10",
+    "sourceIds": ["f1c274be30f46f10"],
+    "names": ["河口湖(空の日)"],
+    "positions": [[35.5232248, 138.7471107]],
+    "descriptionKeys": ["87276515587eb2c8", "33f86865f8c96251"]
+  },
+  {
     "id": "f1d5f78f14f40d03",
     "sourceIds": ["f1d5f78f14f40d03"],
     "names": ["白い恋人パーク(あずことげっさー)"],
@@ -11756,9 +12896,23 @@
     "descriptionKeys": ["afa61a4a47ac12f7", "0b73e477b707aaee"]
   },
   {
+    "id": "f36f10f94a2e671a",
+    "sourceIds": ["f36f10f94a2e671a"],
+    "names": ["道の駅 とわだ ご当地ボイス(azkiナビ)"],
+    "positions": [[40.5741796, 141.2629478]],
+    "descriptionKeys": [
+      "bb1b13391dfd16a5",
+      "b2a5a5e3a7a68388",
+      "f167c0bfabbd37a0"
+    ]
+  },
+  {
     "id": "f3a4698eca0baf70",
-    "sourceIds": ["f3a4698eca0baf70"],
-    "names": ["極楽湯 青森店(フロライフ 癒やしの湯巡り旅)"],
+    "sourceIds": ["f3a4698eca0baf70", "6405a637164144b6"],
+    "names": [
+      "極楽湯 青森店(フロライフ 癒やしの湯巡り旅)",
+      "(終了)極楽湯 青森店(フロライフ 癒やしの湯巡り旅)"
+    ],
     "positions": [[40.7973202, 140.742189]],
     "descriptionKeys": ["4050102d77912d73", "56a2f588b703b94d"]
   },
@@ -11831,10 +12985,24 @@
   },
   {
     "id": "f511ee710f0300b2",
-    "sourceIds": ["f511ee710f0300b2", "22d69971f164f8a7", "e662125d0219c6f7"],
-    "names": ["伊賀流忍者博物館", "伊賀流忍者博物館(azkiナビ)"],
+    "sourceIds": [
+      "f511ee710f0300b2",
+      "22d69971f164f8a7",
+      "e662125d0219c6f7",
+      "86dc7d5db50fa052"
+    ],
+    "names": [
+      "伊賀流忍者博物館",
+      "伊賀流忍者博物館(azkiナビ)",
+      "伊賀流忍者博物館 ご当地ボイス(azkiナビ)"
+    ],
     "positions": [[34.771836, 136.129799]],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "6bb6a81a0bc6b867",
+      "4e6994d57be13820"
+    ]
   },
   {
     "id": "f52268ac42374ac5",
@@ -11926,6 +13094,13 @@
     ]
   },
   {
+    "id": "f62e82831bb44128",
+    "sourceIds": ["f62e82831bb44128"],
+    "names": ["大井町の河津桜(空の日)"],
+    "positions": [[35.3338778, 139.1756539]],
+    "descriptionKeys": ["a1879b24eafbd5fc", "5deaea98a57e6f09"]
+  },
+  {
     "id": "f633e53e22ab7136",
     "sourceIds": ["f633e53e22ab7136", "69715e7edbf31b34"],
     "names": ["桜駅(さくらみこ)", "桜駅(ホロメンマップ/さくらみこ)"],
@@ -11934,16 +13109,27 @@
   },
   {
     "id": "f6522eb25390dded",
-    "sourceIds": ["f6522eb25390dded", "c987355578700c7e", "ae9131447d930048"],
+    "sourceIds": [
+      "f6522eb25390dded",
+      "c987355578700c7e",
+      "ae9131447d930048",
+      "bc5f342ab58f00de"
+    ],
     "names": [
       "高尾山口駅 / 高尾山ケーブルカー清滝駅",
-      "高尾山口駅 / 高尾山ケーブルカー清滝駅(azkiナビ)"
+      "高尾山口駅 / 高尾山ケーブルカー清滝駅(azkiナビ)",
+      "高尾山口駅 / 高尾山ケーブルカー清滝駅 ご当地ボイス(azkiナビ)"
     ],
     "positions": [
       [35.6310963, 139.2695627],
       [35.6310222, 139.2695251]
     ],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "7de679f51c7170cd",
+      "9b042876fa1b5343"
+    ]
   },
   {
     "id": "f65552e6c7398850",
@@ -12152,8 +13338,12 @@
   },
   {
     "id": "fa54870ccb03671d",
-    "sourceIds": ["fa54870ccb03671d"],
-    "names": ["香川県警コラボ交通情報板1(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["fa54870ccb03671d", "c42d47a51345762c", "15213a4d762c3966"],
+    "names": [
+      "香川県警コラボ交通情報板1(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板1",
+      "(掲載終了)香川県警コラボ交通情報板1(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.3069295, 134.0365272]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -12263,8 +13453,12 @@
   },
   {
     "id": "fcb156a4f0081c5e",
-    "sourceIds": ["fcb156a4f0081c5e"],
-    "names": ["香川県警コラボ交通情報板8(香川県警察交通規制アンバサダー)"],
+    "sourceIds": ["fcb156a4f0081c5e", "d12321b926d11b22", "f09a16b32742ac3c"],
+    "names": [
+      "香川県警コラボ交通情報板8(香川県警察交通規制アンバサダー)",
+      "(掲載終了)香川県警コラボ交通情報板8",
+      "(掲載終了)香川県警コラボ交通情報板8(香川県警察交通規制アンバサダー)"
+    ],
     "positions": [[34.307564, 134.0123734]],
     "descriptionKeys": [
       "a0a7a18aff59a09f",
@@ -12304,10 +13498,19 @@
   },
   {
     "id": "fd957147863b0054",
-    "sourceIds": ["fd957147863b0054", "098f1a94d9cb6444", "e85116a85bd22ae7"],
-    "names": ["札幌駅", "札幌駅(azkiナビ)"],
+    "sourceIds": [
+      "fd957147863b0054",
+      "098f1a94d9cb6444",
+      "e85116a85bd22ae7",
+      "83d9aade45f0978b"
+    ],
+    "names": ["札幌駅", "札幌駅(azkiナビ)", "札幌駅 ご当地ボイス(azkiナビ)"],
     "positions": [[43.0686134, 141.3507439]],
-    "descriptionKeys": ["17bc02b0b53f5624"]
+    "descriptionKeys": [
+      "17bc02b0b53f5624",
+      "bb1b13391dfd16a5",
+      "455173c3de439a0e"
+    ]
   },
   {
     "id": "fe1fc450d93ce300",
@@ -12315,6 +13518,13 @@
     "names": ["マクドナルド 国場十字路店(マクドナルド)"],
     "positions": [[26.1961565, 127.7052878]],
     "descriptionKeys": ["cf785c2bb01fe688", "ee3e8ed33818fde2"]
+  },
+  {
+    "id": "fe32c1007b09d197",
+    "sourceIds": ["fe32c1007b09d197"],
+    "names": ["厳島 大黒神島近海(空の日)"],
+    "positions": [[34.2037502, 132.3566449]],
+    "descriptionKeys": ["0e72319ba5e9cd13", "070c388eb90db833"]
   },
   {
     "id": "fe89fc6489e3e010",
