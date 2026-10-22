@@ -9,29 +9,33 @@ import {
   type SeichiMapLocationVisitorSummary,
 } from "@/app/lib/seichiMapVisitedSheet";
 import { NextResponse } from "next/server";
+import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const [response, visitorSummaries, userCount] = await Promise.all([
-      fetch(AZKI_SEICHI_MAP_KML_URL, {
-        cache: "no-store",
-        headers: {
-          Accept: "application/vnd.google-earth.kml+xml,text/xml,*/*",
-        },
-      }),
-      loadSeichiMapLocationVisitorSummaries().catch<
-        Record<string, SeichiMapLocationVisitorSummary>
-      >((error) => {
-        console.error("Failed to load seichi map visitor counts", error);
-        return {};
-      }),
-      loadSeichiMapUserCount().catch<number | null>((error) => {
-        console.error("Failed to load seichi map user count", error);
-        return null;
-      }),
-    ]);
+    const [response, visitorSummaries, userCount, registry] = await Promise.all(
+      [
+        fetch(AZKI_SEICHI_MAP_KML_URL, {
+          cache: "no-store",
+          headers: {
+            Accept: "application/vnd.google-earth.kml+xml,text/xml,*/*",
+          },
+        }),
+        loadSeichiMapLocationVisitorSummaries().catch<
+          Record<string, SeichiMapLocationVisitorSummary>
+        >((error) => {
+          console.error("Failed to load seichi map visitor counts", error);
+          return {};
+        }),
+        loadSeichiMapUserCount().catch<number | null>((error) => {
+          console.error("Failed to load seichi map user count", error);
+          return null;
+        }),
+        loadSeichiMapIdentityRegistry(),
+      ],
+    );
 
     if (!response.ok) {
       return NextResponse.json(
@@ -41,7 +45,7 @@ export async function GET() {
     }
 
     const kml = await response.text();
-    const items = parseSeichiMapKml(kml);
+    const items = parseSeichiMapKml(kml, registry.identities);
 
     const headers = new Headers({ "Cache-Control": "no-store" });
     if (userCount !== null) {

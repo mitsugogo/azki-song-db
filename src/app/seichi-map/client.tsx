@@ -132,6 +132,7 @@ import {
   toggleSeichiMapItineraryStop,
 } from "./itinerary";
 import { buildDokoAzPostUrl } from "./xShare";
+import { SeichiMapIdentityAdmin } from "./SeichiMapIdentityAdmin";
 
 const SeichiMapItinerary = dynamic(() =>
   import("./SeichiMapItinerary").then((module) => module.SeichiMapItinerary),
@@ -2027,6 +2028,7 @@ export default function SeichiMapCompleteClient({
         }
       }
       setLoading(false);
+      return true;
     } catch (error) {
       console.error(error);
       setErrorMessage(
@@ -2034,6 +2036,7 @@ export default function SeichiMapCompleteClient({
       );
       setLocationsLoading(false);
       setLoading(false);
+      return false;
     }
   }, [effectiveShareId, isSignedIn, t]);
 
@@ -3485,6 +3488,8 @@ export default function SeichiMapCompleteClient({
           userCount={userCount}
         />
       </Group>
+
+      <SeichiMapIdentityAdmin onReload={loadData} />
 
       {isSharedView ? (
         <Alert
