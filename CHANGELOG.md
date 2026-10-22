@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.48.0](https://github.com/mitsugogo/azki-song-db/compare/v2.47.0...v2.48.0) (2026-10-22)
+
+### Features
+
+* 聖地マップの地点IDマッピング管理を追加 ([dfb80e5](https://github.com/mitsugogo/azki-song-db/commit/dfb80e5bdc4645336668112889d86a4c99eb8043))
+
 ## [2.47.0](https://github.com/mitsugogo/azki-song-db/compare/v2.46.0...v2.47.0) (2026-10-17)
 
 ### Features
