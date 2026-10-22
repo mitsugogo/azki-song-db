@@ -31,11 +31,23 @@ vi.mock("@/app/lib/seichiMapVisitedSheet", () => ({
   loadSeichiMapVisitorRanking: loadVisitorRankingMock,
 }));
 
+vi.mock("@/app/lib/server/seichiMapIdentityRegistry", () => ({
+  loadSeichiMapIdentityRegistry: vi.fn(),
+}));
+
+import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
+
 import { GET } from "../route";
 
 describe("seichi-map ranking route", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.mocked(loadSeichiMapIdentityRegistry).mockResolvedValue({
+      identities: [],
+      version: 1,
+      updatedAt: null,
+    });
     loadLocationRankingMock.mockResolvedValue([
       { locationId: "cccccccccccccccc", uniqueVisitorCount: 99 },
       { locationId: "bbbbbbbbbbbbbbbb", uniqueVisitorCount: 2 },
@@ -64,6 +76,7 @@ describe("seichi-map ranking route", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
+    expect(parseSeichiMapKmlMock).toHaveBeenCalledWith("<kml />", []);
     expect(data).toEqual({
       locations: [
         {
@@ -95,5 +108,32 @@ describe("seichi-map ranking route", () => {
       "aaaaaaaaaaaaaaaa",
       "bbbbbbbbbbbbbbbb",
     ]);
+  });
+
+  it("DBマッピングを地点一覧と同じようにランキングにも使う", async () => {
+    const identities = [
+      {
+        id: "aaaaaaaaaaaaaaaa",
+        names: ["db"],
+        sourceIds: [],
+        positions: [],
+        descriptionKeys: [],
+      },
+    ];
+    vi.mocked(loadSeichiMapIdentityRegistry).mockResolvedValue({
+      identities,
+      version: 2,
+      updatedAt: null,
+    });
+    await GET();
+    expect(parseSeichiMapKmlMock).toHaveBeenCalledWith("<kml />", identities);
+  });
+
+  it("DB読込失敗時は静的JSONを使わず取得エラーにする", async () => {
+    vi.mocked(loadSeichiMapIdentityRegistry).mockRejectedValue(
+      new Error("unavailable"),
+    );
+    expect((await GET()).status).toBe(500);
+    expect(parseSeichiMapKmlMock).not.toHaveBeenCalled();
   });
 });

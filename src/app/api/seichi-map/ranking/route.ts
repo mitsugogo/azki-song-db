@@ -10,6 +10,7 @@ import {
   SEICHI_MAP_RANKING_LIMIT,
 } from "@/app/lib/seichiMapVisitedSheet";
 import { NextResponse } from "next/server";
+import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ const ADMINISTRATIVE_AREA_CONCURRENCY = 5;
 
 export async function GET() {
   try {
-    const [response, locationRows] = await Promise.all([
+    const [response, locationRows, registry] = await Promise.all([
       fetch(AZKI_SEICHI_MAP_KML_URL, {
         cache: "no-store",
         headers: {
@@ -25,6 +26,7 @@ export async function GET() {
         },
       }),
       loadSeichiMapLocationVisitorRanking(),
+      loadSeichiMapIdentityRegistry(),
     ]);
 
     if (!response.ok) {
@@ -34,7 +36,10 @@ export async function GET() {
       );
     }
 
-    const currentLocations = parseSeichiMapKml(await response.text());
+    const currentLocations = parseSeichiMapKml(
+      await response.text(),
+      registry.identities,
+    );
     const locationsById = new Map(
       currentLocations.map((location) => [location.id, location]),
     );

@@ -1367,6 +1367,36 @@
       "more": "もっとみる"
     }
   },
+  "SeichiMapIdentityAdmin": {
+    "title": "マッピング管理",
+    "description": "最新の聖地マップから地点IDのマッピングを生成します。差分を確認して反映すると、マップとランキングに適用されます。",
+    "preview": "生成して差分を確認",
+    "apply": "反映する",
+    "applying": "反映中…",
+    "summary": "KMLの地点数: {locationCount} / 登録総数: {registryCount} / 新規: {addedCount} / 履歴追加: {updatedCount} / 変更なし: {unchangedCount}",
+    "lastUpdated": "前回の更新: {date}",
+    "notInitialized": "DBには未保存です。初回は変更がなくても反映してください。",
+    "noChanges": "変更はありません。更新は不要です。",
+    "changes": "変更対象",
+    "location": "地点名",
+    "id": "地点ID",
+    "kind": "変更種別",
+    "added": "新規",
+    "updated": "履歴追加",
+    "saved": "マッピングをDBに保存しました。",
+    "reloadFailed": "保存は完了しましたが、表示データを再取得できませんでした。マップを再取得してください。",
+    "reload": "マップを再取得",
+    "errors": {
+      "forbidden": "管理者権限を確認できません。ログイン状態を確認してください。",
+      "invalid_request": "更新リクエストが不正です。差分確認からやり直してください。",
+      "conflict": "別の更新が反映されたか、生成結果が変わりました。差分確認からやり直してください。",
+      "kml_unavailable": "最新KMLを取得できませんでした。「生成して差分を確認」から再試行してください。",
+      "invalid_kml": "KMLに有効な地点がないか、不正な地点・重複IDが含まれています。マッピングは更新していません。",
+      "invalid_registry": "マッピングデータの形式が不正です。管理者によるデータ確認が必要です。",
+      "storage_failed": "DBの読み込みまたは保存に失敗しました。接続状態を確認し、差分確認からやり直してください。",
+      "request_failed": "通信に失敗したか、処理結果を確認できませんでした。差分確認から現在の状態を確認してください。"
+    }
+  },
   "SeichiMapComplete": {
     "userName": "ユーザー",
     "breadcrumb": "聖地マップ",

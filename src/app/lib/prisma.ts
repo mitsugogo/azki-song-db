@@ -8,7 +8,7 @@ declare global {
   var prismaSchemaVersion: string | undefined;
 }
 
-const PRISMA_SCHEMA_VERSION = "seichi-map-profile-v1";
+const PRISMA_SCHEMA_VERSION = "seichi-map-identity-registry-v1";
 
 export const getPrisma = () => {
   if (global.prisma && global.prismaSchemaVersion === PRISMA_SCHEMA_VERSION) {

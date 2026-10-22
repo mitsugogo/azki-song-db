@@ -18,6 +18,14 @@ enum PlaylistVisibility {
   PUBLIC
 }
 
+model SeichiMapIdentityRegistry {
+  key        String   @id @db.VarChar(32)
+  identities Json
+  version    Int
+  updatedAt  DateTime @updatedAt
+  updatedBy  String   @db.VarChar(255)
+}
+
 model SeichiMapVisited {
   /// レコードの一意識別子
   id           String   @id

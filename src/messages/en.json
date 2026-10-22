@@ -1376,6 +1376,36 @@
       "close": "fold"
     }
   },
+  "SeichiMapIdentityAdmin": {
+    "title": "Location mapping management",
+    "description": "Generate location ID mappings from the latest pilgrimage map. Review and apply the changes to update the map and rankings.",
+    "preview": "Generate and review changes",
+    "apply": "Apply changes",
+    "applying": "Applying…",
+    "summary": "KML locations: {locationCount} / Registry entries: {registryCount} / New: {addedCount} / History extended: {updatedCount} / Unchanged: {unchangedCount}",
+    "lastUpdated": "Last updated: {date}",
+    "notInitialized": "Not yet saved to the database. Apply once even if there are no changes.",
+    "noChanges": "No changes. No update is needed.",
+    "changes": "Changed locations",
+    "location": "Location",
+    "id": "Location ID",
+    "kind": "Change type",
+    "added": "New",
+    "updated": "History extended",
+    "saved": "The mappings have been saved to the database.",
+    "reloadFailed": "The mappings were saved, but the displayed data could not be refreshed. Reload the map data.",
+    "reload": "Reload map data",
+    "errors": {
+      "forbidden": "Administrator access could not be verified. Check your sign-in status.",
+      "invalid_request": "The update request is invalid. Generate a new preview.",
+      "conflict": "Another update was applied or the generated mappings changed. Generate a new preview.",
+      "kml_unavailable": "The latest KML could not be loaded. Generate a new preview to retry.",
+      "invalid_kml": "The KML has no valid locations, invalid locations, or duplicate IDs. The mappings have not been updated.",
+      "invalid_registry": "The mapping data is invalid. An administrator needs to inspect the data.",
+      "storage_failed": "The database could not be read or updated. Check the connection and generate a new preview.",
+      "request_failed": "The request failed or its result could not be confirmed. Generate a new preview to check the current state."
+    }
+  },
   "SeichiMapComplete": {
     "userName": "User",
     "breadcrumb": "Seichi Map",
