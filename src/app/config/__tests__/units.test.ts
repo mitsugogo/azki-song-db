@@ -14,6 +14,7 @@ describe("units", () => {
       "rosamia",
       "as-tar",
       "soraz",
+      "azki-else",
     ]);
   });
 
@@ -118,11 +119,12 @@ describe("units", () => {
     });
   });
 
-  it("uses a curated event-focused history only for SorAZ", () => {
+  it("uses curated event-focused histories for SorAZ and AZKi & Else", () => {
     expect(getUnitBySlug("soraz")?.includeWorksInHistory).toBe(false);
+    expect(getUnitBySlug("azki-else")?.includeWorksInHistory).toBe(false);
     expect(
       units
-        .filter((unit) => unit.slug !== "soraz")
+        .filter((unit) => !["soraz", "azki-else"].includes(unit.slug))
         .every((unit) => unit.includeWorksInHistory === undefined),
     ).toBe(true);
   });

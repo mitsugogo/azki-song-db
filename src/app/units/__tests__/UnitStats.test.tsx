@@ -1,6 +1,6 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { theme } from "../../theme";
 import type { ArchiveItem } from "../../types/archiveItem";
 import type { ChannelEntry } from "../../types/api/yt/channels";
@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   unitArchives: [] as ArchiveItem[],
   allArchives: [] as ArchiveItem[],
   channels: [] as ChannelEntry[],
+  unitArchivesLoading: false,
 }));
 
 vi.mock("next-intl", () => ({
@@ -40,7 +41,10 @@ vi.mock("@/app/hook/useChannels", () => ({
 }));
 
 vi.mock("../components/useUnitArchives", () => ({
-  useUnitArchives: () => ({ items: mocks.unitArchives, isLoading: false }),
+  useUnitArchives: () => ({
+    items: mocks.unitArchives,
+    isLoading: mocks.unitArchivesLoading,
+  }),
 }));
 
 import UnitStats from "../components/UnitStats";
@@ -78,6 +82,10 @@ const createArchive = (
 });
 
 describe("UnitStats", () => {
+  beforeEach(() => {
+    mocks.unitArchivesLoading = false;
+  });
+
   beforeAll(() => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -184,6 +192,78 @@ describe("UnitStats", () => {
     expect(
       screen.getByRole("link", { name: /一緒に配信した時間/ }),
     ).toHaveAttribute("href", archiveHref);
+  });
+
+  it.each([true, false])(
+    "totals non-Hololive archives without a ranking badge (channel metadata: %s)",
+    (hasChannelMetadata) => {
+      mocks.unitArchives = [
+        createArchive("dam", "1:29:35", ["AZKi", "エルセ", "HACHI"]),
+        createArchive("room", "1:30:53", ["AZKi", "エルセ"]),
+        createArchive("talk", "1:04:55", ["AZKi", "エルセ", "鈴鳴すばる"]),
+        createArchive("radio", "1:12:31", ["AZKi", "エルセ", "さめのぽき"]),
+        createArchive("short", "PT1M", ["AZKi", "エルセ"], "#Shorts"),
+      ];
+      mocks.allArchives = mocks.unitArchives;
+      mocks.channels = [
+        createChannel("AZKi", "azki"),
+        ...(hasChannelMetadata
+          ? [{ ...createChannel("エルセ", "else"), branch: "ProjectBLUE" }]
+          : []),
+      ];
+
+      render(
+        <MantineProvider theme={theme}>
+          <UnitStats
+            participants={["エルセ"]}
+            unitName="エルあず"
+            unitSearchName="エルあず"
+            activityDays={2683}
+            uniqueSongCount={8}
+            performanceCount={9}
+          />
+        </MantineProvider>,
+      );
+
+      expect(screen.getByText("5h18m")).toBeVisible();
+      expect(screen.queryByLabelText(/配信時間順位/)).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /一緒に配信した時間/ }),
+      ).toHaveAttribute(
+        "href",
+        "/stream-archives/list?cast=%E3%82%A8%E3%83%AB%E3%82%BB",
+      );
+    },
+  );
+
+  it("waits for unranked unit archives before showing their duration", () => {
+    mocks.unitArchives = [];
+    mocks.unitArchivesLoading = true;
+    mocks.allArchives = [];
+    mocks.channels = [];
+    const content = () => (
+      <MantineProvider theme={theme}>
+        <UnitStats
+          participants={["エルセ"]}
+          unitName="エルあず"
+          unitSearchName="エルあず"
+          activityDays={2683}
+          uniqueSongCount={8}
+          performanceCount={9}
+        />
+      </MantineProvider>
+    );
+    const { rerender } = render(content());
+
+    expect(
+      screen.getByRole("link", { name: /一緒に配信した時間/ }),
+    ).not.toHaveTextContent("0m");
+
+    mocks.unitArchives = [createArchive("else", "PT1H", ["AZKi", "エルセ"])];
+    mocks.unitArchivesLoading = false;
+    rerender(content());
+
+    expect(screen.getByText("1h")).toBeVisible();
   });
 
   it("shows the AS_tar activity period alongside its INNK roots", () => {

@@ -2100,7 +2100,7 @@
     "statsSongsTogether": "一緒に歌った曲",
     "statsPerformancesSub": "延べ{count}回歌唱",
     "historyTitle": "History",
-    "historyDescription": "結成からこれまでの主なできごと",
+    "historyDescription": "これまでの主なできごと",
     "historyDescriptionWithLegacy": "{name}時代から現在までの主なできごと",
     "historyEmpty": "表示できるヒストリーがありません。",
     "historyType": {

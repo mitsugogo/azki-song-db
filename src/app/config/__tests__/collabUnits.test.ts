@@ -142,4 +142,16 @@ describe("collabUnits utilities", () => {
     expect(isCollabUnit("azbae") || isCollabUnit("AZBae")).toBeTruthy();
     expect(isCollabUnit("nope")).toBe(false);
   });
+
+  it("uses El-Azu while preserving the previous search names", () => {
+    expect(getCollabUnitName(["AZKi", "エルセ"])).toBe("エルあず");
+    expect(getCollabUnitName(["Else", "AZKi"], "en")).toBe("El-Azu");
+    expect(getCollabMembers("エルあず")).toEqual(["AZKi", "エルセ"]);
+    expect(getCollabMembers("El-Azu", "en")).toEqual(["AZKi", "Else"]);
+    expect(getCollabMembers("AZKi・エルセ")).toEqual(["AZKi", "エルセ"]);
+    expect(getCollabMembers("AZKi & Else", "en")).toEqual(["AZKi", "Else"]);
+    for (const name of ["エルあず", "El-Azu", "AZKi・エルセ", "AZKi & Else"]) {
+      expect(isCollabUnit(name)).toBe(true);
+    }
+  });
 });

@@ -11,6 +11,7 @@ import {
   createChannelsByParticipantName,
   resolveArchiveParticipants,
 } from "@/app/lib/archiveParticipants";
+import { parseVideoDurationSeconds } from "@/app/lib/videoDuration";
 import { formatCompactActivityDuration } from "@/app/stream-archives/archiveActivity";
 import {
   createArchiveCollaborationCombinationRanking,
@@ -108,6 +109,19 @@ export default function UnitStats({
       : null;
   const isCollaborationRankingLoading =
     areAllArchivesLoading || areChannelsLoading;
+  // The archive rankings cover Hololive members; other collaborators still have duration data.
+  const streamDurationSeconds =
+    collaboration?.totalDurationSeconds ??
+    archives.reduce(
+      (total, archive) =>
+        total +
+        (isShortsArchive(archive)
+          ? 0
+          : (parseVideoDurationSeconds(archive.video_duration) ?? 0)),
+      0,
+    );
+  const isStreamDurationLoading =
+    isCollaborationRankingLoading || (!collaboration && isLoading);
   const archiveSearchParams = new URLSearchParams();
   participants.forEach((participant) =>
     archiveSearchParams.append("cast", participant),
@@ -130,13 +144,9 @@ export default function UnitStats({
       href: archiveHref,
     },
     {
-      value: isCollaborationRankingLoading ? null : (
+      value: isStreamDurationLoading ? null : (
         <span className="flex flex-wrap items-center gap-2">
-          <span>
-            {formatCompactActivityDuration(
-              collaboration?.totalDurationSeconds ?? 0,
-            )}
-          </span>
+          <span>{formatCompactActivityDuration(streamDurationSeconds)}</span>
           {collaborationRank !== null && collaborationRank <= 10 ? (
             <Badge
               variant="filled"
