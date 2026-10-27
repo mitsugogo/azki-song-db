@@ -1,14 +1,22 @@
-import { NextResponse } from "next/server";
-import { createMyBestNineSongsEntry } from "@/app/lib/myBestNineSongsSheet";
+import { NextRequest, NextResponse } from "next/server";
+import { saveBestNineResponse } from "@/app/lib/server/bestNineTopics";
+import { requireUserId } from "@/app/lib/server/requireUser";
+import {
+  assertSameOrigin,
+  readGuestToken,
+} from "@/app/lib/server/bestNineParticipant";
+import { bestNineApi, readBestNineJson } from "@/app/lib/server/bestNineApi";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const created = await createMyBestNineSongsEntry(body);
-    return NextResponse.json({ id: created.id }, { status: 201 });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "保存に失敗しました";
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
-}
+export const POST = (request: NextRequest) =>
+  bestNineApi(async () => {
+    assertSameOrigin(request);
+    const userId = await requireUserId();
+    return NextResponse.json(
+      await saveBestNineResponse(
+        await readBestNineJson(request),
+        userId,
+        readGuestToken(request),
+      ),
+      { status: 201 },
+    );
+  });

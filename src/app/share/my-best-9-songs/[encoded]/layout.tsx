@@ -1,3 +1,4 @@
+import { bestNineOgSize } from "@/app/lib/myBestNineSongsOg";
 import type { Metadata } from "next";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -45,8 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // OG 画像 URL
   const ogImageUrl = new URL("/api/og/share/my-best-9-songs", baseUrl);
   ogImageUrl.searchParams.set("id", id);
-  ogImageUrl.searchParams.set("w", "1200");
-  ogImageUrl.searchParams.set("h", "630");
+  ogImageUrl.searchParams.set("hl", locale);
+  ogImageUrl.searchParams.set("w", String(bestNineOgSize.width));
+  ogImageUrl.searchParams.set("h", String(bestNineOgSize.height));
+  ogImageUrl.searchParams.set("v", "cards-v2");
 
   // Canonical URL
   const canonical = new URL(`/share/my-best-9-songs/${id}`, baseUrl);
@@ -64,8 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url: ogImagePath,
-          width: 1200,
-          height: 630,
+          ...bestNineOgSize,
           alt: ogTitle,
         },
       ],

@@ -12,6 +12,13 @@ import { useGlobalPlayer } from "@/app/hook/useGlobalPlayer";
 import { Song } from "@/app/types/song";
 import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 
+import {
+  buildThemeQuery,
+  hasFixedSlots,
+  normalizeSelection,
+  resolveBestNineSlots,
+} from "@/app/lib/myBestNineSongs";
+
 export default function Page() {
   const params = useParams<{ encoded: string }>();
   const encodedParam = params?.encoded;
@@ -37,20 +44,6 @@ export default function Page() {
     setIsPlaying(true);
   };
 
-  const normalizeStart = (value: unknown): string | null => {
-    if (value === null || value === undefined) return null;
-
-    const trimmed = String(value).trim();
-    if (!trimmed) return null;
-
-    const withoutSuffix = trimmed.replace(/s$/i, "");
-    const numeric = Number(withoutSuffix);
-    if (Number.isFinite(numeric)) {
-      return String(numeric);
-    }
-    return withoutSuffix;
-  };
-
   // 曲データを取得して、9選をデコード
   useEffect(() => {
     if (!encoded) return;
@@ -70,7 +63,7 @@ export default function Page() {
             selection?: MyBestNineSongs;
           };
           if (savedData.selection) {
-            setSelection(savedData.selection);
+            setSelection(normalizeSelection(savedData.selection));
             return;
           }
         }
@@ -97,34 +90,12 @@ export default function Page() {
   const isLoading = isSelectionLoading || isSongsLoading;
 
   // フック順序を固定するため、selection が null の場合も常に評価する
-  const selectedSongs = useMemo(() => {
-    if (!selection) return [] as Song[];
-
-    return selection.songs
-      .map((entry) => {
-        const normalizedEntryStart = normalizeStart(entry.s);
-        if (!normalizedEntryStart) return undefined;
-
-        const exact = allSongs.find((s) => {
-          const normalizedSongStart = normalizeStart(s.start);
-          return (
-            s.video_id === entry.v &&
-            normalizedSongStart !== null &&
-            normalizedSongStart === normalizedEntryStart
-          );
-        });
-        if (exact) return exact;
-
-        // 旧データ向け: 同じ video_id が1件しかない場合のみ安全にフォールバック
-        const sameVideoSongs = allSongs.filter((s) => s.video_id === entry.v);
-        if (sameVideoSongs.length === 1) {
-          return sameVideoSongs[0];
-        }
-
-        return undefined;
-      })
-      .filter((s) => s !== undefined) as Song[];
-  }, [selection, allSongs]);
+  const slots = useMemo(
+    () => (selection ? resolveBestNineSlots(selection, allSongs) : []),
+    [selection, allSongs],
+  );
+  const selectedSongs = slots.flatMap((slot) => (slot.song ? [slot.song] : []));
+  const themed = hasFixedSlots(selection);
 
   if (isLoading) {
     return (
@@ -162,7 +133,9 @@ export default function Page() {
 
   // 見つからなかった曲の情報を保持
   const missingCount = selection.songs.length - selectedSongs.length;
-  const createPageHref = `/share/my-best-9-songs?title=${encodeURIComponent(selection.title)}`;
+  const createPageHref = selection.topicId
+    ? `/share/my-best-9-songs?topic=${encodeURIComponent(selection.topicId)}`
+    : `/share/my-best-9-songs?${buildThemeQuery(selection.title, selection.themes)}`;
 
   return (
     <div className="grow p-4 lg:p-6 overflow-auto">
@@ -188,53 +161,77 @@ export default function Page() {
         </div>
 
         {/* 3x3 グリッド */}
-        {selectedSongs.length > 0 ? (
+        {themed || selectedSongs.length > 0 ? (
           <div className="grid grid-cols-3 gap-4 lg:gap-6 mb-8">
-            {selectedSongs.map((song, idx) => (
-              <div
-                key={`${song.video_id}-${song.start}-${idx}`}
-                className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
-              >
-                <button
-                  type="button"
-                  onClick={() => handlePreviewSong(song)}
-                  aria-label={`${song.title} をミニプレイヤで再生`}
-                  className="block w-full text-left cursor-pointer"
-                >
-                  <div className="aspect-video bg-black relative overflow-hidden">
-                    <YoutubeThumbnail
-                      videoId={song.video_id}
-                      alt={song.title}
-                    />
-                    {/* オーバーレイ */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <svg
-                        className="w-12 h-12 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
+            {(themed ? slots : slots.filter((slot) => slot.song)).map(
+              ({ song, theme, entry, slot: idx }) =>
+                song ? (
+                  <div
+                    key={`${song.video_id}-${song.start}-${idx}`}
+                    className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
+                  >
+                    {themed && (
+                      <p className="p-3 text-sm font-bold whitespace-normal break-words">
+                        {idx + 1}. {theme || t("myBest9.themes.freeSlot")}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handlePreviewSong(song)}
+                      aria-label={`${song.title} をミニプレイヤで再生`}
+                      className="block w-full text-left cursor-pointer"
+                    >
+                      <div className="aspect-video bg-black relative overflow-hidden">
+                        <YoutubeThumbnail
+                          videoId={song.video_id}
+                          alt={song.title}
+                        />
+                        {/* オーバーレイ */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <svg
+                            className="w-12 h-12 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* 曲情報 */}
+                    <div className="p-3 lg:p-4">
+                      <Link
+                        href={`/watch?v=${song.video_id}&t=${song.start}`}
+                        className="block"
                       >
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                      </svg>
+                        <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
+                          {song.title}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
+                        {song.artist}
+                      </p>
                     </div>
                   </div>
-                </button>
-
-                {/* 曲情報 */}
-                <div className="p-3 lg:p-4">
-                  <Link
-                    href={`/watch?v=${song.video_id}&t=${song.start}`}
-                    className="block"
+                ) : (
+                  <div
+                    key={`empty-${idx}`}
+                    className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-800"
                   >
-                    <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
-                      {song.title}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
-                    {song.artist}
-                  </p>
-                </div>
-              </div>
-            ))}
+                    <p className="text-sm font-bold whitespace-normal break-words">
+                      {idx + 1}. {theme || t("myBest9.themes.freeSlot")}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-4">
+                      {t(
+                        entry
+                          ? "myBest9.themes.missingSong"
+                          : "myBest9.themes.unanswered",
+                      )}
+                    </p>
+                  </div>
+                ),
+            )}
           </div>
         ) : (
           <div className="text-center py-12">

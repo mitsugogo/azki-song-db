@@ -151,3 +151,66 @@ model LegacyPlaylistImport {
   @@unique([userId, fingerprint], map: "LegacyPlaylistImport_user_fingerprint_key")
   @@index([playlistId], map: "LegacyPlaylistImport_playlist_idx")
 }
+
+model BestNineTopic {
+  id             String                  @id @default(uuid()) @db.Char(36)
+  ownerId        String                  @db.VarChar(255)
+  currentVersion Int                     @default(1)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  revisions      BestNineTopicRevision[]
+
+  @@index([ownerId, updatedAt])
+}
+
+/// 公開済みのお題は変更せず、編集のたびに改訂を追加する。
+model BestNineTopicRevision {
+  id             String             @id @default(uuid()) @db.Char(36)
+  topicId        String             @db.Char(36)
+  version        Int
+  title          String             @db.VarChar(50)
+  themes         Json
+  /// NULL は従来のお題（全カテゴリ）。
+  slotCategories Json?
+  createdAt      DateTime           @default(now())
+  topic          BestNineTopic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
+  responses      BestNineResponse[]
+
+  @@unique([topicId, version])
+}
+
+model BestNineResponse {
+  id            String                  @id @db.VarChar(20)
+  revisionId    String?                 @db.Char(36)
+  /// アカウントIDとゲストCookieは異なる名前空間でHMAC化する。
+  respondentKey String                  @db.Char(64)
+  /// Googleログイン時のみ設定。ゲスト用の架空ユーザーは作らない。
+  userId        String?                 @db.VarChar(255)
+  selection     Json
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  revision      BestNineTopicRevision?  @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  entries       BestNineResponseEntry[]
+
+  @@unique([revisionId, respondentKey])
+  @@index([revisionId, userId])
+}
+
+model BestNineResponseEntry {
+  responseId     String           @db.VarChar(20)
+  slot           Int
+  videoId        String           @db.VarChar(100)
+  start          String           @db.VarChar(32)
+  /// 集計用の曲名・歌手はサーバーで取得した日本語の原表記を保存する。
+  songKey        String           @db.Char(64)
+  /// MySQLの照合順序に依存せず、動画IDの大文字・小文字を区別する。
+  performanceKey String           @db.Char(64)
+  videoTitle     String           @db.VarChar(500)
+  broadcastAt    String           @db.VarChar(64)
+  title          String           @db.VarChar(500)
+  artist         String           @db.VarChar(500)
+  response       BestNineResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@id([responseId, slot])
+  @@index([songKey])
+}

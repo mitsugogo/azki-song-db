@@ -1,72 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { MyBestNineSongs } from "@/app/hook/useMyBestNineSongs";
 
-// デコード/エンコード検証（貼り込み実装）
-const encodeToUrlParam = (selection: MyBestNineSongs): string => {
-  const compressedData = {
-    t: selection.title,
-    a: selection.author,
-    s: selection.songs,
-  };
-
-  const jsonString = JSON.stringify(compressedData);
-  const encoder = new TextEncoder();
-  const utf8Bytes = encoder.encode(jsonString);
-
-  const binaryString = String.fromCharCode(...utf8Bytes);
-  const base64 = btoa(binaryString);
-
-  const base64url = base64
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
-  return base64url;
-};
-
-const decodeFromUrlParam = (param: string): MyBestNineSongs | null => {
-  try {
-    let base64 = param.replace(/-/g, "+").replace(/_/g, "/");
-    const padding = 4 - (base64.length % 4);
-    if (padding !== 4) {
-      base64 += "=".repeat(padding);
-    }
-
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    const decoder = new TextDecoder();
-    const decoded = decoder.decode(bytes);
-    const compressedJson = JSON.parse(decoded);
-
-    const selection: MyBestNineSongs = {
-      title: compressedJson.t || "",
-      author: compressedJson.a,
-      songs: (compressedJson.s || []).map(
-        (entry: { v: string; s: string }) => ({
-          v: entry.v,
-          s: entry.s,
-        }),
-      ),
-    };
-
-    if (
-      !selection.title ||
-      !Array.isArray(selection.songs) ||
-      selection.songs.length > 9
-    ) {
-      return null;
-    }
-
-    return selection;
-  } catch (e) {
-    console.error("Failed to decode MyBestNineSongs:", e);
-    return null;
-  }
-};
+import {
+  encodeSelection as encodeToUrlParam,
+  decodeSelection as decodeFromUrlParam,
+} from "@/app/lib/myBestNineSongs";
 
 describe("MyBestNineSongs codec", () => {
   it("シンプルな9選データをエンコード/デコードできる", () => {
