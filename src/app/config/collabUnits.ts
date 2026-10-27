@@ -4,6 +4,7 @@
 export interface CollabUnit {
   members: string[]; // メンバー名配列（ソート順は問わない）
   unitName: string; // 通称
+  aliases?: string[]; // 検索で受け付ける別名
 
   hl?: {
     en: {
@@ -20,6 +21,12 @@ const sortJapaneseAndEnglish = (a: string, b: string): number => {
 
 // コラボユニット定義
 export const collabUnits: CollabUnit[] = [
+  {
+    members: ["AZKi", "エルセ"],
+    unitName: "エルあず",
+    aliases: ["AZKi・エルセ", "AZKi & Else"],
+    hl: { en: { unitName: "El-Azu", members: ["AZKi", "Else"] } },
+  },
   {
     members: ["AZKi", "星街すいせい"],
     unitName: "AS_tar",
@@ -636,6 +643,7 @@ export const getCollabMembers = (
   const target = normalize(unitName);
   const unit = collabUnits.find((u) => {
     if (normalize(u.unitName) === target) return true;
+    if (u.aliases?.some((alias) => normalize(alias) === target)) return true;
     if (u.hl && u.hl.en && normalize(u.hl.en.unitName) === target) return true;
     return false;
   });
@@ -653,6 +661,7 @@ export const isCollabUnit = (unitName: string): boolean => {
   const target = normalize(unitName);
   return collabUnits.some((u) => {
     if (normalize(u.unitName) === target) return true;
+    if (u.aliases?.some((alias) => normalize(alias) === target)) return true;
     if (u.hl && u.hl.en && normalize(u.hl.en.unitName) === target) return true;
     return false;
   });

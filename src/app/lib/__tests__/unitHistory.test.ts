@@ -558,4 +558,17 @@ describe("unitHistory", () => {
     expect(selected?.video_id).toBe("hero");
     vi.restoreAllMocks();
   });
+
+  it("keeps AZKi & Else duets separate from solo and ensemble works", () => {
+    const duo = getUnitBySlug("azki-else")!;
+    const duet = (sings: string[]) =>
+      createSong({ sings, sing: sings.join("、") });
+    expect(isUnitWork(duet(["AZKi", "エルセ"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["Else", "AZKi"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["AZKi", "エルセとさめのぽき"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["AZKi"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "さめのぽき"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "エルセ", "HACHI"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "Lir.E"]), duo)).toBe(false);
+  });
 });

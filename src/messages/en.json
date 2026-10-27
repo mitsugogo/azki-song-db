@@ -2102,7 +2102,7 @@
     "statsSongsTogether": "Songs performed together",
     "statsPerformancesSub": "{count} total performances",
     "historyTitle": "History",
-    "historyDescription": "Major events from the unit's formation to today.",
+    "historyDescription": "Key moments in their shared history",
     "historyDescriptionWithLegacy": "Major events from the {name} era to today.",
     "historyEmpty": "No history entries are available.",
     "historyType": {
