@@ -15,6 +15,9 @@ vi.mock("next-intl/server", () => ({
     }),
 }));
 vi.mock("../client", () => ({ default: () => null }));
+vi.mock("@/app/lib/server/bestNineTopics", () => ({
+  loadBestNineTopic: vi.fn(),
+}));
 vi.mock("@/app/config/siteConfig", () => ({
   baseUrl: "https://example.test",
   siteConfig: { siteName: "AZKi Song Database" },
