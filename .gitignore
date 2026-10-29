@@ -66,6 +66,9 @@ next-env.d.ts
 .agents
 skills-lock.json
 
+# local research notes
+/.codex/research/
+
 public/build-info.json
 .flowbite-react/
 

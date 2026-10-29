@@ -14,6 +14,7 @@ describe("units", () => {
       "rosamia",
       "as-tar",
       "soraz",
+      "azki-else",
     ]);
   });
 
@@ -38,6 +39,7 @@ describe("units", () => {
       slug: "as-tar",
       name: "AS_tar",
       formedAt: "2024-06-02",
+      anniversary: { month: 5, day: 19, startedAt: "2019-05-19" },
       members: ["AZKi", "星街すいせい"],
       tags: ["AS_tar"],
       videoId: "fVS8qkHfBOg",
@@ -52,17 +54,19 @@ describe("units", () => {
     },
   ])(
     "defines $name members, anniversary, tags, and formation history",
-    ({ slug, name, formedAt, members, tags, videoId }) => {
+    ({ slug, name, formedAt, anniversary, members, tags, videoId }) => {
       const unit = getUnitBySlug(slug);
 
       expect(unit).not.toBeNull();
       expect(getLocalizedUnitText(unit!.name, "ja")).toBe(name);
       expect(getLocalizedUnitText(unit!.name, "en")).toBe(name);
       expect(unit!.formedAt).toBe(formedAt);
-      expect(unit!.anniversary).toEqual({
-        month: Number(formedAt.slice(5, 7)),
-        day: Number(formedAt.slice(8, 10)),
-      });
+      expect(unit!.anniversary).toEqual(
+        anniversary ?? {
+          month: Number(formedAt.slice(5, 7)),
+          day: Number(formedAt.slice(8, 10)),
+        },
+      );
       expect(unit!.members.map((member) => member.name.ja)).toEqual(members);
       expect(unit!.tags).toEqual(tags);
       expect(unit!.highlights).toEqual(
@@ -118,11 +122,12 @@ describe("units", () => {
     });
   });
 
-  it("uses a curated event-focused history only for SorAZ", () => {
+  it("uses curated event-focused histories for SorAZ and AZKi & Else", () => {
     expect(getUnitBySlug("soraz")?.includeWorksInHistory).toBe(false);
+    expect(getUnitBySlug("azki-else")?.includeWorksInHistory).toBe(false);
     expect(
       units
-        .filter((unit) => unit.slug !== "soraz")
+        .filter((unit) => !["soraz", "azki-else"].includes(unit.slug))
         .every((unit) => unit.includeWorksInHistory === undefined),
     ).toBe(true);
   });

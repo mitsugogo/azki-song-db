@@ -2,9 +2,18 @@ import type { Metadata } from "next";
 import MyBestNineSongsPageClient from "./client";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { getLocale, getTranslations } from "next-intl/server";
+import { decodeThemes, buildThemeQuery } from "@/app/lib/myBestNineSongs";
+import { loadBestNineTopic } from "@/app/lib/server/bestNineTopics";
+import { validTopicId } from "@/app/lib/bestNineTopics";
 
 type Props = {
-  searchParams: Promise<{ title?: string | string[] }>;
+  searchParams: Promise<{
+    title?: string | string[];
+    themes?: string | string[];
+    topic?: string | string[];
+    revision?: string | string[];
+    new?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({
@@ -12,7 +21,19 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const params = await searchParams;
   const rawTitle = Array.isArray(params.title) ? params.title[0] : params.title;
-  const normalizedTitle = rawTitle?.trim().slice(0, 50) || null;
+  let normalizedTitle = rawTitle?.trim().slice(0, 50) || null;
+  const topicId = Array.isArray(params.topic) ? params.topic[0] : params.topic;
+  if (validTopicId(topicId)) {
+    try {
+      normalizedTitle = (await loadBestNineTopic(topicId)).title;
+    } catch {
+      /* 取得不可時は一般メタデータを表示 */
+    }
+  }
+  const rawThemes = Array.isArray(params.themes)
+    ? params.themes[0]
+    : params.themes;
+  const themes = rawThemes ? decodeThemes(rawThemes) : null;
   const locale = await getLocale();
   const tMeta = await getTranslations({ namespace: "Metadata.share", locale });
 
@@ -36,8 +57,10 @@ export async function generateMetadata({
 
   const pageUrl = new URL("/share/my-best-9-songs", baseUrl);
   if (normalizedTitle) {
-    pageUrl.searchParams.set("title", normalizedTitle);
+    pageUrl.search = buildThemeQuery(normalizedTitle, themes ?? undefined);
   }
+  if (validTopicId(topicId))
+    pageUrl.search = new URLSearchParams({ topic: topicId }).toString();
   const ogImagePath = `${ogImageUrl.pathname}${ogImageUrl.search}`;
 
   return {
@@ -71,6 +94,11 @@ export async function generateMetadata({
   };
 }
 
-export default function MyBestNineSongsPage() {
-  return <MyBestNineSongsPageClient />;
+export default async function MyBestNineSongsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  return (
+    <MyBestNineSongsPageClient
+      key={`${params.topic ?? "new"}:${params.revision ?? ""}:${params.new ?? ""}`}
+    />
+  );
 }

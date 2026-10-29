@@ -208,13 +208,54 @@ describe("unitHistory", () => {
       },
       { date: "2022-07-03", title: "#AZKi生誕祭2022" },
       {
+        date: "2024-03-17",
+        title: "5th fes.で「The Last Frontier」を歌唱",
+      },
+      {
         date: "2024-05-20",
         title: "イノナカ組・ホロライブ加入5周年記念コラボ",
       },
-      { date: "2024-06-02", title: "AS_tar結成" },
+      { date: "2024-06-02", title: "ユニット名「AS_tar」決定" },
+      {
+        date: "2024-07-27",
+        title: "The Last Frontier - 5th fes. Live ver. -",
+      },
       { date: "2025-11-19", title: "Going My Way 初披露" },
     ]);
   });
+
+  it.each(["ja", "en"])(
+    "preserves AS_tar's fes. performance and letters without song data in %s",
+    (locale) => {
+      const history = buildUnitHistory(
+        getUnitBySlug("as-tar")!,
+        [],
+        locale,
+        new Date("2026-10-29T00:00:00+09:00"),
+      );
+      const fes = history.find((entry) => entry.date === "2024-03-17")!;
+      expect(fes.type).toBe("live");
+      expect(fes.description).toContain("hololive stage3");
+      expect(fes.description).toContain(
+        locale === "ja" ? "歌詞を一部変更" : "revised part of the lyrics",
+      );
+      expect(fes.description).toContain(locale === "ja" ? "手紙" : "letter");
+      expect(fes.href).toBe(
+        "https://prtimes.jp/main/html/rd/p/000001035.000030268.html",
+      );
+      const release = history.find((entry) => entry.date === "2024-07-27")!;
+      expect(release.type).toBe("music");
+      expect(release.videoId).toBe("GW44zWPz2jg");
+      const departure = history.find((entry) => entry.date === "2025-11-19")!;
+      expect(departure.description).toContain("The Last Frontier");
+      expect(departure.description).toContain(
+        locale === "ja" ? "手紙への返事" : "in reply to Suisei's letter",
+      );
+      expect(history.find((entry) => entry.date === "2026-05-19")?.title).toBe(
+        "Going My Way",
+      );
+    },
+  );
 
   it("builds an event-focused SorAZ history without listing each unit song", () => {
     const soraz = getUnitBySlug("soraz")!;
@@ -557,5 +598,18 @@ describe("unitHistory", () => {
 
     expect(selected?.video_id).toBe("hero");
     vi.restoreAllMocks();
+  });
+
+  it("keeps AZKi & Else duets separate from solo and ensemble works", () => {
+    const duo = getUnitBySlug("azki-else")!;
+    const duet = (sings: string[]) =>
+      createSong({ sings, sing: sings.join("、") });
+    expect(isUnitWork(duet(["AZKi", "エルセ"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["Else", "AZKi"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["AZKi", "エルセとさめのぽき"]), duo)).toBe(true);
+    expect(isUnitWork(duet(["AZKi"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "さめのぽき"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "エルセ", "HACHI"]), duo)).toBe(false);
+    expect(isUnitWork(duet(["AZKi", "Lir.E"]), duo)).toBe(false);
   });
 });

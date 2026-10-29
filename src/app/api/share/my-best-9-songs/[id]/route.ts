@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { findMyBestNineSongsEntryById } from "@/app/lib/myBestNineSongsSheet";
+import { loadBestNineResponse } from "@/app/lib/server/bestNineTopics";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -8,16 +9,27 @@ type Props = {
 export async function GET(_: Request, { params }: Props) {
   try {
     const { id } = await params;
-    const entry = await findMyBestNineSongsEntryById(id);
+    let databaseError: unknown;
+    const saved = await loadBestNineResponse(id).catch((error: unknown) => {
+      databaseError = error;
+      return null;
+    });
+    const entry =
+      saved ??
+      (process.env.SAVE_SPREADSHEET_ID
+        ? await findMyBestNineSongsEntryById(id)
+        : null);
+    if (!entry && databaseError) throw databaseError;
 
     if (!entry) {
       return NextResponse.json({ error: "見つかりません" }, { status: 404 });
     }
 
-    return NextResponse.json({ id: entry.id, selection: entry.selection });
+    return NextResponse.json(
+      { id: entry.id, selection: entry.selection },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "取得に失敗しました";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "SERVICE_UNAVAILABLE" }, { status: 503 });
   }
 }

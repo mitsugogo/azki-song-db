@@ -36,13 +36,22 @@ export type UnitHeroAccent = {
   end: string;
 };
 
+export type UnitIntroduction = {
+  title: LocalizedText;
+  paragraphs: LocalizedText[];
+  links: { label: LocalizedText; url: string }[];
+};
+
 export type UnitDefinition = {
   slug: string;
   name: LocalizedText;
+  description?: LocalizedText;
+  introduction?: UnitIntroduction;
   cardBackgroundVideoId: string;
   cardBackgroundZoom?: boolean;
   members: UnitMember[];
   formedAt: string;
+  activityDates?: { date: string; label: LocalizedText }[];
   legacy?: {
     name: LocalizedText;
     startedAt: string;
@@ -51,7 +60,8 @@ export type UnitDefinition = {
   anniversary: {
     month: number;
     day: number;
-  };
+    startedAt?: string;
+  } | null;
   tags: string[];
   includeWorksInHistory?: boolean;
   highlights: UnitHighlight[];
@@ -244,12 +254,29 @@ export const units: UnitDefinition[] = [
       },
     ],
     formedAt: "2024-06-02",
+    activityDates: [
+      {
+        date: "2019-05-19",
+        label: {
+          ja: "イノナカミュージックで共に活動開始",
+          en: "Began working together at INNK MUSIC",
+        },
+      },
+      {
+        date: "2024-06-02",
+        label: {
+          ja: "ユニット名「AS_tar」に決定",
+          en: "Chose the unit name AS_tar",
+        },
+      },
+    ],
     legacy: {
       name: { ja: "イノナカ組", en: "INNK duo" },
       startedAt: "2019-05-19",
       endedAt: "2019-12-01",
     },
-    anniversary: { month: 6, day: 2 },
+    // 記念日はイノナカ始動日。ユニット名が決まった formedAt とは区別する。
+    anniversary: { month: 5, day: 19, startedAt: "2019-05-19" },
     tags: ["AS_tar"],
     highlights: [
       {
@@ -260,8 +287,8 @@ export const units: UnitDefinition[] = [
           en: "INNK MUSIC launches",
         },
         description: {
-          ja: "AZKiと星街すいせいが、ホロライブ内の音楽レーベル「イノナカミュージック」の所属アーティストとして発表された。",
-          en: "AZKi and Hoshimachi Suisei were announced as artists under INNK MUSIC, hololive's music label.",
+          ja: "AZKiと星街すいせいが、ホロライブ内の音楽レーベル「イノナカミュージック」の所属アーティストとして発表され、共に活動を始めた。後にユニット名がAS_tarに決まってからも、二人が一緒に活動を始めた5月19日を記念日としている。",
+          en: "AZKi and Hoshimachi Suisei were announced as artists under INNK MUSIC, hololive's music label, and began working together. Even after choosing the name AS_tar, they mark May 19 as the anniversary of the start of their activities together.",
         },
         url: "https://cover-corp.com/news/detail/20190519",
       },
@@ -306,8 +333,8 @@ export const units: UnitDefinition[] = [
         type: "music",
         title: { ja: "The Last Frontier", en: "The Last Frontier" },
         description: {
-          ja: "AZKiが作詞・作曲し、星街すいせいが歌唱参加したデュエット曲をリリース。",
-          en: "AZKi released a duet she wrote and composed, featuring vocals by Hoshimachi Suisei.",
+          ja: "AZKiが作詞・作曲し、星街すいせいと歌うデュエット曲をリリース。当時は活動終了を予定していたAZKiが、イノナカミュージックで共に活動したすいせいと後悔を残さずに何かを作りたいと考えて制作した。",
+          en: "AZKi released a duet she wrote and composed, sung together with Hoshimachi Suisei. At the time, AZKi had planned to end her activities and wanted to create something with her former INNK MUSIC colleague without leaving any regrets.",
         },
         videoId: "-9wUbw5qevU",
         url: "https://hololive.hololivepro.com/news/20211016-1-21/",
@@ -320,8 +347,8 @@ export const units: UnitDefinition[] = [
           en: "STELLAR into the GALAXY",
         },
         description: {
-          ja: "星街すいせい初のソロライブにAZKiがゲスト出演。",
-          en: "AZKi appeared as a guest at Hoshimachi Suisei's first solo concert.",
+          ja: "星街すいせい初のソロライブにAZKiがゲスト出演し、二人で「The Last Frontier」を歌唱。",
+          en: "AZKi appeared as a guest at Hoshimachi Suisei's first solo concert, where they sang “The Last Frontier” together.",
         },
         url: "https://hololive.hololivepro.com/news/20210910-1-5/",
       },
@@ -349,6 +376,19 @@ export const units: UnitDefinition[] = [
         videoId: "y3Ed1eCwuOA",
       },
       {
+        date: "2024-03-17",
+        type: "live",
+        title: {
+          ja: "5th fes.で「The Last Frontier」を歌唱",
+          en: "“The Last Frontier” at 5th fes.",
+        },
+        description: {
+          ja: "幕張メッセで開催された「hololive 5th fes. Capture the Moment」hololive stage3のユニットパートのトリで、AZKiと星街すいせいが「The Last Frontier」を歌唱。AZKiが活動継続を選び、再び同じ舞台に立った二人に合わせ、すいせいが歌詞を一部変更した。歌唱後、すいせいがサプライズで手紙を読み上げ、再び同じホロライブで活動できる喜びと、これからも一緒に進んでいきたいという思いを伝えた。AZKiは涙を流してその思いを受け止め、すいせいがAZKiを抱きしめた。",
+          en: "AZKi and Hoshimachi Suisei performed “The Last Frontier” as the closing unit act of hololive stage3 at hololive 5th fes. Capture the Moment in Makuhari Messe. After AZKi chose to continue her activities, Suisei revised part of the lyrics to reflect the two sharing a stage again. After the song, Suisei surprised AZKi by reading a letter expressing her joy at being together in hololive again and her wish to keep moving forward together. AZKi listened in tears, and Suisei embraced her.",
+        },
+        url: "https://prtimes.jp/main/html/rd/p/000001035.000030268.html",
+      },
+      {
         date: "2024-05-20",
         type: "stream",
         title: {
@@ -364,12 +404,29 @@ export const units: UnitDefinition[] = [
       {
         date: "2024-06-02",
         type: "formation",
-        title: { ja: "AS_tar結成", en: "AS_tar is formed" },
+        title: {
+          ja: "ユニット名「AS_tar」決定",
+          en: "The unit name AS_tar is chosen",
+        },
         description: {
           ja: "AZKiと星街すいせいの「PlateUp!」コラボ配信で、視聴者投票によりユニット名が決定。",
           en: "AZKi and Hoshimachi Suisei chose the unit name by viewer vote during their PlateUp! collaboration stream.",
         },
         videoId: "fVS8qkHfBOg",
+      },
+      {
+        date: "2024-07-27",
+        type: "music",
+        title: {
+          ja: "The Last Frontier - 5th fes. Live ver. -",
+          en: "The Last Frontier - 5th fes. Live ver. -",
+        },
+        description: {
+          ja: "5th fes.で披露した、歌詞の一部を変更した「The Last Frontier」のライブ音源をリリース。",
+          en: "Released the live recording of “The Last Frontier” performed at 5th fes., featuring the revised lyrics.",
+        },
+        videoId: "GW44zWPz2jg",
+        url: "https://hololive.hololivepro.com/music/449/",
       },
       {
         date: "2025-11-19",
@@ -379,11 +436,21 @@ export const units: UnitDefinition[] = [
           en: '"Going My Way" premieres',
         },
         description: {
-          ja: "AZKi SOLO LiVE 2025 “Departure”に星街すいせいがゲスト出演し、AS_tarの新曲「Going My Way」をサプライズ初披露。",
-          en: "Hoshimachi Suisei appeared as a guest at AZKi SOLO LiVE 2025 “Departure,” where AS_tar gave a surprise premiere of their new song, “Going My Way.”",
+          ja: "AZKi SOLO LiVE 2025 “Departure”に星街すいせいがゲスト出演し、AS_tarとして「The Last Frontier - 5th fes. Live ver. -」を歌唱。5th fes.ですいせいから受け取った手紙への返事をAZKiが読み上げた後、新曲「Going My Way」をサプライズ初披露した。",
+          en: "Hoshimachi Suisei appeared as a guest at AZKi SOLO LiVE 2025 “Departure,” where the two performed “The Last Frontier - 5th fes. Live ver. -” as AS_tar. AZKi read a letter in reply to Suisei's letter at 5th fes., then they gave a surprise premiere of their new song, “Going My Way.”",
         },
         videoId: "7BnkrEde27E",
         url: "https://hololive.hololivepro.com/events/departure/",
+      },
+      {
+        date: "2026-05-19",
+        type: "music",
+        title: { ja: "Going My Way", en: "Going My Way" },
+        description: {
+          ja: "イノナカミュージックで二人が共に活動を始めて7周年の記念日に、「Departure」で初披露した「Going My Way」をリリース。",
+          en: "Released “Going My Way,” first performed at Departure, on the seventh anniversary of the start of their activities together at INNK MUSIC.",
+        },
+        url: "https://hololive.hololivepro.com/en/music/752/",
       },
     ],
   },
@@ -522,6 +589,361 @@ export const units: UnitDefinition[] = [
           en: "SorAZ performed two shows at CLUB CITTA', marking their first standalone concert at a physical venue.",
         },
         url: "https://hololive.hololivepro.com/events/sorazlive/",
+      },
+    ],
+  },
+  // See docs/units-azki-else-research.md for sources and date decisions.
+  // formedAt is the earliest verified shared event; no formation anniversary is claimed.
+  {
+    slug: "azki-else",
+    name: {
+      ja: "エルあず",
+      en: "El-Azu",
+    },
+    description: {
+      ja: "2018年10月にエルセ、11月にAZKiがデビュー。約1か月違いで活動を始めた二人は、翌年の「VirtuaREAL.00」で共演し、「アズラジ」や対バン「LAST V STANDiNG vol.2」でも交流を重ねた。デビューから「mirror」、深海フェスまで、二人の音楽活動を振り返る。",
+      en: "Else debuted in October 2018 and AZKi followed in November, roughly a month apart. They shared the bill at VirtuaREAL.00 the following year, then appeared together on AZ Radio and at LAST V STANDiNG vol.2. Their history traces their music from those debuts through “mirror” and SHINKAI FES.",
+    },
+    introduction: {
+      title: {
+        ja: "エルセさんについて",
+        en: "About Else",
+      },
+      paragraphs: [
+        {
+          ja: "エルセはぷろぶるプロダクション所属のバーチャルシンガー。2018年10月8日に「エルセとさめのぽき」としてデビューし、YouTubeの「エルぽきちゃんねる！」で歌や配信を続けている。",
+          en: "Else is a virtual singer with Puroburu Production. She debuted as part of Else & Poki on October 8, 2018, and continues to sing and stream on the duo’s YouTube channel.",
+        },
+        {
+          ja: "相方のさめのぽきは楽曲の作詞・作曲やコーラスを担当。「mirror」や「世界は巡り、やがて君のものになる」など、AZKiの楽曲も手がけてきた。",
+          en: "Her partner Poki writes lyrics and music and provides backing vocals. Poki has also written songs for AZKi, including “mirror” and “Sekai wa Meguri, Yagate Kimi no Mono ni Naru.”",
+        },
+        {
+          ja: "二人をプロデュースしてきたのが、2018年に結成されたクリエイティブチーム「ProjectBLUE（プロジェクトブルー）」。デビュー曲「BLUE」のMVもチームで制作した。現在は株式会社ProjectBLUEが「ぷろぶるプロダクション」やバーチャルライブ制作チーム「vortex」を運営している。",
+          en: "ProjectBLUE, a creative team formed in 2018, has produced the duo’s work, including the music video for their debut song, “BLUE.” Today, ProjectBLUE Inc. operates Puroburu Production and the virtual concert production team vortex.",
+        },
+        {
+          ja: "2024年10月8日からはコンポーザーの彼方と音楽ユニット「Lir.E（リルエ）」としても活動。彼方はさめのぽきの音楽名義で、エルセがボーカル、彼方が楽曲制作を担当している。二人でアルバムの発表やワンマンライブを行っている。",
+          en: "On October 8, 2024, she also began performing as Lir.E with composer Kanata. Kanata is Poki’s music alias. Else provides the vocals and Kanata creates the music; the duo releases albums and holds standalone concerts.",
+        },
+      ],
+      links: [
+        {
+          label: {
+            ja: "エルセ 公式プロフィール",
+            en: "Else’s official profile",
+          },
+          url: "https://puroburu.com/talent/detail/else",
+        },
+        {
+          label: {
+            ja: "さめのぽき 公式プロフィール",
+            en: "Poki’s official profile",
+          },
+          url: "https://puroburu.com/talent/detail/poki",
+        },
+        {
+          label: {
+            ja: "ProjectBLUE 公式サイト",
+            en: "ProjectBLUE official website",
+          },
+          url: "https://pjblue.com/",
+        },
+        {
+          label: { ja: "Lir.E 公式サイト", en: "Lir.E official website" },
+          url: "https://lire-official.com/",
+        },
+      ],
+    },
+    cardBackgroundVideoId: "jnUo08GC11Y",
+    members: [
+      {
+        name: {
+          ja: "AZKi",
+          en: "AZKi",
+        },
+        aliases: ["AZKi"],
+        color: "#e55099",
+      },
+      {
+        name: {
+          ja: "エルセ",
+          en: "Else",
+        },
+        aliases: [
+          "エルセ",
+          "Else",
+          "エルセとさめのぽき",
+          "Else & Poki",
+          "Else with Poki the shark",
+        ],
+        color: "#47b9dd",
+      },
+    ],
+    formedAt: "2019-06-23",
+    anniversary: null,
+    tags: ["エルあず", "AZKi・エルセ"],
+    includeWorksInHistory: false,
+    highlights: [
+      {
+        date: "2018-10-08",
+        type: "origin",
+        title: {
+          ja: "エルセとさめのぽきがデビュー",
+          en: "Else & Poki debut",
+        },
+        description: {
+          ja: "オリジナル曲「BLUE」のMVを公開し、エルセとさめのぽきが活動を開始。エルセの歌とさめのぽきの音楽を海の底を舞台にした映像とともに届けた。",
+          en: "Else & Poki began their activities with the music video for their original song “BLUE,” pairing Else’s vocals and Poki’s music with an undersea setting.",
+        },
+        videoId: "t3vPbSx2RgQ",
+      },
+      {
+        date: "2018-11-15",
+        type: "origin",
+        title: {
+          ja: "AZKiがデビュー",
+          en: "AZKi debuts",
+        },
+        description: {
+          ja: "「Just Be Friends -piano.ver-」の歌ってみた動画でAZKiが活動を開始。エルセとさめのぽきのデビューから約1か月後、AZKiもYouTubeで歌声を届け始めた。",
+          en: "AZKi began her activities with a cover of “Just Be Friends -piano.ver-,” sharing her singing on YouTube roughly a month after Else & Poki’s debut.",
+        },
+        videoId: "SdgFVX0FsgE",
+      },
+      {
+        date: "2019-06-23",
+        type: "live",
+        title: {
+          ja: "VirtuaREAL.00 大阪公演で共演",
+          en: "Sharing the bill at VirtuaREAL.00 in Osaka",
+        },
+        description: {
+          ja: "デビューから1年足らずのAZKiとエルセとさめのぽきが、大阪・TSUTAYA EBISUBASHIで開催された「VirtuaREAL.00」のリリース記念イベントで共演。",
+          en: "AZKi and Else & Poki appeared at the VirtuaREAL.00 release event at TSUTAYA EBISUBASHI in Osaka, both less than a year after their debuts.",
+        },
+        url: "https://www.virtuareal.net/00/index.html",
+      },
+      {
+        date: "2019-06-26",
+        type: "live",
+        title: {
+          ja: "VirtuaREAL.00 東京公演",
+          en: "VirtuaREAL.00 in Tokyo",
+        },
+        description: {
+          ja: "大阪公演に続き、タワーレコード渋谷店 B1F CUTUP STUDIOで開催された東京公演でも共演。",
+          en: "Both acts also appeared at the Tokyo event at Tower Records Shibuya’s B1F CUTUP STUDIO, following their appearances in Osaka.",
+        },
+        url: "https://www.virtuareal.net/00/index.html",
+      },
+      {
+        date: "2019-10-30",
+        type: "stream",
+        title: {
+          ja: "アズラジ #17にエルセとさめのぽきがゲスト出演",
+          en: "AZ Radio #17 welcomes Else & Poki",
+        },
+        description: {
+          ja: "AZKiのラジオにエルセとさめのぽきがゲスト出演。ライブイベントに続き、配信でも音楽について語り合った。",
+          en: "Else & Poki joined AZKi’s radio show to talk about music, extending their connection from live events to a shared broadcast.",
+        },
+        videoId: "k4MWg_6_vuU",
+      },
+      {
+        date: "2019-10-30",
+        type: "music",
+        title: {
+          ja: "世界は巡り、やがて君のものになる",
+          en: "Sekai wa Meguri, Yagate Kimi no Mono ni Naru",
+        },
+        description: {
+          ja: "さめのぽきが作詞・作曲・編曲を手がけたAZKiの楽曲を先行公開。1stアルバム「without U」に収録され、のちの対バンではAZKiとエルセが二人で歌った。",
+          en: "AZKi previewed a song written, composed and arranged by Poki the Shark for her first album, without U. AZKi and Else would later perform it together at LAST V STANDiNG vol.2.",
+        },
+        videoId: "EAQASQOWCX8",
+      },
+      {
+        date: "2019-11-25",
+        type: "music",
+        title: {
+          ja: "IMAGINATION vol.2「帰りたくなったよ」Short MV",
+          en: "IMAGINATION vol.2: “Kaeritaku Natta yo” short MV",
+        },
+        description: {
+          ja: "AZKiとエルセとさめのぽきを含む参加者全員で歌う集合曲のShort MVをRK Musicが公開。11月27日発売のCDにボーナストラックとして収録された。",
+          en: "RK Music released the short MV for an ensemble song featuring all IMAGINATION vol.2 participants, including AZKi and Else & Poki. It was included as a bonus track on the CD released November 27.",
+        },
+        videoId: "PfffHh-IOpE",
+      },
+      {
+        date: "2020-03-15",
+        type: "music",
+        title: {
+          ja: "二人のために作られた楽曲「mirror」",
+          en: "“mirror”: a song written for the pair",
+        },
+        description: {
+          ja: "さめのぽきが対バンに向けて「mirror」を書き下ろした。AZKi版とエルセとさめのぽき版のソロ音源がそれぞれ用意され、ライブでは二人がデュエットした。",
+          en: "Poki the Shark wrote “mirror” for the upcoming joint concert. It has separate AZKi and Else & Poki solo versions, as well as the duet performed by AZKi and Else on stage.",
+        },
+        url: "https://hololive.hololivepro.com/music/mirror/",
+      },
+      {
+        date: "2020-03-22",
+        type: "live",
+        title: {
+          ja: "LAST V STANDiNG vol.2",
+          en: "LAST V STANDiNG vol.2",
+        },
+        description: {
+          ja: "秋葉原エンタスで、AZKiとエルセとさめのぽきの対バンを開催。「星詠みの唄」で幕を開け、終盤には「世界は巡り、やがて君のものになる」と「mirror」をAZKiとエルセがデュエットした。",
+          en: "AZKi and Else & Poki held a joint concert at Akihabara ENTAS. It opened with “Hoshiyomi no Uta” and closed with AZKi and Else singing “Sekai wa Meguri, Yagate Kimi no Mono ni Naru” and “mirror” together.",
+        },
+        url: "https://hololive.hololivepro.com/events/last-v-standing-vol-2/",
+      },
+      {
+        date: "2020-06-24",
+        type: "stream",
+        title: {
+          ja: "予測不能女子会",
+          en: "Unpredictable Girls’ Talk",
+        },
+        description: {
+          ja: "エルセの「予測不能女子会」にAZKiと鈴鳴すばるがゲスト出演。音楽ライブに加え、トーク配信でも交流を重ねた。",
+          en: "AZKi and Suzuna Subaru joined Else’s Unpredictable Girls’ Talk, continuing their friendship through conversation as well as music.",
+        },
+        videoId: "gBKFd7GEVMs",
+      },
+      {
+        date: "2020-12-19",
+        type: "live",
+        title: {
+          ja: "初回 SHINKAI FES（深海フェス）",
+          en: "The first SHINKAI FES",
+        },
+        description: {
+          ja: "エルセとさめのぽきが初めて主催したオンラインライブに、AZKiがゲスト出演。海の底のステージで、二人の対バン「LAST V STANDiNG vol.2」に向けて作られた「mirror」を歌った。",
+          en: "AZKi appeared as a guest at Else & Poki’s first self-hosted online music festival. On its undersea stage, she sang “mirror,” written for their joint concert, LAST V STANDiNG vol.2.",
+        },
+        videoId: "Bizxhyzdx78",
+      },
+      {
+        date: "2021-08-24",
+        type: "music",
+        title: {
+          ja: "9人で「夏色えがおで1,2,Jump!」",
+          en: "“Natsuiro Egao de 1,2,Jump!” with nine singers",
+        },
+        description: {
+          ja: "MaiR、朝ノ瑠璃、AZKi、戌亥とこ、エルセ、かしこまり、奏天まひろ、宗谷いちか、花鋏キョウによるカバーを公開。",
+          en: "MaiR released a nine-singer cover featuring Asano Ruri, AZKi, Inui Toko, Else, Kashiko Mari, Kanade Mahiro, Souya Ichika and Hanabasami Kyo alongside herself.",
+        },
+        videoId: "F0hEfm_Bnkg",
+      },
+      {
+        date: "2021-08-29",
+        type: "live",
+        title: {
+          ja: "TUBEOUT!FES -2021 SUMMER-",
+          en: "TUBEOUT!FES -2021 SUMMER-",
+        },
+        description: {
+          ja: "エルセとさめのぽきのステージにAZKiが参加し、二人で「mirror」を歌唱。対バンで生まれた二人の楽曲を夏のオンラインフェスでも届けた。",
+          en: "AZKi joined Else & Poki’s stage for a performance of “mirror,” bringing the song from their joint concert to the summer online festival.",
+        },
+        url: "https://spwn.jp/events/210829-TOFES",
+      },
+      {
+        date: "2022-04-29",
+        type: "live",
+        title: {
+          ja: "VTuber Fes Japan 2022で「Snow halation」を歌唱",
+          en: "VTuber Fes Japan 2022: “Snow halation”",
+        },
+        description: {
+          ja: "DAY1に出演。MaiR、朝ノ瑠璃、AZKi、戌亥とこ、エルセ、かしこまり、宗谷いちか、花鋏キョウの8人で「Snow halation」を歌唱した。",
+          en: "On Day 1, AZKi and Else performed “Snow halation” in an eight-singer collaboration with MaiR, Asano Ruri, Inui Toko, Kashiko Mari, Souya Ichika and Hanabasami Kyo.",
+        },
+        url: "https://vtuberfesjapan.jp/2022/report/",
+      },
+      {
+        date: "2022-05-11",
+        type: "music",
+        title: {
+          ja: "チューリングラブ / エルセ & AZKi",
+          en: "Turing Love / Else & AZKi",
+        },
+        description: {
+          ja: "以前の配信で交わした「一緒に歌いたい」という話がカバーMVとして実現。合いの手をHACHIと奏みみ、Mixをさめのぽきが担当した。",
+          en: "A wish to sing together, discussed during an earlier stream, became a cover MV. HACHI and Kanade Mimi provided the chants, and Poki the Shark handled the mix.",
+        },
+        videoId: "jnUo08GC11Y",
+      },
+      {
+        date: "2022-05-11",
+        type: "stream",
+        title: {
+          ja: "エルセの部屋で背中合わせの女子会",
+          en: "Else’s Room: a back-to-back girls’ talk",
+        },
+        description: {
+          ja: "同日の「チューリングラブ」公開に続き、AZKiが「エルセの部屋」にゲスト出演。対バンや深海フェスで一緒に歌ってきた仲間として、二人で女子会を開いた。",
+          en: "After the release of Turing Love that day, AZKi joined Else’s Room for a girls’ talk between singers who had shared joint concerts and SHINKAI FES.",
+        },
+        videoId: "UV0nhTm7-vM",
+      },
+      {
+        date: "2022-09-11",
+        type: "stream",
+        title: {
+          ja: "深海から一緒に歌うエルあず3D歌枠",
+          en: "El-Azu 3D karaoke from the deep sea",
+        },
+        description: {
+          ja: "AZKiが深海のステージを訪れ、エルセと3Dコラボ歌枠を開催。夏の曲や互いのオリジナル曲を交えて歌った。",
+          en: "AZKi visited the undersea stage for a 3D karaoke collaboration with Else, featuring summer songs and songs from their own repertoires.",
+        },
+        videoId: "TmmDZj2Wpqc",
+      },
+      {
+        date: "2022-10-07",
+        type: "live",
+        title: {
+          ja: "vortex オープニングイベント Day4",
+          en: "vortex opening event: Day 4",
+        },
+        description: {
+          ja: "新しいバーチャルライブ空間「vortex」のこけら落としに、AZKi、獅子神レオナ、エルセとさめのぽきが出演。AZKiとエルセは「mirror」を再び二人で歌った。",
+          en: "AZKi, Shishigami Leona and Else & Poki appeared on Day 4 of the new virtual venue vortex’s opening event. AZKi and Else performed “mirror” together again.",
+        },
+        url: "https://pjblue.zaiko.io/e/vortexOP",
+      },
+      {
+        date: "2024-04-22",
+        type: "stream",
+        title: {
+          ja: "AZKi・エルセ・HACHIのDAMカラオケ女子会 第4回",
+          en: "DAM Karaoke Girls’ Party #4: AZKi, Else and HACHI",
+        },
+        description: {
+          ja: "エルセがAZKiとHACHIを招き、vortexでカラオケ女子会を開催。同会場のオープニングイベントに出演した仲間が、再び歌で集まった。",
+          en: "Else welcomed AZKi and HACHI to a DAM karaoke party at vortex, reuniting artists who had performed at the venue’s opening events.",
+        },
+        videoId: "bbBsLapZtpc",
+      },
+      {
+        date: "2026-10-18",
+        type: "live",
+        title: {
+          ja: "深海フェス2026「超・深海」で「mirror」を再びデュエット",
+          en: "SHINKAI FES 2026: together again for “mirror”",
+        },
+        description: {
+          ja: "渋谷ストリーム ホールのDAY2・グランドステージでAZKiがトリを担当。「Intersection」「Fake.Fake.Fake」「世界は巡り、やがて君のものになる」「いのち（2024 ver.）」「エンドロールは終わらない」を歌い、最後はエルセと「mirror」をデュエット。二人の対バンに向けて作られ、2020年の初回にもAZKiが歌った曲を、約6年ぶりの深海フェス出演で再び披露した。",
+          en: "AZKi closed Day 2’s Grand Stage at Shibuya Stream Hall. After Intersection, Fake.Fake.Fake, Sekai wa Meguri, Yagate Kimi no Mono ni Naru, Inochi (2024 ver.) and Endroll wa Owaranai, she sang the final song, “mirror,” as a duet with Else. Returning to SHINKAI FES roughly six years after her first appearance in 2020, she revisited the song written for their joint concert and performed at that first festival.",
+        },
+        url: "https://x.com/AZKi_VDiVA/status/2111769333496176927",
       },
     ],
   },

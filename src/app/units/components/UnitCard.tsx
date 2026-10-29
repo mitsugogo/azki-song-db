@@ -27,11 +27,13 @@ export default function UnitCard({
   const memberNames = unit.members.map((member) =>
     getLocalizedUnitText(member.name, locale),
   );
-  const anniversaryDate = formatAnniversaryDate(
-    unit.anniversary.month,
-    unit.anniversary.day,
-    locale,
-  );
+  const anniversaryDate = unit.anniversary
+    ? formatAnniversaryDate(
+        unit.anniversary.month,
+        unit.anniversary.day,
+        locale,
+      )
+    : null;
 
   return (
     <article>
@@ -70,9 +72,19 @@ export default function UnitCard({
               <p className="mt-1 text-sm font-semibold text-gray-700 dark:text-gray-200 sm:mt-2">
                 {memberNames.join(" × ")}
               </p>
-              <p className="mt-2 text-[0.65rem] font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)] sm:mt-3 sm:text-xs">
-                Since {unit.formedAt.replaceAll("-", ".")}
-              </p>
+              <div className="mt-2 space-y-1 text-[0.65rem] font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)] sm:mt-3 sm:text-xs">
+                {unit.activityDates ? (
+                  <p>
+                    Since:{" "}
+                    {(unit.anniversary?.startedAt ?? unit.formedAt).replaceAll(
+                      "-",
+                      ".",
+                    )}
+                  </p>
+                ) : (
+                  <p>Since {unit.formedAt.replaceAll("-", ".")}</p>
+                )}
+              </div>
             </div>
             <div className="shrink-0">
               <UnitMemberAvatars members={memberNames} variant="card" />
@@ -80,15 +92,17 @@ export default function UnitCard({
           </div>
 
           <div className="flex items-end justify-between gap-4">
-            <div className="rounded-xl border border-white/70 bg-white/85 px-3 py-2 backdrop-blur-sm dark:border-white/25 dark:bg-gray-900/85 sm:rounded-2xl sm:px-4 sm:py-3">
-              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-primary-700 dark:text-pink-200 sm:text-xs">
-                {anniversaryLabel}
-              </p>
-              <p className="mt-0.5 text-base font-black text-gray-950 dark:text-white sm:mt-1 sm:text-lg">
-                {anniversaryDate}
-              </p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary-300/40 bg-white/85 text-primary-700 transition-colors group-hover:bg-primary-50 sm:h-11 sm:w-11 dark:border-white/25 dark:bg-gray-900/85 dark:text-pink-200 dark:group-hover:bg-pink-950/70">
+            {anniversaryDate ? (
+              <div className="rounded-xl border border-white/70 bg-white/85 px-3 py-2 backdrop-blur-sm dark:border-white/25 dark:bg-gray-900/85 sm:rounded-2xl sm:px-4 sm:py-3">
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-primary-700 dark:text-pink-200 sm:text-xs">
+                  {anniversaryLabel}
+                </p>
+                <p className="mt-0.5 text-base font-black text-gray-950 dark:text-white sm:mt-1 sm:text-lg">
+                  {anniversaryDate}
+                </p>
+              </div>
+            ) : null}
+            <span className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary-300/40 bg-white/85 text-primary-700 transition-colors group-hover:bg-primary-50 sm:h-11 sm:w-11 dark:border-white/25 dark:bg-gray-900/85 dark:text-pink-200 dark:group-hover:bg-pink-950/70">
               <HiArrowRight className="h-5 w-5" aria-hidden="true" />
             </span>
           </div>

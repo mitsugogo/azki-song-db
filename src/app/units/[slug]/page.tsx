@@ -27,6 +27,7 @@ import UnitAnniversaryStatus from "../components/UnitAnniversaryStatus";
 import UnitArchiveStrip from "../components/UnitArchiveStrip";
 import UnitMemberAvatars from "../components/UnitMemberAvatars";
 import UnitStats from "../components/UnitStats";
+import UnitIntroduction from "../components/UnitIntroduction";
 import UnitHistory from "../components/UnitHistory";
 import UnitStreams from "../components/UnitStreams";
 import UnitMusic from "../components/UnitMusic";
@@ -80,13 +81,15 @@ export async function generateMetadata({
   );
   return buildUnitPageMetadata({
     title: getLocalizedUnitText(unit.name, locale),
-    description: t("description", {
-      name: getLocalizedUnitText(unit.name, locale),
-      members: new Intl.ListFormat(locale, {
-        style: "long",
-        type: "conjunction",
-      }).format(memberNames),
-    }),
+    description: unit.description
+      ? getLocalizedUnitText(unit.description, locale)
+      : t("description", {
+          name: getLocalizedUnitText(unit.name, locale),
+          members: new Intl.ListFormat(locale, {
+            style: "long",
+            type: "conjunction",
+          }).format(memberNames),
+        }),
     slug,
     locale,
   });
@@ -170,10 +173,19 @@ export default async function UnitPage({
                 {memberNames.join(" × ")}
               </p>
               <div className="mt-4 space-y-1 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                <p>
-                  {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
-                </p>
-                {unit.legacy && legacyName ? (
+                {unit.activityDates ? (
+                  unit.activityDates.map(({ date, label }) => (
+                    <p key={date}>
+                      {date.replaceAll("-", ".")}：
+                      {getLocalizedUnitText(label, locale)}
+                    </p>
+                  ))
+                ) : (
+                  <p>
+                    {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
+                  </p>
+                )}
+                {!unit.activityDates && unit.legacy && legacyName ? (
                   <p>
                     {t("legacyPeriod", {
                       name: legacyName,
@@ -188,17 +200,26 @@ export default async function UnitPage({
               <UnitMemberAvatars members={memberNames} />
             </div>
             <div className="rounded-2xl border border-primary-200/50 bg-white p-5 dark:border-white/25 dark:bg-gray-900">
-              <UnitAnniversaryStatus
-                formedAt={unit.formedAt}
-                anniversaryMonth={unit.anniversary.month}
-                anniversaryDay={unit.anniversary.day}
-                unitName={unitName}
-                initialNowIso={now.toISOString()}
-                freezeNow={previewNow !== null}
-              />
+              {unit.anniversary ? (
+                <UnitAnniversaryStatus
+                  formedAt={unit.formedAt}
+                  anniversaryStartedAt={unit.anniversary.startedAt}
+                  anniversaryMonth={unit.anniversary.month}
+                  anniversaryDay={unit.anniversary.day}
+                  unitName={unitName}
+                  initialNowIso={now.toISOString()}
+                  freezeNow={previewNow !== null}
+                />
+              ) : unit.description ? (
+                <p className="text-sm leading-7 text-gray-700 dark:text-gray-200">
+                  {getLocalizedUnitText(unit.description, locale)}
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
+
+        <UnitIntroduction introduction={unit.introduction} locale={locale} />
 
         <UnitArchiveStrip
           participants={archiveParticipants}

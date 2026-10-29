@@ -15,14 +15,31 @@ vi.mock("next-intl/server", () => ({
     }),
 }));
 vi.mock("../client", () => ({ default: () => null }));
+vi.mock("@/app/lib/server/bestNineTopics", () => ({
+  loadBestNineTopic: vi.fn(),
+}));
 vi.mock("@/app/config/siteConfig", () => ({
   baseUrl: "https://example.test",
   siteConfig: { siteName: "AZKi Song Database" },
 }));
 
 import { generateMetadata } from "../page";
+import { buildThemeQuery } from "@/app/lib/myBestNineSongs";
 
 describe("my best 9 generateMetadata", () => {
+  it("お題URLのcanonicalに9題を保持する", async () => {
+    const themes = Array(9).fill("お題");
+    const params = Object.fromEntries(
+      new URLSearchParams(buildThemeQuery("募集", themes)),
+    );
+    const result = await generateMetadata({
+      searchParams: Promise.resolve(params),
+    });
+    expect(result.alternates?.canonical).toBe(
+      `https://example.test/share/my-best-9-songs?${buildThemeQuery("募集", themes)}`,
+    );
+    expect(result.openGraph?.url).toBe(result.alternates?.canonical);
+  });
   it("お題付きタイトルへ余分な空白を入れずdescriptionをOG/Xと共有する", async () => {
     const result = await generateMetadata({
       searchParams: Promise.resolve({ title: "  春の曲  " }),
