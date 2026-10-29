@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.49.0](https://github.com/mitsugogo/azki-song-db/compare/v2.48.0...v2.49.0) (2026-10-29)
+
+### Features
+
+* **units:** エルセさんとのページを作成 ([15df37c](https://github.com/mitsugogo/azki-song-db/commit/15df37c63c73e3e2007a5a1bcc81af18af1ef035))
+
+### Bug Fixes
+
+* **units:** AS_tarの記念日周りの表記を調整 ([ea3c4a0](https://github.com/mitsugogo/azki-song-db/commit/ea3c4a092780585f0c37d530b3d80fc4374d41c7))
+
 ## [2.48.0](https://github.com/mitsugogo/azki-song-db/compare/v2.47.0...v2.48.0) (2026-10-22)
 
 ### Features
