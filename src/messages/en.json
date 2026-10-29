@@ -2087,7 +2087,7 @@
     "description": "Explore {name}, the unit formed by {members}, through its streams, music, live appearances, anniversaries, and view milestones from formation to today.",
     "since": "Since {date}",
     "legacyPeriod": "Roots: {name} ({start} — {end})",
-    "anniversaryNumberJa": "{number}th Anniversary",
+    "anniversaryNumberJa": "{ordinal} Anniversary",
     "anniversaryNumberEn": "{ordinal} Anniversary",
     "countdownLead": "Until the {anniversary}",
     "heroCongratulations": "Happy {ordinal} anniversary, {name}!",

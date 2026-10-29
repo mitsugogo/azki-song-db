@@ -173,10 +173,19 @@ export default async function UnitPage({
                 {memberNames.join(" × ")}
               </p>
               <div className="mt-4 space-y-1 text-sm font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
-                <p>
-                  {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
-                </p>
-                {unit.legacy && legacyName ? (
+                {unit.activityDates ? (
+                  unit.activityDates.map(({ date, label }) => (
+                    <p key={date}>
+                      {date.replaceAll("-", ".")}：
+                      {getLocalizedUnitText(label, locale)}
+                    </p>
+                  ))
+                ) : (
+                  <p>
+                    {t("since", { date: unit.formedAt.replaceAll("-", ".") })}
+                  </p>
+                )}
+                {!unit.activityDates && unit.legacy && legacyName ? (
                   <p>
                     {t("legacyPeriod", {
                       name: legacyName,
@@ -194,6 +203,7 @@ export default async function UnitPage({
               {unit.anniversary ? (
                 <UnitAnniversaryStatus
                   formedAt={unit.formedAt}
+                  anniversaryStartedAt={unit.anniversary.startedAt}
                   anniversaryMonth={unit.anniversary.month}
                   anniversaryDay={unit.anniversary.day}
                   unitName={unitName}

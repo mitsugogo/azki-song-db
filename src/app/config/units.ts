@@ -51,6 +51,7 @@ export type UnitDefinition = {
   cardBackgroundZoom?: boolean;
   members: UnitMember[];
   formedAt: string;
+  activityDates?: { date: string; label: LocalizedText }[];
   legacy?: {
     name: LocalizedText;
     startedAt: string;
@@ -59,6 +60,7 @@ export type UnitDefinition = {
   anniversary: {
     month: number;
     day: number;
+    startedAt?: string;
   } | null;
   tags: string[];
   includeWorksInHistory?: boolean;
@@ -252,12 +254,29 @@ export const units: UnitDefinition[] = [
       },
     ],
     formedAt: "2024-06-02",
+    activityDates: [
+      {
+        date: "2019-05-19",
+        label: {
+          ja: "イノナカミュージックで共に活動開始",
+          en: "Began working together at INNK MUSIC",
+        },
+      },
+      {
+        date: "2024-06-02",
+        label: {
+          ja: "ユニット名「AS_tar」に決定",
+          en: "Chose the unit name AS_tar",
+        },
+      },
+    ],
     legacy: {
       name: { ja: "イノナカ組", en: "INNK duo" },
       startedAt: "2019-05-19",
       endedAt: "2019-12-01",
     },
-    anniversary: { month: 6, day: 2 },
+    // 記念日はイノナカ始動日。ユニット名が決まった formedAt とは区別する。
+    anniversary: { month: 5, day: 19, startedAt: "2019-05-19" },
     tags: ["AS_tar"],
     highlights: [
       {
@@ -268,8 +287,8 @@ export const units: UnitDefinition[] = [
           en: "INNK MUSIC launches",
         },
         description: {
-          ja: "AZKiと星街すいせいが、ホロライブ内の音楽レーベル「イノナカミュージック」の所属アーティストとして発表された。",
-          en: "AZKi and Hoshimachi Suisei were announced as artists under INNK MUSIC, hololive's music label.",
+          ja: "AZKiと星街すいせいが、ホロライブ内の音楽レーベル「イノナカミュージック」の所属アーティストとして発表され、共に活動を始めた。後にユニット名がAS_tarに決まってからも、二人が一緒に活動を始めた5月19日を記念日としている。",
+          en: "AZKi and Hoshimachi Suisei were announced as artists under INNK MUSIC, hololive's music label, and began working together. Even after choosing the name AS_tar, they mark May 19 as the anniversary of the start of their activities together.",
         },
         url: "https://cover-corp.com/news/detail/20190519",
       },
@@ -314,8 +333,8 @@ export const units: UnitDefinition[] = [
         type: "music",
         title: { ja: "The Last Frontier", en: "The Last Frontier" },
         description: {
-          ja: "AZKiが作詞・作曲し、星街すいせいが歌唱参加したデュエット曲をリリース。",
-          en: "AZKi released a duet she wrote and composed, featuring vocals by Hoshimachi Suisei.",
+          ja: "AZKiが作詞・作曲し、星街すいせいと歌うデュエット曲をリリース。当時は活動終了を予定していたAZKiが、イノナカミュージックで共に活動したすいせいと後悔を残さずに何かを作りたいと考えて制作した。",
+          en: "AZKi released a duet she wrote and composed, sung together with Hoshimachi Suisei. At the time, AZKi had planned to end her activities and wanted to create something with her former INNK MUSIC colleague without leaving any regrets.",
         },
         videoId: "-9wUbw5qevU",
         url: "https://hololive.hololivepro.com/news/20211016-1-21/",
@@ -328,8 +347,8 @@ export const units: UnitDefinition[] = [
           en: "STELLAR into the GALAXY",
         },
         description: {
-          ja: "星街すいせい初のソロライブにAZKiがゲスト出演。",
-          en: "AZKi appeared as a guest at Hoshimachi Suisei's first solo concert.",
+          ja: "星街すいせい初のソロライブにAZKiがゲスト出演し、二人で「The Last Frontier」を歌唱。",
+          en: "AZKi appeared as a guest at Hoshimachi Suisei's first solo concert, where they sang “The Last Frontier” together.",
         },
         url: "https://hololive.hololivepro.com/news/20210910-1-5/",
       },
@@ -357,6 +376,19 @@ export const units: UnitDefinition[] = [
         videoId: "y3Ed1eCwuOA",
       },
       {
+        date: "2024-03-17",
+        type: "live",
+        title: {
+          ja: "5th fes.で「The Last Frontier」を歌唱",
+          en: "“The Last Frontier” at 5th fes.",
+        },
+        description: {
+          ja: "幕張メッセで開催された「hololive 5th fes. Capture the Moment」hololive stage3のユニットパートのトリで、AZKiと星街すいせいが「The Last Frontier」を歌唱。AZKiが活動継続を選び、再び同じ舞台に立った二人に合わせ、すいせいが歌詞を一部変更した。歌唱後、すいせいがサプライズで手紙を読み上げ、再び同じホロライブで活動できる喜びと、これからも一緒に進んでいきたいという思いを伝えた。AZKiは涙を流してその思いを受け止め、すいせいがAZKiを抱きしめた。",
+          en: "AZKi and Hoshimachi Suisei performed “The Last Frontier” as the closing unit act of hololive stage3 at hololive 5th fes. Capture the Moment in Makuhari Messe. After AZKi chose to continue her activities, Suisei revised part of the lyrics to reflect the two sharing a stage again. After the song, Suisei surprised AZKi by reading a letter expressing her joy at being together in hololive again and her wish to keep moving forward together. AZKi listened in tears, and Suisei embraced her.",
+        },
+        url: "https://prtimes.jp/main/html/rd/p/000001035.000030268.html",
+      },
+      {
         date: "2024-05-20",
         type: "stream",
         title: {
@@ -372,12 +404,29 @@ export const units: UnitDefinition[] = [
       {
         date: "2024-06-02",
         type: "formation",
-        title: { ja: "AS_tar結成", en: "AS_tar is formed" },
+        title: {
+          ja: "ユニット名「AS_tar」決定",
+          en: "The unit name AS_tar is chosen",
+        },
         description: {
           ja: "AZKiと星街すいせいの「PlateUp!」コラボ配信で、視聴者投票によりユニット名が決定。",
           en: "AZKi and Hoshimachi Suisei chose the unit name by viewer vote during their PlateUp! collaboration stream.",
         },
         videoId: "fVS8qkHfBOg",
+      },
+      {
+        date: "2024-07-27",
+        type: "music",
+        title: {
+          ja: "The Last Frontier - 5th fes. Live ver. -",
+          en: "The Last Frontier - 5th fes. Live ver. -",
+        },
+        description: {
+          ja: "5th fes.で披露した、歌詞の一部を変更した「The Last Frontier」のライブ音源をリリース。",
+          en: "Released the live recording of “The Last Frontier” performed at 5th fes., featuring the revised lyrics.",
+        },
+        videoId: "GW44zWPz2jg",
+        url: "https://hololive.hololivepro.com/music/449/",
       },
       {
         date: "2025-11-19",
@@ -387,11 +436,21 @@ export const units: UnitDefinition[] = [
           en: '"Going My Way" premieres',
         },
         description: {
-          ja: "AZKi SOLO LiVE 2025 “Departure”に星街すいせいがゲスト出演し、AS_tarの新曲「Going My Way」をサプライズ初披露。",
-          en: "Hoshimachi Suisei appeared as a guest at AZKi SOLO LiVE 2025 “Departure,” where AS_tar gave a surprise premiere of their new song, “Going My Way.”",
+          ja: "AZKi SOLO LiVE 2025 “Departure”に星街すいせいがゲスト出演し、AS_tarとして「The Last Frontier - 5th fes. Live ver. -」を歌唱。5th fes.ですいせいから受け取った手紙への返事をAZKiが読み上げた後、新曲「Going My Way」をサプライズ初披露した。",
+          en: "Hoshimachi Suisei appeared as a guest at AZKi SOLO LiVE 2025 “Departure,” where the two performed “The Last Frontier - 5th fes. Live ver. -” as AS_tar. AZKi read a letter in reply to Suisei's letter at 5th fes., then they gave a surprise premiere of their new song, “Going My Way.”",
         },
         videoId: "7BnkrEde27E",
         url: "https://hololive.hololivepro.com/events/departure/",
+      },
+      {
+        date: "2026-05-19",
+        type: "music",
+        title: { ja: "Going My Way", en: "Going My Way" },
+        description: {
+          ja: "イノナカミュージックで二人が共に活動を始めて7周年の記念日に、「Departure」で初披露した「Going My Way」をリリース。",
+          en: "Released “Going My Way,” first performed at Departure, on the seventh anniversary of the start of their activities together at INNK MUSIC.",
+        },
+        url: "https://hololive.hololivepro.com/en/music/752/",
       },
     ],
   },

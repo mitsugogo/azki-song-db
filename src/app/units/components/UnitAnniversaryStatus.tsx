@@ -31,6 +31,7 @@ function formatCountdown(milliseconds: number) {
 
 export default function UnitAnniversaryStatus({
   formedAt,
+  anniversaryStartedAt = formedAt,
   anniversaryMonth,
   anniversaryDay,
   unitName,
@@ -38,6 +39,7 @@ export default function UnitAnniversaryStatus({
   freezeNow = false,
 }: {
   formedAt: string;
+  anniversaryStartedAt?: string;
   anniversaryMonth: number;
   anniversaryDay: number;
   unitName: string;
@@ -56,7 +58,7 @@ export default function UnitAnniversaryStatus({
 
   const status = useMemo(() => {
     const parts = getJstParts(now);
-    const formedYear = Number(formedAt.slice(0, 4));
+    const anniversaryStartYear = Number(anniversaryStartedAt.slice(0, 4));
     const getAnniversaryTimestamp = (year: number) =>
       Date.UTC(year, anniversaryMonth - 1, anniversaryDay) - JST_OFFSET_MS;
     const thisYearTarget = getAnniversaryTimestamp(parts.year);
@@ -71,14 +73,14 @@ export default function UnitAnniversaryStatus({
     const countdownYear =
       now.getTime() < thisYearTarget ? parts.year : parts.year + 1;
     const anniversaryYear = isCelebrating ? celebrationYear : countdownYear;
-    const number = anniversaryYear - formedYear;
+    const number = anniversaryYear - anniversaryStartYear;
     const target = getAnniversaryTimestamp(countdownYear);
     const remaining = target - now.getTime();
     return { anniversaryYear, number, remaining, isCelebrating };
-  }, [anniversaryDay, anniversaryMonth, formedAt, now]);
+  }, [anniversaryDay, anniversaryMonth, anniversaryStartedAt, now]);
 
   const anniversaryLabel = locale.startsWith("ja")
-    ? t("anniversaryNumberJa", { number: status.number })
+    ? t("anniversaryNumberJa", { ordinal: getOrdinal(status.number) })
     : t("anniversaryNumberEn", { ordinal: getOrdinal(status.number) });
 
   if (status.isCelebrating) {
@@ -95,8 +97,8 @@ export default function UnitAnniversaryStatus({
           })}
         </p>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-          {formedAt.replaceAll("-", ".")} — {status.anniversaryYear}.
-          {String(anniversaryMonth).padStart(2, "0")}.
+          {anniversaryStartedAt.replaceAll("-", ".")} — {status.anniversaryYear}
+          .{String(anniversaryMonth).padStart(2, "0")}.
           {String(anniversaryDay).padStart(2, "0")}
         </p>
       </div>

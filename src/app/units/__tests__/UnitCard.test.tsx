@@ -12,11 +12,11 @@ vi.mock("../components/UnitMemberAvatars", () => ({ default: () => null }));
 
 import UnitCard from "../components/UnitCard";
 
-const renderCard = (slug: string) =>
+const renderCard = (slug: string, locale = "ja") =>
   render(
     <UnitCard
       unit={getUnitBySlug(slug)!}
-      locale="ja"
+      locale={locale}
       anniversaryLabel="記念日"
       openLabel="履歴を見る"
     />,
@@ -40,4 +40,18 @@ describe("UnitCard", () => {
     expect(screen.getByText("記念日")).toBeVisible();
     expect(screen.getByText("9月17日")).toBeVisible();
   });
+
+  it.each([
+    ["ja", "5月19日"],
+    ["en", "May 19"],
+  ])(
+    "shows AS_tar's shared activity start date concisely in %s",
+    (locale, anniversary) => {
+      renderCard("as-tar", locale);
+      expect(screen.getByText(anniversary)).toBeVisible();
+      expect(screen.getByText("Since: 2019.05.19")).toBeVisible();
+      expect(screen.queryByText(/2024\.06\.02/)).not.toBeInTheDocument();
+      expect(screen.queryByText("Since 2024.06.02")).not.toBeInTheDocument();
+    },
+  );
 });

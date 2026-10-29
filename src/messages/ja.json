@@ -2085,7 +2085,7 @@
     "description": "{members}による「{name}」の活動をまとめています。結成から現在までの配信、楽曲、ライブ、周年、再生数マイルストーンを時系列で振り返れます。",
     "since": "Since {date}",
     "legacyPeriod": "ルーツ: {name}（{start} — {end}）",
-    "anniversaryNumberJa": "{number}th Anniversary",
+    "anniversaryNumberJa": "{ordinal} Anniversary",
     "anniversaryNumberEn": "{ordinal} Anniversary",
     "countdownLead": "{anniversary}まで",
     "heroCongratulations": "{name}{number}周年おめでとう！",

@@ -72,9 +72,19 @@ export default function UnitCard({
               <p className="mt-1 text-sm font-semibold text-gray-700 dark:text-gray-200 sm:mt-2">
                 {memberNames.join(" × ")}
               </p>
-              <p className="mt-2 text-[0.65rem] font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)] sm:mt-3 sm:text-xs">
-                Since {unit.formedAt.replaceAll("-", ".")}
-              </p>
+              <div className="mt-2 space-y-1 text-[0.65rem] font-medium tracking-[0.12em] text-gray-500 dark:text-gray-100 dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.65)] sm:mt-3 sm:text-xs">
+                {unit.activityDates ? (
+                  <p>
+                    Since:{" "}
+                    {(unit.anniversary?.startedAt ?? unit.formedAt).replaceAll(
+                      "-",
+                      ".",
+                    )}
+                  </p>
+                ) : (
+                  <p>Since {unit.formedAt.replaceAll("-", ".")}</p>
+                )}
+              </div>
             </div>
             <div className="shrink-0">
               <UnitMemberAvatars members={memberNames} variant="card" />
