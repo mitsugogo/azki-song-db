@@ -1,24 +1,32 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import { encodePlaylistOgPayload } from "@/app/lib/playlistUrl";
+import { emptyThemes } from "@/app/lib/myBestNineSongs";
+import { emptySlotCategories } from "@/app/lib/bestNineCategories";
 
 const {
   fetchLookupMock,
   fetchWithFallbackMock,
   fetchFontsMock,
   imageResponseElements,
+  imageResponseOptions,
 } = vi.hoisted(() => ({
   fetchLookupMock: vi.fn(),
   fetchWithFallbackMock: vi.fn(),
   fetchFontsMock: vi.fn().mockResolvedValue([]),
   imageResponseElements: [] as unknown[],
+  imageResponseOptions: [] as { width?: number; height?: number }[],
 }));
 
 vi.mock("next/og", () => ({
   ImageResponse: class extends Response {
-    constructor(element: unknown, options?: { headers?: HeadersInit }) {
+    constructor(
+      element: unknown,
+      options?: { headers?: HeadersInit; width?: number; height?: number },
+    ) {
       super("png", { status: 200, headers: options?.headers });
       imageResponseElements.push(element);
+      imageResponseOptions.push(options ?? {});
     }
   },
 }));
@@ -79,6 +87,7 @@ type ElementNode = {
     children?: unknown;
     src?: string;
     style?: Record<string, unknown>;
+    "data-og-slot"?: number;
   };
 };
 
@@ -115,6 +124,7 @@ describe("generic OG cache", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     imageResponseElements.length = 0;
+    imageResponseOptions.length = 0;
     fetchFontsMock.mockResolvedValue([]);
   });
 
@@ -151,6 +161,7 @@ describe("OG song freshness routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     imageResponseElements.length = 0;
+    imageResponseOptions.length = 0;
     fetchFontsMock.mockResolvedValue([]);
   });
 
@@ -346,5 +357,140 @@ describe("OG song freshness routes", () => {
       expect.any(String),
       "best-nine",
     );
+    expect(imageResponseOptions.at(-1)).toMatchObject({
+      width: 1200,
+      height: 630,
+    });
+    const cards = collectElements(imageResponseElements.at(-1)).filter(
+      (element) => element.props?.["data-og-slot"] !== undefined,
+    );
+    expect(cards).toHaveLength(9);
+    const children = cards[0].props?.children as ElementNode[];
+    expect(collectText(children[0]).join("")).toBe("1.");
+    expect(collectText(children[1]).join("")).toContain("新曲");
+    expect(collectText(children[1]).join("")).toContain("AZKi");
+    const thumbnail = collectElements(cards[0]).find(
+      (element) => element.props?.src,
+    );
+    expect(thumbnail?.props?.style).toMatchObject({
+      width: 176,
+      height: 99,
+      objectFit: "contain",
+    });
+    expect(thumbnail?.props?.style?.position).toBeUndefined();
+  });
+
+  it("9選のお題・欠損・重複の枠位置を画像でも保つ", async () => {
+    const themes = emptyThemes();
+    themes[0] = "取得できない曲のお題";
+    themes[7] = "長いお題".repeat(8);
+    themes[8] = "歌枠のお題";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        selection: {
+          title: "お題付き",
+          themes,
+          songs: [
+            { v: "missing", s: "0", slot: 0 },
+            { v: "new-video", s: "10", slot: 7 },
+            { v: "new-video", s: "10", slot: 8 },
+          ],
+        },
+      }),
+    );
+    fetchWithFallbackMock.mockResolvedValue([song]);
+    const response = await getBestNine(
+      new Request(
+        "https://example.test/api/og/share/my-best-9-songs?id=themed",
+      ) as never,
+    );
+    expect(response.status).toBe(200);
+    const cards = collectElements(imageResponseElements.at(-1)).filter(
+      (element) => element.props?.["data-og-slot"] !== undefined,
+    );
+    expect(cards).toHaveLength(9);
+    expect(collectText(cards[0]).join("")).toContain("1. 取得できない曲のお題");
+    expect(
+      collectElements(cards[0]).some((element) => element.props?.src),
+    ).toBe(false);
+    expect(
+      collectElements(cards[1]).some((element) => element.props?.src),
+    ).toBe(false);
+    expect(collectText(cards[7]).join("")).toContain("新曲");
+    expect(collectText(cards[8]).join("")).toContain("9. 歌枠のお題");
+    expect(
+      collectElements(cards[8]).some((element) => element.props?.src),
+    ).toBe(true);
+    expect(
+      collectElements(cards[7]).some(
+        (element) => element.props?.style?.lineClamp === 2,
+      ),
+    ).toBe(true);
+    expect(fetchFontsMock).toHaveBeenCalledWith(
+      expect.stringContaining("歌枠のお題"),
+      "best-nine",
+    );
+    expect(collectText(cards[0]).join("")).toContain("曲が見つかりません");
+    expect(collectText(cards[1]).join("")).toContain("未回答");
+  });
+
+  it("お題文が空でもカテゴリを設定した回答の枠を詰めない", async () => {
+    const slotCategories = emptySlotCategories();
+    slotCategories[8] = ["original"];
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        selection: {
+          title: "カテゴリ別",
+          themes: emptyThemes(),
+          slotCategories,
+          songs: [{ v: "new-video", s: "10", slot: 8 }],
+        },
+      }),
+    );
+    fetchWithFallbackMock.mockResolvedValue([song]);
+    const response = await getBestNine(
+      new Request(
+        "https://example.test/api/og/share/my-best-9-songs?id=slots",
+      ) as never,
+    );
+    expect(response.status).toBe(200);
+    const cards = collectElements(imageResponseElements.at(-1)).filter(
+      (element) => element.props?.["data-og-slot"] !== undefined,
+    );
+    expect(cards).toHaveLength(9);
+    expect(collectText(cards[0]).join("")).toContain("未回答");
+    expect(collectText(cards[8]).join("")).toContain("新曲");
+  });
+
+  it("9選の寸法指定は構成全体を拡縮し、不正な寸法は既定値へ戻す", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      Response.json({
+        selection: { title: "9選", songs: [{ v: "new-video", s: "10" }] },
+      }),
+    );
+    fetchWithFallbackMock.mockResolvedValue([song]);
+    await getBestNine(
+      new Request(
+        "https://example.test/api/og/share/my-best-9-songs?id=test&w=600&h=315",
+      ) as never,
+    );
+    expect(imageResponseOptions.at(-1)).toMatchObject({
+      width: 600,
+      height: 315,
+    });
+    expect(
+      collectElements(imageResponseElements.at(-1)).some(
+        (element) => element.props?.style?.transform === "scale(0.5)",
+      ),
+    ).toBe(true);
+    await getBestNine(
+      new Request(
+        "https://example.test/api/og/share/my-best-9-songs?id=test&w=NaN&h=0",
+      ) as never,
+    );
+    expect(imageResponseOptions.at(-1)).toMatchObject({
+      width: 1200,
+      height: 630,
+    });
   });
 });

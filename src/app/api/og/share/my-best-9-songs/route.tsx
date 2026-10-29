@@ -1,6 +1,11 @@
+import { bestNineOgSize, getBestNineOgSize } from "@/app/lib/myBestNineSongsOg";
+import {
+  hasFixedSlots,
+  normalizeSelection,
+  resolveBestNineSlots,
+} from "@/app/lib/myBestNineSongs";
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
-import { Song } from "@/app/types/song";
 import { siteConfig } from "@/app/config/siteConfig";
 import { fetchSongsFromApiWithRecentFallback } from "@/app/lib/server/fetchSongs";
 import {
@@ -15,49 +20,13 @@ type OgSongCard = {
   url: string;
   title: string;
   artist: string;
+  theme?: string;
+  emptyLabel?: string;
 };
 
-const normalizeStart = (value: unknown): string | null => {
-  if (value === null || value === undefined) return null;
-
-  const trimmed = String(value).trim();
-  if (!trimmed) return null;
-
-  const withoutSuffix = trimmed.replace(/s$/i, "");
-  const numeric = Number(withoutSuffix);
-  if (Number.isFinite(numeric)) {
-    return String(numeric);
-  }
-
-  return withoutSuffix;
-};
-
-const resolveSelectedSongs = (
-  songs: Song[],
-  entries: { v: string; s: string }[],
-) =>
-  entries
-    .map((entry) => {
-      const normalizedEntryStart = normalizeStart(entry.s);
-      if (!normalizedEntryStart) return undefined;
-
-      const exact = songs.find((song) => {
-        const normalizedSongStart = normalizeStart(song.start);
-        return (
-          song.video_id === entry.v &&
-          normalizedSongStart !== null &&
-          normalizedSongStart === normalizedEntryStart
-        );
-      });
-      if (exact) return exact;
-
-      const sameVideoSongs = songs.filter((song) => song.video_id === entry.v);
-      return sameVideoSongs.length === 1 ? sameVideoSongs[0] : undefined;
-    })
-    .filter((song): song is Song => song !== undefined)
-    .slice(0, 9);
-
-const fallbackOgImage = async () => {
+const fallbackOgImage = async (
+  size: { width: number; height: number } = bestNineOgSize,
+) => {
   const fonts = await fetchOgFonts(
     "好きな曲9選 AZKi Song Database",
     "best-nine",
@@ -105,8 +74,7 @@ const fallbackOgImage = async () => {
       </div>
     </div>,
     {
-      width: 1200,
-      height: 630,
+      ...size,
       fonts,
       headers: ogImageHeaders,
     },
@@ -120,32 +88,24 @@ export async function GET(req: NextRequest) {
     const hl = searchParams.get("hl")?.toLowerCase() ?? "ja";
     const origin = requestUrl.origin;
     const id = searchParams.get("id");
+    const size = getBestNineOgSize(searchParams);
 
     if (!id) {
-      return await fallbackOgImage();
+      return await fallbackOgImage(size);
     }
-
-    const width = searchParams.get("w") || "1200";
-    const height = searchParams.get("h") || "630";
 
     const savedResponse = await fetch(
       `${origin}/api/share/my-best-9-songs/${id}`,
     ).catch(() => null);
 
     const selection = savedResponse?.ok
-      ? (
-          (await savedResponse.json()) as {
-            selection?: {
-              title: string;
-              author?: string;
-              songs: { v: string; s: string }[];
-            };
-          }
-        ).selection
+      ? normalizeSelection(
+          ((await savedResponse.json()) as { selection?: unknown }).selection,
+        )
       : null;
 
     if (!selection) {
-      return await fallbackOgImage();
+      return await fallbackOgImage(size);
     }
 
     // 曲データを取得
@@ -156,30 +116,57 @@ export async function GET(req: NextRequest) {
         baseUrlOverride: origin,
       },
       (candidateSongs) =>
-        resolveSelectedSongs(candidateSongs, expectedEntries).length ===
-        expectedEntries.length,
+        resolveBestNineSlots(selection, candidateSongs).filter(
+          (slot) => slot.song,
+        ).length === expectedEntries.length,
     ).catch(() => []);
 
     // 厳選した曲を取得
-    const selectedSongs = resolveSelectedSongs(songs, expectedEntries);
+    const themed = hasFixedSlots(selection);
+    const resolvedSlots = resolveBestNineSlots(selection, songs);
+    const selectedSlots = themed
+      ? resolvedSlots
+      : resolvedSlots.filter((slot) => slot.song);
 
     const titleText = normalizeOgText(selection.title.trim() || "好きな曲9選");
     const authorText = selection.author?.trim()
       ? normalizeOgText(`by ${selection.author.trim()}`)
       : "";
 
-    const ogSongCards: OgSongCard[] = selectedSongs.map((song) => {
-      let url = `https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`;
-      if (song.video_id === "fiddR-oZta4") {
-        // afterglow(id:fiddR-oZta4)だけmaxresdefault.jpgが存在しないため、hqdefault.jpgを使用
-        url = `https://img.youtube.com/vi/${song.video_id}/hqdefault.jpg`;
-      }
-      return {
-        url: url,
-        title: normalizeOgText(song.title),
-        artist: normalizeOgText(song.artist),
-      };
-    });
+    const ogSongCards: OgSongCard[] = selectedSlots.map(
+      ({ song, theme, slot, entry }) => {
+        const themeText = themed
+          ? normalizeOgText(
+              `${slot + 1}. ${theme || (hl === "en" ? "Free choice" : "自由枠")}`,
+            )
+          : undefined;
+        if (!song)
+          return {
+            url: "",
+            title: "",
+            artist: "",
+            theme: themeText,
+            emptyLabel: entry
+              ? hl === "en"
+                ? "Song not found"
+                : "曲が見つかりません"
+              : hl === "en"
+                ? "Unanswered"
+                : "未回答",
+          };
+        let url = `https://img.youtube.com/vi/${song.video_id}/maxresdefault.jpg`;
+        if (song.video_id === "fiddR-oZta4") {
+          // afterglow(id:fiddR-oZta4)だけmaxresdefault.jpgが存在しないため、hqdefault.jpgを使用
+          url = `https://img.youtube.com/vi/${song.video_id}/hqdefault.jpg`;
+        }
+        return {
+          url: url,
+          theme: themeText,
+          title: normalizeOgText(song.title),
+          artist: normalizeOgText(song.artist),
+        };
+      },
+    );
 
     // 9枚未満の場合は空カードでパディング
     while (ogSongCards.length < 9) {
@@ -187,6 +174,7 @@ export async function GET(req: NextRequest) {
         url: "",
         title: "",
         artist: "",
+        emptyLabel: hl === "en" ? "Not selected" : "未選択",
       });
     }
 
@@ -195,205 +183,266 @@ export async function GET(req: NextRequest) {
     );
 
     const fontTextSeed = `${titleText}${authorText}${ogSongCards
-      .map((card) => `${card.title}${card.artist}`)
+      .map(
+        (card) =>
+          `${card.theme ?? ""}${card.title}${card.artist}${card.emptyLabel ?? ""}`,
+      )
       .join("")}...…,:・`;
 
     const fonts = await fetchOgFonts(fontTextSeed, "best-nine");
 
+    const scale = Math.min(
+      size.width / bestNineOgSize.width,
+      size.height / bestNineOgSize.height,
+    );
     return new ImageResponse(
       <div
         style={{
-          backgroundColor: ogColors.background,
-          backgroundImage:
-            "linear-gradient(135deg, #fffafc 0%, #fdf2f7 46%, #eef8ff 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "24px 24px 8px",
-          fontFamily: ogFontFamily,
-          position: "relative",
+          justifyContent: "center",
           overflow: "hidden",
+          backgroundColor: ogColors.background,
+          backgroundImage:
+            "linear-gradient(135deg, #fffafc 0%, #fdf2f7 52%, #f5f9ff 100%)",
         }}
       >
-        {/* 背景装飾 */}
         <div
           style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            opacity: 0.96,
-            backgroundImage:
-              "radial-gradient(circle at center, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.46) 42%, rgba(253, 242, 248, 0.92) 100%)",
-          }}
-        />
-
-        {/* ヘッダー */}
-        <div
-          style={{
-            position: "relative",
+            width: bestNineOgSize.width,
+            height: bestNineOgSize.height,
+            flexShrink: 0,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            width: "100%",
-            maxWidth: "1080px",
-            marginBottom: "12px",
+            padding: 16,
+            fontFamily: ogFontFamily,
+            transform: `scale(${scale})`,
+            transformOrigin: "center",
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: 52,
-              fontWeight: 700,
-              color: ogColors.primaryDeep,
-              marginBottom: "6px",
-              letterSpacing: 0,
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: 70,
+              flexShrink: 0,
+              marginBottom: 8,
             }}
           >
-            {titleText}
-          </div>
-          <div
-            style={{
-              display: authorText ? "flex" : "none",
-              fontSize: 28,
-              color: ogColors.muted,
-              fontWeight: 400,
-            }}
-          >
-            {authorText}
-          </div>
-        </div>
-
-        {/* 3x3 レイアウト（next/og では grid が使えないため flex で構成） */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            maxWidth: "1040px",
-            width: "100%",
-            height: "430px",
-            marginBottom: "4px",
-            position: "relative",
-          }}
-        >
-          {thumbnailRows.map((row, rowIdx) => (
             <div
-              key={rowIdx}
               style={{
-                width: "100%",
                 display: "flex",
-                flexDirection: "row",
-                gap: "10px",
-                flex: 1,
+                maxWidth: "100%",
+                fontSize: titleText.length > 32 ? 24 : 36,
+                lineHeight: 1.1,
+                fontWeight: 700,
+                color: ogColors.primaryDeep,
+                textAlign: "center",
+                lineClamp: 2,
+                textOverflow: "ellipsis",
+                overflow: "hidden",
               }}
             >
-              {row.map((card, colIdx) => (
-                <div
-                  key={`${rowIdx}-${colIdx}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    flex: 1,
-                    position: "relative",
-                    backgroundColor: card.url
-                      ? "rgba(255, 255, 255, 0.82)"
-                      : "rgba(255, 240, 247, 0.9)",
-                    borderRadius: "6px",
-                    overflow: "hidden",
-                    border: `1px solid ${ogColors.line}`,
-                  }}
-                >
-                  {card.url ? (
-                    <img
-                      src={card.url}
-                      alt=""
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "center",
-                      }}
-                    />
-                  ) : null}
-
+              {titleText}
+            </div>
+            {authorText && (
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 18,
+                  lineHeight: 1.1,
+                  color: ogColors.muted,
+                  marginTop: 3,
+                }}
+              >
+                {authorText}
+              </div>
+            )}
+          </div>
+          {/* お題は上段、下段は左に16:9の画像・右に曲情報。文字を画像に重ねない。 */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              height: 496,
+              gap: 10,
+              flexShrink: 0,
+            }}
+          >
+            {thumbnailRows.map((row, rowIdx) => (
+              <div
+                key={rowIdx}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 10,
+                  flex: 1,
+                }}
+              >
+                {row.map((card, colIdx) => (
                   <div
+                    key={`${rowIdx}-${colIdx}`}
+                    data-og-slot={rowIdx * 3 + colIdx}
                     style={{
-                      display: card.title ? "flex" : "none",
+                      display: "flex",
                       flexDirection: "column",
-                      justifyContent: "flex-end",
-                      width: "100%",
-                      minHeight: "42px",
-                      padding: "5px 7px",
-                      backgroundImage:
-                        "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(106, 32, 68, 0.76) 78%)",
+                      flex: 1,
+                      minWidth: 0,
+                      height: "100%",
+                      padding: 10,
+                      gap: 3,
+                      backgroundColor: "#ffffff",
+                      border: `1px solid ${ogColors.line}`,
+                      borderRadius: "6px",
+                      overflow: "hidden",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
-                        color: "#ffffff",
-                        fontSize: 12,
+                        alignItems: "center",
+                        width: "100%",
+                        height: 32,
+                        flexShrink: 0,
+                        color: ogColors.primaryDeep,
+                        fontSize: 14,
                         fontWeight: 700,
-                        lineHeight: 1.15,
-                        whiteSpace: "nowrap",
+                        lineHeight: 1.12,
+                        lineClamp: 2,
                         textOverflow: "ellipsis",
                         overflow: "hidden",
                       }}
                     >
-                      {card.title}
+                      {card.theme || `${rowIdx * 3 + colIdx + 1}.`}
                     </div>
                     <div
                       style={{
                         display: "flex",
-                        color: "#f8dbe8",
-                        fontSize: 10,
-                        fontWeight: 400,
-                        marginTop: "2px",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        width: "100%",
+                        height: 99,
+                        gap: 12,
+                        flexShrink: 0,
                       }}
                     >
-                      {card.artist}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 176,
+                          height: 99,
+                          flexShrink: 0,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          backgroundColor: card.url ? "#000000" : "#f7f2f5",
+                        }}
+                      >
+                        {card.url ? (
+                          <img
+                            src={card.url}
+                            alt=""
+                            width={176}
+                            height={99}
+                            style={{
+                              width: 176,
+                              height: 99,
+                              objectFit: "contain",
+                              objectPosition: "center",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              display: "flex",
+                              maxWidth: 160,
+                              fontSize: 14,
+                              color: ogColors.muted,
+                              textAlign: "center",
+                            }}
+                          >
+                            {card.emptyLabel}
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          flex: 1,
+                          minWidth: 0,
+                          height: 99,
+                          overflow: "hidden",
+                        }}
+                      >
+                        {card.title && (
+                          <div
+                            style={{
+                              display: "flex",
+                              fontSize: 17,
+                              lineHeight: 1.15,
+                              fontWeight: 700,
+                              color: ogColors.ink,
+                              lineClamp: 3,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {card.title}
+                          </div>
+                        )}
+                        {card.artist && (
+                          <div
+                            style={{
+                              display: "flex",
+                              marginTop: 4,
+                              fontSize: 13,
+                              lineHeight: 1.2,
+                              color: ogColors.muted,
+                              lineClamp: 2,
+                              textOverflow: "ellipsis",
+                              overflow: "hidden",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {card.artist}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* フッター */}
-        <div
-          style={{
-            position: "absolute",
-            right: "24px",
-            bottom: "4px",
-            display: "flex",
-            fontSize: 18,
-            color: ogColors.muted,
-            fontWeight: 400,
-            letterSpacing: "0.05em",
-          }}
-        >
-          {siteConfig.siteName}
+                ))}
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: 24,
+              flexShrink: 0,
+              fontSize: 13,
+              color: ogColors.muted,
+              letterSpacing: 1.5,
+            }}
+          >
+            {siteConfig.siteName}
+          </div>
         </div>
       </div>,
-      {
-        width: parseInt(width, 10),
-        height: parseInt(height, 10),
-        fonts,
-        headers: ogImageHeaders,
-      },
+      { ...size, fonts, headers: ogImageHeaders },
     );
   } catch (e) {
     if (e instanceof Error) {

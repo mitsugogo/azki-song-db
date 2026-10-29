@@ -138,7 +138,7 @@ describe("MyBestNineSongs integration", () => {
   it("OG 画像パラメータの検証", () => {
     // メタデータで使用される URL パラメータ
     const encoded = "sampleEncodedData";
-    const ogImageUrl = `https://azki-song-db.mitsugogo.tech/api/og/share/my-best-9-songs?encoded=${encoded}&w=1200&h=630`;
+    const ogImageUrl = `https://azki-song-db.mitsugogo.tech/api/og/share/my-best-9-songs?id=${encoded}&w=1200&h=630`;
 
     expect(ogImageUrl).toContain("api/og/share/my-best-9-songs");
     expect(ogImageUrl).toContain("w=1200");

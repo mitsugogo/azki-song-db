@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { randomBytes } from "crypto";
-import { MyBestNineSongs } from "@/app/hook/useMyBestNineSongs";
+import { normalizeSelection } from "./myBestNineSongs";
 
 const SHEET_NAME = "推し曲9選";
 
@@ -42,54 +42,6 @@ const generateShareId = () => {
     .replace(/\//g, "_")
     .replace(/=/g, "")
     .slice(0, 11);
-};
-
-const normalizeSelection = (input: unknown): MyBestNineSongs | null => {
-  if (!input || typeof input !== "object") return null;
-
-  const value = input as {
-    title?: unknown;
-    author?: unknown;
-    songs?: unknown;
-  };
-
-  if (typeof value.title !== "string" || value.title.trim().length === 0) {
-    return null;
-  }
-  if (
-    !Array.isArray(value.songs) ||
-    value.songs.length === 0 ||
-    value.songs.length > 9
-  ) {
-    return null;
-  }
-
-  const songs = value.songs
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") return null;
-      const e = entry as { v?: unknown; s?: unknown };
-      if (typeof e.v !== "string") return null;
-      const videoId = e.v.trim();
-      if (!videoId) return null;
-
-      const startRaw = e.s;
-      if (typeof startRaw !== "string" && typeof startRaw !== "number") {
-        return null;
-      }
-      const start = String(startRaw).trim();
-      if (!start) return null;
-
-      return { v: videoId, s: start };
-    })
-    .filter((v): v is { v: string; s: string } => v !== null);
-
-  if (songs.length !== value.songs.length) return null;
-
-  return {
-    title: value.title,
-    author: typeof value.author === "string" ? value.author : undefined,
-    songs,
-  };
 };
 
 export const createMyBestNineSongsEntry = async (selection: unknown) => {
