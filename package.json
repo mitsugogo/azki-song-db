@@ -2,7 +2,7 @@
   "name": "azki-song-app",
   "version": "2.49.0",
   "private": true,
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.18.0",
   "engines": {
     "node": "24.x"
   },
