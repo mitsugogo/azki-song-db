@@ -12,8 +12,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Toolchain and Validation
 
-- Use Node.js 24.x and pnpm 12.8.1, matching `package.json`. Prefer `corepack pnpm ...` when the globally installed pnpm differs.
-- Install dependencies with `pnpm install --frozen-lockfile`. Keep the pnpm version in `.github/workflows/` synchronized with `package.json`; pin GitHub Actions to full commit SHAs.
+- Use Node.js 24.x and the pnpm version declared in `package.json`'s `packageManager` field. Prefer `corepack pnpm ...` when the globally installed pnpm differs.
+- Install dependencies with `pnpm install --frozen-lockfile`. Use `packageManager` as the single source for the pnpm version; omit the `version` input from `pnpm/action-setup` in `.github/workflows/`. Pin GitHub Actions to full commit SHAs.
 - Run `pnpm lint` for the repository-wide Prettier check, `pnpm test -- --run` for CI-style unit tests, and `pnpm test:e2e` for Playwright tests. `pnpm build` also runs `scripts/pre-build.js` and Prisma generation.
 - Environment variables and data-source setup are documented in [README.md](README.md) and [README_ja.md](README_ja.md). Do not expose `.env.local` values in code, logs, or test output.
 - When a check exposes unrelated pre-existing failures, report them separately and keep the change scoped to the requested behavior.
