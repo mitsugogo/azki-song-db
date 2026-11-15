@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Song } from "../types/song";
-import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
+import { useDebouncedCallback, useMediaQuery } from "@mantine/hooks";
 
 type CumulativeItem = {
   song: Song;
@@ -402,7 +402,14 @@ export default function useControlBar({
   const [isMuted, setIsMuted] = useState(false);
   const [tempVolumeValue, setTempVolumeValue] = useState(volumeValue);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [debouncedVolumeValue] = useDebouncedValue(tempVolumeValue, 100);
+  const applyVolumeChange = useDebouncedCallback((volume: number) => {
+    if (!playerControls?.isReady || volume === volumeValue) return;
+    try {
+      playerControls.setVolume(volume);
+    } catch (error) {
+      console.error("Failed to set volume:", error);
+    }
+  }, 100);
 
   // Sync local muted state from playerControls (or fallback to volume===0)
   useEffect(() => {
@@ -424,38 +431,27 @@ export default function useControlBar({
     playerControls?.volume,
   ]);
 
-  // Debounced volume適用
+  // 外部からの音量同期は表示だけ更新し、古い操作の書き戻しを防ぐ
   useEffect(() => {
-    if (!playerControls?.isReady || debouncedVolumeValue === volumeValue)
-      return;
-    try {
-      playerControls.setVolume(debouncedVolumeValue);
-    } catch (error) {
-      console.error("Failed to set volume:", error);
-    }
-  }, [debouncedVolumeValue, volumeValue, playerControls]);
-
-  // tempボリューム変更（ミュート中は同期しない）
-  useEffect(() => {
-    if (!isMuted) {
-      setTempVolumeValue(volumeValue);
-    }
-  }, [volumeValue, isMuted]);
+    applyVolumeChange.cancel();
+    setTempVolumeValue(volumeValue);
+  }, [volumeValue, playerControls?.isReady, applyVolumeChange]);
 
   const handleVolumeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      if (!playerControls) return;
+      if (!playerControls?.isReady) return;
       const nextValue = Math.min(
         Math.max(Math.round(Number(event.target.value)), 0),
         100,
       );
       setTempVolumeValue(nextValue);
+      applyVolumeChange(nextValue);
       if (nextValue > 0 && isMuted) {
         playerControls.unMute();
         setIsMuted(false);
       }
     },
-    [playerControls, isMuted],
+    [playerControls, isMuted, applyVolumeChange],
   );
 
   const handleToggleMute = useCallback(() => {
