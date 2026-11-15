@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.49.1](https://github.com/mitsugogo/azki-song-db/compare/v2.49.0...v2.49.1) (2026-11-15)
+
+### Bug Fixes
+
+* 音量同期による書き戻しループを防止 ([72ac1b5](https://github.com/mitsugogo/azki-song-db/commit/72ac1b51da467496939ce2289edf9665107f4bc2))
+
 ## [2.49.0](https://github.com/mitsugogo/azki-song-db/compare/v2.48.0...v2.49.0) (2026-10-29)
 
 ### Features
