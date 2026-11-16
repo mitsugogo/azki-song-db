@@ -4,6 +4,7 @@ import type { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "../../types/song";
 import { HomeHeroSection } from "../HomeHeroSection";
+import { HERO_LATEST_PLAYED_STORAGE_KEY } from "../useHeroBackgroundSong";
 
 const video = vi.hoisted(() => ({ props: {} as YouTubeProps }));
 
@@ -17,22 +18,20 @@ vi.mock("next/font/google", () => ({
   Zen_Maru_Gothic: () => ({ className: "test-font" }),
 }));
 vi.mock("../HomeSearchPanel", () => ({ HomeSearchPanel: () => null }));
-vi.mock("../homeData", () => ({
-  pickHeroBackgroundSong: (songs: Song[]) => songs[0] ?? null,
-  buildHeroBackgroundVideoUrl: (song: Song) =>
-    `https://www.youtube.com/watch?v=${song.video_id}`,
-}));
 
 const song = {
   video_id: "hero-video-id",
   video_title: "Hero video",
   title: "Hero song",
+  artist: "AZKi",
+  tags: ["オリ曲MV"],
+  broadcast_at: "2026-01-01",
 } as Song;
 
-function renderHero() {
+function renderHero(songs = [song]) {
   return render(
     <MantineProvider>
-      <HomeHeroSection songs={[song]} />
+      <HomeHeroSection songs={songs} />
     </MantineProvider>,
   );
 }
@@ -61,6 +60,7 @@ function readyPlayer() {
 
 describe("HomeHeroSection playback controls", () => {
   beforeEach(() => {
+    localStorage.clear();
     vi.stubGlobal(
       "matchMedia",
       vi.fn(() => ({
@@ -75,6 +75,7 @@ describe("HomeHeroSection playback controls", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("再生リンクをミュートの左に置き、背景動画を再読み込みせずミュートを切り替える", () => {
@@ -121,4 +122,51 @@ describe("HomeHeroSection playback controls", () => {
       screen.getByRole("link", { name: "heroWatchFromBeginning" }),
     ).toHaveAttribute("href", "/watch?v=hero-video-id");
   });
+
+  it.each(["error", "timeout"])(
+    "%sで最新MVが再生できなければリンクごと別MVへ切り替え、最新MVは未再生に保つ",
+    (failure) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-11-16T12:00:00Z"));
+      const latest = {
+        ...song,
+        video_id: "latest-mv",
+        title: "Latest song",
+        broadcast_at: "2026-11-15",
+      };
+      const { unmount } = renderHero([song, latest]);
+      expect(video.props.videoId).toBe(latest.video_id);
+      const staleProps = video.props;
+
+      act(() => {
+        if (failure === "error") {
+          video.props.onError?.({ data: 100 } as YouTubeEvent<number>);
+        } else {
+          vi.advanceTimersByTime(15_000);
+        }
+      });
+      expect(video.props.videoId).toBe(song.video_id);
+      expect(
+        screen.getByRole("link", { name: "heroWatchFromBeginning" }),
+      ).toHaveAttribute("href", "/watch?v=hero-video-id");
+      expect(screen.getByRole("button", { name: "unmute" })).toBeDisabled();
+
+      act(() => {
+        staleProps.onStateChange?.({ data: 1 } as YouTubeEvent<number>);
+      });
+      readyPlayer();
+      expect(localStorage.getItem(HERO_LATEST_PLAYED_STORAGE_KEY)).toBeNull();
+      act(() => video.props.onError?.({ data: 100 } as YouTubeEvent<number>));
+      expect(screen.queryByTestId("hero-video")).not.toBeInTheDocument();
+
+      unmount();
+      renderHero([song, latest]);
+      expect(video.props.videoId).toBe(latest.video_id);
+      readyPlayer();
+      expect(localStorage.getItem(HERO_LATEST_PLAYED_STORAGE_KEY)).toBe(
+        "latest-mv",
+      );
+      expect(video.props.videoId).toBe(latest.video_id);
+    },
+  );
 });

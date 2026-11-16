@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
 import type { Song } from "../types/song";
 
@@ -31,17 +31,40 @@ export type HomeHeroPlayer = {
 type HomeHeroBackgroundProps = {
   song: Song | null;
   onPlayerChange?: (player: HomeHeroPlayer | null) => void;
+  onPlaybackSuccess?: (videoId: string) => void;
+  onPlaybackFailure?: (videoId: string) => void;
   layout?: "page" | "frame";
 };
 
 export const HomeHeroBackground = memo(function HomeHeroBackground({
   song,
-  onPlayerChange,
-  layout = "page",
+  ...props
 }: HomeHeroBackgroundProps) {
+  return song ? (
+    <HomeHeroVideo key={song.video_id} song={song} {...props} />
+  ) : null;
+});
+
+function HomeHeroVideo({
+  song,
+  onPlayerChange,
+  onPlaybackSuccess,
+  onPlaybackFailure,
+  layout = "page",
+}: HomeHeroBackgroundProps & { song: Song }) {
   const [isUnavailable, setUnavailable] = useState(false);
+  const activeRef = useRef(false);
+  const hasFailedRef = useRef(false);
   const hasPlayedRef = useRef(false);
   const playbackRetryCountRef = useRef(0);
+  const failPlayback = useCallback(() => {
+    if (!activeRef.current || hasFailedRef.current) {
+      return;
+    }
+    hasFailedRef.current = true;
+    setUnavailable(true);
+    onPlaybackFailure?.(song.video_id);
+  }, [onPlaybackFailure, song.video_id]);
   const options = useMemo<YouTubeProps["opts"]>(
     () => ({
       width: "100%",
@@ -66,38 +89,38 @@ export const HomeHeroBackground = memo(function HomeHeroBackground({
   );
 
   useEffect(() => {
-    hasPlayedRef.current = false;
-    playbackRetryCountRef.current = 0;
-    setUnavailable(false);
-
-    if (!song?.video_id) {
-      return;
-    }
+    activeRef.current = true;
 
     const playbackTimeout = window.setTimeout(() => {
       if (!hasPlayedRef.current) {
-        setUnavailable(true);
+        failPlayback();
       }
     }, PLAYBACK_TIMEOUT_MS);
 
-    return () => window.clearTimeout(playbackTimeout);
-  }, [song?.video_id]);
+    return () => {
+      activeRef.current = false;
+      window.clearTimeout(playbackTimeout);
+    };
+  }, [failPlayback]);
 
   useEffect(() => {
     return () => onPlayerChange?.(null);
   }, [song?.video_id, isUnavailable, onPlayerChange]);
 
-  if (!song || isUnavailable) {
+  if (isUnavailable) {
     return null;
   }
 
   const handleReady = (event: YouTubeEvent) => {
+    if (!activeRef.current || hasFailedRef.current) {
+      return;
+    }
     try {
       event.target.mute();
       event.target.playVideo();
       onPlayerChange?.(event.target as unknown as HomeHeroPlayer);
     } catch {
-      setUnavailable(true);
+      failPlayback();
     }
   };
 
@@ -118,10 +141,16 @@ export const HomeHeroBackground = memo(function HomeHeroBackground({
         iframeClassName="h-full w-full"
         title=""
         onReady={handleReady}
-        onError={() => setUnavailable(true)}
+        onError={failPlayback}
         onStateChange={(event) => {
+          if (!activeRef.current || hasFailedRef.current) {
+            return;
+          }
           if (event.data === YOUTUBE_PLAYER_STATE_PLAYING) {
-            hasPlayedRef.current = true;
+            if (!hasPlayedRef.current) {
+              hasPlayedRef.current = true;
+              onPlaybackSuccess?.(song.video_id);
+            }
             return;
           }
           if (
@@ -130,11 +159,15 @@ export const HomeHeroBackground = memo(function HomeHeroBackground({
             PLAYBACK_RETRY_STATES.has(event.data)
           ) {
             playbackRetryCountRef.current += 1;
-            event.target.mute();
-            event.target.playVideo();
+            try {
+              event.target.mute();
+              event.target.playVideo();
+            } catch {
+              failPlayback();
+            }
           }
         }}
       />
     </div>
   );
-});
+}

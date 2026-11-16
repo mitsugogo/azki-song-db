@@ -18,12 +18,10 @@ import { isAzkiBirthday } from "../lib/birthday";
 import { formatDate } from "../lib/formatDate";
 import { buildWatchHref } from "../lib/watchUrl";
 import type { Song } from "../types/song";
-import {
-  buildHeroBackgroundVideoUrl,
-  pickHeroBackgroundSong,
-} from "./homeData";
+import { buildHeroBackgroundVideoUrl } from "./homeData";
 import { HomeHeroBackground, type HomeHeroPlayer } from "./HomeHeroBackground";
 import { HomeSearchPanel } from "./HomeSearchPanel";
+import { useHeroBackgroundSong } from "./useHeroBackgroundSong";
 
 const BIRTHDAY_BALLOONS = [
   { x: "8%", delay: "0s", duration: "13s", color: "#f472b6", size: "2.9rem" },
@@ -91,7 +89,8 @@ export const HomeHeroSection = memo(function HomeHeroSection({
     setMuted(!wasMuted);
   };
   const [showBirthdayHero, setShowBirthdayHero] = useState(false);
-  const backgroundSong = useMemo(() => pickHeroBackgroundSong(songs), [songs]);
+  const { backgroundSong, onPlaybackSuccess, onPlaybackFailure } =
+    useHeroBackgroundSong(songs);
   const backgroundVideoUrl = useMemo(
     () => (backgroundSong ? buildHeroBackgroundVideoUrl(backgroundSong) : null),
     [backgroundSong],
@@ -116,6 +115,8 @@ export const HomeHeroSection = memo(function HomeHeroSection({
       <HomeHeroBackground
         song={backgroundSong}
         onPlayerChange={handlePlayerChange}
+        onPlaybackSuccess={onPlaybackSuccess}
+        onPlaybackFailure={onPlaybackFailure}
       />
       <div
         className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.72),rgba(255,255,255,0.42)_42%,rgba(253,242,248,0.9)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.42),rgba(15,23,42,0.72)_50%,rgba(15,23,42,0.94)_100%)]"
