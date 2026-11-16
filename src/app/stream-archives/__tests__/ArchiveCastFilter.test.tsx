@@ -174,9 +174,9 @@ describe("ArchiveCastFilter", () => {
     const unknownOption = screen.getByRole("option", { name: "ゲスト - 1件" });
     expect(knownOption.querySelector("img")).toBeVisible();
     expect(unknownOption.querySelector("img")).not.toBeInTheDocument();
-    expect(within(knownOption).getByText("- 2件")).toHaveStyle({
-      color: "var(--mantine-color-dimmed)",
-    });
+    expect(within(knownOption).getByText("- 2件").style.color).toBe(
+      "var(--mantine-color-dimmed)",
+    );
   });
 
   it("formats cast counts with the supplied locale label", () => {
@@ -197,9 +197,9 @@ describe("ArchiveCastFilter", () => {
     fireEvent.click(screen.getByRole("combobox", { name: "Cast members" }));
 
     const option = screen.getByRole("option", { name: "AZKi - 2 items" });
-    expect(within(option).getByText("- 2 items")).toHaveStyle({
-      color: "var(--mantine-color-dimmed)",
-    });
+    expect(within(option).getByText("- 2 items").style.color).toBe(
+      "var(--mantine-color-dimmed)",
+    );
   });
 
   it("disables cast members without matching videos", () => {

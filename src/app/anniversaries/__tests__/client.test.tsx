@@ -68,6 +68,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -202,9 +203,19 @@ describe("anniversaries page", () => {
   );
 
   it("cleans up the day timer on unmount", () => {
+    const setTimeoutSpy = vi.spyOn(window, "setTimeout");
+    const clearTimeoutSpy = vi.spyOn(window, "clearTimeout");
     const { unmount } = renderPage();
+    const dayTimerIndex = setTimeoutSpy.mock.calls.findIndex(
+      ([, delay]) => delay === 12 * 60 * 60 * 1000,
+    );
+    expect(dayTimerIndex).toBeGreaterThanOrEqual(0);
+    const dayTimer = setTimeoutSpy.mock.results[dayTimerIndex].value;
+    clearTimeoutSpy.mockClear();
+
     unmount();
-    expect(vi.getTimerCount()).toBe(0);
+
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(dayTimer);
   });
 
   it("shows a loading status without exposing the list", () => {
