@@ -24,6 +24,28 @@ describe("YoutubeThumbnail", () => {
     mockedUseYoutubeThumbnailFallback.mockReset();
   });
 
+  it.each(["", "   "])(
+    "動画IDがない場合は画像を取得せずCDのplaceholderを表示する（%j）",
+    (videoId) => {
+      const handleError = vi.fn();
+      mockedUseYoutubeThumbnailFallback.mockReturnValue({
+        imageUrl: "https://i.ytimg.com/vi_webp//maxresdefault.webp",
+        handleError,
+        isExhausted: false,
+      });
+
+      const { container } = render(
+        <YoutubeThumbnail videoId={videoId} alt="FEEL ALiVE feat. AZKi" />,
+      );
+
+      expect(
+        screen.getByRole("img", { name: "FEEL ALiVE feat. AZKi" }),
+      ).toHaveAttribute("data-testid", "video-thumbnail-placeholder");
+      expect(container.querySelector("img, source")).toBeNull();
+      expect(handleError).not.toHaveBeenCalled();
+    },
+  );
+
   it("complete 済みの画像なら onLoad を待たずに表示する", async () => {
     mockedUseYoutubeThumbnailFallback.mockReturnValue({
       imageUrl: "https://img.youtube.com/vi/test/maxresdefault.jpg",

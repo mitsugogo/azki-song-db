@@ -3,6 +3,7 @@
 import { Skeleton } from "@mantine/core";
 import useYoutubeThumbnailFallback from "../hook/useYoutubeThumbnailFallback";
 import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { FaCompactDisc } from "react-icons/fa6";
 
 interface YoutubeThumbnailProps {
   videoId: string;
@@ -70,6 +71,26 @@ const YoutubeThumbnail: React.FC<YoutubeThumbnailProps> = ({
     }
     setLoading(false);
   };
+
+  if (!videoId.trim()) {
+    return (
+      <div
+        role="img"
+        aria-label={alt}
+        data-testid="video-thumbnail-placeholder"
+        className={`relative flex h-full w-full ${
+          aspectRatio === "square" ? "aspect-square" : "aspect-video"
+        } items-center justify-center overflow-hidden bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 ${
+          outcontainerClassName || ""
+        } ${className || ""}`}
+      >
+        <FaCompactDisc
+          aria-hidden="true"
+          className="h-1/3 w-1/3 max-h-20 max-w-20"
+        />
+      </div>
+    );
+  }
 
   // sddefault が含まれる場合はスケールさせる
   const isSdDefault = imageUrl.includes("sddefault");
