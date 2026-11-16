@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.50.0](https://github.com/mitsugogo/azki-song-db/compare/v2.49.1...v2.50.0) (2026-11-16)
+
+### Features
+
+* 通常検索で作詞・作曲・編曲者を検索可能にする ([ab67ced](https://github.com/mitsugogo/azki-song-db/commit/ab67ced7c9905e2a8869de1834b15c75782cb12f))
+
+### Bug Fixes
+
+* **discography:** 動画未収録データにはplaceholderを表示 ([0b0341f](https://github.com/mitsugogo/azki-song-db/commit/0b0341fb158b053c3c1bd817c3c5548c2bbdaa58))
+
 ## [2.49.1](https://github.com/mitsugogo/azki-song-db/compare/v2.49.0...v2.49.1) (2026-11-15)
 
 ### Bug Fixes
