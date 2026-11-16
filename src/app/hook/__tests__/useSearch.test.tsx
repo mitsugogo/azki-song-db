@@ -522,6 +522,41 @@ describe("useSearch", () => {
     );
   });
 
+  it.each([
+    { field: "lyricist", partial: "くし１", exact: "さくし1" },
+    { field: "composer", partial: "きょく１", exact: "さっきょく1" },
+    { field: "arranger", partial: "じゃー１", exact: "あれんじゃー1" },
+  ])(
+    "通常検索で $field の部分一致・完全一致・除外が動作する",
+    async ({ partial, exact }) => {
+      const { result } = renderHook(() => useSearch(mockSongs));
+
+      act(() => {
+        result.current.setSearchTerm(partial);
+      });
+
+      await waitFor(() => {
+        expect(result.current.songs).toEqual([mockSongs[0]]);
+      });
+
+      act(() => {
+        result.current.setSearchTerm(`"${exact}"`);
+      });
+
+      await waitFor(() => {
+        expect(result.current.songs).toEqual([mockSongs[0]]);
+      });
+
+      act(() => {
+        result.current.setSearchTerm(`-${exact}`);
+      });
+
+      await waitFor(() => {
+        expect(result.current.songs).toEqual(mockSongs.slice(1));
+      });
+    },
+  );
+
   it("作曲者検索が動作する", async () => {
     const { result } = renderHook(() => useSearch(mockSongs));
 

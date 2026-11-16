@@ -310,6 +310,10 @@ const useSearch = (allSongs: Song[], options?: UseSearchOptions) => {
               ? equalsOrIncludes(song.artist_en, word)
               : false)) ||
           equalsOrIncludes(song.album.toLowerCase(), word) ||
+          someEqualsOrIncludes(
+            [song.lyricist, song.composer, song.arranger],
+            word,
+          ) ||
           song.sing
             .toLowerCase()
             .split("、")

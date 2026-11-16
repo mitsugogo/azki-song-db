@@ -1,7 +1,6 @@
 minimumReleaseAge: 4320
 
 minimumReleaseAgeExclude:
-  - mariadb@3.4.7
   # Allow the requested Next.js release before the 72-hour delay.
   - next@16.4.3
   - eslint-config-next@16.4.3
@@ -24,13 +23,20 @@ overrides:
   "@types/parse-path": "-"
   postcss: ^8.5.15
   gaxios: 7.3.0
-  vite: 8.0.16
-  undici: 7.29.0
-  js-yaml: 4.3.1
-  fast-uri: 3.1.6
+  vite: 8.1.6
+  "undici@>=7.0.0 <7.30.1": 7.30.1
+  "undici@>=8.0.0 <8.12.2": 8.12.2
+  js-yaml: 4.3.2
+  fast-uri: 3.1.9
   mysql2: 3.23.1
-  qs: 6.16.0
-  mariadb: 3.4.7
+  qs: 6.16.1
+  # Keep legacy minimatch 3 callers on their existing CommonJS API.
+  "minimatch@>=7.0.0 <11.0.1": 11.0.1
+  "brace-expansion@<1.1.21": 1.1.21
+  "brace-expansion@>=4.0.0 <5.0.12": 5.0.12
+  "basic-ftp@<6.2.4": 6.2.4
+  "fflate@>=0.7.0 <0.7.5": 0.7.5
+  "zod@<4.6.6": 4.6.6
   deepmerge-ts: 8.0.2
 
 allowBuilds:

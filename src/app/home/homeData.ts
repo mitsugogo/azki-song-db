@@ -36,20 +36,56 @@ export function pickRecommendedSongs(items: Song[], count: number) {
   return pool.slice(0, count);
 }
 
-export function pickHeroBackgroundSong(items: Song[]) {
-  const candidates = items.filter(
-    (song) =>
-      song.video_id &&
-      song.tags.some((tag) => tag.includes("MV")) &&
-      isOriginalSong(song),
-  );
+function getHeroBackgroundCandidates(items: Song[], now: number) {
+  const videos = new Map<string, Song>();
+  for (const song of items) {
+    const broadcastTime = new Date(song.broadcast_at).getTime();
+    if (
+      !song.video_id ||
+      !song.tags.some((tag) => tag.includes("MV")) ||
+      !isOriginalSong(song) ||
+      broadcastTime > now
+    ) {
+      continue;
+    }
+
+    const existing = videos.get(song.video_id);
+    const existingTime = existing
+      ? new Date(existing.broadcast_at).getTime()
+      : NaN;
+    if (
+      !existing ||
+      (Number.isFinite(broadcastTime) &&
+        (!Number.isFinite(existingTime) || broadcastTime > existingTime))
+    ) {
+      videos.set(song.video_id, song);
+    }
+  }
+  return [...videos.values()];
+}
+
+export function getLatestHeroBackgroundSong(items: Song[], now = Date.now()) {
+  let latest: Song | null = null;
+  let latestTime = Number.NEGATIVE_INFINITY;
+  for (const song of getHeroBackgroundCandidates(items, now)) {
+    const broadcastTime = new Date(song.broadcast_at).getTime();
+    if (Number.isFinite(broadcastTime) && broadcastTime > latestTime) {
+      latest = song;
+      latestTime = broadcastTime;
+    }
+  }
+  return latest;
+}
+
+export function pickHeroBackgroundSong(items: Song[], now = Date.now()) {
+  const candidates = getHeroBackgroundCandidates(items, now);
 
   if (candidates.length === 0) {
     return null;
   }
 
   const recentThreshold =
-    Date.now() - HERO_BACKGROUND_RECENT_DAYS * 24 * 60 * 60 * 1000;
+    now - HERO_BACKGROUND_RECENT_DAYS * 24 * 60 * 60 * 1000;
   const weightedCandidates = candidates.map((song) => {
     const broadcastTime = new Date(song.broadcast_at).getTime();
     const isRecent =
