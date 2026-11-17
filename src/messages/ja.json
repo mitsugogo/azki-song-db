@@ -723,7 +723,7 @@
       "songsCount": "{count}曲",
       "missingCount": "({count}曲が見つかりません)",
       "noSongsFound": "曲が見つかりませんでした",
-      "createFromTopic": "このお題で9選を作成する"
+      "createFromTopic": "このお題を回答する"
     },
     "copied": "コピーしました！",
     "index": {

@@ -725,7 +725,7 @@
       "songsCount": "{count} songs",
       "missingCount": "({count} songs missing)",
       "noSongsFound": "No songs found",
-      "createFromTopic": "Create Cloud Nine from this topic"
+      "createFromTopic": "Answer this topic"
     },
     "copied": "Copied",
     "index": {
