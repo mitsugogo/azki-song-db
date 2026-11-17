@@ -1,5 +1,9 @@
 "use client";
 
+import BestNineSettingsFields, {
+  BestNineLivePerformanceField,
+} from "./BestNineSettingsFields";
+import { type BestNineSettings } from "@/app/lib/bestNineSettings";
 import { useState } from "react";
 import {
   Alert,
@@ -18,6 +22,8 @@ import { showAppNotification } from "@/app/lib/notifications";
 import BestNineThemeFields from "./BestNineThemeFields";
 import {
   normalizeSlotCategories,
+  hasLiveSetlistCategory,
+  type BestNineCategory,
   emptySlotCategories,
 } from "@/app/lib/bestNineCategories";
 
@@ -37,15 +43,42 @@ export default function BestNineTopicEditModal({
     () =>
       normalizeSlotCategories(topic.slotCategories) ?? emptySlotCategories(),
   );
+  const [settings, setSettings] = useState<BestNineSettings>({
+    songCount: topic.songCount ?? 9,
+    allowedLiveIds: topic.allowedLiveIds ?? [],
+    hashtags: topic.hashtags ?? [],
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const normalizedThemes = themes.map((theme) => theme.trim());
   const changed =
+    JSON.stringify(settings) !==
+      JSON.stringify({
+        songCount: topic.songCount ?? 9,
+        allowedLiveIds: topic.allowedLiveIds ?? [],
+        hashtags: topic.hashtags ?? [],
+      }) ||
     title.trim() !== topic.title ||
     JSON.stringify(slotCategories) !==
       JSON.stringify(normalizeSlotCategories(topic.slotCategories)) ||
     normalizedThemes.some((theme, index) => theme !== topic.themes[index]);
   const canSave = topic.canEdit && !!title.trim() && changed && !saving;
+  const liveEnabled = hasLiveSetlistCategory(
+    slotCategories,
+    settings.songCount,
+  );
+  const changeCategories = (categories: BestNineCategory[][]) => {
+    setSlotCategories(categories);
+    if (!hasLiveSetlistCategory(categories, settings.songCount))
+      setSettings((previous) => ({ ...previous, allowedLiveIds: [] }));
+  };
+  const changeSettings = (next: BestNineSettings) =>
+    setSettings({
+      ...next,
+      allowedLiveIds: hasLiveSetlistCategory(slotCategories, next.songCount)
+        ? next.allowedLiveIds
+        : [],
+    });
   return (
     <Modal
       opened
@@ -76,6 +109,7 @@ export default function BestNineTopicEditModal({
               {
                 method: "PATCH",
                 body: JSON.stringify({
+                  ...settings,
                   title: title.trim(),
                   themes: normalizedThemes,
                   slotCategories,
@@ -102,13 +136,28 @@ export default function BestNineTopicEditModal({
             disabled={saving}
             onChange={(event) => setTitle(event.currentTarget.value)}
           />
+          <BestNineSettingsFields
+            value={settings}
+            onChange={changeSettings}
+            disabled={saving}
+          />
           <BestNineThemeFields
             themes={themes}
+            songCount={settings.songCount}
             slotCategories={slotCategories}
-            onCategoriesChange={setSlotCategories}
+            onCategoriesChange={changeCategories}
             onChange={setThemes}
             readOnly={saving}
           />
+          {liveEnabled && (
+            <BestNineLivePerformanceField
+              value={settings.allowedLiveIds ?? []}
+              onChange={(allowedLiveIds) =>
+                setSettings((previous) => ({ ...previous, allowedLiveIds }))
+              }
+              disabled={saving}
+            />
+          )}
           <Text size="xs" c="dimmed">
             {t("topics.revisionHelp")}
           </Text>

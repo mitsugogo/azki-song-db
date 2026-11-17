@@ -1,3 +1,5 @@
+import { buildBestNineLiveChoices } from "@/app/lib/bestNineLive";
+import { departureGroups } from "@/app/lib/__tests__/fixtures/bestNineLive";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
@@ -95,6 +97,33 @@ describe("共有9選ページ", () => {
     );
   });
 
+  it("動画がない1曲のライブ回答を表示し、公演へリンクする", async () => {
+    const live = buildBestNineLiveChoices(departureGroups)[0];
+    vi.mocked(fetch).mockResolvedValue(
+      Response.json({
+        selection: {
+          title: "Departureの1曲",
+          songCount: 1,
+          songs: [
+            {
+              kind: "live",
+              liveId: live.liveId,
+              liveEntryKey: live.entryKey,
+              snapshot: live,
+            },
+          ],
+        },
+      }),
+    );
+    render(<Page />);
+    await screen.findByRole("heading", { name: "未来カンパネラ" });
+    expect(
+      screen.getByRole("link", { name: "Departure / 2025-11-19" }),
+    ).toHaveAttribute("href", "/lives/departure");
+    expect(screen.queryByTestId("yt-thumb")).toBeNull();
+    expect(globalPlayerMock.setCurrentSong).not.toHaveBeenCalled();
+  });
+
   it("サムネクリックでMiniPlayerの再生を開始する", async () => {
     render(<Page />);
 
@@ -118,6 +147,52 @@ describe("共有9選ページ", () => {
     );
   });
 
+  it.each([
+    { maximum: 1, count: 1, theme: "", expected: "" },
+    { maximum: 9, count: 1, theme: "", expected: "" },
+    {
+      maximum: 1,
+      count: 1,
+      theme: "今1番推したい曲",
+      expected: "1. 今1番推したい曲",
+    },
+    { maximum: 2, count: 2, theme: "", expected: "1." },
+    { maximum: 2, count: 2, theme: "出会い", expected: "1. 出会い" },
+  ])(
+    "共有カードは選曲数と枠のお題に応じた見出しを表示する: %j",
+    async ({ maximum, count, theme, expected }) => {
+      const themes = emptyThemes();
+      themes[0] = theme;
+      const second = { ...sampleSong, video_id: "video-2", title: "二曲目" };
+      useSongsMock.mockReturnValue({
+        allSongs: [sampleSong, second],
+        isLoading: false,
+      });
+      vi.mocked(fetch).mockResolvedValue(
+        Response.json({
+          selection: {
+            title: "見出しの確認",
+            songCount: maximum,
+            themes,
+            slotCategories: Array.from({ length: 9 }, () => ["original"]),
+            songs: [
+              { v: "video-1", s: "15", slot: 0 },
+              ...(count > 1 ? [{ v: "video-2", s: "15", slot: 1 }] : []),
+            ],
+          },
+        }),
+      );
+      render(<Page />);
+      await screen.findByText("見出しの確認");
+      if (expected)
+        expect(screen.getByText(expected, { exact: true })).toBeInTheDocument();
+      else expect(screen.queryByText(/^1\./)).toBeNull();
+      if (count > 1)
+        expect(screen.getByText("2.", { exact: true })).toBeInTheDocument();
+      expect(screen.queryByText(/freeSlot|自由枠/)).toBeNull();
+    },
+  );
+
   it("タイトルを消した枠でもカテゴリ設定があれば共有時の位置を維持する", async () => {
     const slotCategories = emptySlotCategories();
     slotCategories[8] = ["original"];
@@ -135,8 +210,8 @@ describe("共有9選ページ", () => {
     );
     render(<Page />);
     await screen.findByText("カテゴリ別9選");
-    const grid = screen.getByText("1. myBest9.themes.freeSlot").parentElement!
-      .parentElement!;
+    const grid = screen.getAllByText("myBest9.themes.unanswered")[0]
+      .parentElement!.parentElement!;
     expect(grid.children).toHaveLength(9);
     expect(grid.children[0]).toHaveTextContent("myBest9.themes.unanswered");
     expect(grid.children[8]).toHaveTextContent("テスト曲");

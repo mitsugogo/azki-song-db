@@ -8,7 +8,7 @@ declare global {
   var prismaSchemaVersion: string | undefined;
 }
 
-const PRISMA_SCHEMA_VERSION = "best-nine-topics-v2";
+const PRISMA_SCHEMA_VERSION = "best-nine-topics-v3";
 
 export const getPrisma = () => {
   if (global.prisma && global.prismaSchemaVersion === PRISMA_SCHEMA_VERSION) {

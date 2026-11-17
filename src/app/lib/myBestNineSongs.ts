@@ -1,3 +1,9 @@
+import {
+  normalizeBestNineSettings,
+  bestNineSettingsSnapshot,
+  type BestNineSettings,
+} from "./bestNineSettings";
+import { normalizeLiveSnapshot, type BestNineLiveChoice } from "./bestNineLive";
 import type { Song } from "@/app/types/song";
 import {
   hasCategoryRestrictions,
@@ -7,8 +13,29 @@ import {
 
 export const MAX_BEST_NINE_SONGS = 9;
 export const emptyThemes = () => Array<string>(9).fill("");
-export type MyBestNineSongsEntry = { v: string; s: string; slot?: number };
-export type MyBestNineSongs = {
+export type MyBestNineSongsEntry = (
+  | {
+      kind?: "video";
+      v: string;
+      s: string;
+      liveId?: never;
+      liveEntryKey?: never;
+      snapshot?: never;
+    }
+  | {
+      kind: "live";
+      liveId: string;
+      liveEntryKey: string;
+      snapshot?: BestNineLiveChoice;
+      v?: never;
+      s?: never;
+    }
+) & { slot?: number };
+export const bestNineEntryKey = (entry: MyBestNineSongsEntry) =>
+  entry.kind === "live"
+    ? JSON.stringify(["live", entry.liveId, entry.liveEntryKey])
+    : JSON.stringify([entry.v, entry.s]);
+export type MyBestNineSongs = BestNineSettings & {
   title: string;
   author?: string;
   themes?: string[];
@@ -21,11 +48,30 @@ export type MyBestNineSongs = {
 export const hasThemes = (themes?: string[]) =>
   !!themes?.some((theme) => theme.trim());
 
+/** 1曲のお題なし回答は見出しを省略し、複数曲では枠番号だけを表示する。 */
+export const bestNineSlotHeading = (
+  slot: number,
+  theme: string | undefined,
+  selectedCount: number,
+) => {
+  const text = theme?.trim();
+  return text
+    ? `${slot + 1}. ${text}`
+    : selectedCount > 1
+      ? `${slot + 1}.`
+      : "";
+};
+
 export const hasFixedSlots = (
-  selection?: Pick<MyBestNineSongs, "themes" | "slotCategories"> | null,
+  selection?: Pick<
+    MyBestNineSongs,
+    "themes" | "slotCategories" | "songCount"
+  > | null,
 ) =>
-  hasThemes(selection?.themes) ||
-  hasCategoryRestrictions(selection?.slotCategories);
+  hasThemes(selection?.themes?.slice(0, selection.songCount ?? 9)) ||
+  hasCategoryRestrictions(
+    selection?.slotCategories?.slice(0, selection.songCount ?? 9),
+  );
 
 export const normalizeStart = (value: unknown): string | null => {
   if (value === null || value === undefined) return null;
@@ -47,11 +93,13 @@ export function normalizeSelection(
 ): MyBestNineSongs | null {
   if (!input || typeof input !== "object") return null;
   const value = input as Record<string, unknown>;
+  const settings = normalizeBestNineSettings(value);
+  if (!settings) return null;
   if (typeof value.title !== "string" || (!allowEmpty && !value.title.trim()))
     return null;
   if (
     !Array.isArray(value.songs) ||
-    value.songs.length > 9 ||
+    value.songs.length > settings.songCount ||
     (!allowEmpty && !value.songs.length)
   )
     return null;
@@ -60,18 +108,21 @@ export function normalizeSelection(
   if (themes === null) return null;
   const slotCategories = normalizeSlotCategories(value.slotCategories);
   if (!slotCategories) return null;
-  const restricted = hasCategoryRestrictions(slotCategories);
-  const themed = hasThemes(themes) || restricted;
+  const restricted = hasCategoryRestrictions(
+    slotCategories.slice(0, settings.songCount),
+  );
+  const themed = hasThemes(themes?.slice(0, settings.songCount)) || restricted;
   const slots = new Set<number>();
   const songs: MyBestNineSongsEntry[] = [];
   for (const [index, raw] of value.songs.entries()) {
     if (!raw || typeof raw !== "object") return null;
     const entry = raw as Record<string, unknown>;
     if (
-      typeof entry.v !== "string" ||
-      !entry.v.trim() ||
-      (typeof entry.s !== "string" && typeof entry.s !== "number") ||
-      !String(entry.s).trim()
+      entry.kind !== "live" &&
+      (typeof entry.v !== "string" ||
+        !entry.v.trim() ||
+        (typeof entry.s !== "string" && typeof entry.s !== "number") ||
+        !String(entry.s).trim())
     )
       return null;
     const slot = entry.slot === undefined ? index : entry.slot;
@@ -79,19 +130,51 @@ export function normalizeSelection(
       typeof slot !== "number" ||
       !Number.isInteger(slot) ||
       slot < 0 ||
-      slot > 8 ||
+      slot >= settings.songCount ||
       slots.has(slot)
     )
       return null;
     slots.add(slot);
-    songs.push({
-      v: entry.v.trim(),
-      s: String(entry.s).trim(),
-      ...(themed ? { slot } : {}),
-    });
+    if (entry.kind === "live") {
+      if (
+        typeof entry.liveId !== "string" ||
+        !entry.liveId.trim() ||
+        entry.liveId.length > 200 ||
+        typeof entry.liveEntryKey !== "string" ||
+        !entry.liveEntryKey ||
+        entry.liveEntryKey.length > 4000
+      )
+        return null;
+      const snapshot = normalizeLiveSnapshot(entry.snapshot);
+      if (
+        entry.snapshot !== undefined &&
+        (!snapshot ||
+          snapshot.liveId !== entry.liveId ||
+          snapshot.entryKey !== entry.liveEntryKey)
+      )
+        return null;
+      songs.push({
+        kind: "live",
+        liveId: entry.liveId,
+        liveEntryKey: entry.liveEntryKey,
+        ...(snapshot ? { snapshot } : {}),
+        ...(themed ? { slot } : {}),
+      });
+    } else {
+      if (entry.kind !== undefined && entry.kind !== "video") return null;
+      songs.push({
+        v: (entry.v as string).trim(),
+        s: String(entry.s).trim(),
+        ...(themed ? { slot } : {}),
+      });
+    }
   }
   return {
     title: value.title,
+    ...bestNineSettingsSnapshot({
+      ...settings,
+      songCount: value.songCount === undefined ? undefined : settings.songCount,
+    }),
     author: typeof value.author === "string" ? value.author : undefined,
     ...(themed ? { themes: themes ?? emptyThemes() } : {}),
     ...(restricted ? { slotCategories } : {}),
@@ -123,6 +206,7 @@ export const encodeSelection = (selection: MyBestNineSongs) =>
     t: selection.title,
     a: selection.author,
     s: selection.songs,
+    ...bestNineSettingsSnapshot(selection),
     ...(hasThemes(selection.themes) ? { q: selection.themes } : {}),
     ...(hasCategoryRestrictions(selection.slotCategories)
       ? { c: selection.slotCategories }
@@ -140,6 +224,9 @@ export const decodeSelection = (param: string): MyBestNineSongs | null => {
         songs: value.s ?? [],
         themes: value.q,
         slotCategories: value.c,
+        songCount: value.songCount,
+        allowedLiveIds: value.allowedLiveIds,
+        hashtags: value.hashtags,
       },
       true,
     );
@@ -178,15 +265,21 @@ export const resolveBestNineSlots = (
   selection: MyBestNineSongs,
   songs: Song[],
 ) => {
-  const slots = Array.from({ length: 9 }, (_, slot) => ({
+  const slots = Array.from({ length: selection.songCount ?? 9 }, (_, slot) => ({
     slot,
     theme: selection.themes?.[slot] ?? "",
     entry: undefined as MyBestNineSongsEntry | undefined,
     song: undefined as Song | undefined,
+    live: undefined as BestNineLiveChoice | undefined,
   }));
   selection.songs.forEach((entry, index) => {
     const slot = entry.slot ?? index;
     if (!slots[slot]) return;
+    slots[slot].entry = entry;
+    if (entry.kind === "live") {
+      slots[slot].live = entry.snapshot;
+      return;
+    }
     const start = normalizeStart(entry.s);
     const exact =
       start === null

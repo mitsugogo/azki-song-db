@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { emptyThemes } from "@/app/lib/myBestNineSongs";
 import type { Song } from "@/app/types/song";
 import { emptySlotCategories } from "@/app/lib/bestNineCategories";
-const { db, fetchSongs } = vi.hoisted(() => {
+import { departureGroups } from "../../__tests__/fixtures/bestNineLive";
+import { buildBestNineLiveChoices, bestNineWorkKey } from "../../bestNineLive";
+import { canonicalSongKey } from "../../bestNineTopics";
+import { createHash } from "node:crypto";
+const { db, fetchSongs, fetchLives } = vi.hoisted(() => {
   const model = () => ({
     findUnique: vi.fn(),
     findFirst: vi.fn(),
@@ -24,8 +28,10 @@ const { db, fetchSongs } = vi.hoisted(() => {
       $transaction: vi.fn(),
     },
     fetchSongs: vi.fn(),
+    fetchLives: vi.fn(),
   };
 });
+vi.mock("../fetchLives", () => ({ fetchLiveTitleGroupsFromApi: fetchLives }));
 vi.mock("@/app/lib/prisma", () => ({ getPrisma: () => db }));
 vi.mock("../fetchSongs", () => ({
   fetchSongsFromApiWithRecentFallback: fetchSongs,
@@ -102,6 +108,168 @@ describe("お題・ゲスト回答・集計のサーバー処理", () => {
       ...data,
     }));
     fetchSongs.mockResolvedValue([song]);
+    fetchLives.mockResolvedValue(departureGroups);
+  });
+
+  it("ライブの曲をサーバーのデータで保存し、改ざんした表示情報を採用しない", async () => {
+    const live = buildBestNineLiveChoices(departureGroups)[0];
+    const liveRevision = {
+      ...revision,
+      songCount: 1,
+      allowedLiveIds: [live.liveId],
+      hashtags: ["AZKiと未来へ"],
+    };
+    db.bestNineTopicRevision.findUnique.mockResolvedValue(liveRevision);
+    db.bestNineTopic.findUnique.mockResolvedValue({
+      ...topic,
+      revisions: [liveRevision],
+    });
+    await saveBestNineResponse(
+      {
+        ...body,
+        songCount: 1,
+        songs: [
+          {
+            kind: "live",
+            liveId: live.liveId,
+            liveEntryKey: live.entryKey,
+            snapshot: { ...live, title: "偽タイトル" },
+          },
+        ],
+      },
+      null,
+      "guest",
+    );
+    const data = db.bestNineResponse.create.mock.calls[0][0].data;
+    expect(data.selection).toMatchObject({
+      songCount: 1,
+      allowedLiveIds: [live.liveId],
+      hashtags: ["AZKiと未来へ"],
+      songs: [{ kind: "live", snapshot: { title: "未来カンパネラ" } }],
+    });
+    expect(data.entries.create[0]).toMatchObject({
+      sourceType: "live",
+      videoId: null,
+      start: null,
+      liveId: "departure",
+      title: "未来カンパネラ",
+    });
+    expect(fetchSongs).not.toHaveBeenCalled();
+  });
+
+  it("公演と一致する別バージョンの動画を保存し、未披露曲を拒否する", async () => {
+    const liveRevision = {
+      ...revision,
+      songCount: 1,
+      allowedLiveIds: ["departure"],
+    };
+    db.bestNineTopicRevision.findUnique.mockResolvedValue(liveRevision);
+    db.bestNineTopic.findUnique.mockResolvedValue({
+      ...topic,
+      revisions: [liveRevision],
+    });
+    fetchSongs.mockResolvedValue([
+      {
+        ...song,
+        title: "without U",
+        artist: "AZKi",
+        tags: ["オリ曲MV"],
+        hl: { ja: { title: "without U", artist: "AZKi" } },
+      },
+    ]);
+    await expect(
+      saveBestNineResponse(
+        { ...body, songs: [{ v: "video", s: "10" }] },
+        null,
+        "guest",
+      ),
+    ).resolves.toBeDefined();
+    fetchSongs.mockResolvedValue([song]);
+    await expect(
+      saveBestNineResponse(
+        { ...body, songs: [{ v: "video", s: "10" }] },
+        null,
+        "guest",
+      ),
+    ).rejects.toMatchObject({ code: "SONG_CATEGORY_NOT_ALLOWED" });
+  });
+
+  it("ライブセトリのお題では歌枠と、MVがある曲のアートトラックを保存できない", async () => {
+    const liveRevision = {
+      ...revision,
+      songCount: 1,
+      allowedLiveIds: ["departure"],
+      slotCategories: Array.from({ length: 9 }, () => ["live-setlist"]),
+    };
+    db.bestNineTopicRevision.findUnique.mockResolvedValue(liveRevision);
+    db.bestNineTopic.findUnique.mockResolvedValue({
+      ...topic,
+      revisions: [liveRevision],
+    });
+    const base = {
+      ...song,
+      title: "without U",
+      artist: "AZKi",
+      hl: { ja: { title: "without U", artist: "AZKi" } },
+    };
+    const mv = { ...base, video_id: "mv", tags: ["オリ曲MV"] };
+    const art = {
+      ...base,
+      video_id: "art",
+      tags: ["オリ曲", "アートトラック"],
+    };
+    const singing = { ...base, video_id: "singing", tags: ["歌枠"] };
+    fetchSongs.mockResolvedValue([singing, art, mv]);
+    for (const videoId of ["singing", "art"]) {
+      await expect(
+        saveBestNineResponse(
+          { ...body, songs: [{ v: videoId, s: "10" }] },
+          null,
+          "guest",
+        ),
+      ).rejects.toMatchObject({ code: "SONG_CATEGORY_NOT_ALLOWED" });
+    }
+    await expect(
+      saveBestNineResponse(
+        { ...body, songs: [{ v: "mv", s: "10" }] },
+        null,
+        "guest",
+      ),
+    ).resolves.toBeDefined();
+    fetchSongs.mockResolvedValue([singing, art]);
+    await expect(
+      saveBestNineResponse(
+        { ...body, songs: [{ v: "art", s: "10" }] },
+        null,
+        "guest",
+      ),
+    ).resolves.toBeDefined();
+  });
+
+  it("存在しないライブ項目と歌唱者がAZKiではない項目を保存できない", async () => {
+    const live = buildBestNineLiveChoices(departureGroups)[0];
+    await expect(
+      saveBestNineResponse(
+        {
+          title: "1曲",
+          songs: [
+            { kind: "live", liveId: live.liveId, liveEntryKey: "unknown" },
+          ],
+        },
+        null,
+        "guest",
+      ),
+    ).rejects.toMatchObject({ code: "SONG_NOT_FOUND" });
+  });
+
+  it("古い改訂からの回答にも現在の最大曲数を適用する", async () => {
+    db.bestNineTopic.findUnique.mockResolvedValue({
+      ...topic,
+      revisions: [{ ...revision, songCount: 1 }],
+    });
+    await expect(
+      saveBestNineResponse(body, null, "guest"),
+    ).rejects.toMatchObject({ code: "TOPIC_CHANGED" });
   });
 
   it("お題作成者はセッションのIDを保存し、本文のownerIdを採用しない", async () => {
@@ -642,6 +810,110 @@ describe("お題・ゲスト回答・集計のサーバー処理", () => {
       canViewResults: true,
     });
   });
+
+  it("同じ曲への動画回答とライブ回答を合算し、公演情報も返す", async () => {
+    db.bestNineTopic.findUnique.mockResolvedValue({
+      ...topic,
+      revisions: [{ ...revision, themes: emptyThemes(), songCount: 1 }],
+    });
+    db.bestNineResponse.findMany.mockResolvedValue([
+      { id: "video-answer", respondentKey: "a", userId: null },
+      { id: "live-answer", respondentKey: "b", userId: null },
+    ]);
+    const row = {
+      slot: 0,
+      songKey: "same-work",
+      title: "未来カンパネラ",
+      artist: "AZKi",
+      videoTitle: "Departure",
+      broadcastAt: "2025-11-19",
+      _count: { _all: 1 },
+    };
+    db.bestNineResponseEntry.groupBy.mockResolvedValue([
+      { ...row, videoId: "video", start: "0" },
+      {
+        ...row,
+        videoId: null,
+        start: null,
+        liveId: "departure",
+        liveEntryKey: "entry",
+        livePath: "/lives/departure",
+        singers: "AZKi",
+      },
+    ]);
+    const result = await getBestNineResults(id, "owner");
+    expect(result.slots[0].rankings[0]).toMatchObject({
+      count: 2,
+      performances: expect.arrayContaining([
+        {
+          liveId: "departure",
+          liveEntryKey: "entry",
+          livePath: "/lives/departure",
+          singers: "AZKi",
+          count: 1,
+          videoTitle: "Departure",
+          broadcastAt: "2025-11-19",
+        },
+      ]),
+    });
+  });
+
+  it.each(["fixed", "free"])(
+    "旧キーで保存した回答も新形式の同じ曲と合算する（%s）",
+    async (mode) => {
+      db.bestNineTopic.findUnique.mockResolvedValue({
+        ...topic,
+        revisions: [
+          { ...revision, themes: mode === "free" ? emptyThemes() : themes },
+        ],
+      });
+      db.bestNineResponse.findMany.mockResolvedValue([
+        { id: "old", respondentKey: "a", userId: null },
+        { id: "new", respondentKey: "b", userId: null },
+      ]);
+      const oldTitle = "without U (Re:arrange ver.)";
+      const oldKey = createHash("sha256")
+        .update(canonicalSongKey(oldTitle, "AZKi"))
+        .digest("hex");
+      const newKey = createHash("sha256")
+        .update(bestNineWorkKey("without U", "AZKi"))
+        .digest("hex");
+      expect(oldKey).not.toBe(newKey);
+      const row = {
+        slot: 0,
+        artist: "AZKi",
+        videoTitle: "歌枠",
+        broadcastAt: "2025-01-01",
+        _count: { _all: 1 },
+      };
+      db.bestNineResponseEntry.groupBy.mockResolvedValue([
+        {
+          ...row,
+          songKey: oldKey,
+          title: oldTitle,
+          videoId: "old-video",
+          start: "0",
+        },
+        {
+          ...row,
+          slot: mode === "free" ? 8 : 0,
+          songKey: newKey,
+          title: "without U",
+          videoId: "new-video",
+          start: "10",
+        },
+      ]);
+      const result = await getBestNineResults(id, "owner");
+      expect(result.slots[0].rankings).toHaveLength(1);
+      expect(result.slots[0].rankings[0]).toMatchObject({
+        songKey: oldKey,
+        count: 2,
+      });
+      expect(result.slots[0].rankings[0].performances).toHaveLength(2);
+      expect(db.bestNineResponseEntry.update).not.toHaveBeenCalled();
+      expect(db.bestNineResponseEntry.updateMany).not.toHaveBeenCalled();
+    },
+  );
 
   it("全改訂の回答を合計し、同じ回答者は最新の1件だけを枠別に集計する", async () => {
     db.bestNineTopic.findUnique.mockResolvedValue({

@@ -114,9 +114,81 @@
 }
 
 .songCard:focus-visible,
+.liveSongSelect:focus-visible,
+.livePerformanceLink:focus-visible,
 .slotButton:focus-visible {
   outline: 2px solid var(--mantine-primary-color-filled);
   outline-offset: 3px;
+}
+
+.liveSongCard {
+  position: relative;
+  align-self: start;
+  border: 1px solid var(--mantine-color-default-border);
+  overflow: hidden;
+}
+
+.liveSongCard[data-selected] {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.liveSongCard[data-disabled] {
+  opacity: 0.45;
+}
+
+.liveSongSelect {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.liveSongSelect:disabled {
+  cursor: not-allowed;
+}
+
+.liveSongSelect:focus-visible {
+  outline-offset: -2px;
+}
+
+.liveSongSelect .thumbnail,
+.liveSongSelect .songDetails {
+  display: block;
+}
+
+.liveSongSelect .songDetails {
+  padding: 6px 6px 4px;
+}
+
+.livePerformanceLink {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  display: flex;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 3px;
+  color: var(--mantine-color-dimmed);
+}
+
+.livePerformanceLink:hover {
+  color: var(--mantine-primary-color-filled);
+}
+
+.selectedCheck.liveChoiceIndicator {
+  color: var(--mantine-color-dimmed);
+  background: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.liveChoiceIndicator[data-selected] {
+  color: var(--mantine-color-white);
+  background: var(--mantine-primary-color-filled);
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.liveSongCard:hover .liveChoiceIndicator:not([data-selected]) {
+  color: var(--mantine-primary-color-filled);
+  border-color: var(--mantine-primary-color-filled);
 }
 
 .songCard[aria-disabled="true"] {

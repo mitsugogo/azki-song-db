@@ -897,6 +897,30 @@
       "selectionHelp": "Share a selection of 1–9 songs.",
       "previewSong": "Play {title}",
       "removeSong": "Remove {title} from your selection",
+      "settings": {
+        "originalMv": "Original music video",
+        "artTrack": "Art track",
+        "videoPlaceholder": "No video available",
+        "performanceInfo": "Performance details for {title}",
+
+        "overLimit": "This topic now allows up to {count} songs. Reset your selection and choose again.",
+        "songCount": "Maximum songs",
+        "countOption": "Up to {count} songs",
+        "livePerformances": "Eligible live performances",
+        "liveHelp": "Leave empty for all performances. Setlist songs use original music videos, then art tracks when no music video is available.",
+        "liveError": "Unable to load live setlists. Please reopen this form later.",
+        "hashtags": "Post hashtags",
+        "hashtagHelp": "Up to 5 tags, added alongside #AZSongDB. Press Enter to confirm.",
+        "browsePerformance": "Filter by performance",
+        "allPerformances": "All eligible performances",
+        "selectedLive": "Selected: {title}",
+        "selectLive": "Select {title}",
+        "noLiveSongs": "No eligible live setlist entries.",
+        "showMore": "Show more",
+        "selectionHelp": "Choose up to {count} songs to share.",
+        "confirmTitle": "Change selection settings?",
+        "confirmDescription": "Selected songs that no longer meet the conditions will be removed. Previously shared responses will remain unchanged."
+      },
       "defaultTitle": "Cloud Nine AZKi Songs",
       "unknownBroadcastDate": "Unknown stream date",
       "pageTitle": "Cloud Nine AZKi Songs Generator",
@@ -907,7 +931,7 @@
       "form": {
         "titleLabel": "Title",
         "titlePlaceholder": "e.g. Cloud Nine AZKi Songs",
-        "authorLabel": "Author (optional)",
+        "authorLabel": "Respondent (optional)",
         "authorPlaceholder": "e.g. mitsugogo"
       },
       "tooltip": {
@@ -923,7 +947,7 @@
         "generate": "Generate share URL",
         "reset": "Reset"
       },
-      "selectedCount": "Selected: {count}/9",
+      "selectedCount": "Selected: {count}/{max}",
       "status": {
         "selected": "Selected",
         "unselected": "Not selected"
@@ -934,6 +958,7 @@
       },
       "selectSongsTitle": "Select songs ({count}/9)",
       "filters": {
+        "liveSetlist": "Live setlists",
         "all": "All",
         "original": "Originals",
         "cover": "Covers",
@@ -1019,7 +1044,7 @@
         "close": "Close",
         "create": "Create a topic",
         "selectionMode": "Song selection",
-        "freeNine": "Any nine songs",
+        "freeNine": "Free choice",
         "themeRequired": "Enter at least one theme. Empty slots allow any song.",
         "createHelp": "Creating a topic requires signing in with Google. Anyone can answer without signing in.",
         "publish": "Create a topic and invite answers",

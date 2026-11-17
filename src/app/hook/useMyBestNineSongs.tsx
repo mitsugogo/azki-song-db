@@ -18,7 +18,7 @@ const useMyBestNineSongs = () => {
 
   // 9曲上限チェック
   const isLimit = (selection: MyBestNineSongs): boolean => {
-    return selection.songs.length >= MAX_SONGS;
+    return selection.songs.length >= (selection.songCount ?? MAX_SONGS);
   };
 
   // 曲の重複チェック
@@ -41,7 +41,10 @@ const useMyBestNineSongs = () => {
       s: String(song.start),
       ...(hasFixedSlots(selection)
         ? {
-            slot: Array.from({ length: 9 }, (_, slot) => slot).find(
+            slot: Array.from(
+              { length: selection.songCount ?? 9 },
+              (_, slot) => slot,
+            ).find(
               (slot) =>
                 !selection.songs.some(
                   (entry, index) => (entry.slot ?? index) === slot,

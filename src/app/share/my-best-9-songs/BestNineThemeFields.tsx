@@ -12,10 +12,12 @@ export default function BestNineThemeFields({
   readOnly = false,
   slotCategories,
   onCategoriesChange,
+  songCount = 9,
 }: {
   themes: string[];
   onChange: (themes: string[]) => void;
   readOnly?: boolean;
+  songCount?: number;
   slotCategories?: BestNineCategory[][];
   onCategoriesChange?: (categories: BestNineCategory[][]) => void;
 }) {
@@ -52,7 +54,7 @@ export default function BestNineThemeFields({
       >
         {t("clear")}
       </Button>
-      {themes.map((theme, index) => (
+      {themes.slice(0, songCount).map((theme, index) => (
         <Stack key={index} gap={4} mb="xs">
           <TextInput
             label={t("inputLabel", { number: index + 1 })}

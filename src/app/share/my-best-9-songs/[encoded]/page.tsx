@@ -1,5 +1,6 @@
 "use client";
 
+import { bestNineColumns } from "@/app/lib/bestNineSettings";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -14,6 +15,7 @@ import YoutubeThumbnail from "@/app/components/YoutubeThumbnail";
 
 import {
   buildThemeQuery,
+  bestNineSlotHeading,
   hasFixedSlots,
   normalizeSelection,
   resolveBestNineSlots,
@@ -132,7 +134,9 @@ export default function Page() {
   }
 
   // 見つからなかった曲の情報を保持
-  const missingCount = selection.songs.length - selectedSongs.length;
+  const liveCount = slots.filter((slot) => slot.live).length;
+  const missingCount =
+    selection.songs.length - selectedSongs.length - liveCount;
   const createPageHref = selection.topicId
     ? `/share/my-best-9-songs?topic=${encodeURIComponent(selection.topicId)}`
     : `/share/my-best-9-songs?${buildThemeQuery(selection.title, selection.themes)}`;
@@ -151,7 +155,7 @@ export default function Page() {
             </p>
           )}
           <p className="text-sm text-gray-500 dark:text-gray-200">
-            {t("share.songsCount", { count: selectedSongs.length })}
+            {t("share.songsCount", { count: selectedSongs.length + liveCount })}
             {missingCount > 0 && (
               <span className="ml-2 text-yellow-600 dark:text-yellow-400">
                 {t("share.missingCount", { count: missingCount })}
@@ -161,77 +165,111 @@ export default function Page() {
         </div>
 
         {/* 3x3 グリッド */}
-        {themed || selectedSongs.length > 0 ? (
-          <div className="grid grid-cols-3 gap-4 lg:gap-6 mb-8">
-            {(themed ? slots : slots.filter((slot) => slot.song)).map(
-              ({ song, theme, entry, slot: idx }) =>
-                song ? (
-                  <div
-                    key={`${song.video_id}-${song.start}-${idx}`}
-                    className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
+        {themed || selectedSongs.length > 0 || liveCount > 0 ? (
+          <div
+            className="grid gap-4 lg:gap-6 mb-8"
+            style={{
+              gridTemplateColumns: `repeat(${bestNineColumns(selection.songCount ?? 9)}, minmax(0, 1fr))`,
+            }}
+          >
+            {(themed
+              ? slots
+              : slots.filter((slot) => slot.song || slot.live)
+            ).map(({ song, live, theme, entry, slot: idx }) => {
+              const heading = bestNineSlotHeading(
+                idx,
+                theme,
+                selection.songs.length,
+              );
+              return live ? (
+                <div
+                  key={`live-${idx}`}
+                  className="rounded-lg border border-gray-200 bg-white p-4 shadow-md dark:border-gray-700 dark:bg-gray-800"
+                >
+                  {heading && (
+                    <p className="mb-3 text-sm font-bold">{heading}</p>
+                  )}
+                  <h3 className="mb-2 text-xl font-semibold">{live.title}</h3>
+                  <p>{live.artist}</p>
+                  <p className="mt-2 text-sm">{live.singers}</p>
+                  <Link
+                    href={live.path}
+                    className="mt-4 block text-sm underline"
                   >
-                    {themed && (
-                      <p className="p-3 text-sm font-bold whitespace-normal break-words">
-                        {idx + 1}. {theme || t("myBest9.themes.freeSlot")}
-                      </p>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handlePreviewSong(song)}
-                      aria-label={`${song.title} をミニプレイヤで再生`}
-                      className="block w-full text-left cursor-pointer"
-                    >
-                      <div className="aspect-video bg-black relative overflow-hidden">
-                        <YoutubeThumbnail
-                          videoId={song.video_id}
-                          alt={song.title}
-                        />
-                        {/* オーバーレイ */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <svg
-                            className="w-12 h-12 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                          </svg>
-                        </div>
+                    {[live.liveTitle, live.performance, live.date]
+                      .filter(Boolean)
+                      .join(" / ")}
+                  </Link>
+                </div>
+              ) : song ? (
+                <div
+                  key={`${song.video_id}-${song.start}-${idx}`}
+                  className="group rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition"
+                >
+                  {heading && (
+                    <p className="p-3 text-sm font-bold whitespace-normal break-words">
+                      {heading}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handlePreviewSong(song)}
+                    aria-label={`${song.title} をミニプレイヤで再生`}
+                    className="block w-full text-left cursor-pointer"
+                  >
+                    <div className="aspect-video bg-black relative overflow-hidden">
+                      <YoutubeThumbnail
+                        videoId={song.video_id}
+                        alt={song.title}
+                      />
+                      {/* オーバーレイ */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <svg
+                          className="w-12 h-12 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                        </svg>
                       </div>
-                    </button>
-
-                    {/* 曲情報 */}
-                    <div className="p-3 lg:p-4">
-                      <Link
-                        href={`/watch?v=${song.video_id}&t=${song.start}`}
-                        className="block"
-                      >
-                        <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
-                          {song.title}
-                        </h3>
-                      </Link>
-                      <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
-                        {song.artist}
-                      </p>
                     </div>
+                  </button>
+
+                  {/* 曲情報 */}
+                  <div className="p-3 lg:p-4">
+                    <Link
+                      href={`/watch?v=${song.video_id}&t=${song.start}`}
+                      className="block"
+                    >
+                      <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-pink-600 transition">
+                        {song.title}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-gray-600 dark:text-gray-200 line-clamp-1">
+                      {song.artist}
+                    </p>
                   </div>
-                ) : (
-                  <div
-                    key={`empty-${idx}`}
-                    className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-800"
-                  >
+                </div>
+              ) : (
+                <div
+                  key={`empty-${idx}`}
+                  className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-800"
+                >
+                  {heading && (
                     <p className="text-sm font-bold whitespace-normal break-words">
-                      {idx + 1}. {theme || t("myBest9.themes.freeSlot")}
+                      {heading}
                     </p>
-                    <p className="text-sm text-gray-500 mt-4">
-                      {t(
-                        entry
-                          ? "myBest9.themes.missingSong"
-                          : "myBest9.themes.unanswered",
-                      )}
-                    </p>
-                  </div>
-                ),
-            )}
+                  )}
+                  <p className="text-sm text-gray-500 mt-4">
+                    {t(
+                      entry
+                        ? "myBest9.themes.missingSong"
+                        : "myBest9.themes.unanswered",
+                    )}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">

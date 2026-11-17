@@ -12,6 +12,7 @@ export const BEST_NINE_CATEGORIES = [
   "unit-guest",
   "live-singing",
   "collaboration",
+  "live-setlist",
 ] as const;
 export type BestNineCategory = (typeof BEST_NINE_CATEGORIES)[number];
 export const bestNineCategoryLabel: Record<BestNineCategory, string> = {
@@ -21,6 +22,7 @@ export const bestNineCategoryLabel: Record<BestNineCategory, string> = {
   "unit-guest": "unitGuest",
   "live-singing": "liveSinging",
   collaboration: "collaboration",
+  "live-setlist": "liveSetlist",
 };
 
 /** 省略は従来どおり全曲。空配列や「全て」と個別指定の混在は受け付けない。 */
@@ -50,6 +52,8 @@ export function matchesBestNineCategory(
     artist: song.hl?.ja?.artist || song.artist,
   };
   switch (category) {
+    case "live-setlist":
+      return false; // ライブカタログとの照合は bestNineLive で行う。
     case "all":
       return true;
     case "original":
@@ -97,3 +101,11 @@ export function isBestNineSongAllowed(
     categories.some((category) => matchesBestNineCategory(song, category))
   );
 }
+
+export const hasLiveSetlistCategory = (
+  slots: readonly (readonly BestNineCategory[])[],
+  songCount = 9,
+) =>
+  slots
+    .slice(0, songCount)
+    .some((categories) => categories.includes("live-setlist"));

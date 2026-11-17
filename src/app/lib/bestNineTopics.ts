@@ -1,16 +1,20 @@
+import {
+  normalizeBestNineSettings,
+  type BestNineSettings,
+} from "./bestNineSettings";
 import { emptyThemes, normalizeThemes } from "./myBestNineSongs";
 import {
   normalizeSlotCategories,
   type BestNineCategory,
 } from "./bestNineCategories";
 
-export type BestNineTopicDefinition = {
+export type BestNineTopicDefinition = BestNineSettings & {
   title: string;
   themes: string[];
   slotCategories?: BestNineCategory[][];
 };
 
-export type BestNineTopicView = {
+export type BestNineTopicView = BestNineSettings & {
   id: string;
   title: string;
   themes: string[];
@@ -44,8 +48,12 @@ export type BestNineResults = {
       artist: string;
       count: number;
       performances: {
-        videoId: string;
-        start: string;
+        videoId?: string;
+        start?: string;
+        liveId?: string;
+        liveEntryKey?: string;
+        livePath?: string;
+        singers?: string;
         count: number;
         videoTitle?: string;
         broadcastAt?: string;
@@ -94,9 +102,10 @@ export const validateTopicInput = (input: unknown) => {
   const title = typeof value.title === "string" ? value.title.trim() : "";
   const themes = normalizeThemes(value.themes ?? emptyThemes());
   const slotCategories = normalizeSlotCategories(value.slotCategories);
-  if (!title || title.length > 50 || !themes || !slotCategories)
+  const settings = normalizeBestNineSettings(value);
+  if (!title || title.length > 50 || !themes || !slotCategories || !settings)
     throw new BestNineError("INVALID_TOPIC", 400);
-  return { title, themes, slotCategories };
+  return { title, themes, slotCategories, ...settings };
 };
 
 export const canonicalSongKey = (title: string, artist: string) =>

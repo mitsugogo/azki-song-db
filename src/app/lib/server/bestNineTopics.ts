@@ -1,3 +1,14 @@
+import {
+  buildBestNineLiveChoices,
+  isBestNineVideoAllowed,
+  isBestNineLiveAllowed,
+  bestNineWorkKey,
+} from "../bestNineLive";
+import { fetchLiveTitleGroupsFromApi } from "./fetchLives";
+import {
+  normalizeBestNineSettings,
+  bestNineSettingsSnapshot,
+} from "../bestNineSettings";
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { getPrisma } from "../prisma";
@@ -5,7 +16,6 @@ import { isAdminGoogleAccountId } from "../adminConfig";
 import {
   BestNineError,
   BEST_NINE_TOPICS_PAGE_SIZE,
-  canonicalSongKey,
   validTopicId,
   validateTopicInput,
 } from "../bestNineTopics";
@@ -19,6 +29,7 @@ import {
   hasFixedSlots,
   normalizeSelection,
   normalizeStart,
+  bestNineEntryKey,
 } from "../myBestNineSongs";
 import type { MyBestNineSongs } from "../myBestNineSongs";
 import { fetchSongsFromApiWithRecentFallback } from "./fetchSongs";
@@ -26,7 +37,6 @@ import { participantKey } from "./bestNineParticipant";
 import { prepareBestNineResultSlots } from "../bestNineResults";
 import type { Prisma } from "@/generated/prisma/client";
 import {
-  isBestNineSongAllowed,
   normalizeSlotCategories,
   emptySlotCategories,
   hasCategoryRestrictions,
@@ -63,6 +73,9 @@ const topicView = (
     themes: unknown;
     version: number;
     slotCategories?: unknown;
+    songCount?: number;
+    allowedLiveIds?: unknown;
+    hashtags?: unknown;
   },
   userId?: string | null,
 ): BestNineTopicView => ({
@@ -72,6 +85,13 @@ const topicView = (
   slotCategories:
     normalizeSlotCategories(revision.slotCategories ?? undefined) ??
     emptySlotCategories(),
+  ...bestNineSettingsSnapshot(
+    normalizeBestNineSettings({
+      songCount: revision.songCount,
+      allowedLiveIds: revision.allowedLiveIds ?? undefined,
+      hashtags: revision.hashtags ?? undefined,
+    }) ?? {},
+  ),
   version: revision.version,
   createdAt: topic.createdAt.toISOString(),
   canEdit: !!userId && topic.ownerId === userId,
@@ -239,83 +259,153 @@ export const saveBestNineResponse = async (
       title: revision.title,
       themes: revision.themes,
       slotCategories: revision.slotCategories ?? undefined,
+      songCount: revision.songCount ?? 9,
+      allowedLiveIds: revision.allowedLiveIds ?? undefined,
+      hashtags: revision.hashtags ?? undefined,
     });
     if (!canonical) throw new BestNineError("INVALID_RESPONSE", 400);
     selection = canonical;
   }
   const themes = revision ? (revision.themes as string[]) : selection.themes;
-  const entries = selection.songs.map((entry, index) => ({
-    ...entry,
-    slot: entry.slot ?? index,
-    s: normalizeStart(entry.s) ?? entry.s,
-  }));
+  const entries = selection.songs.map((entry, index) =>
+    entry.kind === "live"
+      ? { ...entry, slot: entry.slot ?? index }
+      : {
+          ...entry,
+          slot: entry.slot ?? index,
+          s: normalizeStart(entry.s) ?? entry.s,
+        },
+  );
   if (
     entries.some(
       (entry) =>
-        entry.v.length > 100 ||
-        entry.s.length > 32 ||
-        !Number.isFinite(Number(entry.s)) ||
-        Number(entry.s) < 0,
+        entry.kind !== "live" &&
+        (entry.v.length > 100 ||
+          entry.s.length > 32 ||
+          !Number.isFinite(Number(entry.s)) ||
+          Number(entry.s) < 0),
     )
   )
     throw new BestNineError("INVALID_RESPONSE", 400);
   if (
     !hasFixedSlots(selection) &&
-    new Set(entries.map((entry) => JSON.stringify([entry.v, entry.s]))).size !==
-      entries.length
+    new Set(entries.map(bestNineEntryKey)).size !== entries.length
   )
     throw new BestNineError("INVALID_RESPONSE", 400);
-  const songs = await fetchSongsFromApiWithRecentFallback(
-    { locale: "ja" },
-    (songs) =>
-      entries.every((entry) =>
-        songs.some(
-          (song) =>
-            song.video_id === entry.v && normalizeStart(song.start) === entry.s,
-        ),
-      ),
-  );
-  const answerSongs = entries.map((entry) => {
+  const videoEntries = entries.filter((entry) => entry.kind !== "live");
+  const needsLives =
+    entries.some((entry) => entry.kind === "live") ||
+    !!selection.allowedLiveIds?.length ||
+    !!selection.slotCategories?.some((slot) => slot.includes("live-setlist"));
+  const [songs, liveChoices] = await Promise.all([
+    videoEntries.length
+      ? fetchSongsFromApiWithRecentFallback({ locale: "ja" }, (catalog) =>
+          videoEntries.every((entry) =>
+            catalog.some(
+              (song) =>
+                song.video_id === entry.v &&
+                normalizeStart(song.start) === entry.s,
+            ),
+          ),
+        )
+      : Promise.resolve([]),
+    needsLives
+      ? fetchLiveTitleGroupsFromApi().then(buildBestNineLiveChoices)
+      : Promise.resolve([]),
+  ]);
+  const answerChoices = entries.map((entry) => {
+    if (entry.kind === "live") {
+      const live = liveChoices.find(
+        (choice) =>
+          choice.liveId === entry.liveId &&
+          choice.entryKey === entry.liveEntryKey,
+      );
+      if (!live) throw new BestNineError("SONG_NOT_FOUND", 400);
+      return { live, song: undefined };
+    }
     const song = songs.find(
       (song) =>
         song.video_id === entry.v && normalizeStart(song.start) === entry.s,
     );
     if (!song || song.is_members_only)
       throw new BestNineError("SONG_NOT_FOUND", 400);
-    return song;
+    return { song, live: undefined };
   });
+  const validateChoices = (
+    categories: ReturnType<typeof normalizeSlotCategories>,
+    ids: string[],
+  ) => {
+    if (
+      !categories ||
+      answerChoices.some(({ song, live }, index) =>
+        live
+          ? !isBestNineLiveAllowed(live, categories[entries[index].slot], ids)
+          : !isBestNineVideoAllowed(
+              song!,
+              categories[entries[index].slot],
+              liveChoices,
+              ids,
+              songs,
+            ),
+      )
+    )
+      throw new BestNineError("SONG_CATEGORY_NOT_ALLOWED", 400);
+  };
+  validateChoices(
+    normalizeSlotCategories(selection.slotCategories),
+    selection.allowedLiveIds ?? [],
+  );
   const answers = entries.map((entry, index) => {
-    const song = answerSongs[index];
-    const title = song.hl?.ja?.title || song.title;
-    const artist = song.hl?.ja?.artist || song.artist;
+    const { song, live } = answerChoices[index];
+    const title = live?.title ?? song!.hl?.ja?.title ?? song!.title;
+    const artist = live?.artist ?? song!.hl?.ja?.artist ?? song!.artist;
     return {
       slot: entry.slot,
-      videoId: entry.v,
-      start: entry.s,
+      sourceType: live ? "live" : "video",
+      videoId: entry.kind === "live" ? null : entry.v,
+      start: entry.kind === "live" ? null : entry.s,
+      liveId: live?.liveId ?? null,
+      liveEntryKey: live?.entryKey ?? null,
+      livePath: live?.path ?? null,
+      singers: live?.singers ?? null,
       title: title.slice(0, 500),
       artist: artist.slice(0, 500),
-      videoTitle: (song.video_title || song.title).slice(0, 500),
-      broadcastAt: (song.broadcast_at || "").slice(0, 64),
+      videoTitle: (live
+        ? [live.liveTitle, live.performance].filter(Boolean).join(" / ")
+        : song!.video_title || song!.title
+      ).slice(0, 500),
+      broadcastAt: (live?.date ?? song!.broadcast_at ?? "").slice(0, 64),
       songKey: createHash("sha256")
-        .update(canonicalSongKey(title, artist))
+        .update(bestNineWorkKey(title, artist))
         .digest("hex"),
       performanceKey: createHash("sha256")
-        .update(JSON.stringify([entry.v, entry.s]))
+        .update(bestNineEntryKey(entry))
         .digest("hex"),
     };
   });
   const snapshot: MyBestNineSongs = {
     title: revision?.title ?? selection.title,
     author: selection.author,
+    ...bestNineSettingsSnapshot(selection),
     ...(hasFixedSlots(selection) ? { themes: themes ?? emptyThemes() } : {}),
     ...(hasCategoryRestrictions(selection.slotCategories)
       ? { slotCategories: selection.slotCategories }
       : {}),
-    songs: entries.map(({ v, s, slot }) => ({
-      v,
-      s,
-      ...(hasFixedSlots(selection) ? { slot } : {}),
-    })),
+    songs: entries.map((entry, index) =>
+      entry.kind === "live"
+        ? {
+            kind: "live",
+            liveId: entry.liveId,
+            liveEntryKey: entry.liveEntryKey,
+            snapshot: answerChoices[index].live!,
+            ...(hasFixedSlots(selection) ? { slot: entry.slot } : {}),
+          }
+        : {
+            v: entry.v,
+            s: entry.s,
+            ...(hasFixedSlots(selection) ? { slot: entry.slot } : {}),
+          },
+    ),
   };
   return transaction(async (tx) => {
     if (revision) {
@@ -326,17 +416,32 @@ export const saveBestNineResponse = async (
       });
       if (!current) throw new BestNineError("NOT_FOUND", 404);
       // 古い画面や改ざんしたリクエストでも、現在のお題のカテゴリ制限を適用する。
-      const allowed = normalizeSlotCategories(
-        current.revisions[0]?.slotCategories ?? undefined,
-      );
+      const latest = current.revisions[0];
+      const latestSettings = normalizeBestNineSettings({
+        songCount: latest?.songCount,
+        allowedLiveIds: latest?.allowedLiveIds ?? undefined,
+        hashtags: latest?.hashtags ?? undefined,
+      });
       if (
-        !allowed ||
-        answerSongs.some(
-          (song, index) =>
-            !isBestNineSongAllowed(song, allowed[entries[index].slot]),
-        )
+        !latestSettings ||
+        entries.length > latestSettings.songCount ||
+        entries.some((entry) => entry.slot >= latestSettings.songCount)
       )
-        throw new BestNineError("SONG_CATEGORY_NOT_ALLOWED", 400);
+        throw new BestNineError("TOPIC_CHANGED", 409);
+      // 新しい改訂でライブ条件が加わった場合も現在のカタログで検証する。
+      const latestNeedsLives =
+        latestSettings.allowedLiveIds.length ||
+        (latest?.slotCategories as string[][] | null)?.some((slot) =>
+          slot.includes("live-setlist"),
+        );
+      if (latestNeedsLives && !needsLives)
+        liveChoices.push(
+          ...buildBestNineLiveChoices(await fetchLiveTitleGroupsFromApi()),
+        );
+      validateChoices(
+        normalizeSlotCategories(latest?.slotCategories ?? undefined),
+        latestSettings.allowedLiveIds,
+      );
     }
     let existing = revision
       ? await tx.bestNineResponse.findFirst({
@@ -451,6 +556,11 @@ export const getBestNineResults = async (
               "artist",
               "videoId",
               "start",
+              "sourceType",
+              "liveId",
+              "liveEntryKey",
+              "livePath",
+              "singers",
             ],
             where: {
               responseId: { in: latest.map((response) => response.id) },
@@ -466,16 +576,28 @@ export const getBestNineResults = async (
       };
     },
   );
-  const slots: BestNineResults["slots"] = emptyThemes().map((_, slot) => ({
-    slot,
-    theme: topic.themes[slot],
-    answerCount: 0,
-    rankings: [],
-  }));
+  const slotCount = Math.max(
+    topic.songCount ?? 9,
+    ...groups.map((group) => group.slot + 1),
+  );
+  const slots: BestNineResults["slots"] = Array.from(
+    { length: slotCount },
+    (_, slot) => ({
+      slot,
+      theme: topic.themes[slot],
+      answerCount: 0,
+      rankings: [],
+    }),
+  );
   for (const group of groups) {
     const slot = slots[group.slot];
     slot.answerCount += group._count._all;
-    let rank = slot.rankings.find((rank) => rank.songKey === group.songKey);
+    // 旧形式の保存キーも、日本語の保存済み曲名・歌手から照合する。
+    // DBのキーを書き換えず、新しい別バージョンの回答と合算する。
+    const workKey = bestNineWorkKey(group.title, group.artist);
+    let rank = slot.rankings.find(
+      (rank) => bestNineWorkKey(rank.title, rank.artist) === workKey,
+    );
     if (!rank) {
       rank = {
         songKey: group.songKey,
@@ -487,14 +609,23 @@ export const getBestNineResults = async (
       slot.rankings.push(rank);
     }
     rank.count += group._count._all;
-    const performance = rank.performances.find(
-      (item) => item.videoId === group.videoId && item.start === group.start,
+    const performance = rank.performances.find((item) =>
+      group.liveId
+        ? item.liveId === group.liveId &&
+          item.liveEntryKey === group.liveEntryKey
+        : item.videoId === group.videoId && item.start === group.start,
     );
     if (performance) performance.count += group._count._all;
     else
       rank.performances.push({
-        videoId: group.videoId,
-        start: group.start,
+        ...(group.liveId
+          ? {
+              liveId: group.liveId,
+              liveEntryKey: group.liveEntryKey!,
+              livePath: group.livePath!,
+              singers: group.singers ?? "",
+            }
+          : { videoId: group.videoId!, start: group.start! }),
         count: group._count._all,
         videoTitle: group.videoTitle,
         broadcastAt: group.broadcastAt,

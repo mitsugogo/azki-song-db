@@ -1,5 +1,6 @@
 import type { BestNineResults, BestNineTopicView } from "./bestNineTopics";
 import { hasFixedSlots } from "./myBestNineSongs";
+import { bestNineWorkKey } from "./bestNineLive";
 
 type ResultSlot = BestNineResults["slots"][number];
 
@@ -23,17 +24,20 @@ export function prepareBestNineResultSlots(
     const rankings = new Map<string, ResultSlot["rankings"][number]>();
     for (const slot of slots) {
       for (const rank of slot.rankings) {
-        let combined = rankings.get(rank.songKey);
+        const workKey = bestNineWorkKey(rank.title, rank.artist);
+        let combined = rankings.get(workKey);
         if (!combined) {
           combined = { ...rank, count: 0, performances: [] };
-          rankings.set(rank.songKey, combined);
+          rankings.set(workKey, combined);
         }
         combined.count += rank.count;
         for (const performance of rank.performances) {
-          const existing = combined.performances.find(
-            (item) =>
-              item.videoId === performance.videoId &&
-              item.start === performance.start,
+          const existing = combined.performances.find((item) =>
+            performance.liveId
+              ? item.liveId === performance.liveId &&
+                item.liveEntryKey === performance.liveEntryKey
+              : item.videoId === performance.videoId &&
+                item.start === performance.start,
           );
           if (existing) existing.count += performance.count;
           else combined.performances.push({ ...performance });
@@ -55,7 +59,11 @@ export function prepareBestNineResultSlots(
     );
     for (const rank of slot.rankings)
       rank.performances.sort(
-        (a, b) => b.count - a.count || a.videoId.localeCompare(b.videoId),
+        (a, b) =>
+          b.count - a.count ||
+          (a.videoId ?? a.liveId ?? "").localeCompare(
+            b.videoId ?? b.liveId ?? "",
+          ),
       );
   }
   return results;
