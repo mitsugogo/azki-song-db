@@ -1,3 +1,6 @@
+vi.mock("@/app/hook/useBestNineLiveCatalog", () => ({
+  default: () => ({ groups: [], choices: [], loading: false, error: false }),
+}));
 import { emptySlotCategories } from "@/app/lib/bestNineCategories";
 import { MantineProvider } from "@mantine/core";
 import {
@@ -175,6 +178,9 @@ describe("作成したお題・集計の専用ページ", () => {
       .mock.calls.find(([, init]) => init?.method === "PATCH")!;
     expect(save[0]).toBe("/api/share/my-best-9-songs/topics/topic-id");
     expect(JSON.parse(save[1]!.body as string)).toEqual({
+      songCount: 9,
+      allowedLiveIds: [],
+      hashtags: [],
       title: "更新したお題",
       themes: updated.themes,
       slotCategories: emptySlotCategories(),
@@ -186,6 +192,41 @@ describe("作成したお題・集計の専用ページ", () => {
     expect(
       within(screen.getByRole("dialog")).getAllByLabelText("inputLabel")[0],
     ).toHaveValue("更新した枠");
+  });
+
+  it("一覧からの編集でもライブセトリを指定したときだけ公演の選択欄を表示する", async () => {
+    status = "authenticated";
+    if (!HTMLElement.prototype.scrollIntoView)
+      Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+        configurable: true,
+        value: vi.fn(),
+      });
+    render(content());
+    await screen.findByRole("heading", { name: topic.title });
+    fireEvent.click(screen.getByRole("button", { name: "edit", exact: true }));
+    const dialog = within(screen.getByRole("dialog"));
+    expect(
+      dialog.queryByRole("combobox", { name: "livePerformances" }),
+    ).toBeNull();
+    const categories = dialog.getAllByLabelText(
+      "topics.slotCategoriesLabel",
+    )[0];
+    fireEvent.click(categories);
+    fireEvent.click(
+      screen.getByRole("option", { name: "filters.liveSetlist", exact: true }),
+    );
+    fireEvent.keyDown(categories, { key: "Escape" });
+    expect(
+      dialog.getByRole("combobox", { name: "livePerformances" }),
+    ).toBeInTheDocument();
+    fireEvent.click(categories);
+    fireEvent.click(
+      screen.getByRole("option", { name: "filters.all", exact: true }),
+    );
+    fireEvent.keyDown(categories, { key: "Escape" });
+    expect(
+      dialog.queryByRole("combobox", { name: "livePerformances" }),
+    ).toBeNull();
   });
 
   it("編集のキャンセルは一覧と保存データを変更しない", async () => {

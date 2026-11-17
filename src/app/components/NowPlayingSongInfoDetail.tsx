@@ -628,6 +628,14 @@ const NowPlayingSongInfoDetail = ({
                                 : "border-transparent"
                             }`}
                           >
+                            <span
+                              className="mr-2 shrink-0 text-right tabular-nums"
+                              style={{
+                                minWidth: `${String(videoTimestamps.length).length + 1}ch`,
+                              }}
+                            >
+                              {index + 1}.
+                            </span>
                             <div className="flex tabular-nums">
                               <Link
                                 href={`?v=${song.video_id}&t=${song.start}`}

@@ -120,9 +120,9 @@ The following environment variables are used in the project:
 | `GOOGLE_API_KEY`       | Google Sheets API key for reading data from Google Sheets |
 | `SPREADSHEET_ID`       | Google Sheets ID for reading data from Google Sheets       |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API key for reading YouTube video information |
-| `SAVE_SPREADSHEET_ID`  | Google Sheets ID used to save Cloud Nine shared data       |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account email used for writing Cloud Nine shared data |
-| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Service account private key used for writing Cloud Nine shared data |
+| `SAVE_SPREADSHEET_ID`  | Google Sheets ID for reading legacy Cloud Nine shares (new shares use TiDB)       |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account email used for reading Google Sheets data |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Service account private key used for reading Google Sheets data |
 | `NEXT_PUBLIC_BASE_URL` | Public base URL used when generating internal and shared URLs |
 | `PUBLIC_BASE_URL`      | Fallback base URL for server-side URL generation           |
 

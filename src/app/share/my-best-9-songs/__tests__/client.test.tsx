@@ -1,6 +1,19 @@
+import { departureGroups } from "@/app/lib/__tests__/fixtures/bestNineLive";
+import { buildBestNineLiveChoices } from "@/app/lib/bestNineLive";
+import type { LiveTitleGroup } from "@/app/types/live";
+let liveGroups: LiveTitleGroup[] = [];
+vi.mock("@/app/hook/useBestNineLiveCatalog", () => ({
+  default: () => ({
+    groups: liveGroups,
+    choices: buildBestNineLiveChoices(liveGroups),
+    loading: false,
+    error: false,
+  }),
+}));
 import { emptySlotCategories } from "@/app/lib/bestNineCategories";
 import { MantineProvider } from "@mantine/core";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -83,7 +96,9 @@ vi.mock("@/app/hook/useGlobalPlayer", () => ({
   }),
 }));
 vi.mock("@/app/components/YoutubeThumbnail", () => ({
-  default: ({ alt }: { alt: string }) => <span>{alt}サムネイル</span>,
+  default: ({ alt, videoId }: { alt: string; videoId: string }) => (
+    <span data-video-id={videoId}>{alt}サムネイル</span>
+  ),
 }));
 const notify = vi.fn();
 vi.mock("@/app/lib/notifications", () => ({
@@ -154,6 +169,12 @@ const preset = () => {
 
 describe("9選の枠ごとのお題編集", () => {
   beforeEach(() => {
+    liveGroups = [];
+    if (!HTMLElement.prototype.scrollIntoView)
+      Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+        configurable: true,
+        value: vi.fn(),
+      });
     availableSongs = songs;
     virtualRows = [{ index: 0, start: 0, end: 220, key: "row" }];
     measureElementMock.mockClear();
@@ -184,6 +205,319 @@ describe("9選の枠ごとのお題編集", () => {
     cleanup();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+
+  it("1曲・Departure・企画タグをログイン後の作成用に保持する", async () => {
+    liveGroups = departureGroups;
+    mount();
+    const dialog = openCreate();
+    fireEvent.click(dialog.getByRole("combobox", { name: "最大選曲数" }));
+    fireEvent.click(
+      screen.getByRole("option", { name: "最大1曲", exact: true }),
+    );
+    expect(
+      dialog.queryByRole("combobox", { name: "対象ライブ公演" }),
+    ).toBeNull();
+    fireEvent.click(dialog.getByRole("radio", { name: "枠ごとのお題" }));
+    const categories = dialog.getByLabelText("1枠目のカテゴリ");
+    fireEvent.click(categories);
+    fireEvent.click(
+      screen.getByRole("option", { name: "ライブセトリ", exact: true }),
+    );
+    fireEvent.keyDown(categories, { key: "Escape" });
+    expect(dialog.getByLabelText("1枠目のお題")).toHaveValue("");
+    const liveSelect = dialog.getByRole("combobox", { name: "対象ライブ公演" });
+    fireEvent.click(liveSelect);
+    fireEvent.click(
+      screen.getByRole("option", { name: "Departure / 2025-11-19" }),
+    );
+    fireEvent.keyDown(liveSelect, { key: "Escape" });
+
+    const tags = dialog.getByRole("combobox", { name: "投稿ハッシュタグ" });
+    act(() => tags.focus());
+    fireEvent.change(tags, { target: { value: "#AZKiと未来へ" } });
+    fireEvent.keyDown(tags, { key: "Enter" });
+    fireEvent.click(
+      dialog.getByRole("button", {
+        name: messages.Share.myBest9.topics.loginToCreate,
+      }),
+    );
+    await waitFor(() => expect(signInMock).toHaveBeenCalled());
+    expect(
+      JSON.parse(sessionStorage.getItem("azki-best-nine:pending-topic")!),
+    ).toMatchObject({
+      songCount: 1,
+      allowedLiveIds: ["departure"],
+      hashtags: ["AZKiと未来へ"],
+      themes: emptyThemes(),
+      slotCategories: [["live-setlist"], ...emptySlotCategories().slice(1)],
+    });
+  });
+
+  it("1曲のお題で動画なしのライブ曲を選び、曲名と企画タグ付きで共有できる", async () => {
+    liveGroups = departureGroups;
+    const id = "12345678-1234-4234-8234-123456789abc";
+    params = new URLSearchParams({ topic: id });
+    vi.mocked(fetch).mockImplementation(async (url) =>
+      Response.json(
+        String(url).endsWith(`/topics/${id}`)
+          ? {
+              topic: {
+                id,
+                title: "Departureで今1番推したい1曲",
+                version: 1,
+                themes: emptyThemes(),
+                songCount: 1,
+                allowedLiveIds: ["departure"],
+                hashtags: ["AZKiと未来へ"],
+                canEdit: false,
+              },
+              response: null,
+            }
+          : { id: "saved-live", ready: true },
+      ),
+    );
+    mount();
+    await waitFor(() =>
+      expect(screen.getByLabelText("タイトル", { exact: false })).toHaveValue(
+        "Departureで今1番推したい1曲",
+      ),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "ライブセトリ", exact: true }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "未来カンパネラを選択" }),
+    );
+    expect(readDraft()).toMatchObject({
+      songCount: 1,
+      songs: [{ kind: "live", snapshot: { title: "未来カンパネラ" } }],
+    });
+    expect(screen.getByText("1 / 1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Creating worldを選択" }),
+    ).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("回答者（任意）"), {
+      target: { value: "みつごご" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "共有URLを生成" }));
+    await screen.findByRole("button", { name: "共有URL作成済み" });
+    const share = new URL(
+      screen
+        .getByRole("link", { name: "X（Twitter）でシェア" })
+        .getAttribute("href")!,
+    );
+    expect(share.searchParams.get("text")).toBe(
+      `Departureで今1番推したい1曲 by みつごご\n\n未来カンパネラ\n\n${window.location.origin}/ja\n#AZSongDB #AZKiと未来へ`,
+    );
+    expect(share.searchParams.has("url")).toBe(false);
+    expect(share.searchParams.has("hashtags")).toBe(false);
+  });
+
+  it("ライブセトリはMV・アートトラック・placeholderから選び、歌枠の一覧を出さない", async () => {
+    liveGroups = departureGroups;
+    availableSongs = [
+      {
+        ...songs[0],
+        title: "未来カンパネラ",
+        video_id: "campanella-singing",
+        tags: ["歌枠"],
+      },
+      {
+        ...songs[0],
+        title: "未来カンパネラ",
+        video_id: "campanella-art",
+        tags: ["オリ曲", "アートトラック"],
+      },
+      {
+        ...songs[0],
+        title: "未来カンパネラ",
+        video_id: "campanella-mv",
+        tags: ["オリ曲MV"],
+      },
+      {
+        ...songs[0],
+        title: "Creating world",
+        video_id: "creating-art",
+        tags: ["オリ曲", "アートトラック"],
+      },
+      {
+        ...songs[0],
+        title: "without U",
+        video_id: "without-singing",
+        tags: ["歌枠"],
+      },
+    ];
+    mount();
+    fireEvent.click(
+      screen.getByRole("button", { name: "ライブセトリ", exact: true }),
+    );
+    expect(screen.getByText("オリ曲MV", { exact: true })).toBeInTheDocument();
+    expect(
+      screen.getByText("アートトラック", { exact: true }),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-video-id="campanella-mv"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-video-id="creating-art"]'),
+    ).not.toBeNull();
+    expect(document.querySelector('[data-video-id=""]')).not.toBeNull();
+    expect(
+      document.querySelector('[data-video-id="campanella-singing"]'),
+    ).toBeNull();
+    expect(
+      document.querySelector('[data-video-id="campanella-art"]'),
+    ).toBeNull();
+    expect(
+      document.querySelector('[data-video-id="without-singing"]'),
+    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /の動画を選ぶ/ })).toBeNull();
+    const tile = screen.getByRole("button", { name: "未来カンパネラを選択" });
+    expect(tile.tagName).toBe("BUTTON");
+    expect(tile).toHaveAttribute("type", "button");
+    expect(tile).toHaveAttribute("aria-pressed", "false");
+    expect(
+      tile.querySelector('[data-video-id="campanella-mv"]'),
+    ).not.toBeNull();
+    expect(tile).toHaveTextContent("未来カンパネラ");
+    expect(tile).not.toHaveTextContent("未来カンパネラを選択");
+    const info = screen.getByRole("link", { name: "未来カンパネラの公演情報" });
+    expect(info).toHaveAttribute("href", "/lives/departure");
+    expect(info.closest("button")).toBeNull();
+    fireEvent.click(tile);
+    expect(
+      screen.getByRole("button", { name: "選択済み：未来カンパネラ" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(readDraft().songs).toEqual([{ v: "campanella-mv", s: "0" }]);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Creating worldを選択" }),
+    );
+    expect(readDraft().songs[1]).toEqual({ v: "creating-art", s: "0" });
+    fireEvent.click(
+      screen.getByRole("button", { name: "without U (Re:arrange ver.)を選択" }),
+    );
+    expect(readDraft().songs[2]).toMatchObject({
+      kind: "live",
+      snapshot: { title: "without U (Re:arrange ver.)" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "選択済み：未来カンパネラ" }),
+    );
+    expect(readDraft().songs.some((entry) => entry.v === "campanella-mv")).toBe(
+      false,
+    );
+  });
+
+  it("ライブセトリ限定のお題は初期の全て表示でも代表MVから選曲する", async () => {
+    liveGroups = departureGroups;
+    availableSongs = [
+      {
+        ...songs[0],
+        title: "未来カンパネラ",
+        video_id: "live-singing",
+        tags: ["歌枠"],
+      },
+      {
+        ...songs[0],
+        title: "未来カンパネラ",
+        video_id: "original-mv",
+        tags: ["オリ曲MV"],
+      },
+    ];
+    const id = "12345678-1234-4234-8234-123456789abc";
+    params = new URLSearchParams({ topic: id });
+    vi.mocked(fetch).mockImplementation(async (url) =>
+      Response.json(
+        String(url).endsWith(`/topics/${id}`)
+          ? {
+              topic: {
+                id,
+                title: "ライブから推す1曲",
+                version: 1,
+                songCount: 1,
+                themes: emptyThemes(),
+                slotCategories: Array.from({ length: 9 }, () => [
+                  "live-setlist",
+                ]),
+                canEdit: false,
+              },
+              response: null,
+            }
+          : { ready: true },
+      ),
+    );
+    mount();
+    await screen.findByDisplayValue("ライブから推す1曲");
+    expect(
+      document.querySelector('[data-video-id="original-mv"]'),
+    ).not.toBeNull();
+    expect(document.querySelector('[data-video-id="live-singing"]')).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "未来カンパネラを選択" }),
+    );
+    expect(readDraft().songs).toEqual([{ v: "original-mv", s: "0", slot: 0 }]);
+  });
+
+  it("曲数を減らすときは確認するまで選択済みの曲を保持する", async () => {
+    await mountOwnerEditing();
+    choose("曲A");
+    choose("曲B");
+    fireEvent.click(screen.getByRole("combobox", { name: "最大選曲数" }));
+    fireEvent.click(
+      screen.getByRole("option", { name: "最大1曲", exact: true }),
+    );
+    const dialog = within(
+      screen.getByRole("dialog", { name: "選曲条件を変更しますか？" }),
+    );
+    expect(readDraft().songs).toHaveLength(2);
+    fireEvent.click(
+      dialog.getByRole("button", {
+        name: messages.Share.myBest9.themes.confirm,
+      }),
+    );
+    expect(readDraft()).toMatchObject({
+      songCount: 1,
+      songs: [{ v: "song-a", s: "0" }],
+    });
+    expect(readDraft().songs).toHaveLength(1);
+  });
+
+  it("ライブセトリを選んだときだけ公演を表示し、カテゴリを外すと公演指定を解除する", async () => {
+    liveGroups = departureGroups;
+    await mountOwnerEditing();
+    expect(
+      screen.queryByRole("combobox", { name: "対象ライブ公演" }),
+    ).toBeNull();
+    openThemes();
+    const categories = screen.getByLabelText("1枠目のカテゴリ");
+    fireEvent.click(categories);
+    fireEvent.click(
+      screen.getByRole("option", { name: "ライブセトリ", exact: true }),
+    );
+    fireEvent.keyDown(categories, { key: "Escape" });
+    const liveSelect = screen.getByRole("combobox", { name: "対象ライブ公演" });
+    fireEvent.click(liveSelect);
+    fireEvent.click(
+      screen.getByRole("option", { name: "Departure / 2025-11-19" }),
+    );
+    fireEvent.keyDown(liveSelect, { key: "Escape" });
+    expect(readDraft().allowedLiveIds).toEqual(["departure"]);
+    fireEvent.click(categories);
+    fireEvent.click(screen.getByRole("option", { name: "全て", exact: true }));
+    fireEvent.keyDown(categories, { key: "Escape" });
+    expect(
+      screen.queryByRole("combobox", { name: "対象ライブ公演" }),
+    ).toBeNull();
+    expect(readDraft().allowedLiveIds).toBeUndefined();
+    fireEvent.click(categories);
+    fireEvent.click(
+      screen.getByRole("option", { name: "ライブセトリ", exact: true }),
+    );
+    fireEvent.keyDown(categories, { key: "Escape" });
+    expect(
+      screen.getByRole("combobox", { name: "対象ライブ公演" }),
+    ).toHaveValue("");
   });
 
   it("作成時に枠ごとに複数カテゴリを指定し、Googleログイン後の作成用にも保持する", async () => {
@@ -517,7 +851,7 @@ describe("9選の枠ごとのお題編集", () => {
     expect(
       await screen.findByRole("button", { name: "共有URL作成済み" }),
     ).toBeDisabled();
-    fireEvent.change(screen.getByLabelText("作成者名（任意）"), {
+    fireEvent.change(screen.getByLabelText("回答者（任意）"), {
       target: { value: "回答者" },
     });
     expect(screen.getByRole("button", { name: "共有URLを生成" })).toBeEnabled();
@@ -549,7 +883,7 @@ describe("9選の枠ごとのお題編集", () => {
       expect(screen.getByLabelText("タイトル", { exact: false })).toHaveValue(
         "私が選んだ究極の9曲",
       );
-      expect(screen.getByLabelText("作成者名（任意）")).toHaveValue("");
+      expect(screen.getByLabelText("回答者（任意）")).toHaveValue("");
       expect(
         screen.queryByRole("button", { name: "9枠目の曲を削除" }),
       ).toBeNull();
@@ -578,7 +912,7 @@ describe("9選の枠ごとのお題編集", () => {
       expect(screen.getByLabelText("タイトル", { exact: false })).toHaveValue(
         "募集",
       );
-      expect(screen.getByLabelText("作成者名（任意）")).toHaveValue("");
+      expect(screen.getByLabelText("回答者（任意）")).toHaveValue("");
       expect(readDraft()).toEqual(saved);
       choose("曲B");
       expect(readDraft().songs).toEqual([{ v: "song-b", s: "10", slot: 0 }]);
@@ -618,7 +952,7 @@ describe("9選の枠ごとのお題編集", () => {
     choose("曲A");
     const saved = readDraft();
     const dialog = openCreate();
-    expect(dialog.getByRole("radio", { name: "任意の9曲" })).toBeChecked();
+    expect(dialog.getByRole("radio", { name: "自由に選ぶ" })).toBeChecked();
     fireEvent.change(dialog.getByLabelText("タイトル", { exact: false }), {
       target: { value: "未保存" },
     });
@@ -630,14 +964,17 @@ describe("9選の枠ごとのお題編集", () => {
     ).toHaveValue("私が選んだ究極の9曲");
   });
 
-  it("テーマ方式は1題以上を必要とし、空白タイトルも作成しない", () => {
+  it("枠のお題文がすべて空でも作成でき、空白タイトルは作成しない", () => {
     mount();
     const dialog = openCreate();
     const submit = dialog.getByRole("button", {
       name: "Googleでログインしてお題を作成",
     });
     fireEvent.click(dialog.getByRole("radio", { name: "枠ごとのお題" }));
-    expect(submit).toBeDisabled();
+    expect(submit).toBeEnabled();
+    expect(
+      dialog.queryByText(messages.Share.myBest9.topics.themeRequired),
+    ).toBeNull();
     fireEvent.change(dialog.getByLabelText("1枠目のお題"), {
       target: { value: "出会い" },
     });
@@ -792,7 +1129,7 @@ describe("9選の枠ごとのお題編集", () => {
           "現在のお題",
         ),
       );
-      expect(screen.getByLabelText("作成者名（任意）")).toHaveValue(
+      expect(screen.getByLabelText("回答者（任意）")).toHaveValue(
         ["matching", "old-version"].includes(source)
           ? "下書きの回答者"
           : "保存済み回答者",
@@ -848,6 +1185,9 @@ describe("9選の枠ごとのお題編集", () => {
         )!;
       expect(call[1]?.method).toBe("POST");
       expect(JSON.parse(call[1]!.body as string)).toEqual({
+        songCount: 9,
+        allowedLiveIds: [],
+        hashtags: [],
         title: "新しい募集",
         slotCategories: emptySlotCategories(),
         themes:

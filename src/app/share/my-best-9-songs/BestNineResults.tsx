@@ -261,11 +261,18 @@ export default function BestNineResults({ data }: { data: Results }) {
                                   <ul className={styles.performances}>
                                     {rank.performances.map((performance) => (
                                       <li
-                                        key={`${performance.videoId}:${performance.start}`}
+                                        key={
+                                          performance.liveId
+                                            ? `${performance.liveId}:${performance.liveEntryKey}`
+                                            : `${performance.videoId}:${performance.start}`
+                                        }
                                         className={styles.performance}
                                       >
                                         <Link
-                                          href={`/watch?v=${encodeURIComponent(performance.videoId)}&t=${encodeURIComponent(performance.start)}`}
+                                          href={
+                                            performance.livePath ||
+                                            `/watch?v=${encodeURIComponent(performance.videoId!)}&t=${encodeURIComponent(performance.start!)}`
+                                          }
                                           className={styles.performanceLink}
                                         >
                                           {performance.videoTitle ||
@@ -283,7 +290,9 @@ export default function BestNineResults({ data }: { data: Results }) {
                                                 /{" "}
                                               </>
                                             )}
-                                            {formatStart(performance.start)}
+                                            {performance.start !== undefined
+                                              ? formatStart(performance.start)
+                                              : performance.singers}
                                           </span>
                                         </Link>
                                         <span

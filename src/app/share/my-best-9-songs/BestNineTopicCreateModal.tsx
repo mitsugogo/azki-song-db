@@ -1,4 +1,9 @@
 "use client";
+import BestNineSettingsFields, {
+  BestNineLivePerformanceField,
+} from "./BestNineSettingsFields";
+import BestNineCategoryFields from "./BestNineCategoryFields";
+import type { BestNineSettings } from "@/app/lib/bestNineSettings";
 
 import { useState } from "react";
 import {
@@ -11,9 +16,13 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { emptyThemes, hasThemes } from "@/app/lib/myBestNineSongs";
+import { emptyThemes } from "@/app/lib/myBestNineSongs";
 import BestNineThemeFields from "./BestNineThemeFields";
-import { emptySlotCategories } from "@/app/lib/bestNineCategories";
+import {
+  emptySlotCategories,
+  hasLiveSetlistCategory,
+  type BestNineCategory,
+} from "@/app/lib/bestNineCategories";
 import type { BestNineTopicDefinition } from "@/app/lib/bestNineTopics";
 
 export default function BestNineTopicCreateModal({
@@ -31,9 +40,30 @@ export default function BestNineTopicCreateModal({
 }) {
   const t = useTranslations("Share.myBest9");
   const [title, setTitle] = useState(() => t("defaultTitle"));
+  const [settings, setSettings] = useState<BestNineSettings>({
+    songCount: 9,
+    allowedLiveIds: [],
+    hashtags: [],
+  });
   const [mode, setMode] = useState("free");
   const [themes, setThemes] = useState(emptyThemes);
   const [slotCategories, setSlotCategories] = useState(emptySlotCategories);
+  const liveEnabled = hasLiveSetlistCategory(
+    slotCategories,
+    settings.songCount,
+  );
+  const changeCategories = (categories: BestNineCategory[][]) => {
+    setSlotCategories(categories);
+    if (!hasLiveSetlistCategory(categories, settings.songCount))
+      setSettings((previous) => ({ ...previous, allowedLiveIds: [] }));
+  };
+  const changeSettings = (next: BestNineSettings) =>
+    setSettings({
+      ...next,
+      allowedLiveIds: hasLiveSetlistCategory(slotCategories, next.songCount)
+        ? next.allowedLiveIds
+        : [],
+    });
   return (
     <Modal
       opened={opened}
@@ -55,19 +85,13 @@ export default function BestNineTopicCreateModal({
         }}
         onSubmit={async (event) => {
           event.preventDefault();
-          if (
-            saving ||
-            status === "loading" ||
-            !title.trim() ||
-            (mode === "themed" && !hasThemes(themes))
-          )
-            return;
+          if (saving || status === "loading" || !title.trim()) return;
           if (
             await onCreate({
+              ...settings,
               title: title.trim(),
               themes: mode === "themed" ? themes : emptyThemes(),
-              slotCategories:
-                mode === "themed" ? slotCategories : emptySlotCategories(),
+              slotCategories: slotCategories,
             })
           )
             onClose();
@@ -83,10 +107,33 @@ export default function BestNineTopicCreateModal({
             disabled={saving}
             onChange={(event) => setTitle(event.currentTarget.value)}
           />
+          <BestNineSettingsFields
+            value={settings}
+            onChange={changeSettings}
+            disabled={saving}
+          />
+          {mode === "free" && (
+            <BestNineCategoryFields
+              slot={0}
+              value={slotCategories[0]}
+              disabled={saving}
+              onChange={(categories) =>
+                changeCategories(
+                  Array.from({ length: 9 }, () => [...categories]),
+                )
+              }
+            />
+          )}
           <Radio.Group
             label={t("topics.selectionMode")}
             value={mode}
-            onChange={setMode}
+            onChange={(nextMode) => {
+              setMode(nextMode);
+              if (nextMode === "free")
+                changeCategories(
+                  Array.from({ length: 9 }, () => [...slotCategories[0]]),
+                );
+            }}
           >
             <Stack gap="xs" mt="xs">
               <Radio
@@ -105,17 +152,22 @@ export default function BestNineTopicCreateModal({
             <>
               <BestNineThemeFields
                 themes={themes}
+                songCount={settings.songCount}
                 slotCategories={slotCategories}
-                onCategoriesChange={setSlotCategories}
+                onCategoriesChange={changeCategories}
                 onChange={setThemes}
                 readOnly={saving}
               />
-              {!hasThemes(themes) && (
-                <Text size="xs" c="dimmed">
-                  {t("topics.themeRequired")}
-                </Text>
-              )}
             </>
+          )}
+          {liveEnabled && (
+            <BestNineLivePerformanceField
+              value={settings.allowedLiveIds ?? []}
+              onChange={(allowedLiveIds) =>
+                setSettings((previous) => ({ ...previous, allowedLiveIds }))
+              }
+              disabled={saving}
+            />
           )}
           <Text size="sm" c="dimmed">
             {t("topics.createHelp")}
@@ -127,11 +179,7 @@ export default function BestNineTopicCreateModal({
             <Button
               type="submit"
               loading={saving}
-              disabled={
-                status === "loading" ||
-                !title.trim() ||
-                (mode === "themed" && !hasThemes(themes))
-              }
+              disabled={status === "loading" || !title.trim()}
             >
               {t(
                 status === "authenticated"

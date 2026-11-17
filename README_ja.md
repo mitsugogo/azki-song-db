@@ -83,9 +83,9 @@ pnpm test:e2e:headed
 | `GOOGLE_API_KEY` | Google Sheets API（データ読み取り）|
 | `SPREADSHEET_ID` | 使用するスプレッドシートの ID |
 | `YOUTUBE_DATA_API_KEY` | YouTube Data API（動画メタデータ取得） |
-| `SAVE_SPREADSHEET_ID` | 「究極の9曲」の共有データ保存先スプレッドシート ID |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | 「究極の9曲」の共有データ書き込みに使うサービスアカウントメール |
-| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | 「究極の9曲」の共有データ書き込みに使うサービスアカウント秘密鍵 |
+| `SAVE_SPREADSHEET_ID` | 「究極の9曲」の旧共有データを読み取るスプレッドシート ID（新規保存は TiDB） |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Google Sheets のデータ取得に使うサービスアカウントメール |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Google Sheets のデータ取得に使うサービスアカウント秘密鍵 |
 | `NEXT_PUBLIC_BASE_URL` | 共有URLや内部URL生成に使う公開ベース URL |
 | `PUBLIC_BASE_URL` | サーバー側URL生成に使うフォールバックのベース URL |
 

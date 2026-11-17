@@ -172,6 +172,9 @@ model BestNineTopicRevision {
   themes         Json
   /// NULL は従来のお題（全カテゴリ）。
   slotCategories Json?
+  songCount      Int                @default(9)
+  allowedLiveIds Json?
+  hashtags       Json?
   createdAt      DateTime           @default(now())
   topic          BestNineTopic      @relation(fields: [topicId], references: [id], onDelete: Restrict)
   responses      BestNineResponse[]
@@ -199,8 +202,13 @@ model BestNineResponse {
 model BestNineResponseEntry {
   responseId     String           @db.VarChar(20)
   slot           Int
-  videoId        String           @db.VarChar(100)
-  start          String           @db.VarChar(32)
+  sourceType     String           @default("video") @db.VarChar(10)
+  liveId         String?          @db.VarChar(200)
+  liveEntryKey   String?          @db.Text
+  livePath       String?          @db.VarChar(1000)
+  singers        String?          @db.VarChar(500)
+  videoId        String?          @db.VarChar(100)
+  start          String?          @db.VarChar(32)
   /// 集計用の曲名・歌手はサーバーで取得した日本語の原表記を保存する。
   songKey        String           @db.Char(64)
   /// MySQLの照合順序に依存せず、動画IDの大文字・小文字を区別する。

@@ -51,7 +51,7 @@ describe("共有9選のOGメタデータ", () => {
       expect(image.searchParams.get("hl")).toBe(language);
       expect(image.searchParams.get("w")).toBe("1200");
       expect(image.searchParams.get("h")).toBe("630");
-      expect(image.searchParams.get("v")).toBe("cards-v2");
+      expect(image.searchParams.get("v")).toBe("cards-v5");
       expect(metadata.twitter?.card).toBe("summary_large_image");
       expect(metadata.twitter?.images).toEqual([images[0].url]);
       expect(metadata.openGraph?.title).toBe(metadata.title);

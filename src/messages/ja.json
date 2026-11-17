@@ -895,6 +895,30 @@
       "selectionHelp": "1〜9曲で共有できます。",
       "previewSong": "「{title}」を再生",
       "removeSong": "「{title}」を選曲から外す",
+      "settings": {
+        "originalMv": "オリ曲MV",
+        "artTrack": "アートトラック",
+        "videoPlaceholder": "動画なし",
+        "performanceInfo": "{title}の公演情報",
+
+        "overLimit": "現在のお題は最大{count}曲です。選曲をリセットして選び直してください。",
+        "songCount": "最大選曲数",
+        "countOption": "最大{count}曲",
+        "livePerformances": "対象ライブ公演",
+        "liveHelp": "未指定なら全公演。セトリの曲をオリ曲MV、アートトラックの順で表示します。",
+        "liveError": "ライブセトリを取得できませんでした。時間をおいて開き直してください。",
+        "hashtags": "投稿ハッシュタグ",
+        "hashtagHelp": "最大5件。#AZSongDB と併記します。Enterで確定してください。",
+        "browsePerformance": "ライブ公演で絞り込み",
+        "allPerformances": "すべての対象公演",
+        "selectedLive": "選択済み：{title}",
+        "selectLive": "{title}を選択",
+        "noLiveSongs": "対象のライブセトリがありません。",
+        "showMore": "さらに表示",
+        "selectionHelp": "最大{count}曲を選んで共有できます。",
+        "confirmTitle": "選曲条件を変更しますか？",
+        "confirmDescription": "新しい条件に合わない選択済みの曲を外します。共有済みの回答は変更されません。"
+      },
       "defaultTitle": "私が選んだ究極の9曲",
       "unknownBroadcastDate": "配信日不明",
       "pageTitle": "究極の9曲ジェネレーター",
@@ -905,7 +929,7 @@
       "form": {
         "titleLabel": "タイトル",
         "titlePlaceholder": "例: 私が選んだ究極の九曲",
-        "authorLabel": "作成者名（任意）",
+        "authorLabel": "回答者（任意）",
         "authorPlaceholder": "例: みつごご"
       },
       "tooltip": {
@@ -921,7 +945,7 @@
         "generate": "共有URLを生成",
         "reset": "リセット"
       },
-      "selectedCount": "選択済み: {count}/9",
+      "selectedCount": "選択済み: {count}/{max}",
       "status": {
         "selected": "選択中",
         "unselected": "未選択"
@@ -932,6 +956,7 @@
       },
       "selectSongsTitle": "曲を選択 ({count}/9)",
       "filters": {
+        "liveSetlist": "ライブセトリ",
         "all": "全て",
         "original": "オリ曲",
         "cover": "カバー曲",
@@ -1021,7 +1046,7 @@
         "close": "閉じる",
         "create": "お題を作成する",
         "selectionMode": "選曲方式",
-        "freeNine": "任意の9曲",
+        "freeNine": "自由に選ぶ",
         "themeRequired": "お題を1つ以上入力してください。空欄の枠は自由枠になります。",
         "createHelp": "お題の作成にはGoogleアカウントでのログインが必要です。回答はログインせずに参加できます。",
         "publish": "お題を作成して募集する",

@@ -1,0 +1,13 @@
+ALTER TABLE `BestNineTopicRevision`
+  ADD COLUMN `songCount` INTEGER NOT NULL DEFAULT 9,
+  ADD COLUMN `allowedLiveIds` JSON NULL,
+  ADD COLUMN `hashtags` JSON NULL;
+
+ALTER TABLE `BestNineResponseEntry`
+  ADD COLUMN `sourceType` VARCHAR(10) NOT NULL DEFAULT 'video',
+  ADD COLUMN `liveId` VARCHAR(200) NULL,
+  ADD COLUMN `liveEntryKey` TEXT NULL,
+  ADD COLUMN `livePath` VARCHAR(1000) NULL,
+  ADD COLUMN `singers` VARCHAR(500) NULL,
+  MODIFY `videoId` VARCHAR(100) NULL,
+  MODIFY `start` VARCHAR(32) NULL;

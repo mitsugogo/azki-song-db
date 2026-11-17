@@ -1,3 +1,5 @@
+import { buildBestNineLiveChoices } from "@/app/lib/bestNineLive";
+import { departureGroups } from "@/app/lib/__tests__/fixtures/bestNineLive";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import { encodePlaylistOgPayload } from "@/app/lib/playlistUrl";
@@ -88,6 +90,7 @@ type ElementNode = {
     src?: string;
     style?: Record<string, unknown>;
     "data-og-slot"?: number;
+    "data-og-row"?: number;
   };
 };
 
@@ -366,7 +369,7 @@ describe("OG song freshness routes", () => {
     );
     expect(cards).toHaveLength(9);
     const children = cards[0].props?.children as ElementNode[];
-    expect(collectText(children[0]).join("")).toBe("1.");
+    expect(collectText(children[0]).join("")).toBe("");
     expect(collectText(children[1]).join("")).toContain("新曲");
     expect(collectText(children[1]).join("")).toContain("AZKi");
     const thumbnail = collectElements(cards[0]).find(
@@ -375,9 +378,120 @@ describe("OG song freshness routes", () => {
     expect(thumbnail?.props?.style).toMatchObject({
       width: 176,
       height: 99,
-      objectFit: "contain",
+      objectFit: "cover",
     });
     expect(thumbnail?.props?.style?.position).toBeUndefined();
+  });
+
+  it.each([1, 3, 9])(
+    "指定された最大%d曲分だけカードを描画する",
+    async (songCount) => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        Response.json({
+          selection: {
+            title: "推したい曲",
+            songCount,
+            songs: [{ v: "new-video", s: "10" }],
+          },
+        }),
+      );
+      fetchWithFallbackMock.mockResolvedValue([song]);
+      await getBestNine(
+        new Request(
+          "https://example.test/api/og/share/my-best-9-songs?id=count",
+        ) as never,
+      );
+      const cards = collectElements(imageResponseElements.at(-1)).filter(
+        (element) => element.props?.["data-og-slot"] !== undefined,
+      );
+      expect(cards).toHaveLength(songCount);
+      if (songCount === 1)
+        expect(
+          collectElements(cards[0]).find((element) => element.props?.src)?.props
+            ?.style,
+        ).toMatchObject({ width: 448, height: 252 });
+    },
+  );
+
+  it.each([
+    { count: 1, theme: "", expected: "" },
+    { count: 1, theme: "今1番推したい曲", expected: "1. 今1番推したい曲" },
+    { count: 2, theme: "", expected: "" },
+    { count: 2, theme: "出会いの曲", expected: "1. 出会いの曲" },
+  ])(
+    "OGカードの見出しも選曲数と枠のお題に合わせる: %j",
+    async ({ count, theme, expected }) => {
+      const themes = emptyThemes();
+      themes[0] = theme;
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        Response.json({
+          selection: {
+            title: "見出し",
+            songCount: count,
+            themes,
+            slotCategories: Array.from({ length: 9 }, () => ["original"]),
+            songs: Array.from({ length: count }, (_, slot) => ({
+              v: "new-video",
+              s: "10",
+              slot,
+            })),
+          },
+        }),
+      );
+      fetchWithFallbackMock.mockResolvedValue([song]);
+      await getBestNine(
+        new Request(
+          "https://example.test/api/og/share/my-best-9-songs?id=headings",
+        ) as never,
+      );
+      const cards = collectElements(imageResponseElements.at(-1)).filter(
+        (element) => element.props?.["data-og-slot"] !== undefined,
+      );
+      const children = cards[0].props?.children as unknown[];
+      expect(collectText(children[0]).join("")).toBe(expected);
+      if (count > 1)
+        expect(
+          collectText((cards[1].props?.children as unknown[])[0]).join(""),
+        ).toBe("");
+      expect(collectText(cards).join("")).not.toMatch(/自由枠|Free choice/);
+    },
+  );
+
+  it("動画のないライブ曲でも公演名・曲名・歌唱者のOG画像を生成する", async () => {
+    const live = buildBestNineLiveChoices(departureGroups)[0];
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        selection: {
+          title: "Departureで推したい1曲",
+          songCount: 1,
+          songs: [
+            {
+              kind: "live",
+              liveId: live.liveId,
+              liveEntryKey: live.entryKey,
+              snapshot: live,
+            },
+          ],
+        },
+      }),
+    );
+    await getBestNine(
+      new Request(
+        "https://example.test/api/og/share/my-best-9-songs?id=live",
+      ) as never,
+    );
+    const elements = collectElements(imageResponseElements.at(-1));
+    expect(
+      elements.filter(
+        (element) => element.props?.["data-og-slot"] !== undefined,
+      ),
+    ).toHaveLength(1);
+    const text = collectText(imageResponseElements.at(-1)).join("");
+    expect(text).toContain("未来カンパネラ");
+    expect(text).toContain("Departure");
+    expect(text).toContain("AZKi");
+    expect(elements.some((element) => element.props?.src)).toBe(false);
+    expect(fetchWithFallbackMock).not.toHaveBeenCalled();
   });
 
   it("9選のお題・欠損・重複の枠位置を画像でも保つ", async () => {

@@ -66,7 +66,7 @@ export function createBestNineResultsPreview(
     return seed / 0x100000000;
   };
   const slots: BestNineResults["slots"] = Array.from(
-    { length: 9 },
+    { length: topic.songCount ?? 9 },
     (_, slot) => {
       const slotCandidates = candidates
         .map(

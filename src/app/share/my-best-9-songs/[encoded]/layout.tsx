@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ogImageUrl.searchParams.set("hl", locale);
   ogImageUrl.searchParams.set("w", String(bestNineOgSize.width));
   ogImageUrl.searchParams.set("h", String(bestNineOgSize.height));
-  ogImageUrl.searchParams.set("v", "cards-v2");
+  ogImageUrl.searchParams.set("v", "cards-v5");
 
   // Canonical URL
   const canonical = new URL(`/share/my-best-9-songs/${id}`, baseUrl);
