@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.51.0](https://github.com/mitsugogo/azki-song-db/compare/v2.50.0...v2.51.0) (2026-11-17)
+
+### Features
+
+* 究極の9曲ジェネレータの拡張 ([1c046af](https://github.com/mitsugogo/azki-song-db/commit/1c046af5e411de91b25cb1951139ef5cb334c75a))
+
 ## [2.50.0](https://github.com/mitsugogo/azki-song-db/compare/v2.49.1...v2.50.0) (2026-11-16)
 
 ### Features
