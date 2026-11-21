@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.51.1](https://github.com/mitsugogo/azki-song-db/compare/v2.51.0...v2.51.1) (2026-11-21)
+
+### Bug Fixes
+
+* 内部APIのFirewall例外を限定 ([4043097](https://github.com/mitsugogo/azki-song-db/commit/404309717d3a874cf99b7b0cef1de0cbc97c90c4))
+
 ## [2.51.0](https://github.com/mitsugogo/azki-song-db/compare/v2.50.0...v2.51.0) (2026-11-17)
 
 ### Features
