@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { baseUrl, siteConfig } from "@/app/config/siteConfig";
 import type { LiveTitleGroup } from "@/app/types/live";
+import { internalApiFetch } from "./internalApiFetch";
 
 const getBaseCandidates = (baseUrlOverride?: string) =>
   Array.from(
@@ -22,7 +23,7 @@ export const fetchLiveTitleGroupsFromApi = cache(
   async (baseUrlOverride?: string): Promise<LiveTitleGroup[]> => {
     for (const base of getBaseCandidates(baseUrlOverride)) {
       try {
-        const response = await fetch(new URL("/api/lives", base), {
+        const response = await internalApiFetch(new URL("/api/lives", base), {
           cache: "no-store",
         });
         if (!response.ok) continue;

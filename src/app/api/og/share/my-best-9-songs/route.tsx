@@ -13,6 +13,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/app/config/siteConfig";
 import { fetchSongsFromApiWithRecentFallback } from "@/app/lib/server/fetchSongs";
+import { internalApiFetch } from "@/app/lib/server/internalApiFetch";
 import {
   fetchOgFonts,
   normalizeOgText,
@@ -93,8 +94,8 @@ export async function GET(req: NextRequest) {
       return await fallbackOgImage(size);
     }
 
-    const savedResponse = await fetch(
-      `${origin}/api/share/my-best-9-songs/${id}`,
+    const savedResponse = await internalApiFetch(
+      new URL(`/api/share/my-best-9-songs/${encodeURIComponent(id)}`, origin),
     ).catch(() => null);
 
     const selection = savedResponse?.ok

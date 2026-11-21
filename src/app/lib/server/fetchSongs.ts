@@ -1,6 +1,7 @@
 import type { Song } from "@/app/types/song";
 import { baseUrl, siteConfig } from "@/app/config/siteConfig";
 import type { SongMetadataLookupEntry } from "@/app/lib/songMetadataLookup";
+import { internalApiFetch } from "./internalApiFetch";
 import {
   getRecentSongsBucket,
   songsFreshnessQueryParamKey,
@@ -44,7 +45,7 @@ const fetchSongsJson = async (
   url: URL,
   init?: RequestInit,
 ): Promise<Song[]> => {
-  const response = await fetch(url, {
+  const response = await internalApiFetch(url, {
     ...init,
     cache: "no-store",
   });
@@ -121,7 +122,7 @@ export async function fetchSongsVersionFromApi({
     try {
       const songsUrl = new URL("/api/songs", base);
       songsUrl.searchParams.set("hl", locale);
-      const response = await fetch(songsUrl, {
+      const response = await internalApiFetch(songsUrl, {
         method: "HEAD",
       });
       const version = response.headers.get(songsVersionHeader);
@@ -149,7 +150,7 @@ export async function fetchSongMetadataLookup({
         lookupUrl.searchParams.set("t", String(start));
       }
 
-      const response = await fetch(lookupUrl);
+      const response = await internalApiFetch(lookupUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch song lookup: ${response.status}`);
       }
