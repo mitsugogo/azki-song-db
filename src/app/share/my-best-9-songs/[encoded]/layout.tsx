@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { siteConfig, baseUrl } from "@/app/config/siteConfig";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { MyBestNineSongs } from "@/app/hook/useMyBestNineSongs";
+import { internalApiFetch } from "@/app/lib/server/internalApiFetch";
 
 type Props = {
   params: Promise<{ encoded: string }>;
@@ -14,9 +15,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let selection: MyBestNineSongs | null = null;
 
   try {
-    const response = await fetch(`${baseUrl}/api/share/my-best-9-songs/${id}`, {
-      cache: "no-store",
-    });
+    const response = await internalApiFetch(
+      new URL(`/api/share/my-best-9-songs/${encodeURIComponent(id)}`, baseUrl),
+      { cache: "no-store" },
+    );
     if (response.ok) {
       const data = (await response.json()) as { selection?: MyBestNineSongs };
       if (data.selection) {

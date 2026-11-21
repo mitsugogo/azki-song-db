@@ -2,9 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import {
   fetchSongMetadataLookup,
+  fetchSongsFromApiCached,
   fetchSongsFromApiWithRecentFallback,
   fetchSongsVersionFromApi,
 } from "../fetchSongs";
+
+const baseUrlOverride = "https://azki-song-db.mitsugogo.tech";
 
 const makeSong = (title: string, videoId = "video-id"): Song => ({
   title,
@@ -43,6 +46,7 @@ describe("fetchSongs server helpers", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
   it("通常取得に期待する曲があればfresh取得を行わない", async () => {
@@ -52,7 +56,7 @@ describe("fetchSongs server helpers", () => {
       .mockResolvedValue(jsonResponse([song]));
 
     const songs = await fetchSongsFromApiWithRecentFallback(
-      { baseUrlOverride: "https://example.test" },
+      { baseUrlOverride },
       (candidateSongs) => candidateSongs.some((item) => item.title === "Known"),
     );
 
@@ -71,7 +75,7 @@ describe("fetchSongs server helpers", () => {
       .mockResolvedValueOnce(jsonResponse([freshSong]));
 
     const songs = await fetchSongsFromApiWithRecentFallback(
-      { locale: "ja", baseUrlOverride: "https://example.test" },
+      { locale: "ja", baseUrlOverride },
       (candidateSongs) => candidateSongs.some((item) => item.title === "Fresh"),
     );
 
@@ -84,6 +88,7 @@ describe("fetchSongs server helpers", () => {
   });
 
   it("限定公開取得はCookieを引き継ぎfresh取得へ進まない", async () => {
+    vi.stubEnv("INTERNAL_WAF_TOKEN", "test-token");
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(jsonResponse([]));
@@ -92,7 +97,7 @@ describe("fetchSongs server helpers", () => {
       {
         includeMembersOnly: true,
         cookie: "azki_members_only_access=token",
-        baseUrlOverride: "https://example.test",
+        baseUrlOverride,
       },
       () => false,
     );
@@ -103,25 +108,31 @@ describe("fetchSongs server helpers", () => {
     expect(fetchMock.mock.calls[0]?.[1]).toEqual(
       expect.objectContaining({
         cache: "no-store",
-        headers: { cookie: "azki_members_only_access=token" },
+        redirect: "error",
       }),
     );
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get("cookie")).toBe("azki_members_only_access=token");
+    expect(headers.get("x-azki-internal-token")).toBe("test-token");
   });
 
   it("HEADから曲データ世代を取得する", async () => {
+    vi.stubEnv("INTERNAL_WAF_TOKEN", "test-token");
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(null, {
         headers: { "x-songs-version": "version-a" },
       }),
     );
 
-    await expect(
-      fetchSongsVersionFromApi({ baseUrlOverride: "https://example.test" }),
-    ).resolves.toBe("version-a");
+    await expect(fetchSongsVersionFromApi({ baseUrlOverride })).resolves.toBe(
+      "version-a",
+    );
     expect(fetchMock.mock.calls[0]?.[1]).toEqual(
       expect.objectContaining({ method: "HEAD" }),
     );
     expect(fetchMock.mock.calls[0]?.[1]).not.toHaveProperty("cache");
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get("x-azki-internal-token")).toBe("test-token");
   });
 
   it("公開lookupへvideoIdとstartだけを渡す", async () => {
@@ -143,7 +154,7 @@ describe("fetchSongs server helpers", () => {
         locale: "en",
         videoId: "video-id",
         start: 10,
-        baseUrlOverride: "https://example.test",
+        baseUrlOverride,
       }),
     ).resolves.toEqual([entry]);
 
@@ -152,6 +163,21 @@ describe("fetchSongs server helpers", () => {
     expect(lookupUrl.searchParams.get("hl")).toBe("en");
     expect(lookupUrl.searchParams.get("v")).toBe("video-id");
     expect(lookupUrl.searchParams.get("t")).toBe("10");
-    expect(fetchMock.mock.calls[0]?.[1]).toBeUndefined();
+    expect(fetchMock.mock.calls[0]?.[1]).not.toHaveProperty("cache");
+  });
+
+  it("許可外のURL候補をスキップし、本番URLの候補で取得する", async () => {
+    vi.stubEnv("INTERNAL_WAF_TOKEN", "test-token");
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse([]));
+
+    await expect(
+      fetchSongsFromApiCached({ baseUrlOverride: "https://other.example" }),
+    ).resolves.toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      `${baseUrlOverride}/api/songs?hl=ja`,
+    );
   });
 });

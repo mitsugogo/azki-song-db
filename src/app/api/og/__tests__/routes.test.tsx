@@ -1,6 +1,6 @@
 import { buildBestNineLiveChoices } from "@/app/lib/bestNineLive";
 import { departureGroups } from "@/app/lib/__tests__/fixtures/bestNineLive";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Song } from "@/app/types/song";
 import { encodePlaylistOgPayload } from "@/app/lib/playlistUrl";
 import { emptyThemes } from "@/app/lib/myBestNineSongs";
@@ -83,6 +83,11 @@ const lookupSong = {
   broadcast_at: song.broadcast_at,
   tags: song.tags,
 };
+
+const bestNineOgUrl =
+  "https://azki-song-db.mitsugogo.tech/api/og/share/my-best-9-songs";
+
+afterEach(() => vi.unstubAllEnvs());
 
 type ElementNode = {
   props?: {
@@ -329,7 +334,8 @@ describe("OG song freshness routes", () => {
   });
 
   it("好きな曲9選は通常ミス後のrecent曲で画像を200描画する", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    vi.stubEnv("INTERNAL_WAF_TOKEN", "test-token");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       Response.json({
         selection: {
           title: "新曲9選",
@@ -350,12 +356,17 @@ describe("OG song freshness routes", () => {
     );
 
     const response = await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=new-selection&hl=ja",
-      ) as never,
+      new Request(`${bestNineOgUrl}?id=new-selection&hl=ja`) as never,
     );
 
     expect(response.status).toBe(200);
+    const [savedUrl, options] = fetchMock.mock.calls.at(-1)!;
+    expect(new URL(String(savedUrl)).pathname).toBe(
+      "/api/share/my-best-9-songs/new-selection",
+    );
+    expect(new Headers(options?.headers).get("x-azki-internal-token")).toBe(
+      "test-token",
+    );
     expect(fetchFontsMock).toHaveBeenCalledWith(
       expect.any(String),
       "best-nine",
@@ -383,7 +394,7 @@ describe("OG song freshness routes", () => {
     expect(thumbnail?.props?.style?.position).toBeUndefined();
   });
 
-  it.each([1, 3, 9])(
+  it.each([1, 2, 3, 4, 5, 6, 7, 8, 9])(
     "指定された最大%d曲分だけカードを描画する",
     async (songCount) => {
       vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -396,11 +407,7 @@ describe("OG song freshness routes", () => {
         }),
       );
       fetchWithFallbackMock.mockResolvedValue([song]);
-      await getBestNine(
-        new Request(
-          "https://example.test/api/og/share/my-best-9-songs?id=count",
-        ) as never,
-      );
+      await getBestNine(new Request(`${bestNineOgUrl}?id=count-test`) as never);
       const cards = collectElements(imageResponseElements.at(-1)).filter(
         (element) => element.props?.["data-og-slot"] !== undefined,
       );
@@ -439,11 +446,7 @@ describe("OG song freshness routes", () => {
         }),
       );
       fetchWithFallbackMock.mockResolvedValue([song]);
-      await getBestNine(
-        new Request(
-          "https://example.test/api/og/share/my-best-9-songs?id=headings",
-        ) as never,
-      );
+      await getBestNine(new Request(`${bestNineOgUrl}?id=headings`) as never);
       const cards = collectElements(imageResponseElements.at(-1)).filter(
         (element) => element.props?.["data-og-slot"] !== undefined,
       );
@@ -475,11 +478,7 @@ describe("OG song freshness routes", () => {
         },
       }),
     );
-    await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=live",
-      ) as never,
-    );
+    await getBestNine(new Request(`${bestNineOgUrl}?id=live-test`) as never);
     const elements = collectElements(imageResponseElements.at(-1));
     expect(
       elements.filter(
@@ -514,9 +513,7 @@ describe("OG song freshness routes", () => {
     );
     fetchWithFallbackMock.mockResolvedValue([song]);
     const response = await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=themed",
-      ) as never,
+      new Request(`${bestNineOgUrl}?id=themed-test`) as never,
     );
     expect(response.status).toBe(200);
     const cards = collectElements(imageResponseElements.at(-1)).filter(
@@ -563,9 +560,7 @@ describe("OG song freshness routes", () => {
     );
     fetchWithFallbackMock.mockResolvedValue([song]);
     const response = await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=slots",
-      ) as never,
+      new Request(`${bestNineOgUrl}?id=slots-test`) as never,
     );
     expect(response.status).toBe(200);
     const cards = collectElements(imageResponseElements.at(-1)).filter(
@@ -584,9 +579,7 @@ describe("OG song freshness routes", () => {
     );
     fetchWithFallbackMock.mockResolvedValue([song]);
     await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=test&w=600&h=315",
-      ) as never,
+      new Request(`${bestNineOgUrl}?id=test-share&w=600&h=315`) as never,
     );
     expect(imageResponseOptions.at(-1)).toMatchObject({
       width: 600,
@@ -598,9 +591,7 @@ describe("OG song freshness routes", () => {
       ),
     ).toBe(true);
     await getBestNine(
-      new Request(
-        "https://example.test/api/og/share/my-best-9-songs?id=test&w=NaN&h=0",
-      ) as never,
+      new Request(`${bestNineOgUrl}?id=test-share&w=NaN&h=0`) as never,
     );
     expect(imageResponseOptions.at(-1)).toMatchObject({
       width: 1200,

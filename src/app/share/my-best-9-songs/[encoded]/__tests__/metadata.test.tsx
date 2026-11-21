@@ -5,14 +5,18 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
 }));
 vi.mock("@/app/config/siteConfig", () => ({
-  baseUrl: "https://example.test",
-  siteConfig: { siteName: "AZKi Song Database" },
+  baseUrl: "https://azki-song-db.mitsugogo.tech",
+  siteConfig: {
+    siteName: "AZKi Song Database",
+    siteUrl: "https://azki-song-db.mitsugogo.tech",
+  },
 }));
 import { generateMetadata } from "../layout";
 
 describe("共有9選のOGメタデータ", () => {
   beforeEach(() => {
     locale = "ja";
+    vi.stubEnv("INTERNAL_WAF_TOKEN", "test-token");
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation(async () =>
@@ -26,7 +30,10 @@ describe("共有9選のOGメタデータ", () => {
       ),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
 
   it.each(["ja", "en"])(
     "%s: 横長画像と大画像カードを維持し、新レイアウトのURLを共有する",
@@ -35,6 +42,15 @@ describe("共有9選のOGメタデータ", () => {
       const metadata = await generateMetadata({
         params: Promise.resolve({ encoded: "selection-id" }),
       });
+      const [url, options] = vi.mocked(fetch).mock.calls[0]!;
+      expect(String(url)).toBe(
+        "https://azki-song-db.mitsugogo.tech/api/share/my-best-9-songs/selection-id",
+      );
+      expect(options?.cache).toBe("no-store");
+      expect(new Headers(options?.headers).get("x-azki-internal-token")).toBe(
+        "test-token",
+      );
+      expect(metadata.title).toBe("私の9曲 | 作者 | AZKi Song Database");
       const images = metadata.openGraph?.images as {
         url: string;
         width: number;
