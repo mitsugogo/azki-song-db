@@ -1,6 +1,6 @@
 {
   "name": "azki-song-app",
-  "version": "2.51.1",
+  "version": "2.51.2",
   "private": true,
   "packageManager": "pnpm@12.18.0",
   "engines": {
