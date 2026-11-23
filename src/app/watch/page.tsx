@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import WatchPageClient from "./client";
 import { metadata } from "../layout";
@@ -9,6 +9,10 @@ import {
   normalizeWatchTimeParam,
 } from "@/app/lib/watchUrl";
 import { formatDate } from "@/app/lib/formatDate";
+import {
+  hasMembersOnlyAccess,
+  membersOnlyAccessCookieName,
+} from "@/app/lib/membersOnlyAccess";
 import {
   fetchSongMetadataLookup,
   fetchSongsFromApiCached,
@@ -34,7 +38,6 @@ export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
   const locale = await getLocale();
-  const requestHeaders = await headers();
   const tMeta = await getTranslations({ namespace: "Metadata.watch", locale });
   const params = await searchParams;
   const q = getParamValue(params.q);
@@ -56,25 +59,32 @@ export async function generateMetadata({
   let ogImageHeight = 630;
   let twitterCard: "summary" | "summary_large_image" = "summary_large_image";
 
-  const fetchSongs = async (
-    videoId: string,
-    start?: string | number | null,
-  ) => {
-    const cookie = requestHeaders.get("cookie") ?? "";
+  const fetchMetadataSongs = async (videoId: string, start?: number) => {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get(membersOnlyAccessCookieName)?.value;
 
-    if (!cookie) {
-      return fetchSongMetadataLookup({
+    if (accessToken && hasMembersOnlyAccess(accessToken)) {
+      try {
+        return await fetchSongsFromApiCached({
+          locale,
+          includeMembersOnly: true,
+          cookie: `${membersOnlyAccessCookieName}=${accessToken}`,
+        });
+      } catch {
+        console.warn("[watch] Failed to fetch members-only song metadata");
+      }
+    }
+
+    try {
+      return await fetchSongMetadataLookup({
         locale,
         videoId,
         start,
       });
+    } catch {
+      console.warn("[watch] Failed to fetch public song metadata");
+      return null;
     }
-
-    return fetchSongsFromApiCached({
-      locale,
-      includeMembersOnly: true,
-      cookie,
-    });
   };
 
   if (q) {
@@ -128,13 +138,14 @@ export async function generateMetadata({
     ogImageUrl.searchParams.set("titlecolor", "b81e8a");
   }
 
-  if (v && t) {
+  const songs = v ? await fetchMetadataSongs(v, tSeconds ?? undefined) : null;
+
+  if (v && t && songs) {
     ogImageUrl = new URL("/api/og/thumb", baseUrl);
     ogImageUrl.searchParams.set("v", v);
     ogImageUrl.searchParams.set("t", t);
     ogImageUrl.searchParams.set("hl", locale);
 
-    const songs = await fetchSongs(v, tSeconds ?? t);
     const song = songs.find(
       (s) =>
         s.video_id === v &&
@@ -158,8 +169,7 @@ export async function generateMetadata({
         videoTitle: song.video_title,
       });
     }
-  } else if (v) {
-    const songs = await fetchSongs(v);
+  } else if (v && songs) {
     const filteredSongs = songs.filter((s) => s.video_id === v);
     if (filteredSongs.length > 0) {
       const song = filteredSongs[0];
