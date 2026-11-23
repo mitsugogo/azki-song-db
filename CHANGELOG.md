@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.51.2](https://github.com/mitsugogo/azki-song-db/compare/v2.51.1...v2.51.2) (2026-11-23)
+
+### Bug Fixes
+
+* watchページのメタデータ取得を堅牢化 ([67cde74](https://github.com/mitsugogo/azki-song-db/commit/67cde74a67c78e60b857c50f464b2bf6f4d672a8))
+
 ## [2.51.1](https://github.com/mitsugogo/azki-song-db/compare/v2.51.0...v2.51.1) (2026-11-21)
 
 ### Bug Fixes
