@@ -469,6 +469,59 @@ const loadGsiMunicipalityNames = () => {
   return municipalityNamesPromise;
 };
 
+/**
+ * 国土地理院の逆ジオコーダで市区町村コードを取得する。
+ * 日本国外や海上の地点では null を返し、通信やHTTPのエラーは例外にする。
+ */
+export async function lookupGsiMunicipalityCode(
+  location: Pick<SeichiMapLocation, "latitude" | "longitude">,
+  options: { signal?: AbortSignal } = {},
+): Promise<string | null> {
+  const params = new URLSearchParams({
+    lat: String(location.latitude),
+    lon: String(location.longitude),
+  });
+  const response = await fetch(
+    `${GSI_REVERSE_GEOCODING_URL}?${params.toString()}`,
+    { cache: "no-store", signal: options.signal },
+  );
+  if (!response.ok) {
+    throw new Error(`GSI reverse geocoding failed: ${response.status}`);
+  }
+  const payload = (await response.json()) as GsiReverseGeocodingResponse;
+  const municipalityCode = payload.results?.muniCd?.trim();
+  return municipalityCode ? municipalityCode : null;
+}
+
+export type SeichiMapLocationNameParts = {
+  /** NFKC 正規化した地点名 */
+  name: string;
+  /** 末尾の（…）ラベルを除いた地点名 */
+  baseName: string;
+  /** 末尾の（…）ラベル。無ければ空文字 */
+  label: string;
+};
+
+export const normalizeSeichiMapText = (value: string) =>
+  value.normalize("NFKC").replace(/\s+/g, " ").trim();
+
+const NORMALIZED_TRAILING_LABEL_PATTERN = /\s*\(([^()]+)\)\s*$/u;
+
+export function splitSeichiMapLocationName(
+  value: string,
+): SeichiMapLocationNameParts {
+  const name = normalizeSeichiMapText(value);
+  const match = name.match(NORMALIZED_TRAILING_LABEL_PATTERN);
+  if (!match || match.index === undefined || match.index === 0) {
+    return { name, baseName: name, label: "" };
+  }
+  return {
+    name,
+    baseName: name.slice(0, match.index).trim(),
+    label: match[1].trim(),
+  };
+}
+
 export function loadSeichiMapAdministrativeArea(
   location: Pick<SeichiMapLocation, "latitude" | "longitude">,
 ): Promise<string | null> {
@@ -477,18 +530,7 @@ export function loadSeichiMapAdministrativeArea(
   if (cached) return cached;
 
   const request = (async () => {
-    const params = new URLSearchParams({
-      lat: String(location.latitude),
-      lon: String(location.longitude),
-    });
-    const response = await fetch(
-      `${GSI_REVERSE_GEOCODING_URL}?${params.toString()}`,
-      { cache: "no-store" },
-    );
-    if (!response.ok) return null;
-
-    const payload = (await response.json()) as GsiReverseGeocodingResponse;
-    const municipalityCode = payload.results?.muniCd;
+    const municipalityCode = await lookupGsiMunicipalityCode(location);
     if (!municipalityCode) return null;
     const municipalities = await loadGsiMunicipalityNames();
     return municipalities.get(String(Number(municipalityCode))) ?? null;

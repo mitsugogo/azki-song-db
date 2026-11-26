@@ -2,11 +2,14 @@
 
 import { ActionIcon, Badge, Button, Group, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { FiBarChart2, FiSettings, FiShare2 } from "react-icons/fi";
 import { Link } from "@/i18n/navigation";
 
 type Props = {
   isSharedView: boolean;
+  /** レベル・称号を表示するプレイヤーカード。共有マップでは持ち主のもの */
+  playerCard?: ReactNode;
   onOpenSettings: () => void;
   onOpenShare: () => void;
   showNicknamePrompt?: boolean;
@@ -36,6 +39,7 @@ export const shouldShowNicknameRegistrationPrompt = ({
 
 export function SeichiMapHeaderActions({
   isSharedView,
+  playerCard,
   onOpenSettings,
   onOpenShare,
   showNicknamePrompt = false,
@@ -44,7 +48,8 @@ export function SeichiMapHeaderActions({
   const t = useTranslations("SeichiMapComplete");
 
   return (
-    <Group gap="xs" wrap="nowrap">
+    <Group gap="xs" wrap="wrap" justify="flex-end">
+      {playerCard ?? null}
       {userCount !== null ? (
         <Badge variant="light" color="gray" size="sm">
           {t("usage.userCount", { count: userCount })}

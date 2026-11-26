@@ -5,7 +5,9 @@ const {
   loadVisitorRankingMock,
   loadAdministrativeAreaMock,
   parseSeichiMapKmlMock,
+  loadRankingBadgesMock,
 } = vi.hoisted(() => ({
+  loadRankingBadgesMock: vi.fn(),
   loadLocationRankingMock: vi.fn(),
   loadVisitorRankingMock: vi.fn(),
   loadAdministrativeAreaMock: vi.fn(),
@@ -31,6 +33,10 @@ vi.mock("@/app/lib/seichiMapVisitedSheet", () => ({
   loadSeichiMapVisitorRanking: loadVisitorRankingMock,
 }));
 
+vi.mock("@/app/lib/server/seichiMapAchievements", () => ({
+  loadSeichiMapRankingBadges: loadRankingBadgesMock,
+}));
+
 vi.mock("@/app/lib/server/seichiMapIdentityRegistry", () => ({
   loadSeichiMapIdentityRegistry: vi.fn(),
 }));
@@ -38,6 +44,21 @@ vi.mock("@/app/lib/server/seichiMapIdentityRegistry", () => ({
 import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
 
 import { GET } from "../route";
+
+const badge = {
+  level: 7,
+  points: 540,
+  title: {
+    achievementId: "rail",
+    name: { ja: "鉄分補給", en: "Iron Supplement" },
+    metric: "LOCATION_COUNT",
+    level: 6,
+    thresholdType: "PERCENT",
+    thresholdValue: 100,
+    rarity: "UR",
+    holderRate: 0.01,
+  },
+};
 
 describe("seichi-map ranking route", () => {
   beforeEach(() => {
@@ -54,9 +75,12 @@ describe("seichi-map ranking route", () => {
       { locationId: "aaaaaaaaaaaaaaaa", uniqueVisitorCount: 2 },
     ]);
     loadVisitorRankingMock.mockResolvedValue([
-      { nickname: "開拓者A", visitCount: 8 },
-      { nickname: null, visitCount: 5 },
+      { userId: "user-secret-a", nickname: "開拓者A", visitCount: 8 },
+      { userId: "user-secret-b", nickname: null, visitCount: 5 },
     ]);
+    loadRankingBadgesMock.mockResolvedValue(
+      new Map([["user-secret-a", badge]]),
+    );
     loadAdministrativeAreaMock.mockImplementation(
       ({ latitude }: { latitude: number }) =>
         Promise.resolve(latitude === 35 ? "千葉県千葉市" : "千葉県習志野市"),
@@ -97,17 +121,39 @@ describe("seichi-map ranking route", () => {
         },
       ],
       visitors: [
-        { nickname: "開拓者A", visitCount: 8 },
-        { nickname: null, visitCount: 5 },
+        { nickname: "開拓者A", visitCount: 8, achievement: badge },
+        { nickname: null, visitCount: 5, achievement: null },
       ],
     });
+    expect(loadRankingBadgesMock).toHaveBeenCalledWith([
+      "user-secret-a",
+      "user-secret-b",
+    ]);
     expect(JSON.stringify(data)).not.toContain("userId");
+    expect(JSON.stringify(data)).not.toContain("user-secret");
     expect(JSON.stringify(data)).not.toContain("shareId");
     expect(JSON.stringify(data)).not.toContain("cccccccccccccccc");
     expect(loadVisitorRankingMock).toHaveBeenCalledWith([
       "aaaaaaaaaaaaaaaa",
       "bbbbbbbbbbbbbbbb",
     ]);
+  });
+
+  it("バッジの集計に失敗してもランキングは返す", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    loadRankingBadgesMock.mockRejectedValue(new Error("table missing"));
+
+    const response = await GET();
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.visitors).toEqual([
+      { nickname: "開拓者A", visitCount: 8, achievement: null },
+      { nickname: null, visitCount: 5, achievement: null },
+    ]);
+    consoleError.mockRestore();
   });
 
   it("DBマッピングを地点一覧と同じようにランキングにも使う", async () => {

@@ -8,10 +8,13 @@ import {
   loadSeichiMapUserCount,
   type SeichiMapLocationVisitorSummary,
 } from "@/app/lib/seichiMapVisitedSheet";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
+import { syncSeichiMapAchievementsIfChanged } from "@/app/lib/server/seichiMapAchievements";
 
 export const dynamic = "force-dynamic";
+// レスポンス後のバッジ判定用の同期（after）もこの上限で打ち切られる。
+export const maxDuration = 60;
 
 export async function GET() {
   try {
@@ -46,6 +49,19 @@ export async function GET() {
 
     const kml = await response.text();
     const items = parseSeichiMapKml(kml, registry.identities);
+
+    // マップが編集されていたら、レスポンス後にバッジ判定用の地点を同期する。
+    after(async () => {
+      try {
+        await syncSeichiMapAchievementsIfChanged({
+          kml,
+          registry,
+          locations: items,
+        });
+      } catch (error) {
+        console.error("Failed to sync seichi map achievements", error);
+      }
+    });
 
     const headers = new Headers({ "Cache-Control": "no-store" });
     if (userCount !== null) {

@@ -1773,6 +1773,10 @@
       "shareSaveFailed": "Failed to save the share URL",
       "shareDeleteFailed": "Failed to stop publishing",
       "shareCopyFailed": "Failed to copy the share URL"
+    },
+    "achievements": {
+      "open": "Open badges",
+      "openOf": "Open {name}'s badges"
     }
   },
   "SeichiMapRanking": {
@@ -2655,6 +2659,76 @@
         "title": "Seichi Map",
         "description": "Explore places connected with her activities on a map."
       }
+    }
+  },
+  "SeichiMapAchievements": {
+    "title": "Seichi Map Badges",
+    "notReady": "Badges are being prepared. Please check back later.",
+    "preparing": "Coming soon",
+    "progressLabel": "Progress to the next grade",
+    "achievedAt": "Earned on {date}",
+    "requiredCount": "Earned at {count}",
+    "progress": {
+      "locations": "{count} / {total} locations",
+      "prefectures": "{count} / {total} prefectures"
+    },
+    "tier": {
+      "locations": "{count, plural, one {# spot} other {# spots}}",
+      "prefectures": "{count, plural, one {# prefecture} other {# prefectures}}",
+      "percent": "{value}%",
+      "complete": "Complete"
+    },
+    "toast": {
+      "unlockedTitle": "Badge earned",
+      "item": "[{rarity}] {name} ({tier})",
+      "more": "{count} more badges earned",
+      "summaryTitle": "Badges earned",
+      "summary": "You earned {count} badges from your past visits. Open the badge button at the top right to see them."
+    },
+    "errors": {
+      "loadFailed": "Could not load badges.",
+      "titleFailed": "Could not change your title."
+    },
+    "titleOf": "{name}'s badges",
+    "holderRate": "{rate} of players",
+    "noTitle": "No title",
+    "points": "{points} pt",
+    "earnedCount": "{earned}/{total} earned",
+    "levelProgress": "Level {level} ({current}/{span} pt to next level)",
+    "levelDetail": "Lv.{level} · {points} pt · {remaining} pt to next level",
+    "rarityCount": "{rarity} earned",
+    "equipped": "Equipped as title",
+    "equipHint": "Click to equip as title",
+    "titleSelectedHint": "Click an earned grade to change your title. Click the equipped one again to go back to automatic.",
+    "titleAutoHint": "Your rarest grade is shown as your title automatically. Click an earned grade to pin it.",
+    "resetTitle": "Use automatic"
+  },
+  "SeichiMapAchievementAdmin": {
+    "title": "Badge sync",
+    "description": "Rebuilds badge target locations and prefectures from the latest map and re-evaluates every user's badges. Earned badges are never removed.",
+    "preview": "Check target locations",
+    "sync": "Sync and re-evaluate",
+    "syncing": "Syncing… (prefecture lookup can take about a minute)",
+    "summary": "KML locations: {locationCount} / Prefecture not resolved: {geocodePendingCount}",
+    "lastSynced": "Last synced: {date}",
+    "notSynced": "Not synced yet",
+    "kmlChanged": "The map has changed since the last sync",
+    "kmlUnchanged": "No changes since the last sync",
+    "overlapWarning": "Some badges have so few locations that grades with the same count were merged automatically (numbers are grade levels).",
+    "denominators": "Target locations per badge",
+    "achievement": "Badge",
+    "denominator": "Targets",
+    "synced": "Synced ({locationCount} locations, {awardedCount} new grades awarded).",
+    "geocodePending": "{count} locations still have no prefecture. Please sync again.",
+    "errors": {
+      "forbidden": "Could not confirm admin permission. Check that you are signed in.",
+      "invalid_request": "The request is invalid.",
+      "conflict": "Another sync is running. Please try again later.",
+      "kml_unavailable": "Could not fetch the latest KML. Please try again.",
+      "invalid_kml": "The KML has no valid locations or contains invalid or duplicate locations. Nothing was synced.",
+      "invalid_master": "The badge master data is invalid.",
+      "storage_failed": "Failed to read from or write to the database.",
+      "request_failed": "The request failed or its result could not be confirmed."
     }
   }
 }

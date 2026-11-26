@@ -1768,6 +1768,10 @@
       "shareSaveFailed": "共有URLの保存に失敗しました",
       "shareDeleteFailed": "公開中止に失敗しました",
       "shareCopyFailed": "共有URLのコピーに失敗しました"
+    },
+    "achievements": {
+      "open": "バッジ一覧を開く",
+      "openOf": "{name}さんのバッジ一覧を開く"
     }
   },
   "SeichiMapRanking": {
@@ -2657,6 +2661,76 @@
         "title": "聖地マップ",
         "description": "AZKiさんの活動に縁のある場所を、地図から探す。"
       }
+    }
+  },
+  "SeichiMapAchievements": {
+    "title": "聖地マップのバッジ",
+    "notReady": "バッジは準備中です。しばらくしてからもう一度開いてください。",
+    "preparing": "準備中",
+    "progressLabel": "次のグレードまでの進捗",
+    "achievedAt": "{date} に獲得",
+    "requiredCount": "{count}件で達成",
+    "progress": {
+      "locations": "{count} / {total} 地点",
+      "prefectures": "{count} / {total} 都道府県"
+    },
+    "tier": {
+      "locations": "{count}箇所",
+      "prefectures": "{count}都道府県",
+      "percent": "{value}%",
+      "complete": "全制覇"
+    },
+    "toast": {
+      "unlockedTitle": "バッジを獲得しました",
+      "item": "[{rarity}] {name}（{tier}）",
+      "more": "ほかに {count} 個のバッジを獲得しました",
+      "summaryTitle": "バッジを獲得しました",
+      "summary": "これまでの訪問で {count} 個のバッジを獲得しました。右上のバッジボタンから確認できます。"
+    },
+    "errors": {
+      "loadFailed": "バッジを取得できませんでした。",
+      "titleFailed": "称号を変更できませんでした。"
+    },
+    "titleOf": "{name}さんのバッジ",
+    "holderRate": "取得率 {rate}",
+    "noTitle": "称号なし",
+    "points": "{points} pt",
+    "earnedCount": "{earned}/{total} 獲得",
+    "levelProgress": "レベル {level}（次のレベルまで {current}/{span} pt）",
+    "levelDetail": "Lv.{level} · {points} pt · 次のレベルまで {remaining} pt",
+    "rarityCount": "{rarity} の獲得数",
+    "equipped": "称号に設定中",
+    "equipHint": "押すと称号に設定",
+    "titleSelectedHint": "獲得したグレードを押すと称号を変更できます。設定中の称号をもう一度押すと自動に戻ります。",
+    "titleAutoHint": "いちばんレアなグレードを称号として自動で表示しています。獲得したグレードを押すと固定できます。",
+    "resetTitle": "自動に戻す"
+  },
+  "SeichiMapAchievementAdmin": {
+    "title": "バッジ判定の同期",
+    "description": "最新の聖地マップから判定用の地点と都道府県を作り直し、全ユーザーのバッジを再判定します。獲得済みのバッジは取り消されません。",
+    "preview": "対象地点を確認",
+    "sync": "同期して再判定",
+    "syncing": "同期中…（都道府県の判定に1分ほどかかることがあります）",
+    "summary": "KMLの地点数: {locationCount} / 都道府県が未判定: {geocodePendingCount}",
+    "lastSynced": "前回の同期: {date}",
+    "notSynced": "まだ同期していません",
+    "kmlChanged": "前回の同期からマップが変わっています",
+    "kmlUnchanged": "前回の同期から変更はありません",
+    "overlapWarning": "地点が少ないため、同じ件数になるグレードを自動で1つにまとめているバッジがあります（数字はグレード）。",
+    "denominators": "各バッジの対象地点数",
+    "achievement": "バッジ",
+    "denominator": "対象数",
+    "synced": "同期しました（地点 {locationCount} 件、新たに付与したグレード {awardedCount} 件）。",
+    "geocodePending": "都道府県が未判定の地点が {count} 件残っています。もう一度同期してください。",
+    "errors": {
+      "forbidden": "管理者権限を確認できません。ログイン状態を確認してください。",
+      "invalid_request": "リクエストが不正です。",
+      "conflict": "別の同期が実行中です。しばらくしてから再試行してください。",
+      "kml_unavailable": "最新KMLを取得できませんでした。再試行してください。",
+      "invalid_kml": "KMLに有効な地点がないか、不正な地点・重複IDが含まれています。同期していません。",
+      "invalid_master": "バッジのマスタデータが不正です。",
+      "storage_failed": "DBの読み込みまたは保存に失敗しました。",
+      "request_failed": "通信に失敗したか、処理結果を確認できませんでした。"
     }
   }
 }

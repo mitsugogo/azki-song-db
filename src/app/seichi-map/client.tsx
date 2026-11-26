@@ -133,6 +133,13 @@ import {
 } from "./itinerary";
 import { buildDokoAzPostUrl } from "./xShare";
 import { SeichiMapIdentityAdmin } from "./SeichiMapIdentityAdmin";
+import { SeichiMapAchievementAdmin } from "./SeichiMapAchievementAdmin";
+import {
+  SeichiMapAchievementsModal,
+  useSeichiMapAchievements,
+} from "./SeichiMapAchievements";
+import { SeichiMapPlayerCard } from "./SeichiMapPlayerCard";
+import type { SeichiMapUnlockedAchievement } from "../types/seichiMapAchievements";
 
 const SeichiMapItinerary = dynamic(() =>
   import("./SeichiMapItinerary").then((module) => module.SeichiMapItinerary),
@@ -1499,6 +1506,25 @@ export default function SeichiMapCompleteClient({
     : pointLayer;
   const canEditVisits = isSignedIn && !isSharedView;
   const canViewVisitedList = canEditVisits || isSharedView;
+  const {
+    data: achievementData,
+    loading: achievementsLoading,
+    error: achievementsError,
+    refresh: refreshAchievements,
+    handleUnlocked: handleAchievementsUnlocked,
+    updateTitle: updateAchievementTitle,
+    titleUpdating: achievementTitleUpdating,
+  } = useSeichiMapAchievements({
+    // 共有マップでは持ち主の、自分のマップでは本人のバッジ状況を出す
+    enabled: canEditVisits || isSharedView,
+    shareId: isSharedView ? effectiveShareId : null,
+  });
+  const achievementProfile = achievementData?.profile ?? null;
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const handleOpenAchievements = useCallback(() => {
+    setShowAchievementsModal(true);
+    void refreshAchievements();
+  }, [refreshAchievements]);
   const sharedViewNickname = sharedViewInfo?.nickname ?? t("share.loadingUser");
   const registeredNickname =
     resolveSeichiMapNicknameDraft(profileInfo?.nickname, shareInfo?.nickname) ||
@@ -3132,7 +3158,9 @@ export default function SeichiMapCompleteClient({
 
       const payload = (await response.json().catch(() => ({}))) as {
         item?: VisitedItem;
+        unlockedAchievements?: SeichiMapUnlockedAchievement[];
       };
+      handleAchievementsUnlocked(payload.unlockedAchievements);
       if (isDateInputValue(visitedDate)) {
         try {
           window.sessionStorage.setItem(
@@ -3482,6 +3510,19 @@ export default function SeichiMapCompleteClient({
         </Box>
         <SeichiMapHeaderActions
           isSharedView={isSharedView}
+          playerCard={
+            achievementProfile ? (
+              <SeichiMapPlayerCard
+                profile={achievementProfile}
+                onClick={handleOpenAchievements}
+                label={
+                  isSharedView
+                    ? t("achievements.openOf", { name: sharedViewNickname })
+                    : t("achievements.open")
+                }
+              />
+            ) : null
+          }
           onOpenSettings={handleOpenSettings}
           onOpenShare={handleOpenShare}
           showNicknamePrompt={showNicknamePrompt}
@@ -3490,6 +3531,18 @@ export default function SeichiMapCompleteClient({
       </Group>
 
       <SeichiMapIdentityAdmin onReload={loadData} />
+      <SeichiMapAchievementAdmin />
+      <SeichiMapAchievementsModal
+        opened={showAchievementsModal}
+        onClose={() => setShowAchievementsModal(false)}
+        data={achievementData}
+        loading={achievementsLoading}
+        error={achievementsError}
+        editable={canEditVisits}
+        ownerName={isSharedView ? sharedViewNickname : null}
+        titleUpdating={achievementTitleUpdating}
+        onSelectTitle={(selection) => void updateAchievementTitle(selection)}
+      />
 
       {isSharedView ? (
         <Alert

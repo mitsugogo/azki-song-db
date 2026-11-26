@@ -103,9 +103,7 @@ const hashRegistry = (identities: SeichiMapLocationIdentity[]) =>
     )
     .digest("hex");
 
-async function generateCandidate() {
-  const current = await loadSeichiMapIdentityRegistry();
-  let kml: string;
+export async function fetchSeichiMapKmlText(): Promise<string> {
   try {
     const response = await fetch(AZKI_SEICHI_MAP_KML_URL, {
       cache: "no-store",
@@ -113,10 +111,20 @@ async function generateCandidate() {
       signal: AbortSignal.timeout(30_000),
     });
     if (!response.ok) throw new Error("KML fetch failed");
-    kml = await response.text();
+    return await response.text();
   } catch {
     throw new SeichiMapIdentityError("kml_unavailable", 502);
   }
+}
+
+/**
+ * KML が壊れていないかを確認し、現在の地点ID登録で解析した地点を返す。
+ * 不正な地点がパーサーで読み飛ばされたまま使われることを防ぐ。
+ */
+export function parseValidatedSeichiMapKml(
+  kml: string,
+  identities: readonly SeichiMapLocationIdentity[],
+) {
   if (!/<kml(?:\s[^>]*)?>[\s\S]*<\/kml>\s*$/i.test(kml.trim())) {
     throw new SeichiMapIdentityError("invalid_kml", 422);
   }
@@ -124,7 +132,7 @@ async function generateCandidate() {
   const markup = kml.replace(/<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->/g, "");
   const placemarkCount = [...markup.matchAll(/<Placemark(?:\s[^>]*)?>/g)]
     .length;
-  const previousLocations = parseSeichiMapKml(kml, current.identities);
+  const previousLocations = parseSeichiMapKml(kml, identities);
   if (
     previousLocations.length === 0 ||
     previousLocations.length !== placemarkCount ||
@@ -141,6 +149,13 @@ async function generateCandidate() {
     )
   )
     throw new SeichiMapIdentityError("invalid_kml", 422);
+  return previousLocations;
+}
+
+async function generateCandidate() {
+  const current = await loadSeichiMapIdentityRegistry();
+  const kml = await fetchSeichiMapKmlText();
+  const previousLocations = parseValidatedSeichiMapKml(kml, current.identities);
   const candidate = validateRegistry(
     updateSeichiMapLocationIdentityRegistry(kml, current.identities),
   );

@@ -19,6 +19,12 @@ import { type ReactNode, useEffect, useState } from "react";
 import { FiMapPin, FiUsers } from "react-icons/fi";
 import { SiGooglemaps } from "react-icons/si";
 import { pageClasses } from "../../theme";
+import { getSeichiMapLevelProgress } from "../../lib/seichiMapAchievementLevel";
+import type { SeichiMapRankingBadge } from "../../types/seichiMapAchievements";
+import {
+  SeichiMapLevelRing,
+  SeichiMapTitlePlate,
+} from "../SeichiMapPlayerCard";
 import { addCompetitionRanks } from "./ranking";
 
 type RankingResponse = {
@@ -30,7 +36,11 @@ type RankingResponse = {
     googleMapUrl: string;
     uniqueVisitorCount: number;
   }[];
-  visitors: { nickname: string | null; visitCount: number }[];
+  visitors: {
+    nickname: string | null;
+    visitCount: number;
+    achievement?: SeichiMapRankingBadge | null;
+  }[];
 };
 
 type VisitedResponse = {
@@ -125,6 +135,7 @@ export default function SeichiMapRankingClient() {
             rows={data.visitors.map((item) => ({
               name: item.nickname ?? t("anonymousVisitor"),
               count: item.visitCount,
+              badge: item.achievement ?? null,
             }))}
           />
         </SimpleGrid>
@@ -157,6 +168,7 @@ function RankingPanel({
     administrativeArea?: string | null;
     seichiMapUrl?: string;
     googleMapUrl?: string;
+    badge?: SeichiMapRankingBadge | null;
   }[];
   seichiMapButtonLabel?: string;
   googleMapButtonLabel?: string;
@@ -189,6 +201,14 @@ function RankingPanel({
                 <Text fw={700} c={row.rank <= 3 ? "pink" : "dimmed"} w={28}>
                   {row.rank}
                 </Text>
+                {row.badge ? (
+                  <span className="shrink-0">
+                    <SeichiMapLevelRing
+                      profile={getSeichiMapLevelProgress(row.badge.points)}
+                      size={36}
+                    />
+                  </span>
+                ) : null}
                 <Stack gap={2} className="min-w-0 flex-1">
                   <Group gap={6} wrap="nowrap" className="min-w-0">
                     <Text fw={600} lineClamp={1} className="min-w-0 flex-1">
@@ -205,6 +225,11 @@ function RankingPanel({
                       </Badge>
                     ) : null}
                   </Group>
+                  {row.badge?.title ? (
+                    <div className="min-w-0">
+                      <SeichiMapTitlePlate title={row.badge.title} />
+                    </div>
+                  ) : null}
                   {row.administrativeArea ||
                   row.seichiMapUrl ||
                   row.googleMapUrl ? (

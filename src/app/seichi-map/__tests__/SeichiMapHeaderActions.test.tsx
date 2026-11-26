@@ -133,6 +133,42 @@ describe("SeichiMapHeaderActions", () => {
     ).not.toHaveTextContent("profile.open");
   });
 
+  it("プレイヤーカードは先頭に置き、共有マップでも表示する", () => {
+    const card = <button type="button">player-card</button>;
+    const { container, rerender } = render(
+      <SeichiMapHeaderActions
+        isSharedView={false}
+        playerCard={card}
+        onOpenSettings={vi.fn()}
+        onOpenShare={vi.fn()}
+        userCount={null}
+      />,
+    );
+
+    expect(Array.from(container.firstElementChild?.children ?? [])).toEqual([
+      screen.getByRole("button", { name: "player-card" }),
+      screen.getByRole("link", { name: "ranking.open" }),
+      screen.getByRole("button", { name: "share.open" }),
+      screen.getByRole("button", { name: "profile.open" }),
+    ]);
+
+    rerender(
+      <SeichiMapHeaderActions
+        isSharedView
+        playerCard={card}
+        onOpenSettings={vi.fn()}
+        onOpenShare={vi.fn()}
+        userCount={null}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "player-card" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "share.open" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("共有マップでは編集操作を隠してランキングだけを残す", () => {
     render(
       <SeichiMapHeaderActions

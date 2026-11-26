@@ -9,9 +9,23 @@ import {
   validateSeichiMapVisitedBody,
   type UpsertSeichiMapVisitedBody,
 } from "@/app/lib/seichiMapVisitedSheet";
+import { evaluateSeichiMapUserAchievements } from "@/app/lib/server/seichiMapAchievements";
+import type { SeichiMapUnlockedAchievement } from "@/app/types/seichiMapAchievements";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+// バッジ判定の失敗で訪問ログの保存を失敗扱いにしない。
+const evaluateAchievements = async (
+  userId: string,
+): Promise<SeichiMapUnlockedAchievement[]> => {
+  try {
+    return await evaluateSeichiMapUserAchievements(userId, "LIVE");
+  } catch (error) {
+    console.error("Failed to evaluate seichi map achievements", error);
+    return [];
+  }
+};
 
 const requireUserId = async (): Promise<string | null> => {
   const session = await getOptionalServerSession();
@@ -55,8 +69,9 @@ export async function POST(request: Request) {
     }
 
     const item = await createSeichiMapVisited(userId, validated);
+    const unlockedAchievements = await evaluateAchievements(userId);
 
-    return NextResponse.json({ item }, { status: 201 });
+    return NextResponse.json({ item, unlockedAchievements }, { status: 201 });
   } catch (error) {
     console.error("Failed to add seichi map visited item", error);
     const handled = toSeichiMapVisitedWriteError(error);
@@ -93,7 +108,9 @@ export async function PUT(request: Request) {
       );
     }
 
-    return NextResponse.json({ item });
+    const unlockedAchievements = await evaluateAchievements(userId);
+
+    return NextResponse.json({ item, unlockedAchievements });
   } catch (error) {
     console.error("Failed to update seichi map visited item", error);
     const handled = toSeichiMapVisitedWriteError(error);

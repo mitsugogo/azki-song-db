@@ -1,0 +1,292 @@
+/* 称号のレア度表現。N < R < SR < SSR < UR の順に装飾を強くする。 */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4em;
+  padding: 0.05em 0.45em;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: #fff;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 35%);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tag[data-rarity="N"] {
+  background: #868e96;
+}
+
+.tag[data-rarity="R"] {
+  background: linear-gradient(135deg, #1c7ed6, #4dabf7);
+}
+
+.tag[data-rarity="SR"] {
+  background: linear-gradient(135deg, #7048e8, #cc5de8);
+}
+
+.tag[data-rarity="SSR"] {
+  position: relative;
+  overflow: hidden;
+  color: #5c3c00;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 55%);
+  background: linear-gradient(
+    135deg,
+    #f08c00,
+    #ffe066 45%,
+    #fab005 70%,
+    #e67700
+  );
+}
+
+.tag[data-rarity="UR"] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    100deg,
+    #ff6b6b,
+    #fcc419,
+    #51cf66,
+    #22b8cf,
+    #845ef7,
+    #f06595,
+    #ff6b6b
+  );
+  background-size: 300% 100%;
+  animation: rainbow 4s linear infinite;
+}
+
+/* SSR・URは光が走る */
+.tag[data-rarity="SSR"]::after,
+.tag[data-rarity="UR"]::after,
+.plate[data-rarity="SSR"]::after,
+.plate[data-rarity="UR"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgb(255 255 255 / 65%) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: shine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 称号プレート。枠線の色と光り方でレア度を示す。 */
+.plate {
+  --plate-border: #ced4da;
+  --plate-glow: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.2rem 0.6rem 0.2rem 0.3rem;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--mantine-color-body), var(--mantine-color-body))
+      padding-box,
+    var(--plate-border) border-box;
+  box-shadow: 0 0 10px var(--plate-glow);
+  color: var(--mantine-color-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.plate[data-rarity="R"] {
+  --plate-border: linear-gradient(135deg, #1c7ed6, #74c0fc);
+}
+
+.plate[data-rarity="SR"] {
+  --plate-border: linear-gradient(135deg, #7048e8, #e599f7);
+  --plate-glow: rgb(151 117 250 / 30%);
+}
+
+.plate[data-rarity="SSR"] {
+  --plate-border: linear-gradient(135deg, #e67700, #ffe066, #f08c00);
+  --plate-glow: rgb(250 176 5 / 45%);
+}
+
+.plate[data-rarity="UR"] {
+  --plate-border: linear-gradient(
+    100deg,
+    #ff6b6b,
+    #fcc419,
+    #51cf66,
+    #22b8cf,
+    #845ef7,
+    #f06595
+  );
+  --plate-glow: rgb(240 101 149 / 45%);
+}
+
+.plateName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plateTier {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ヘッダーのプレイヤーカード */
+.card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: min(100%, 22rem);
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 999px;
+  background: var(--mantine-color-body);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: var(--mantine-color-pink-4);
+  box-shadow: 0 2px 10px rgb(230 73 128 / 18%);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--mantine-color-pink-5);
+  outline-offset: 2px;
+}
+
+.cardBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--mantine-color-dimmed);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.points {
+  color: var(--mantine-color-pink-6);
+  font-variant-numeric: tabular-nums;
+}
+
+.levelNumber {
+  font-size: 0.95rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* 獲得済みグレードのバッジ。レア度の色で塗り、未獲得は枠だけにする。 */
+.tierChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem 0.15rem 0.2rem;
+  overflow: hidden;
+  border: 1px dashed var(--mantine-color-default-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mantine-color-dimmed);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.tierChip[data-achieved="true"] {
+  border-style: solid;
+  color: var(--mantine-color-text);
+}
+
+.tierChip[data-achieved="false"] .tag {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.tierChip[data-achieved="true"][data-rarity="SSR"] {
+  border-color: #fab005;
+  box-shadow: 0 0 6px rgb(250 176 5 / 40%);
+}
+
+.tierChip[data-achieved="true"][data-rarity="UR"] {
+  border-color: #f06595;
+  box-shadow: 0 0 8px rgb(240 101 149 / 45%);
+}
+
+.tierChip[data-selectable="true"] {
+  cursor: pointer;
+}
+
+.tierChip[data-selectable="true"]:hover,
+.tierChip[data-selectable="true"]:focus-visible {
+  border-color: var(--mantine-color-pink-5);
+}
+
+.tierChip[data-equipped="true"] {
+  outline: 2px solid var(--mantine-color-pink-5);
+  outline-offset: 1px;
+}
+
+.rarityCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rainbow {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+@keyframes shine {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag[data-rarity="UR"],
+  .tag[data-rarity="SSR"]::after,
+  .tag[data-rarity="UR"]::after,
+  .plate[data-rarity="SSR"]::after,
+  .plate[data-rarity="UR"]::after {
+    animation: none;
+  }
+}

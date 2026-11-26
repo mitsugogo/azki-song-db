@@ -1,5 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { afterMock, syncIfChangedMock } = vi.hoisted(() => ({
+  afterMock: vi.fn(),
+  syncIfChangedMock: vi.fn(),
+}));
+
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: afterMock,
+}));
+
+vi.mock("@/app/lib/server/seichiMapAchievements", () => ({
+  syncSeichiMapAchievementsIfChanged: syncIfChangedMock,
+}));
+
 vi.mock("@/app/lib/seichiMap", () => ({
   AZKI_SEICHI_MAP_KML_URL: "https://example.com/seichi-map.kml",
   parseSeichiMapKml: vi.fn(),
@@ -75,6 +89,34 @@ describe("GET /api/seichi-map/locations", () => {
         singleVisitorNickname: "開拓者A",
       }),
     ]);
+  });
+
+  it("レスポンス後にバッジ判定用の地点同期を予約する", async () => {
+    syncIfChangedMock.mockResolvedValue(null);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(afterMock).toHaveBeenCalledTimes(1);
+    expect(syncIfChangedMock).not.toHaveBeenCalled();
+    await afterMock.mock.calls[0][0]();
+    expect(syncIfChangedMock).toHaveBeenCalledWith({
+      kml: "<kml />",
+      registry: { identities: [], version: 1, updatedAt: null },
+      locations: [expect.objectContaining({ id: "aaaaaaaaaaaaaaaa" })],
+    });
+  });
+
+  it("予約した同期が失敗しても例外を外に出さない", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    syncIfChangedMock.mockRejectedValue(new Error("sync failed"));
+
+    await GET();
+
+    await expect(afterMock.mock.calls[0][0]()).resolves.toBeUndefined();
+    consoleError.mockRestore();
   });
 
   it("DBマッピングの読込失敗時は古いJSONへ戻さず取得エラーにする", async () => {
