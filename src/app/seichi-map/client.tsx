@@ -793,13 +793,10 @@ const styleInfoWindowButton = (
   element.style.borderRadius = "6px";
   element.style.boxSizing = "border-box";
   element.style.display = "inline-flex";
-  element.style.fontSize = "13px";
   element.style.fontWeight = "600";
   element.style.gap = "6px";
-  element.style.height = "32px";
   element.style.justifyContent = "center";
   element.style.lineHeight = "1";
-  element.style.padding = "0 12px";
   element.style.textDecoration = "none";
   element.style.transition =
     "background-color 120ms ease, border-color 120ms ease";
@@ -827,6 +824,8 @@ const buildGoogleMapsSearchUrl = (location: LocationOption) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${location.latitude},${location.longitude}`,
   )}`;
+
+const DOKO_AZ_HASHTAG = "#どこAZ";
 
 /** X（旧 Twitter）のロゴ。ポップアップは DOM を直接組み立てるので、SVG も要素として作る。 */
 const createXLogoIconElement = (): SVGSVGElement => {
@@ -3022,11 +3021,10 @@ export default function SeichiMapCompleteClient({
         body.appendChild(card);
       });
 
-      // 主な操作（記録・旅程）を上の1行に、補助の操作（地図・投稿・詳細記録・削除）を下の文字リンクにまとめる
       const actions = document.createElement("div");
       actions.className = "seichi-map-popup__actions";
       const primaryRow = document.createElement("div");
-      primaryRow.className = "seichi-map-popup__primary";
+      primaryRow.className = "seichi-map-primary-actions";
       const secondaryRow = document.createElement("div");
       secondaryRow.className = "seichi-map-popup__secondary";
 
@@ -3037,9 +3035,8 @@ export default function SeichiMapCompleteClient({
           ? t("popup.editVisit")
           : t("popup.recordVisit");
         recordButton.style.cursor = "pointer";
-        recordButton.style.flex = "1 1 auto";
+        recordButton.style.flexGrow = "1";
         styleInfoWindowButton(recordButton, visitedItem ? "light" : "filled");
-        recordButton.style.height = "36px";
         recordButton.addEventListener("click", () => {
           if (visitedItem) {
             recordLocationVisit(location, visitedItem);
@@ -3054,6 +3051,7 @@ export default function SeichiMapCompleteClient({
           recordButton.style.borderRadius = "6px 0 0 6px";
           const detailsButton = document.createElement("button");
           detailsButton.type = "button";
+          detailsButton.className = "seichi-map-primary-actions__details";
           detailsButton.setAttribute(
             "aria-label",
             t("popup.recordWithDetails"),
@@ -3064,10 +3062,6 @@ export default function SeichiMapCompleteClient({
           detailsButton.style.borderRadius = "0 6px 6px 0";
           detailsButton.style.borderInlineStart =
             "1px solid rgba(255, 255, 255, 0.45)";
-          detailsButton.style.height = "36px";
-          detailsButton.style.padding = "0";
-          detailsButton.style.width = "36px";
-          detailsButton.style.flex = "0 0 auto";
           detailsButton.appendChild(createPencilIconElement());
           detailsButton.addEventListener("click", () => {
             recordLocationVisit(location);
@@ -3088,9 +3082,8 @@ export default function SeichiMapCompleteClient({
       itineraryButton.disabled = isInItinerary;
       itineraryButton.style.cursor = isInItinerary ? "default" : "pointer";
       itineraryButton.style.opacity = isInItinerary ? "0.65" : "1";
-      itineraryButton.style.flex = isSharedView ? "1 1 auto" : "0 0 auto";
+      if (isSharedView) itineraryButton.style.flexGrow = "1";
       styleInfoWindowButton(itineraryButton, "light", "cyan");
-      itineraryButton.style.height = "36px";
       itineraryButton.addEventListener("click", () => {
         addLocationToItinerary(location.id);
         itineraryButton.disabled = true;
@@ -3116,7 +3109,7 @@ export default function SeichiMapCompleteClient({
         "seichi-map-popup__link seichi-map-popup__link--icon";
       xPostLink.setAttribute("aria-label", t("popup.postDokoAz"));
       xPostLink.title = t("popup.postDokoAz");
-      xPostLink.appendChild(createXLogoIconElement());
+      xPostLink.append(createXLogoIconElement(), DOKO_AZ_HASHTAG);
       primaryRow.appendChild(xPostLink);
 
       if (canEditVisits && visitedItem) {
@@ -3808,28 +3801,27 @@ export default function SeichiMapCompleteClient({
     const visitedItem = getVisitedItemForLocation(location);
     const isInItinerary = itineraryLocationIds.has(location.id);
 
-    // 主な操作（記録・旅程）を上の1行に、補助の操作を下の文字リンクにまとめる（地図のポップアップと同じ構成）。
     // ボトムシート表示（lg 未満）の間は、地図のポップアップがシートの陰に入るので、行の下にも操作を出す。
     return (
       <Stack className="seichi-map-list-actions" gap={4} hiddenFrom="lg" p="xs">
-        <Group gap="xs" wrap="nowrap">
+        <div className="seichi-map-primary-actions">
           {!isSharedView ? (
             visitedItem ? (
               <Button
                 variant="light"
                 color="pink"
-                style={{ flex: 1 }}
+                style={{ flexGrow: 1 }}
                 onClick={() => recordLocationVisit(location, visitedItem)}
               >
                 {t("popup.editVisit")}
               </Button>
             ) : (
               // 「訪問を記録」（一発記録）と、日付・メモ付きで記録する鉛筆を1つのボタンのようにつなげる
-              <Button.Group style={{ flex: 1 }}>
+              <Button.Group style={{ flexGrow: 1 }}>
                 <Button
                   variant="filled"
                   color="pink"
-                  style={{ flex: 1 }}
+                  style={{ flexGrow: 1 }}
                   onClick={() => void quickRecordVisit(location)}
                 >
                   {t("popup.recordVisit")}
@@ -3837,7 +3829,7 @@ export default function SeichiMapCompleteClient({
                 <Button
                   variant="filled"
                   color="pink"
-                  px="xs"
+                  className="seichi-map-primary-actions__details"
                   aria-label={t("popup.recordWithDetails")}
                   title={t("popup.recordWithDetails")}
                   onClick={() => recordLocationVisit(location)}
@@ -3850,26 +3842,27 @@ export default function SeichiMapCompleteClient({
           <Button
             variant="light"
             color="cyan"
-            style={isSharedView ? { flex: 1 } : undefined}
+            style={isSharedView ? { flexGrow: 1 } : undefined}
             disabled={isInItinerary}
             onClick={() => addLocationToItinerary(location.id)}
           >
             {isInItinerary ? t("popup.inItinerary") : t("popup.addToItinerary")}
           </Button>
-          <ActionIcon
+          <Button
             component="a"
             href={buildDokoAzPostUrl(location.name)}
             target="_blank"
             rel="noopener noreferrer"
             variant="filled"
             color="dark"
-            size={30}
             aria-label={t("popup.postDokoAz")}
             title={t("popup.postDokoAz")}
+            leftSection={<FaXTwitter size={14} aria-hidden="true" />}
+            styles={{ section: { marginInlineEnd: 6 } }}
           >
-            <FaXTwitter size={14} aria-hidden="true" />
-          </ActionIcon>
-        </Group>
+            {DOKO_AZ_HASHTAG}
+          </Button>
+        </div>
         <Group gap="md" wrap="wrap" justify="flex-start">
           <Anchor
             href={buildGoogleMapsSearchUrl(location)}

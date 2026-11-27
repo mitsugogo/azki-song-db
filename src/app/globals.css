@@ -230,31 +230,36 @@ body.seichi-map-viewport-fullscreen-open {
   padding: 10px 16px 14px;
 }
 
-/* 主な操作（記録・旅程）は1行に並べ、記録を広く取る */
-.seichi-map-popup__primary {
+/* 収まらない場合は、訪問記録と鉛筆をひとまとまりにして折り返す */
+.seichi-map-primary-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.seichi-map-primary-actions > * {
+  flex-shrink: 0;
 }
 
 /* 「訪問を記録」と鉛筆（日付・メモ付き）を1つのボタンのようにつなげる */
 .seichi-map-popup__split {
   display: flex;
-  flex: 1 1 auto;
-  min-inline-size: 0;
+  flex-grow: 1;
 }
 
-.seichi-map-popup__split > button {
+:is(.seichi-map-popup, .seichi-map-list-actions)
+  .seichi-map-primary-actions
+  :is(button, a) {
+  block-size: 36px;
+  font-size: 13px;
+  padding-inline: 10px;
   white-space: nowrap;
 }
 
-.seichi-map-popup__split > button:first-child {
-  flex: 1 1 auto;
-}
-
-.seichi-map-popup__primary > button {
-  max-inline-size: 100%;
-  min-block-size: 36px;
-  white-space: nowrap;
+.seichi-map-primary-actions button.seichi-map-primary-actions__details {
+  flex-shrink: 0;
+  inline-size: 36px;
+  padding-inline: 0;
 }
 
 /* 補助の操作は、枠のない文字リンクにして主な操作と区別する */
@@ -286,17 +291,14 @@ body.seichi-map-viewport-fullscreen-open {
   text-decoration: underline;
 }
 
-/* X のアイコンだけのリンク。主な操作の行（記録・旅程の右）に、ボタンと同じ高さで置く。配色は watch ページの X 共有ボタン（filled / dark）と同じ */
+/* X のボタン（アイコン＋#どこAZ）。主な操作の行（記録・旅程の右）に、ボタンと同じ高さで置く。配色は watch ページの X 共有ボタン（filled / dark）と同じ */
 .seichi-map-popup .seichi-map-popup__link--icon {
   background: var(--mantine-color-dark-filled, #2e2e2e);
-  block-size: 36px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 6px;
   color: #fff;
-  flex: 0 0 auto;
-  inline-size: 36px;
+  gap: 6px;
   justify-content: center;
-  min-block-size: 36px;
 }
 
 .seichi-map-popup .seichi-map-popup__link--icon:hover {
@@ -311,7 +313,7 @@ body.seichi-map-viewport-fullscreen-open {
   opacity: 0.55;
 }
 
-/* 外部リンクの矢印は、アイコンだけのリンクには付けない（別タブで開くことは見れば分かる） */
+/* 外部リンクの矢印は、X のボタンには付けない（別タブで開くことは見れば分かる） */
 .seichi-map-popup a.seichi-map-popup__link.seichi-map-popup__link--icon::after {
   content: none;
 }
