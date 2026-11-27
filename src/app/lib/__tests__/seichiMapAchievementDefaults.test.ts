@@ -50,8 +50,9 @@ describe("seichi map achievement defaults", () => {
 
   it("migration の初期データが定義と一致する", () => {
     expect(migrationSql).toContain(toSeichiMapAchievementSeedSql());
+    // レア度は全グレードを毎回そろえ直すので、最新の調整 migration が現在の定義と一致する
     expect(
-      readMigration("20261128000000_seichi_map_achievement_rarity_rebalance"),
+      readMigration("20261129000000_seichi_map_achievement_rarity_adjust"),
     ).toContain(toSeichiMapAchievementRaritySeedSql());
   });
 
@@ -119,6 +120,31 @@ describe("seichi map achievement defaults", () => {
       "SR",
       "SR",
       "SSR",
+      "SSR",
+      "UR",
+    ]);
+  });
+
+  it("ベテランGuessrは 70箇所が SR、90箇所が SSR", () => {
+    const veteran = SEICHI_MAP_ACHIEVEMENT_DEFAULTS.find(
+      ({ id }) => id === "real-guess-veteran",
+    )!;
+    expect(veteran.tiers.map(({ rarity }) => rarity)).toEqual([
+      "R",
+      "SR",
+      "SSR",
+    ]);
+  });
+
+  it("コラボイベント参加証は全制覇だけが UR", () => {
+    const collab = SEICHI_MAP_ACHIEVEMENT_DEFAULTS.find(
+      ({ id }) => id === "collab-event",
+    )!;
+    expect(collab.tiers.map(({ rarity }) => rarity)).toEqual([
+      "N",
+      "R",
+      "R",
+      "SR",
       "SSR",
       "UR",
     ]);

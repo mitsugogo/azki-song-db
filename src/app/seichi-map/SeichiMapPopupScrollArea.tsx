@@ -28,7 +28,6 @@ export function SeichiMapPopupScrollArea({
       type="auto"
       scrollbars="y"
       scrollbarSize={6}
-      offsetScrollbars="y"
       overscrollBehavior="contain"
     >
       <div ref={bodyHostRef} />

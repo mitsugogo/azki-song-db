@@ -5,6 +5,7 @@ import jaMessages from "@/messages/ja.json";
 
 vi.mock("@mantine/core", () => {
   const Group = ({ children }: any) => <div>{children}</div>;
+  const Box = ({ children }: any) => <div>{children}</div>;
   const Badge = ({ children }: any) => <span>{children}</span>;
   const Tooltip = ({ children, label, opened }: any) => (
     <>
@@ -28,7 +29,7 @@ vi.mock("@mantine/core", () => {
     component: Component = "button",
     ...props
   }: any) => <Component {...props}>{children}</Component>;
-  return { ActionIcon, Badge, Button, Group, Tooltip };
+  return { ActionIcon, Badge, Box, Button, Group, Tooltip };
 });
 
 import {
@@ -89,7 +90,6 @@ describe("SeichiMapHeaderActions", () => {
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
         showNicknamePrompt
-        userCount={null}
       />,
     );
 
@@ -98,7 +98,7 @@ describe("SeichiMapHeaderActions", () => {
     );
   });
 
-  it("自分のマップではBadge、ランキング、共有、設定の順に表示する", () => {
+  it("自分のマップではランキング、共有、設定の順にアイコンだけで表示する", () => {
     const onOpenSettings = vi.fn();
     const onOpenShare = vi.fn();
     const { container } = render(
@@ -106,7 +106,6 @@ describe("SeichiMapHeaderActions", () => {
         isSharedView={false}
         onOpenSettings={onOpenSettings}
         onOpenShare={onOpenShare}
-        userCount={12}
       />,
     );
 
@@ -115,25 +114,24 @@ describe("SeichiMapHeaderActions", () => {
 
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
     expect(onOpenShare).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("usage.userCount")).toBeVisible();
     const rankingLink = screen.getByRole("link", { name: "ranking.open" });
     expect(rankingLink).toHaveAttribute("href", "/seichi-map/ranking");
     expect(Array.from(container.firstElementChild?.children ?? [])).toEqual([
-      screen.getByText("usage.userCount"),
       rankingLink,
       screen.getByRole("button", { name: "share.open" }),
       screen.getByRole("button", { name: "profile.open" }),
     ]);
-    expect(rankingLink).toHaveTextContent("ranking.open");
-    expect(
+    // 操作は名前（aria-label）だけで、文字は出さない
+    for (const control of [
+      rankingLink,
       screen.getByRole("button", { name: "share.open" }),
-    ).not.toHaveTextContent("share.open");
-    expect(
       screen.getByRole("button", { name: "profile.open" }),
-    ).not.toHaveTextContent("profile.open");
+    ]) {
+      expect(control).toHaveTextContent("");
+    }
   });
 
-  it("プレイヤーカードは先頭に置き、共有マップでも表示する", () => {
+  it("プレイヤーカードは lg 以上のヘッダーの先頭に置き、共有マップでも表示する", () => {
     const card = <button type="button">player-card</button>;
     const { container, rerender } = render(
       <SeichiMapHeaderActions
@@ -141,12 +139,12 @@ describe("SeichiMapHeaderActions", () => {
         playerCard={card}
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
-        userCount={null}
       />,
     );
 
+    // lg 以上でだけ見えるように Box で包んでいる。lg 未満は要約帯に出す
     expect(Array.from(container.firstElementChild?.children ?? [])).toEqual([
-      screen.getByRole("button", { name: "player-card" }),
+      screen.getByRole("button", { name: "player-card" }).parentElement,
       screen.getByRole("link", { name: "ranking.open" }),
       screen.getByRole("button", { name: "share.open" }),
       screen.getByRole("button", { name: "profile.open" }),
@@ -158,7 +156,6 @@ describe("SeichiMapHeaderActions", () => {
         playerCard={card}
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
-        userCount={null}
       />,
     );
     expect(
@@ -175,7 +172,6 @@ describe("SeichiMapHeaderActions", () => {
         isSharedView
         onOpenSettings={vi.fn()}
         onOpenShare={vi.fn()}
-        userCount={null}
       />,
     );
 

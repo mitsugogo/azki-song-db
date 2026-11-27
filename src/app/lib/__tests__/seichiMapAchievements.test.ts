@@ -40,6 +40,7 @@ import {
   backfillSeichiMapUserAchievements,
   computeSeichiMapAchievementSyncHash,
   evaluateSeichiMapUserAchievements,
+  loadSeichiMapAchievementTargetLocationIds,
   loadSeichiMapUserAchievementSummary,
   loadSeichiMapRankingBadges,
   loadSharedSeichiMapAchievementSummary,
@@ -223,6 +224,28 @@ describe("seichi map achievements server", () => {
     expect(db.seichiMapVisited.findMany).not.toHaveBeenCalled();
   });
 
+  describe("バッジの対象地点", () => {
+    it("達成条件の対象になっている地点の ID だけを返す", async () => {
+      expect(await loadSeichiMapAchievementTargetLocationIds("layer")).toEqual([
+        LOCATION_A,
+      ]);
+      expect(
+        (await loadSeichiMapAchievementTargetLocationIds("all"))?.sort(),
+      ).toEqual([LOCATION_A, LOCATION_B]);
+    });
+
+    it("存在しないバッジは null", async () => {
+      expect(
+        await loadSeichiMapAchievementTargetLocationIds("missing"),
+      ).toBeNull();
+    });
+
+    it("同期前は null", async () => {
+      db.seichiMapAchievementSyncState.findUnique.mockResolvedValue(null);
+      expect(await loadSeichiMapAchievementTargetLocationIds("all")).toBeNull();
+    });
+  });
+
   it("一覧では進捗と未通知の獲得分を返す", async () => {
     db.seichiMapVisited.findMany.mockResolvedValue([
       { locationId: LOCATION_B },
@@ -249,6 +272,7 @@ describe("seichi map achievements server", () => {
       id: "all",
       progressCount: 1,
       denominator: 2,
+      targetsAll: true,
       tiers: [
         { level: 1, requiredCount: 1, achievedAt: "2026-11-26T01:00:00.000Z" },
         { level: 2, requiredCount: 2, achievedAt: null },
@@ -258,6 +282,7 @@ describe("seichi map achievements server", () => {
       id: "layer",
       progressCount: 0,
       denominator: 1,
+      targetsAll: false,
     });
     expect(summary.unseen).toEqual([
       expect.objectContaining({

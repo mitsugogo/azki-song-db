@@ -1,13 +1,11 @@
 "use client";
 
 import {
+  ActionIcon,
   Alert,
-  Anchor,
-  Badge,
-  Button,
   Group,
   Loader,
-  Paper,
+  SegmentedControl,
   SimpleGrid,
   Stack,
   Text,
@@ -16,16 +14,10 @@ import {
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useState } from "react";
-import { FiMapPin, FiUsers } from "react-icons/fi";
-import { SiGooglemaps } from "react-icons/si";
+import { FiMap, FiMapPin, FiUsers } from "react-icons/fi";
 import { pageClasses } from "../../theme";
-import { getSeichiMapLevelProgress } from "../../lib/seichiMapAchievementLevel";
 import type { SeichiMapRankingBadge } from "../../types/seichiMapAchievements";
-import {
-  SeichiMapLevelRing,
-  SeichiMapTitlePlate,
-} from "../SeichiMapPlayerCard";
-import { addCompetitionRanks } from "./ranking";
+import { LocationRanking, VisitorRanking } from "./SeichiMapRankingLists";
 
 type RankingResponse = {
   locations: {
@@ -40,12 +32,15 @@ type RankingResponse = {
     nickname: string | null;
     visitCount: number;
     achievement?: SeichiMapRankingBadge | null;
+    isSelf?: boolean;
   }[];
 };
 
 type VisitedResponse = {
   items?: { locationId?: string | null }[];
 };
+
+type RankingTab = "visitors" | "locations";
 
 export default function SeichiMapRankingClient() {
   const t = useTranslations("SeichiMapRanking");
@@ -54,6 +49,7 @@ export default function SeichiMapRankingClient() {
     () => new Set(),
   );
   const [error, setError] = useState(false);
+  const [tab, setTab] = useState<RankingTab>("visitors");
 
   useEffect(() => {
     let cancelled = false;
@@ -92,203 +88,132 @@ export default function SeichiMapRankingClient() {
     };
   }, []);
 
+  const renderVisitors = (data: RankingResponse) => (
+    <Stack gap="xs">
+      <Text size="xs" c="dimmed">
+        {t("visitors.nicknameNotice")}
+      </Text>
+      <VisitorRanking
+        rows={data.visitors.map((item) => ({
+          name: item.nickname ?? t("anonymousVisitor"),
+          count: item.visitCount,
+          badge: item.achievement ?? null,
+          isSelf: item.isSelf === true,
+        }))}
+        unit={t("visitors.unit")}
+        empty={t("visitors.empty")}
+        showMoreLabel={t("showMore")}
+        formatSelfRank={(rank) => t("visitors.selfRank", { rank })}
+      />
+    </Stack>
+  );
+
+  const renderLocations = (data: RankingResponse) => (
+    <LocationRanking
+      rows={data.locations.map((item) => ({
+        name: item.name,
+        count: item.uniqueVisitorCount,
+        isVisited: visitedLocationIds.has(item.id),
+        administrativeArea: item.administrativeArea,
+        seichiMapUrl: item.seichiMapUrl,
+        googleMapUrl: item.googleMapUrl,
+      }))}
+      unit={t("locations.unit")}
+      empty={t("locations.empty")}
+      visitedLabel={t("locations.visited")}
+      seichiMapLabel={t("locations.openSeichiMap")}
+      googleMapLabel={t("locations.openGoogleMap")}
+      attribution={t("locations.attribution")}
+      showMoreLabel={t("showMore")}
+    />
+  );
+
   return (
     <>
-      <Stack gap="xs" mb="xl">
-        <h1 className={pageClasses.heading}>{t("title")}</h1>
-        <p className={pageClasses.description}>{t("description")}</p>
-      </Stack>
+      <Group justify="space-between" align="flex-start" wrap="nowrap" mb="md">
+        <Stack gap="xs" style={{ minWidth: 0 }}>
+          <h1 className={pageClasses.heading}>{t("title")}</h1>
+          <p className={`${pageClasses.description} hidden sm:block`}>
+            {t("description")}
+          </p>
+        </Stack>
+        <ActionIcon
+          component={Link}
+          href="/seichi-map"
+          hiddenFrom="sm"
+          variant="light"
+          color="pink"
+          size="lg"
+          className="shrink-0"
+          aria-label={t("backToMap")}
+        >
+          <FiMap size={18} />
+        </ActionIcon>
+      </Group>
 
       {error ? (
         <Alert color="red">{t("error")}</Alert>
       ) : !data ? (
         <Stack align="center" py="xl">
-          <Loader />
+          <Loader color="pink" />
           <Text c="dimmed">{t("loading")}</Text>
         </Stack>
       ) : (
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-          <RankingPanel
-            icon={<FiMapPin size={20} />}
-            title={t("locations.title")}
-            unit={t("locations.unit")}
-            empty={t("locations.empty")}
-            rows={data.locations.map((item) => ({
-              name: item.name,
-              count: item.uniqueVisitorCount,
-              isVisited: visitedLocationIds.has(item.id),
-              administrativeArea: item.administrativeArea,
-              seichiMapUrl: item.seichiMapUrl,
-              googleMapUrl: item.googleMapUrl,
-            }))}
-            visitedLabel={t("locations.visited")}
-            seichiMapButtonLabel={t("locations.openSeichiMap")}
-            googleMapButtonLabel={t("locations.openGoogleMap")}
-            attribution={t("locations.attribution")}
-          />
-          <RankingPanel
-            icon={<FiUsers size={20} />}
-            title={t("visitors.title")}
-            description={t("visitors.nicknameNotice")}
-            unit={t("visitors.unit")}
-            empty={t("visitors.empty")}
-            rows={data.visitors.map((item) => ({
-              name: item.nickname ?? t("anonymousVisitor"),
-              count: item.visitCount,
-              badge: item.achievement ?? null,
-            }))}
-          />
-        </SimpleGrid>
+        <>
+          <Stack gap="md" hiddenFrom="md">
+            <SegmentedControl
+              fullWidth
+              value={tab}
+              onChange={(value) =>
+                setTab(value === "locations" ? value : "visitors")
+              }
+              data={[
+                { label: t("tabs.visitors"), value: "visitors" },
+                { label: t("tabs.locations"), value: "locations" },
+              ]}
+              aria-label={t("title")}
+            />
+            {tab === "visitors" ? renderVisitors(data) : renderLocations(data)}
+          </Stack>
+
+          <SimpleGrid cols={2} spacing="xl" visibleFrom="md">
+            <RankingColumn
+              icon={<FiUsers size={20} />}
+              title={t("visitors.title")}
+            >
+              {renderVisitors(data)}
+            </RankingColumn>
+            <RankingColumn
+              icon={<FiMapPin size={20} />}
+              title={t("locations.title")}
+            >
+              {renderLocations(data)}
+            </RankingColumn>
+          </SimpleGrid>
+        </>
       )}
     </>
   );
 }
 
-function RankingPanel({
+function RankingColumn({
   icon,
   title,
-  description,
-  unit,
-  empty,
-  rows,
-  seichiMapButtonLabel,
-  googleMapButtonLabel,
-  visitedLabel,
-  attribution,
+  children,
 }: {
   icon: ReactNode;
   title: string;
-  description?: string;
-  unit: string;
-  empty: string;
-  rows: {
-    name: string;
-    count: number;
-    isVisited?: boolean;
-    administrativeArea?: string | null;
-    seichiMapUrl?: string;
-    googleMapUrl?: string;
-    badge?: SeichiMapRankingBadge | null;
-  }[];
-  seichiMapButtonLabel?: string;
-  googleMapButtonLabel?: string;
-  visitedLabel?: string;
-  attribution?: string;
+  children: ReactNode;
 }) {
   return (
-    <Paper withBorder radius="md" p="md">
-      <Stack gap="sm">
-        <Title order={2} size="h3" className="flex items-center gap-2">
-          {icon}
+    <Stack gap="sm">
+      <Group gap="xs" wrap="nowrap">
+        {icon}
+        <Title order={2} size="h3">
           {title}
         </Title>
-        {description ? (
-          <Text size="xs" c="dimmed" mt={-4}>
-            {description}
-          </Text>
-        ) : null}
-        {rows.length === 0 ? (
-          <Text c="dimmed" size="sm">
-            {empty}
-          </Text>
-        ) : (
-          <Stack gap={0}>
-            {addCompetitionRanks(rows).map((row, index) => (
-              <div
-                className="flex items-center gap-3 border-b border-gray-2 py-2 last:border-b-0 dark:border-dark-4"
-                key={`${row.rank}-${row.name}-${index}`}
-              >
-                <Text fw={700} c={row.rank <= 3 ? "pink" : "dimmed"} w={28}>
-                  {row.rank}
-                </Text>
-                {row.badge ? (
-                  <span className="shrink-0">
-                    <SeichiMapLevelRing
-                      profile={getSeichiMapLevelProgress(row.badge.points)}
-                      size={36}
-                    />
-                  </span>
-                ) : null}
-                <Stack gap={2} className="min-w-0 flex-1">
-                  <Group gap={6} wrap="nowrap" className="min-w-0">
-                    <Text fw={600} lineClamp={1} className="min-w-0 flex-1">
-                      {row.name}
-                    </Text>
-                    {row.isVisited && visitedLabel ? (
-                      <Badge
-                        color="green"
-                        variant="light"
-                        size="sm"
-                        className="shrink-0"
-                      >
-                        {visitedLabel}
-                      </Badge>
-                    ) : null}
-                  </Group>
-                  {row.badge?.title ? (
-                    <div className="min-w-0">
-                      <SeichiMapTitlePlate title={row.badge.title} />
-                    </div>
-                  ) : null}
-                  {row.administrativeArea ||
-                  row.seichiMapUrl ||
-                  row.googleMapUrl ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      {row.administrativeArea ? (
-                        <Text size="xs" c="dimmed">
-                          {row.administrativeArea}
-                        </Text>
-                      ) : null}
-                      {row.seichiMapUrl && seichiMapButtonLabel ? (
-                        <Button
-                          component={Link}
-                          href={row.seichiMapUrl}
-                          leftSection={<FiMapPin size={12} />}
-                          variant="light"
-                          color="gray"
-                          size="compact-xs"
-                          c="dimmed"
-                        >
-                          {seichiMapButtonLabel}
-                        </Button>
-                      ) : null}
-                      {row.googleMapUrl && googleMapButtonLabel ? (
-                        <Button
-                          component="a"
-                          href={row.googleMapUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          leftSection={<SiGooglemaps size={12} />}
-                          variant="light"
-                          color="gray"
-                          size="compact-xs"
-                          c="dimmed"
-                        >
-                          {googleMapButtonLabel}
-                        </Button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </Stack>
-                <Text size="sm" c="dimmed">
-                  {row.count.toLocaleString()} {unit}
-                </Text>
-              </div>
-            ))}
-          </Stack>
-        )}
-        {attribution ? (
-          <Anchor
-            href="https://maps.gsi.go.jp/help/termsofuse.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            size="xs"
-            c="dimmed"
-          >
-            {attribution}
-          </Anchor>
-        ) : null}
-      </Stack>
-    </Paper>
+      </Group>
+      {children}
+    </Stack>
   );
 }

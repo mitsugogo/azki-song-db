@@ -61,6 +61,8 @@ export type SeichiMapAchievementView = {
   metric: SeichiMapAchievementMetricName;
   progressCount: number;
   denominator: number;
+  /** 全地点が対象か。対象を絞り込めないので、地点での絞り込みを出さない */
+  targetsAll: boolean;
   tiers: SeichiMapAchievementTierView[];
 };
 

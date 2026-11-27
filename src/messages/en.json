@@ -1596,6 +1596,34 @@
     "ranking": {
       "open": "Rankings"
     },
+    "filter": {
+      "label": "Locations to show",
+      "all": "All",
+      "unvisited": "Not visited {count}",
+      "visited": "Visited {count}"
+    },
+    "quickRecord": {
+      "saved": "Visit recorded",
+      "undo": "Undo",
+      "addNote": "Add a note",
+      "rowLabel": "Mark {name} as visited"
+    },
+    "badgeFilter": {
+      "pick": "Filter by a badge’s locations…",
+      "clear": "Clear badge filter",
+      "loadFailed": "Could not load the target locations."
+    },
+    "sheet": {
+      "toggle": "Toggle panel"
+    },
+    "admin": {
+      "toggle": "Admin tools"
+    },
+    "view": {
+      "map": "Map",
+      "list": "List",
+      "backToMap": "Back to map"
+    },
     "usage": {
       "userCount": "{count} people using the map"
     },
@@ -1705,6 +1733,7 @@
       "addToItinerary": "Add to itinerary",
       "inItinerary": "Added to itinerary",
       "recordVisit": "Record visit",
+      "recordWithDetails": "Record with date & note",
       "editVisit": "Edit visit",
       "deleteVisited": "Delete visited status"
     },
@@ -1787,6 +1816,12 @@
     "loading": "Loading rankings...",
     "error": "Failed to load rankings.",
     "anonymousVisitor": "Passerby Pioneer (nickname private)",
+    "backToMap": "Back to map",
+    "showMore": "Show more",
+    "tabs": {
+      "visitors": "Pioneers",
+      "locations": "Locations"
+    },
     "locations": {
       "title": "Most Visited Locations",
       "unit": "people",
@@ -1800,6 +1835,7 @@
       "title": "Pioneers with Most Visits",
       "nicknameNotice": "Nicknames are displayed only for people who make them public in rankings.",
       "unit": "visits",
+      "selfRank": "You: #{rank}",
       "empty": "No visits have been recorded yet."
     }
   },
@@ -2688,6 +2724,19 @@
     "errors": {
       "loadFailed": "Could not load badges.",
       "titleFailed": "Could not change your title."
+    },
+    "filterMap": "Show on map",
+    "filterMapLabel": "Filter by locations for {name}",
+    "nextTargets": {
+      "title": "Closest badges",
+      "remainingLocations": "{count} more places",
+      "remainingPrefectures": "{count} more prefectures"
+    },
+    "filter": {
+      "label": "Badges to show",
+      "all": "All",
+      "earned": "Earned",
+      "unearned": "Not earned"
     },
     "titleOf": "{name}'s badges",
     "holderRate": "{rate} of players",

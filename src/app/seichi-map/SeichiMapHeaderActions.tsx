@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Badge, Button, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Group, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { FiBarChart2, FiSettings, FiShare2 } from "react-icons/fi";
@@ -8,12 +8,11 @@ import { Link } from "@/i18n/navigation";
 
 type Props = {
   isSharedView: boolean;
-  /** レベル・称号を表示するプレイヤーカード。共有マップでは持ち主のもの */
+  /** レベル・称号を表示するプレイヤーカード。共有マップでは持ち主のもの。lg 未満は見出しの下に全幅で出す */
   playerCard?: ReactNode;
   onOpenSettings: () => void;
   onOpenShare: () => void;
   showNicknamePrompt?: boolean;
-  userCount: number | null;
 };
 
 type NicknamePromptState = {
@@ -37,47 +36,49 @@ export const shouldShowNicknameRegistrationPrompt = ({
   !nickname &&
   !promptDismissed;
 
+/**
+ * 見出しの右側に置く操作。プレイヤーカード（lg 以上）と、無地のアイコンボタン3つ（ランキング・共有・設定）だけにして、
+ * 色と文字を減らす。利用者数は出典の行に置く（呼び出し側）。
+ */
 export function SeichiMapHeaderActions({
   isSharedView,
   playerCard,
   onOpenSettings,
   onOpenShare,
   showNicknamePrompt = false,
-  userCount,
 }: Props) {
   const t = useTranslations("SeichiMapComplete");
 
   return (
-    <Group gap="xs" wrap="wrap" justify="flex-end">
-      {playerCard ?? null}
-      {userCount !== null ? (
-        <Badge variant="light" color="gray" size="sm">
-          {t("usage.userCount", { count: userCount })}
-        </Badge>
+    <Group gap={4} wrap="nowrap" justify="flex-end" className="shrink-0">
+      {playerCard ? (
+        <Box visibleFrom="lg" mr="xs">
+          {playerCard}
+        </Box>
       ) : null}
       <Tooltip label={t("ranking.open")} withArrow>
-        <Button
+        <ActionIcon
           component={Link}
           href="/seichi-map/ranking"
-          variant="light"
+          variant="subtle"
           color="gray"
-          size="sm"
-          leftSection={<FiBarChart2 size={16} />}
+          size="lg"
+          aria-label={t("ranking.open")}
         >
-          {t("ranking.open")}
-        </Button>
+          <FiBarChart2 size={20} />
+        </ActionIcon>
       </Tooltip>
       {!isSharedView ? (
         <>
           <Tooltip label={t("share.open")} withArrow>
             <ActionIcon
-              variant="light"
-              color="pink"
+              variant="subtle"
+              color="gray"
               size="lg"
               aria-label={t("share.open")}
               onClick={onOpenShare}
             >
-              <FiShare2 size={18} />
+              <FiShare2 size={20} />
             </ActionIcon>
           </Tooltip>
           <Tooltip
@@ -87,13 +88,13 @@ export function SeichiMapHeaderActions({
             withArrow
           >
             <ActionIcon
-              variant="light"
-              color="pink"
+              variant="subtle"
+              color="gray"
               size="lg"
               aria-label={t("profile.open")}
               onClick={onOpenSettings}
             >
-              <FiSettings size={18} />
+              <FiSettings size={20} />
             </ActionIcon>
           </Tooltip>
         </>

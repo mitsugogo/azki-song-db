@@ -1,0 +1,59 @@
+/* 順位の列。数字もメダルも同じ幅に置き、名前の頭がそろうようにする */
+.rankSlot {
+  display: flex;
+  flex: 0 0 auto;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1〜3位のリングは少し大きいので、同じ幅の枠に入れて名前の頭をそろえる */
+.ringSlot {
+  display: flex;
+  flex: 0 0 auto;
+  width: 44px;
+  justify-content: center;
+}
+
+.rankNumber {
+  font-variant-numeric: tabular-nums;
+}
+
+.count {
+  flex: 0 0 auto;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ログイン中の自分の行。枠は付けず、うすい背景だけで示す */
+.selfRow {
+  margin-inline: calc(var(--mantine-spacing-xs) * -1);
+  padding-inline: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-md);
+  background: light-dark(
+    var(--mantine-color-pink-0),
+    color-mix(in srgb, var(--mantine-color-pink-9) 30%, transparent)
+  );
+}
+
+/* 自分の行が画面の外にあるときだけ出る、順位への案内。一覧の末尾で、画面の下に張り付く */
+.selfJump {
+  position: sticky;
+  bottom: var(--mantine-spacing-md);
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  padding-block: var(--mantine-spacing-xs);
+  pointer-events: none;
+}
+
+.selfJump > * {
+  pointer-events: auto;
+  box-shadow: var(--mantine-shadow-md);
+}

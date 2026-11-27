@@ -12,12 +12,14 @@ import {
   Paper,
   Progress,
   ScrollArea,
+  SegmentedControl,
   Stack,
   Text,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useLocale, useTranslations } from "next-intl";
-import { FiAward } from "react-icons/fi";
+import { FiAward, FiMapPin } from "react-icons/fi";
 import type {
   SeichiMapAchievementRarityName,
   SeichiMapAchievementsResponse,
@@ -37,6 +39,12 @@ import {
   SeichiMapRarityTag,
 } from "./SeichiMapPlayerCard";
 import classes from "./SeichiMapRarity.module.css";
+import {
+  filterSeichiMapAchievements,
+  pickNextSeichiMapTargets,
+  type SeichiMapAchievementFilter,
+  type SeichiMapNextTarget,
+} from "./achievementTargets";
 
 export {
   formatSeichiMapAchievementTier,
@@ -319,6 +327,7 @@ function AchievementCard({
   editable,
   titleUpdating,
   onSelectTitle,
+  onFilterMap,
 }: {
   achievement: SeichiMapAchievementView;
   equippedTitle: SeichiMapAchievementTitle | null | undefined;
@@ -326,6 +335,8 @@ function AchievementCard({
   editable: boolean;
   titleUpdating: boolean;
   onSelectTitle?: (selection: SeichiMapTitleSelection) => void;
+  /** 達成条件の対象地点で地図・一覧を絞り込む */
+  onFilterMap?: (achievement: SeichiMapAchievementView) => void;
 }) {
   const t = useTranslations("SeichiMapAchievements");
   const locale = useLocale();
@@ -383,6 +394,21 @@ function AchievementCard({
             aria-label={t("progressLabel")}
           />
         ) : null}
+        {!preparing && !achievement.targetsAll && onFilterMap ? (
+          <Button
+            size="compact-xs"
+            variant="subtle"
+            color="gray"
+            w="fit-content"
+            leftSection={<FiMapPin size={12} />}
+            aria-label={t("filterMapLabel", {
+              name: pickSeichiMapLocalizedText(achievement.name, locale),
+            })}
+            onClick={() => onFilterMap(achievement)}
+          >
+            {t("filterMap")}
+          </Button>
+        ) : null}
         <Group gap={6}>
           {achievement.tiers.map((tier) => {
             const equipped = isEquipped(
@@ -415,6 +441,53 @@ function AchievementCard({
   );
 }
 
+/** あと少しで獲得できるバッジ。次に何を狙えばよいかを最上部で示す */
+function NextTargets({ targets }: { targets: SeichiMapNextTarget[] }) {
+  const t = useTranslations("SeichiMapAchievements");
+  const locale = useLocale();
+  if (targets.length === 0) return null;
+
+  return (
+    <Stack gap="xs" aria-label={t("nextTargets.title")} role="region">
+      <Text fw={700} size="sm">
+        {t("nextTargets.title")}
+      </Text>
+      {targets.map(({ achievement, tier, remaining, ratio }) => (
+        <Paper key={achievement.id} withBorder radius="md" p="xs">
+          <Stack gap={4}>
+            <Group justify="space-between" wrap="nowrap" gap="xs">
+              <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+                <SeichiMapRarityTag rarity={tier.rarity} />
+                <Text size="sm" fw={600} lineClamp={1}>
+                  {pickSeichiMapLocalizedText(achievement.name, locale)}
+                  {" · "}
+                  {formatSeichiMapAchievementTier(t, tier, achievement.metric)}
+                </Text>
+              </Group>
+              <Text
+                size="xs"
+                c="pink"
+                fw={700}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {achievement.metric === "PREFECTURE_COUNT"
+                  ? t("nextTargets.remainingPrefectures", { count: remaining })
+                  : t("nextTargets.remainingLocations", { count: remaining })}
+              </Text>
+            </Group>
+            <Progress
+              value={ratio * 100}
+              size="sm"
+              color="pink"
+              aria-label={t("progressLabel")}
+            />
+          </Stack>
+        </Paper>
+      ))}
+    </Stack>
+  );
+}
+
 type ModalProps = {
   opened: boolean;
   onClose: () => void;
@@ -427,6 +500,8 @@ type ModalProps = {
   ownerName?: string | null;
   titleUpdating?: boolean;
   onSelectTitle?: (selection: SeichiMapTitleSelection) => void;
+  /** 渡すと、各バッジに「地図で絞り込む」を出す */
+  onFilterMap?: (achievement: SeichiMapAchievementView) => void;
 };
 
 export function SeichiMapAchievementsModal({
@@ -439,9 +514,15 @@ export function SeichiMapAchievementsModal({
   ownerName = null,
   titleUpdating = false,
   onSelectTitle,
+  onFilterMap,
 }: ModalProps) {
   const t = useTranslations("SeichiMapAchievements");
   const profile = data?.profile ?? null;
+  const isSmallScreen = useMediaQuery("(max-width: 48em)");
+  const [filter, setFilter] = useState<SeichiMapAchievementFilter>("all");
+  const items = data?.items ?? [];
+  // 次に狙えるバッジは自分のマップでだけ出す（共有マップでは持ち主の進捗を見るだけ）
+  const nextTargets = editable ? pickNextSeichiMapTargets(items, 3) : [];
 
   return (
     <Modal
@@ -449,6 +530,7 @@ export function SeichiMapAchievementsModal({
       onClose={onClose}
       title={ownerName ? t("titleOf", { name: ownerName }) : t("title")}
       size="lg"
+      fullScreen={Boolean(isSmallScreen)}
       scrollAreaComponent={ScrollArea.Autosize}
     >
       <Stack gap="sm">
@@ -490,18 +572,36 @@ export function SeichiMapAchievementsModal({
                 ) : null}
               </Group>
             ) : null}
+            <NextTargets targets={nextTargets} />
+            <SegmentedControl
+              size="xs"
+              fullWidth
+              value={filter}
+              onChange={(value) =>
+                setFilter(value as SeichiMapAchievementFilter)
+              }
+              aria-label={t("filter.label")}
+              data={[
+                { label: t("filter.all"), value: "all" },
+                { label: t("filter.earned"), value: "earned" },
+                { label: t("filter.unearned"), value: "unearned" },
+              ]}
+            />
             <Divider />
-            {data.items.map((achievement) => (
-              <AchievementCard
-                key={achievement.id}
-                achievement={achievement}
-                equippedTitle={profile.title}
-                titleSelected={profile.titleSelected}
-                editable={editable}
-                titleUpdating={titleUpdating}
-                onSelectTitle={onSelectTitle}
-              />
-            ))}
+            {filterSeichiMapAchievements(data.items, filter).map(
+              (achievement) => (
+                <AchievementCard
+                  key={achievement.id}
+                  achievement={achievement}
+                  equippedTitle={profile.title}
+                  titleSelected={profile.titleSelected}
+                  editable={editable}
+                  titleUpdating={titleUpdating}
+                  onSelectTitle={onSelectTitle}
+                  onFilterMap={onFilterMap}
+                />
+              ),
+            )}
           </>
         ) : null}
       </Stack>

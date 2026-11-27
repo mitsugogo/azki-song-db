@@ -97,7 +97,7 @@ const assertFixedPopupActions = async (page: Page) => {
 
   await expect(body).toBeVisible();
   await expect(actions).toBeVisible();
-  await expect(controls).toHaveCount(4);
+  await expect(controls).toHaveCount(5);
 
   const bodyMetrics = await body.evaluate((element) => ({
     clientHeight: element.clientHeight,
@@ -170,29 +170,31 @@ test.describe("Seichi map location popup", () => {
     await setupSeichiMapPopupMocks(page);
     await page.goto("/seichi-map");
 
-    const badge = page.getByText(/12人が利用中|12 people using the map/);
+    // 利用者数は出典の行に、操作はアイコンだけで見出しと同じ行に並ぶ
+    const badge = page
+      .getByText(/12人が利用中|12 people using the map/)
+      .filter({ visible: true });
     const ranking = page.getByRole("link", { name: /ランキング|Rankings/ });
     const share = page.getByRole("button", { name: /共有|Share/ });
     const settings = page.getByRole("button", { name: /設定|Settings/ });
 
     await expect(badge).toBeVisible();
-    await expect(ranking).toContainText(/ランキング|Rankings/);
+    await expect(ranking).toBeVisible();
+    await expect(ranking).toHaveText("");
     await expect(share).toHaveText("");
     await expect(settings).toHaveText("");
 
-    const [badgeBox, rankingBox, shareBox, settingsBox] = await Promise.all([
-      badge.boundingBox(),
+    const [rankingBox, shareBox, settingsBox] = await Promise.all([
       ranking.boundingBox(),
       share.boundingBox(),
       settings.boundingBox(),
     ]);
-    expect(badgeBox).not.toBeNull();
     expect(rankingBox).not.toBeNull();
     expect(shareBox).not.toBeNull();
     expect(settingsBox).not.toBeNull();
-    expect(badgeBox!.x).toBeLessThan(rankingBox!.x);
     expect(rankingBox!.x).toBeLessThan(shareBox!.x);
     expect(shareBox!.x).toBeLessThan(settingsBox!.x);
+    expect(Math.abs(rankingBox!.y - settingsBox!.y)).toBeLessThan(2);
   });
 
   test("switches the point layer and shows a public single visitor", async ({
@@ -326,12 +328,16 @@ test.describe("Seichi map location popup", () => {
       page.locator(".seichi-map-fullscreen-surface:visible").first(),
     ).toBeVisible({ timeout: 15_000 });
 
+    // 一覧はボトムシートの中にある。開いてから地点を選ぶ（選んだ後もシートは開いたまま）。
+    await page
+      .getByRole("button", { name: /シートを開閉|Toggle panel/ })
+      .click();
     await page.getByText("低解像度端末で確認する地点", { exact: true }).click();
 
     const listActions = page.locator(".seichi-map-list-actions");
     await expect(listActions).toHaveCount(1);
     await expect(listActions).toBeVisible();
-    await expect(listActions.locator("a, button")).toHaveCount(4);
+    await expect(listActions.locator("a, button")).toHaveCount(5);
     await expect(
       listActions.getByRole("link", { name: "Google Maps" }),
     ).toHaveAttribute("href", /google\.com\/maps\/search/);

@@ -58,9 +58,12 @@ const PERCENT_TIER_RARITIES: Record<
 const progressTiers = ({
   withFirst = true,
   nationwide = false,
+  finalRarity,
 }: {
   withFirst?: boolean;
   nationwide?: boolean;
+  /** 全制覇のレア度を上書きする（地域限定でも全制覇だけを UR にしたいバッジ用） */
+  finalRarity?: SeichiMapAchievementRarityName;
 } = {}): SeichiMapAchievementTierDefinition[] => {
   const rarities =
     PERCENT_TIER_RARITIES[nationwide ? "nationwide" : "regional"];
@@ -77,7 +80,7 @@ const progressTiers = ({
     ...[10, 25, 50, 75, 100].map((thresholdValue, index) => ({
       thresholdType: "PERCENT" as const,
       thresholdValue,
-      rarity: rarities[index],
+      rarity: index === 4 && finalRarity ? finalRarity : rarities[index],
     })),
   ];
   return tiers.map((tier, index) => ({ ...tier, level: index + 1 }));
@@ -125,7 +128,7 @@ const definitions: DefinitionInput[] = [
     metric: "LOCATION_COUNT",
     criteria: [],
     denominatorOverride: null,
-    tiers: count([50, "R"], [70, "R"], [90, "R"]),
+    tiers: count([50, "R"], [70, "SR"], [90, "SSR"]),
   },
   {
     id: "real-guess-pioneer",
@@ -412,7 +415,7 @@ const definitions: DefinitionInput[] = [
       },
     ],
     denominatorOverride: null,
-    tiers: progressTiers(),
+    tiers: progressTiers({ finalRarity: "UR" }),
   },
 ];
 

@@ -246,6 +246,21 @@ async function loadEvaluationState(): Promise<EvaluationState | null> {
   };
 }
 
+/**
+ * バッジの達成条件の対象になっている地点の ID。地図・一覧の絞り込みに使う。
+ * 同期前、またはバッジが無効・存在しない場合は null。
+ */
+export async function loadSeichiMapAchievementTargetLocationIds(
+  achievementId: string,
+): Promise<string[] | null> {
+  const state = await loadEvaluationState();
+  if (!state) return null;
+  const target = state.context.targets.find(
+    ({ master }) => master.id === achievementId,
+  );
+  return target ? [...target.locationIds] : null;
+}
+
 const tierKey = (achievementId: string, level: number) =>
   `${achievementId}\n${level}`;
 
@@ -682,6 +697,11 @@ async function buildAchievementSummary(
         evaluation.context.prefectureByLocationId,
       ),
       denominator: target.denominator,
+      // 全地点が対象のバッジは、地点を絞り込む意味がないので UI が絞り込みを出さない
+      targetsAll:
+        target.locationIds.size > 0 &&
+        target.locationIds.size ===
+          evaluation.context.prefectureByLocationId.size,
       // まとめたグレードは隠す。ただし獲得済みのものは取り消さずに表示する。
       tiers: achievement.tiers
         .filter(

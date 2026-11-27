@@ -2,7 +2,7 @@
 
 import { Group, RingProgress, Stack, Text, Tooltip } from "@mantine/core";
 import { useLocale, useTranslations } from "next-intl";
-import { FiAward } from "react-icons/fi";
+import { FiAward, FiChevronRight } from "react-icons/fi";
 import { SEICHI_MAP_RARITY_ORDER } from "../lib/seichiMapAchievementLevel";
 import type {
   SeichiMapAchievementProfile,
@@ -141,6 +141,11 @@ export function SeichiMapPlayerCard({
           </span>
         </span>
       </span>
+      <FiChevronRight
+        size={16}
+        className={classes.chevron}
+        aria-hidden="true"
+      />
     </button>
   );
 }

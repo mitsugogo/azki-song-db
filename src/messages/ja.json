@@ -1591,6 +1591,34 @@
     "ranking": {
       "open": "ランキング"
     },
+    "filter": {
+      "label": "表示する地点",
+      "all": "すべて",
+      "unvisited": "未訪問 {count}",
+      "visited": "訪問済 {count}"
+    },
+    "quickRecord": {
+      "saved": "訪問を記録しました",
+      "undo": "元に戻す",
+      "addNote": "メモを追加",
+      "rowLabel": "{name}を訪問済みにする"
+    },
+    "badgeFilter": {
+      "pick": "バッジの対象地点で絞り込む…",
+      "clear": "バッジの絞り込みを解除",
+      "loadFailed": "対象地点を取得できませんでした。"
+    },
+    "sheet": {
+      "toggle": "シートを開閉"
+    },
+    "admin": {
+      "toggle": "管理ツール"
+    },
+    "view": {
+      "map": "地図",
+      "list": "一覧",
+      "backToMap": "地図に戻る"
+    },
     "usage": {
       "userCount": "{count}人が利用中"
     },
@@ -1700,6 +1728,7 @@
       "addToItinerary": "旅程に追加",
       "inItinerary": "旅程に追加済み",
       "recordVisit": "訪問を記録",
+      "recordWithDetails": "日付・メモ付きで記録",
       "editVisit": "訪問を編集",
       "deleteVisited": "訪問済を削除"
     },
@@ -1782,6 +1811,12 @@
     "loading": "ランキングを読み込み中...",
     "error": "ランキングの取得に失敗しました。",
     "anonymousVisitor": "通りすがりの開拓者（ニックネーム非公開）",
+    "backToMap": "地図に戻る",
+    "showMore": "さらに表示",
+    "tabs": {
+      "visitors": "開拓者",
+      "locations": "場所"
+    },
     "locations": {
       "title": "訪問者が多い場所",
       "unit": "人",
@@ -1795,6 +1830,7 @@
       "title": "訪問数が多い開拓者",
       "nicknameNotice": "ニックネームをランキングに公開設定している方のみ表示しています",
       "unit": "件",
+      "selfRank": "あなた: {rank}位",
       "empty": "訪問記録はまだありません。"
     }
   },
@@ -2690,6 +2726,19 @@
     "errors": {
       "loadFailed": "バッジを取得できませんでした。",
       "titleFailed": "称号を変更できませんでした。"
+    },
+    "filterMap": "地図で絞り込む",
+    "filterMapLabel": "{name}の対象地点で絞り込む",
+    "nextTargets": {
+      "title": "次に狙えるバッジ",
+      "remainingLocations": "あと{count}箇所",
+      "remainingPrefectures": "あと{count}都道府県"
+    },
+    "filter": {
+      "label": "表示するバッジ",
+      "all": "すべて",
+      "earned": "獲得済み",
+      "unearned": "未獲得"
     },
     "titleOf": "{name}さんのバッジ",
     "holderRate": "取得率 {rate}",

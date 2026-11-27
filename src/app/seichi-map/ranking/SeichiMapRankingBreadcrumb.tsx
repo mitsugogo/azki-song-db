@@ -12,6 +12,7 @@ export default function SeichiMapRankingBreadcrumb() {
   return (
     <Breadcrumbs
       aria-label="Breadcrumb"
+      visibleFrom="sm"
       className={breadcrumbClasses.root}
       separator={<HiChevronRight className={breadcrumbClasses.separator} />}
     >

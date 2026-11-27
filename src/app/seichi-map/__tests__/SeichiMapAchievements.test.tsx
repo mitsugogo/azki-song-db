@@ -25,8 +25,13 @@ vi.mock("@mantine/core", () => {
   const Box = ({ children }: any) => <div>{children}</div>;
   return {
     Alert: ({ children }: any) => <div role="alert">{children}</div>,
-    Button: ({ children, onClick, disabled }: any) => (
-      <button type="button" onClick={onClick} disabled={disabled}>
+    Button: ({ children, onClick, disabled, ...props }: any) => (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={props["aria-label"]}
+      >
         {children}
       </button>
     ),
@@ -49,7 +54,26 @@ vi.mock("@mantine/core", () => {
       </div>
     ),
     ScrollArea: { Autosize: Box },
-    Stack: Box,
+    SegmentedControl: ({ data, value, onChange, ...props }: any) => (
+      <div role="radiogroup" aria-label={props["aria-label"]}>
+        {data.map((item: any) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={item.value === value}
+            key={item.value}
+            onClick={() => onChange(item.value)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    ),
+    Stack: ({ children, ...props }: any) => (
+      <div role={props.role} aria-label={props["aria-label"]}>
+        {children}
+      </div>
+    ),
     Text: ({ children }: any) => <p>{children}</p>,
     Tooltip: ({ children }: any) => children,
   };
@@ -116,6 +140,7 @@ const item = (
   metric: "LOCATION_COUNT",
   progressCount: 2,
   denominator: 10,
+  targetsAll: false,
   tiers: [
     {
       level: 1,
@@ -480,5 +505,133 @@ describe("SeichiMapAchievements", () => {
       />,
     );
     expect(screen.getByText("notReady")).toBeInTheDocument();
+  });
+
+  it("本人のバッジ一覧には、次に狙えるバッジを残りの件数つきで出す", () => {
+    render(
+      <SeichiMapAchievementsModal
+        opened
+        onClose={vi.fn()}
+        loading={false}
+        error={false}
+        editable
+        data={response({ items: [item()] })}
+      />,
+    );
+
+    const region = screen.getByRole("region", { name: "nextTargets.title" });
+    expect(region).toHaveTextContent("交通のお姉さん");
+    expect(region).toHaveTextContent("nextTargets.remainingLocations");
+  });
+
+  it("他人のバッジ一覧には、次に狙えるバッジを出さない", () => {
+    render(
+      <SeichiMapAchievementsModal
+        opened
+        onClose={vi.fn()}
+        loading={false}
+        error={false}
+        ownerName="開拓者A"
+        data={response({ items: [item()] })}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("region", { name: "nextTargets.title" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("獲得状況でバッジの一覧を絞り込める", () => {
+    render(
+      <SeichiMapAchievementsModal
+        opened
+        onClose={vi.fn()}
+        loading={false}
+        error={false}
+        data={response({
+          items: [
+            item(),
+            item({
+              id: "fresh",
+              name: { ja: "未獲得のバッジ", en: null },
+              description: null,
+              progressCount: 0,
+              tiers: [
+                {
+                  level: 1,
+                  thresholdType: "COUNT",
+                  thresholdValue: 5,
+                  rarity: "N",
+                  requiredCount: 5,
+                  achievedAt: null,
+                  holderRate: null,
+                },
+              ],
+            }),
+          ],
+        })}
+      />,
+    );
+
+    // 称号プレートにも名前が出るので、獲得済みバッジのカードだけにある説明文で見分ける
+    expect(screen.getByText("説明")).toBeInTheDocument();
+    expect(screen.getByText("未獲得のバッジ")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "filter.unearned" }));
+    expect(screen.queryByText("説明")).not.toBeInTheDocument();
+    expect(screen.getByText("未獲得のバッジ")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "filter.earned" }));
+    expect(screen.getByText("説明")).toBeInTheDocument();
+    expect(screen.queryByText("未獲得のバッジ")).not.toBeInTheDocument();
+  });
+
+  it("onFilterMap を渡すと、準備中でないバッジに「地図で絞り込む」を出す", () => {
+    const onFilterMap = vi.fn();
+    const target = item();
+    const preparing = item({
+      id: "empty",
+      name: { ja: "準備中のバッジ", en: null },
+      description: null,
+      progressCount: 0,
+      denominator: 0,
+    });
+    // 全地点が対象のバッジは絞り込む意味がないので、ボタンを出さない
+    const allLocations = item({
+      id: "all",
+      name: { ja: "全地点のバッジ", en: null },
+      targetsAll: true,
+    });
+    render(
+      <SeichiMapAchievementsModal
+        opened
+        onClose={vi.fn()}
+        loading={false}
+        error={false}
+        onFilterMap={onFilterMap}
+        data={response({ items: [target, preparing, allLocations] })}
+      />,
+    );
+
+    const buttons = screen.getAllByRole("button", { name: /filterMapLabel/ });
+    expect(buttons).toHaveLength(1);
+    fireEvent.click(buttons[0]);
+    expect(onFilterMap).toHaveBeenCalledWith(target);
+  });
+
+  it("onFilterMap が無ければ「地図で絞り込む」は出さない", () => {
+    render(
+      <SeichiMapAchievementsModal
+        opened
+        onClose={vi.fn()}
+        loading={false}
+        error={false}
+        data={response({ items: [item()] })}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /filterMapLabel/ }),
+    ).not.toBeInTheDocument();
   });
 });

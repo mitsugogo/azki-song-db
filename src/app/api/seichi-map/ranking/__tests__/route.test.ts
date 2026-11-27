@@ -6,7 +6,9 @@ const {
   loadAdministrativeAreaMock,
   parseSeichiMapKmlMock,
   loadRankingBadgesMock,
+  getSessionMock,
 } = vi.hoisted(() => ({
+  getSessionMock: vi.fn(),
   loadRankingBadgesMock: vi.fn(),
   loadLocationRankingMock: vi.fn(),
   loadVisitorRankingMock: vi.fn(),
@@ -37,6 +39,10 @@ vi.mock("@/app/lib/server/seichiMapAchievements", () => ({
   loadSeichiMapRankingBadges: loadRankingBadgesMock,
 }));
 
+vi.mock("@/app/lib/authSession", () => ({
+  getOptionalServerSession: getSessionMock,
+}));
+
 vi.mock("@/app/lib/server/seichiMapIdentityRegistry", () => ({
   loadSeichiMapIdentityRegistry: vi.fn(),
 }));
@@ -64,6 +70,7 @@ describe("seichi-map ranking route", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    getSessionMock.mockResolvedValue(null);
     vi.mocked(loadSeichiMapIdentityRegistry).mockResolvedValue({
       identities: [],
       version: 1,
@@ -121,8 +128,13 @@ describe("seichi-map ranking route", () => {
         },
       ],
       visitors: [
-        { nickname: "開拓者A", visitCount: 8, achievement: badge },
-        { nickname: null, visitCount: 5, achievement: null },
+        {
+          nickname: "開拓者A",
+          visitCount: 8,
+          achievement: badge,
+          isSelf: false,
+        },
+        { nickname: null, visitCount: 5, achievement: null, isSelf: false },
       ],
     });
     expect(loadRankingBadgesMock).toHaveBeenCalledWith([
@@ -150,10 +162,34 @@ describe("seichi-map ranking route", () => {
 
     expect(response.status).toBe(200);
     expect(data.visitors).toEqual([
-      { nickname: "開拓者A", visitCount: 8, achievement: null },
-      { nickname: null, visitCount: 5, achievement: null },
+      { nickname: "開拓者A", visitCount: 8, achievement: null, isSelf: false },
+      { nickname: null, visitCount: 5, achievement: null, isSelf: false },
     ]);
     consoleError.mockRestore();
+  });
+
+  it("ログイン中の自分の行にだけ isSelf を付け、識別子は返さない", async () => {
+    getSessionMock.mockResolvedValue({ user: { id: "user-secret-b" } });
+
+    const data = await (await GET()).json();
+
+    expect(
+      data.visitors.map((visitor: { isSelf: boolean }) => visitor.isSelf),
+    ).toEqual([false, true]);
+    expect(JSON.stringify(data)).not.toContain("user-secret");
+  });
+
+  it("セッションの取得に失敗してもランキングは返す", async () => {
+    getSessionMock.mockRejectedValue(new Error("auth down"));
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(
+      (await response.json()).visitors.every(
+        (visitor: { isSelf: boolean }) => !visitor.isSelf,
+      ),
+    ).toBe(true);
   });
 
   it("DBマッピングを地点一覧と同じようにランキングにも使う", async () => {

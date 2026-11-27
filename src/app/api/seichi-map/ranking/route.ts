@@ -9,6 +9,7 @@ import {
   loadSeichiMapVisitorRanking,
   SEICHI_MAP_RANKING_LIMIT,
 } from "@/app/lib/seichiMapVisitedSheet";
+import { getOptionalServerSession } from "@/app/lib/authSession";
 import { NextResponse } from "next/server";
 import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
 import { loadSeichiMapRankingBadges } from "@/app/lib/server/seichiMapAchievements";
@@ -105,6 +106,10 @@ export async function GET() {
     }));
 
     const badges = await badgesRequest;
+    // 自分の行を強調するための印。セッションが取れなくてもランキングは返す。
+    const selfUserId = await getOptionalServerSession()
+      .then((session) => session?.user?.id ?? null)
+      .catch(() => null);
 
     return NextResponse.json(
       {
@@ -114,6 +119,7 @@ export async function GET() {
           nickname,
           visitCount,
           achievement: badges.get(userId) ?? null,
+          isSelf: selfUserId !== null && userId === selfUserId,
         })),
       },
       { headers: { "Cache-Control": "no-store" } },
