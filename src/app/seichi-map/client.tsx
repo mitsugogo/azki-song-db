@@ -24,12 +24,13 @@ import {
   Center,
   Checkbox,
   Divider,
-  Grid,
   Group,
+  Indicator,
   Loader,
   Modal,
   NavLink,
   Paper,
+  Pill,
   Progress,
   Radio,
   ScrollArea,
@@ -43,13 +44,16 @@ import {
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import { HiChevronRight, HiHome } from "react-icons/hi";
+import { FaXTwitter } from "react-icons/fa6";
 import {
   FiAlertCircle,
   FiCalendar,
   FiCheck,
-  FiChevronDown,
-  FiChevronUp,
+  FiCheckCircle,
+  FiCircle,
   FiCopy,
   FiEdit3,
   FiExternalLink,
@@ -132,7 +136,33 @@ import {
   toggleSeichiMapItineraryStop,
 } from "./itinerary";
 import { buildDokoAzPostUrl } from "./xShare";
+import { SeichiMapAdminTools } from "./SeichiMapAdminTools";
+import { SeichiMapBottomSheetHandle } from "./SeichiMapBottomSheetHandle";
+import { SeichiMapLayerDialog } from "./SeichiMapLayerDialog";
+import { SeichiMapVisitFilterMenu } from "./SeichiMapVisitFilterMenu";
+import type { SeichiMapSheetSnap } from "./sheetSnap";
+import classes from "./SeichiMapStage.module.css";
+import { deleteSeichiMapVisit, saveSeichiMapVisit } from "./visitApi";
+import {
+  filterSeichiMapLocationsByIds,
+  filterSeichiMapLocationsByVisit,
+  readSeichiMapVisitFilter,
+  saveSeichiMapVisitFilter,
+  type SeichiMapVisitFilter,
+} from "./visitFilter";
 import { SeichiMapIdentityAdmin } from "./SeichiMapIdentityAdmin";
+import { SeichiMapAchievementAdmin } from "./SeichiMapAchievementAdmin";
+import {
+  SeichiMapAchievementsModal,
+  useSeichiMapAchievements,
+} from "./SeichiMapAchievements";
+import { SeichiMapPlayerCard } from "./SeichiMapPlayerCard";
+import type {
+  SeichiMapAchievementView,
+  SeichiMapLocalizedText,
+  SeichiMapUnlockedAchievement,
+} from "../types/seichiMapAchievements";
+import { pickSeichiMapLocalizedText } from "./achievementText";
 
 const SeichiMapItinerary = dynamic(() =>
   import("./SeichiMapItinerary").then((module) => module.SeichiMapItinerary),
@@ -763,13 +793,10 @@ const styleInfoWindowButton = (
   element.style.borderRadius = "6px";
   element.style.boxSizing = "border-box";
   element.style.display = "inline-flex";
-  element.style.fontSize = "13px";
   element.style.fontWeight = "600";
   element.style.gap = "6px";
-  element.style.height = "32px";
   element.style.justifyContent = "center";
   element.style.lineHeight = "1";
-  element.style.padding = "0 12px";
   element.style.textDecoration = "none";
   element.style.transition =
     "background-color 120ms ease, border-color 120ms ease";
@@ -797,6 +824,48 @@ const buildGoogleMapsSearchUrl = (location: LocationOption) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${location.latitude},${location.longitude}`,
   )}`;
+
+const DOKO_AZ_HASHTAG = "#どこAZ";
+
+/** X（旧 Twitter）のロゴ。ポップアップは DOM を直接組み立てるので、SVG も要素として作る。 */
+const createXLogoIconElement = (): SVGSVGElement => {
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const icon = document.createElementNS(svgNamespace, "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("width", "14");
+  icon.setAttribute("height", "14");
+  icon.setAttribute("fill", "currentColor");
+  icon.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(svgNamespace, "path");
+  path.setAttribute(
+    "d",
+    "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
+  );
+  icon.appendChild(path);
+  return icon;
+};
+
+/** 鉛筆のアイコン（Feather の edit-2）。ポップアップ用に SVG を要素として作る。 */
+const createPencilIconElement = (): SVGSVGElement => {
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const icon = document.createElementNS(svgNamespace, "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("width", "16");
+  icon.setAttribute("height", "16");
+  icon.setAttribute("fill", "none");
+  icon.setAttribute("stroke", "currentColor");
+  icon.setAttribute("stroke-width", "2");
+  icon.setAttribute("stroke-linecap", "round");
+  icon.setAttribute("stroke-linejoin", "round");
+  icon.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(svgNamespace, "path");
+  path.setAttribute(
+    "d",
+    "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
+  );
+  icon.appendChild(path);
+  return icon;
+};
 
 const createLuCrownIconElement = (): SVGSVGElement => {
   const svgNamespace = "http://www.w3.org/2000/svg";
@@ -1256,6 +1325,12 @@ export default function SeichiMapCompleteClient({
   const datePickerLocale = locale === "ja" ? "ja" : "en";
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const stageTopRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  // 地図の枠の上端（ページ先頭からの距離）。lg 未満は画面の残りいっぱいを地図にするために使う
+  const [stageTop, setStageTop] = useState<number | null>(null);
+  // 地図の枠の上端から、main の下端（フッターの手前）までの高さ。PC は残りいっぱいを地図とパネルにする
+  const [stageRoom, setStageRoom] = useState<number | null>(null);
   const mapRef = useRef<GoogleMapInstance | null>(null);
   const leafletApiRef = useRef<typeof import("leaflet") | null>(null);
   const leafletMapRef = useRef<Leaflet.Map | null>(null);
@@ -1282,6 +1357,12 @@ export default function SeichiMapCompleteClient({
   const hoverTimerRef = useRef<number | null>(null);
   const isMapDraggingRef = useRef(false);
   const infoWindowRef = useRef<GoogleInfoWindow | null>(null);
+  // 地点のポップアップが開いているか。モーダルを閉じて選択だけが外れても、開いたままのポップアップの本文は消さない
+  const isLocationPopupOpenRef = useRef(false);
+
+  const quickRecordVisitRef = useRef<(location: LocationOption) => void>(
+    () => undefined,
+  );
   const [popupScrollContent, setPopupScrollContent] =
     useState<SeichiMapPopupScrollContent | null>(null);
   const getMarkerPresentationRef = useRef<
@@ -1295,9 +1376,9 @@ export default function SeichiMapCompleteClient({
     }),
   );
   const isSharedViewRef = useRef(false);
-  const openLocationInfoWindowRef = useRef<(location: LocationOption) => void>(
-    () => undefined,
-  );
+  const openLocationInfoWindowRef = useRef<
+    (location: LocationOption, options?: { keepSheet?: boolean }) => void
+  >(() => undefined);
   const selectedLocationIdRef = useRef<string | null>(null);
   const itineraryLocationIdsRef = useRef<ReadonlySet<string>>(new Set());
   const focusedInitialLocationIdRef = useRef<string | null>(null);
@@ -1362,7 +1443,16 @@ export default function SeichiMapCompleteClient({
   const [showModal, setShowModal] = useState(false);
   const [recordModalPortalTarget, setRecordModalPortalTarget] =
     useState<HTMLElement | null>(null);
-  const [isLayerSelectorOpen, setIsLayerSelectorOpen] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width: 48em)");
+  const [isLayerDialogOpen, setIsLayerDialogOpen] = useState(false);
+  const [sheetSnap, setSheetSnap] = useState<SeichiMapSheetSnap>("peek");
+  const [visitFilter, setVisitFilter] = useState<SeichiMapVisitFilter>("all");
+  // バッジの達成条件の対象地点だけに絞るときの状態。locationIds が null の間は取得中
+  const [badgeFilter, setBadgeFilter] = useState<{
+    achievementId: string;
+    name: SeichiMapLocalizedText;
+    locationIds: ReadonlySet<string> | null;
+  } | null>(null);
   const [isMapProviderMenuOpen, setIsMapProviderMenuOpen] = useState(false);
   const [isIosMapDevice, setIsIosMapDevice] = useState<boolean | null>(null);
   const [isNativeMapFullscreen, setIsNativeMapFullscreen] = useState(false);
@@ -1412,6 +1502,49 @@ export default function SeichiMapCompleteClient({
     },
     [mapsKey],
   );
+
+  useEffect(() => {
+    const element = stageTopRef.current;
+    if (!element) return;
+    const measure = () => {
+      // 枠の上端は、上の領域の下端ではなく地図の枠そのものから測る（余白の折り返しを含めるため）
+      const stage = stageRef.current;
+      if (!stage) return;
+      // main がスクロールしていても、一番上までスクロールした状態の位置になるよう補正する
+      const scroller = stage.closest("main");
+      const next = Math.round(
+        stage.getBoundingClientRect().top +
+          window.scrollY +
+          (scroller?.scrollTop ?? 0),
+      );
+      setStageTop((current) => (current === next ? current : next));
+      if (scroller) {
+        // 画面の下端、main の下端、画面下に固定されたフッターの上端のうち、いちばん上にあるものまでが使える範囲
+        let bottom = Math.min(
+          window.innerHeight,
+          scroller.getBoundingClientRect().bottom,
+        );
+        const footer = document.querySelector("footer");
+        if (footer && getComputedStyle(footer).position === "fixed") {
+          const footerTop = footer.getBoundingClientRect().top;
+          if (footerTop > 0) bottom = Math.min(bottom, footerTop);
+        }
+        const room = Math.round(bottom - (next - window.scrollY));
+        setStageRoom((current) => (current === room ? current : room));
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    if (typeof ResizeObserver === "undefined") {
+      return () => window.removeEventListener("resize", measure);
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => {
+      window.removeEventListener("resize", measure);
+      observer.disconnect();
+    };
+  }, []);
 
   const refreshMapViewport = useCallback(() => {
     window.requestAnimationFrame(() => {
@@ -1499,6 +1632,25 @@ export default function SeichiMapCompleteClient({
     : pointLayer;
   const canEditVisits = isSignedIn && !isSharedView;
   const canViewVisitedList = canEditVisits || isSharedView;
+  const {
+    data: achievementData,
+    loading: achievementsLoading,
+    error: achievementsError,
+    refresh: refreshAchievements,
+    handleUnlocked: handleAchievementsUnlocked,
+    updateTitle: updateAchievementTitle,
+    titleUpdating: achievementTitleUpdating,
+  } = useSeichiMapAchievements({
+    // 共有マップでは持ち主の、自分のマップでは本人のバッジ状況を出す
+    enabled: canEditVisits || isSharedView,
+    shareId: isSharedView ? effectiveShareId : null,
+  });
+  const achievementProfile = achievementData?.profile ?? null;
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const handleOpenAchievements = useCallback(() => {
+    setShowAchievementsModal(true);
+    void refreshAchievements();
+  }, [refreshAchievements]);
   const sharedViewNickname = sharedViewInfo?.nickname ?? t("share.loadingUser");
   const registeredNickname =
     resolveSeichiMapNicknameDraft(profileInfo?.nickname, shareInfo?.nickname) ||
@@ -1550,6 +1702,52 @@ export default function SeichiMapCompleteClient({
   }, [showNicknamePrompt]);
 
   useEffect(() => {
+    setVisitFilter(readSeichiMapVisitFilter(window.localStorage));
+  }, []);
+
+  const changeVisitFilter = useCallback((filter: SeichiMapVisitFilter) => {
+    setVisitFilter(filter);
+    saveSeichiMapVisitFilter(window.localStorage, filter);
+  }, []);
+
+  const clearBadgeFilter = useCallback(() => setBadgeFilter(null), []);
+
+  const startBadgeFilter = useCallback(
+    async (achievement: SeichiMapAchievementView) => {
+      setBadgeFilter({
+        achievementId: achievement.id,
+        name: achievement.name,
+        locationIds: null,
+      });
+      try {
+        const response = await fetch(
+          `/api/seichi-map/achievements/${encodeURIComponent(achievement.id)}/locations`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) throw new Error("Failed to load target locations");
+        const payload = (await response.json()) as { locationIds?: string[] };
+        const ids = new Set(payload.locationIds ?? []);
+        // 取得中に別のバッジへ切り替えたり解除したりしていたら、結果は捨てる
+        setBadgeFilter((current) =>
+          current?.achievementId === achievement.id
+            ? { ...current, locationIds: ids }
+            : current,
+        );
+      } catch (error) {
+        console.error(error);
+        setBadgeFilter((current) =>
+          current?.achievementId === achievement.id ? null : current,
+        );
+        notifications.show({
+          color: "red",
+          message: t("badgeFilter.loadFailed"),
+        });
+      }
+    },
+    [t],
+  );
+
+  useEffect(() => {
     try {
       window.localStorage.setItem(
         HIDDEN_LAYERS_STORAGE_KEY,
@@ -1571,7 +1769,6 @@ export default function SeichiMapCompleteClient({
 
   const addLocationToItinerary = useCallback((locationId: string) => {
     setItinerary((current) => addSeichiMapItineraryStop(current, locationId));
-    setIsLayerSelectorOpen(false);
     setListMode("itinerary");
   }, []);
 
@@ -1726,10 +1923,48 @@ export default function SeichiMapCompleteClient({
     );
   }, [hiddenLayerNameSet, locations, uncategorizedLayerName]);
 
+  // 訪問状況の絞り込みは、見られる状態（自分のログイン済み・共有マップ）のときだけ効かせる
+  const effectiveVisitFilter: SeichiMapVisitFilter = canViewVisitedList
+    ? visitFilter
+    : "all";
+
+  // 地図・一覧・近隣に出す地点。進捗率（completion）は絞り込み前の visibleLocations で数える
+  const badgeLocationIds = badgeFilter?.locationIds ?? null;
+  // バッジで絞るときは、非表示にしているレイヤーの地点も対象にする（条件の対象を見落とさないため）
+  const mapLocations = useMemo(
+    () =>
+      filterSeichiMapLocationsByVisit(
+        badgeLocationIds
+          ? filterSeichiMapLocationsByIds(locations, badgeLocationIds)
+          : visibleLocations,
+        isLocationVisited,
+        effectiveVisitFilter,
+      ),
+    [
+      badgeLocationIds,
+      effectiveVisitFilter,
+      isLocationVisited,
+      locations,
+      visibleLocations,
+    ],
+  );
+
+  // バッジで絞っているときの、対象地点の訪問状況
+  const badgeCompletion = useMemo(() => {
+    if (!badgeLocationIds) return null;
+    const scoped = filterSeichiMapLocationsByIds(locations, badgeLocationIds);
+    const done = scoped.filter(isLocationVisited).length;
+    return {
+      total: scoped.length,
+      done,
+      percent: roundCompletionPercent(done, scoped.length),
+    };
+  }, [badgeLocationIds, isLocationVisited, locations]);
+
   const nearbyLocations = useMemo(() => {
     if (!currentPosition) return [];
-    return getNearbyLocations(currentPosition, visibleLocations);
-  }, [currentPosition, visibleLocations]);
+    return getNearbyLocations(currentPosition, mapLocations);
+  }, [currentPosition, mapLocations]);
 
   const completion = useMemo(() => {
     if (visibleLocations.length === 0) {
@@ -1789,14 +2024,14 @@ export default function SeichiMapCompleteClient({
 
   const filteredLocations = useMemo(() => {
     const query = normalizeSearchText(locationSearchQuery.trim());
-    if (!query) return visibleLocations;
+    if (!query) return mapLocations;
 
-    return visibleLocations.filter((item) => {
+    return mapLocations.filter((item) => {
       return normalizeSearchText(
         `${item.name} ${item.folder} ${stripHtmlToLines(item.description)}`,
       ).includes(query);
     });
-  }, [locationSearchQuery, visibleLocations]);
+  }, [locationSearchQuery, mapLocations]);
 
   const groupedLocations = useMemo(() => {
     const groups: Record<string, LocationOption[]> = {};
@@ -2158,6 +2393,7 @@ export default function SeichiMapCompleteClient({
           infoWindowRef.current = new InfoWindow();
           infoWindowCloseClickListenerRef.current =
             infoWindowRef.current.addListener?.("closeclick", () => {
+              isLocationPopupOpenRef.current = false;
               setSelectedLocationId(null);
             }) ?? null;
           mapOverlayRef.current = createSeichiCanvasOverlay({
@@ -2378,6 +2614,7 @@ export default function SeichiMapCompleteClient({
           if (leafletPopupRef.current !== event.popup) return;
 
           leafletPopupRef.current = null;
+          isLocationPopupOpenRef.current = false;
           setSelectedLocationId(null);
         });
         setMapReady(true);
@@ -2514,6 +2751,25 @@ export default function SeichiMapCompleteClient({
     [],
   );
 
+  const upsertVisitedItem = useCallback((savedItem: VisitedItem) => {
+    setVisited((current) => {
+      const nextItems = current.filter((item) => {
+        if (item.id === savedItem.id) return false;
+        if (savedItem.locationId && item.locationId === savedItem.locationId) {
+          return false;
+        }
+        return !(
+          !savedItem.locationId &&
+          !item.locationId &&
+          item.locationName === savedItem.locationName
+        );
+      });
+      return [savedItem, ...nextItems].sort((a, b) =>
+        a.visitedAt < b.visitedAt ? 1 : -1,
+      );
+    });
+  }, []);
+
   const deleteVisited = useCallback(
     async (visitedId: string) => {
       if (!confirm(t("confirm.deleteVisited"))) {
@@ -2534,7 +2790,9 @@ export default function SeichiMapCompleteClient({
         setVisited((current) =>
           current.filter((item) => item.id !== visitedId),
         );
+        isLocationPopupOpenRef.current = false;
         infoWindowRef.current?.close?.();
+        leafletMapRef.current?.closePopup();
         mapOverlayRef.current?.draw();
       } catch (error) {
         console.error(error);
@@ -2765,22 +3023,55 @@ export default function SeichiMapCompleteClient({
 
       const actions = document.createElement("div");
       actions.className = "seichi-map-popup__actions";
+      const primaryRow = document.createElement("div");
+      primaryRow.className = "seichi-map-primary-actions";
+      const secondaryRow = document.createElement("div");
+      secondaryRow.className = "seichi-map-popup__secondary";
 
-      const mapsLink = document.createElement("a");
-      mapsLink.href = buildGoogleMapsSearchUrl(location);
-      mapsLink.target = "_blank";
-      mapsLink.rel = "noopener noreferrer";
-      mapsLink.textContent = t("popup.googleMaps");
-      styleInfoWindowButton(mapsLink, "outline");
-      actions.appendChild(mapsLink);
-
-      const xPostLink = document.createElement("a");
-      xPostLink.href = buildDokoAzPostUrl(location.name);
-      xPostLink.target = "_blank";
-      xPostLink.rel = "noopener noreferrer";
-      xPostLink.textContent = t("popup.postDokoAz");
-      styleInfoWindowButton(xPostLink, "outline");
-      actions.appendChild(xPostLink);
+      if (!isSharedView) {
+        const recordButton = document.createElement("button");
+        recordButton.type = "button";
+        recordButton.textContent = visitedItem
+          ? t("popup.editVisit")
+          : t("popup.recordVisit");
+        recordButton.style.cursor = "pointer";
+        recordButton.style.flexGrow = "1";
+        styleInfoWindowButton(recordButton, visitedItem ? "light" : "filled");
+        recordButton.addEventListener("click", () => {
+          if (visitedItem) {
+            recordLocationVisit(location, visitedItem);
+            return;
+          }
+          quickRecordVisitRef.current(location);
+        });
+        if (visitedItem) {
+          primaryRow.appendChild(recordButton);
+        } else {
+          // 「訪問を記録」（一発記録）と、日付・メモ付きで記録する鉛筆を1つのボタンのようにつなげる
+          recordButton.style.borderRadius = "6px 0 0 6px";
+          const detailsButton = document.createElement("button");
+          detailsButton.type = "button";
+          detailsButton.className = "seichi-map-primary-actions__details";
+          detailsButton.setAttribute(
+            "aria-label",
+            t("popup.recordWithDetails"),
+          );
+          detailsButton.title = t("popup.recordWithDetails");
+          detailsButton.style.cursor = "pointer";
+          styleInfoWindowButton(detailsButton, "filled");
+          detailsButton.style.borderRadius = "0 6px 6px 0";
+          detailsButton.style.borderInlineStart =
+            "1px solid rgba(255, 255, 255, 0.45)";
+          detailsButton.appendChild(createPencilIconElement());
+          detailsButton.addEventListener("click", () => {
+            recordLocationVisit(location);
+          });
+          const split = document.createElement("div");
+          split.className = "seichi-map-popup__split";
+          split.append(recordButton, detailsButton);
+          primaryRow.appendChild(split);
+        }
+      }
 
       const itineraryButton = document.createElement("button");
       itineraryButton.type = "button";
@@ -2791,6 +3082,7 @@ export default function SeichiMapCompleteClient({
       itineraryButton.disabled = isInItinerary;
       itineraryButton.style.cursor = isInItinerary ? "default" : "pointer";
       itineraryButton.style.opacity = isInItinerary ? "0.65" : "1";
+      if (isSharedView) itineraryButton.style.flexGrow = "1";
       styleInfoWindowButton(itineraryButton, "light", "cyan");
       itineraryButton.addEventListener("click", () => {
         addLocationToItinerary(location.id);
@@ -2799,34 +3091,40 @@ export default function SeichiMapCompleteClient({
         itineraryButton.style.opacity = "0.65";
         itineraryButton.textContent = t("popup.inItinerary");
       });
-      actions.appendChild(itineraryButton);
+      primaryRow.appendChild(itineraryButton);
 
-      if (!isSharedView) {
-        const recordButton = document.createElement("button");
-        recordButton.type = "button";
-        recordButton.textContent = visitedItem
-          ? t("popup.editVisit")
-          : t("popup.recordVisit");
-        recordButton.style.cursor = "pointer";
-        styleInfoWindowButton(recordButton, visitedItem ? "light" : "filled");
-        recordButton.addEventListener("click", () => {
-          recordLocationVisit(location, visitedItem);
-        });
-        actions.appendChild(recordButton);
-      }
+      const mapsLink = document.createElement("a");
+      mapsLink.href = buildGoogleMapsSearchUrl(location);
+      mapsLink.target = "_blank";
+      mapsLink.rel = "noopener noreferrer";
+      mapsLink.className = "seichi-map-popup__link";
+      mapsLink.textContent = t("popup.googleMaps");
+      secondaryRow.appendChild(mapsLink);
+
+      const xPostLink = document.createElement("a");
+      xPostLink.href = buildDokoAzPostUrl(location.name);
+      xPostLink.target = "_blank";
+      xPostLink.rel = "noopener noreferrer";
+      xPostLink.className =
+        "seichi-map-popup__link seichi-map-popup__link--icon";
+      xPostLink.setAttribute("aria-label", t("popup.postDokoAz"));
+      xPostLink.title = t("popup.postDokoAz");
+      xPostLink.append(createXLogoIconElement(), DOKO_AZ_HASHTAG);
+      primaryRow.appendChild(xPostLink);
 
       if (canEditVisits && visitedItem) {
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
+        deleteButton.className =
+          "seichi-map-popup__link seichi-map-popup__link--danger";
         deleteButton.textContent = t("popup.deleteVisited");
-        deleteButton.style.cursor = "pointer";
-        styleInfoWindowButton(deleteButton, "outline");
-        deleteButton.style.color = "#e03131";
         deleteButton.addEventListener("click", () => {
           void deleteVisited(visitedItem.id);
         });
-        actions.appendChild(deleteButton);
+        secondaryRow.appendChild(deleteButton);
       }
+
+      actions.append(primaryRow, secondaryRow);
 
       // Keep content available for the map's initial popup size measurement.
       scrollContainer.appendChild(body);
@@ -2846,15 +3144,167 @@ export default function SeichiMapCompleteClient({
     ],
   );
 
+  const quickRecordVisit = useCallback(
+    async (location: LocationOption) => {
+      if (isSharedView) return;
+      if (!isSignedIn) {
+        void signIn("google", { callbackUrl: "/seichi-map" });
+        return;
+      }
+      const existing = getVisitedItemForLocation(location);
+      if (existing) {
+        openRecordModal(location, existing);
+        return;
+      }
+
+      const refreshPopup = (item?: VisitedItem) => {
+        const content = createInfoWindowContent(location, item);
+        infoWindowRef.current?.setContent(content);
+        leafletPopupRef.current?.setContent(content);
+        mapOverlayRef.current?.draw();
+      };
+
+      try {
+        const payload = await saveSeichiMapVisit<
+          VisitedItem,
+          SeichiMapUnlockedAchievement
+        >(
+          {
+            locationId: location.id,
+            locationName: location.name,
+            visitedDate: toLocalDateInputValue(new Date()),
+            note: "",
+            url: "",
+          },
+          {
+            saveFailed: t("errors.saveFailed"),
+            updateFailed: t("errors.updateFailed"),
+          },
+        );
+        handleAchievementsUnlocked(payload.unlockedAchievements);
+        const saved = payload.item;
+        if (!saved) return;
+        upsertVisitedItem(saved);
+        refreshPopup(saved);
+
+        const notificationId = `seichi-map-quick-record-${saved.id}`;
+        notifications.show({
+          id: notificationId,
+          color: "pink",
+          title: t("quickRecord.saved"),
+          autoClose: 8000,
+          message: (
+            <Stack gap={6}>
+              <Text size="sm" lineClamp={2}>
+                {location.name}
+              </Text>
+              <Group gap="xs">
+                <Button
+                  size="compact-xs"
+                  variant="light"
+                  color="gray"
+                  onClick={() => {
+                    notifications.hide(notificationId);
+                    void deleteSeichiMapVisit(
+                      saved.id,
+                      t("errors.deleteFailed"),
+                    )
+                      .then(() => {
+                        setVisited((current) =>
+                          current.filter((item) => item.id !== saved.id),
+                        );
+                        refreshPopup();
+                      })
+                      .catch((error) => {
+                        console.error(error);
+                        setErrorMessage(
+                          error instanceof Error
+                            ? error.message
+                            : t("errors.deleteFailed"),
+                        );
+                      });
+                  }}
+                >
+                  {t("quickRecord.undo")}
+                </Button>
+                <Button
+                  size="compact-xs"
+                  variant="light"
+                  color="pink"
+                  onClick={() => {
+                    notifications.hide(notificationId);
+                    openRecordModal(location, saved);
+                  }}
+                >
+                  {t("quickRecord.addNote")}
+                </Button>
+              </Group>
+            </Stack>
+          ),
+        });
+      } catch (error) {
+        console.error(error);
+        setErrorMessage(
+          error instanceof Error ? error.message : t("errors.saveFailed"),
+        );
+      }
+    },
+    [
+      createInfoWindowContent,
+      getVisitedItemForLocation,
+      handleAchievementsUnlocked,
+      isSharedView,
+      isSignedIn,
+      openRecordModal,
+      t,
+      upsertVisitedItem,
+    ],
+  );
+
+  useEffect(() => {
+    quickRecordVisitRef.current = (location) => {
+      void quickRecordVisit(location);
+    };
+  }, [quickRecordVisit]);
+
+  // 訪問記録が変わったら、開いているポップアップの内容（「訪問を記録」か「編集」か）も更新する。
+  // 記録・編集・削除・取り消しのどの経路でも、また記録の読み込みが後から終わった場合でも揃うようにする。
+  useEffect(() => {
+    const locationId = selectedLocationIdRef.current;
+    if (!locationId || !isLocationPopupOpenRef.current) return;
+    const location = locationById.get(locationId);
+    if (!location) return;
+    const content = createInfoWindowContent(location);
+    leafletPopupRef.current?.setContent(content);
+    infoWindowRef.current?.setContent(content);
+    // visited の変化だけを契機にする（popup の内容は createInfoWindowContent が最新の状態から作る）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visited]);
+
   const openLocationInfoWindow = useCallback(
-    (location: LocationOption) => {
+    (location: LocationOption, options?: { keepSheet?: boolean }) => {
+      // lg 未満ではシートが地図の下側を覆うので、ピンを選んだらシートを畳み、
+      // ポップアップがシートの陰に入らないよう自動パンの余白を取る
+      const isSheetLayout =
+        window.matchMedia?.("(max-width: 74.99em)").matches ?? false;
+      // 一覧から選んだ場合は、続けて一覧を操作できるようシートを開いたままにする
+      if (isSheetLayout && !options?.keepSheet) setSheetSnap("peek");
+      isLocationPopupOpenRef.current = true;
+
       if (isLeafletMapProvider(mapProvider)) {
         const map = leafletMapRef.current;
         const leaflet = leafletApiRef.current;
         if (!map || !leaflet) return;
 
         const popup = leaflet
-          .popup()
+          .popup(
+            isSheetLayout
+              ? {
+                  autoPanPaddingTopLeft: [16, 16],
+                  autoPanPaddingBottomRight: [16, 176],
+                }
+              : undefined,
+          )
           .setLatLng([location.latitude, location.longitude])
           .setContent(createInfoWindowContent(location));
         leafletPopupRef.current = popup;
@@ -2889,13 +3339,15 @@ export default function SeichiMapCompleteClient({
   useEffect(() => {
     selectedLocationIdRef.current = selectedLocationId;
     mapOverlayRef.current?.setSelectedLocationId(selectedLocationId);
-    if (!selectedLocationId) setPopupScrollContent(null);
+    if (!selectedLocationId && !isLocationPopupOpenRef.current) {
+      setPopupScrollContent(null);
+    }
   }, [selectedLocationId]);
 
   useEffect(() => {
     if (!mapReady || mapLoading) return;
-    mapOverlayRef.current?.setLocations(visibleLocations);
-  }, [mapLoading, mapProvider, mapReady, visibleLocations]);
+    mapOverlayRef.current?.setLocations(mapLocations);
+  }, [mapLoading, mapProvider, mapReady, mapLocations]);
 
   useEffect(() => {
     if (!isLeafletMapProvider(mapProvider) || !mapReady || mapLoading) return;
@@ -2906,7 +3358,7 @@ export default function SeichiMapCompleteClient({
     if (!leaflet || !map || !markerLayer || !canvasRenderer) return;
 
     markerLayer.clearLayers();
-    const locationsInPaintOrder = visibleLocations
+    const locationsInPaintOrder = mapLocations
       .map((location) => ({
         location,
         presentation: getMarkerPresentation(location),
@@ -2952,7 +3404,7 @@ export default function SeichiMapCompleteClient({
     mapProvider,
     mapReady,
     selectedLocationId,
-    visibleLocations,
+    mapLocations,
   ]);
 
   useEffect(() => {
@@ -2962,6 +3414,7 @@ export default function SeichiMapCompleteClient({
         getLocationLayerName(selectedLocation, uncategorizedLayerName),
       )
     ) {
+      isLocationPopupOpenRef.current = false;
       setSelectedLocationId(null);
       infoWindowRef.current?.close();
       leafletMapRef.current?.closePopup();
@@ -2980,7 +3433,7 @@ export default function SeichiMapCompleteClient({
           [location.latitude, location.longitude],
           Math.max(map.getZoom(), 12),
         );
-        openLocationInfoWindow(location);
+        openLocationInfoWindow(location, { keepSheet: true });
         return;
       }
 
@@ -2990,7 +3443,7 @@ export default function SeichiMapCompleteClient({
       setSelectedLocationId(location.id);
       map.panTo({ lat: location.latitude, lng: location.longitude });
       map.setZoom(Math.max(map.getZoom() ?? DEFAULT_MAP_ZOOM, 12));
-      openLocationInfoWindow(location);
+      openLocationInfoWindow(location, { keepSheet: true });
     },
     [mapProvider, openLocationInfoWindow],
   );
@@ -3105,34 +3558,24 @@ export default function SeichiMapCompleteClient({
     setSubmitting(true);
     setErrorMessage(null);
     try {
-      const response = await fetch("/api/seichi-map/visited", {
-        method: selectedVisitedId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...(selectedVisitedId ? { id: selectedVisitedId } : {}),
+      const payload = await saveSeichiMapVisit<
+        VisitedItem,
+        SeichiMapUnlockedAchievement
+      >(
+        {
+          id: selectedVisitedId ?? undefined,
           locationId: selectedLocation.id,
           locationName: selectedLocation.name,
-          visitedAt: `${visitedDate}T00:00:00.000Z`,
+          visitedDate,
           note,
           url: visitUrl,
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => ({}))) as {
-          error?: string;
-        };
-        throw new Error(
-          payload.error ||
-            (selectedVisitedId
-              ? t("errors.updateFailed")
-              : t("errors.saveFailed")),
-        );
-      }
-
-      const payload = (await response.json().catch(() => ({}))) as {
-        item?: VisitedItem;
-      };
+        },
+        {
+          saveFailed: t("errors.saveFailed"),
+          updateFailed: t("errors.updateFailed"),
+        },
+      );
+      handleAchievementsUnlocked(payload.unlockedAchievements);
       if (isDateInputValue(visitedDate)) {
         try {
           window.sessionStorage.setItem(
@@ -3146,28 +3589,13 @@ export default function SeichiMapCompleteClient({
       }
       const savedItem = payload.item;
       if (savedItem) {
-        setVisited((current) => {
-          const nextItems = current.filter((item) => {
-            if (item.id === savedItem.id) return false;
-            if (
-              savedItem.locationId &&
-              item.locationId === savedItem.locationId
-            ) {
-              return false;
-            }
-            return !(
-              !savedItem.locationId &&
-              !item.locationId &&
-              item.locationName === savedItem.locationName
-            );
-          });
-          return [savedItem, ...nextItems].sort((a, b) =>
-            a.visitedAt < b.visitedAt ? 1 : -1,
-          );
-        });
-        infoWindowRef.current?.setContent(
-          createInfoWindowContent(selectedLocation, savedItem),
+        upsertVisitedItem(savedItem);
+        const savedContent = createInfoWindowContent(
+          selectedLocation,
+          savedItem,
         );
+        infoWindowRef.current?.setContent(savedContent);
+        leafletPopupRef.current?.setContent(savedContent);
         mapOverlayRef.current?.draw();
       }
 
@@ -3373,804 +3801,845 @@ export default function SeichiMapCompleteClient({
     const visitedItem = getVisitedItemForLocation(location);
     const isInItinerary = itineraryLocationIds.has(location.id);
 
+    // ボトムシート表示（lg 未満）の間は、地図のポップアップがシートの陰に入るので、行の下にも操作を出す。
     return (
-      <Group
-        className="seichi-map-list-actions"
-        gap="xs"
-        hiddenFrom="sm"
-        p="xs"
-        wrap="wrap"
-      >
-        <Button
-          component="a"
-          href={buildGoogleMapsSearchUrl(location)}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="default"
-          size="compact-sm"
-        >
-          {t("popup.googleMaps")}
-        </Button>
-        <Button
-          component="a"
-          href={buildDokoAzPostUrl(location.name)}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="default"
-          size="compact-sm"
-        >
-          {t("popup.postDokoAz")}
-        </Button>
-        <Button
-          variant="light"
-          color="cyan"
-          size="compact-sm"
-          disabled={isInItinerary}
-          onClick={() => addLocationToItinerary(location.id)}
-        >
-          {isInItinerary ? t("popup.inItinerary") : t("popup.addToItinerary")}
-        </Button>
-        {!isSharedView ? (
+      <Stack className="seichi-map-list-actions" gap={4} hiddenFrom="lg" p="xs">
+        <div className="seichi-map-primary-actions">
+          {!isSharedView ? (
+            visitedItem ? (
+              <Button
+                variant="light"
+                color="pink"
+                style={{ flexGrow: 1 }}
+                onClick={() => recordLocationVisit(location, visitedItem)}
+              >
+                {t("popup.editVisit")}
+              </Button>
+            ) : (
+              // 「訪問を記録」（一発記録）と、日付・メモ付きで記録する鉛筆を1つのボタンのようにつなげる
+              <Button.Group style={{ flexGrow: 1 }}>
+                <Button
+                  variant="filled"
+                  color="pink"
+                  style={{ flexGrow: 1 }}
+                  onClick={() => void quickRecordVisit(location)}
+                >
+                  {t("popup.recordVisit")}
+                </Button>
+                <Button
+                  variant="filled"
+                  color="pink"
+                  className="seichi-map-primary-actions__details"
+                  aria-label={t("popup.recordWithDetails")}
+                  title={t("popup.recordWithDetails")}
+                  onClick={() => recordLocationVisit(location)}
+                >
+                  <FiEdit3 size={14} aria-hidden="true" />
+                </Button>
+              </Button.Group>
+            )
+          ) : null}
           <Button
-            variant={visitedItem ? "light" : "filled"}
-            color="pink"
-            size="compact-sm"
-            onClick={() => recordLocationVisit(location, visitedItem)}
+            variant="light"
+            color="cyan"
+            style={isSharedView ? { flexGrow: 1 } : undefined}
+            disabled={isInItinerary}
+            onClick={() => addLocationToItinerary(location.id)}
           >
-            {visitedItem ? t("popup.editVisit") : t("popup.recordVisit")}
+            {isInItinerary ? t("popup.inItinerary") : t("popup.addToItinerary")}
           </Button>
-        ) : null}
-        {canEditVisits && visitedItem ? (
           <Button
-            variant="outline"
-            color="red"
-            size="compact-sm"
-            onClick={() => void deleteVisited(visitedItem.id)}
+            component="a"
+            href={buildDokoAzPostUrl(location.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="filled"
+            color="dark"
+            aria-label={t("popup.postDokoAz")}
+            title={t("popup.postDokoAz")}
+            leftSection={<FaXTwitter size={14} aria-hidden="true" />}
+            styles={{ section: { marginInlineEnd: 6 } }}
           >
-            {t("popup.deleteVisited")}
+            {DOKO_AZ_HASHTAG}
           </Button>
-        ) : null}
-      </Group>
+        </div>
+        <Group gap="md" wrap="wrap" justify="flex-start">
+          <Anchor
+            href={buildGoogleMapsSearchUrl(location)}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="xs"
+            fw={600}
+            c="dimmed"
+            underline="hover"
+            className="inline-flex items-center gap-1"
+          >
+            {t("popup.googleMaps")}
+            <FiExternalLink size={11} aria-hidden="true" />
+          </Anchor>
+
+          {canEditVisits && visitedItem ? (
+            <Anchor
+              component="button"
+              type="button"
+              size="xs"
+              fw={600}
+              c="red.7"
+              underline="hover"
+              ml="auto"
+              onClick={() => void deleteVisited(visitedItem.id)}
+            >
+              {t("popup.deleteVisited")}
+            </Anchor>
+          ) : null}
+        </Group>
+      </Stack>
     );
   };
 
+  const quickRecordButton = (location: LocationOption) => (
+    <Tooltip label={t("popup.recordVisit")} withArrow>
+      <ActionIcon
+        component="span"
+        role="button"
+        tabIndex={0}
+        variant="subtle"
+        color="gray"
+        size="md"
+        aria-label={t("quickRecord.rowLabel", { name: location.name })}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          void quickRecordVisit(location);
+        }}
+        onKeyDown={(event: React.KeyboardEvent) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          event.stopPropagation();
+          void quickRecordVisit(location);
+        }}
+      >
+        <FiCircle size={18} />
+      </ActionIcon>
+    </Tooltip>
+  );
+
+  // 一覧の右端のチェック。訪問済みは緑のチェック、未訪問は空の丸（押すと記録）。同じ大きさの枠に入れて右端をそろえる
+  const renderVisitMark = (location: LocationOption, visited: boolean) =>
+    visited ? (
+      <ThemeIcon
+        variant="transparent"
+        color="green"
+        size="md"
+        role="img"
+        aria-label={t("list.visitedBadge")}
+      >
+        <FiCheckCircle size={18} />
+      </ThemeIcon>
+    ) : canEditVisits ? (
+      quickRecordButton(location)
+    ) : null;
+
+  const visitFilterMenu = canViewVisitedList ? (
+    <SeichiMapVisitFilterMenu
+      value={visitFilter}
+      onChange={changeVisitFilter}
+      label={t("filter.label")}
+      badge={{
+        active: badgeFilter !== null,
+        pickLabel: t("badgeFilter.pick"),
+        clearLabel: t("badgeFilter.clear"),
+        onPick: achievementData?.ready
+          ? () => setShowAchievementsModal(true)
+          : undefined,
+        onClear: clearBadgeFilter,
+      }}
+      options={[
+        { value: "all", label: t("filter.all") },
+        {
+          value: "unvisited",
+          label: t("filter.unvisited", {
+            count: completion.total - completion.done,
+          }),
+        },
+        {
+          value: "visited",
+          label: t("filter.visited", { count: completion.done }),
+        },
+      ]}
+    />
+  ) : null;
+
+  const shownCompletion = badgeCompletion ?? completion;
+  const badgeFilterChip = badgeFilter ? (
+    <Pill
+      size="sm"
+      withRemoveButton
+      onRemove={clearBadgeFilter}
+      removeButtonProps={{ "aria-label": t("badgeFilter.clear") }}
+      style={{ maxWidth: "60%" }}
+    >
+      {pickSeichiMapLocalizedText(badgeFilter.name, locale)}
+    </Pill>
+  ) : null;
+
+  const layerSummaryLabel = t("layers.summary", {
+    visible: layerNames.length - hiddenVisibleLayerCount,
+    total: layerNames.length,
+  });
+  const layerButton =
+    layerNames.length > 0 && !badgeFilter ? (
+      <Indicator
+        color="pink"
+        size={8}
+        offset={3}
+        disabled={hiddenVisibleLayerCount === 0}
+      >
+        <ActionIcon
+          variant="light"
+          color="gray"
+          aria-label={layerSummaryLabel}
+          title={layerSummaryLabel}
+          onClick={() => setIsLayerDialogOpen(true)}
+        >
+          <FiLayers size={16} />
+        </ActionIcon>
+      </Indicator>
+    ) : null;
+
+  const achievementPlayerCard = achievementProfile ? (
+    <SeichiMapPlayerCard
+      profile={achievementProfile}
+      onClick={handleOpenAchievements}
+      label={
+        isSharedView
+          ? t("achievements.openOf", { name: sharedViewNickname })
+          : t("achievements.open")
+      }
+    />
+  ) : null;
+
   return (
-    <main className={pageClasses.shellFlushBottom}>
+    <main className="grow overflow-auto px-2 pt-3 pb-0 sm:px-6 sm:py-5 lg:p-6 lg:pb-0">
       {popupScrollContent && (
         <SeichiMapPopupScrollArea {...popupScrollContent} />
       )}
-      <Breadcrumbs
-        aria-label="Breadcrumb"
-        className={breadcrumbClasses.root}
-        separator={<HiChevronRight className={breadcrumbClasses.separator} />}
-      >
-        <Link href="/" className={breadcrumbClasses.link}>
-          <HiHome className="mr-1.5 h-4 w-4" /> HOME
-        </Link>
-        <Link href="/seichi-map" className={breadcrumbClasses.link}>
-          {t("breadcrumb")}
-        </Link>
-      </Breadcrumbs>
+      <div ref={stageTopRef}>
+        <Breadcrumbs
+          aria-label="Breadcrumb"
+          className={breadcrumbClasses.root}
+          visibleFrom="sm"
+          separator={<HiChevronRight className={breadcrumbClasses.separator} />}
+        >
+          <Link href="/" className={breadcrumbClasses.link}>
+            <HiHome className="mr-1.5 h-4 w-4" /> HOME
+          </Link>
+          <Link href="/seichi-map" className={breadcrumbClasses.link}>
+            {t("breadcrumb")}
+          </Link>
+        </Breadcrumbs>
 
-      <Group justify="space-between" align="flex-start" gap="md" mb="md">
-        <Box>
-          <h1 className={pageClasses.heading}>{pageTitle}</h1>
-          <p className={pageClasses.description}>{pageDescription}</p>
-          <Group gap="md" mt={-16} mb="md" wrap="wrap">
-            <Text size="sm" c="dimmed">
-              {t("credit.prefix")}
-              <Anchor
-                href="https://note.com/yspione/n/nccf2fbbdc0dc"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t("credit.linkLabel")}
-              </Anchor>
-              {t("credit.suffix")}
-            </Text>
+        <Group
+          className="px-1 sm:px-0"
+          justify="space-between"
+          align="flex-start"
+          wrap="nowrap"
+          gap="xs"
+          mb={{ base: "xs", sm: 0 }}
+        >
+          <Box style={{ minWidth: 0 }}>
+            <h1 className={`${pageClasses.heading} max-sm:mb-0 max-sm:text-xl`}>
+              {pageTitle}
+            </h1>
+            <p className={`${pageClasses.description} hidden sm:block`}>
+              {pageDescription}
+            </p>
+          </Box>
+          <SeichiMapHeaderActions
+            isSharedView={isSharedView}
+            playerCard={achievementPlayerCard}
+            onOpenSettings={handleOpenSettings}
+            onOpenShare={handleOpenShare}
+            showNicknamePrompt={showNicknamePrompt}
+          />
+        </Group>
+
+        <Group
+          className="px-1 sm:px-0"
+          justify="space-between"
+          align="flex-start"
+          wrap="nowrap"
+          gap="xs"
+          mb="sm"
+        >
+          <Text size="xs" c="dimmed">
+            {t("credit.prefix")}
+            <Anchor
+              href="https://note.com/yspione/n/nccf2fbbdc0dc"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("credit.linkLabel")}
+            </Anchor>
+            {t("credit.suffix")}
+            <span aria-hidden="true"> · </span>
             <Anchor
               href="https://www.geoguessr.com/ja/maps/69b79020d61d81a4c952ba6e"
               target="_blank"
               rel="noopener noreferrer"
-              size="sm"
-              className="inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1 align-bottom"
             >
               {t("geoguessr.open")}
-              <FiExternalLink size={14} aria-hidden="true" />
+              <FiExternalLink size={12} aria-hidden="true" />
             </Anchor>
-          </Group>
-        </Box>
-        <SeichiMapHeaderActions
-          isSharedView={isSharedView}
-          onOpenSettings={handleOpenSettings}
-          onOpenShare={handleOpenShare}
-          showNicknamePrompt={showNicknamePrompt}
-          userCount={userCount}
+          </Text>
+          {userCount !== null ? (
+            <Badge variant="light" color="gray" size="sm" className="shrink-0">
+              {t("usage.userCount", { count: userCount })}
+            </Badge>
+          ) : null}
+        </Group>
+
+        <SeichiMapAdminTools>
+          <SeichiMapIdentityAdmin onReload={loadData} />
+          <SeichiMapAchievementAdmin />
+        </SeichiMapAdminTools>
+        <SeichiMapAchievementsModal
+          opened={showAchievementsModal}
+          onClose={() => setShowAchievementsModal(false)}
+          data={achievementData}
+          loading={achievementsLoading}
+          error={achievementsError}
+          editable={canEditVisits}
+          ownerName={isSharedView ? sharedViewNickname : null}
+          titleUpdating={achievementTitleUpdating}
+          onSelectTitle={(selection) => void updateAchievementTitle(selection)}
+          onFilterMap={(achievement) => {
+            setShowAchievementsModal(false);
+            setListMode("locations");
+            setSheetSnap((current) => (current === "peek" ? "half" : current));
+            void startBadgeFilter(achievement);
+          }}
         />
-      </Group>
 
-      <SeichiMapIdentityAdmin onReload={loadData} />
-
-      {isSharedView ? (
-        <Alert
-          mb="md"
-          color="pink"
-          variant="light"
-          icon={<FiShare2 size={16} />}
-        >
-          <Group justify="space-between" gap="sm" wrap="wrap">
-            <Box>
-              <Text fw={700}>{t("share.viewMode")}</Text>
-              <Text size="sm">
-                {t("share.viewing", { nickname: sharedViewNickname })}
-              </Text>
-            </Box>
-            <Button
-              component={Link}
-              href="/seichi-map"
-              variant="white"
-              color="pink"
-              size="xs"
-              leftSection={<FiMapPin size={14} />}
-            >
-              {t("share.backToMyMap")}
-            </Button>
-          </Group>
-        </Alert>
-      ) : null}
-
-      {errorMessage ? (
-        <Alert
-          mb="md"
-          color="red"
-          variant="light"
-          icon={<FiAlertCircle size={16} />}
-        >
-          {errorMessage}
-        </Alert>
-      ) : null}
-
-      <Grid gap="md" align="stretch">
-        <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper
-            ref={mapContainerRef}
-            withBorder
-            radius="md"
-            shadow="sm"
-            className={`seichi-map-fullscreen-surface relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80${
-              isViewportMapFullscreen
-                ? " seichi-map-fullscreen-surface--viewport"
-                : ""
-            }`}
-            data-viewport-fullscreen={
-              isViewportMapFullscreen ? "true" : undefined
-            }
-            data-point-layer={effectivePointLayer}
+        {isSharedView ? (
+          <Alert
+            mb="md"
+            color="pink"
+            variant="light"
+            icon={<FiShare2 size={16} />}
           >
-            <Box
-              className={`seichi-map-provider-control seichi-map-provider-control--${
+            <Group justify="space-between" gap="sm" wrap="wrap">
+              <Box>
+                <Text fw={700}>{t("share.viewMode")}</Text>
+                <Text size="sm">
+                  {t("share.viewing", { nickname: sharedViewNickname })}
+                </Text>
+              </Box>
+              <Button
+                component={Link}
+                href="/seichi-map"
+                variant="white"
+                color="pink"
+                size="xs"
+                leftSection={<FiMapPin size={14} />}
+              >
+                {t("share.backToMyMap")}
+              </Button>
+            </Group>
+          </Alert>
+        ) : null}
+
+        {errorMessage ? (
+          <Alert
+            mb="md"
+            color="red"
+            variant="light"
+            icon={<FiAlertCircle size={16} />}
+          >
+            {errorMessage}
+          </Alert>
+        ) : null}
+
+        {!isSignedIn && !isSharedView ? (
+          <Alert
+            mb="sm"
+            color="pink"
+            variant="light"
+            py="xs"
+            icon={<FiLogIn size={16} />}
+          >
+            <Group justify="space-between" gap="xs" wrap="wrap">
+              <Text size="sm" style={{ flex: "1 1 12rem" }}>
+                {t("alerts.loginRequired")}
+              </Text>
+              <Button
+                color="pink"
+                size="compact-sm"
+                className="shrink-0"
+                onClick={() =>
+                  void signIn("google", { callbackUrl: "/seichi-map" })
+                }
+              >
+                {t("alerts.login")}
+              </Button>
+            </Group>
+          </Alert>
+        ) : null}
+
+        {achievementPlayerCard ? (
+          <Box hiddenFrom="lg" mb="xs">
+            {achievementPlayerCard}
+          </Box>
+        ) : null}
+      </div>
+
+      <div
+        ref={stageRef}
+        className={classes.stage}
+        style={
+          stageTop === null
+            ? undefined
+            : ({
+                "--stage-top": `${stageTop}px`,
+                ...(stageRoom === null
+                  ? {}
+                  : { "--stage-room": `${stageRoom}px` }),
+              } as React.CSSProperties)
+        }
+      >
+        <Paper
+          ref={mapContainerRef}
+          withBorder
+          radius="md"
+          shadow="sm"
+          className={`seichi-map-fullscreen-surface relative isolate overflow-hidden bg-white/90 dark:bg-gray-900/80${
+            isViewportMapFullscreen
+              ? " seichi-map-fullscreen-surface--viewport"
+              : ""
+          }`}
+          data-viewport-fullscreen={
+            isViewportMapFullscreen ? "true" : undefined
+          }
+          data-point-layer={effectivePointLayer}
+        >
+          <Box
+            className={`seichi-map-provider-control seichi-map-provider-control--${
+              mapProvider === "google" ? "google" : "leaflet"
+            } absolute right-3 flex flex-col items-end`}
+            style={{
+              top: mapProvider === "google" ? 56 : 12,
+              right: 12,
+              zIndex: 1000,
+            }}
+          >
+            <Button
+              variant="white"
+              color="gray"
+              size="sm"
+              px={0}
+              className="h-11 w-11 p-0 shadow-md"
+              aria-label={t("mapProvider.openMenu")}
+              title={t("mapProvider.openMenu")}
+              onClick={() => setIsMapProviderMenuOpen((isOpen) => !isOpen)}
+            >
+              <FiLayers size={22} aria-hidden="true" />
+            </Button>
+            {isMapProviderMenuOpen ? (
+              <Paper
+                withBorder
+                radius="sm"
+                shadow="md"
+                p="xs"
+                mt={6}
+                miw={230}
+                className="bg-white/95 dark:bg-gray-900/95"
+              >
+                <Text size="xs" fw={700} mb={4}>
+                  {t("mapProvider.title")}
+                </Text>
+                <Stack gap={2}>
+                  <Radio
+                    checked={mapProvider === "gsi"}
+                    label={t("mapProvider.gsi")}
+                    onChange={() => selectMapProvider("gsi")}
+                  />
+                  <Radio
+                    checked={mapProvider === "osm"}
+                    label={t("mapProvider.osm")}
+                    onChange={() => selectMapProvider("osm")}
+                  />
+                  <Radio
+                    checked={mapProvider === "google"}
+                    label={t("mapProvider.google")}
+                    disabled={!mapsKey}
+                    onChange={() => selectMapProvider("google")}
+                  />
+                </Stack>
+                {!mapsKey ? (
+                  <Text size="xs" c="dimmed" mt={6}>
+                    {t("mapProvider.googleUnavailable")}
+                  </Text>
+                ) : null}
+                {!isSharedView ? (
+                  <>
+                    <Divider my="xs" />
+                    <Text size="xs" fw={700} mb={4}>
+                      {t("pointLayer.title")}
+                    </Text>
+                    <Radio.Group
+                      name="seichi-map-point-layer"
+                      value={pointLayer}
+                      aria-label={t("pointLayer.title")}
+                      onChange={(value) => {
+                        if (value === "self" || value === "everyone") {
+                          setPointLayer(value);
+                        }
+                      }}
+                    >
+                      <Stack gap={2}>
+                        <Radio value="self" label={t("pointLayer.self")} />
+                        <Radio
+                          value="everyone"
+                          label={t("pointLayer.everyone")}
+                        />
+                      </Stack>
+                    </Radio.Group>
+                    <Stack
+                      gap={4}
+                      mt="xs"
+                      aria-label={t("pointLayer.legend.title")}
+                    >
+                      <Text size="xs" fw={600} c="dimmed">
+                        {t("pointLayer.legend.title")}
+                      </Text>
+                      <Group gap="xs" wrap="wrap">
+                        {pointLayer === "self" ? (
+                          <>
+                            <Group gap={4} wrap="nowrap">
+                              <Box
+                                w={10}
+                                h={10}
+                                aria-hidden="true"
+                                style={{
+                                  borderRadius: "50%",
+                                  backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
+                                }}
+                              />
+                              <Text size="xs" c="dimmed">
+                                {t("pointLayer.legend.unvisited")}
+                              </Text>
+                            </Group>
+                            <Group gap={4} wrap="nowrap">
+                              <Box
+                                w={10}
+                                h={10}
+                                aria-hidden="true"
+                                style={{
+                                  borderRadius: "50%",
+                                  backgroundColor:
+                                    SEICHI_MAP_SELF_VISITED_COLOR,
+                                }}
+                              />
+                              <Text size="xs" c="dimmed">
+                                {t("pointLayer.legend.visited")}
+                              </Text>
+                            </Group>
+                          </>
+                        ) : (
+                          <>
+                            <Group gap={4} wrap="nowrap">
+                              <Box
+                                w={10}
+                                h={10}
+                                aria-hidden="true"
+                                style={{
+                                  borderRadius: "50%",
+                                  backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
+                                }}
+                              />
+                              <Text size="xs" c="dimmed">
+                                {t("pointLayer.legend.none")}
+                              </Text>
+                            </Group>
+                            <Group gap={4} wrap="nowrap">
+                              <Box
+                                w={10}
+                                h={10}
+                                aria-hidden="true"
+                                style={{
+                                  borderRadius: "50%",
+                                  backgroundColor:
+                                    SEICHI_MAP_EVERYONE_SINGLE_VISITOR_COLOR,
+                                }}
+                              />
+                              <Text size="xs" c="dimmed">
+                                {t("pointLayer.legend.one")}
+                              </Text>
+                            </Group>
+                            <Group gap={4} wrap="nowrap">
+                              <Box
+                                w={24}
+                                h={10}
+                                aria-hidden="true"
+                                style={{
+                                  borderRadius: 999,
+                                  background: `linear-gradient(90deg, ${SEICHI_MAP_EVERYONE_LIGHT_COLOR}, ${SEICHI_MAP_EVERYONE_DARK_COLOR})`,
+                                }}
+                              />
+                              <Text size="xs" c="dimmed">
+                                {t("pointLayer.legend.multiple")}
+                              </Text>
+                            </Group>
+                          </>
+                        )}
+                      </Group>
+                    </Stack>
+                  </>
+                ) : null}
+              </Paper>
+            ) : null}
+          </Box>
+          {showCustomFullscreenControl ? (
+            <button
+              type="button"
+              className={`seichi-map-fullscreen-control seichi-map-fullscreen-control--${
                 mapProvider === "google" ? "google" : "leaflet"
-              } absolute right-3 flex flex-col items-end`}
+              } absolute top-3 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50 ${
+                mapProvider === "google" ? "right-3" : "right-16"
+              }`}
+              style={{ zIndex: 1000 }}
+              title={
+                isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
+              }
+              aria-label={
+                isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
+              }
+              aria-pressed={isMapFullscreen}
+              onClick={() => void toggleMapFullscreen()}
+            >
+              {isMapFullscreen ? (
+                <FiMinimize size={20} aria-hidden="true" />
+              ) : (
+                <FiMaximize size={20} aria-hidden="true" />
+              )}
+            </button>
+          ) : null}
+          {isLeafletMapProvider(mapProvider) ? (
+            <button
+              ref={currentLocationControlRef}
+              type="button"
+              className="seichi-map-current-location-control--leaflet absolute right-3 bottom-3 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md disabled:cursor-wait disabled:opacity-70"
+              style={{ zIndex: 1000 }}
+              title={t("currentLocation.show")}
+              aria-label={t("currentLocation.show")}
+              onClick={() => requestCurrentLocationRef.current()}
+            >
+              <FiMapPin size={20} aria-hidden="true" />
+            </button>
+          ) : null}
+          <Box ref={mapElementRef} className="h-full w-full" />
+          {hoveredLocation ? (
+            <Box
+              className="pointer-events-none absolute z-2 max-w-65 -translate-x-1/2 -translate-y-full rounded-md bg-gray-900/92 px-2.5 py-1.5 text-xs font-semibold leading-tight text-white shadow-lg"
               style={{
-                top: mapProvider === "google" ? 56 : 12,
-                right: 12,
+                left: hoveredLocation.x,
+                top: hoveredLocation.y - 12,
                 zIndex: 1000,
               }}
             >
-              <Button
-                variant="white"
-                color="gray"
-                size="sm"
-                px={0}
-                className="h-11 w-11 p-0 shadow-md"
-                aria-label={t("mapProvider.openMenu")}
-                title={t("mapProvider.openMenu")}
-                onClick={() => setIsMapProviderMenuOpen((isOpen) => !isOpen)}
-              >
-                <FiLayers size={22} aria-hidden="true" />
-              </Button>
-              {isMapProviderMenuOpen ? (
-                <Paper
-                  withBorder
-                  radius="sm"
-                  shadow="md"
-                  p="xs"
-                  mt={6}
-                  miw={230}
-                  className="bg-white/95 dark:bg-gray-900/95"
-                >
-                  <Text size="xs" fw={700} mb={4}>
-                    {t("mapProvider.title")}
-                  </Text>
-                  <Stack gap={2}>
-                    <Radio
-                      checked={mapProvider === "gsi"}
-                      label={t("mapProvider.gsi")}
-                      onChange={() => selectMapProvider("gsi")}
-                    />
-                    <Radio
-                      checked={mapProvider === "osm"}
-                      label={t("mapProvider.osm")}
-                      onChange={() => selectMapProvider("osm")}
-                    />
-                    <Radio
-                      checked={mapProvider === "google"}
-                      label={t("mapProvider.google")}
-                      disabled={!mapsKey}
-                      onChange={() => selectMapProvider("google")}
-                    />
-                  </Stack>
-                  {!mapsKey ? (
-                    <Text size="xs" c="dimmed" mt={6}>
-                      {t("mapProvider.googleUnavailable")}
-                    </Text>
-                  ) : null}
-                  {!isSharedView ? (
-                    <>
-                      <Divider my="xs" />
-                      <Text size="xs" fw={700} mb={4}>
-                        {t("pointLayer.title")}
-                      </Text>
-                      <Radio.Group
-                        name="seichi-map-point-layer"
-                        value={pointLayer}
-                        aria-label={t("pointLayer.title")}
-                        onChange={(value) => {
-                          if (value === "self" || value === "everyone") {
-                            setPointLayer(value);
-                          }
-                        }}
-                      >
-                        <Stack gap={2}>
-                          <Radio value="self" label={t("pointLayer.self")} />
-                          <Radio
-                            value="everyone"
-                            label={t("pointLayer.everyone")}
-                          />
-                        </Stack>
-                      </Radio.Group>
-                      <Stack
-                        gap={4}
-                        mt="xs"
-                        aria-label={t("pointLayer.legend.title")}
-                      >
-                        <Text size="xs" fw={600} c="dimmed">
-                          {t("pointLayer.legend.title")}
-                        </Text>
-                        <Group gap="xs" wrap="wrap">
-                          {pointLayer === "self" ? (
-                            <>
-                              <Group gap={4} wrap="nowrap">
-                                <Box
-                                  w={10}
-                                  h={10}
-                                  aria-hidden="true"
-                                  style={{
-                                    borderRadius: "50%",
-                                    backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
-                                  }}
-                                />
-                                <Text size="xs" c="dimmed">
-                                  {t("pointLayer.legend.unvisited")}
-                                </Text>
-                              </Group>
-                              <Group gap={4} wrap="nowrap">
-                                <Box
-                                  w={10}
-                                  h={10}
-                                  aria-hidden="true"
-                                  style={{
-                                    borderRadius: "50%",
-                                    backgroundColor:
-                                      SEICHI_MAP_SELF_VISITED_COLOR,
-                                  }}
-                                />
-                                <Text size="xs" c="dimmed">
-                                  {t("pointLayer.legend.visited")}
-                                </Text>
-                              </Group>
-                            </>
-                          ) : (
-                            <>
-                              <Group gap={4} wrap="nowrap">
-                                <Box
-                                  w={10}
-                                  h={10}
-                                  aria-hidden="true"
-                                  style={{
-                                    borderRadius: "50%",
-                                    backgroundColor: SEICHI_MAP_UNVISITED_COLOR,
-                                  }}
-                                />
-                                <Text size="xs" c="dimmed">
-                                  {t("pointLayer.legend.none")}
-                                </Text>
-                              </Group>
-                              <Group gap={4} wrap="nowrap">
-                                <Box
-                                  w={10}
-                                  h={10}
-                                  aria-hidden="true"
-                                  style={{
-                                    borderRadius: "50%",
-                                    backgroundColor:
-                                      SEICHI_MAP_EVERYONE_SINGLE_VISITOR_COLOR,
-                                  }}
-                                />
-                                <Text size="xs" c="dimmed">
-                                  {t("pointLayer.legend.one")}
-                                </Text>
-                              </Group>
-                              <Group gap={4} wrap="nowrap">
-                                <Box
-                                  w={24}
-                                  h={10}
-                                  aria-hidden="true"
-                                  style={{
-                                    borderRadius: 999,
-                                    background: `linear-gradient(90deg, ${SEICHI_MAP_EVERYONE_LIGHT_COLOR}, ${SEICHI_MAP_EVERYONE_DARK_COLOR})`,
-                                  }}
-                                />
-                                <Text size="xs" c="dimmed">
-                                  {t("pointLayer.legend.multiple")}
-                                </Text>
-                              </Group>
-                            </>
-                          )}
-                        </Group>
-                      </Stack>
-                    </>
-                  ) : null}
-                </Paper>
-              ) : null}
+              {hoveredLocation.name}
             </Box>
-            {showCustomFullscreenControl ? (
-              <button
-                type="button"
-                className={`seichi-map-fullscreen-control seichi-map-fullscreen-control--${
-                  mapProvider === "google" ? "google" : "leaflet"
-                } absolute top-3 z-10 grid h-11 w-11 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md hover:bg-gray-50 ${
-                  mapProvider === "google" ? "right-3" : "right-16"
-                }`}
-                style={{ zIndex: 1000 }}
-                title={
-                  isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
-                }
-                aria-label={
-                  isMapFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")
-                }
-                aria-pressed={isMapFullscreen}
-                onClick={() => void toggleMapFullscreen()}
-              >
-                {isMapFullscreen ? (
-                  <FiMinimize size={20} aria-hidden="true" />
-                ) : (
-                  <FiMaximize size={20} aria-hidden="true" />
-                )}
-              </button>
-            ) : null}
-            {isLeafletMapProvider(mapProvider) ? (
-              <button
-                ref={currentLocationControlRef}
-                type="button"
-                className="seichi-map-current-location-control--leaflet absolute right-3 bottom-3 z-10 grid h-10 w-10 place-items-center rounded-sm border-0 bg-white text-[#3c4043] shadow-md disabled:cursor-wait disabled:opacity-70"
-                style={{ zIndex: 1000 }}
-                title={t("currentLocation.show")}
-                aria-label={t("currentLocation.show")}
-                onClick={() => requestCurrentLocationRef.current()}
-              >
-                <FiMapPin size={20} aria-hidden="true" />
-              </button>
-            ) : null}
-            <Box ref={mapElementRef} className="h-full w-full" />
-            {hoveredLocation ? (
-              <Box
-                className="pointer-events-none absolute z-2 max-w-65 -translate-x-1/2 -translate-y-full rounded-md bg-gray-900/92 px-2.5 py-1.5 text-xs font-semibold leading-tight text-white shadow-lg"
-                style={{
-                  left: hoveredLocation.x,
-                  top: hoveredLocation.y - 12,
-                  zIndex: 1000,
-                }}
-              >
-                {hoveredLocation.name}
-              </Box>
-            ) : null}
-            <Box
-              className="pointer-events-none absolute inset-0 bg-white/80 dark:bg-gray-900/70"
-              style={{
-                display: mapLoading || locationsLoading ? "block" : "none",
-              }}
-            >
-              {mapLoading || locationsLoading ? (
-                <Center h="100%">
-                  <Stack align="center" gap="xs">
-                    <Loader color="pink" />
-                    <Text size="sm" c="dimmed">
-                      {t("loading.map")}
-                    </Text>
-                  </Stack>
-                </Center>
-              ) : null}
-            </Box>
-          </Paper>
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Paper
-            withBorder
-            radius="md"
-            shadow="sm"
-            p="md"
-            className="bg-white/90 dark:bg-gray-900/80"
-            style={{ height: "70vh", minHeight: 460 }}
+          ) : null}
+          <Box
+            className="pointer-events-none absolute inset-0 bg-white/80 dark:bg-gray-900/70"
+            style={{
+              display: mapLoading || locationsLoading ? "block" : "none",
+            }}
           >
-            <Stack gap="md" h="100%">
-              <Stack gap={4}>
-                <Group justify="space-between" align="center">
-                  <Title order={2} size="h3">
-                    {progressTitle}
-                  </Title>
+            {mapLoading || locationsLoading ? (
+              <Center h="100%">
+                <Stack align="center" gap="xs">
+                  <Loader color="pink" />
+                  <Text size="sm" c="dimmed">
+                    {t("loading.map")}
+                  </Text>
+                </Stack>
+              </Center>
+            ) : null}
+          </Box>
+        </Paper>
+        <Paper
+          withBorder
+          radius="md"
+          shadow="sm"
+          className={classes.sheet}
+          data-snap={sheetSnap}
+          data-hidden={isMapFullscreen ? "true" : undefined}
+        >
+          <SeichiMapBottomSheetHandle
+            snap={sheetSnap}
+            onSnapChange={setSheetSnap}
+            label={t("sheet.toggle")}
+          />
+          <Stack gap="md" className={classes.sheetBody}>
+            <Stack gap={4} visibleFrom="lg">
+              <Group justify="space-between" align="center">
+                <Title order={2} size="h3">
+                  {progressTitle}
+                </Title>
+                <Group gap={6} wrap="nowrap">
                   <Badge variant="light" color="gray">
-                    {completion.done} / {completion.total}
+                    {shownCompletion.done} / {shownCompletion.total}
                   </Badge>
+                  {layerButton}
                 </Group>
-                <Progress
-                  value={completion.percent}
-                  color="pink"
-                  radius="xl"
-                  size="lg"
-                />
+              </Group>
+              <Progress
+                value={shownCompletion.percent}
+                color="pink"
+                radius="xl"
+                size="lg"
+              />
+              {badgeFilterChip ? (
+                <Group gap="xs">{badgeFilterChip}</Group>
+              ) : (
                 <Text size="xs" c="dimmed">
                   {t("progress.percent", { percent: completion.percent })}
                 </Text>
-              </Stack>
-
-              {layerNames.length > 0 ? (
-                isLayerSelectorOpen ? (
-                  <Paper
-                    withBorder
-                    radius="md"
-                    p="xs"
-                    className="min-h-0 flex-1 bg-white/70 dark:bg-white/3"
-                  >
-                    <Stack gap="xs" h="100%" className="min-h-0">
-                      <Group justify="space-between" gap="xs" wrap="nowrap">
-                        <Text size="sm" fw={700}>
-                          {t("layers.summary", {
-                            visible:
-                              layerNames.length - hiddenVisibleLayerCount,
-                            total: layerNames.length,
-                          })}
-                        </Text>
-                        <Button
-                          variant="subtle"
-                          color="gray"
-                          size="compact-xs"
-                          rightSection={<FiChevronUp size={14} />}
-                          onClick={() => setIsLayerSelectorOpen(false)}
-                        >
-                          {t("layers.collapse")}
-                        </Button>
-                      </Group>
-                      <Group gap={6}>
-                        <Button
-                          variant="light"
-                          color="gray"
-                          size="compact-xs"
-                          onClick={showAllLayers}
-                        >
-                          {t("layers.showAll")}
-                        </Button>
-                        <Button
-                          variant="subtle"
-                          color="gray"
-                          size="compact-xs"
-                          onClick={hideAllLayers}
-                        >
-                          {t("layers.hideAll")}
-                        </Button>
-                      </Group>
-                      <ScrollArea
-                        className="min-h-0 flex-1"
-                        h="100%"
-                        offsetScrollbars
-                        scrollbarSize={6}
-                      >
-                        <Stack gap={8} pr="xs">
-                          {layerNames.map((layerName) => {
-                            const layerStats = layerStatsByName.get(
-                              layerName,
-                            ) ?? {
-                              total: 0,
-                              done: 0,
-                              percent: 0,
-                            };
-                            return (
-                              <Checkbox
-                                key={layerName}
-                                size="sm"
-                                checked={!hiddenLayerNameSet.has(layerName)}
-                                onChange={() =>
-                                  toggleLayerVisibility(layerName)
-                                }
-                                label={
-                                  <Group
-                                    justify="space-between"
-                                    gap="xs"
-                                    wrap="nowrap"
-                                    className="min-w-0"
-                                  >
-                                    <Text size="sm" fw={600} lineClamp={1}>
-                                      {layerName}
-                                    </Text>
-                                    <Text
-                                      size="xs"
-                                      c="dimmed"
-                                      className="shrink-0"
-                                    >
-                                      {t("list.layerProgress", {
-                                        done: layerStats.done,
-                                        total: layerStats.total,
-                                        percent: formatCompletionPercent(
-                                          layerStats.percent,
-                                        ),
-                                      })}
-                                    </Text>
-                                  </Group>
-                                }
-                              />
-                            );
-                          })}
-                        </Stack>
-                      </ScrollArea>
-                    </Stack>
-                  </Paper>
-                ) : (
-                  <Button
-                    variant="light"
-                    color="gray"
-                    fullWidth
-                    justify="space-between"
-                    rightSection={<FiChevronDown size={16} />}
-                    aria-expanded={isLayerSelectorOpen}
-                    aria-label={t("layers.expand")}
-                    onClick={() => setIsLayerSelectorOpen(true)}
-                  >
-                    {t("layers.summary", {
-                      visible: layerNames.length - hiddenVisibleLayerCount,
-                      total: layerNames.length,
-                    })}
-                  </Button>
-                )
-              ) : null}
-
-              {isLayerSelectorOpen ? null : (
-                <Group gap="xs" wrap="nowrap">
-                  <SegmentedControl
-                    className="min-w-0 flex-1"
-                    value={listMode}
-                    onChange={handleListModeChange}
-                    data={[
-                      { label: t("tabs.locations"), value: "locations" },
-                      { label: t("tabs.nearby"), value: "nearby" },
-                      { label: t("tabs.visited"), value: "visited" },
-                    ]}
-                    size="xs"
-                    fullWidth
-                  />
-                  <Tooltip label={t("tabs.itinerary")}>
-                    <ActionIcon
-                      variant={listMode === "itinerary" ? "filled" : "light"}
-                      color="pink"
-                      size="lg"
-                      aria-label={t("tabs.itinerary")}
-                      aria-pressed={listMode === "itinerary"}
-                      onClick={() => setListMode("itinerary")}
-                    >
-                      <FiMap size={18} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
               )}
+            </Stack>
 
-              {isLayerSelectorOpen ? null : listMode === "locations" ? (
-                <>
+            <Group hiddenFrom="lg" gap="xs" wrap="nowrap">
+              {badgeFilterChip}
+              <Text size="xs" fw={700} className="shrink-0">
+                {shownCompletion.done} / {shownCompletion.total}
+              </Text>
+              <Progress
+                value={shownCompletion.percent}
+                color="pink"
+                radius="xl"
+                size="sm"
+                className="min-w-0 flex-1"
+              />
+              {badgeFilterChip ? null : (
+                <Text size="xs" c="dimmed" className="shrink-0">
+                  {completion.percent}%
+                </Text>
+              )}
+              {layerButton}
+            </Group>
+
+            {
+              <Group gap="xs" wrap="nowrap">
+                <SegmentedControl
+                  className="min-w-0 flex-1"
+                  value={listMode}
+                  onChange={(value) => {
+                    handleListModeChange(value);
+                    setSheetSnap((current) =>
+                      current === "peek" ? "half" : current,
+                    );
+                  }}
+                  data={[
+                    { label: t("tabs.locations"), value: "locations" },
+                    { label: t("tabs.nearby"), value: "nearby" },
+                    { label: t("tabs.visited"), value: "visited" },
+                  ]}
+                  size="xs"
+                  fullWidth
+                />
+                <Tooltip label={t("tabs.itinerary")}>
+                  <ActionIcon
+                    variant={listMode === "itinerary" ? "filled" : "light"}
+                    color="pink"
+                    size="lg"
+                    aria-label={t("tabs.itinerary")}
+                    aria-pressed={listMode === "itinerary"}
+                    onClick={() => {
+                      setListMode("itinerary");
+                      setSheetSnap((current) =>
+                        current === "peek" ? "half" : current,
+                      );
+                    }}
+                  >
+                    <FiMap size={18} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            }
+
+            {listMode === "locations" ? (
+              <>
+                <Group gap="xs" wrap="nowrap">
                   <TextInput
-                    label={t("search.locationLabel")}
+                    aria-label={t("search.locationLabel")}
                     placeholder={t("search.locationPlaceholder")}
                     value={locationSearchQuery}
                     onChange={(event) =>
                       setLocationSearchQuery(event.target.value)
                     }
                     leftSection={<FiSearch size={16} />}
+                    className="min-w-0 flex-1"
                   />
+                  {visitFilterMenu}
+                </Group>
 
-                  <Paper
-                    withBorder
-                    radius="md"
-                    p="xs"
-                    className="min-h-0 flex-1 bg-white/60 dark:bg-gray-950/20"
-                  >
-                    <ScrollArea h="100%" offsetScrollbars scrollbarSize={6}>
-                      <Stack gap="sm">
-                        {loading ? (
-                          <Center py="xl">
-                            <Loader size="sm" color="pink" />
-                          </Center>
-                        ) : Object.keys(groupedLocations).length === 0 ? (
-                          <Text size="sm" c="dimmed" px="xs" py="sm">
-                            {t("list.emptyLocations")}
-                          </Text>
-                        ) : (
-                          Object.keys(groupedLocations)
-                            .sort((a, b) => a.localeCompare(b, htmlLocale))
-                            .map((folder) => (
-                              <Paper
-                                key={folder}
-                                radius="sm"
-                                p="xs"
-                                className="bg-primary-50/40 dark:bg-white/3"
-                              >
-                                <Stack gap={6}>
-                                  <Group justify="space-between" gap="xs">
-                                    <Badge variant="light">{folder}</Badge>
-                                    <Text size="xs" c="dimmed">
-                                      {t("list.layerProgress", {
-                                        done:
-                                          layerStatsByName.get(folder)?.done ??
-                                          0,
-                                        total:
-                                          layerStatsByName.get(folder)?.total ??
-                                          groupedLocations[folder].length,
-                                        percent: formatCompletionPercent(
-                                          layerStatsByName.get(folder)
-                                            ?.percent ?? 0,
-                                        ),
-                                      })}
-                                    </Text>
-                                  </Group>
-                                  <Stack gap={1}>
-                                    {groupedLocations[folder].map((item) => {
-                                      const visitedLocation =
-                                        isLocationVisited(item);
-                                      return (
-                                        <Box key={item.key}>
-                                          <NavLink
-                                            variant="light"
-                                            color={
-                                              visitedLocation ? "green" : "pink"
-                                            }
-                                            active={
-                                              selectedLocationId === item.id
-                                            }
-                                            onClick={() =>
-                                              showLocationOnMap(item)
-                                            }
-                                            label={item.name}
-                                            description={
-                                              item.description ? (
-                                                <Text
-                                                  size="xs"
-                                                  c="dimmed"
-                                                  lineClamp={1}
-                                                >
-                                                  {stripHtmlToLines(
-                                                    item.description,
-                                                  )}
-                                                </Text>
-                                              ) : undefined
-                                            }
-                                            leftSection={
-                                              <ThemeIcon
-                                                size={30}
-                                                radius="xl"
-                                                variant="light"
-                                                color={
-                                                  visitedLocation
-                                                    ? "green"
-                                                    : "pink"
-                                                }
-                                              >
-                                                <FiMapPin size={14} />
-                                              </ThemeIcon>
-                                            }
-                                            rightSection={
-                                              visitedLocation ? (
-                                                <Badge
-                                                  variant="light"
-                                                  color="green"
-                                                  size="xs"
-                                                >
-                                                  {t("list.visitedBadge")}
-                                                </Badge>
-                                              ) : null
-                                            }
-                                          />
-                                          {selectedLocationId === item.id
-                                            ? renderMobileLocationActions(item)
-                                            : null}
-                                        </Box>
-                                      );
-                                    })}
-                                  </Stack>
-                                </Stack>
-                              </Paper>
-                            ))
-                        )}
-                      </Stack>
-                    </ScrollArea>
-                  </Paper>
-                </>
-              ) : listMode === "nearby" ? (
-                <Stack gap="sm" className="min-h-0 flex-1">
-                  <Group justify="space-between" gap="xs">
-                    <Text size="sm" c="dimmed">
-                      {t("list.nearbySummary")}
-                    </Text>
-                    {nearbyLocationStatus === "ready" ? (
-                      <Badge variant="light" color="blue">
-                        {t("list.nearbyCount", {
-                          count: nearbyLocations.length,
-                        })}
-                      </Badge>
-                    ) : null}
-                  </Group>
-
-                  {nearbyLocationStatus === "locating" ||
-                  nearbyLocationStatus === "idle" ? (
-                    <Center py="xl">
-                      <Stack gap="xs" align="center">
+                <ScrollArea
+                  className="min-h-0 flex-1"
+                  h="100%"
+                  offsetScrollbars
+                  scrollbarSize={6}
+                >
+                  <Stack gap="sm">
+                    {loading ? (
+                      <Center py="xl">
                         <Loader size="sm" color="pink" />
-                        <Text size="sm" c="dimmed">
-                          {t("list.nearbyLoading")}
-                        </Text>
-                      </Stack>
-                    </Center>
-                  ) : nearbyLocationStatus === "unavailable" ? (
-                    <Alert
-                      color="orange"
-                      variant="light"
-                      icon={<FiAlertCircle size={16} />}
-                    >
-                      {t("currentLocation.unavailable")}
-                    </Alert>
-                  ) : nearbyLocations.length === 0 ? (
-                    <Text size="sm" c="dimmed">
-                      {t("list.emptyNearby")}
-                    </Text>
-                  ) : (
-                    <Paper
-                      withBorder
-                      radius="md"
-                      p="xs"
-                      className="min-h-0 flex-1 bg-white/60 dark:bg-gray-950/20"
-                    >
-                      <ScrollArea h="100%" offsetScrollbars scrollbarSize={6}>
-                        <Stack gap={1}>
-                          {nearbyLocations.map(
-                            ({ location: item, distanceMeters }) => {
-                              const visitedLocation = isLocationVisited(item);
-                              return (
-                                <Box key={item.key}>
-                                  <NavLink
-                                    variant="light"
-                                    color={visitedLocation ? "green" : "pink"}
-                                    active={selectedLocationId === item.id}
-                                    onClick={() => showLocationOnMap(item)}
-                                    label={item.name}
-                                    description={
-                                      <Stack gap={0}>
-                                        <Text
-                                          size="xs"
-                                          c="dimmed"
-                                          lineClamp={1}
-                                        >
-                                          {getLocationLayerName(
-                                            item,
-                                            uncategorizedLayerName,
-                                          )}
-                                        </Text>
-                                        {item.description ? (
+                      </Center>
+                    ) : Object.keys(groupedLocations).length === 0 ? (
+                      <Text size="sm" c="dimmed" px="xs" py="sm">
+                        {t("list.emptyLocations")}
+                      </Text>
+                    ) : (
+                      Object.keys(groupedLocations)
+                        .sort((a, b) => a.localeCompare(b, htmlLocale))
+                        .map((folder) => (
+                          <Stack key={folder} gap={2}>
+                            <Group
+                              justify="space-between"
+                              gap="xs"
+                              px="xs"
+                              pt="xs"
+                              wrap="nowrap"
+                            >
+                              <Text size="xs" fw={700} c="pink.7" lineClamp={1}>
+                                {folder}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {t("list.layerProgress", {
+                                  done: layerStatsByName.get(folder)?.done ?? 0,
+                                  total:
+                                    layerStatsByName.get(folder)?.total ??
+                                    groupedLocations[folder].length,
+                                  percent: formatCompletionPercent(
+                                    layerStatsByName.get(folder)?.percent ?? 0,
+                                  ),
+                                })}
+                              </Text>
+                            </Group>
+                            <Stack gap={1}>
+                              {groupedLocations[folder].map((item) => {
+                                const visitedLocation = isLocationVisited(item);
+                                return (
+                                  <Box key={item.key}>
+                                    <NavLink
+                                      className={classes.navLink}
+                                      variant="light"
+                                      color="pink"
+                                      active={selectedLocationId === item.id}
+                                      onClick={() => showLocationOnMap(item)}
+                                      label={item.name}
+                                      description={
+                                        item.description ? (
                                           <Text
                                             size="xs"
                                             c="dimmed"
@@ -4178,223 +4647,343 @@ export default function SeichiMapCompleteClient({
                                           >
                                             {stripHtmlToLines(item.description)}
                                           </Text>
-                                        ) : null}
-                                      </Stack>
-                                    }
-                                    leftSection={
-                                      <ThemeIcon
-                                        size={30}
-                                        radius="xl"
-                                        variant="light"
-                                        color={
-                                          visitedLocation ? "green" : "pink"
-                                        }
-                                      >
-                                        <FiMapPin size={14} />
-                                      </ThemeIcon>
-                                    }
-                                    rightSection={
-                                      <Badge variant="light" color="blue">
-                                        {formatStraightLineDistance(
-                                          distanceMeters,
-                                        )}
-                                      </Badge>
-                                    }
-                                  />
-                                  {selectedLocationId === item.id
-                                    ? renderMobileLocationActions(item)
-                                    : null}
-                                </Box>
-                              );
-                            },
-                          )}
-                        </Stack>
-                      </ScrollArea>
-                    </Paper>
-                  )}
-                </Stack>
-              ) : listMode === "itinerary" ? (
-                <SeichiMapItinerary
-                  itinerary={itinerary}
-                  locationsById={locationById}
-                  onClear={clearItinerary}
-                  onOpenLocation={openItineraryLocation}
-                  onRemove={removeItineraryStop}
-                  onReorder={reorderItineraryStops}
-                  onToggle={toggleItineraryStop}
-                  visitedLocationIds={visitedLocationIds}
-                />
-              ) : canViewVisitedList ? (
-                <Stack gap="sm" className="min-h-0 flex-1">
-                  <Group justify="space-between" align="end">
-                    <Title order={3} size="h5">
-                      {recordedListTitle}
-                    </Title>
-                    <Badge variant="light" color="gray">
-                      {t("list.recordedCount", {
-                        visible: visibleVisited.length,
-                        total: filteredVisited.length,
-                      })}
-                    </Badge>
+                                        ) : undefined
+                                      }
+                                      leftSection={
+                                        <FiMapPin
+                                          size={16}
+                                          color="var(--mantine-color-pink-6)"
+                                          aria-hidden="true"
+                                        />
+                                      }
+                                      rightSection={renderVisitMark(
+                                        item,
+                                        visitedLocation,
+                                      )}
+                                    />
+                                    {selectedLocationId === item.id
+                                      ? renderMobileLocationActions(item)
+                                      : null}
+                                  </Box>
+                                );
+                              })}
+                            </Stack>
+                          </Stack>
+                        ))
+                    )}
+                  </Stack>
+                </ScrollArea>
+              </>
+            ) : listMode === "nearby" ? (
+              <Stack gap="sm" className="min-h-0 flex-1">
+                <Group justify="space-between" gap="xs">
+                  <Text size="sm" c="dimmed">
+                    {t("list.nearbySummary")}
+                  </Text>
+                  <Group gap="xs" wrap="nowrap">
+                    {nearbyLocationStatus === "ready" ? (
+                      <Badge variant="light" color="blue">
+                        {t("list.nearbyCount", {
+                          count: nearbyLocations.length,
+                        })}
+                      </Badge>
+                    ) : null}
+                    {visitFilterMenu}
                   </Group>
+                </Group>
 
-                  <TextInput
-                    placeholder={t("search.visitedPlaceholder")}
-                    value={visitedSearchQuery}
-                    onChange={(event) =>
-                      setVisitedSearchQuery(event.target.value)
-                    }
-                    leftSection={<FiSearch size={16} />}
-                  />
-
-                  {filteredVisited.length === 0 ? (
-                    <Text size="sm" c="dimmed">
-                      {t("list.emptyVisited")}
-                    </Text>
-                  ) : (
-                    <Stack gap="sm" className="min-h-0 flex-1">
-                      <ScrollArea
-                        className="min-h-0 flex-1"
-                        h="100%"
-                        offsetScrollbars
-                        scrollbarSize={6}
-                      >
-                        <Stack gap="sm" pr="xs">
-                          {visibleVisited.map((item) => (
-                            <UnstyledButton
-                              key={item.id}
-                              component="div"
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => onVisitedItemClick(item)}
-                              style={{ width: "100%", cursor: "pointer" }}
-                            >
-                              <Paper
-                                withBorder
-                                radius="md"
-                                p="sm"
-                                className="bg-white/80 dark:bg-white/3"
-                              >
-                                <Group
-                                  justify="space-between"
-                                  align="flex-start"
-                                  wrap="nowrap"
-                                >
-                                  <Stack gap={4} className="min-w-0 flex-1">
-                                    <Text fw={600} lineClamp={2}>
-                                      {locationById.get(item.locationId)
-                                        ?.name ?? item.locationName}
-                                    </Text>
-                                    <Group gap={6}>
-                                      <FiCalendar size={12} />
-                                      <Text size="xs" c="dimmed">
-                                        {new Date(
-                                          item.visitedAt,
-                                        ).toLocaleDateString(htmlLocale)}
-                                      </Text>
-                                    </Group>
-                                  </Stack>
-                                  {canEditVisits ? (
-                                    <Group gap={4} wrap="nowrap">
-                                      <Button
-                                        variant="subtle"
-                                        color="pink"
-                                        size="compact-sm"
-                                        aria-label={t("aria.edit")}
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          onEditVisited(item);
-                                        }}
-                                      >
-                                        <FiEdit3 size={14} />
-                                      </Button>
-                                      <Button
-                                        variant="subtle"
-                                        color="red"
-                                        size="compact-sm"
-                                        aria-label={t("aria.delete")}
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          void deleteVisited(item.id);
-                                        }}
-                                      >
-                                        <FiTrash2 size={14} />
-                                      </Button>
-                                    </Group>
-                                  ) : null}
-                                </Group>
-                                {item.note ? (
-                                  <Text size="sm" mt="xs" lineClamp={3}>
-                                    {item.note}
-                                  </Text>
-                                ) : null}
-                                {item.url ? (
-                                  <Text
-                                    component="a"
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    size="xs"
-                                    c="blue"
-                                    mt={6}
-                                    onClick={(event) => event.stopPropagation()}
-                                  >
-                                    <FiExternalLink className="mr-1 inline" />
-                                    {t("list.openPostLink")}
-                                  </Text>
-                                ) : null}
-                              </Paper>
-                            </UnstyledButton>
-                          ))}
-                        </Stack>
-                      </ScrollArea>
-
-                      {visibleVisitedCount < filteredVisited.length ? (
-                        <Button
-                          variant="light"
-                          color="gray"
-                          fullWidth
-                          onClick={() =>
-                            setVisibleVisitedCount(
-                              (current) => current + VISITED_PAGE_SIZE,
-                            )
-                          }
-                        >
-                          {t("list.loadMore", { count: VISITED_PAGE_SIZE })}
-                        </Button>
-                      ) : null}
+                {nearbyLocationStatus === "locating" ||
+                nearbyLocationStatus === "idle" ? (
+                  <Center py="xl">
+                    <Stack gap="xs" align="center">
+                      <Loader size="sm" color="pink" />
+                      <Text size="sm" c="dimmed">
+                        {t("list.nearbyLoading")}
+                      </Text>
                     </Stack>
-                  )}
-                </Stack>
-              ) : (
-                <Alert color="pink" variant="light">
-                  {t("alerts.loginRequired")}
-                  <div className="mt-2 -ml-1.5">
-                    {!isSignedIn ? (
+                  </Center>
+                ) : nearbyLocationStatus === "unavailable" ? (
+                  <Alert
+                    color="orange"
+                    variant="light"
+                    icon={<FiAlertCircle size={16} />}
+                  >
+                    {t("currentLocation.unavailable")}
+                  </Alert>
+                ) : nearbyLocations.length === 0 ? (
+                  <Text size="sm" c="dimmed">
+                    {t("list.emptyNearby")}
+                  </Text>
+                ) : (
+                  <ScrollArea
+                    className="min-h-0 flex-1"
+                    h="100%"
+                    offsetScrollbars
+                    scrollbarSize={6}
+                  >
+                    <Stack gap={1}>
+                      {nearbyLocations.map(
+                        ({ location: item, distanceMeters }) => {
+                          const visitedLocation = isLocationVisited(item);
+                          return (
+                            <Box key={item.key}>
+                              <NavLink
+                                className={classes.navLink}
+                                variant="light"
+                                color="pink"
+                                active={selectedLocationId === item.id}
+                                onClick={() => showLocationOnMap(item)}
+                                label={item.name}
+                                description={
+                                  <Stack gap={0}>
+                                    <Text size="xs" c="dimmed" lineClamp={1}>
+                                      {getLocationLayerName(
+                                        item,
+                                        uncategorizedLayerName,
+                                      )}
+                                    </Text>
+                                    {item.description ? (
+                                      <Text size="xs" c="dimmed" lineClamp={1}>
+                                        {stripHtmlToLines(item.description)}
+                                      </Text>
+                                    ) : null}
+                                  </Stack>
+                                }
+                                leftSection={
+                                  <FiMapPin
+                                    size={16}
+                                    color="var(--mantine-color-pink-6)"
+                                    aria-hidden="true"
+                                  />
+                                }
+                                rightSection={
+                                  <Group gap={4} wrap="nowrap">
+                                    <Badge variant="light" color="blue">
+                                      {formatStraightLineDistance(
+                                        distanceMeters,
+                                      )}
+                                    </Badge>
+                                    {renderVisitMark(item, visitedLocation)}
+                                  </Group>
+                                }
+                              />
+                              {selectedLocationId === item.id
+                                ? renderMobileLocationActions(item)
+                                : null}
+                            </Box>
+                          );
+                        },
+                      )}
+                    </Stack>
+                  </ScrollArea>
+                )}
+              </Stack>
+            ) : listMode === "itinerary" ? (
+              <SeichiMapItinerary
+                itinerary={itinerary}
+                locationsById={locationById}
+                onClear={clearItinerary}
+                onOpenLocation={openItineraryLocation}
+                onRemove={removeItineraryStop}
+                onReorder={reorderItineraryStops}
+                onToggle={toggleItineraryStop}
+                visitedLocationIds={visitedLocationIds}
+              />
+            ) : canViewVisitedList ? (
+              <Stack gap="sm" className="min-h-0 flex-1">
+                <Group justify="space-between" align="end">
+                  <Title order={3} size="h5">
+                    {recordedListTitle}
+                  </Title>
+                  <Badge variant="light" color="gray">
+                    {t("list.recordedCount", {
+                      visible: visibleVisited.length,
+                      total: filteredVisited.length,
+                    })}
+                  </Badge>
+                </Group>
+
+                <TextInput
+                  placeholder={t("search.visitedPlaceholder")}
+                  value={visitedSearchQuery}
+                  onChange={(event) =>
+                    setVisitedSearchQuery(event.target.value)
+                  }
+                  leftSection={<FiSearch size={16} />}
+                />
+
+                {filteredVisited.length === 0 ? (
+                  <Text size="sm" c="dimmed">
+                    {t("list.emptyVisited")}
+                  </Text>
+                ) : (
+                  <Stack gap="sm" className="min-h-0 flex-1">
+                    <ScrollArea
+                      className="min-h-0 flex-1"
+                      h="100%"
+                      offsetScrollbars
+                      scrollbarSize={6}
+                    >
+                      <Stack gap="sm" pr="xs">
+                        {visibleVisited.map((item) => (
+                          <UnstyledButton
+                            key={item.id}
+                            component="div"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onVisitedItemClick(item)}
+                            style={{ width: "100%", cursor: "pointer" }}
+                          >
+                            <Paper
+                              withBorder
+                              radius="md"
+                              p="sm"
+                              className="bg-white/80 dark:bg-white/3"
+                            >
+                              <Group
+                                justify="space-between"
+                                align="flex-start"
+                                wrap="nowrap"
+                              >
+                                <Stack gap={4} className="min-w-0 flex-1">
+                                  <Text fw={600} lineClamp={2}>
+                                    {locationById.get(item.locationId)?.name ??
+                                      item.locationName}
+                                  </Text>
+                                  <Group gap={6}>
+                                    <FiCalendar size={12} />
+                                    <Text size="xs" c="dimmed">
+                                      {new Date(
+                                        item.visitedAt,
+                                      ).toLocaleDateString(htmlLocale)}
+                                    </Text>
+                                  </Group>
+                                </Stack>
+                                {canEditVisits ? (
+                                  <Group gap={4} wrap="nowrap">
+                                    <Button
+                                      variant="subtle"
+                                      color="pink"
+                                      size="compact-sm"
+                                      aria-label={t("aria.edit")}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        onEditVisited(item);
+                                      }}
+                                    >
+                                      <FiEdit3 size={14} />
+                                    </Button>
+                                    <Button
+                                      variant="subtle"
+                                      color="red"
+                                      size="compact-sm"
+                                      aria-label={t("aria.delete")}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        void deleteVisited(item.id);
+                                      }}
+                                    >
+                                      <FiTrash2 size={14} />
+                                    </Button>
+                                  </Group>
+                                ) : null}
+                              </Group>
+                              {item.note ? (
+                                <Text size="sm" mt="xs" lineClamp={3}>
+                                  {item.note}
+                                </Text>
+                              ) : null}
+                              {item.url ? (
+                                <Text
+                                  component="a"
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  size="xs"
+                                  c="blue"
+                                  mt={6}
+                                  onClick={(event) => event.stopPropagation()}
+                                >
+                                  <FiExternalLink className="mr-1 inline" />
+                                  {t("list.openPostLink")}
+                                </Text>
+                              ) : null}
+                            </Paper>
+                          </UnstyledButton>
+                        ))}
+                      </Stack>
+                    </ScrollArea>
+
+                    {visibleVisitedCount < filteredVisited.length ? (
                       <Button
-                        color="pink"
-                        size="xs"
-                        className="ml-2"
-                        leftSection={<FiLogIn size={14} />}
+                        variant="light"
+                        color="gray"
+                        fullWidth
                         onClick={() =>
-                          void signIn("google", { callbackUrl: "/seichi-map" })
+                          setVisibleVisitedCount(
+                            (current) => current + VISITED_PAGE_SIZE,
+                          )
                         }
                       >
-                        {t("alerts.login")}
+                        {t("list.loadMore", { count: VISITED_PAGE_SIZE })}
                       </Button>
                     ) : null}
-                  </div>
-                </Alert>
-              )}
-            </Stack>
-          </Paper>
-        </Grid.Col>
-      </Grid>
+                  </Stack>
+                )}
+              </Stack>
+            ) : (
+              <Alert color="pink" variant="light">
+                {t("alerts.loginRequired")}
+                <div className="mt-2 -ml-1.5">
+                  {!isSignedIn ? (
+                    <Button
+                      color="pink"
+                      size="xs"
+                      className="ml-2"
+                      leftSection={<FiLogIn size={14} />}
+                      onClick={() =>
+                        void signIn("google", { callbackUrl: "/seichi-map" })
+                      }
+                    >
+                      {t("alerts.login")}
+                    </Button>
+                  ) : null}
+                </div>
+              </Alert>
+            )}
+          </Stack>
+        </Paper>
+      </div>
+
+      <SeichiMapLayerDialog
+        opened={isLayerDialogOpen}
+        onClose={() => setIsLayerDialogOpen(false)}
+        layers={layerNames.map((layerName) => {
+          const layerStats = layerStatsByName.get(layerName) ?? {
+            total: 0,
+            done: 0,
+            percent: 0,
+          };
+          return {
+            name: layerName,
+            visible: !hiddenLayerNameSet.has(layerName),
+            progressLabel: t("list.layerProgress", {
+              done: layerStats.done,
+              total: layerStats.total,
+              percent: formatCompletionPercent(layerStats.percent),
+            }),
+          };
+        })}
+        onToggle={toggleLayerVisibility}
+        onShowAll={showAllLayers}
+        onHideAll={hideAllLayers}
+      />
 
       <Modal
         opened={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
         title={t("profile.title")}
+        fullScreen={Boolean(isSmallScreen)}
         centered
       >
         <Stack gap="sm">
@@ -4434,6 +5023,7 @@ export default function SeichiMapCompleteClient({
         opened={showShareModal}
         onClose={() => setShowShareModal(false)}
         title={t("share.title")}
+        fullScreen={Boolean(isSmallScreen)}
         centered
       >
         <Stack gap="sm">

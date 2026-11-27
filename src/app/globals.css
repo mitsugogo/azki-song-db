@@ -116,9 +116,24 @@ body.seichi-map-viewport-fullscreen-open {
   border-radius: 0;
 }
 
+/* 地図の高さは SeichiMapStage.module.css の .stage が決める。地図はその枠いっぱいに広げる */
 .seichi-map-fullscreen-surface {
-  height: 70vh;
-  min-height: 460px;
+  height: 100%;
+  min-height: 0;
+}
+
+/* lg 未満は地図の下端をボトムシートが覆うので、現在地ボタンと出典表示をシートの上に出す */
+@media (max-width: 74.99em) {
+  .seichi-map-current-location-control--leaflet {
+    bottom: calc(var(--sheet-peek, 0px) + 12px) !important;
+  }
+
+  .seichi-map-fullscreen-surface:not(
+      .seichi-map-fullscreen-surface--viewport
+    ):not(:fullscreen)
+    .leaflet-bottom {
+    bottom: var(--sheet-peek, 0px);
+  }
 }
 
 .seichi-map-fullscreen-surface--viewport {
@@ -178,7 +193,7 @@ body.seichi-map-viewport-fullscreen-open {
   max-inline-size: min(350px, calc(100dvw - 64px));
   min-inline-size: min(280px, calc(100dvw - 64px));
   overflow: hidden;
-  padding: 2px 2px 4px;
+  padding: 0;
 }
 
 .seichi-map-popup__scroll-area {
@@ -192,32 +207,124 @@ body.seichi-map-viewport-fullscreen-open {
 .seichi-map-popup__body {
   min-inline-size: 0;
   overflow-wrap: anywhere;
-  padding-inline-end: 2px;
+  padding: 14px 16px 10px;
+}
+
+/* Google Maps は閉じるボタン用の見出し帯が吹き出しの上にあるので、本文の上の余白は小さくする */
+.gm-style-iw-d .seichi-map-popup__body {
+  padding-block-start: 4px;
+}
+
+/* 閉じるボタンの下に潜らないよう、見出しの右に余白を取る */
+.seichi-map-popup__body > strong:first-child {
+  padding-inline-end: 22px;
 }
 
 .seichi-map-popup__actions {
-  align-items: center;
   background: #fff;
-  border-block-start: 1px solid #e9ecef;
+  border-block-start: 1px solid #f1f3f5;
   display: flex;
   flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-block-start: 12px;
-  padding-block-start: 10px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px 14px;
 }
 
-.seichi-map-popup__actions > a,
-.seichi-map-popup__actions > button {
-  max-inline-size: 100%;
-  min-block-size: 32px;
-  overflow-wrap: anywhere;
-  white-space: normal;
+/* 収まらない場合は、訪問記録と鉛筆をひとまとまりにして折り返す */
+.seichi-map-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.seichi-map-primary-actions > * {
+  flex-shrink: 0;
+}
+
+/* 「訪問を記録」と鉛筆（日付・メモ付き）を1つのボタンのようにつなげる */
+.seichi-map-popup__split {
+  display: flex;
+  flex-grow: 1;
+}
+
+:is(.seichi-map-popup, .seichi-map-list-actions)
+  .seichi-map-primary-actions
+  :is(button, a) {
+  block-size: 36px;
+  font-size: 13px;
+  padding-inline: 10px;
+  white-space: nowrap;
+}
+
+.seichi-map-primary-actions button.seichi-map-primary-actions__details {
+  flex-shrink: 0;
+  inline-size: 36px;
+  padding-inline: 0;
+}
+
+/* 補助の操作は、枠のない文字リンクにして主な操作と区別する */
+.seichi-map-popup__secondary {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+}
+
+.seichi-map-popup .seichi-map-popup__link {
+  align-items: center;
+  background: none;
+  border: 0;
+  box-sizing: border-box;
+  color: #495057;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  min-block-size: 28px;
+  padding: 0;
+  text-decoration: none;
+}
+
+.seichi-map-popup .seichi-map-popup__link:hover {
+  text-decoration: underline;
+}
+
+/* X のボタン（アイコン＋#どこAZ）。主な操作の行（記録・旅程の右）に、ボタンと同じ高さで置く。配色は watch ページの X 共有ボタン（filled / dark）と同じ */
+.seichi-map-popup .seichi-map-popup__link--icon {
+  background: var(--mantine-color-dark-filled, #2e2e2e);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #fff;
+  gap: 6px;
+  justify-content: center;
+}
+
+.seichi-map-popup .seichi-map-popup__link--icon:hover {
+  background: var(--mantine-color-dark-filled-hover, #242424);
+  text-decoration: none;
+}
+
+.seichi-map-popup a.seichi-map-popup__link::after {
+  content: "↗";
+  font-size: 10px;
+  margin-inline-start: 3px;
+  opacity: 0.55;
+}
+
+/* 外部リンクの矢印は、X のボタンには付けない（別タブで開くことは見れば分かる） */
+.seichi-map-popup a.seichi-map-popup__link.seichi-map-popup__link--icon::after {
+  content: none;
+}
+
+/* 削除は取り違えないよう、他のリンクから離して右端に置く */
+.seichi-map-popup .seichi-map-popup__link--danger {
+  color: #e03131;
+  margin-inline-start: auto;
 }
 
 .seichi-map-list-actions {
-  background: light-dark(#fff, var(--mantine-color-dark-7));
-  border-block-start: 1px solid var(--mantine-color-default-border);
   margin-block-end: 6px;
   margin-inline: 8px;
 }
@@ -231,14 +338,43 @@ body.seichi-map-viewport-fullscreen-open {
   overflow: hidden !important;
 }
 
-@media (max-width: 61.99em) {
-  .seichi-map-fullscreen-surface {
-    height: clamp(280px, calc(100dvh - 304px), 70dvh);
-    min-height: 280px;
-  }
+/*
+ * 吹き出しの枠そのものには余白を持たせず、内容の余白は .seichi-map-popup 側で取る。
+ * こうすると、スクロールバーは吹き出しの右端に付き、本文とボタンには適度な余白が残る。
+ */
+.gm-style-iw-c:has(.seichi-map-popup) {
+  padding: 0 !important;
+}
 
+.leaflet-popup-content-wrapper:has(.seichi-map-popup) {
+  overflow: hidden;
+  padding: 0;
+}
+
+.leaflet-popup-content:has(.seichi-map-popup) {
+  margin: 0;
+}
+
+/*
+ * lg 未満はボトムシート（peek）が地図の下端を覆うので、ポップアップはその上に収める。
+ * 地図の高さは SeichiMapStage.module.css の .stage と同じ式。内容はポップアップ内でスクロールする。
+ */
+@media (max-width: 74.99em) {
   .seichi-map-popup {
-    max-block-size: clamp(160px, calc(100dvh - 396px), 420px);
+    max-block-size: clamp(
+      160px,
+      calc(
+        max(360px, 100dvh - var(--stage-top, 290px)) -
+          var(--sheet-peek, 112px) - 70px
+      ),
+      420px
+    );
+  }
+}
+
+@media (max-width: 74.99em) and (max-height: 480px) {
+  .seichi-map-popup {
+    max-block-size: clamp(120px, calc(100dvh - 160px), 420px);
   }
 }
 

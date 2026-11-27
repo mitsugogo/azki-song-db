@@ -9,8 +9,11 @@ import {
   loadSeichiMapVisitorRanking,
   SEICHI_MAP_RANKING_LIMIT,
 } from "@/app/lib/seichiMapVisitedSheet";
+import { getOptionalServerSession } from "@/app/lib/authSession";
 import { NextResponse } from "next/server";
 import { loadSeichiMapIdentityRegistry } from "@/app/lib/server/seichiMapIdentityRegistry";
+import { loadSeichiMapRankingBadges } from "@/app/lib/server/seichiMapAchievements";
+import type { SeichiMapRankingBadge } from "@/app/types/seichiMapAchievements";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +49,13 @@ export async function GET() {
     const visitors = await loadSeichiMapVisitorRanking(
       currentLocations.map((location) => location.id),
     );
+    // バッジの集計に失敗してもランキング自体は返す。
+    const badgesRequest = loadSeichiMapRankingBadges(
+      visitors.map(({ userId }) => userId),
+    ).catch<Map<string, SeichiMapRankingBadge>>((error) => {
+      console.error("Failed to load seichi map ranking badges", error);
+      return new Map();
+    });
     const rankedLocations = locationRows
       .flatMap((row) => {
         const location = locationsById.get(row.locationId);
@@ -95,8 +105,23 @@ export async function GET() {
       uniqueVisitorCount: location.uniqueVisitorCount,
     }));
 
+    const badges = await badgesRequest;
+    // 自分の行を強調するための印。セッションが取れなくてもランキングは返す。
+    const selfUserId = await getOptionalServerSession()
+      .then((session) => session?.user?.id ?? null)
+      .catch(() => null);
+
     return NextResponse.json(
-      { locations, visitors },
+      {
+        locations,
+        // userId は内部の照合にだけ使い、レスポンスには含めない。
+        visitors: visitors.map(({ userId, nickname, visitCount }) => ({
+          nickname,
+          visitCount,
+          achievement: badges.get(userId) ?? null,
+          isSelf: selfUserId !== null && userId === selfUserId,
+        })),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {

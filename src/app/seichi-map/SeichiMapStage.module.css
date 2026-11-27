@@ -1,0 +1,120 @@
+/*
+ * 地図とパネルの配置。
+ * lg 未満: 地図を画面いっぱいに出し、パネルを下から引き出すボトムシートにする。
+ * lg 以上: 地図 2 : パネル 1 の横並び。パネルは DOM を 1 つだけにして CSS で切り替える。
+ */
+.stage {
+  --sheet-peek: calc(112px + env(safe-area-inset-bottom, 0px));
+  position: relative;
+  /* --stage-top は client.tsx が測った、地図の枠より上の高さ。画面の残りをすべて地図にする */
+  height: max(360px, calc(100dvh - var(--stage-top, 290px)));
+  margin-bottom: 0;
+}
+
+.sheet {
+  --sheet-height: var(--sheet-peek);
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  /* モーダル（Mantine の z-index 200）より下に置く。地図は isolate で独立しているので 1 でも上に出る */
+  z-index: 10;
+  display: flex;
+  height: var(--sheet-height);
+  flex-direction: column;
+  overflow: hidden;
+  /* 下の地図が透けて見えないよう、背景は不透明にする */
+  background: var(--mantine-color-body);
+  border-radius: var(--mantine-radius-lg) var(--mantine-radius-lg) 0 0;
+  transition: height 200ms ease;
+}
+
+.sheet[data-snap="half"] {
+  --sheet-height: 72%;
+}
+
+.sheet[data-snap="full"] {
+  --sheet-height: 94%;
+}
+
+/* 地図の全画面表示中は、地図の上にシートが重ならないようにする */
+.sheet[data-hidden] {
+  display: none;
+}
+
+.sheetBody {
+  min-height: 0;
+  flex: 1;
+  padding: 0 var(--mantine-spacing-sm)
+    calc(var(--mantine-spacing-sm) + env(safe-area-inset-bottom, 0px));
+}
+
+.handle {
+  display: flex;
+  width: 100%;
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 10px 0 8px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.grip {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--mantine-color-gray-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+}
+
+/* 高さの足りない横向きのスマホでは、画面に収まる高さにしてシートの peek を小さくする */
+@media (max-width: 74.99em) and (max-height: 480px) {
+  .stage {
+    --sheet-peek: calc(88px + env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 16px);
+    min-height: 0;
+  }
+}
+
+@media (min-width: 75em) {
+  .stage {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--mantine-spacing-md);
+    /* 残りの高さをすべて使い、下の余白を左右の余白（24px）と同じにする */
+    height: max(460px, calc(var(--stage-room, calc(70vh + 24px)) - 24px));
+    min-height: 460px;
+    margin-bottom: 0;
+  }
+
+  .sheet,
+  .sheet[data-snap] {
+    position: static;
+    z-index: auto;
+    height: auto;
+    min-height: 0;
+    border-radius: var(--mantine-radius-md);
+    transition: none;
+  }
+
+  .sheetBody {
+    padding: var(--mantine-spacing-md);
+  }
+
+  .handle {
+    display: none;
+  }
+}
+
+/* 一覧で選択中の行。濃い塗りと色付き文字をやめ、うすい背景だけで示す */
+.navLink[data-active] {
+  background: light-dark(
+    var(--mantine-color-pink-0),
+    color-mix(in srgb, var(--mantine-color-pink-9) 22%, transparent)
+  );
+  color: var(--mantine-color-text);
+}

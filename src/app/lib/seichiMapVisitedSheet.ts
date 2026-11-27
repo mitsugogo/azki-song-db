@@ -27,6 +27,8 @@ export type SeichiMapLocationVisitorSummary = {
 };
 
 export type SeichiMapVisitorRankingItem = {
+  /** サーバー内でバッジ状況を引くためだけに使う。レスポンスには含めない。 */
+  userId: string;
   nickname: string | null;
   visitCount: number;
 };
@@ -222,9 +224,10 @@ export async function loadSeichiMapVisitorRanking(
   if (locationIds.length === 0) return [];
 
   const rows = await prisma.$queryRaw<
-    { nickname: string | null; visitCount: bigint }[]
+    { userId: string; nickname: string | null; visitCount: bigint }[]
   >(sqltag`
     SELECT
+      userId,
       (
         SELECT CASE
           WHEN showNicknameInRanking THEN nickname
@@ -242,7 +245,8 @@ export async function loadSeichiMapVisitorRanking(
     LIMIT ${SEICHI_MAP_RANKING_LIMIT}
   `);
 
-  return rows.map(({ nickname, visitCount }) => ({
+  return rows.map(({ userId, nickname, visitCount }) => ({
+    userId,
     nickname,
     visitCount: Number(visitCount),
   }));

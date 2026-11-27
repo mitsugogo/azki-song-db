@@ -74,6 +74,128 @@ model SeichiMapProfile {
   updatedAt             DateTime @updatedAt
 }
 
+enum SeichiMapAchievementMetric {
+  LOCATION_COUNT
+  PREFECTURE_COUNT
+}
+
+enum SeichiMapAchievementThresholdType {
+  COUNT
+  PERCENT
+}
+
+enum SeichiMapAchievementSource {
+  LIVE
+  BACKFILL
+}
+
+enum SeichiMapAchievementRarity {
+  N
+  R
+  SR
+  SSR
+  UR
+}
+
+enum SeichiMapLocationRegion {
+  DOMESTIC
+  OVERSEAS
+  UNKNOWN
+}
+
+/// 聖地マップのバッジのマスタ。
+model SeichiMapAchievement {
+  id                  String                     @id @db.VarChar(64)
+  sortOrder           Int
+  nameJa              String                     @db.VarChar(100)
+  nameEn              String?                    @db.VarChar(100)
+  descriptionJa       String?                    @db.VarChar(500)
+  descriptionEn       String?                    @db.VarChar(500)
+  metric              SeichiMapAchievementMetric @default(LOCATION_COUNT)
+  /// 対象地点のルール配列。配列内はOR、各ルール内の条件はAND。空配列は全地点。
+  criteria            Json
+  /// 都道府県×47のように分母を固定する場合に設定する。
+  denominatorOverride Int?
+  isActive            Boolean                    @default(true)
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  tiers               SeichiMapAchievementTier[]
+
+  @@index([isActive, sortOrder], map: "SeichiMapAchievement_active_sort_idx")
+}
+
+/// バッジのグレード。PERCENTは10〜100で、100は全制覇。
+model SeichiMapAchievementTier {
+  achievementId  String                            @db.VarChar(64)
+  level          Int
+  thresholdType  SeichiMapAchievementThresholdType
+  thresholdValue Int
+  rarity         SeichiMapAchievementRarity        @default(N)
+  achievement    SeichiMapAchievement              @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([achievementId, level])
+}
+
+/// 自動判定の例外。通常は空。
+model SeichiMapAchievementLocationOverride {
+  achievementId String  @db.VarChar(64)
+  locationId    String  @db.VarChar(16)
+  /// true は対象に含め、false は対象から外す。
+  include       Boolean
+  note          String? @db.VarChar(255)
+
+  @@id([achievementId, locationId])
+}
+
+/// バッジ判定に使う地点のスナップショット。KML同期時に置き換える。
+model SeichiMapLocationSnapshot {
+  locationId     String                  @id @db.VarChar(16)
+  folder         String                  @db.VarChar(255)
+  name           String                  @db.VarChar(500)
+  latitude       Float
+  longitude      Float
+  region         SeichiMapLocationRegion @default(UNKNOWN)
+  /// JISの都道府県コード（01〜47）。
+  prefectureCode String?                 @db.Char(2)
+  geocodedAt     DateTime?
+  syncedAt       DateTime
+}
+
+model SeichiMapAchievementSyncState {
+  key           String    @id @db.VarChar(32)
+  version       Int
+  kmlHash       String    @db.Char(64)
+  locationCount Int
+  syncedAt      DateTime
+  syncedBy      String    @db.VarChar(255)
+  /// 同期処理の実行中を示すリース。期限を過ぎたら別の処理が取得できる。
+  lockedUntil   DateTime?
+}
+
+/// ユーザーが表示用に選んだ称号。未設定なら最もレア度の高いグレードを表示する。
+model SeichiMapUserTitle {
+  userId        String   @id @db.VarChar(255)
+  achievementId String   @db.VarChar(64)
+  level         Int
+  updatedAt     DateTime @updatedAt
+}
+
+/// ユーザーごとの達成状況。一度付与したグレードは削除しない。
+model SeichiMapUserAchievement {
+  userId             String                     @db.VarChar(255)
+  achievementId      String                     @db.VarChar(64)
+  level              Int
+  achievedAt         DateTime                   @default(now())
+  source             SeichiMapAchievementSource
+  progressCount      Int
+  denominatorAtAward Int?
+  seenAt             DateTime?
+
+  @@id([userId, achievementId, level])
+  @@index([userId, seenAt], map: "SeichiMapUserAchievement_user_seen_idx")
+  @@index([achievementId, level], map: "SeichiMapUserAchievement_tier_idx")
+}
+
 model Statistics {
   id           String   @id @default(uuid()) @db.Char(36)
   videoId      String?  @map("video_id") @db.VarChar(50)
